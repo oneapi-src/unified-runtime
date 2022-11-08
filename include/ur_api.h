@@ -17,6 +17,7 @@
 // standard headers
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 #if defined(__cplusplus)
 extern "C" {

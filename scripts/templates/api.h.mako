@@ -30,6 +30,7 @@ from templates import helper as th
 // standard headers
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 %endif
 
 #if defined(__cplusplus)
