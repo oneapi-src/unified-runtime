@@ -60,6 +60,48 @@ params:
             [in] handle of the context to get a reference of.
 --- #--------------------------------------------------------------------------
 type: enum
+desc: "Supported memory order capabilities"
+class: $xContext
+name: $x_memory_order_flags_t
+etors:
+    - name: RELAXED
+      desc: "Memory order relaxed"
+      value: "$X_BIT(0)"
+    - name: ACQUIRE
+      desc: "Memory order acquire"
+      value: "$X_BIT(1)"
+    - name: RELEASE
+      desc: "Memory order release"
+      value: "$X_BIT(2)"
+    - name: ACQ_REL
+      desc: "Memory order acquire-release"
+      value: "$X_BIT(3)"
+    - name: SEQ_CST
+      desc: "Memory order sequentially-consistent"
+      value: "$X_BIT(4)"
+--- #--------------------------------------------------------------------------
+type: enum
+desc: "Supported memory scopes"
+class: $xContext
+name: $x_memory_scope_flags_t
+etors:
+    - name: WORK_ITEM
+      desc: "Memory scope of work-item"
+      value: "$X_BIT(0)"
+    - name: SUB_GROUP
+      desc: "Memory scope of sub-group"
+      value: "$X_BIT(1)"
+    - name: WORK_GROUP
+      desc: "Memory scope of work-group"
+      value: "$X_BIT(2)"
+    - name: DEVICE
+      desc: "Memory scope of device"
+      value: "$X_BIT(3)"
+    - name: SYSTEM
+      desc: "Memory scope of system"
+      value: "$X_BIT(4)"
+--- #--------------------------------------------------------------------------
+type: enum
 desc: "Supported context info"
 class: $xContext
 name: $x_context_info_t
@@ -69,7 +111,19 @@ etors:
       desc: "[uint32_t] The number of the devices in the context"
     - name: DEVICES
       value: "2"
-      desc: "[$x_context_handle_t...] The array of the device handles in the context"
+      desc: "[$x_device_handle_t...] The array of the device handles in the context"
+    - name: PLATFORM
+      value: "3"
+      desc: "[$x_platform_handle_t] The platform with which the context is assocaited with"
+    - name: REFERENCE_COUNT
+      value: "4"
+      desc: "[uint32_t] The reference count of the context"
+    - name: ATOMIC_MEMORY_ORDER_CAPABILITIES
+      value: "5"
+      desc: "[$x_memory_order_flags_t] Supported memory order capabilities"
+    - name: ATOMIC_MEMORY_SCOPE_CAPABILITIES
+      value: "6"
+      desc: "[$x_memory_scope_flags_t] Supported memory scopes"
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Releases the context handle reference indicating end of its usage"
