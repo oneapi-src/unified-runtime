@@ -242,6 +242,15 @@ typedef ur_result_t (UR_APICALL *ur_pfnEventCreateWithNativeHandle_t)(
     );
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for urEventSetCallback 
+typedef ur_result_t (UR_APICALL *ur_pfnEventSetCallback_t)(
+    ur_event_handle_t,
+    ur_execution_info_t,
+    ur_event_callback_t,
+    void*
+    );
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Table of Event functions pointers
 typedef struct _ur_event_dditable_t
 {
@@ -253,6 +262,7 @@ typedef struct _ur_event_dditable_t
     ur_pfnEventRelease_t                                        pfnRelease;
     ur_pfnEventGetNativeHandle_t                                pfnGetNativeHandle;
     ur_pfnEventCreateWithNativeHandle_t                         pfnCreateWithNativeHandle;
+    ur_pfnEventSetCallback_t                                    pfnSetCallback;
 } ur_event_dditable_t;
 
 ///////////////////////////////////////////////////////////////////////////////
