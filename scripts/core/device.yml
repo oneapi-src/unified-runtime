@@ -126,6 +126,8 @@ etors:
       desc: "uint32_t: native vector width for half float"
     - name: MAX_CLOCK_FREQUENCY
       desc: "uint32_t: max clock frequency in MHz"
+    - name: MEMORY_CLOCK_RATE
+      desc: "uint32_t: memory clock frequency in MHz"
     - name: ADDRESS_BITS
       desc: "uint32_t: address bits"
     - name: MAX_MEM_ALLOC_SIZE
