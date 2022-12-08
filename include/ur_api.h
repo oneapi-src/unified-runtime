@@ -3728,7 +3728,7 @@ urPlatformGet(
                                                     ///< If phPlatforms is not NULL, then NumEntries but be greater than zero.
     ur_platform_handle_t* phPlatforms,              ///< [out][optional][range(0, NumEntries)] array of handle of platforms.
                                                     ///< If NumEntries is less than the number of platforms available, then
-                                                    ///< ::urPlatform shall only retrieve that number of platforms.
+                                                    ///< ::urPlatformGet shall only retrieve that number of platforms.
     uint32_t* pNumPlatforms                         ///< [out][optional] returns the total number of platforms available. 
     );
 
