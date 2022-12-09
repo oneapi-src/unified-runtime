@@ -335,12 +335,43 @@ urContextRetain(
     );
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Supported memory order capabilities
+typedef uint32_t ur_memory_order_flags_t;
+typedef enum ur_memory_order_flag_t
+{
+    UR_MEMORY_ORDER_FLAG_RELAXED = UR_BIT(0),       ///< Memory order relaxed
+    UR_MEMORY_ORDER_FLAG_ACQUIRE = UR_BIT(1),       ///< Memory order acquire
+    UR_MEMORY_ORDER_FLAG_RELEASE = UR_BIT(2),       ///< Memory order release
+    UR_MEMORY_ORDER_FLAG_ACQ_REL = UR_BIT(3),       ///< Memory order acquire-release
+    UR_MEMORY_ORDER_FLAG_SEQ_CST = UR_BIT(4),       ///< Memory order sequentially-consistent
+    UR_MEMORY_ORDER_FLAG_FORCE_UINT32 = 0x7fffffff
+
+} ur_memory_order_flag_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Supported memory scopes
+typedef uint32_t ur_memory_scope_flags_t;
+typedef enum ur_memory_scope_flag_t
+{
+    UR_MEMORY_SCOPE_FLAG_WORK_ITEM = UR_BIT(0),     ///< Memory scope of work-item
+    UR_MEMORY_SCOPE_FLAG_SUB_GROUP = UR_BIT(1),     ///< Memory scope of sub-group
+    UR_MEMORY_SCOPE_FLAG_WORK_GROUP = UR_BIT(2),    ///< Memory scope of work-group
+    UR_MEMORY_SCOPE_FLAG_DEVICE = UR_BIT(3),        ///< Memory scope of device
+    UR_MEMORY_SCOPE_FLAG_SYSTEM = UR_BIT(4),        ///< Memory scope of system
+    UR_MEMORY_SCOPE_FLAG_FORCE_UINT32 = 0x7fffffff
+
+} ur_memory_scope_flag_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Supported context info
 typedef enum ur_context_info_t
 {
     UR_CONTEXT_INFO_NUM_DEVICES = 1,                ///< [uint32_t] The number of the devices in the context
-    UR_CONTEXT_INFO_DEVICES = 2,                    ///< [::ur_context_handle_t...] The array of the device handles in the
+    UR_CONTEXT_INFO_DEVICES = 2,                    ///< [::ur_device_handle_t...] The array of the device handles in the
                                                     ///< context
+    UR_CONTEXT_INFO_REFERENCE_COUNT = 3,            ///< [uint32_t] The reference count of the context
+    UR_CONTEXT_INFO_ATOMIC_MEMORY_ORDER_CAPABILITIES = 4,   ///< [::ur_memory_order_flags_t] Supported memory order capabilities
+    UR_CONTEXT_INFO_ATOMIC_MEMORY_SCOPE_CAPABILITIES = 5,   ///< [::ur_memory_scope_flags_t] Supported memory scopes
     UR_CONTEXT_INFO_FORCE_UINT32 = 0x7fffffff
 
 } ur_context_info_t;
@@ -386,7 +417,7 @@ urContextRelease(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_CONTEXT_INFO_DEVICES < ContextInfoType`
+///         + `::UR_CONTEXT_INFO_ATOMIC_MEMORY_SCOPE_CAPABILITIES < ContextInfoType`
 UR_APIEXPORT ur_result_t UR_APICALL
 urContextGetInfo(
     ur_context_handle_t hContext,                   ///< [in] handle of the context

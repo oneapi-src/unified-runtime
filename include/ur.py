@@ -240,11 +240,42 @@ class ur_rect_region_t(Structure):
     ]
 
 ###############################################################################
+## @brief Supported memory order capabilities
+class ur_memory_order_flags_v(IntEnum):
+    RELAXED = UR_BIT(0)                             ## Memory order relaxed
+    ACQUIRE = UR_BIT(1)                             ## Memory order acquire
+    RELEASE = UR_BIT(2)                             ## Memory order release
+    ACQ_REL = UR_BIT(3)                             ## Memory order acquire-release
+    SEQ_CST = UR_BIT(4)                             ## Memory order sequentially-consistent
+
+class ur_memory_order_flags_t(c_int):
+    def __str__(self):
+        return hex(self.value)
+
+
+###############################################################################
+## @brief Supported memory scopes
+class ur_memory_scope_flags_v(IntEnum):
+    WORK_ITEM = UR_BIT(0)                           ## Memory scope of work-item
+    SUB_GROUP = UR_BIT(1)                           ## Memory scope of sub-group
+    WORK_GROUP = UR_BIT(2)                          ## Memory scope of work-group
+    DEVICE = UR_BIT(3)                              ## Memory scope of device
+    SYSTEM = UR_BIT(4)                              ## Memory scope of system
+
+class ur_memory_scope_flags_t(c_int):
+    def __str__(self):
+        return hex(self.value)
+
+
+###############################################################################
 ## @brief Supported context info
 class ur_context_info_v(IntEnum):
     NUM_DEVICES = 1                                 ## [uint32_t] The number of the devices in the context
-    DEVICES = 2                                     ## [::ur_context_handle_t...] The array of the device handles in the
+    DEVICES = 2                                     ## [::ur_device_handle_t...] The array of the device handles in the
                                                     ## context
+    REFERENCE_COUNT = 3                             ## [uint32_t] The reference count of the context
+    ATOMIC_MEMORY_ORDER_CAPABILITIES = 4            ## [::ur_memory_order_flags_t] Supported memory order capabilities
+    ATOMIC_MEMORY_SCOPE_CAPABILITIES = 5            ## [::ur_memory_scope_flags_t] Supported memory scopes
 
 class ur_context_info_t(c_int):
     def __str__(self):
