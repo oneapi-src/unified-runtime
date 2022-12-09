@@ -135,7 +135,7 @@ urContextRelease(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_CONTEXT_INFO_DEVICES < ContextInfoType`
+///         + `::UR_CONTEXT_INFO_ATOMIC_MEMORY_SCOPE_CAPABILITIES < ContextInfoType`
 ur_result_t UR_APICALL
 urContextGetInfo(
     ur_context_handle_t hContext,                   ///< [in] handle of the context
