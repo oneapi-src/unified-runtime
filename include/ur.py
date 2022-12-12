@@ -747,6 +747,7 @@ class ur_fp_capability_flags_v(IntEnum):
     INF_NAN = UR_BIT(4)                             ## Support INF to NAN
     DENORM = UR_BIT(5)                              ## Support denorm
     FMA = UR_BIT(6)                                 ## Support FMA
+    SOFT_FLOAT = UR_BIT(7)                          ## Support floating point types in software
 
 class ur_fp_capability_flags_t(c_int):
     def __str__(self):

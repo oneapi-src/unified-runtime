@@ -3050,6 +3050,7 @@ typedef enum ur_fp_capability_flag_t
     UR_FP_CAPABILITY_FLAG_INF_NAN = UR_BIT(4),      ///< Support INF to NAN
     UR_FP_CAPABILITY_FLAG_DENORM = UR_BIT(5),       ///< Support denorm
     UR_FP_CAPABILITY_FLAG_FMA = UR_BIT(6),          ///< Support FMA
+    UR_FP_CAPABILITY_FLAG_SOFT_FLOAT = UR_BIT(7),   ///< Support floating point types in software
     UR_FP_CAPABILITY_FLAG_FORCE_UINT32 = 0x7fffffff
 
 } ur_fp_capability_flag_t;

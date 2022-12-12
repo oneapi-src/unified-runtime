@@ -447,7 +447,7 @@ etors:
     - name: CORRECTLY_ROUNDED_DIVIDE_SQRT
       desc: "Support correctly rounded divide and sqrt"
       value: "$X_BIT(0)"
-    - name: ROUND_TO_NEAREST      
+    - name: ROUND_TO_NEAREST
       desc: "Support round to nearest"
       value: "$X_BIT(1)"
     - name: ROUND_TO_ZERO
@@ -465,6 +465,9 @@ etors:
     - name: FMA
       desc: "Support FMA"
       value: "$X_BIT(6)"
+    - name: SOFT_FLOAT
+      desc: "Support floating point types in software"
+      value: "$X_BIT(7)"
 --- #--------------------------------------------------------------------------
 type: enum
 desc: "Device memory cache type"
