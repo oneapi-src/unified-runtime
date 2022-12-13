@@ -1,3 +1,6 @@
+# Copyright (C) 2022 Intel Corporation
+# SPDX-License-Identifier: MIT
+
 cmake_minimum_required(VERSION 3.8.0 FATAL_ERROR)
 project(unified-runtime VERSION 0.5.0)
 
@@ -8,7 +11,7 @@ include(CTest)
 find_package(Python3 COMPONENTS Interpreter)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # define rpath for libraries so that adapters can be found automatically
