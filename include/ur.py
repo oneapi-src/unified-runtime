@@ -791,7 +791,11 @@ class ur_device_exec_capability_flags_t(c_int):
 ## @brief Device affinity domain
 class ur_device_affinity_domain_flags_v(IntEnum):
     NUMA = UR_BIT(0)                                ## By NUMA
-    NEXT_PARTITIONABLE = UR_BIT(1)                  ## BY next partitionable
+    NEXT_PARTITIONABLE = UR_BIT(1)                  ## By next partitionable
+    L4_CACHE = UR_BIT(2)                            ## By L4 Cache
+    L3_CACHE = UR_BIT(3)                            ## By L3 Cache
+    L2_CACHE = UR_BIT(4)                            ## By L2 Cache
+    L1_CACHE = UR_BIT(5)                            ## By L1 Cache
 
 class ur_device_affinity_domain_flags_t(c_int):
     def __str__(self):

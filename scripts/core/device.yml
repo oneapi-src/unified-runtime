@@ -509,8 +509,20 @@ etors:
       desc: "By NUMA"
       value: "$X_BIT(0)"
     - name: NEXT_PARTITIONABLE
-      desc: "BY next partitionable"
+      desc: "By next partitionable"
       value: "$X_BIT(1)"
+    - name: L4_CACHE
+      desc: "By L4 Cache"
+      value: "$X_BIT(2)"
+    - name: L3_CACHE
+      desc: "By L3 Cache"
+      value: "$X_BIT(3)"
+    - name: L2_CACHE
+      desc: "By L2 Cache"
+      value: "$X_BIT(4)"
+    - name: L1_CACHE
+      desc: "By L1 Cache"
+      value: "$X_BIT(5)"
 --- #--------------------------------------------------------------------------
 type: class
 desc: "C++ wrapper for a device"

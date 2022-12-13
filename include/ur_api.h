@@ -3092,7 +3092,11 @@ typedef uint32_t ur_device_affinity_domain_flags_t;
 typedef enum ur_device_affinity_domain_flag_t
 {
     UR_DEVICE_AFFINITY_DOMAIN_FLAG_NUMA = UR_BIT(0),///< By NUMA
-    UR_DEVICE_AFFINITY_DOMAIN_FLAG_NEXT_PARTITIONABLE = UR_BIT(1),  ///< BY next partitionable
+    UR_DEVICE_AFFINITY_DOMAIN_FLAG_NEXT_PARTITIONABLE = UR_BIT(1),  ///< By next partitionable
+    UR_DEVICE_AFFINITY_DOMAIN_FLAG_L4_CACHE = UR_BIT(2),///< By L4 Cache
+    UR_DEVICE_AFFINITY_DOMAIN_FLAG_L3_CACHE = UR_BIT(3),///< By L3 Cache
+    UR_DEVICE_AFFINITY_DOMAIN_FLAG_L2_CACHE = UR_BIT(4),///< By L2 Cache
+    UR_DEVICE_AFFINITY_DOMAIN_FLAG_L1_CACHE = UR_BIT(5),///< By L1 Cache
     UR_DEVICE_AFFINITY_DOMAIN_FLAG_FORCE_UINT32 = 0x7fffffff
 
 } ur_device_affinity_domain_flag_t;
