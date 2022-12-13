@@ -121,9 +121,10 @@ add_custom_target(generate ALL
     DEPENDS ${API_JSON_FILE}
 )
 
-# generate source and check for uncommitted diffs
+# check for uncommitted diffs and valid python module
 add_custom_target(check-generated
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMAND git diff --exit-code
+    COMMAND PYTHONPATH=${CMAKE_SOURCE_DIR}/include ${Python3_EXECUTABLE} -c "import ur"
     DEPENDS generate
 )
