@@ -2599,16 +2599,10 @@ urKernelCreate(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Set kernel argument for a kernel.
+/// @brief Set kernel argument to a value.
 /// 
 /// @details
-///     - The application must **not** call this function from simultaneous
-///       threads with the same kernel handle.
 ///     - The implementation of this function should be lock-free.
-/// 
-/// @remarks
-///   _Analogues_
-///     - **clSetKernelArg**
 /// 
 /// @returns
 ///     - ::UR_RESULT_SUCCESS
@@ -2616,13 +2610,41 @@ urKernelCreate(
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hKernel`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pArgValue`
+///     - ::UR_ERROR_INVALID_KERNEL_ARGUMENT_INDEX
+///     - ::UR_ERROR_INVALID_KERNEL_ARGUMENT_SIZE
 ur_result_t UR_APICALL
-urKernelSetArg(
+urKernelSetArgValue(
     ur_kernel_handle_t hKernel,                     ///< [in] handle of the kernel object
     uint32_t argIndex,                              ///< [in] argument index in range [0, num args - 1]
     size_t argSize,                                 ///< [in] size of argument type
-    const void* pArgValue                           ///< [in][optional] argument value represented as matching arg type. If
-                                                    ///< null then argument value is considered null.
+    const void* pArgValue                           ///< [in] argument value represented as matching arg type.
+    )
+{
+    ur_result_t result = UR_RESULT_SUCCESS;
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Set kernel argument to a local buffer.
+/// 
+/// @details
+///     - The implementation of this function should be lock-free.
+/// 
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hKernel`
+///     - ::UR_ERROR_INVALID_KERNEL_ARGUMENT_INDEX
+///     - ::UR_ERROR_INVALID_KERNEL_ARGUMENT_SIZE
+ur_result_t UR_APICALL
+urKernelSetArgLocal(
+    ur_kernel_handle_t hKernel,                     ///< [in] handle of the kernel object
+    uint32_t argIndex,                              ///< [in] argument index in range [0, num args - 1]
+    size_t argSize                                  ///< [in] size of the local buffer to be allocated by the runtime
     )
 {
     ur_result_t result = UR_RESULT_SUCCESS;
@@ -2782,8 +2804,6 @@ urKernelRelease(
 /// @brief Set a USM pointer as the argument value of a Kernel.
 /// 
 /// @details
-///     - The application must **not** call this function from simultaneous
-///       threads with the same kernel handle.
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @remarks
@@ -2796,6 +2816,8 @@ urKernelRelease(
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hKernel`
+///     - ::UR_ERROR_INVALID_KERNEL_ARGUMENT_INDEX
+///     - ::UR_ERROR_INVALID_KERNEL_ARGUMENT_SIZE
 ur_result_t UR_APICALL
 urKernelSetArgPointer(
     ur_kernel_handle_t hKernel,                     ///< [in] handle of the kernel object
@@ -2848,8 +2870,6 @@ urKernelSetExecInfo(
 /// @brief Set a Sampler object as the argument value of a Kernel.
 /// 
 /// @details
-///     - The application must **not** call this function from simultaneous
-///       threads with the same kernel handle.
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
@@ -2859,6 +2879,7 @@ urKernelSetExecInfo(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hKernel`
 ///         + `NULL == hArgValue`
+///     - ::UR_ERROR_INVALID_KERNEL_ARGUMENT_INDEX
 ur_result_t UR_APICALL
 urKernelSetArgSampler(
     ur_kernel_handle_t hKernel,                     ///< [in] handle of the kernel object
@@ -2874,8 +2895,6 @@ urKernelSetArgSampler(
 /// @brief Set a Memory object as the argument value of a Kernel.
 /// 
 /// @details
-///     - The application must **not** call this function from simultaneous
-///       threads with the same kernel handle.
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
@@ -2884,12 +2903,12 @@ urKernelSetArgSampler(
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hKernel`
-///         + `NULL == hArgValue`
+///     - ::UR_ERROR_INVALID_KERNEL_ARGUMENT_INDEX
 ur_result_t UR_APICALL
 urKernelSetArgMemObj(
     ur_kernel_handle_t hKernel,                     ///< [in] handle of the kernel object
     uint32_t argIndex,                              ///< [in] argument index in range [0, num args - 1]
-    ur_mem_handle_t hArgValue                       ///< [in] handle of Memory object.
+    ur_mem_handle_t hArgValue                       ///< [in][optional] handle of Memory object.
     )
 {
     ur_result_t result = UR_RESULT_SUCCESS;
