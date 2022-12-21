@@ -163,9 +163,8 @@ class ${N}_DDI:
     def __init__(self, version : ${x}_api_version_t):
         # load the ${x}_loader library
         if "Windows" == platform.uname()[0]:
-            os.add_dll_directory(os.getenv("UR_ADAPTERS_SEARCH_DIR"))
-            LOAD_LIBRARY_SEARCH_DEFAULT_DIRS = 0x00001000
-            self.__dll = WinDLL("${x}_loader.dll", winmode=LOAD_LIBRARY_SEARCH_DEFAULT_DIRS)
+            os.add_dll_directory(os.getenv("PATH").split(";")[0])
+            self.__dll = WinDLL("${x}_loader.dll", winmode=0)
         else:
             self.__dll = CDLL("lib${x}_loader.so")
 
