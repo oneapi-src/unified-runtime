@@ -4433,10 +4433,10 @@ urGetGlobalProcAddrTable(
             continue;
         auto getTable = reinterpret_cast<ur_pfnGetGlobalProcAddrTable_t>(
             GET_FUNCTION_PTR( platform.handle, "urGetGlobalProcAddrTable") );
-        if(!getTable) 
-            continue; 
+        if(!getTable)
+            continue;
         auto getTableResult = getTable( version, &platform.dditable.ur.Global);
-        if(getTableResult == UR_RESULT_SUCCESS) 
+        if(getTableResult == UR_RESULT_SUCCESS)
             atLeastOneplatformValid = true;
         else
             platform.initStatus = getTableResult;
@@ -4461,6 +4461,16 @@ urGetGlobalProcAddrTable(
             // return pointers directly to platform's DDIs
             *pDdiTable = loader::context->platforms.front().dditable.ur.Global;
         }
+    }
+
+    // If the validation layer is enabled, then intercept the loader's DDIs
+    if(( UR_RESULT_SUCCESS == result ) && ( nullptr != loader::context->validationLayer ))
+    {
+        auto getTable = reinterpret_cast<ur_pfnGetGlobalProcAddrTable_t>(
+            GET_FUNCTION_PTR(loader::context->validationLayer, "urGetGlobalProcAddrTable") );
+        if(!getTable)
+            return UR_RESULT_ERROR_UNINITIALIZED;
+        result = getTable( version, pDdiTable );
     }
 
     return result;
@@ -4500,10 +4510,10 @@ urGetContextProcAddrTable(
             continue;
         auto getTable = reinterpret_cast<ur_pfnGetContextProcAddrTable_t>(
             GET_FUNCTION_PTR( platform.handle, "urGetContextProcAddrTable") );
-        if(!getTable) 
-            continue; 
+        if(!getTable)
+            continue;
         auto getTableResult = getTable( version, &platform.dditable.ur.Context);
-        if(getTableResult == UR_RESULT_SUCCESS) 
+        if(getTableResult == UR_RESULT_SUCCESS)
             atLeastOneplatformValid = true;
         else
             platform.initStatus = getTableResult;
@@ -4532,6 +4542,16 @@ urGetContextProcAddrTable(
             // return pointers directly to platform's DDIs
             *pDdiTable = loader::context->platforms.front().dditable.ur.Context;
         }
+    }
+
+    // If the validation layer is enabled, then intercept the loader's DDIs
+    if(( UR_RESULT_SUCCESS == result ) && ( nullptr != loader::context->validationLayer ))
+    {
+        auto getTable = reinterpret_cast<ur_pfnGetContextProcAddrTable_t>(
+            GET_FUNCTION_PTR(loader::context->validationLayer, "urGetContextProcAddrTable") );
+        if(!getTable)
+            return UR_RESULT_ERROR_UNINITIALIZED;
+        result = getTable( version, pDdiTable );
     }
 
     return result;
@@ -4571,10 +4591,10 @@ urGetEnqueueProcAddrTable(
             continue;
         auto getTable = reinterpret_cast<ur_pfnGetEnqueueProcAddrTable_t>(
             GET_FUNCTION_PTR( platform.handle, "urGetEnqueueProcAddrTable") );
-        if(!getTable) 
-            continue; 
+        if(!getTable)
+            continue;
         auto getTableResult = getTable( version, &platform.dditable.ur.Enqueue);
-        if(getTableResult == UR_RESULT_SUCCESS) 
+        if(getTableResult == UR_RESULT_SUCCESS)
             atLeastOneplatformValid = true;
         else
             platform.initStatus = getTableResult;
@@ -4622,6 +4642,16 @@ urGetEnqueueProcAddrTable(
         }
     }
 
+    // If the validation layer is enabled, then intercept the loader's DDIs
+    if(( UR_RESULT_SUCCESS == result ) && ( nullptr != loader::context->validationLayer ))
+    {
+        auto getTable = reinterpret_cast<ur_pfnGetEnqueueProcAddrTable_t>(
+            GET_FUNCTION_PTR(loader::context->validationLayer, "urGetEnqueueProcAddrTable") );
+        if(!getTable)
+            return UR_RESULT_ERROR_UNINITIALIZED;
+        result = getTable( version, pDdiTable );
+    }
+
     return result;
 }
 
@@ -4659,10 +4689,10 @@ urGetEventProcAddrTable(
             continue;
         auto getTable = reinterpret_cast<ur_pfnGetEventProcAddrTable_t>(
             GET_FUNCTION_PTR( platform.handle, "urGetEventProcAddrTable") );
-        if(!getTable) 
-            continue; 
+        if(!getTable)
+            continue;
         auto getTableResult = getTable( version, &platform.dditable.ur.Event);
-        if(getTableResult == UR_RESULT_SUCCESS) 
+        if(getTableResult == UR_RESULT_SUCCESS)
             atLeastOneplatformValid = true;
         else
             platform.initStatus = getTableResult;
@@ -4692,6 +4722,16 @@ urGetEventProcAddrTable(
             // return pointers directly to platform's DDIs
             *pDdiTable = loader::context->platforms.front().dditable.ur.Event;
         }
+    }
+
+    // If the validation layer is enabled, then intercept the loader's DDIs
+    if(( UR_RESULT_SUCCESS == result ) && ( nullptr != loader::context->validationLayer ))
+    {
+        auto getTable = reinterpret_cast<ur_pfnGetEventProcAddrTable_t>(
+            GET_FUNCTION_PTR(loader::context->validationLayer, "urGetEventProcAddrTable") );
+        if(!getTable)
+            return UR_RESULT_ERROR_UNINITIALIZED;
+        result = getTable( version, pDdiTable );
     }
 
     return result;
@@ -4731,10 +4771,10 @@ urGetKernelProcAddrTable(
             continue;
         auto getTable = reinterpret_cast<ur_pfnGetKernelProcAddrTable_t>(
             GET_FUNCTION_PTR( platform.handle, "urGetKernelProcAddrTable") );
-        if(!getTable) 
-            continue; 
+        if(!getTable)
+            continue;
         auto getTableResult = getTable( version, &platform.dditable.ur.Kernel);
-        if(getTableResult == UR_RESULT_SUCCESS) 
+        if(getTableResult == UR_RESULT_SUCCESS)
             atLeastOneplatformValid = true;
         else
             platform.initStatus = getTableResult;
@@ -4770,6 +4810,16 @@ urGetKernelProcAddrTable(
             // return pointers directly to platform's DDIs
             *pDdiTable = loader::context->platforms.front().dditable.ur.Kernel;
         }
+    }
+
+    // If the validation layer is enabled, then intercept the loader's DDIs
+    if(( UR_RESULT_SUCCESS == result ) && ( nullptr != loader::context->validationLayer ))
+    {
+        auto getTable = reinterpret_cast<ur_pfnGetKernelProcAddrTable_t>(
+            GET_FUNCTION_PTR(loader::context->validationLayer, "urGetKernelProcAddrTable") );
+        if(!getTable)
+            return UR_RESULT_ERROR_UNINITIALIZED;
+        result = getTable( version, pDdiTable );
     }
 
     return result;
@@ -4809,10 +4859,10 @@ urGetMemProcAddrTable(
             continue;
         auto getTable = reinterpret_cast<ur_pfnGetMemProcAddrTable_t>(
             GET_FUNCTION_PTR( platform.handle, "urGetMemProcAddrTable") );
-        if(!getTable) 
-            continue; 
+        if(!getTable)
+            continue;
         auto getTableResult = getTable( version, &platform.dditable.ur.Mem);
-        if(getTableResult == UR_RESULT_SUCCESS) 
+        if(getTableResult == UR_RESULT_SUCCESS)
             atLeastOneplatformValid = true;
         else
             platform.initStatus = getTableResult;
@@ -4845,6 +4895,16 @@ urGetMemProcAddrTable(
             // return pointers directly to platform's DDIs
             *pDdiTable = loader::context->platforms.front().dditable.ur.Mem;
         }
+    }
+
+    // If the validation layer is enabled, then intercept the loader's DDIs
+    if(( UR_RESULT_SUCCESS == result ) && ( nullptr != loader::context->validationLayer ))
+    {
+        auto getTable = reinterpret_cast<ur_pfnGetMemProcAddrTable_t>(
+            GET_FUNCTION_PTR(loader::context->validationLayer, "urGetMemProcAddrTable") );
+        if(!getTable)
+            return UR_RESULT_ERROR_UNINITIALIZED;
+        result = getTable( version, pDdiTable );
     }
 
     return result;
@@ -4884,10 +4944,10 @@ urGetModuleProcAddrTable(
             continue;
         auto getTable = reinterpret_cast<ur_pfnGetModuleProcAddrTable_t>(
             GET_FUNCTION_PTR( platform.handle, "urGetModuleProcAddrTable") );
-        if(!getTable) 
-            continue; 
+        if(!getTable)
+            continue;
         auto getTableResult = getTable( version, &platform.dditable.ur.Module);
-        if(getTableResult == UR_RESULT_SUCCESS) 
+        if(getTableResult == UR_RESULT_SUCCESS)
             atLeastOneplatformValid = true;
         else
             platform.initStatus = getTableResult;
@@ -4914,6 +4974,16 @@ urGetModuleProcAddrTable(
             // return pointers directly to platform's DDIs
             *pDdiTable = loader::context->platforms.front().dditable.ur.Module;
         }
+    }
+
+    // If the validation layer is enabled, then intercept the loader's DDIs
+    if(( UR_RESULT_SUCCESS == result ) && ( nullptr != loader::context->validationLayer ))
+    {
+        auto getTable = reinterpret_cast<ur_pfnGetModuleProcAddrTable_t>(
+            GET_FUNCTION_PTR(loader::context->validationLayer, "urGetModuleProcAddrTable") );
+        if(!getTable)
+            return UR_RESULT_ERROR_UNINITIALIZED;
+        result = getTable( version, pDdiTable );
     }
 
     return result;
@@ -4953,10 +5023,10 @@ urGetPlatformProcAddrTable(
             continue;
         auto getTable = reinterpret_cast<ur_pfnGetPlatformProcAddrTable_t>(
             GET_FUNCTION_PTR( platform.handle, "urGetPlatformProcAddrTable") );
-        if(!getTable) 
-            continue; 
+        if(!getTable)
+            continue;
         auto getTableResult = getTable( version, &platform.dditable.ur.Platform);
-        if(getTableResult == UR_RESULT_SUCCESS) 
+        if(getTableResult == UR_RESULT_SUCCESS)
             atLeastOneplatformValid = true;
         else
             platform.initStatus = getTableResult;
@@ -4983,6 +5053,16 @@ urGetPlatformProcAddrTable(
             // return pointers directly to platform's DDIs
             *pDdiTable = loader::context->platforms.front().dditable.ur.Platform;
         }
+    }
+
+    // If the validation layer is enabled, then intercept the loader's DDIs
+    if(( UR_RESULT_SUCCESS == result ) && ( nullptr != loader::context->validationLayer ))
+    {
+        auto getTable = reinterpret_cast<ur_pfnGetPlatformProcAddrTable_t>(
+            GET_FUNCTION_PTR(loader::context->validationLayer, "urGetPlatformProcAddrTable") );
+        if(!getTable)
+            return UR_RESULT_ERROR_UNINITIALIZED;
+        result = getTable( version, pDdiTable );
     }
 
     return result;
@@ -5022,10 +5102,10 @@ urGetProgramProcAddrTable(
             continue;
         auto getTable = reinterpret_cast<ur_pfnGetProgramProcAddrTable_t>(
             GET_FUNCTION_PTR( platform.handle, "urGetProgramProcAddrTable") );
-        if(!getTable) 
-            continue; 
+        if(!getTable)
+            continue;
         auto getTableResult = getTable( version, &platform.dditable.ur.Program);
-        if(getTableResult == UR_RESULT_SUCCESS) 
+        if(getTableResult == UR_RESULT_SUCCESS)
             atLeastOneplatformValid = true;
         else
             platform.initStatus = getTableResult;
@@ -5057,6 +5137,16 @@ urGetProgramProcAddrTable(
             // return pointers directly to platform's DDIs
             *pDdiTable = loader::context->platforms.front().dditable.ur.Program;
         }
+    }
+
+    // If the validation layer is enabled, then intercept the loader's DDIs
+    if(( UR_RESULT_SUCCESS == result ) && ( nullptr != loader::context->validationLayer ))
+    {
+        auto getTable = reinterpret_cast<ur_pfnGetProgramProcAddrTable_t>(
+            GET_FUNCTION_PTR(loader::context->validationLayer, "urGetProgramProcAddrTable") );
+        if(!getTable)
+            return UR_RESULT_ERROR_UNINITIALIZED;
+        result = getTable( version, pDdiTable );
     }
 
     return result;
@@ -5096,10 +5186,10 @@ urGetQueueProcAddrTable(
             continue;
         auto getTable = reinterpret_cast<ur_pfnGetQueueProcAddrTable_t>(
             GET_FUNCTION_PTR( platform.handle, "urGetQueueProcAddrTable") );
-        if(!getTable) 
-            continue; 
+        if(!getTable)
+            continue;
         auto getTableResult = getTable( version, &platform.dditable.ur.Queue);
-        if(getTableResult == UR_RESULT_SUCCESS) 
+        if(getTableResult == UR_RESULT_SUCCESS)
             atLeastOneplatformValid = true;
         else
             platform.initStatus = getTableResult;
@@ -5129,6 +5219,16 @@ urGetQueueProcAddrTable(
             // return pointers directly to platform's DDIs
             *pDdiTable = loader::context->platforms.front().dditable.ur.Queue;
         }
+    }
+
+    // If the validation layer is enabled, then intercept the loader's DDIs
+    if(( UR_RESULT_SUCCESS == result ) && ( nullptr != loader::context->validationLayer ))
+    {
+        auto getTable = reinterpret_cast<ur_pfnGetQueueProcAddrTable_t>(
+            GET_FUNCTION_PTR(loader::context->validationLayer, "urGetQueueProcAddrTable") );
+        if(!getTable)
+            return UR_RESULT_ERROR_UNINITIALIZED;
+        result = getTable( version, pDdiTable );
     }
 
     return result;
@@ -5168,10 +5268,10 @@ urGetSamplerProcAddrTable(
             continue;
         auto getTable = reinterpret_cast<ur_pfnGetSamplerProcAddrTable_t>(
             GET_FUNCTION_PTR( platform.handle, "urGetSamplerProcAddrTable") );
-        if(!getTable) 
-            continue; 
+        if(!getTable)
+            continue;
         auto getTableResult = getTable( version, &platform.dditable.ur.Sampler);
-        if(getTableResult == UR_RESULT_SUCCESS) 
+        if(getTableResult == UR_RESULT_SUCCESS)
             atLeastOneplatformValid = true;
         else
             platform.initStatus = getTableResult;
@@ -5199,6 +5299,16 @@ urGetSamplerProcAddrTable(
             // return pointers directly to platform's DDIs
             *pDdiTable = loader::context->platforms.front().dditable.ur.Sampler;
         }
+    }
+
+    // If the validation layer is enabled, then intercept the loader's DDIs
+    if(( UR_RESULT_SUCCESS == result ) && ( nullptr != loader::context->validationLayer ))
+    {
+        auto getTable = reinterpret_cast<ur_pfnGetSamplerProcAddrTable_t>(
+            GET_FUNCTION_PTR(loader::context->validationLayer, "urGetSamplerProcAddrTable") );
+        if(!getTable)
+            return UR_RESULT_ERROR_UNINITIALIZED;
+        result = getTable( version, pDdiTable );
     }
 
     return result;
@@ -5238,10 +5348,10 @@ urGetUSMProcAddrTable(
             continue;
         auto getTable = reinterpret_cast<ur_pfnGetUSMProcAddrTable_t>(
             GET_FUNCTION_PTR( platform.handle, "urGetUSMProcAddrTable") );
-        if(!getTable) 
-            continue; 
+        if(!getTable)
+            continue;
         auto getTableResult = getTable( version, &platform.dditable.ur.USM);
-        if(getTableResult == UR_RESULT_SUCCESS) 
+        if(getTableResult == UR_RESULT_SUCCESS)
             atLeastOneplatformValid = true;
         else
             platform.initStatus = getTableResult;
@@ -5266,6 +5376,16 @@ urGetUSMProcAddrTable(
             // return pointers directly to platform's DDIs
             *pDdiTable = loader::context->platforms.front().dditable.ur.USM;
         }
+    }
+
+    // If the validation layer is enabled, then intercept the loader's DDIs
+    if(( UR_RESULT_SUCCESS == result ) && ( nullptr != loader::context->validationLayer ))
+    {
+        auto getTable = reinterpret_cast<ur_pfnGetUSMProcAddrTable_t>(
+            GET_FUNCTION_PTR(loader::context->validationLayer, "urGetUSMProcAddrTable") );
+        if(!getTable)
+            return UR_RESULT_ERROR_UNINITIALIZED;
+        result = getTable( version, pDdiTable );
     }
 
     return result;
@@ -5305,10 +5425,10 @@ urGetDeviceProcAddrTable(
             continue;
         auto getTable = reinterpret_cast<ur_pfnGetDeviceProcAddrTable_t>(
             GET_FUNCTION_PTR( platform.handle, "urGetDeviceProcAddrTable") );
-        if(!getTable) 
-            continue; 
+        if(!getTable)
+            continue;
         auto getTableResult = getTable( version, &platform.dditable.ur.Device);
-        if(getTableResult == UR_RESULT_SUCCESS) 
+        if(getTableResult == UR_RESULT_SUCCESS)
             atLeastOneplatformValid = true;
         else
             platform.initStatus = getTableResult;
@@ -5339,6 +5459,16 @@ urGetDeviceProcAddrTable(
             // return pointers directly to platform's DDIs
             *pDdiTable = loader::context->platforms.front().dditable.ur.Device;
         }
+    }
+
+    // If the validation layer is enabled, then intercept the loader's DDIs
+    if(( UR_RESULT_SUCCESS == result ) && ( nullptr != loader::context->validationLayer ))
+    {
+        auto getTable = reinterpret_cast<ur_pfnGetDeviceProcAddrTable_t>(
+            GET_FUNCTION_PTR(loader::context->validationLayer, "urGetDeviceProcAddrTable") );
+        if(!getTable)
+            return UR_RESULT_ERROR_UNINITIALIZED;
+        result = getTable( version, pDdiTable );
     }
 
     return result;

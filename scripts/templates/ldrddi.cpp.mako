@@ -240,10 +240,10 @@ ${tbl['export']['name']}(
             continue;
         auto getTable = reinterpret_cast<${tbl['pfn']}>(
             GET_FUNCTION_PTR( platform.handle, "${tbl['export']['name']}") );
-        if(!getTable) 
-            continue; 
+        if(!getTable)
+            continue;
         auto getTableResult = getTable( version, &platform.dditable.${n}.${tbl['name']});
-        if(getTableResult == ${X}_RESULT_SUCCESS) 
+        if(getTableResult == ${X}_RESULT_SUCCESS)
             atLeastOneplatformValid = true;
         %if tbl['experimental'] is False:
         else
@@ -280,6 +280,16 @@ ${tbl['export']['name']}(
             // return pointers directly to platform's DDIs
             *pDdiTable = loader::context->platforms.front().dditable.${n}.${tbl['name']};
         }
+    }
+
+    // If the validation layer is enabled, then intercept the loader's DDIs
+    if(( ${X}_RESULT_SUCCESS == result ) && ( nullptr != loader::context->validationLayer ))
+    {
+        auto getTable = reinterpret_cast<${tbl['pfn']}>(
+            GET_FUNCTION_PTR(loader::context->validationLayer, "${tbl['export']['name']}") );
+        if(!getTable)
+            return ${X}_RESULT_ERROR_UNINITIALIZED;
+        result = getTable( version, pDdiTable );
     }
 
     return result;

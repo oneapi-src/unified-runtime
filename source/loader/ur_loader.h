@@ -39,6 +39,8 @@ namespace loader
 
         platform_vector_t platforms;
 
+        HMODULE validationLayer = nullptr;
+
         bool forceIntercept = false;
 
         ur_result_t init();
@@ -48,7 +50,7 @@ namespace loader
 
     extern context_t *context;
     extern ur_event_factory_t ur_event_factory;
-    
+
 }
 
 #endif /* UR_LOADER_H */
