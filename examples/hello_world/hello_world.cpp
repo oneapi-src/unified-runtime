@@ -5,16 +5,41 @@
  * SPDX-License-Identifier: MIT
  *
  */
-#include <stdlib.h>
 #include <memory>
 #include <iostream>
+#include <stdlib.h>
+#include <string.h>
 #include <vector>
 
 #include "ur_api.h"
 
-//////////////////////////////////////////////////////////////////////////
+#if defined(_WIN32)
+    #define putenv_safe _putenv
+#else
+    #define putenv_safe putenv
+#endif
+
+inline bool argparse( int argc, char *argv[],
+    const char *shortName, const char *longName )
+{
+    char **arg = &argv[ 1 ];
+    char **argE = &argv[ argc ];
+
+    for( ; arg != argE; ++arg )
+        if( ( 0 == strcmp( *arg, shortName ) ) || ( 0 == strcmp( *arg, longName ) ) )
+            return true;
+
+    return false;
+}
+
 int main(int argc, char *argv[])
 {
+    if( argparse( argc, argv, "-val", "--enable_validation_layer" ) )
+    {
+        putenv_safe( const_cast<char *>( "UR_ENABLE_VALIDATION_LAYER=1" ) );
+        putenv_safe( const_cast<char *>( "UR_ENABLE_PARAMETER_VALIDATION=1" ) );
+    }
+
     ur_result_t status;
 
     ur_platform_handle_t platform = nullptr;
@@ -50,7 +75,7 @@ int main(int argc, char *argv[])
     for (auto p : platforms)
     {
         ur_api_version_t api_version = {};
-        status = urPlatformGetApiVersion(platform, &api_version);
+        status = urPlatformGetApiVersion(p, &api_version);
         if (status != UR_RESULT_SUCCESS)
         {
             std::cout << "urPlatformGetApiVersion failed with return code: " << status << std::endl;
