@@ -16,11 +16,19 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-
-    - name: Install apt package
+    - name: Install apt packages
       run: |
         sudo apt-get update
-        sudo apt-get install -y doxygen
+        sudo apt-get install -y doxygen libncurses5
+  
+    - name: Install clang-format-10
+      run: |
+        cd ${{github.workspace}}
+        wget -q https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.1/clang+llvm-10.0.1-x86_64-linux-gnu-ubuntu-16.04.tar.xz
+        tar -xf ${{github.workspace}}/clang+llvm-10.0.1-x86_64-linux-gnu-ubuntu-16.04.tar.xz
+        cp ${{github.workspace}}/clang+llvm-10.0.1-x86_64-linux-gnu-ubuntu-16.04/bin/clang-format ${{github.workspace}}/clang-format-10
+        rm -rf clang+llvm-10.0.1-x86_64-linux-gnu-ubuntu-16.04 clang+llvm-10.0.1-x86_64-linux-gnu-ubuntu-16.04.tar.xz
+        echo ${{github.workspace}} >> $GITHUB_PATH
 
     - name: Install pip packages
       run: pip install -r third_party/requirements.txt
@@ -30,6 +38,9 @@ jobs:
 
     - name: Generate source from spec, check for uncommitted diff
       run: cmake --build ${{github.workspace}}/build --target check-generated
+
+    - name: Check source code is formatted
+      run: cmake --build ${{github.workspace}}/build --target check-cppformat
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build

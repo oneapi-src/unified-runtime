@@ -36,3 +36,23 @@ function(add_cppformat name)
 
     add_dependencies(cppformat cppformat-${name})
 endfunction()
+
+function(check_cppformat name)
+    if(NOT CLANG_FORMAT OR NOT (CLANG_FORMAT_VERSION VERSION_EQUAL CLANG_FORMAT_REQUIRED))
+        return()
+    endif()
+
+    if(${ARGC} EQUAL 0)
+        return()
+    else()
+    add_custom_target(check-cppformat-${name}
+        COMMAND ! ${CLANG_FORMAT}
+            --style=file
+            --output-replacements-xml
+            ${ARGN}
+            | grep -q "replacement offset"
+        )
+    endif()
+
+    add_dependencies(check-cppformat check-cppformat-${name})
+endfunction()
