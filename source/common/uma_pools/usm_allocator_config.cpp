@@ -25,7 +25,7 @@ constexpr auto operator""_GB(unsigned long long x) -> size_t {
   return x * 1024 * 1024 * 1024;
 }
 
-USMAllocatorConfig::USMAllocatorConfig() {
+USMAllocatorConfig::USMAllocatorConfig(const std::string& config, bool trace) {
   size_t i = 0;
   for (auto &memoryTypeName : MemTypeNames) {
     Configs[i++].memoryTypeName = memoryTypeName;
@@ -61,7 +61,7 @@ USMAllocatorConfig::USMAllocatorConfig() {
   Configs[MemType::SharedReadOnly].SlabMinSize = 2_MB;
 
   // Parse optional parameters of this form:
-  // SYCL_PI_LEVEL_ZERO_USM_ALLOCATOR=[EnableBuffers][;[MaxPoolSize][;memtypelimits]...]
+  // [EnableBuffers][;[MaxPoolSize][;memtypelimits]...]
   //  memtypelimits: [<memtype>:]<limits>
   //  memtype: host|device|shared
   //  limits:  [MaxPoolableSize][,[Capacity][,SlabMinSize]]
@@ -83,8 +83,9 @@ USMAllocatorConfig::USMAllocatorConfig() {
   //                  Default 64KB host and device, 2MB shared.
   //
   // Example of usage:
-  // SYCL_PI_LEVEL_ZERO_USM_ALLOCATOR=1;32M;host:1M,4,64K;device:1M,4,64K;shared:0,0,2M
+  // "1;32M;host:1M,4,64K;device:1M,4,64K;shared:0,0,2M"
 
+  // TODO: replace with UR ENV var parser and avoid creating a copy of 'config'
   auto GetValue = [=](std::string &Param, size_t Length, size_t &Setting) {
     size_t Multiplier = 1;
     if (tolower(Param[Length - 1]) == 'k') {
@@ -181,9 +182,8 @@ USMAllocatorConfig::USMAllocatorConfig() {
   auto limits = std::make_shared<USMLimits>();
 
   // Update pool settings if specified in environment.
-  char *PoolParams = getenv("SYCL_PI_LEVEL_ZERO_USM_ALLOCATOR");
-  if (PoolParams != nullptr) {
-    std::string Params(PoolParams);
+  if (config != "") {
+    std::string Params = config;
     size_t Pos = Params.find(';');
     if (Pos != std::string::npos) {
       if (Pos > 0) {
@@ -220,18 +220,12 @@ USMAllocatorConfig::USMAllocatorConfig() {
     }
   }
 
-  char *PoolTraceVal = getenv("SYCL_PI_LEVEL_ZERO_USM_ALLOCATOR_TRACE");
-  int PoolTrace = 0;
-  if (PoolTraceVal != nullptr) {
-    PoolTrace = std::atoi(PoolTraceVal);
-  }
-
   for (auto &Config : Configs) {
     Config.limits = limits;
-    Config.PoolTrace = PoolTrace;
+    Config.PoolTrace = trace;
   }
 
-  if (PoolTrace < 1)
+  if (!trace)
     return;
 
   std::cout << "USM Pool Settings (Built-in or Adjusted by Environment "
