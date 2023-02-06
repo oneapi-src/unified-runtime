@@ -170,5 +170,4 @@ TEST_F(urDevicePartitionTest, PartitionByAffinityDomain) {
             }
         }
     }
-    
 }
