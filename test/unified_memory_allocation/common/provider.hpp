@@ -60,16 +60,20 @@ struct provider_malloc : public provider_base {
         }
 
 #ifdef _WIN32
-        // we could use _aligned_alloc but it requires using _aligned_free...
-        return UMA_RESULT_ERROR_INVALID_ARGUMENT;
+        *ptr = _aligned_malloc(size, align);
 #else
         *ptr = ::aligned_alloc(align, size);
+#endif
+
         return (*ptr) ? UMA_RESULT_SUCCESS
                       : UMA_RESULT_ERROR_OUT_OF_HOST_MEMORY;
-#endif
     }
     enum uma_result_t free(void *ptr, size_t) noexcept {
+#ifdef _WIN32
+        _aligned_free(ptr);
+#else
         ::free(ptr);
+#endif
         return UMA_RESULT_SUCCESS;
     }
 };

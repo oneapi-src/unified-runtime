@@ -5,6 +5,7 @@
 
 add_library(disjoint_pool STATIC
     disjoint_pool.cpp
+    disjoint_pool_config.cpp
 )
 
 add_library(${PROJECT_NAME}::disjoint_pool ALIAS disjoint_pool)

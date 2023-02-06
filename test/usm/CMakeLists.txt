@@ -25,3 +25,4 @@ function(add_usm_test name)
 endfunction()
 
 add_usm_test(usmPoolManager usmPoolManager.cpp)
+add_usm_test(disjointPoolConfig disjoint_pool_config.cpp)
