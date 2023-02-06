@@ -21,7 +21,9 @@
 #include <utility>
 #include <vector>
 
-#include "ur.hpp"
+// TODO: replace with logger?
+#include <iostream>
+
 #include "usm_allocator.hpp"
 
 // USM allocations are a minimum of 4KB/64KB/2MB even when a smaller size is

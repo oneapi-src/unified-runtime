@@ -23,11 +23,14 @@ public:
 
 class USMLimits {
 public:
+  USMLimits(): TotalSize(0) {
+  }
+
   // Maximum memory left unfreed
   size_t MaxSize = 16 * 1024 * 1024;
 
   // Total size of pooled memory
-  std::atomic<size_t> TotalSize = 0;
+  std::atomic<size_t> TotalSize;
 };
 
 // Configuration for specific USM allocator instance

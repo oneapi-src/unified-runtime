@@ -10,3 +10,6 @@ target_include_directories(common INTERFACE
 
 add_subdirectory(unified_memory_allocation)
 target_link_libraries(common INTERFACE unified_memory_allocation)
+
+add_subdirectory(uma_pools)
+target_link_libraries(common INTERFACE uma_usm_pool)
