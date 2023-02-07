@@ -19,15 +19,15 @@ enum MemType { Host, Device, Shared, SharedReadOnly, All };
 
 // Parses and stores configuration for all instances of USM allocator
 class USMAllocatorConfig {
-public:
-  USMAllocatorConfig(const std::string &config = "", bool trace = true);
+  public:
+    USMAllocatorConfig(const std::string &config = "", bool trace = true);
 
-  size_t EnableBuffers = 1;
-  USMAllocatorParameters Configs[MemType::All];
+    size_t EnableBuffers = 1;
+    USMAllocatorParameters Configs[MemType::All];
 
-  // String names of memory types for printing in limits traces.
-  static constexpr const char *MemTypeNames[MemType::All] = {
-      "Host", "Device", "Shared", "SharedReadOnly"};
+    // String names of memory types for printing in limits traces.
+    static constexpr const char *MemTypeNames[MemType::All] = {
+        "Host", "Device", "Shared", "SharedReadOnly"};
 };
 } // namespace usm_settings
 
