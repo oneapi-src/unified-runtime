@@ -22,7 +22,7 @@ TEST_F(urDevicePartitionTest, PartitionEquallySuccess) {
         }
 
         uint32_t n_compute_units = 0;
-        getNumberComputeUnits(device, n_compute_units);
+        ASSERT_NO_FATAL_FAILURE(getNumberComputeUnits(device, n_compute_units));
 
         for (uint32_t i = 1; i < n_compute_units; ++i) {
             ur_device_partition_property_t properties[] = {
@@ -56,7 +56,7 @@ TEST_F(urDevicePartitionTest, PartitionByCounts) {
         }
 
         uint32_t n_cu_in_device = 0;
-        getNumberComputeUnits(device, n_cu_in_device);
+        ASSERT_NO_FATAL_FAILURE(getNumberComputeUnits(device, n_cu_in_device));
 
         std::vector<ur_device_partition_property_t> properties = {
             UR_DEVICE_PARTITION_BY_COUNTS};
@@ -113,7 +113,8 @@ TEST_F(urDevicePartitionTest, PartitionByCounts) {
             for (auto sub_device : sub_devices) {
                 ASSERT_NE(sub_device, nullptr);
                 uint32_t n_cu_in_sub_device;
-                getNumberComputeUnits(sub_device, n_cu_in_sub_device);
+                ASSERT_NO_FATAL_FAILURE(
+                    getNumberComputeUnits(sub_device, n_cu_in_sub_device));
                 sum += n_cu_in_sub_device;
                 ASSERT_SUCCESS(urDeviceRelease(sub_device));
             }
@@ -132,7 +133,7 @@ TEST_F(urDevicePartitionTest, PartitionByAffinityDomain) {
         }
 
         uint32_t n_compute_units = 0;
-        getNumberComputeUnits(device, n_compute_units);
+        ASSERT_NO_FATAL_FAILURE(getNumberComputeUnits(device, n_compute_units));
 
         std::vector<ur_device_affinity_domain_flag_t> testFlags = {
             UR_DEVICE_AFFINITY_DOMAIN_FLAG_NUMA,
