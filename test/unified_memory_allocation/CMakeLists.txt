@@ -27,6 +27,8 @@ function(add_uma_test name)
     set_tests_properties(uma-${name} PROPERTIES LABELS "uma")
 endfunction()
 
+add_subdirectory(uma_pools)
+
 add_uma_test(memoryProvider memoryProvider.cpp)
 add_uma_test(memoryPool memoryPool.cpp)
 add_uma_test(base base.cpp)

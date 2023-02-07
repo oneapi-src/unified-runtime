@@ -12,14 +12,7 @@
 #include <atomic>
 #include <memory>
 
-// USM system memory allocation/deallocation interface.
-class SystemMemory {
-public:
-  virtual void *allocate(size_t size) = 0;
-  virtual void *allocate(size_t size, size_t aligned) = 0;
-  virtual void deallocate(void *ptr) = 0;
-  virtual ~SystemMemory() = default;
-};
+#include "uma_helpers.hpp"
 
 class USMLimits {
 public:
@@ -36,6 +29,8 @@ public:
 // Configuration for specific USM allocator instance
 class USMAllocatorParameters {
 public:
+  USMAllocatorParameters();
+
   const char *memoryTypeName = "";
 
   // Minimum allocation size that will be requested from the system.
@@ -60,12 +55,13 @@ public:
   std::shared_ptr<USMLimits> limits;
 };
 
+// TODO: get rid of this and only leave usm_pool once L0 adapter is implemented
 class USMAllocContext {
 public:
   // Keep it public since it needs to be accessed by the lower layer(Buckets)
   class USMAllocImpl;
 
-  USMAllocContext(std::unique_ptr<SystemMemory> memHandle,
+  USMAllocContext(uma::ur_memory_provider_handle_unique hProvider,
                   USMAllocatorParameters params);
   ~USMAllocContext();
 

@@ -72,6 +72,9 @@ static size_t AlignUp(size_t Val, size_t Alignment) {
   return (Val + Alignment - 1) & (~(Alignment - 1));
 }
 
+USMAllocatorParameters::USMAllocatorParameters():
+  limits(std::make_shared<USMLimits>()) { }
+
 class Bucket;
 
 // Represents the allocated memory block of size 'SlabMinSize'
@@ -211,7 +214,7 @@ public:
   // Free an allocation that is a full slab in this bucket.
   void freeSlab(Slab &Slab, bool &ToPool);
 
-  SystemMemory &getMemHandle();
+  uma_memory_provider_handle_t getMemHandle();
 
   USMAllocContext::USMAllocImpl &getUsmAllocCtx() { return OwnAllocCtx; }
 
@@ -265,8 +268,8 @@ class USMAllocContext::USMAllocImpl {
   std::unordered_multimap<void *, Slab &> KnownSlabs;
   std::shared_timed_mutex KnownSlabsMapLock;
 
-  // Handle to the memory allocation routine
-  std::unique_ptr<SystemMemory> MemHandle;
+  // Handle to the memory provider
+  uma::ur_memory_provider_handle_unique MemHandle;
 
   // Store as unique_ptrs since Bucket is not Movable(because of std::mutex)
   std::vector<std::unique_ptr<Bucket>> Buckets;
@@ -275,9 +278,9 @@ class USMAllocContext::USMAllocImpl {
   USMAllocatorParameters params;
 
 public:
-  USMAllocImpl(std::unique_ptr<SystemMemory> SystemMemHandle,
+  USMAllocImpl(uma::ur_memory_provider_handle_unique hProvider,
                USMAllocatorParameters params)
-      : MemHandle{std::move(SystemMemHandle)}, params(params) {
+      : MemHandle{std::move(hProvider)}, params(params) {
 
     // Generate buckets sized such as: 64, 96, 128, 192, ..., CutOff.
     // Powers of 2 and the value halfway between the powers of 2.
@@ -294,7 +297,7 @@ public:
   void *allocate(size_t Size, bool &FromPool);
   void deallocate(void *Ptr, bool &ToPool);
 
-  SystemMemory &getMemHandle() { return *MemHandle; }
+  uma_memory_provider_handle_t getMemHandle() { return MemHandle.get(); }
 
   std::shared_timed_mutex &getKnownSlabsMapLock() { return KnownSlabsMapLock; }
   std::unordered_multimap<void *, Slab &> &getKnownSlabs() {
@@ -312,6 +315,26 @@ private:
   Bucket &findBucket(size_t Size);
 };
 
+static void* memoryProviderAlloc(uma_memory_provider_handle_t hProvider, size_t size, size_t alignment = 0)
+{
+  void *ptr;
+  auto ret = umaMemoryProviderAlloc(hProvider, size, alignment, &ptr);
+  if (ret != UMA_RESULT_SUCCESS) {
+    // TODO: introduce custom exceptions? PI L0 relies on those
+    throw std::runtime_error("umaMemoryProviderAlloc");
+  }
+  return ptr;
+}
+
+static void memoryProviderFree(uma_memory_provider_handle_t hProvider, void *ptr)
+{
+  auto ret = umaMemoryProviderFree(hProvider, ptr, 0);
+  if (ret != UMA_RESULT_SUCCESS) {
+    // TODO: introduce custom exceptions? PI L0 relies on those
+    throw std::runtime_error("memoryProviderFree");
+  }
+}
+
 bool operator==(const Slab &Lhs, const Slab &Rhs) {
   return Lhs.getPtr() == Rhs.getPtr();
 }
@@ -328,13 +351,13 @@ Slab::Slab(Bucket &Bkt)
       Chunks(Bkt.SlabMinSize() / Bkt.getSize()), NumAllocated{0}, bucket(Bkt),
       SlabListIter{}, FirstFreeChunkIdx{0} {
   auto SlabSize = Bkt.SlabAllocSize();
-  MemPtr = Bkt.getMemHandle().allocate(SlabSize);
+  MemPtr = memoryProviderAlloc(Bkt.getMemHandle(), SlabSize);
   regSlab(*this);
 }
 
 Slab::~Slab() {
   unregSlab(*this);
-  bucket.getMemHandle().deallocate(MemPtr);
+  memoryProviderFree(bucket.getMemHandle(), MemPtr);
 }
 
 // Return the index of the first available chunk, -1 otherwize
@@ -612,7 +635,7 @@ bool Bucket::CanPool(bool &ToPool) {
   return false;
 }
 
-SystemMemory &Bucket::getMemHandle() { return OwnAllocCtx.getMemHandle(); }
+uma_memory_provider_handle_t Bucket::getMemHandle() { return OwnAllocCtx.getMemHandle(); }
 
 size_t Bucket::SlabMinSize() { return OwnAllocCtx.getParams().SlabMinSize; }
 
@@ -678,7 +701,7 @@ void *USMAllocContext::USMAllocImpl::allocate(size_t Size, bool &FromPool) {
 
   FromPool = false;
   if (Size > getParams().MaxPoolableSize) {
-    return getMemHandle().allocate(Size);
+    return memoryProviderAlloc(getMemHandle(), Size);
   }
 
   auto &Bucket = findBucket(Size);
@@ -710,7 +733,7 @@ void *USMAllocContext::USMAllocImpl::allocate(size_t Size, size_t Alignment,
   // If not, just request aligned pointer from the system.
   FromPool = false;
   if (AlignedSize > getParams().MaxPoolableSize) {
-    return getMemHandle().allocate(Size, Alignment);
+    return memoryProviderAlloc(getMemHandle(), Size, Alignment );
   }
 
   auto &Bucket = findBucket(AlignedSize);
@@ -749,7 +772,7 @@ void USMAllocContext::USMAllocImpl::deallocate(void *Ptr, bool &ToPool) {
   auto Slabs = getKnownSlabs().equal_range(SlabPtr);
   if (Slabs.first == Slabs.second) {
     Lk.unlock();
-    getMemHandle().deallocate(Ptr);
+    memoryProviderFree(getMemHandle(), Ptr);
     return;
   }
 
@@ -780,10 +803,10 @@ void USMAllocContext::USMAllocImpl::deallocate(void *Ptr, bool &ToPool) {
   // There is a rare case when we have a pointer from system allocation next
   // to some slab with an entry in the map. So we find a slab
   // but the range checks fail.
-  getMemHandle().deallocate(Ptr);
+  memoryProviderFree(getMemHandle(), Ptr);
 }
 
-USMAllocContext::USMAllocContext(std::unique_ptr<SystemMemory> MemHandle,
+USMAllocContext::USMAllocContext(uma::ur_memory_provider_handle_unique MemHandle,
                                  USMAllocatorParameters params)
     : pImpl(std::make_unique<USMAllocImpl>(std::move(MemHandle), params)) {}
 
