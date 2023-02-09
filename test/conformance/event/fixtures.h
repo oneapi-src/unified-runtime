@@ -16,7 +16,8 @@ namespace event {
  */
 struct urEventReferenceTest : uur::urQueueTest {
 
-    void CreateEvent() {
+    void SetUp() override {
+        UUR_RETURN_ON_FATAL_FAILURE(urQueueTest::SetUp());
         ASSERT_SUCCESS(urMemBufferCreate(context, UR_MEM_FLAG_WRITE_ONLY, size,
                                          nullptr, &buffer));
 
@@ -25,17 +26,18 @@ struct urEventReferenceTest : uur::urQueueTest {
             queue, buffer, false, 0, size, input.data(), 0, nullptr, &event));
     }
 
-    void checkEventReferenceCount(uint32_t expected_value) {
-        uint32_t reference_count{};
-        urEventGetInfo(event, ur_event_info_t::UR_EVENT_INFO_REFERENCE_COUNT,
-                       sizeof(uint32_t), &reference_count, nullptr);
-        ASSERT_EQ(reference_count, expected_value);
-    }
-
-    void Cleanup() {
+    void TearDown() override {
         if (buffer) {
             EXPECT_SUCCESS(urMemRelease(buffer));
         }
+        urQueueTest::TearDown();
+    }
+
+    bool checkEventReferenceCount(uint32_t expected_value) {
+        uint32_t reference_count{};
+        urEventGetInfo(event, ur_event_info_t::UR_EVENT_INFO_REFERENCE_COUNT,
+                       sizeof(uint32_t), &reference_count, nullptr);
+        return reference_count == expected_value;
     }
 
     const size_t count = 1024;

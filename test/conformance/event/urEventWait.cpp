@@ -4,7 +4,7 @@
 #include <uur/fixtures.h>
 
 struct urEventWaitTest : uur::urQueueTest {
-    void WriteSourceBuffer() {
+    void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(urQueueTest::SetUp());
         ASSERT_SUCCESS(urMemBufferCreate(context, UR_MEM_FLAG_WRITE_ONLY, size,
                                          nullptr, &src_buffer));
@@ -17,7 +17,7 @@ struct urEventWaitTest : uur::urQueueTest {
         ASSERT_SUCCESS(urEventWait(1, &event));
     }
 
-    void Cleanup() {
+    void TearDown() override {
         if (src_buffer) {
             EXPECT_SUCCESS(urMemRelease(src_buffer));
         }
@@ -40,7 +40,6 @@ struct urEventWaitTest : uur::urQueueTest {
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEventWaitTest);
 
 TEST_P(urEventWaitTest, Success) {
-    ASSERT_NO_FATAL_FAILURE(WriteSourceBuffer());
     ur_event_handle_t event1 = nullptr;
     ASSERT_SUCCESS(urEnqueueMemBufferCopy(queue, src_buffer, dst_buffer, 0, 0,
                                           size, 0, nullptr, &event1));
@@ -56,14 +55,17 @@ TEST_P(urEventWaitTest, Success) {
 
     EXPECT_SUCCESS(urEventRelease(event1));
     EXPECT_SUCCESS(urEventRelease(event2));
-    EXPECT_NO_FATAL_FAILURE(Cleanup());
 }
 
-TEST_P(urEventWaitTest, ZeroSize) {
+using urEventWaitNegativeTest = uur::urQueueTest;
+
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEventWaitNegativeTest);
+
+TEST_P(urEventWaitNegativeTest, ZeroSize) {
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_VALUE, urEventWait(0, nullptr));
 }
 
-TEST_P(urEventWaitTest, InvalidNullPointerEventList) {
+TEST_P(urEventWaitNegativeTest, InvalidNullPointerEventList) {
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_POINTER,
                      urEventWait(1, nullptr));
 }
