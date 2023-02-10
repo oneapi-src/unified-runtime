@@ -1,4 +1,5 @@
-//===---------- usm_allocator.cpp - Allocator for USM memory --------------===//
+//===-- disjoint_pool.cpp - pool that keeps metadata separate from the data
+//-===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -12,6 +13,7 @@
 #include <cassert>
 #include <cctype>
 #include <iomanip>
+#include <limits>
 #include <list>
 #include <memory>
 #include <mutex>
@@ -24,27 +26,26 @@
 // TODO: replace with logger?
 #include <iostream>
 
-#include "usm_allocator.hpp"
+#include "disjoint_pool.hpp"
 
-// USM allocations are a minimum of 4KB/64KB/2MB even when a smaller size is
+// Allocations are a minimum of 4KB/64KB/2MB even when a smaller size is
 // requested. The implementation distinguishes between allocations of size
 // ChunkCutOff = (minimum-alloc-size / 2) and those that are larger.
 // Allocation requests smaller than ChunkCutoff use chunks taken from a single
-// USM allocation. Thus, for example, for a 64KB minimum allocation size,
-// and 8-byte allocations, only 1 in ~8000 requests results in a new
-// USM allocation. Freeing results only in a chunk of a larger allocation
-// to be marked as available and no real return to the system.
-// An allocation is returned to the system only when all
-// chunks in the larger allocation are freed by the program.
-// Allocations larger than ChunkCutOff use a separate USM allocation for each
-// request. These are subject to "pooling". That is, when such an allocation is
-// freed by the program it is retained in a pool. The pool is available for
-// future allocations, which means there are fewer actual USM
-// allocations/deallocations.
+// coarse-grain allocation. Thus, for example, for a 64KB minimum allocation
+// size, and 8-byte allocations, only 1 in ~8000 requests results in a new
+// coarse-grain allocation. Freeing results only in a chunk of a larger
+// allocation to be marked as available and no real return to the system. An
+// allocation is returned to the system only when all chunks in the larger
+// allocation are freed by the program. Allocations larger than ChunkCutOff use
+// a separate coarse-grain allocation for each request. These are subject to
+// "pooling". That is, when such an allocation is freed by the program it is
+// retained in a pool. The pool is available for future allocations, which means
+// there are fewer actual coarse-grain allocations/deallocations.
 
 // The largest size which is allocated via the allocator.
-// Allocations with size > CutOff bypass the USM allocator and
-// go directly to the runtime.
+// Allocations with size > CutOff bypass the pool and
+// go directly to the provider.
 static constexpr size_t CutOff = (size_t)1 << 31; // 2GB
 
 // Aligns the pointer down to the specified alignment
@@ -72,16 +73,15 @@ static size_t AlignUp(size_t Val, size_t Alignment) {
     return (Val + Alignment - 1) & (~(Alignment - 1));
 }
 
-USMAllocatorParameters::USMAllocatorParameters()
-    : limits(std::make_shared<USMLimits>()) {}
+DisjointPoolConfig::DisjointPoolConfig()
+    : limits(std::make_shared<DisjointPoolConfig::SharedLimits>()) {}
 
 class Bucket;
 
 // Represents the allocated memory block of size 'SlabMinSize'
 // Internally, it splits the memory block into chunks. The number of
 // chunks depends of the size of a Bucket which created the Slab.
-// The chunks
-// Note: Bucket's method are responsible for thread safety of Slab access,
+// Note: Bucket's methods are responsible for thread safety of Slab access,
 // so no locking happens here.
 class Slab {
 
@@ -108,7 +108,7 @@ class Slab {
     // Hints where to start search for free chunk in a slab
     size_t FirstFreeChunkIdx = 0;
 
-    // Return the index of the first available chunk, -1 otherwize
+    // Return the index of the first available chunk, SIZE_MAX otherwize
     size_t FindFirstAvailableChunkIdx() const;
 
     // Register/Unregister the slab in the global slab address map.
@@ -160,7 +160,7 @@ class Bucket {
 
     // Reference to the allocator context, used access memory allocation
     // routines, slab map and etc.
-    USMAllocContext::USMAllocImpl &OwnAllocCtx;
+    DisjointPool::AllocImpl &OwnAllocCtx;
 
     // For buckets used in chunked mode, a counter of slabs in the pool.
     // For allocations that use an entire slab each, the entries in the
@@ -170,15 +170,15 @@ class Bucket {
     // Available list if any one or more of their chunks is free.The entire slab
     // is not necessarily free, just some chunks in the slab are free. To
     // implement pooling we will allow one slab in the Available list to be
-    // entirely empty. Normally such a slab would have been freed from USM. But
+    // entirely empty. Normally such a slab would have been freed. But
     // now we don't, and treat this slab as "in the pool".
     // When a slab becomes entirely free we have to decide whether to return it
-    // to USM or keep it allocated. A simple check for size of the Available
-    // list is not sufficient to check whether any slab has been pooled yet.We
-    // would have to traverse the entire Available listand check if any of them
-    // is entirely free. Instead we keep a counter of entirely empty slabs
-    // within the Available list to speed up the process of checking if a slab
-    // in this bucket is already pooled.
+    // to the provider or keep it allocated. A simple check for size of the
+    // Available list is not sufficient to check whether any slab has been
+    // pooled yet.We would have to traverse the entire Available listand check
+    // if any of them is entirely free. Instead we keep a counter of entirely
+    // empty slabs within the Available list to speed up the process of checking
+    // if a slab in this bucket is already pooled.
     size_t chunkedSlabsInPool;
 
     // Statistics
@@ -193,7 +193,7 @@ class Bucket {
     size_t allocCount;
     size_t maxSlabsInUse;
 
-    Bucket(size_t Sz, USMAllocContext::USMAllocImpl &AllocCtx)
+    Bucket(size_t Sz, DisjointPool::AllocImpl &AllocCtx)
         : Size{Sz}, OwnAllocCtx{AllocCtx}, chunkedSlabsInPool(0),
           allocPoolCount(0), freeCount(0), currSlabsInUse(0),
           currSlabsInPool(0), maxSlabsInPool(0), allocCount(0),
@@ -217,7 +217,7 @@ class Bucket {
 
     uma_memory_provider_handle_t getMemHandle();
 
-    USMAllocContext::USMAllocImpl &getUsmAllocCtx() { return OwnAllocCtx; }
+    DisjointPool::AllocImpl &getAllocCtx() { return OwnAllocCtx; }
 
     // Check whether an allocation to be freed can be placed in the pool.
     bool CanPool(bool &ToPool);
@@ -263,7 +263,7 @@ class Bucket {
     decltype(AvailableSlabs.begin()) getAvailFullSlab(bool &FromPool);
 };
 
-class USMAllocContext::USMAllocImpl {
+class DisjointPool::AllocImpl {
     // It's important for the map to be destroyed last after buckets and their
     // slabs This is because slab's destructor removes the object from the map.
     std::unordered_multimap<void *, Slab &> KnownSlabs;
@@ -276,11 +276,11 @@ class USMAllocContext::USMAllocImpl {
     std::vector<std::unique_ptr<Bucket>> Buckets;
 
     // Configuration for this instance
-    USMAllocatorParameters params;
+    DisjointPoolConfig params;
 
   public:
-    USMAllocImpl(uma::ur_memory_provider_handle_unique hProvider,
-                 USMAllocatorParameters params)
+    AllocImpl(uma::ur_memory_provider_handle_unique hProvider,
+              DisjointPoolConfig params)
         : MemHandle{std::move(hProvider)}, params(params) {
 
         // Generate buckets sized such as: 64, 96, 128, 192, ..., CutOff.
@@ -309,7 +309,7 @@ class USMAllocContext::USMAllocImpl {
 
     size_t SlabMinSize() { return params.SlabMinSize; };
 
-    USMAllocatorParameters &getParams() { return params; }
+    DisjointPoolConfig &getParams() { return params; }
 
     void printStats(bool &TitlePrinted, size_t &HighBucketSize,
                     size_t &HighPeakSlabsInUse, const std::string &Label);
@@ -363,7 +363,7 @@ Slab::~Slab() {
     memoryProviderFree(bucket.getMemHandle(), MemPtr);
 }
 
-// Return the index of the first available chunk, -1 otherwize
+// Return the index of the first available chunk, SIZE_MAX otherwise
 size_t Slab::FindFirstAvailableChunkIdx() const {
     // Use the first free chunk index as a hint for the search.
     auto It = std::find_if(Chunks.begin() + FirstFreeChunkIdx, Chunks.end(),
@@ -372,7 +372,7 @@ size_t Slab::FindFirstAvailableChunkIdx() const {
         return It - Chunks.begin();
     }
 
-    return static_cast<size_t>(-1);
+    return std::numeric_limits<size_t>::max();
 }
 
 void *Slab::getChunk() {
@@ -380,7 +380,7 @@ void *Slab::getChunk() {
 
     const size_t ChunkIdx = FindFirstAvailableChunkIdx();
     // Free chunk must exist, otherwise we would have allocated another slab
-    assert(ChunkIdx != (static_cast<size_t>(-1)));
+    assert(ChunkIdx != (std::numeric_limits<size_t>::max()));
 
     void *const FreeChunk =
         (static_cast<uint8_t *>(getPtr())) + ChunkIdx * getChunkSize();
@@ -401,16 +401,16 @@ const Bucket &Slab::getBucket() const { return bucket; }
 size_t Slab::getChunkSize() const { return bucket.getSize(); }
 
 void Slab::regSlabByAddr(void *Addr, Slab &Slab) {
-    auto &Lock = Slab.getBucket().getUsmAllocCtx().getKnownSlabsMapLock();
-    auto &Map = Slab.getBucket().getUsmAllocCtx().getKnownSlabs();
+    auto &Lock = Slab.getBucket().getAllocCtx().getKnownSlabsMapLock();
+    auto &Map = Slab.getBucket().getAllocCtx().getKnownSlabs();
 
     std::lock_guard<std::shared_timed_mutex> Lg(Lock);
     Map.insert({Addr, Slab});
 }
 
 void Slab::unregSlabByAddr(void *Addr, Slab &Slab) {
-    auto &Lock = Slab.getBucket().getUsmAllocCtx().getKnownSlabsMapLock();
-    auto &Map = Slab.getBucket().getUsmAllocCtx().getKnownSlabs();
+    auto &Lock = Slab.getBucket().getAllocCtx().getKnownSlabsMapLock();
+    auto &Map = Slab.getBucket().getAllocCtx().getKnownSlabs();
 
     std::lock_guard<std::shared_timed_mutex> Lg(Lock);
 
@@ -462,8 +462,9 @@ void Slab::freeChunk(void *Ptr) {
     Chunks[ChunkIdx] = false;
     NumAllocated -= 1;
 
-    if (ChunkIdx < FirstFreeChunkIdx)
+    if (ChunkIdx < FirstFreeChunkIdx) {
         FirstFreeChunkIdx = ChunkIdx;
+    }
 }
 
 void *Slab::getEnd() const {
@@ -594,7 +595,7 @@ void Bucket::onFreeChunk(Slab &Slab, bool &ToPool) {
         // The slab is now empty.
         // If pool has capacity then put the slab in the pool.
         // The ToPool parameter indicates whether the Slab will be put in the
-        // pool or freed from USM.
+        // pool or freed.
         if (!CanPool(ToPool)) {
             // Note: since the slab is stored as unique_ptr, just remove it from
             // the list to destroy the object.
@@ -609,10 +610,11 @@ bool Bucket::CanPool(bool &ToPool) {
     size_t NewFreeSlabsInBucket;
     // Check if this bucket is used in chunked form or as full slabs.
     bool chunkedBucket = getSize() <= ChunkCutOff();
-    if (chunkedBucket)
+    if (chunkedBucket) {
         NewFreeSlabsInBucket = chunkedSlabsInPool + 1;
-    else
+    } else {
         NewFreeSlabsInBucket = AvailableSlabs.size() + 1;
+    }
     if (Capacity() >= NewFreeSlabsInBucket) {
         size_t PoolSize = OwnAllocCtx.getParams().limits->TotalSize;
         while (true) {
@@ -625,8 +627,9 @@ bool Bucket::CanPool(bool &ToPool) {
             if (OwnAllocCtx.getParams()
                     .limits->TotalSize.compare_exchange_strong(PoolSize,
                                                                NewPoolSize)) {
-                if (chunkedBucket)
+                if (chunkedBucket) {
                     ++chunkedSlabsInPool;
+                }
 
                 updateStats(-1, 1);
                 ToPool = true;
@@ -651,10 +654,11 @@ size_t Bucket::SlabAllocSize() { return std::max(getSize(), SlabMinSize()); }
 size_t Bucket::Capacity() {
     // For buckets used in chunked mode, just one slab in pool is sufficient.
     // For larger buckets, the capacity could be more and is adjustable.
-    if (getSize() <= ChunkCutOff())
+    if (getSize() <= ChunkCutOff()) {
         return 1;
-    else
+    } else {
         return OwnAllocCtx.getParams().Capacity;
+    }
 }
 
 size_t Bucket::MaxPoolableSize() {
@@ -665,15 +669,17 @@ size_t Bucket::ChunkCutOff() { return SlabMinSize() / 2; }
 
 void Bucket::countAlloc(bool FromPool) {
     ++allocCount;
-    if (FromPool)
+    if (FromPool) {
         ++allocPoolCount;
+    }
 }
 
 void Bucket::countFree() { ++freeCount; }
 
 void Bucket::updateStats(int InUse, int InPool) {
-    if (OwnAllocCtx.getParams().PoolTrace == 0)
+    if (OwnAllocCtx.getParams().PoolTrace == 0) {
         return;
+    }
     currSlabsInUse += InUse;
     maxSlabsInUse = std::max(currSlabsInUse, maxSlabsInUse);
     currSlabsInPool += InPool;
@@ -701,11 +707,12 @@ void Bucket::printStats(bool &TitlePrinted, const std::string &Label) {
     }
 }
 
-void *USMAllocContext::USMAllocImpl::allocate(size_t Size, bool &FromPool) {
+void *DisjointPool::AllocImpl::allocate(size_t Size, bool &FromPool) {
     void *Ptr;
 
-    if (Size == 0)
+    if (Size == 0) {
         return nullptr;
+    }
 
     FromPool = false;
     if (Size > getParams().MaxPoolableSize) {
@@ -714,26 +721,30 @@ void *USMAllocContext::USMAllocImpl::allocate(size_t Size, bool &FromPool) {
 
     auto &Bucket = findBucket(Size);
 
-    if (Size > Bucket.ChunkCutOff())
+    if (Size > Bucket.ChunkCutOff()) {
         Ptr = Bucket.getSlab(FromPool);
-    else
+    } else {
         Ptr = Bucket.getChunk(FromPool);
+    }
 
-    if (getParams().PoolTrace > 1)
+    if (getParams().PoolTrace > 1) {
         Bucket.countAlloc(FromPool);
+    }
 
     return Ptr;
 }
 
-void *USMAllocContext::USMAllocImpl::allocate(size_t Size, size_t Alignment,
-                                              bool &FromPool) {
+void *DisjointPool::AllocImpl::allocate(size_t Size, size_t Alignment,
+                                        bool &FromPool) {
     void *Ptr;
 
-    if (Size == 0)
+    if (Size == 0) {
         return nullptr;
+    }
 
-    if (Alignment <= 1)
+    if (Alignment <= 1) {
         return allocate(Size, FromPool);
+    }
 
     size_t AlignedSize = (Size > 1) ? AlignUp(Size, Alignment) : Alignment;
 
@@ -752,13 +763,14 @@ void *USMAllocContext::USMAllocImpl::allocate(size_t Size, size_t Alignment,
         Ptr = Bucket.getChunk(FromPool);
     }
 
-    if (getParams().PoolTrace > 1)
+    if (getParams().PoolTrace > 1) {
         Bucket.countAlloc(FromPool);
+    }
 
     return AlignPtrUp(Ptr, Alignment);
 }
 
-Bucket &USMAllocContext::USMAllocImpl::findBucket(size_t Size) {
+Bucket &DisjointPool::AllocImpl::findBucket(size_t Size) {
     assert(Size <= CutOff && "Unexpected size");
 
     auto It = std::find_if(
@@ -770,7 +782,7 @@ Bucket &USMAllocContext::USMAllocImpl::findBucket(size_t Size) {
     return *(*It);
 }
 
-void USMAllocContext::USMAllocImpl::deallocate(void *Ptr, bool &ToPool) {
+void DisjointPool::AllocImpl::deallocate(void *Ptr, bool &ToPool) {
     auto *SlabPtr = AlignPtrDown(Ptr, SlabMinSize());
 
     // Lock the map on read
@@ -794,8 +806,9 @@ void USMAllocContext::USMAllocImpl::deallocate(void *Ptr, bool &ToPool) {
             Lk.unlock();
             auto &Bucket = Slab.getBucket();
 
-            if (getParams().PoolTrace > 1)
+            if (getParams().PoolTrace > 1) {
                 Bucket.countFree();
+            }
 
             if (Bucket.getSize() <= Bucket.ChunkCutOff()) {
                 Bucket.freeChunk(Ptr, Slab, ToPool);
@@ -814,87 +827,103 @@ void USMAllocContext::USMAllocImpl::deallocate(void *Ptr, bool &ToPool) {
     memoryProviderFree(getMemHandle(), Ptr);
 }
 
-USMAllocContext::USMAllocContext(
-    uma::ur_memory_provider_handle_unique MemHandle,
-    USMAllocatorParameters params)
-    : pImpl(std::make_unique<USMAllocImpl>(std::move(MemHandle), params)) {}
-
-void *USMAllocContext::allocate(size_t size) {
-    // For full-slab allocations indicates whether slab is from Pool.
-    bool FromPool;
-    auto Ptr = pImpl->allocate(size, FromPool);
-
-    if (pImpl->getParams().PoolTrace > 2) {
-        auto MT = pImpl->getParams().memoryTypeName;
-        std::cout << "Allocated " << std::setw(8) << size << " " << MT
-                  << " USM bytes from " << (FromPool ? "Pool" : "USM") << " ->"
-                  << Ptr << std::endl;
-    }
-    return Ptr;
-}
-
-void *USMAllocContext::allocate(size_t size, size_t alignment) {
-    bool FromPool;
-    auto Ptr = pImpl->allocate(size, alignment, FromPool);
-
-    if (pImpl->getParams().PoolTrace > 2) {
-        auto MT = pImpl->getParams().memoryTypeName;
-        std::cout << "Allocated " << std::setw(8) << size << " " << MT
-                  << " USM bytes aligned at " << alignment << " from "
-                  << (FromPool ? "Pool" : "USM") << " ->" << Ptr << std::endl;
-    }
-    return Ptr;
-}
-
-void USMAllocContext::deallocate(void *ptr) {
-    bool ToPool;
-    pImpl->deallocate(ptr, ToPool);
-
-    if (pImpl->getParams().PoolTrace > 2) {
-        auto MT = pImpl->getParams().memoryTypeName;
-        std::cout << "Freed " << MT << " USM " << ptr << " to "
-                  << (ToPool ? "Pool" : "USM") << ", Current total pool size "
-                  << pImpl->getParams().limits->TotalSize.load()
-                  << ", Current pool size for " << MT << " "
-                  << pImpl->getParams().CurPoolSize << "\n";
-    }
-    return;
-}
-
-// Define destructor for use with unique_ptr
-USMAllocContext::~USMAllocContext() {
-    bool TitlePrinted = false;
-    size_t HighBucketSize;
-    size_t HighPeakSlabsInUse;
-    if (pImpl->getParams().PoolTrace > 1) {
-        auto MT = pImpl->getParams().memoryTypeName;
-        pImpl->printStats(TitlePrinted, HighBucketSize, HighPeakSlabsInUse, MT);
-        if (TitlePrinted) {
-            try { // cannot throw in destructor
-                std::cout << "Current Pool Size "
-                          << pImpl->getParams().limits->TotalSize.load()
-                          << std::endl;
-                const char *Label = MT;
-                std::cout << "Suggested Setting: TODO_USM_ALLOCATOR=;"
-                          << std::string(1, tolower(*Label))
-                          << std::string(Label + 1) << ":" << HighBucketSize
-                          << "," << HighPeakSlabsInUse << ",64K" << std::endl;
-            } catch (...) { // ignore exceptions
-            }
-        }
-    }
-}
-
-void USMAllocContext::USMAllocImpl::printStats(bool &TitlePrinted,
-                                               size_t &HighBucketSize,
-                                               size_t &HighPeakSlabsInUse,
-                                               const std::string &MTName) {
+void DisjointPool::AllocImpl::printStats(bool &TitlePrinted,
+                                         size_t &HighBucketSize,
+                                         size_t &HighPeakSlabsInUse,
+                                         const std::string &MTName) {
     HighBucketSize = 0;
     HighPeakSlabsInUse = 0;
     for (auto &B : Buckets) {
         (*B).printStats(TitlePrinted, MTName);
         HighPeakSlabsInUse = std::max((*B).maxSlabsInUse, HighPeakSlabsInUse);
-        if ((*B).allocCount)
+        if ((*B).allocCount) {
             HighBucketSize = std::max((*B).SlabAllocSize(), HighBucketSize);
+        }
+    }
+}
+
+DisjointPool::DisjointPool(uma::ur_memory_provider_handle_unique memProvider,
+                           DisjointPoolConfig parameters)
+    : impl(std::make_unique<AllocImpl>(std::move(memProvider), parameters)) {}
+
+void *DisjointPool::malloc(size_t size) { // For full-slab allocations indicates
+                                          // whether slab is from Pool.
+    bool FromPool;
+    auto Ptr = impl->allocate(size, FromPool);
+
+    if (impl->getParams().PoolTrace > 2) {
+        auto MT = impl->getParams().name;
+        std::cout << "Allocated " << std::setw(8) << size << " " << MT
+                  << " bytes from " << (FromPool ? "Pool" : "Provider") << " ->"
+                  << Ptr << std::endl;
+    }
+    return Ptr;
+}
+
+void *DisjointPool::calloc(size_t, size_t) { return NULL; }
+
+void *DisjointPool::realloc(void *, size_t) { return NULL; }
+
+void *DisjointPool::aligned_malloc(size_t size, size_t alignment) {
+    bool FromPool;
+    auto Ptr = impl->allocate(size, alignment, FromPool);
+
+    if (impl->getParams().PoolTrace > 2) {
+        auto MT = impl->getParams().name;
+        std::cout << "Allocated " << std::setw(8) << size << " " << MT
+                  << " bytes aligned at " << alignment << " from "
+                  << (FromPool ? "Pool" : "Provider") << " ->" << Ptr
+                  << std::endl;
+    }
+    return Ptr;
+}
+
+size_t DisjointPool::malloc_usable_size(void *) { /* TODO */
+    return 0;
+}
+
+void DisjointPool::free(void *ptr) {
+    bool ToPool;
+    impl->deallocate(ptr, ToPool);
+
+    if (impl->getParams().PoolTrace > 2) {
+        auto MT = impl->getParams().name;
+        std::cout << "Freed " << MT << " " << ptr << " to "
+                  << (ToPool ? "Pool" : "Provider")
+                  << ", Current total pool size "
+                  << impl->getParams().limits->TotalSize.load()
+                  << ", Current pool size for " << MT << " "
+                  << impl->getParams().CurPoolSize << "\n";
+    }
+    return;
+}
+
+enum uma_result_t DisjointPool::get_last_result(const char **ppMessage) {
+    // TODO: implement
+    return UMA_RESULT_ERROR_UNKNOWN;
+}
+
+// Define destructor for use with unique_ptr
+DisjointPool::~DisjointPool() {
+    bool TitlePrinted = false;
+    size_t HighBucketSize;
+    size_t HighPeakSlabsInUse;
+    if (impl->getParams().PoolTrace > 1) {
+        auto name = impl->getParams().name;
+        impl->printStats(TitlePrinted, HighBucketSize, HighPeakSlabsInUse,
+                         name.c_str());
+        if (TitlePrinted) {
+            try { // cannot throw in destructor
+                std::cout << "Current Pool Size "
+                          << impl->getParams().limits->TotalSize.load()
+                          << std::endl;
+                std::cout << "Suggested Setting: TODO__ALLOCATOR=;"
+                          << std::string(1, tolower(name[0]))
+                          << std::string(name.c_str() + 1) << ":"
+                          << HighBucketSize << "," << HighPeakSlabsInUse
+                          << ",64K" << std::endl;
+            } catch (...) { // ignore exceptions
+            }
+        }
     }
 }

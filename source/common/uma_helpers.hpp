@@ -31,7 +31,8 @@ template <typename T, typename Tuple, size_t... I>
 auto createFromTuple(Tuple &&t, std::index_sequence<I...>) {
     return new T(std::get<I>(std::forward<Tuple>(t))...);
 }
-template <typename T, typename Tuple> auto createFromTuple(Tuple &&t) {
+template <typename T, typename Tuple>
+auto createFromTuple(Tuple &&t) {
     return createFromTuple<T>(
         std::forward<Tuple>(t),
         std::make_index_sequence<std::tuple_size<Tuple>::value>{});

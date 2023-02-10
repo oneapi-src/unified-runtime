@@ -1,4 +1,4 @@
-//===---------- usm_allocator.hpp - Allocator for USM memory --------------===//
+//===---------- disjoint_pool.hpp - Allocator for USM memory --------------===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -14,23 +14,22 @@
 
 #include "uma_helpers.hpp"
 
-class USMLimits {
-  public:
-    USMLimits() : TotalSize(0) {}
-
-    // Maximum memory left unfreed
-    size_t MaxSize = 16 * 1024 * 1024;
-
-    // Total size of pooled memory
-    std::atomic<size_t> TotalSize;
-};
-
 // Configuration for specific USM allocator instance
-class USMAllocatorParameters {
+class DisjointPoolConfig {
   public:
-    USMAllocatorParameters();
+    DisjointPoolConfig();
 
-    const char *memoryTypeName = "";
+    std::string name = "";
+
+    struct SharedLimits {
+        SharedLimits() : TotalSize(0) {}
+
+        // Maximum memory left unfreed
+        size_t MaxSize = 16 * 1024 * 1024;
+
+        // Total size of pooled memory
+        std::atomic<size_t> TotalSize;
+    };
 
     // Minimum allocation size that will be requested from the system.
     // By default this is the minimum allocation size of each memory type.
@@ -51,25 +50,29 @@ class USMAllocatorParameters {
     // Whether to print pool usage statistics
     int PoolTrace = 0;
 
-    std::shared_ptr<USMLimits> limits;
+    std::shared_ptr<SharedLimits> limits;
 };
 
-// TODO: get rid of this and only leave usm_pool once L0 adapter is implemented
-class USMAllocContext {
+class DisjointPool {
   public:
-    // Keep it public since it needs to be accessed by the lower layer(Buckets)
-    class USMAllocImpl;
+    using Config = DisjointPoolConfig;
 
-    USMAllocContext(uma::ur_memory_provider_handle_unique hProvider,
-                    USMAllocatorParameters params);
-    ~USMAllocContext();
+    DisjointPool(uma::ur_memory_provider_handle_unique memProvider,
+                 DisjointPoolConfig parameters);
+    ~DisjointPool();
 
-    void *allocate(size_t size);
-    void *allocate(size_t size, size_t alignment);
-    void deallocate(void *ptr);
+    void *malloc(size_t size);
+    void *calloc(size_t, size_t);
+    void *realloc(void *, size_t);
+    void *aligned_malloc(size_t size, size_t alignment);
+    size_t malloc_usable_size(void *);
+    void free(void *ptr);
+    enum uma_result_t get_last_result(const char **ppMessage);
+
+    class AllocImpl;
 
   private:
-    std::unique_ptr<USMAllocImpl> pImpl;
+    std::unique_ptr<AllocImpl> impl;
 };
 
 #endif

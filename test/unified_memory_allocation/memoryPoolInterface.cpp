@@ -1,13 +1,14 @@
 // Copyright (C) 2023 Intel Corporation
 // SPDX-License-Identifier: MIT
 
-#include "helpers.h"
-#include "pool.h"
+#include "helpers.hpp"
 
 #include <string>
 #include <unordered_map>
 
-TEST_F(umaTest, memoryPoolTrace) {
+using uma::test;
+
+TEST_F(test, memoryPoolTrace) {
     static std::unordered_map<std::string, size_t> calls;
     auto trace = [](const char *name) { calls[name]++; };
 

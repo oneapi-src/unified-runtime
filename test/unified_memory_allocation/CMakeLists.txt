@@ -4,11 +4,12 @@
 set(UR_UMA_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(uma_test_helpers STATIC
+    ${UR_UMA_TEST_DIR}/common/helpers.hpp
     ${UR_UMA_TEST_DIR}/common/pool.c
     ${UR_UMA_TEST_DIR}/common/provider.c
 )
 
-target_link_libraries(uma_test_helpers PRIVATE ${PROJECT_NAME}::unified_memory_allocation)
+target_link_libraries(uma_test_helpers PRIVATE ${PROJECT_NAME}::common)
 
 function(add_uma_test name)
     set(TEST_TARGET_NAME uma_test-${name})
@@ -16,7 +17,7 @@ function(add_uma_test name)
         ${ARGN})
     target_link_libraries(${TEST_TARGET_NAME}
         PRIVATE
-        ${PROJECT_NAME}::unified_memory_allocation
+        ${PROJECT_NAME}::common
         uma_test_helpers
         GTest::gtest_main)
     target_include_directories(${TEST_TARGET_NAME} PRIVATE
@@ -29,6 +30,6 @@ endfunction()
 
 add_subdirectory(uma_pools)
 
-add_uma_test(memoryProvider memoryProvider.cpp)
-add_uma_test(memoryPool memoryPool.cpp)
+add_uma_test(memoryProviderInterface memoryProviderInterface.cpp)
+add_uma_test(memoryPoolInterface memoryPoolInterface.cpp)
 add_uma_test(base base.cpp)

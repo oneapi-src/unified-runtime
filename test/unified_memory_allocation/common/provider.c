@@ -125,7 +125,7 @@ enum uma_result_t mallocBasedAlloc(void *provider, size_t size, size_t alignment
     (void) alignment;
 
     *ptr = malloc(size);
-    return *(ptr) ? UMA_RESULT_SUCCESS : UMA_RESULT_OUT_OF_HOST_MEMORY;
+    return *(ptr) ? UMA_RESULT_SUCCESS : UMA_RESULT_ERROR_OUT_OF_HOST_MEMORY;
 }
 
 enum uma_result_t mallocBasedFree(void *provider, void *ptr, size_t size) {

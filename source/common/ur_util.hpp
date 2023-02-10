@@ -106,4 +106,13 @@ inline bool getenv_tobool(const char *name) {
     return 0 == strcmp("1", env);
 }
 
+inline std::size_t combine_hashes(std::size_t seed) {
+    return seed;
+}
+
+template <typename T, typename... Args>
+inline std::size_t combine_hashes(std::size_t seed, const T &v, Args... args) {
+    return combine_hashes(seed ^ std::hash<T>{}(v), args...);
+}
+
 #endif /* UR_UTIL_H */
