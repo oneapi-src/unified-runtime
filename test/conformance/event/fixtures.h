@@ -30,6 +30,7 @@ struct urEventReferenceTest : uur::urQueueTest {
         if (buffer) {
             EXPECT_SUCCESS(urMemRelease(buffer));
         }
+
         urQueueTest::TearDown();
     }
 
@@ -45,6 +46,16 @@ struct urEventReferenceTest : uur::urQueueTest {
     ur_mem_handle_t buffer = nullptr;
     ur_event_handle_t event = nullptr;
     std::vector<uint32_t> input;
+};
+
+struct urEventTest : urEventReferenceTest {
+
+    void TearDown() override {
+        if (event) {
+            EXPECT_SUCCESS(urEventRelease(event));
+        }
+        urEventReferenceTest::TearDown();
+    }
 };
 } // namespace event
 } // namespace uur
