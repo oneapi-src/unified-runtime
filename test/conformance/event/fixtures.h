@@ -30,7 +30,6 @@ struct urEventReferenceTest : uur::urQueueTest {
         if (buffer) {
             EXPECT_SUCCESS(urMemRelease(buffer));
         }
-
         urQueueTest::TearDown();
     }
 
