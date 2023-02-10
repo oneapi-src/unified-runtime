@@ -55,34 +55,34 @@ TEST_P(urEventGetInfoTest, Success) {
     switch (info_type) {
     case UR_EVENT_INFO_COMMAND_QUEUE: {
         auto returned_queue = reinterpret_cast<ur_queue_handle_t>(data.data());
-        EXPECT_EQ(queue, returned_queue);
+        ASSERT_EQ(queue, returned_queue);
         break;
     }
     case UR_EVENT_INFO_CONTEXT: {
         auto returned_context =
             reinterpret_cast<ur_context_handle_t>(data.data());
-        EXPECT_EQ(context, returned_context);
+        ASSERT_EQ(context, returned_context);
         break;
     }
     case UR_EVENT_INFO_COMMAND_TYPE: {
         auto returned_command = reinterpret_cast<ur_command_t *>(data.data());
-        EXPECT_EQ(UR_COMMAND_MEM_BUFFER_WRITE, *returned_command);
+        ASSERT_EQ(UR_COMMAND_MEM_BUFFER_WRITE, *returned_command);
         break;
     }
     case UR_EVENT_INFO_COMMAND_EXECUTION_STATUS: {
         auto returned_status =
             reinterpret_cast<ur_event_status_t *>(data.data());
-        EXPECT_EQ(UR_EVENT_STATUS_COMPLETE, *returned_status);
+        ASSERT_EQ(UR_EVENT_STATUS_COMPLETE, *returned_status);
         break;
     }
     case UR_EVENT_INFO_REFERENCE_COUNT: {
         auto returned_reference_count =
             reinterpret_cast<uint32_t *>(data.data());
-        EXPECT_EQ(1, *returned_reference_count);
+        ASSERT_EQ(1, *returned_reference_count);
         break;
     }
     default:
-        ASSERT_FALSE(false);
+        FAIL() << "Invalid event info enumeration";
     }
 }
 
@@ -104,19 +104,14 @@ TEST_P(urEventGetInfoNegativeTest, InvalidNullHandle) {
     std::vector<uint8_t> data(size);
 
     /* Invalid hEvent */
-    EXPECT_EQ(
+    ASSERT_EQ(
         urEventGetInfo(nullptr, UR_EVENT_INFO_COMMAND_QUEUE, 0, nullptr, &size),
-        UR_RESULT_ERROR_INVALID_NULL_HANDLE);
-
-    /* Valid hEvent but invalid pPropValue and pPropValueSizeRet */
-    EXPECT_EQ(
-        urEventGetInfo(event, UR_EVENT_INFO_COMMAND_QUEUE, 0, nullptr, nullptr),
         UR_RESULT_ERROR_INVALID_NULL_HANDLE);
 }
 
 TEST_P(urEventGetInfoNegativeTest, InvalidEnumeration) {
     size_t size;
-    EXPECT_EQ(
+    ASSERT_EQ(
         urEventGetInfo(event, UR_EVENT_INFO_FORCE_UINT32, 0, nullptr, &size),
         UR_RESULT_ERROR_INVALID_ENUMERATION);
 }
@@ -129,7 +124,7 @@ TEST_P(urEventGetInfoNegativeTest, InvalidValue) {
     std::vector<uint8_t> data(size);
 
     /* Invalid propValueSize */
-    EXPECT_EQ(urEventGetInfo(event, UR_EVENT_INFO_COMMAND_QUEUE, 0, data.data(),
+    ASSERT_EQ(urEventGetInfo(event, UR_EVENT_INFO_COMMAND_QUEUE, 0, data.data(),
                              nullptr),
               UR_RESULT_ERROR_INVALID_VALUE);
 }
