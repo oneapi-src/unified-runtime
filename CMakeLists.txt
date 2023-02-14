@@ -190,6 +190,8 @@ add_custom_target(generate-code
 add_custom_target(generate
     COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target generate-code
     COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target cppformat
+    # clang-format is not idempotent 
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target cppformat
 )
 
 # Generate source and check for uncommitted diffs
