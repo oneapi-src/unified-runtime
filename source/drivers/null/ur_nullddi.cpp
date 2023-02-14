@@ -389,9 +389,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
     size_t bufferSlicePitch, ///< [in] length of each 2D slice in bytes in the
                              ///< buffer object being read
     size_t hostRowPitch,     ///< [in] length of each row in bytes in the host
-                         ///< memory region pointed by dst
-    size_t hostSlicePitch, ///< [in] length of each 2D slice in bytes in the
-                           ///< host memory region pointed by dst
+                             ///< memory region pointed by dst
+    size_t hostSlicePitch,   ///< [in] length of each 2D slice in bytes in the
+                             ///< host memory region pointed by dst
     void *pDst, ///< [in] pointer to host memory where data is to be read into
     uint32_t numEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t
@@ -441,10 +441,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
                              ///< object
     size_t bufferSlicePitch, ///< [in] length of each 2D slice in bytes in the
                              ///< buffer object being written
-    size_t hostRowPitch, ///< [in] length of each row in bytes in the host
-                         ///< memory region pointed by src
-    size_t hostSlicePitch, ///< [in] length of each 2D slice in bytes in the
-                           ///< host memory region pointed by src
+    size_t hostRowPitch,     ///< [in] length of each row in bytes in the host
+                             ///< memory region pointed by src
+    size_t hostSlicePitch,   ///< [in] length of each 2D slice in bytes in the
+                             ///< host memory region pointed by src
     void
         *pSrc, ///< [in] pointer to host memory where data is to be written from
     uint32_t numEventsInWaitList, ///< [in] size of the event wait list
@@ -621,8 +621,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageRead(
                              ///< the 1D, 2D, or 3D image
     ur_rect_region_t region, ///< [in] defines the (width, height, depth) in
                              ///< pixels of the 1D, 2D, or 3D image
-    size_t rowPitch,   ///< [in] length of each row in bytes
-    size_t slicePitch, ///< [in] length of each 2D slice of the 3D image
+    size_t rowPitch,         ///< [in] length of each row in bytes
+    size_t slicePitch,       ///< [in] length of each 2D slice of the 3D image
     void *pDst, ///< [in] pointer to host memory where image is to be read into
     uint32_t numEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t
@@ -666,8 +666,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageWrite(
                              ///< the 1D, 2D, or 3D image
     ur_rect_region_t region, ///< [in] defines the (width, height, depth) in
                              ///< pixels of the 1D, 2D, or 3D image
-    size_t inputRowPitch,   ///< [in] length of each row in bytes
-    size_t inputSlicePitch, ///< [in] length of each 2D slice of the 3D image
+    size_t inputRowPitch,    ///< [in] length of each row in bytes
+    size_t inputSlicePitch,  ///< [in] length of each 2D slice of the 3D image
     void *pSrc, ///< [in] pointer to host memory where image is to be read into
     uint32_t numEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t
@@ -711,8 +711,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageCopy(
                                 ///< in the source 1D, 2D, or 3D image
     ur_rect_offset_t dstOrigin, ///< [in] defines the (x,y,z) offset in pixels
                                 ///< in the destination 1D, 2D, or 3D image
-    ur_rect_region_t region, ///< [in] defines the (width, height, depth) in
-                             ///< pixels of the 1D, 2D, or 3D image
+    ur_rect_region_t region,    ///< [in] defines the (width, height, depth) in
+                                ///< pixels of the 1D, 2D, or 3D image
     uint32_t numEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t
         *phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
@@ -1530,9 +1530,9 @@ __urdlllocal ur_result_t UR_APICALL urMemGetInfo(
                      ///< pMemInfo.
     void *pMemInfo,  ///< [out][optional] array of bytes holding the info.
                      ///< If propSize is less than the real number of bytes
-                    ///< needed to return the info then the
-                    ///< ::UR_RESULT_ERROR_INVALID_SIZE error is returned and
-                    ///< pMemInfo is not used.
+                     ///< needed to return the info then the
+                     ///< ::UR_RESULT_ERROR_INVALID_SIZE error is returned and
+                     ///< pMemInfo is not used.
     size_t *pPropSizeRet ///< [out][optional] pointer to the actual size in
                          ///< bytes of data queried by pMemInfo.
 ) {
@@ -1560,9 +1560,9 @@ __urdlllocal ur_result_t UR_APICALL urMemImageGetInfo(
                      ///< pImgInfo.
     void *pImgInfo,  ///< [out][optional] array of bytes holding the info.
                      ///< If propSize is less than the real number of bytes
-                    ///< needed to return the info then the
-                    ///< ::UR_RESULT_ERROR_INVALID_SIZE error is returned and
-                    ///< pImgInfo is not used.
+                     ///< needed to return the info then the
+                     ///< ::UR_RESULT_ERROR_INVALID_SIZE error is returned and
+                     ///< pImgInfo is not used.
     size_t *pPropSizeRet ///< [out][optional] pointer to the actual size in
                          ///< bytes of data queried by pImgInfo.
 ) {
@@ -2619,9 +2619,9 @@ __urdlllocal ur_result_t UR_APICALL urModuleCreate(
     const char
         *pOptions, ///< [in] pointer to compiler options null-terminated string.
     ur_modulecreate_callback_t
-        pfnNotify, ///< [in][optional] A function pointer to a notification
-                   ///< routine that is called when program compilation is
-                   ///< complete.
+        pfnNotify,   ///< [in][optional] A function pointer to a notification
+                     ///< routine that is called when program compilation is
+                     ///< complete.
     void *pUserData, ///< [in][optional] Passed as an argument when pfnNotify is
                      ///< called.
     ur_module_handle_t
@@ -3007,12 +3007,12 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetInfo(
     ur_program_handle_t hProgram, ///< [in] handle of the Program object
     ur_program_info_t propName, ///< [in] name of the Program property to query
     size_t propSize,            ///< [in] the size of the Program property.
-    void *pProgramInfo, ///< [in,out][optional] array of bytes of holding the
-                        ///< program info property. If propSize is not equal to
-                        ///< or greater than the real number of bytes needed to
-                        ///< return the info then the
-                        ///< ::UR_RESULT_ERROR_INVALID_SIZE error is returned
-                        ///< and pProgramInfo is not used.
+    void *pProgramInfo,  ///< [in,out][optional] array of bytes of holding the
+                         ///< program info property. If propSize is not equal to
+                         ///< or greater than the real number of bytes needed to
+                         ///< return the info then the
+                         ///< ::UR_RESULT_ERROR_INVALID_SIZE error is returned
+                         ///< and pProgramInfo is not used.
     size_t *pPropSizeRet ///< [out][optional] pointer to the actual size in
                          ///< bytes of data copied to propName.
 ) {
