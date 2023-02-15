@@ -80,21 +80,29 @@ TEST_P(urEventSetCallbackTest, AllStates) {
                              ur_execution_info_t execStatus, void *pUserData) {
 
             auto status = reinterpret_cast<CallbackStatus *>(pUserData);
-            if (execStatus ==
-                ur_execution_info_t::UR_EXECUTION_INFO_EXECUTION_INFO_QUEUED) {
+            switch (execStatus) {
+            case ur_execution_info_t::UR_EXECUTION_INFO_EXECUTION_INFO_QUEUED: {
                 status->queued = true;
+                break;
             }
-            if (execStatus == ur_execution_info_t::
-                                  UR_EXECUTION_INFO_EXECUTION_INFO_SUBMITTED) {
+            case ur_execution_info_t::
+                UR_EXECUTION_INFO_EXECUTION_INFO_SUBMITTED: {
                 status->submitted = true;
+                break;
             }
-            if (execStatus ==
-                ur_execution_info_t::UR_EXECUTION_INFO_EXECUTION_INFO_RUNNING) {
+            case ur_execution_info_t::
+                UR_EXECUTION_INFO_EXECUTION_INFO_RUNNING: {
                 status->running = true;
+                break;
             }
-            if (execStatus == ur_execution_info_t::
-                                  UR_EXECUTION_INFO_EXECUTION_INFO_COMPLETE) {
+            case ur_execution_info_t::
+                UR_EXECUTION_INFO_EXECUTION_INFO_COMPLETE: {
                 status->complete = true;
+                break;
+            }
+            default: {
+                FAIL() << "Invalid execution info enumeration";
+            }
             }
         }
     };
