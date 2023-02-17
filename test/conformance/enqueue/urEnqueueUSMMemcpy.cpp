@@ -44,13 +44,13 @@ struct urEnqueueUSMMemcpyTest : uur::urQueueTest {
     bool verifyData() {
         EXPECT_SUCCESS(
             urEnqueueUSMMemcpy(queue, true, host_mem.data(), device_dst, allocation_size, 0, nullptr, nullptr));
-        return std::all_of(host_mem.begin(), host_mem.end(), [this](uint32_t i) { return i == memset_value; });
+        return std::all_of(host_mem.begin(), host_mem.end(), [this](uint8_t i) { return i == memset_value; });
     }
 
     const uint32_t num_elements = 1024;
     const uint8_t memset_value = 12;
-    const uint32_t allocation_size = sizeof(int) * num_elements;
-    std::vector<uint32_t> host_mem = std::vector<uint32_t>(num_elements);
+    const uint32_t allocation_size = sizeof(uint8_t) * num_elements;
+    std::vector<uint8_t> host_mem = std::vector<uint8_t>(num_elements);
 
     ur_event_handle_t memset_event = nullptr;
     int *device_src{nullptr};
