@@ -41,6 +41,13 @@ struct urEnqueueUSMMemcpyTest : uur::urQueueTest {
         UUR_RETURN_ON_FATAL_FAILURE(urQueueTest::TearDown());
     }
 
+    bool memsetHasFinished() {
+        ur_event_status_t memset_event_status;
+        EXPECT_SUCCESS(urEventGetInfo(memset_event, UR_EVENT_INFO_COMMAND_EXECUTION_STATUS,
+                                      sizeof(ur_event_status_t), &memset_event_status, nullptr));
+        return UR_EVENT_STATUS_COMPLETE == memset_event_status;
+    }
+
     bool verifyData() {
         EXPECT_SUCCESS(
             urEnqueueUSMMemcpy(queue, true, host_mem.data(), device_dst, allocation_size, 0, nullptr, nullptr));
@@ -61,8 +68,8 @@ struct urEnqueueUSMMemcpyTest : uur::urQueueTest {
  * Test that urEnqueueUSMMemcpy blocks when the blocking parameter is set to true.
  */
 TEST_P(urEnqueueUSMMemcpyTest, Blocking) {
-
     ASSERT_SUCCESS(urEventWait(1, &memset_event));
+    ASSERT_TRUE(memsetHasFinished());
     ASSERT_SUCCESS(urEnqueueUSMMemcpy(queue, true, device_dst, device_src, allocation_size, 0, nullptr, nullptr));
     ASSERT_TRUE(verifyData());
 }
@@ -72,9 +79,9 @@ TEST_P(urEnqueueUSMMemcpyTest, Blocking) {
  * parameter is set to true.
  */
 TEST_P(urEnqueueUSMMemcpyTest, BlockingWithEvent) {
-
     ur_event_handle_t memcpy_event = nullptr;
     ASSERT_SUCCESS(urEventWait(1, &memset_event));
+    ASSERT_TRUE(memsetHasFinished());
     ASSERT_SUCCESS(
         urEnqueueUSMMemcpy(queue, true, device_dst, device_src, allocation_size, 0, nullptr, &memcpy_event));
 
@@ -91,8 +98,8 @@ TEST_P(urEnqueueUSMMemcpyTest, BlockingWithEvent) {
  * the application waits for the returned event to complete.
  */
 TEST_P(urEnqueueUSMMemcpyTest, NonBlocking) {
-
     ASSERT_SUCCESS(urEventWait(1, &memset_event));
+    ASSERT_TRUE(memsetHasFinished());
     ur_event_handle_t memcpy_event = nullptr;
     ASSERT_SUCCESS(
         urEnqueueUSMMemcpy(queue, false, device_dst, device_src, allocation_size, 0, nullptr, &memcpy_event));
@@ -105,14 +112,13 @@ TEST_P(urEnqueueUSMMemcpyTest, NonBlocking) {
  * Test that urEnqueueUSMMemcpy waits for the events dependencies before copying the memory.
  */
 TEST_P(urEnqueueUSMMemcpyTest, WaitForDependencies) {
-
     ASSERT_SUCCESS(
         urEnqueueUSMMemcpy(queue, true, device_dst, device_src, sizeof(int), 1, &memset_event, nullptr));
+    ASSERT_TRUE(memsetHasFinished());
     ASSERT_TRUE(verifyData());
 }
 
 TEST_P(urEnqueueUSMMemcpyTest, InvalidNullQueueHandle) {
-
     ASSERT_EQ_RESULT(
         urEnqueueUSMMemcpy(nullptr, true, device_dst, device_src, allocation_size, 0, nullptr, nullptr),
         UR_RESULT_ERROR_INVALID_NULL_HANDLE);
