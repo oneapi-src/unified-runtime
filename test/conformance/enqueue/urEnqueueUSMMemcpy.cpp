@@ -43,7 +43,7 @@ struct urEnqueueUSMMemcpyTest : uur::urQueueTest {
 
     bool verifyData() {
         EXPECT_SUCCESS(
-            urEnqueueUSMMemcpy(queue, true, host_mem.data(), device_dst, allocation_size, 1, nullptr, nullptr));
+            urEnqueueUSMMemcpy(queue, true, host_mem.data(), device_dst, allocation_size, 0, nullptr, nullptr));
         return std::all_of(host_mem.begin(), host_mem.end(), [this](uint32_t i) { return i == memset_value; });
     }
 
