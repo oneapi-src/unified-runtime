@@ -129,10 +129,8 @@ class ur_result_v(IntEnum):
     ERROR_INVALID_BUFFER_SIZE = 10                  ## Invalid buffer size
     ERROR_INVALID_MEM_OBJECT = 11                   ## Invalid memory object
     ERROR_INVALID_EVENT = 12                        ## Invalid event
-    ERROR_INVALID_EVENT_WAIT_LIST = 13              ## Returned under the following conditions:
-                                                    ## * If phEventWaitList == nullptr && numEventsInWaitList > 0
-                                                    ## * If phEventWaitList != nullptr && numEventsInWaitList == 0
-                                                    ## * If event objects in phEventWaitList are not valid events.
+    ERROR_INVALID_EVENT_WAIT_LIST = 13              ## Returned when the event wait list or the events in the wait list are
+                                                    ## invalid.
     ERROR_MISALIGNED_SUB_BUFFER_OFFSET = 14         ## Misaligned sub buffer offset
     ERROR_BUILD_PROGRAM_FAILURE = 15                ## Build program failure
     ERROR_INVALID_WORK_GROUP_SIZE = 16              ## Invalid work group size
