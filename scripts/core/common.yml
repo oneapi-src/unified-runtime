@@ -149,7 +149,11 @@ etors:
     - name: ERROR_INVALID_EVENT
       desc: "Invalid event"
     - name: ERROR_INVALID_EVENT_WAIT_LIST
-      desc: "Invalid event wait list"
+      desc: |
+        Returned under the following conditions:
+        * If phEventWaitList == nullptr && numEventsInWaitList > 0
+        * If phEventWaitList != nullptr && numEventsInWaitList == 0
+        * If event objects in phEventWaitList are not valid events.
     - name: ERROR_MISALIGNED_SUB_BUFFER_OFFSET
       desc: "Misaligned sub buffer offset"
     - name: ERROR_BUILD_PROGRAM_FAILURE
