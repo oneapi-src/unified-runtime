@@ -247,10 +247,6 @@ urEnqueueKernelLaunch(
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
-        if (If event objects in phEventWaitList are not valid events.) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
     }
 
     return pfnKernelLaunch(hQueue, hKernel, workDim, pGlobalWorkOffset, pGlobalWorkSize, pLocalWorkSize, numEventsInWaitList, phEventWaitList, phEvent);
@@ -288,10 +284,6 @@ urEnqueueEventsWait(
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
-        if (If event objects in phEventWaitList are not valid events.) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
     }
 
     return pfnEventsWait(hQueue, numEventsInWaitList, phEventWaitList, phEvent);
@@ -327,10 +319,6 @@ urEnqueueEventsWaitWithBarrier(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
-
-        if (If event objects in phEventWaitList are not valid events.) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
     }
@@ -382,10 +370,6 @@ urEnqueueMemBufferRead(
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
-        if (If event objects in phEventWaitList are not valid events.) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
     }
 
     return pfnMemBufferRead(hQueue, hBuffer, blockingRead, offset, size, pDst, numEventsInWaitList, phEventWaitList, phEvent);
@@ -433,10 +417,6 @@ urEnqueueMemBufferWrite(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
-
-        if (If event objects in phEventWaitList are not valid events.) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
     }
@@ -493,10 +473,6 @@ urEnqueueMemBufferReadRect(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
-
-        if (If event objects in phEventWaitList are not valid events.) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
     }
@@ -556,10 +532,6 @@ urEnqueueMemBufferWriteRect(
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
-        if (If event objects in phEventWaitList are not valid events.) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
     }
 
     return pfnMemBufferWriteRect(hQueue, hBuffer, blockingWrite, bufferOffset, hostOffset, region, bufferRowPitch, bufferSlicePitch, hostRowPitch, hostSlicePitch, pSrc, numEventsInWaitList, phEventWaitList, phEvent);
@@ -607,10 +579,6 @@ urEnqueueMemBufferCopy(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
-
-        if (If event objects in phEventWaitList are not valid events.) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
     }
@@ -666,10 +634,6 @@ urEnqueueMemBufferCopyRect(
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
-        if (If event objects in phEventWaitList are not valid events.) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
     }
 
     return pfnMemBufferCopyRect(hQueue, hBufferSrc, hBufferDst, srcOrigin, dstOrigin, srcRegion, srcRowPitch, srcSlicePitch, dstRowPitch, dstSlicePitch, numEventsInWaitList, phEventWaitList, phEvent);
@@ -717,10 +681,6 @@ urEnqueueMemBufferFill(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
-
-        if (If event objects in phEventWaitList are not valid events.) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
     }
@@ -775,10 +735,6 @@ urEnqueueMemImageRead(
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
-        if (If event objects in phEventWaitList are not valid events.) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
     }
 
     return pfnMemImageRead(hQueue, hImage, blockingRead, origin, region, rowPitch, slicePitch, pDst, numEventsInWaitList, phEventWaitList, phEvent);
@@ -831,10 +787,6 @@ urEnqueueMemImageWrite(
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
-        if (If event objects in phEventWaitList are not valid events.) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
     }
 
     return pfnMemImageWrite(hQueue, hImage, blockingWrite, origin, region, inputRowPitch, inputSlicePitch, pSrc, numEventsInWaitList, phEventWaitList, phEvent);
@@ -885,10 +837,6 @@ urEnqueueMemImageCopy(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
-
-        if (If event objects in phEventWaitList are not valid events.) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
     }
@@ -946,10 +894,6 @@ urEnqueueMemBufferMap(
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
-        if (If event objects in phEventWaitList are not valid events.) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
     }
 
     return pfnMemBufferMap(hQueue, hBuffer, blockingMap, mapFlags, offset, size, numEventsInWaitList, phEventWaitList, phEvent, ppRetMap);
@@ -996,10 +940,6 @@ urEnqueueMemUnmap(
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
-        if (If event objects in phEventWaitList are not valid events.) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
     }
 
     return pfnMemUnmap(hQueue, hMem, pMappedPtr, numEventsInWaitList, phEventWaitList, phEvent);
@@ -1041,10 +981,6 @@ urEnqueueUSMMemset(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
-
-        if (If event objects in phEventWaitList are not valid events.) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
     }
@@ -1095,10 +1031,6 @@ urEnqueueUSMMemcpy(
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
-        if (If event objects in phEventWaitList are not valid events.) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
     }
 
     return pfnUSMMemcpy(hQueue, blocking, pDst, pSrc, size, numEventsInWaitList, phEventWaitList, phEvent);
@@ -1146,10 +1078,6 @@ urEnqueueUSMPrefetch(
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
-        if (If event objects in phEventWaitList are not valid events.) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
     }
 
     return pfnUSMPrefetch(hQueue, pMem, size, flags, numEventsInWaitList, phEventWaitList, phEvent);
@@ -1183,18 +1111,6 @@ urEnqueueUSMMemAdvise(
 
         if (UR_MEM_ADVICE_DEFAULT < advice) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
-        }
-
-        if (phEventWaitList == NULL && numEventsInWaitList > 0) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
-
-        if (phEventWaitList != NULL && numEventsInWaitList == 0) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
-
-        if (If event objects in phEventWaitList are not valid events.) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
     }
 
@@ -1246,10 +1162,6 @@ urEnqueueUSMFill2D(
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
-        if (If event objects in phEventWaitList are not valid events.) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
     }
 
     return pfnUSMFill2D(hQueue, pMem, pitch, patternSize, pPattern, width, height, numEventsInWaitList, phEventWaitList, phEvent);
@@ -1293,10 +1205,6 @@ urEnqueueUSMMemset2D(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
-
-        if (If event objects in phEventWaitList are not valid events.) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
     }
@@ -1348,10 +1256,6 @@ urEnqueueUSMMemcpy2D(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
-
-        if (If event objects in phEventWaitList are not valid events.) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
     }
@@ -1408,10 +1312,6 @@ urEnqueueDeviceGlobalVariableWrite(
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
-        if (If event objects in phEventWaitList are not valid events.) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
     }
 
     return pfnDeviceGlobalVariableWrite(hQueue, hProgram, name, blockingWrite, count, offset, pSrc, numEventsInWaitList, phEventWaitList, phEvent);
@@ -1464,10 +1364,6 @@ urEnqueueDeviceGlobalVariableRead(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
-
-        if (If event objects in phEventWaitList are not valid events.) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
     }
