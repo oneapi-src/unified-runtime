@@ -42,9 +42,9 @@ struct urEnqueueUSMMemset2DTestWithParam
                                  width, height, 0, nullptr, nullptr));
         for (int w = 0; w < width; ++w) {
             for (int h = 0; h < height; ++h) {
-                char *reinterpretedPtr = host_mem.data();
+                char *host_ptr = host_mem.data();
                 size_t index = (pitch * h) + w;
-                if (*(reinterpretedPtr + index) != memset_value) {
+                if (*(host_ptr + index) != memset_value) {
                     return false;
                 }
             }
@@ -64,15 +64,15 @@ struct urEnqueueUSMMemset2DTestWithParam
 std::vector<uur::TestParameters2D> test_cases{
     /* Everything set to 1 */
     {1, 1, 1},
-    /* Height == 1 and Pitch > width */
+    /* Height == 1 && Pitch > width */
     {1024, 256, 1},
     /* Height == 1 && Pitch == width */
     {1024, 1024, 1},
-    /* Pitch > width && height > 1 */
+    /* Height > 1 && Pitch > width */
     {1024, 256, 256},
-    /* Pitch == width + 1 */
+    /* Height > 1 && Pitch == width + 1 */
     {234, 233, 23},
-    /* Pitch == width + 1 && height == 1 */
+    /* Height == 1 && Pitch == width + 1 */
     {234, 233, 1}};
 
 UUR_TEST_SUITE_P(urEnqueueUSMMemset2DTestWithParam,
