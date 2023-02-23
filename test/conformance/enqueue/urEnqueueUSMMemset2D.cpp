@@ -19,13 +19,12 @@ struct urEnqueueUSMMemset2DTestWithParam
                                        sizeof(bool), &device_usm, nullptr));
 
         if (!device_usm) {
-            GTEST_SKIP_("Device USM is not supported");
+            GTEST_SKIP() << ("Device USM is not supported");
         }
 
         ur_usm_mem_flags_t flags{};
         ASSERT_SUCCESS(urUSMDeviceAlloc(context, device, &flags, num_elements, 0,
                                         reinterpret_cast<void **>(&ptr)));
-        ASSERT_SUCCESS(urQueueFlush(queue));
     }
 
     void TearDown() override {
@@ -36,20 +35,19 @@ struct urEnqueueUSMMemset2DTestWithParam
         UUR_RETURN_ON_FATAL_FAILURE(urQueueTestWithParam::TearDown());
     }
 
-    bool verifyData() {
-        EXPECT_SUCCESS(
-            urEnqueueUSMMemcpy2D(queue, true, host_mem.data(), pitch, ptr, pitch,
-                                 width, height, 0, nullptr, nullptr));
+    void verifyData() {
+        ASSERT_SUCCESS(
+            urEnqueueUSMMemcpy2D(queue, true, host_mem.data(), pitch, ptr,
+                                 pitch, width, height, 0, nullptr, nullptr));
         for (int w = 0; w < width; ++w) {
             for (int h = 0; h < height; ++h) {
                 char *host_ptr = host_mem.data();
                 size_t index = (pitch * h) + w;
                 if (*(host_ptr + index) != memset_value) {
-                    return false;
+                    ASSERT_TRUE(false);
                 }
             }
         }
-        return true;
     }
 
     const int memset_value = 12;
@@ -95,7 +93,7 @@ TEST_P(urEnqueueUSMMemset2DTestWithParam, Success) {
     ASSERT_EQ(UR_EVENT_STATUS_COMPLETE, event_status);
     EXPECT_SUCCESS(urEventRelease(event));
 
-    verifyData();
+    ASSERT_NO_FATAL_FAILURE(verifyData());
 }
 
 struct urEnqueueUSMMemset2DNegativeTest : uur::urQueueTest {
@@ -113,7 +111,6 @@ struct urEnqueueUSMMemset2DNegativeTest : uur::urQueueTest {
         ur_usm_mem_flags_t flags{};
         ASSERT_SUCCESS(urUSMDeviceAlloc(context, device, &flags, num_elements, 0,
                                         reinterpret_cast<void **>(&ptr)));
-        ASSERT_SUCCESS(urQueueFlush(queue));
     }
 
     void TearDown() override {
@@ -199,7 +196,7 @@ TEST_P(urEnqueueUSMMemset2DNegativeTest, OutOfBounds) {
 
 TEST_P(urEnqueueUSMMemset2DNegativeTest, InvalidNullPtrEventWaitList) {
 
-    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_POINTER,
+    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST,
                      urEnqueueUSMMemset2D(queue, nullptr, default_pitch,
                                           memset_value, default_width,
                                           default_height, 1, nullptr, nullptr));
@@ -207,7 +204,7 @@ TEST_P(urEnqueueUSMMemset2DNegativeTest, InvalidNullPtrEventWaitList) {
     ur_event_handle_t validEvent;
     ASSERT_SUCCESS(urEnqueueEventsWait(queue, 0, nullptr, &validEvent));
 
-    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_POINTER,
+    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST,
                      urEnqueueUSMMemset2D(queue, nullptr, default_pitch,
                                           memset_value, default_width,
                                           default_height, 0, &validEvent,
