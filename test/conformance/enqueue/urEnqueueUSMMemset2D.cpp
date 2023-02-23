@@ -103,7 +103,7 @@ struct urEnqueueUSMMemset2DNegativeTest : uur::urQueueTest {
                                        sizeof(bool), &device_usm, nullptr));
 
         if (!device_usm) {
-            GTEST_SKIP << "Device USM is not supported";
+            GTEST_SKIP() << "Device USM is not supported";
         }
 
         ur_usm_mem_flags_t flags{};
