@@ -976,6 +976,14 @@ urEnqueueUSMMemset(
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
 
+        if (count == 0) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (count` is higher than the allocation size of `ptr) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
@@ -1022,6 +1030,14 @@ urEnqueueUSMMemcpy(
 
         if (NULL == pSrc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (size == 0) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (size` is higher than the allocation size of `pSrc` or `pDst) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
         }
 
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
@@ -1071,6 +1087,14 @@ urEnqueueUSMPrefetch(
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
 
+        if (size == 0) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (size` is higher than the allocation size of `pMem) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
@@ -1111,6 +1135,14 @@ urEnqueueUSMMemAdvise(
 
         if (UR_MEM_ADVICE_DEFAULT < advice) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        }
+
+        if (size == 0) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (size` is higher than the allocation size of `pMem) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
         }
     }
 
@@ -1153,6 +1185,26 @@ urEnqueueUSMFill2D(
 
         if (NULL == pPattern) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (pitch == 0) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (width == 0) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (height == 0) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (pitch < width) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (pitch * height` is higher than the allocation size of `pMem) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
         }
 
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
@@ -1249,6 +1301,34 @@ urEnqueueUSMMemcpy2D(
 
         if (NULL == pSrc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (srcPitch == 0) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (dstPitch == 0) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (srcPitch < width) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (dstPitch < width) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (height == 0) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (srcPitch * height` is higher than the allocation size of `pSrc) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (dstPitch * height` is higher than the allocation size of `pDst) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
         }
 
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {

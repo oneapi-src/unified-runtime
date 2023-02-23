@@ -1083,6 +1083,9 @@ urEnqueueMemUnmap(
 ///         + `NULL == ptr`
 ///     - ::UR_RESULT_ERROR_INVALID_QUEUE
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT
+///     - ::UR_RESULT_ERROR_INVALID_SIZE
+///         + `count == 0`
+///         + `count` is higher than the allocation size of `ptr`
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
 ///         + `phEventWaitList == NULL && numEventsInWaitList > 0`
 ///         + `phEventWaitList != NULL && numEventsInWaitList == 0`
@@ -1126,6 +1129,9 @@ urEnqueueUSMMemset(
 ///         + `NULL == pSrc`
 ///     - ::UR_RESULT_ERROR_INVALID_QUEUE
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT
+///     - ::UR_RESULT_ERROR_INVALID_SIZE
+///         + `size == 0`
+///         + `size` is higher than the allocation size of `pSrc` or `pDst`
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
 ///         + `phEventWaitList == NULL && numEventsInWaitList > 0`
 ///         + `phEventWaitList != NULL && numEventsInWaitList == 0`
@@ -1171,6 +1177,9 @@ urEnqueueUSMMemcpy(
 ///         + `0x1 < flags`
 ///     - ::UR_RESULT_ERROR_INVALID_QUEUE
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT
+///     - ::UR_RESULT_ERROR_INVALID_SIZE
+///         + `size == 0`
+///         + `size` is higher than the allocation size of `pMem`
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
 ///         + `phEventWaitList == NULL && numEventsInWaitList > 0`
 ///         + `phEventWaitList != NULL && numEventsInWaitList == 0`
@@ -1215,6 +1224,9 @@ urEnqueueUSMPrefetch(
 ///         + `::UR_MEM_ADVICE_DEFAULT < advice`
 ///     - ::UR_RESULT_ERROR_INVALID_QUEUE
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT
+///     - ::UR_RESULT_ERROR_INVALID_SIZE
+///         + `size == 0`
+///         + `size` is higher than the allocation size of `pMem`
 ///     - ::UR_RESULT_ERROR_INVALID_MEM_OBJECT
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
@@ -1247,6 +1259,12 @@ urEnqueueUSMMemAdvise(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `NULL == pMem`
 ///         + `NULL == pPattern`
+///     - ::UR_RESULT_ERROR_INVALID_SIZE
+///         + `pitch == 0`
+///         + `width == 0`
+///         + `height == 0`
+///         + `pitch < width`
+///         + `pitch * height` is higher than the allocation size of `pMem`
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
 ///         + `phEventWaitList == NULL && numEventsInWaitList > 0`
 ///         + `phEventWaitList != NULL && numEventsInWaitList == 0`
@@ -1329,6 +1347,14 @@ urEnqueueUSMMemset2D(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `NULL == pDst`
 ///         + `NULL == pSrc`
+///     - ::UR_RESULT_ERROR_INVALID_SIZE
+///         + `srcPitch == 0`
+///         + `dstPitch == 0`
+///         + `srcPitch < width`
+///         + `dstPitch < width`
+///         + `height == 0`
+///         + `srcPitch * height` is higher than the allocation size of `pSrc`
+///         + `dstPitch * height` is higher than the allocation size of `pDst`
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
 ///         + `phEventWaitList == NULL && numEventsInWaitList > 0`
 ///         + `phEventWaitList != NULL && numEventsInWaitList == 0`
