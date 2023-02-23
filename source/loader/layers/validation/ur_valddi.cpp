@@ -951,7 +951,8 @@ __urdlllocal ur_result_t UR_APICALL
 urEnqueueUSMMemset(
     ur_queue_handle_t hQueue,                 ///< [in] handle of the queue object
     void *ptr,                                ///< [in] pointer to USM memory object
-    int8_t byteValue,                         ///< [in] byte value to fill
+    int value,                                ///< [in] value to fill. It is interpreted as an 8-bit value and the upper
+                                              ///< 24 bits are ignored
     size_t count,                             ///< [in] size in bytes to be set
     uint32_t numEventsInWaitList,             ///< [in] size of the event wait list
     const ur_event_handle_t *phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
@@ -980,10 +981,6 @@ urEnqueueUSMMemset(
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
 
-        if (count` is higher than the allocation size of `ptr) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
@@ -993,7 +990,7 @@ urEnqueueUSMMemset(
         }
     }
 
-    return pfnUSMMemset(hQueue, ptr, byteValue, count, numEventsInWaitList, phEventWaitList, phEvent);
+    return pfnUSMMemset(hQueue, ptr, value, count, numEventsInWaitList, phEventWaitList, phEvent);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1033,10 +1030,6 @@ urEnqueueUSMMemcpy(
         }
 
         if (size == 0) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-
-        if (size` is higher than the allocation size of `pSrc` or `pDst) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
 
@@ -1091,10 +1084,6 @@ urEnqueueUSMPrefetch(
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
 
-        if (size` is higher than the allocation size of `pMem) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
@@ -1138,10 +1127,6 @@ urEnqueueUSMMemAdvise(
         }
 
         if (size == 0) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-
-        if (size` is higher than the allocation size of `pMem) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
     }
@@ -1203,10 +1188,6 @@ urEnqueueUSMFill2D(
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
 
-        if (pitch * height` is higher than the allocation size of `pMem) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
@@ -1226,7 +1207,8 @@ urEnqueueUSMMemset2D(
     ur_queue_handle_t hQueue,                 ///< [in] handle of the queue to submit to.
     void *pMem,                               ///< [in] pointer to memory to be filled.
     size_t pitch,                             ///< [in] the total width of the destination memory including padding.
-    int value,                                ///< [in] the value to fill into the region in pMem.
+    int value,                                ///< [in] the value to fill into the region in pMem. It is interpreted as
+                                              ///< an 8-bit value and the upper 24 bits are ignored
     size_t width,                             ///< [in] the width in bytes of each row to set.
     size_t height,                            ///< [in] the height of the columns to set.
     uint32_t numEventsInWaitList,             ///< [in] size of the event wait list
@@ -1320,14 +1302,6 @@ urEnqueueUSMMemcpy2D(
         }
 
         if (height == 0) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-
-        if (srcPitch * height` is higher than the allocation size of `pSrc) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-
-        if (dstPitch * height` is higher than the allocation size of `pDst) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
 

@@ -1085,7 +1085,7 @@ urEnqueueMemUnmap(
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         + `count == 0`
-///         + `count` is higher than the allocation size of `ptr`
+///         + If `count` is higher than the allocation size of `ptr`
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
 ///         + `phEventWaitList == NULL && numEventsInWaitList > 0`
 ///         + `phEventWaitList != NULL && numEventsInWaitList == 0`
@@ -1097,7 +1097,8 @@ ur_result_t UR_APICALL
 urEnqueueUSMMemset(
     ur_queue_handle_t hQueue,                 ///< [in] handle of the queue object
     void *ptr,                                ///< [in] pointer to USM memory object
-    int8_t byteValue,                         ///< [in] byte value to fill
+    int value,                                ///< [in] value to fill. It is interpreted as an 8-bit value and the upper
+                                              ///< 24 bits are ignored
     size_t count,                             ///< [in] size in bytes to be set
     uint32_t numEventsInWaitList,             ///< [in] size of the event wait list
     const ur_event_handle_t *phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
@@ -1112,7 +1113,7 @@ urEnqueueUSMMemset(
         return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
-    return pfnUSMMemset(hQueue, ptr, byteValue, count, numEventsInWaitList, phEventWaitList, phEvent);
+    return pfnUSMMemset(hQueue, ptr, value, count, numEventsInWaitList, phEventWaitList, phEvent);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1131,7 +1132,7 @@ urEnqueueUSMMemset(
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         + `size == 0`
-///         + `size` is higher than the allocation size of `pSrc` or `pDst`
+///         + If `size` is higher than the allocation size of `pSrc` or `pDst`
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
 ///         + `phEventWaitList == NULL && numEventsInWaitList > 0`
 ///         + `phEventWaitList != NULL && numEventsInWaitList == 0`
@@ -1179,7 +1180,7 @@ urEnqueueUSMMemcpy(
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         + `size == 0`
-///         + `size` is higher than the allocation size of `pMem`
+///         + If `size` is higher than the allocation size of `pMem`
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
 ///         + `phEventWaitList == NULL && numEventsInWaitList > 0`
 ///         + `phEventWaitList != NULL && numEventsInWaitList == 0`
@@ -1226,7 +1227,7 @@ urEnqueueUSMPrefetch(
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         + `size == 0`
-///         + `size` is higher than the allocation size of `pMem`
+///         + If `size` is higher than the allocation size of `pMem`
 ///     - ::UR_RESULT_ERROR_INVALID_MEM_OBJECT
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
@@ -1264,11 +1265,14 @@ urEnqueueUSMMemAdvise(
 ///         + `width == 0`
 ///         + `height == 0`
 ///         + `pitch < width`
-///         + `pitch * height` is higher than the allocation size of `pMem`
+///         + If `pitch * height` is higher than the allocation size of `pMem`
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
 ///         + `phEventWaitList == NULL && numEventsInWaitList > 0`
 ///         + `phEventWaitList != NULL && numEventsInWaitList == 0`
 ///         + If event objects in phEventWaitList are not valid events.
+///     - ::UR_RESULT_ERROR_INVALID_MEM_OBJECT
+///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
+///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
 ur_result_t UR_APICALL
 urEnqueueUSMFill2D(
@@ -1310,13 +1314,17 @@ urEnqueueUSMFill2D(
 ///         + `phEventWaitList == NULL && numEventsInWaitList > 0`
 ///         + `phEventWaitList != NULL && numEventsInWaitList == 0`
 ///         + If event objects in phEventWaitList are not valid events.
+///     - ::UR_RESULT_ERROR_INVALID_MEM_OBJECT
+///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
+///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
 ur_result_t UR_APICALL
 urEnqueueUSMMemset2D(
     ur_queue_handle_t hQueue,                 ///< [in] handle of the queue to submit to.
     void *pMem,                               ///< [in] pointer to memory to be filled.
     size_t pitch,                             ///< [in] the total width of the destination memory including padding.
-    int value,                                ///< [in] the value to fill into the region in pMem.
+    int value,                                ///< [in] the value to fill into the region in pMem. It is interpreted as
+                                              ///< an 8-bit value and the upper 24 bits are ignored
     size_t width,                             ///< [in] the width in bytes of each row to set.
     size_t height,                            ///< [in] the height of the columns to set.
     uint32_t numEventsInWaitList,             ///< [in] size of the event wait list
@@ -1353,12 +1361,15 @@ urEnqueueUSMMemset2D(
 ///         + `srcPitch < width`
 ///         + `dstPitch < width`
 ///         + `height == 0`
-///         + `srcPitch * height` is higher than the allocation size of `pSrc`
-///         + `dstPitch * height` is higher than the allocation size of `pDst`
+///         + If `srcPitch * height` is higher than the allocation size of `pSrc`
+///         + If `dstPitch * height` is higher than the allocation size of `pDst`
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
 ///         + `phEventWaitList == NULL && numEventsInWaitList > 0`
 ///         + `phEventWaitList != NULL && numEventsInWaitList == 0`
 ///         + If event objects in phEventWaitList are not valid events.
+///     - ::UR_RESULT_ERROR_INVALID_MEM_OBJECT
+///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
+///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
 ur_result_t UR_APICALL
 urEnqueueUSMMemcpy2D(
