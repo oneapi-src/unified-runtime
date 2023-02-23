@@ -43,9 +43,7 @@ struct urEnqueueUSMMemset2DTestWithParam
             for (int h = 0; h < height; ++h) {
                 char *host_ptr = host_mem.data();
                 size_t index = (pitch * h) + w;
-                if (*(host_ptr + index) != memset_value) {
-                    ASSERT_TRUE(false);
-                }
+                ASSERT_TRUE((*(host_ptr + index) == memset_value));
             }
         }
     }
