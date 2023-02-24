@@ -464,7 +464,7 @@ class ur_name_flags_v(IntEnum):
       - `in,out` is used for members that are both read and write; typically this is used for pointers to other data structures that contain both read and write members
     + `desc` may include one the following annotations: {`"[optional]"`}
       - `optional` is used for members that are pointers where it is legal for the value to be `nullptr`
-    + `type` must be an ISO-C standard identifier; except it may **not** be a `handle_t`
+    + `type` must be an ISO-C standard identifier
     + `name` must be a unique ISO-C standard identifier
   - A member may take the following optional scalar field: {`init`, `version`}
     + `init` will be used to initialize the C++ struct|union member's value
