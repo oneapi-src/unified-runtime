@@ -47,7 +47,7 @@ TEST_P(urEnqueueUSMPrefetchTest, InvalidNullPointerMem) {
 TEST_P(urEnqueueUSMPrefetchTest, InvalidEnumeration) {
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_ENUMERATION,
                      urEnqueueUSMPrefetch(queue, ptr, sizeof(int),
-                                          UR_MEM_ADVICE_FORCE_UINT32, 0,
+                                          UR_USM_MIGRATION_FLAG_FORCE_UINT32, 0,
                                           nullptr,
                                           nullptr));
 }
