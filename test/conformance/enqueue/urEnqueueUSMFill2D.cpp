@@ -63,10 +63,10 @@ struct urEnqueueUSMFill2DTestWithParam
 
         const size_t seed = 1;
         std::mt19937 mersenne_engine{seed};
-        std::uniform_int_distribution<uint8_t> dist{0, 255};
+        std::uniform_int_distribution<int> dist{0, 255};
 
         auto gen = [&dist, &mersenne_engine]() {
-            return dist(mersenne_engine);
+            return static_cast<uint8_t>(dist(mersenne_engine));
         };
 
         std::generate(begin(pattern), end(pattern), gen);
