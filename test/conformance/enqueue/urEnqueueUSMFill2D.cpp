@@ -11,7 +11,7 @@ struct testParametersFill2D {
     size_t pattern_size;
 };
 
-template<typename T>
+template <typename T>
 inline std::string printFill2DTestString(const testing::TestParamInfo<typename T::ParamType> &info) {
     const auto device_handle = std::get<0>(info.param);
     const auto
@@ -66,7 +66,7 @@ struct urEnqueueUSMFill2DTestWithParam
         std::uniform_int_distribution<uint8_t> dist{0, 255};
 
         auto gen = [&dist, &mersenne_engine]() {
-          return dist(mersenne_engine);
+            return dist(mersenne_engine);
         };
 
         std::generate(begin(pattern), end(pattern), gen);
