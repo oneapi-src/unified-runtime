@@ -179,8 +179,8 @@ struct urEnqueueUSMFill2DNegativeTest : uur::urQueueTest {
     static constexpr size_t width = 16;
     static constexpr size_t height = 16;
     static constexpr size_t pattern_size = 4;
-    static constexpr std::array<uint8_t, 4> pattern{0x01, 0x02, 0x03, 0x04};
     static constexpr size_t allocation_size = height * pitch;
+    std::vector<uint8_t> pattern{0x01, 0x02, 0x03, 0x04};
     void *ptr{nullptr};
 };
 
