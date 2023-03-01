@@ -11,7 +11,7 @@ struct testParametersFill2D {
     size_t pattern_size;
 };
 
-template <typename T>
+template<typename T>
 inline std::string printFill2DTestString(const testing::TestParamInfo<typename T::ParamType> &info) {
     const auto device_handle = std::get<0>(info.param);
     const auto
@@ -39,19 +39,16 @@ struct urEnqueueUSMFill2DTestWithParam
         allocation_size = pitch * height;
         host_mem = std::vector<uint8_t>(allocation_size);
 
-        bool device_usm{false};
-        ASSERT_SUCCESS(
-            urDeviceGetInfo(device, UR_DEVICE_INFO_USM_DEVICE_SUPPORT,
-                            sizeof(bool), &device_usm, nullptr));
-
-        if (!device_usm) {
+        const auto device_usm =
+            uur::GetDeviceInfo<bool>(device, UR_DEVICE_INFO_USM_DEVICE_SUPPORT);
+        ASSERT_TRUE(device_usm.has_value());
+        if (!device_usm.value()) {
             GTEST_SKIP() << "Device USM is not supported";
         }
 
-        ur_usm_mem_flags_t flags{};
         ASSERT_SUCCESS(
-            urUSMDeviceAlloc(context, device, &flags, allocation_size, 0,
-                             reinterpret_cast<void **>(&ptr)));
+            urUSMDeviceAlloc(context, device, nullptr, nullptr, allocation_size,
+                             0, &ptr));
     }
 
     void TearDown() override {
@@ -69,7 +66,7 @@ struct urEnqueueUSMFill2DTestWithParam
         std::uniform_int_distribution<uint8_t> dist{0, 255};
 
         auto gen = [&dist, &mersenne_engine]() {
-            return dist(mersenne_engine);
+          return dist(mersenne_engine);
         };
 
         std::generate(begin(pattern), end(pattern), gen);
@@ -102,7 +99,7 @@ struct urEnqueueUSMFill2DTestWithParam
     std::vector<uint8_t> pattern;
     size_t allocation_size;
     std::vector<uint8_t> host_mem;
-    int *ptr{nullptr};
+    void *ptr{nullptr};
 };
 
 static std::vector<testParametersFill2D> test_cases{
@@ -145,11 +142,10 @@ TEST_P(urEnqueueUSMFill2DTestWithParam, Success) {
     EXPECT_SUCCESS(urQueueFlush(queue));
 
     ASSERT_SUCCESS(urEventWait(1, &event));
-    ur_event_status_t event_status;
-    EXPECT_SUCCESS(urEventGetInfo(event, UR_EVENT_INFO_COMMAND_EXECUTION_STATUS,
-                                  sizeof(ur_event_status_t), &event_status,
-                                  nullptr));
-    ASSERT_EQ(UR_EVENT_STATUS_COMPLETE, event_status);
+    const auto event_status = uur::GetEventInfo<ur_event_status_t>(event,
+                                                                   UR_EVENT_INFO_COMMAND_EXECUTION_STATUS);
+    ASSERT_TRUE(event_status.has_value());
+    ASSERT_EQ(event_status.value(), UR_EVENT_STATUS_COMPLETE);
     EXPECT_SUCCESS(urEventRelease(event));
 
     ASSERT_NO_FATAL_FAILURE(verifyData());
@@ -159,19 +155,16 @@ struct urEnqueueUSMFill2DNegativeTest : uur::urQueueTest {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(uur::urQueueTest::SetUp());
 
-        bool device_usm{false};
-        ASSERT_SUCCESS(
-            urDeviceGetInfo(device, UR_DEVICE_INFO_USM_DEVICE_SUPPORT,
-                            sizeof(bool), &device_usm, nullptr));
-
-        if (!device_usm) {
+        const auto device_usm =
+            uur::GetDeviceInfo<bool>(device, UR_DEVICE_INFO_USM_DEVICE_SUPPORT);
+        ASSERT_TRUE(device_usm.has_value());
+        if (!device_usm.value()) {
             GTEST_SKIP() << "Device USM is not supported";
         }
 
-        ur_usm_mem_flags_t flags{};
         ASSERT_SUCCESS(
-            urUSMDeviceAlloc(context, device, &flags, allocation_size, 0,
-                             reinterpret_cast<void **>(&ptr)));
+            urUSMDeviceAlloc(context, device, nullptr, nullptr, allocation_size,
+                             0, &ptr));
     }
 
     void TearDown() override {
@@ -182,13 +175,13 @@ struct urEnqueueUSMFill2DNegativeTest : uur::urQueueTest {
         UUR_RETURN_ON_FATAL_FAILURE(uur::urQueueTest::TearDown());
     }
 
-    const size_t pitch = 16;
-    const size_t width = 16;
-    const size_t height = 16;
-    const size_t pattern_size = 4;
-    const std::vector<uint8_t> pattern{0x01, 0x02, 0x03, 0x04};
-    const size_t allocation_size = height * pitch;
-    int *ptr{nullptr};
+    static constexpr size_t pitch = 16;
+    static constexpr size_t width = 16;
+    static constexpr size_t height = 16;
+    static constexpr size_t pattern_size = 4;
+    static constexpr std::array<uint8_t, 4> pattern{0x01, 0x02, 0x03, 0x04};
+    static constexpr size_t allocation_size = height * pitch;
+    void *ptr{nullptr};
 };
 
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueUSMFill2DNegativeTest);
