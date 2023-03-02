@@ -37,13 +37,14 @@ TEST_P(urEnqueueUSMPrefetchWithParamTest, CheckWaitEvent) {
     ASSERT_SUCCESS(urQueueCreate(context, device, nullptr, &memset_queue));
 
     size_t big_allocation = 65536;
+    void *memset_ptr = nullptr;
     ASSERT_SUCCESS(
         urUSMDeviceAlloc(context, device, nullptr, nullptr,
-                         allocation_size, 0, &ptr));
+                         allocation_size, 0, &memset_ptr));
 
     ur_event_handle_t memset_event;
     ASSERT_SUCCESS(
-        urEnqueueUSMMemset(memset_queue, ptr, 0, big_allocation, 0,
+        urEnqueueUSMMemset(memset_queue, memset_ptr, 0, big_allocation, 0,
                            nullptr, &memset_event));
 
     ur_event_handle_t prefetch_event = nullptr;
@@ -67,6 +68,8 @@ TEST_P(urEnqueueUSMPrefetchWithParamTest, CheckWaitEvent) {
     ASSERT_TRUE(event_status.has_value());
     ASSERT_EQ(event_status.value(), UR_EVENT_STATUS_COMPLETE);
     ASSERT_SUCCESS(urEventRelease(prefetch_event));
+
+    ASSERT_SUCCESS(urUSMFree(context, memset_ptr));
 }
 
 using urEnqueueUSMPrefetchTest = uur::urUSMDeviceAllocTest;
