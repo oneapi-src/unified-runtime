@@ -106,6 +106,7 @@ returns:
         - "`NULL != pProperties && pProperties->count > 0 && NULL == pProperties->pMetadatas`"
     - $X_RESULT_ERROR_INVALID_SIZE:
         - "`NULL != pProperties && NULL != pProperties->pMetadatas && pProperties->count == 0`"
+id: 85
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Create a program object from device native binary."
@@ -141,6 +142,7 @@ returns:
         - "`NULL != pProperties && pProperties->count > 0 && NULL == pProperties->pMetadatas`"
     - $X_RESULT_ERROR_INVALID_SIZE:
         - "`NULL != pProperties && NULL != pProperties->pMetadatas && pProperties->count == 0`"
+id: 86
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Get a reference to the Program object."
@@ -158,6 +160,7 @@ params:
     - type: $x_program_handle_t
       name: hProgram
       desc: "[in] handle for the Program to retain"
+id: 87
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Release Program."
@@ -175,6 +178,7 @@ params:
     - type: $x_program_handle_t
       name: hProgram
       desc: "[in] handle for the Program to release"
+id: 88
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Retrieves a device function pointer to a user-defined function."
@@ -208,6 +212,7 @@ params:
       name: ppFunctionPointer
       desc: |
             [out] Returns the pointer to the function if it is found in the program.
+id: 89
 --- #--------------------------------------------------------------------------
 type: enum
 desc: "Get Program object information"
@@ -264,6 +269,7 @@ params:
       name: "pPropSizeRet"
       desc: |
             [out][optional] pointer to the actual size in bytes of data copied to pProgramInfo.
+id: 90
 --- #--------------------------------------------------------------------------
 type: enum
 desc: "Program object build status"
@@ -339,6 +345,7 @@ params:
       name: pPropSizeRet
       desc: |
             [out][optional] pointer to the actual size in bytes of data being queried by propName.
+id: 91
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Set a Program object specialization constant to a specific value"
@@ -358,6 +365,7 @@ params:
     - type: "const void*"
       name: pSpecValue
       desc: "[in] pointer to the specialization value bytes"
+id: 92
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Return program native program handle."
@@ -379,6 +387,7 @@ params:
       name: phNativeProgram
       desc: |
             [out] a pointer to the native handle of the program.
+id: 93
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Create runtime program object from native program handle."
@@ -402,3 +411,4 @@ params:
       name: phProgram
       desc: |
             [out] pointer to the handle of the program object created.
+id: 94

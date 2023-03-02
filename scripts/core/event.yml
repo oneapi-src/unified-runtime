@@ -145,6 +145,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_EVENT
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
+id: 43
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Get profiling information for the command associated with an event object"
@@ -174,6 +175,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_EVENT
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
+id: 44
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Wait for a list of events to finish."
@@ -196,6 +198,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_CONTEXT
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 45
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Get a reference to an event handle. Increment the event object's reference count."
@@ -212,6 +215,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_EVENT
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
+id: 46
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Decrement the event object's reference count and delete the event object if the reference count becomes zero."
@@ -228,6 +232,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_EVENT
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
+id: 47
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Return platform native event handle."
@@ -249,6 +254,7 @@ params:
       name: phNativeEvent
       desc: |
             [out] a pointer to the native handle of the event.
+id: 48
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Create runtime event object from native event handle."
@@ -272,6 +278,7 @@ params:
       name: phEvent
       desc: |
             [out] pointer to the handle of the event object created.
+id: 49
 --- #--------------------------------------------------------------------------
 type: enum
 desc: "Event states for all events."
@@ -325,3 +332,4 @@ params:
     - type: void*
       name: pUserData
       desc: "[in][out][optional] pointer to data to be passed to callback."
+id: 50

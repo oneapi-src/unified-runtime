@@ -15,6 +15,7 @@ from templates.helper import param_traits, type_traits, value_traits
 
 default_version = "0.5"
 all_versions = ["0.5", "1.0", "1.1", "2.0"]
+function_ids = set()
 
 """
     preprocess object
@@ -93,6 +94,15 @@ def _validate_doc(f, d, tags, line_num):
 
             if ordinal != d['ordinal']:
                 raise Exception("'ordinal' invalid value: '%s'"%d['ordinal'])   
+
+    def __validate_id(d):
+        if 'id' in d:
+            if not isinstance(d['id'], int):
+                raise Exception("'ordinal' must be an int: '%s'"%type(d['id']))
+
+            if d['id'] in function_ids:
+                raise Exception("'id' must be unique")
+            function_ids.add(d['id'])
 
     def __validate_version(d, prefix="", base_version=default_version):
         if 'version' in d:
@@ -378,8 +388,8 @@ def _validate_doc(f, d, tags, line_num):
             __validate_version(d)
 
         elif 'function' == d['type']:
-            if ('desc' not in d) or ('name' not in d):
-                raise Exception("'function' requires the following scalar fields: {`desc`, `name`}")
+            if ('desc' not in d) or ('name' not in d) or ('id' not in d):
+                raise Exception("'function' requires the following scalar fields: {`desc`, `name`, `id`}")
 
             if 'class' in d:
                 __validate_name({'name': d['class']+d['name']}, 'name', tags, case='camel')
@@ -390,6 +400,7 @@ def _validate_doc(f, d, tags, line_num):
             __validate_details(d)
             __validate_ordinal(d)
             __validate_version(d)
+            __validate_id(d)
 
         elif 'class' == d['type']:
             if ('desc' not in d) or ('name' not in d):

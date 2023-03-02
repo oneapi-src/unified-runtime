@@ -40,6 +40,7 @@ params:
 returns:
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_DEVICE_MEMORY
+id: 1
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Makes a reference of the context handle indicating it's in use until paired $xContextRelease is called"
@@ -58,6 +59,7 @@ params:
       name: hContext
       desc: |
             [in] handle of the context to get a reference of.
+id: 2
 --- #--------------------------------------------------------------------------
 type: enum
 desc: "Supported context info"
@@ -96,6 +98,7 @@ params:
       name: hContext
       desc: |
             [in] handle of the context to release.
+id: 3
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Retrieves various information about context"
@@ -129,6 +132,7 @@ params:
       name: pPropSizeRet
       desc: |
             [out][optional] pointer to the actual size in bytes of data queried by ContextInfoType.
+id: 4
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Return platform native context handle."
@@ -150,6 +154,7 @@ params:
       name: phNativeContext
       desc: |
             [out] a pointer to the native handle of the context.
+id: 5
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Create runtime context object from native context handle."
@@ -170,6 +175,7 @@ params:
       name: phContext
       desc: |
             [out] pointer to the handle of the context object created.
+id: 6
 --- #--------------------------------------------------------------------------
 type: fptr_typedef
 desc: "Context's extended deleter callback function with user data."
@@ -204,3 +210,4 @@ params:
     - type: void*
       name: pUserData
       desc: "[in][out][optional] pointer to data to be passed to callback."
+id: 7

@@ -103,6 +103,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_VALUE
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 95
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Create a command queue for a device in a context"
@@ -136,6 +137,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_QUEUE_PROPERTIES
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 96
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Get a reference to the command queue handle. Increment the command queue's reference count"
@@ -155,6 +157,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_QUEUE
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 97
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Decrement the command queue's reference count and delete the command queue if the reference count becomes zero."
@@ -175,6 +178,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_QUEUE
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES    
+id: 98
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Return queue native queue handle."
@@ -196,6 +200,7 @@ params:
       name: phNativeQueue
       desc: |
             [out] a pointer to the native handle of the queue.
+id: 99
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Create runtime queue object from native queue handle."
@@ -219,6 +224,7 @@ params:
       name: phQueue
       desc: |
             [out] pointer to the handle of the queue object created.
+id: 100
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Blocks until all previously issued commands to the command queue are finished."
@@ -239,6 +245,7 @@ params:
 returns:
     - $X_RESULT_ERROR_INVALID_QUEUE
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
+id: 101
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Issues all previously enqueued commands in a command queue to the device."
@@ -258,3 +265,4 @@ params:
 returns:
     - $X_RESULT_ERROR_INVALID_QUEUE
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
+id: 102

@@ -209,6 +209,18 @@ typedef struct ${n}_callbacks_t
 %endfor
 } ${n}_callbacks_t;
 
+## FUNCTIONS ENUM #############################################################
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Defines unique function identifiers
+typedef enum ${x}_function_t {
+%for obj in sorted(th.extract_objs(specs, r"function"), key=lambda obj: obj['id']):
+    ${th.make_func_enum_name(n, tags, obj)} = ${obj['id']},
+%endfor
+
+    UR_FUNCTION_FORCE_UINT32 = 0x7fffffff
+} ${x}_function_t;
+
 #if !defined(__GNUC__)
 #pragma endregion
 #endif

@@ -30,6 +30,7 @@ params:
     - type: $x_kernel_handle_t*
       name: phKernel
       desc: "[out] pointer to handle of kernel object created."
+id: 51
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Set kernel argument to a value."
@@ -54,6 +55,7 @@ params:
 returns:
     - $X_RESULT_ERROR_INVALID_KERNEL_ARGUMENT_INDEX
     - $X_RESULT_ERROR_INVALID_KERNEL_ARGUMENT_SIZE
+id: 52
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Set kernel argument to a local buffer."
@@ -75,6 +77,7 @@ params:
 returns:
     - $X_RESULT_ERROR_INVALID_KERNEL_ARGUMENT_INDEX
     - $X_RESULT_ERROR_INVALID_KERNEL_ARGUMENT_SIZE
+id: 53
 --- #--------------------------------------------------------------------------
 type: enum
 desc: "Get Kernel object information"
@@ -167,6 +170,7 @@ params:
       name: "pPropSizeRet"
       desc: |
             [out][optional] pointer to the actual size in bytes of data being queried by propName.
+id: 54
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Query work Group information about a Kernel object"
@@ -194,6 +198,7 @@ params:
     - type: "size_t*"
       name: "pPropSizeRet"
       desc: "[out][optional] pointer to the actual size in bytes of data being queried by propName."
+id: 55
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Query SubGroup information about a Kernel object"
@@ -220,6 +225,7 @@ params:
       name: pPropSizeRet
       desc: |
             [out][optional] pointer to the actual size in bytes of data being queried by propName.
+id: 56
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Get a reference to the Kernel object."
@@ -237,6 +243,7 @@ params:
     - type: $x_kernel_handle_t
       name: hKernel
       desc: "[in] handle for the Kernel to retain"
+id: 57
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Release Kernel."
@@ -254,6 +261,7 @@ params:
     - type: $x_kernel_handle_t
       name: hKernel
       desc: "[in] handle for the Kernel to release"
+id: 58
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Set a USM pointer as the argument value of a Kernel."
@@ -280,6 +288,7 @@ params:
 returns:
     - $X_RESULT_ERROR_INVALID_KERNEL_ARGUMENT_INDEX
     - $X_RESULT_ERROR_INVALID_KERNEL_ARGUMENT_SIZE
+id: 59
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Set additional Kernel execution attributes."
@@ -303,6 +312,7 @@ params:
     - type: "const void*"
       name: pPropValue
       desc: "[in][range(0, propSize)] pointer to memory location holding the property value."
+id: 60
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Set a Sampler object as the argument value of a Kernel."
@@ -323,6 +333,7 @@ params:
       desc: "[in] handle of Sampler object."
 returns:
     - $X_RESULT_ERROR_INVALID_KERNEL_ARGUMENT_INDEX
+id: 61
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Set a Memory object as the argument value of a Kernel."
@@ -343,6 +354,7 @@ params:
       desc: "[in][optional] handle of Memory object."
 returns:
     - $X_RESULT_ERROR_INVALID_KERNEL_ARGUMENT_INDEX
+id: 62
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Return platform native kernel handle."
@@ -364,6 +376,7 @@ params:
       name: phNativeKernel
       desc: |
             [out] a pointer to the native handle of the kernel.
+id: 63
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Create runtime kernel object from native kernel handle."
@@ -387,3 +400,4 @@ params:
       name: phKernel
       desc: |
             [out] pointer to the handle of the kernel object created.
+id: 64

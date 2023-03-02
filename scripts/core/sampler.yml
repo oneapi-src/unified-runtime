@@ -95,6 +95,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_OPERATION
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 105
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Get a reference to the sampler object handle. Increment its reference count"
@@ -111,6 +112,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_SAMPLER
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 106
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Decrement the sampler's reference count and delete the sampler if the reference count becomes zero."
@@ -127,6 +129,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_SAMPLER
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES    
+id: 107
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Query information about a sampler object"
@@ -156,6 +159,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_VALUE
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 108
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Return sampler native sampler handle."
@@ -177,6 +181,7 @@ params:
       name: phNativeSampler
       desc: |
             [out] a pointer to the native handle of the sampler.
+id: 109
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Create runtime sampler object from native sampler handle."
@@ -200,3 +205,4 @@ params:
       name: phSampler
       desc: |
             [out] pointer to the handle of the sampler object created.
+id: 110

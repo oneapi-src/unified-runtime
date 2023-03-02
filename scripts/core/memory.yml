@@ -235,6 +235,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_HOST_PTR
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 65
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Create a memory buffer"
@@ -266,6 +267,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_HOST_PTR
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 66
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Get a reference the memory object. Increment the memory object's reference count"
@@ -285,6 +287,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_MEM_OBJECT
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 67
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Decrement the memory object's reference count and delete the object if the reference count becomes zero."
@@ -301,6 +304,7 @@ params:
 returns:
     - $X_RESULT_ERROR_INVALID_MEM_OBJECT
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
+id: 68
 --- #--------------------------------------------------------------------------
 type: struct
 desc: "Buffer region type, used to describe a sub buffer"
@@ -354,6 +358,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_HOST_PTR
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 69
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Return platform native mem handle."
@@ -375,6 +380,7 @@ params:
       name: phNativeMem
       desc: |
             [out] a pointer to the native handle of the mem.
+id: 70
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Create runtime mem object from native mem handle."
@@ -398,6 +404,7 @@ params:
       name: phMem
       desc: |
             [out] pointer to the handle of the mem object created.
+id: 71
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Retrieve information about a memory object."
@@ -429,6 +436,7 @@ params:
       name: pPropSizeRet
       desc: |
             [out][optional] pointer to the actual size in bytes of data queried by pMemInfo.
+id: 72
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Retrieve information about an image object."
@@ -460,3 +468,4 @@ params:
       name: pPropSizeRet
       desc: |
             [out][optional] pointer to the actual size in bytes of data queried by pImgInfo.
+id: 73

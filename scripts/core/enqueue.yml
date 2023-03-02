@@ -63,6 +63,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_VALUE
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 17
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command which waits a list of events to complete before it completes" 
@@ -101,6 +102,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_VALUE
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 18
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a barrier command which waits a list of events to complete before it completes" 
@@ -140,6 +142,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_VALUE
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 19
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command to read from a buffer object to host memory" 
@@ -191,6 +194,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_MEM_OBJECT
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 20
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command to write into a buffer object from host memory" 
@@ -242,6 +246,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_MEM_OBJECT
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 21
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command to read a 2D or 3D rectangular region from a buffer object to host memory" 
@@ -309,6 +314,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_MEM_OBJECT
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 22
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command to write a 2D or 3D rectangular region in a buffer object from host memory" 
@@ -376,6 +382,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_MEM_OBJECT
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 23
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command to copy from a buffer object to another" 
@@ -425,6 +432,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_MEM_OBJECT
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 24
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command to copy a 2D or 3D rectangular region from one buffer object to another" 
@@ -486,6 +494,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_MEM_OBJECT
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 25
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command to fill a buffer object with a pattern of a given size" 
@@ -535,6 +544,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_MEM_OBJECT
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 26
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command to read from an image or image array object to host memory" 
@@ -592,6 +602,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_MEM_OBJECT
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 27
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command to write an image or image array object from host memory" 
@@ -649,6 +660,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_MEM_OBJECT
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 28
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command to copy from an image object to another" 
@@ -698,6 +710,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_MEM_OBJECT
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 29
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command to fill an image object with specified color" 
@@ -750,6 +763,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_MEM_OBJECT
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 30
 --- #--------------------------------------------------------------------------
 type: enum
 desc: "Map flags"
@@ -827,6 +841,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_MEM_OBJECT
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 31
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command to map a region of the image object into the host address space and return a pointer to the mapped region" 
@@ -890,6 +905,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_MEM_OBJECT
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 32
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command to unmap a previously mapped region of a memory object" 
@@ -930,6 +946,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_MEM_OBJECT
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 33
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command to set USM memory object value" 
@@ -974,6 +991,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_MEM_OBJECT
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 34
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command to copy USM memory" 
@@ -1021,6 +1039,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_MEM_OBJECT
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 35
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command to prefetch USM memory" 
@@ -1065,6 +1084,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_MEM_OBJECT
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 36
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command to set USM memory advice" 
@@ -1097,6 +1117,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_MEM_OBJECT
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
+id: 37
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command to fill 2D USM memory."
@@ -1152,6 +1173,7 @@ returns:
   - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
   - $X_RESULT_ERROR_OUT_OF_RESOURCES
   - $X_RESULT_ERROR_UNSUPPORTED_FEATURE
+id: 38
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command to set 2D USM memory."
@@ -1204,6 +1226,7 @@ returns:
   - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
   - $X_RESULT_ERROR_OUT_OF_RESOURCES
   - $X_RESULT_ERROR_UNSUPPORTED_FEATURE
+id: 39
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command to copy 2D USM memory."
@@ -1264,6 +1287,7 @@ returns:
   - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
   - $X_RESULT_ERROR_OUT_OF_RESOURCES
   - $X_RESULT_ERROR_UNSUPPORTED_FEATURE
+id: 40
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command to write data from the host to device global variable."
@@ -1309,6 +1333,7 @@ returns:
     - "`phEventWaitList == NULL && numEventsInWaitList > 0`"
     - "`phEventWaitList != NULL && numEventsInWaitList == 0`"
     - "If event objects in phEventWaitList are not valid events."
+id: 41
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command to read data from a device global variable to the host."
@@ -1354,3 +1379,4 @@ returns:
     - "`phEventWaitList == NULL && numEventsInWaitList > 0`"
     - "`phEventWaitList != NULL && numEventsInWaitList == 0`"
     - "If event objects in phEventWaitList are not valid events."
+id: 42

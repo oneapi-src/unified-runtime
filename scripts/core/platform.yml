@@ -39,6 +39,7 @@ params:
             [out][optional] returns the total number of platforms available. 
 returns:
     - $X_RESULT_ERROR_INVALID_SIZE
+id: 79
 --- #--------------------------------------------------------------------------
 type: enum
 desc: "Supported platform info"
@@ -94,6 +95,7 @@ params:
       name: pSizeRet
       desc: |
             [out][optional] pointer to the actual number of bytes being queried by pPlatformInfo.
+id: 80
 --- #--------------------------------------------------------------------------
 type: enum
 desc: "Supported API versions"
@@ -121,6 +123,7 @@ params:
     - type: "$x_api_version_t*"
       name: pVersion
       desc: "[out] api version"
+id: 81
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Return platform native platform handle."
@@ -142,6 +145,7 @@ params:
       name: phNativePlatform
       desc: |
             [out] a pointer to the native handle of the platform.
+id: 82
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Create runtime platform object from native platform handle."
@@ -162,6 +166,7 @@ params:
       name: phPlatform
       desc: |
             [out] pointer to the handle of the platform object created.
+id: 83
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Retrieve string representation of the underlying adapter specific result
@@ -191,3 +196,4 @@ params:
       name: ppMessage
       desc: "[out] pointer to a string containing adapter specific result
              in string representation."
+id: 84

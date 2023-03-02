@@ -71,6 +71,7 @@ params:
             pNumDevices will be updated with the total number of devices available.
 returns:
     - $X_RESULT_ERROR_INVALID_VALUE
+id: 8
 --- #--------------------------------------------------------------------------
 type: enum
 desc: "Supported device info"
@@ -320,6 +321,7 @@ params:
             [out][optional] pointer to the actual size in bytes of the queried infoType.
 returns:
     - $X_RESULT_ERROR_INVALID_VALUE
+id: 9
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Makes a reference of the device handle indicating it's in use until paired $xDeviceRelease is called"
@@ -338,6 +340,7 @@ params:
       name: hDevice
       desc: |
             [in] handle of the device to get a reference of.
+id: 10
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Releases the device handle reference indicating end of its usage"
@@ -356,6 +359,7 @@ params:
       name: hDevice
       desc: |
             [in] handle of the device to release.
+id: 11
 --- #--------------------------------------------------------------------------
 type: typedef
 desc: "Device partition property type"
@@ -420,6 +424,7 @@ params:
 returns:
     - $X_RESULT_ERROR_DEVICE_PARTITION_FAILED
     - $X_RESULT_ERROR_INVALID_DEVICE_PARTITION_COUNT
+id: 12
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Selects the most appropriate device binary based on runtime information and the IR characteristics."
@@ -454,6 +459,7 @@ params:
             If a suitable binary was not found the function returns ${X}_INVALID_BINARY.
 returns:
     - $X_RESULT_ERROR_INVALID_VALUE
+id: 13
 --- #--------------------------------------------------------------------------
 type: enum
 desc: "FP capabilities"
@@ -561,6 +567,7 @@ params:
       name: phNativeDevice
       desc: |
             [out] a pointer to the native handle of the device.
+id: 14
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Create runtime device object from native device handle."
@@ -584,6 +591,7 @@ params:
       name: phDevice
       desc: |
             [out] pointer to the handle of the device object created.
+id: 15
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Returns synchronized Host and Device global timestamps."
@@ -610,6 +618,7 @@ params:
       desc: |
             [out][optional] pointer to the Host's global timestamp that 
             correlates with the Device's global timestamp value
+id: 16
 --- #--------------------------------------------------------------------------
 type: enum
 desc: "Memory order capabilities"

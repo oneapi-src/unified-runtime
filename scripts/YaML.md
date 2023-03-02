@@ -584,9 +584,10 @@ class ur_name_t(Structure):
 
 #### type: function
 * A function initiates the creation of a C/C++ function declaration in the specification
-* A function requires the following scalar fields: {`desc`, `name`}
+* A function requires the following scalar fields: {`desc`, `name`,`id`}
   - `desc` will be used as the function's description comment
   - `name` must be a unique ISO-C standard identifier, and be PascalCase
+  - `id` must be a unique numeric identifier specific to each function
 * A function may take the following optional scalar fields: {`class`, `decl`, `condition`, `ordinal`, `version`}
   - `class` will be used to scope the function declaration within the specified C++ class
   - `decl` will be used to specify the function's linkage as one of the following: {`static`}
@@ -630,7 +631,8 @@ class ur_name_t(Structure):
 type: function
 desc: "A brief description..."
 name: FnName
-name: $xClsName
+id: 1
+class: $xClsName
 details: 
     - "A more detailed description..."
 analogue:

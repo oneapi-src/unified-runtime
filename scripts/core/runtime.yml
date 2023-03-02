@@ -41,6 +41,7 @@ params:
       init: "0"
 returns:
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
+id: 103
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Tear down the $OneApi instance and release all its resources"
@@ -54,3 +55,4 @@ params:
       desc: "[in] pointer to tear down parameters"
 returns:
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
+id: 104
