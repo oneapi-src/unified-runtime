@@ -67,7 +67,9 @@ TEST_P(urEnqueueUSMPrefetchWithParamTest, CheckWaitEvent) {
                                              UR_EVENT_INFO_COMMAND_EXECUTION_STATUS);
     ASSERT_TRUE(event_status.has_value());
     ASSERT_EQ(event_status.value(), UR_EVENT_STATUS_COMPLETE);
+
     ASSERT_SUCCESS(urEventRelease(prefetch_event));
+    ASSERT_SUCCESS(urEventRelease(memset_event));
 
     ASSERT_SUCCESS(urUSMFree(context, memset_ptr));
 }
