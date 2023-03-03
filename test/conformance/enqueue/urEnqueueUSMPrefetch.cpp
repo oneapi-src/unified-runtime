@@ -40,7 +40,7 @@ TEST_P(urEnqueueUSMPrefetchWithParamTest, CheckWaitEvent) {
     void *memset_ptr = nullptr;
     ASSERT_SUCCESS(
         urUSMDeviceAlloc(context, device, nullptr, nullptr,
-                         allocation_size, 0, &memset_ptr));
+                         big_allocation, 0, &memset_ptr));
 
     ur_event_handle_t memset_event;
     ASSERT_SUCCESS(
