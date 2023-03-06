@@ -3398,9 +3398,10 @@ __urdlllocal ur_result_t UR_APICALL
 urEnqueueUSMFill(
     ur_queue_handle_t hQueue,                 ///< [in] handle of the queue object
     void *ptr,                                ///< [in] pointer to USM memory object
-    size_t patternSize,                       ///< [in] the size in bytes of the pattern.
+    size_t patternSize,                       ///< [in] the size in bytes of the pattern. Must be a power of 2 and less
+                                              ///< than or equal to width.
     const void *pPattern,                     ///< [in] pointer with the bytes of the pattern to set.
-    size_t size,                              ///< [in] size in bytes to be set
+    size_t size,                              ///< [in] size in bytes to be set. Must be a multiple of patternSize.
     uint32_t numEventsInWaitList,             ///< [in] size of the event wait list
     const ur_event_handle_t *phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
                                               ///< events that must be complete before this command can be executed.
@@ -3432,7 +3433,19 @@ urEnqueueUSMFill(
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
 
+        if (size % patternSize != 0) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
         if (patternSize == 0) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (patternSize > size) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (patternSize != 0 && ((patternSize & (patternSize - 1)) != 0)) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
 
@@ -3596,9 +3609,11 @@ urEnqueueUSMFill2D(
     ur_queue_handle_t hQueue,                 ///< [in] handle of the queue to submit to.
     void *pMem,                               ///< [in] pointer to memory to be filled.
     size_t pitch,                             ///< [in] the total width of the destination memory including padding.
-    size_t patternSize,                       ///< [in] the size in bytes of the pattern.
+    size_t patternSize,                       ///< [in] the size in bytes of the pattern. Must be a power of 2 and less
+                                              ///< than or equal to width.
     const void *pPattern,                     ///< [in] pointer with the bytes of the pattern to set.
-    size_t width,                             ///< [in] the width in bytes of each row to fill.
+    size_t width,                             ///< [in] the width in bytes of each row to fill. Must be a multiple of
+                                              ///< patternSize.
     size_t height,                            ///< [in] the height of the columns to fill.
     uint32_t numEventsInWaitList,             ///< [in] size of the event wait list
     const ur_event_handle_t *phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
@@ -3631,7 +3646,15 @@ urEnqueueUSMFill2D(
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
 
+        if (pitch < width) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
         if (width == 0) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (width % patternSize != 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
 
@@ -3639,11 +3662,15 @@ urEnqueueUSMFill2D(
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
 
-        if (pitch < width) {
+        if (patternSize == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
 
-        if (patternSize == 0) {
+        if (patternSize > width) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (patternSize != 0 && ((patternSize & (patternSize - 1)) != 0)) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
 
