@@ -9,6 +9,6 @@ target_include_directories(common INTERFACE
 )
 
 add_subdirectory(unified_memory_allocation)
-target_link_libraries(common INTERFACE unified_memory_allocation)
+target_link_libraries(common INTERFACE unified_memory_allocation ${PROJECT_NAME}::headers)
 
 target_sources(common INTERFACE uma_helpers.hpp)
