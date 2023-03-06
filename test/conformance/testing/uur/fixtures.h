@@ -348,9 +348,9 @@ struct urUSMDeviceAllocTest : urQueueTest {
                              0, &ptr));
         ur_event_handle_t event = nullptr;
 
-        int fillPattern = 0;
+        uint8_t fillPattern = 0;
         ASSERT_SUCCESS(
-            urEnqueueUSMFill(queue, ptr, allocation_size, &fillPattern,
+            urEnqueueUSMFill(queue, ptr, sizeof(fillPattern), &fillPattern,
                              allocation_size, 0, nullptr, &event));
 
         EXPECT_SUCCESS(urQueueFlush(queue));
@@ -383,9 +383,9 @@ struct urUSMDeviceAllocTestWithParam : urQueueTestWithParam<T> {
                              allocation_size, 0, &ptr));
         ur_event_handle_t event = nullptr;
 
-        int fillPattern = 0;
+        uint8_t fillPattern = 0;
         ASSERT_SUCCESS(
-            urEnqueueUSMFill(this->queue, ptr, allocation_size, &fillPattern,
+            urEnqueueUSMFill(this->queue, ptr, sizeof(fillPattern), &fillPattern,
                              allocation_size, 0, nullptr, &event));
 
         EXPECT_SUCCESS(urQueueFlush(this->queue));

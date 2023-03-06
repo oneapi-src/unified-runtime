@@ -63,9 +63,9 @@ struct urEnqueueUSMMemcpyTest : uur::urQueueTest {
         ASSERT_TRUE(good);
     }
 
-    const uint32_t num_elements = 1024;
-    const uint8_t memset_value = 12;
-    const uint32_t allocation_size = sizeof(uint8_t) * num_elements;
+    static constexpr uint32_t num_elements = 1024;
+    static constexpr uint8_t memset_value = 12;
+    static constexpr uint32_t allocation_size = sizeof(uint8_t) * num_elements;
     std::vector<uint8_t> host_mem = std::vector<uint8_t>(num_elements);
 
     ur_event_handle_t memset_event = nullptr;

@@ -65,7 +65,7 @@ struct urEnqueueUSMMemcpy2DTestWithParam
 
     void *pSrc = nullptr;
     void *pDst = nullptr;
-    static constexpr int memset_value = 42;
+    static constexpr uint8_t memset_value = 42;
     size_t pitch = 0;
     size_t width = 0;
     size_t height = 0;
