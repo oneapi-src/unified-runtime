@@ -3393,14 +3393,14 @@ urEnqueueMemUnmap(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urEnqueueUSMMemset
+/// @brief Intercept function for urEnqueueUSMFill
 __urdlllocal ur_result_t UR_APICALL
-urEnqueueUSMMemset(
+urEnqueueUSMFill(
     ur_queue_handle_t hQueue,                 ///< [in] handle of the queue object
     void *ptr,                                ///< [in] pointer to USM memory object
-    int value,                                ///< [in] value to fill. It is interpreted as an 8-bit value and the upper
-                                              ///< 24 bits are ignored
-    size_t count,                             ///< [in] size in bytes to be set
+    size_t patternSize,                       ///< [in] the size in bytes of the pattern.
+    const void *pPattern,                     ///< [in] pointer with the bytes of the pattern to set.
+    size_t size,                              ///< [in] size in bytes to be set
     uint32_t numEventsInWaitList,             ///< [in] size of the event wait list
     const ur_event_handle_t *phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
                                               ///< events that must be complete before this command can be executed.
@@ -3409,9 +3409,9 @@ urEnqueueUSMMemset(
     ur_event_handle_t *phEvent                ///< [in,out][optional] return an event object that identifies this
                                               ///< particular command instance.
 ) {
-    auto pfnUSMMemset = context.urDdiTable.Enqueue.pfnUSMMemset;
+    auto pfnUSMFill = context.urDdiTable.Enqueue.pfnUSMFill;
 
-    if (nullptr == pfnUSMMemset) {
+    if (nullptr == pfnUSMFill) {
         return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
     }
 
@@ -3424,7 +3424,15 @@ urEnqueueUSMMemset(
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
 
-        if (count == 0) {
+        if (NULL == pPattern) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (size == 0) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (patternSize == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
 
@@ -3437,7 +3445,7 @@ urEnqueueUSMMemset(
         }
     }
 
-    return pfnUSMMemset(hQueue, ptr, value, count, numEventsInWaitList, phEventWaitList, phEvent);
+    return pfnUSMFill(hQueue, ptr, patternSize, pPattern, size, numEventsInWaitList, phEventWaitList, phEvent);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3649,68 +3657,6 @@ urEnqueueUSMFill2D(
     }
 
     return pfnUSMFill2D(hQueue, pMem, pitch, patternSize, pPattern, width, height, numEventsInWaitList, phEventWaitList, phEvent);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urEnqueueUSMMemset2D
-__urdlllocal ur_result_t UR_APICALL
-urEnqueueUSMMemset2D(
-    ur_queue_handle_t hQueue,                 ///< [in] handle of the queue to submit to.
-    void *pMem,                               ///< [in] pointer to memory to be filled.
-    size_t pitch,                             ///< [in] the total width of the destination memory including padding.
-    int value,                                ///< [in] the value to fill into the region in pMem. It is interpreted as
-                                              ///< an 8-bit value and the upper 24 bits are ignored
-    size_t width,                             ///< [in] the width in bytes of each row to set.
-    size_t height,                            ///< [in] the height of the columns to set.
-    uint32_t numEventsInWaitList,             ///< [in] size of the event wait list
-    const ur_event_handle_t *phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
-                                              ///< events that must be complete before the kernel execution.
-                                              ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait
-                                              ///< event.
-    ur_event_handle_t *phEvent                ///< [in,out][optional] return an event object that identifies this
-                                              ///< particular kernel execution instance.
-) {
-    auto pfnUSMMemset2D = context.urDdiTable.Enqueue.pfnUSMMemset2D;
-
-    if (nullptr == pfnUSMMemset2D) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-    }
-
-    if (context.enableParameterValidation) {
-        if (NULL == hQueue) {
-            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-        }
-
-        if (NULL == pMem) {
-            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-        }
-
-        if (pitch == 0) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-
-        if (width == 0) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-
-        if (height == 0) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-
-        if (pitch < width) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-
-        if (phEventWaitList == NULL && numEventsInWaitList > 0) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
-
-        if (phEventWaitList != NULL && numEventsInWaitList == 0) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
-    }
-
-    return pfnUSMMemset2D(hQueue, pMem, pitch, value, width, height, numEventsInWaitList, phEventWaitList, phEvent);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4051,8 +3997,8 @@ urGetEnqueueProcAddrTable(
     dditable.pfnMemUnmap = pDdiTable->pfnMemUnmap;
     pDdiTable->pfnMemUnmap = validation_layer::urEnqueueMemUnmap;
 
-    dditable.pfnUSMMemset = pDdiTable->pfnUSMMemset;
-    pDdiTable->pfnUSMMemset = validation_layer::urEnqueueUSMMemset;
+    dditable.pfnUSMFill = pDdiTable->pfnUSMFill;
+    pDdiTable->pfnUSMFill = validation_layer::urEnqueueUSMFill;
 
     dditable.pfnUSMMemcpy = pDdiTable->pfnUSMMemcpy;
     pDdiTable->pfnUSMMemcpy = validation_layer::urEnqueueUSMMemcpy;
@@ -4065,9 +4011,6 @@ urGetEnqueueProcAddrTable(
 
     dditable.pfnUSMFill2D = pDdiTable->pfnUSMFill2D;
     pDdiTable->pfnUSMFill2D = validation_layer::urEnqueueUSMFill2D;
-
-    dditable.pfnUSMMemset2D = pDdiTable->pfnUSMMemset2D;
-    pDdiTable->pfnUSMMemset2D = validation_layer::urEnqueueUSMMemset2D;
 
     dditable.pfnUSMMemcpy2D = pDdiTable->pfnUSMMemcpy2D;
     pDdiTable->pfnUSMMemcpy2D = validation_layer::urEnqueueUSMMemcpy2D;
