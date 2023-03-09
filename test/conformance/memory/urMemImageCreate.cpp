@@ -17,7 +17,7 @@ static ur_image_desc_t image_desc{
     1,                            ///< [in] image height
     1,                            ///< [in] image depth
     1,                            ///< [in] image array size
-    1,                            ///< [in] image row pitch
+    0,                            ///< [in] image row pitch
     0,                            ///< [in] image slice pitch
     0,                            ///< [in] number of MIP levels
     0                             ///< [in] number of samples
