@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 cmake_minimum_required(VERSION 3.14.0 FATAL_ERROR)
-project(unified-runtime VERSION 0.5.0)
+project(unified-runtime VERSION 0.6.0)
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
