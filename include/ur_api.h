@@ -4089,8 +4089,8 @@ urEnqueueKernelLaunch(
                                               ///< events that must be complete before the kernel execution.
                                               ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait
                                               ///< event.
-    ur_event_handle_t *phEvent                ///< [in,out][optional] return an event object that identifies this
-                                              ///< particular kernel execution instance.
+    ur_event_handle_t *phEvent                ///< [out][optional] return an event object that identifies this particular
+                                              ///< kernel execution instance.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4130,8 +4130,8 @@ urEnqueueEventsWait(
                                               ///< If nullptr, the numEventsInWaitList must be 0, indicating that all
                                               ///< previously enqueued commands
                                               ///< must be complete.
-    ur_event_handle_t *phEvent                ///< [in,out][optional] return an event object that identifies this
-                                              ///< particular command instance.
+    ur_event_handle_t *phEvent                ///< [out][optional] return an event object that identifies this particular
+                                              ///< command instance.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4173,8 +4173,8 @@ urEnqueueEventsWaitWithBarrier(
                                               ///< If nullptr, the numEventsInWaitList must be 0, indicating that all
                                               ///< previously enqueued commands
                                               ///< must be complete.
-    ur_event_handle_t *phEvent                ///< [in,out][optional] return an event object that identifies this
-                                              ///< particular command instance.
+    ur_event_handle_t *phEvent                ///< [out][optional] return an event object that identifies this particular
+                                              ///< command instance.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4219,8 +4219,8 @@ urEnqueueMemBufferRead(
                                               ///< events that must be complete before this command can be executed.
                                               ///< If nullptr, the numEventsInWaitList must be 0, indicating that this
                                               ///< command does not wait on any event to complete.
-    ur_event_handle_t *phEvent                ///< [in,out][optional] return an event object that identifies this
-                                              ///< particular command instance.
+    ur_event_handle_t *phEvent                ///< [out][optional] return an event object that identifies this particular
+                                              ///< command instance.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4265,8 +4265,8 @@ urEnqueueMemBufferWrite(
                                               ///< events that must be complete before this command can be executed.
                                               ///< If nullptr, the numEventsInWaitList must be 0, indicating that this
                                               ///< command does not wait on any event to complete.
-    ur_event_handle_t *phEvent                ///< [in,out][optional] return an event object that identifies this
-                                              ///< particular command instance.
+    ur_event_handle_t *phEvent                ///< [out][optional] return an event object that identifies this particular
+                                              ///< command instance.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4321,8 +4321,8 @@ urEnqueueMemBufferReadRect(
                                               ///< events that must be complete before this command can be executed.
                                               ///< If nullptr, the numEventsInWaitList must be 0, indicating that this
                                               ///< command does not wait on any event to complete.
-    ur_event_handle_t *phEvent                ///< [in,out][optional] return an event object that identifies this
-                                              ///< particular command instance.
+    ur_event_handle_t *phEvent                ///< [out][optional] return an event object that identifies this particular
+                                              ///< command instance.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4378,8 +4378,8 @@ urEnqueueMemBufferWriteRect(
                                               ///< events that must be complete before this command can be executed.
                                               ///< If nullptr, the numEventsInWaitList must be 0, indicating that this
                                               ///< command does not wait on any event to complete.
-    ur_event_handle_t *phEvent                ///< [in,out][optional] return an event object that identifies this
-                                              ///< particular command instance.
+    ur_event_handle_t *phEvent                ///< [out][optional] return an event object that identifies this particular
+                                              ///< command instance.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4419,8 +4419,8 @@ urEnqueueMemBufferCopy(
                                               ///< events that must be complete before this command can be executed.
                                               ///< If nullptr, the numEventsInWaitList must be 0, indicating that this
                                               ///< command does not wait on any event to complete.
-    ur_event_handle_t *phEvent                ///< [in,out][optional] return an event object that identifies this
-                                              ///< particular command instance.
+    ur_event_handle_t *phEvent                ///< [out][optional] return an event object that identifies this particular
+                                              ///< command instance.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4465,8 +4465,8 @@ urEnqueueMemBufferCopyRect(
                                               ///< events that must be complete before this command can be executed.
                                               ///< If nullptr, the numEventsInWaitList must be 0, indicating that this
                                               ///< command does not wait on any event to complete.
-    ur_event_handle_t *phEvent                ///< [in,out][optional] return an event object that identifies this
-                                              ///< particular command instance.
+    ur_event_handle_t *phEvent                ///< [out][optional] return an event object that identifies this particular
+                                              ///< command instance.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4508,8 +4508,8 @@ urEnqueueMemBufferFill(
                                               ///< events that must be complete before this command can be executed.
                                               ///< If nullptr, the numEventsInWaitList must be 0, indicating that this
                                               ///< command does not wait on any event to complete.
-    ur_event_handle_t *phEvent                ///< [in,out][optional] return an event object that identifies this
-                                              ///< particular command instance.
+    ur_event_handle_t *phEvent                ///< [out][optional] return an event object that identifies this particular
+                                              ///< command instance.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4558,8 +4558,8 @@ urEnqueueMemImageRead(
                                               ///< events that must be complete before this command can be executed.
                                               ///< If nullptr, the numEventsInWaitList must be 0, indicating that this
                                               ///< command does not wait on any event to complete.
-    ur_event_handle_t *phEvent                ///< [in,out][optional] return an event object that identifies this
-                                              ///< particular command instance.
+    ur_event_handle_t *phEvent                ///< [out][optional] return an event object that identifies this particular
+                                              ///< command instance.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4608,8 +4608,8 @@ urEnqueueMemImageWrite(
                                               ///< events that must be complete before this command can be executed.
                                               ///< If nullptr, the numEventsInWaitList must be 0, indicating that this
                                               ///< command does not wait on any event to complete.
-    ur_event_handle_t *phEvent                ///< [in,out][optional] return an event object that identifies this
-                                              ///< particular command instance.
+    ur_event_handle_t *phEvent                ///< [out][optional] return an event object that identifies this particular
+                                              ///< command instance.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4652,8 +4652,8 @@ urEnqueueMemImageCopy(
                                               ///< events that must be complete before this command can be executed.
                                               ///< If nullptr, the numEventsInWaitList must be 0, indicating that this
                                               ///< command does not wait on any event to complete.
-    ur_event_handle_t *phEvent                ///< [in,out][optional] return an event object that identifies this
-                                              ///< particular command instance.
+    ur_event_handle_t *phEvent                ///< [out][optional] return an event object that identifies this particular
+                                              ///< command instance.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4727,9 +4727,9 @@ urEnqueueMemBufferMap(
                                               ///< events that must be complete before this command can be executed.
                                               ///< If nullptr, the numEventsInWaitList must be 0, indicating that this
                                               ///< command does not wait on any event to complete.
-    ur_event_handle_t *phEvent,               ///< [in,out][optional] return an event object that identifies this
-                                              ///< particular command instance.
-    void **ppRetMap                           ///< [in,out] return mapped pointer.  TODO: move it before
+    ur_event_handle_t *phEvent,               ///< [out][optional] return an event object that identifies this particular
+                                              ///< command instance.
+    void **ppRetMap                           ///< [out] return mapped pointer.  TODO: move it before
                                               ///< numEventsInWaitList?
 );
 
@@ -4769,8 +4769,8 @@ urEnqueueMemUnmap(
                                               ///< events that must be complete before this command can be executed.
                                               ///< If nullptr, the numEventsInWaitList must be 0, indicating that this
                                               ///< command does not wait on any event to complete.
-    ur_event_handle_t *phEvent                ///< [in,out][optional] return an event object that identifies this
-                                              ///< particular command instance.
+    ur_event_handle_t *phEvent                ///< [out][optional] return an event object that identifies this particular
+                                              ///< command instance.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4814,8 +4814,8 @@ urEnqueueUSMFill(
                                               ///< events that must be complete before this command can be executed.
                                               ///< If nullptr, the numEventsInWaitList must be 0, indicating that this
                                               ///< command does not wait on any event to complete.
-    ur_event_handle_t *phEvent                ///< [in,out][optional] return an event object that identifies this
-                                              ///< particular command instance.
+    ur_event_handle_t *phEvent                ///< [out][optional] return an event object that identifies this particular
+                                              ///< command instance.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4854,8 +4854,8 @@ urEnqueueUSMMemcpy(
                                               ///< events that must be complete before this command can be executed.
                                               ///< If nullptr, the numEventsInWaitList must be 0, indicating that this
                                               ///< command does not wait on any event to complete.
-    ur_event_handle_t *phEvent                ///< [in,out][optional] return an event object that identifies this
-                                              ///< particular command instance.
+    ur_event_handle_t *phEvent                ///< [out][optional] return an event object that identifies this particular
+                                              ///< command instance.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4894,8 +4894,8 @@ urEnqueueUSMPrefetch(
                                               ///< events that must be complete before this command can be executed.
                                               ///< If nullptr, the numEventsInWaitList must be 0, indicating that this
                                               ///< command does not wait on any event to complete.
-    ur_event_handle_t *phEvent                ///< [in,out][optional] return an event object that identifies this
-                                              ///< particular command instance.
+    ur_event_handle_t *phEvent                ///< [out][optional] return an event object that identifies this particular
+                                              ///< command instance.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4925,8 +4925,8 @@ urEnqueueUSMMemAdvise(
     const void *pMem,          ///< [in] pointer to the USM memory object
     size_t size,               ///< [in] size in bytes to be advised
     ur_mem_advice_t advice,    ///< [in] USM memory advice
-    ur_event_handle_t *phEvent ///< [in,out][optional] return an event object that identifies this
-                               ///< particular command instance.
+    ur_event_handle_t *phEvent ///< [out][optional] return an event object that identifies this particular
+                               ///< command instance.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4975,8 +4975,8 @@ urEnqueueUSMFill2D(
                                               ///< events that must be complete before the kernel execution.
                                               ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait
                                               ///< event.
-    ur_event_handle_t *phEvent                ///< [in,out][optional] return an event object that identifies this
-                                              ///< particular kernel execution instance.
+    ur_event_handle_t *phEvent                ///< [out][optional] return an event object that identifies this particular
+                                              ///< kernel execution instance.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -5022,8 +5022,8 @@ urEnqueueUSMMemcpy2D(
                                               ///< events that must be complete before the kernel execution.
                                               ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait
                                               ///< event.
-    ur_event_handle_t *phEvent                ///< [in,out][optional] return an event object that identifies this
-                                              ///< particular kernel execution instance.
+    ur_event_handle_t *phEvent                ///< [out][optional] return an event object that identifies this particular
+                                              ///< kernel execution instance.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -5058,8 +5058,8 @@ urEnqueueDeviceGlobalVariableWrite(
                                               ///< events that must be complete before the kernel execution.
                                               ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait
                                               ///< event.
-    ur_event_handle_t *phEvent                ///< [in,out][optional] return an event object that identifies this
-                                              ///< particular kernel execution instance.
+    ur_event_handle_t *phEvent                ///< [out][optional] return an event object that identifies this particular
+                                              ///< kernel execution instance.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -5094,8 +5094,8 @@ urEnqueueDeviceGlobalVariableRead(
                                               ///< events that must be complete before the kernel execution.
                                               ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait
                                               ///< event.
-    ur_event_handle_t *phEvent                ///< [in,out][optional] return an event object that identifies this
-                                              ///< particular kernel execution instance.
+    ur_event_handle_t *phEvent                ///< [out][optional] return an event object that identifies this particular
+                                              ///< kernel execution instance.
 );
 
 #if !defined(__GNUC__)
