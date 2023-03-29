@@ -25,6 +25,7 @@ option(UR_USE_UBSAN "enable UndefinedBehaviorSanitizer" OFF)
 option(UR_USE_MSAN "enable MemorySanitizer" OFF)
 option(UMA_BUILD_SHARED_LIBRARY "Build UMA as shared library" OFF)
 option(UR_ENABLE_TRACING "enable api tracing through xpti" OFF)
+option(VAL_USE_LIBUNWIND_BACKTRACE "enable libunwind validation backtrace" OFF)
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
