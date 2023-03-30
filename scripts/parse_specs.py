@@ -172,7 +172,7 @@ def _validate_doc(f, d, tags, line_num):
     def __validate_details(d):
         if 'details' in d:
 
-            if not isinstance(d['details'], list) or isinstance(d['details'], str):
+            if not (isinstance(d['details'], list) or isinstance(d['details'], str)):
                 raise Exception("'details' must be a string or a sequence")
 
             if isinstance(d['details'], list):
