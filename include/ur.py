@@ -583,6 +583,10 @@ class ur_device_exec_capability_flags_t(c_int):
 class ur_device_affinity_domain_flags_v(IntEnum):
     NUMA = UR_BIT(0)                                ## By NUMA
     NEXT_PARTITIONABLE = UR_BIT(1)                  ## BY next partitionable
+    L4_CACHE = UR_BIT(2)                            ## Sub-device will have compute units which share a level 4 cache
+    L3_CACHE = UR_BIT(2)                            ## Sub-device will have compute units which share a level 3 cache
+    L4_CACHE = UR_BIT(2)                            ## Sub-device will have compute units which share a level 2 cache
+    L1_CACHE = UR_BIT(2)                            ## Sub-device will have compute units which share a level 1 cache
 
 class ur_device_affinity_domain_flags_t(c_int):
     def __str__(self):

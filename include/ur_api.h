@@ -1060,13 +1060,17 @@ typedef uint32_t ur_device_affinity_domain_flags_t;
 typedef enum ur_device_affinity_domain_flag_t {
     UR_DEVICE_AFFINITY_DOMAIN_FLAG_NUMA = UR_BIT(0),               ///< By NUMA
     UR_DEVICE_AFFINITY_DOMAIN_FLAG_NEXT_PARTITIONABLE = UR_BIT(1), ///< BY next partitionable
+    UR_DEVICE_AFFINITY_DOMAIN_FLAG_L4_CACHE = UR_BIT(2),           ///< Sub-device will have compute units which share a level 4 cache
+    UR_DEVICE_AFFINITY_DOMAIN_FLAG_L3_CACHE = UR_BIT(2),           ///< Sub-device will have compute units which share a level 3 cache
+    UR_DEVICE_AFFINITY_DOMAIN_FLAG_L4_CACHE = UR_BIT(2),           ///< Sub-device will have compute units which share a level 2 cache
+    UR_DEVICE_AFFINITY_DOMAIN_FLAG_L1_CACHE = UR_BIT(2),           ///< Sub-device will have compute units which share a level 1 cache
     /// @cond
     UR_DEVICE_AFFINITY_DOMAIN_FLAG_FORCE_UINT32 = 0x7fffffff
     /// @endcond
 
 } ur_device_affinity_domain_flag_t;
 /// @brief Bit Mask for validating ur_device_affinity_domain_flags_t
-#define UR_DEVICE_AFFINITY_DOMAIN_FLAGS_MASK 0xfffffffc
+#define UR_DEVICE_AFFINITY_DOMAIN_FLAGS_MASK 0xfffffff8
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Return platform native device handle.

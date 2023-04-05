@@ -606,6 +606,18 @@ etors:
     - name: NEXT_PARTITIONABLE
       desc: "BY next partitionable"
       value: "$X_BIT(1)"
+    - name: L4_CACHE
+      desc: "Sub-device will have compute units which share a level 4 cache"
+      value: "$X_BIT(2)"
+    - name: L3_CACHE
+      desc: "Sub-device will have compute units which share a level 3 cache"
+      value: "$X_BIT(2)"
+    - name: L4_CACHE
+      desc: "Sub-device will have compute units which share a level 2 cache"
+      value: "$X_BIT(2)"
+    - name: L1_CACHE
+      desc: "Sub-device will have compute units which share a level 1 cache"
+      value: "$X_BIT(2)"
 --- #--------------------------------------------------------------------------
 type: class
 desc: "C++ wrapper for a device"
