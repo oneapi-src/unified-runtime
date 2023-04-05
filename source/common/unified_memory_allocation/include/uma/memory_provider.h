@@ -12,6 +12,10 @@
 #include <uma/base.h>
 #include <uma/memory_provider_ops.h>
 
+#define UMA_ATTR_DONTNEED 4    /* Don't need these pages.  */
+#define UMA_ATTR_HUGEPAGE 14   /* Worth backing with hugepages.  */
+#define UMA_ATTR_NOHUGEPAGE 15 /* Not worth backing with hugepages.  */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -56,6 +60,17 @@ enum uma_result_t umaMemoryProviderAlloc(uma_memory_provider_handle_t hProvider,
 ///
 enum uma_result_t umaMemoryProviderFree(uma_memory_provider_handle_t hProvider,
                                         void *ptr, size_t size);
+
+///
+/// \brief Set attributes of the memory space pointed by ptr from the memory provider
+/// \param hProvider handle to the memory provider
+/// \param ptr pointer to the allocated memory
+/// \param size size of the allocation
+/// \param attrs attributes of the memory space to be set
+///
+enum uma_result_t
+umaMemoryProviderSetAttributes(uma_memory_provider_handle_t hProvider,
+                               void *ptr, size_t size, int attrs);
 
 ///
 /// \brief Retrieve string representation of the underlying provider specific

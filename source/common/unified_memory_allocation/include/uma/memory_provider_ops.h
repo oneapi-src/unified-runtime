@@ -40,6 +40,8 @@ struct uma_memory_provider_ops_t {
     enum uma_result_t (*alloc)(void *provider, size_t size, size_t alignment,
                                void **ptr);
     enum uma_result_t (*free)(void *provider, void *ptr, size_t size);
+    enum uma_result_t (*set_attrs)(void *provider, void *ptr, size_t size,
+                                   int attrs);
     enum uma_result_t (*get_last_result)(void *provider,
                                          const char **ppMessage);
 };
