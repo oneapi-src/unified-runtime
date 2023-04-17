@@ -32,6 +32,15 @@ static enum uma_result_t nullFree(void *provider, void *ptr, size_t size) {
     return UMA_RESULT_SUCCESS;
 }
 
+static enum uma_result_t nullSetAttributes(void *provider, void *ptr,
+                                           size_t size, int attrs) {
+    (void)provider;
+    (void)ptr;
+    (void)size;
+    (void)attrs;
+    return UMA_RESULT_SUCCESS;
+}
+
 static enum uma_result_t nullGetLastResult(void *provider, const char **ppMsg) {
     (void)provider;
     (void)ppMsg;
@@ -44,6 +53,7 @@ uma_memory_provider_handle_t nullProviderCreate(void) {
                                             .finalize = nullFinalize,
                                             .alloc = nullAlloc,
                                             .free = nullFree,
+                                            .set_attrs = nullSetAttributes,
                                             .get_last_result =
                                                 nullGetLastResult};
 
@@ -87,6 +97,15 @@ static enum uma_result_t traceFree(void *provider, void *ptr, size_t size) {
     return umaMemoryProviderFree(traceProvider->hUpstreamProvider, ptr, size);
 }
 
+static enum uma_result_t traceSetAttributes(void *provider, void *ptr,
+                                            size_t size, int attrs) {
+    struct traceParams *traceProvider = (struct traceParams *)provider;
+
+    traceProvider->trace("set_attrs");
+    return umaMemoryProviderSetAttributes(traceProvider->hUpstreamProvider, ptr,
+                                          size, attrs);
+}
+
 static enum uma_result_t traceGetLastResult(void *provider,
                                             const char **ppMsg) {
     struct traceParams *traceProvider = (struct traceParams *)provider;
@@ -104,6 +123,7 @@ traceProviderCreate(uma_memory_provider_handle_t hUpstreamProvider,
                                             .finalize = traceFinalize,
                                             .alloc = traceAlloc,
                                             .free = traceFree,
+                                            .set_attrs = traceSetAttributes,
                                             .get_last_result =
                                                 traceGetLastResult};
 
