@@ -12,10 +12,13 @@
 #define UMA_MEMORY_POOL_OPS_H 1
 
 #include <uma/base.h>
+#include <uma/memory_provider.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef struct uma_memory_pool_t *uma_memory_pool_native_handle_t;
 
 /// \brief This structure comprises function pointers used by corresponding umaPool*
 /// calls. Each memory pool implementation should initialize all function
@@ -35,21 +38,26 @@ struct uma_memory_pool_ops_t {
     /// \return UMA_RESULT_SUCCESS on success or appropriate error code on failure.
     enum uma_result_t (*initialize)(uma_memory_provider_handle_t *providers,
                                     size_t numProviders, void *params,
-                                    void **pool);
+                                    uma_memory_pool_native_handle_t *pool);
 
     ///
     /// \brief Finalizes memory pool
     /// \param pool pool to finalize
-    void (*finalize)(void *pool);
+    void (*finalize)(uma_memory_pool_native_handle_t pool);
 
     /// Refer to memory_pool.h for description of those functions
-    void *(*malloc)(void *pool, size_t size);
-    void *(*calloc)(void *pool, size_t num, size_t size);
-    void *(*realloc)(void *pool, void *ptr, size_t size);
-    void *(*aligned_malloc)(void *pool, size_t size, size_t alignment);
-    size_t (*malloc_usable_size)(void *pool, void *ptr);
-    void (*free)(void *pool, void *);
-    enum uma_result_t (*get_last_result)(void *pool, const char **ppMessage);
+    void *(*malloc)(uma_memory_pool_native_handle_t pool, size_t size);
+    void *(*calloc)(uma_memory_pool_native_handle_t pool, size_t num,
+                    size_t size);
+    void *(*realloc)(uma_memory_pool_native_handle_t pool, void *ptr,
+                     size_t size);
+    void *(*aligned_malloc)(uma_memory_pool_native_handle_t pool, size_t size,
+                            size_t alignment);
+    size_t (*malloc_usable_size)(uma_memory_pool_native_handle_t pool,
+                                 void *ptr);
+    void (*free)(uma_memory_pool_native_handle_t pool, void *);
+    enum uma_result_t (*get_last_result)(uma_memory_pool_native_handle_t pool,
+                                         const char **ppMessage);
 };
 
 #ifdef __cplusplus

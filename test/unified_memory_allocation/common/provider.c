@@ -10,16 +10,19 @@
 #include <assert.h>
 #include <stdlib.h>
 
-static enum uma_result_t nullInitialize(void *params, void **pool) {
+static enum uma_result_t
+nullInitialize(void *params, uma_memory_provider_native_handle_t *provider) {
     (void)params;
-    *pool = NULL;
+    *provider = NULL;
     return UMA_RESULT_SUCCESS;
 }
 
-static void nullFinalize(void *pool) { (void)pool; }
+static void nullFinalize(uma_memory_provider_native_handle_t pool) {
+    (void)pool;
+}
 
-static enum uma_result_t nullAlloc(void *provider, size_t size,
-                                   size_t alignment, void **ptr) {
+static enum uma_result_t nullAlloc(uma_memory_provider_native_handle_t provider,
+                                   size_t size, size_t alignment, void **ptr) {
     (void)provider;
     (void)size;
     (void)alignment;
@@ -27,45 +30,53 @@ static enum uma_result_t nullAlloc(void *provider, size_t size,
     return UMA_RESULT_SUCCESS;
 }
 
-static enum uma_result_t nullFree(void *provider, void *ptr, size_t size) {
+static enum uma_result_t nullFree(uma_memory_provider_native_handle_t provider,
+                                  void *ptr, size_t size) {
     (void)provider;
     (void)ptr;
     (void)size;
     return UMA_RESULT_SUCCESS;
 }
 
-static enum uma_result_t nullGetLastResult(void *provider, const char **ppMsg) {
+static enum uma_result_t
+nullGetLastResult(uma_memory_provider_native_handle_t provider,
+                  const char **ppMsg) {
     (void)provider;
     (void)ppMsg;
     return UMA_RESULT_SUCCESS;
 }
 
-static enum uma_result_t nullGetRecommendedPageSize(void *provider, size_t size,
-                                                    size_t *pageSize) {
+static enum uma_result_t
+nullGetRecommendedPageSize(uma_memory_provider_native_handle_t provider,
+                           size_t size, size_t *pageSize) {
     (void)provider;
     (void)size;
     (void)pageSize;
     return UMA_RESULT_SUCCESS;
 }
 
-static enum uma_result_t nullGetPageSize(void *provider, void *ptr,
+static enum uma_result_t
+nullGetPageSize(uma_memory_provider_native_handle_t provider, void *ptr,
 
-                                         size_t *pageSize) {
+                size_t *pageSize) {
     (void)provider;
     (void)ptr;
     (void)pageSize;
     return UMA_RESULT_SUCCESS;
 }
 
-static enum uma_result_t nullPurgeLazy(void *provider, void *ptr, size_t size) {
+static enum uma_result_t
+nullPurgeLazy(uma_memory_provider_native_handle_t provider, void *ptr,
+              size_t size) {
     (void)provider;
     (void)ptr;
     (void)size;
     return UMA_RESULT_SUCCESS;
 }
 
-static enum uma_result_t nullPurgeForce(void *provider, void *ptr,
-                                        size_t size) {
+static enum uma_result_t
+nullPurgeForce(uma_memory_provider_native_handle_t provider, void *ptr,
+               size_t size) {
     (void)provider;
     (void)ptr;
     (void)size;
@@ -98,19 +109,23 @@ struct traceParams {
     void (*trace)(const char *);
 };
 
-static enum uma_result_t traceInitialize(void *params, void **pool) {
-    struct traceParams *tracePool =
+static enum uma_result_t
+traceInitialize(void *params, uma_memory_provider_native_handle_t *provider) {
+    struct traceParams *traceProvider =
         (struct traceParams *)malloc(sizeof(struct traceParams));
-    *tracePool = *((struct traceParams *)params);
-    *pool = tracePool;
+    *traceProvider = *((struct traceParams *)params);
+    *provider = (uma_memory_provider_native_handle_t)traceProvider;
 
     return UMA_RESULT_SUCCESS;
 }
 
-static void traceFinalize(void *pool) { free(pool); }
+static void traceFinalize(uma_memory_provider_native_handle_t provider) {
+    free(provider);
+}
 
-static enum uma_result_t traceAlloc(void *provider, size_t size,
-                                    size_t alignment, void **ptr) {
+static enum uma_result_t
+traceAlloc(uma_memory_provider_native_handle_t provider, size_t size,
+           size_t alignment, void **ptr) {
     struct traceParams *traceProvider = (struct traceParams *)provider;
 
     traceProvider->trace("alloc");
@@ -118,15 +133,17 @@ static enum uma_result_t traceAlloc(void *provider, size_t size,
                                   alignment, ptr);
 }
 
-static enum uma_result_t traceFree(void *provider, void *ptr, size_t size) {
+static enum uma_result_t traceFree(uma_memory_provider_native_handle_t provider,
+                                   void *ptr, size_t size) {
     struct traceParams *traceProvider = (struct traceParams *)provider;
 
     traceProvider->trace("free");
     return umaMemoryProviderFree(traceProvider->hUpstreamProvider, ptr, size);
 }
 
-static enum uma_result_t traceGetLastResult(void *provider,
-                                            const char **ppMsg) {
+static enum uma_result_t
+traceGetLastResult(uma_memory_provider_native_handle_t provider,
+                   const char **ppMsg) {
     struct traceParams *traceProvider = (struct traceParams *)provider;
 
     traceProvider->trace("get_last_result");
@@ -135,7 +152,8 @@ static enum uma_result_t traceGetLastResult(void *provider,
 }
 
 static enum uma_result_t
-traceGetRecommendedPageSize(void *provider, size_t size, size_t *pageSize) {
+traceGetRecommendedPageSize(uma_memory_provider_native_handle_t provider,
+                            size_t size, size_t *pageSize) {
     struct traceParams *traceProvider = (struct traceParams *)provider;
 
     traceProvider->trace("get_recommended_page_size");
@@ -143,9 +161,10 @@ traceGetRecommendedPageSize(void *provider, size_t size, size_t *pageSize) {
         traceProvider->hUpstreamProvider, size, pageSize);
 }
 
-static enum uma_result_t traceGetPageSize(void *provider, void *ptr,
+static enum uma_result_t
+traceGetPageSize(uma_memory_provider_native_handle_t provider, void *ptr,
 
-                                          size_t *pageSize) {
+                 size_t *pageSize) {
     struct traceParams *traceProvider = (struct traceParams *)provider;
 
     traceProvider->trace("get_min_page_size");
@@ -153,8 +172,9 @@ static enum uma_result_t traceGetPageSize(void *provider, void *ptr,
                                            ptr, pageSize);
 }
 
-static enum uma_result_t tracePurgeLazy(void *provider, void *ptr,
-                                        size_t size) {
+static enum uma_result_t
+tracePurgeLazy(uma_memory_provider_native_handle_t provider, void *ptr,
+               size_t size) {
     struct traceParams *traceProvider = (struct traceParams *)provider;
 
     traceProvider->trace("purge_lazy");
@@ -162,8 +182,9 @@ static enum uma_result_t tracePurgeLazy(void *provider, void *ptr,
                                       size);
 }
 
-static enum uma_result_t tracePurgeForce(void *provider, void *ptr,
-                                         size_t size) {
+static enum uma_result_t
+tracePurgeForce(uma_memory_provider_native_handle_t provider, void *ptr,
+                size_t size) {
     struct traceParams *traceProvider = (struct traceParams *)provider;
 
     traceProvider->trace("purge_force");

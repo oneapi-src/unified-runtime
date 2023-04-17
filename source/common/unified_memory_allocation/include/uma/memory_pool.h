@@ -12,13 +12,14 @@
 #define UMA_MEMORY_POOL_H 1
 
 #include <uma/base.h>
+#include <uma/memory_pool_ops.h>
 #include <uma/memory_provider.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct uma_memory_pool_t *uma_memory_pool_handle_t;
+typedef struct uma_memory_pool_handle_t_ *uma_memory_pool_handle_t;
 
 struct uma_memory_pool_ops_t;
 
@@ -145,6 +146,11 @@ enum uma_result_t
 umaPoolGetMemoryProviders(uma_memory_pool_handle_t hPool, size_t numProviders,
                           uma_memory_provider_handle_t *hProviders,
                           size_t *numProvidersRet);
+
+/// \brief Retrive native handle to the memory pool. This is the handle returned from
+///        uma_memory_pool_ops_t::initialize()
+uma_memory_pool_native_handle_t
+umaPoolGetNativeHandle(uma_memory_pool_handle_t hPool);
 
 #ifdef __cplusplus
 }

@@ -18,7 +18,7 @@
 extern "C" {
 #endif
 
-typedef struct uma_memory_provider_t *uma_memory_provider_handle_t;
+typedef struct uma_memory_provider_handle_t_ *uma_memory_provider_handle_t;
 
 ///
 /// \brief Creates new memory provider.
@@ -131,6 +131,11 @@ umaMemoryProviderPurgeLazy(uma_memory_provider_handle_t hProvider, void *ptr,
 enum uma_result_t
 umaMemoryProviderPurgeForce(uma_memory_provider_handle_t hProvider, void *ptr,
                             size_t size);
+
+/// \brief Retrive native handle to the memory provider. This is the handle returned from
+///        uma_memory_provider_ops_t::initialize()
+uma_memory_provider_native_handle_t
+umaProviderGetNativeHandle(uma_memory_provider_handle_t hProvider);
 
 #ifdef __cplusplus
 }

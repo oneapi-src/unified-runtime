@@ -94,32 +94,25 @@ void *umaMemoryTrackerGetPool(uma_memory_tracker_handle_t hTracker,
     return hTracker->find(ptr);
 }
 
-struct uma_tracking_memory_provider_t {
+struct uma_memory_provider_t {
     uma_memory_provider_handle_t hUpstream;
     uma_memory_tracker_handle_t hTracker;
     uma_memory_pool_handle_t pool;
 };
 
-typedef struct uma_tracking_memory_provider_t uma_tracking_memory_provider_t;
-
-static enum uma_result_t trackingAlloc(void *hProvider, size_t size,
-                                       size_t alignment, void **ptr) {
-    uma_tracking_memory_provider_t *p =
-        (uma_tracking_memory_provider_t *)hProvider;
+static enum uma_result_t
+trackingAlloc(uma_memory_provider_native_handle_t hProvider, size_t size,
+              size_t alignment, void **ptr) {
     enum uma_result_t ret = UMA_RESULT_SUCCESS;
 
-    if (!p->hUpstream) {
-        return UMA_RESULT_ERROR_INVALID_ARGUMENT;
-    }
-
-    ret = umaMemoryProviderAlloc(p->hUpstream, size, alignment, ptr);
+    ret = umaMemoryProviderAlloc(hProvider->hUpstream, size, alignment, ptr);
     if (ret != UMA_RESULT_SUCCESS) {
         return ret;
     }
 
-    ret = umaMemoryTrackerAdd(p->hTracker, p->pool, *ptr, size);
-    if (ret != UMA_RESULT_SUCCESS && p->hUpstream) {
-        if (umaMemoryProviderFree(p->hUpstream, *ptr, size)) {
+    ret = umaMemoryTrackerAdd(hProvider->hTracker, hProvider->pool, *ptr, size);
+    if (ret != UMA_RESULT_SUCCESS && hProvider->hUpstream) {
+        if (umaMemoryProviderFree(hProvider->hUpstream, *ptr, size)) {
             // TODO: LOG
         }
     }
@@ -127,24 +120,24 @@ static enum uma_result_t trackingAlloc(void *hProvider, size_t size,
     return ret;
 }
 
-static enum uma_result_t trackingFree(void *hProvider, void *ptr, size_t size) {
+static enum uma_result_t
+trackingFree(uma_memory_provider_native_handle_t hProvider, void *ptr,
+             size_t size) {
     enum uma_result_t ret;
-    uma_tracking_memory_provider_t *p =
-        (uma_tracking_memory_provider_t *)hProvider;
 
     // umaMemoryTrackerRemove should be called before umaMemoryProviderFree
     // to avoid a race condition. If the order would be different, other thread
     // could allocate the memory at address `ptr` before a call to umaMemoryTrackerRemove
     // resulting in inconsistent state.
-    ret = umaMemoryTrackerRemove(p->hTracker, ptr, size);
+    ret = umaMemoryTrackerRemove(hProvider->hTracker, ptr, size);
     if (ret != UMA_RESULT_SUCCESS) {
         return ret;
     }
 
-    ret = umaMemoryProviderFree(p->hUpstream, ptr, size);
+    ret = umaMemoryProviderFree(hProvider->hUpstream, ptr, size);
     if (ret != UMA_RESULT_SUCCESS) {
-        if (umaMemoryTrackerAdd(p->hTracker, p->pool, ptr, size) !=
-            UMA_RESULT_SUCCESS) {
+        if (umaMemoryTrackerAdd(hProvider->hTracker, hProvider->pool, ptr,
+                                size) != UMA_RESULT_SUCCESS) {
             // TODO: LOG
         }
         return ret;
@@ -153,61 +146,58 @@ static enum uma_result_t trackingFree(void *hProvider, void *ptr, size_t size) {
     return ret;
 }
 
-static enum uma_result_t trackingInitialize(void *params, void **ret) {
-    uma_tracking_memory_provider_t *provider =
-        (uma_tracking_memory_provider_t *)malloc(
-            sizeof(uma_tracking_memory_provider_t));
+static enum uma_result_t
+trackingInitialize(void *params, uma_memory_provider_native_handle_t *ret) {
+    uma_memory_provider_native_handle_t provider =
+        (uma_memory_provider_t *)malloc(sizeof(uma_memory_provider_t));
     if (!provider) {
         return UMA_RESULT_ERROR_OUT_OF_HOST_MEMORY;
     }
 
-    *provider = *((uma_tracking_memory_provider_t *)params);
+    *provider = *((uma_memory_provider_t *)params);
     *ret = provider;
     return UMA_RESULT_SUCCESS;
 }
 
-static void trackingFinalize(void *provider) { free(provider); }
-
-static enum uma_result_t trackingGetLastResult(void *provider,
-                                               const char **msg) {
-    uma_tracking_memory_provider_t *p =
-        (uma_tracking_memory_provider_t *)provider;
-    return umaMemoryProviderGetLastResult(p->hUpstream, msg);
+static void trackingFinalize(uma_memory_provider_native_handle_t provider) {
+    free(provider);
 }
 
 static enum uma_result_t
-trackingGetRecommendedPageSize(void *provider, size_t size, size_t *pageSize) {
-    uma_tracking_memory_provider_t *p =
-        (uma_tracking_memory_provider_t *)provider;
-    return umaMemoryProviderGetRecommendedPageSize(p->hUpstream, size,
+trackingGetLastResult(uma_memory_provider_native_handle_t hProvider,
+                      const char **msg) {
+    return umaMemoryProviderGetLastResult(hProvider->hUpstream, msg);
+}
+
+static enum uma_result_t
+trackingGetRecommendedPageSize(uma_memory_provider_native_handle_t hProvider,
+                               size_t size, size_t *pageSize) {
+    return umaMemoryProviderGetRecommendedPageSize(hProvider->hUpstream, size,
                                                    pageSize);
 }
 
-static enum uma_result_t trackingGetMinPageSize(void *provider, void *ptr,
-                                                size_t *pageSize) {
-    uma_tracking_memory_provider_t *p =
-        (uma_tracking_memory_provider_t *)provider;
-    return umaMemoryProviderGetMinPageSize(p->hUpstream, ptr, pageSize);
+static enum uma_result_t
+trackingGetMinPageSize(uma_memory_provider_native_handle_t hProvider, void *ptr,
+                       size_t *pageSize) {
+    return umaMemoryProviderGetMinPageSize(hProvider->hUpstream, ptr, pageSize);
 }
 
-static enum uma_result_t trackingPurgeLazy(void *provider, void *ptr,
-                                           size_t size) {
-    uma_tracking_memory_provider_t *p =
-        (uma_tracking_memory_provider_t *)provider;
-    return umaMemoryProviderPurgeLazy(p->hUpstream, ptr, size);
+static enum uma_result_t
+trackingPurgeLazy(uma_memory_provider_native_handle_t hProvider, void *ptr,
+                  size_t size) {
+    return umaMemoryProviderPurgeLazy(hProvider->hUpstream, ptr, size);
 }
 
-static enum uma_result_t trackingPurgeForce(void *provider, void *ptr,
-                                            size_t size) {
-    uma_tracking_memory_provider_t *p =
-        (uma_tracking_memory_provider_t *)provider;
-    return umaMemoryProviderPurgeForce(p->hUpstream, ptr, size);
+static enum uma_result_t
+trackingPurgeForce(uma_memory_provider_native_handle_t hProvider, void *ptr,
+                   size_t size) {
+    return umaMemoryProviderPurgeForce(hProvider->hUpstream, ptr, size);
 }
 
 enum uma_result_t umaTrackingMemoryProviderCreate(
     uma_memory_provider_handle_t hUpstream, uma_memory_pool_handle_t hPool,
     uma_memory_provider_handle_t *hTrackingProvider) {
-    uma_tracking_memory_provider_t params;
+    uma_memory_provider_t params;
     params.hUpstream = hUpstream;
     params.hTracker = umaMemoryTrackerGet();
     params.pool = hPool;
@@ -230,11 +220,9 @@ enum uma_result_t umaTrackingMemoryProviderCreate(
 }
 
 void umaTrackingMemoryProviderGetUpstreamProvider(
-    uma_memory_provider_handle_t hTrackingProvider,
+    uma_memory_provider_native_handle_t hTrackingProvider,
     uma_memory_provider_handle_t *hUpstream) {
     assert(hUpstream);
-    uma_tracking_memory_provider_t *p =
-        (uma_tracking_memory_provider_t *)hTrackingProvider;
-    *hUpstream = p->hUpstream;
+    *hUpstream = hTrackingProvider->hUpstream;
 }
 }

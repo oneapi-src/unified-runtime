@@ -8,7 +8,6 @@
  *
  */
 
-#include "memory_provider_internal.h"
 #include "memory_tracker.h"
 
 #include <uma/memory_pool.h>
@@ -17,8 +16,8 @@
 #include <assert.h>
 #include <stdlib.h>
 
-struct uma_memory_pool_t {
-    void *pool_priv;
+struct uma_memory_pool_handle_t_ {
+    uma_memory_pool_native_handle_t native_handle;
     struct uma_memory_pool_ops_t ops;
 
     // Holds array of memory providers. All providers are wrapped
@@ -47,7 +46,8 @@ enum uma_result_t umaPoolCreate(struct uma_memory_pool_ops_t *ops,
     }
 
     enum uma_result_t ret = UMA_RESULT_SUCCESS;
-    uma_memory_pool_handle_t pool = malloc(sizeof(struct uma_memory_pool_t));
+    uma_memory_pool_handle_t pool =
+        malloc(sizeof(struct uma_memory_pool_handle_t_));
     if (!pool) {
         return UMA_RESULT_ERROR_OUT_OF_HOST_MEMORY;
     }
@@ -75,7 +75,7 @@ enum uma_result_t umaPoolCreate(struct uma_memory_pool_ops_t *ops,
 
     pool->ops = *ops;
     ret = ops->initialize(pool->providers, pool->numProviders, params,
-                          &pool->pool_priv);
+                          &pool->native_handle);
     if (ret != UMA_RESULT_SUCCESS) {
         goto err_pool_init;
     }
@@ -93,34 +93,34 @@ err_providers_alloc:
 }
 
 void umaPoolDestroy(uma_memory_pool_handle_t hPool) {
-    hPool->ops.finalize(hPool->pool_priv);
+    hPool->ops.finalize(hPool->native_handle);
     destroyMemoryProviderWrappers(hPool->providers, hPool->numProviders);
     free(hPool);
 }
 
 void *umaPoolMalloc(uma_memory_pool_handle_t hPool, size_t size) {
-    return hPool->ops.malloc(hPool->pool_priv, size);
+    return hPool->ops.malloc(hPool->native_handle, size);
 }
 
 void *umaPoolAlignedMalloc(uma_memory_pool_handle_t hPool, size_t size,
                            size_t alignment) {
-    return hPool->ops.aligned_malloc(hPool->pool_priv, size, alignment);
+    return hPool->ops.aligned_malloc(hPool->native_handle, size, alignment);
 }
 
 void *umaPoolCalloc(uma_memory_pool_handle_t hPool, size_t num, size_t size) {
-    return hPool->ops.calloc(hPool->pool_priv, num, size);
+    return hPool->ops.calloc(hPool->native_handle, num, size);
 }
 
 void *umaPoolRealloc(uma_memory_pool_handle_t hPool, void *ptr, size_t size) {
-    return hPool->ops.realloc(hPool->pool_priv, ptr, size);
+    return hPool->ops.realloc(hPool->native_handle, ptr, size);
 }
 
 size_t umaPoolMallocUsableSize(uma_memory_pool_handle_t hPool, void *ptr) {
-    return hPool->ops.malloc_usable_size(hPool->pool_priv, ptr);
+    return hPool->ops.malloc_usable_size(hPool->native_handle, ptr);
 }
 
 void umaPoolFree(uma_memory_pool_handle_t hPool, void *ptr) {
-    hPool->ops.free(hPool->pool_priv, ptr);
+    hPool->ops.free(hPool->native_handle, ptr);
 }
 
 void umaFree(void *ptr) {
@@ -132,7 +132,7 @@ void umaFree(void *ptr) {
 
 enum uma_result_t umaPoolGetLastResult(uma_memory_pool_handle_t hPool,
                                        const char **ppMessage) {
-    return hPool->ops.get_last_result(hPool->pool_priv, ppMessage);
+    return hPool->ops.get_last_result(hPool->native_handle, ppMessage);
 }
 
 uma_memory_pool_handle_t umaPoolByPtr(const void *ptr) {
@@ -154,9 +154,15 @@ umaPoolGetMemoryProviders(uma_memory_pool_handle_t hPool, size_t numProviders,
     if (hProviders) {
         for (size_t i = 0; i < hPool->numProviders; i++) {
             umaTrackingMemoryProviderGetUpstreamProvider(
-                umaMemoryProviderGetPriv(hPool->providers[i]), hProviders + i);
+                umaProviderGetNativeHandle(hPool->providers[i]),
+                hProviders + i);
         }
     }
 
     return UMA_RESULT_SUCCESS;
+}
+
+uma_memory_pool_native_handle_t
+umaPoolGetNativeHandle(uma_memory_pool_handle_t hPool) {
+    return hPool->native_handle;
 }

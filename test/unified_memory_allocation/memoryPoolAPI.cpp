@@ -136,6 +136,23 @@ TEST_F(test, retrieveMemoryProviders) {
     ASSERT_EQ(retProviders, providers);
 }
 
+TEST_F(test, memoryPoolGetNative) {
+    static void *poolNativeHandle = nullptr;
+    struct pool : public uma_test::pool_base {
+        uma_result_t initialize(uma_memory_provider_handle_t *,
+                                size_t) noexcept {
+            poolNativeHandle = this;
+            return UMA_RESULT_SUCCESS;
+        }
+    };
+
+    auto provider = nullProviderCreate();
+    auto ret = uma::poolMakeUnique<pool>(&provider, 1);
+    ASSERT_EQ(ret.first, UMA_RESULT_SUCCESS);
+
+    ASSERT_EQ(poolNativeHandle, umaPoolGetNativeHandle(ret.second.get()));
+}
+
 template <typename Pool>
 static auto
 makePool(std::function<uma::provider_unique_handle_t()> makeProvider) {

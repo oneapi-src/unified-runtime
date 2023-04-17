@@ -25,10 +25,10 @@
 namespace uma {
 
 using pool_unique_handle_t =
-    std::unique_ptr<uma_memory_pool_t,
+    std::unique_ptr<uma_memory_pool_handle_t_,
                     std::function<void(uma_memory_pool_handle_t)>>;
 using provider_unique_handle_t =
-    std::unique_ptr<uma_memory_provider_t,
+    std::unique_ptr<uma_memory_provider_handle_t_,
                     std::function<void(uma_memory_provider_handle_t)>>;
 
 /// @brief creates UMA memory provider based on given T type.
@@ -45,10 +45,11 @@ auto memoryProviderMakeUnique(Args &&...args) {
         noexcept(std::declval<T>().initialize(std::forward<Args>(args)...)));
 
     ops.version = UMA_VERSION_CURRENT;
-    ops.initialize = [](void *params, void **obj) {
+    ops.initialize = [](void *params,
+                        uma_memory_provider_native_handle_t *obj) {
         auto *tuple = reinterpret_cast<decltype(argsTuple) *>(params);
         auto provider = new T;
-        *obj = provider;
+        *obj = reinterpret_cast<uma_memory_provider_native_handle_t>(provider);
         auto ret = std::apply(
             &T::initialize, std::tuple_cat(std::make_tuple(provider), *tuple));
         if (ret != UMA_RESULT_SUCCESS) {
@@ -56,36 +57,42 @@ auto memoryProviderMakeUnique(Args &&...args) {
         }
         return ret;
     };
-    ops.finalize = [](void *obj) { delete reinterpret_cast<T *>(obj); };
-    ops.alloc = [](void *obj, auto... args) {
+    ops.finalize = [](uma_memory_provider_native_handle_t obj) {
+        delete reinterpret_cast<T *>(obj);
+    };
+    ops.alloc = [](uma_memory_provider_native_handle_t obj, auto... args) {
         static_assert(noexcept(reinterpret_cast<T *>(obj)->alloc(args...)));
         return reinterpret_cast<T *>(obj)->alloc(args...);
     };
-    ops.free = [](void *obj, auto... args) {
+    ops.free = [](uma_memory_provider_native_handle_t obj, auto... args) {
         static_assert(noexcept(reinterpret_cast<T *>(obj)->free(args...)));
         return reinterpret_cast<T *>(obj)->free(args...);
     };
-    ops.get_last_result = [](void *obj, auto... args) {
+    ops.get_last_result = [](uma_memory_provider_native_handle_t obj,
+                             auto... args) {
         static_assert(
             noexcept(reinterpret_cast<T *>(obj)->get_last_result(args...)));
         return reinterpret_cast<T *>(obj)->get_last_result(args...);
     };
-    ops.get_recommended_page_size = [](void *obj, auto... args) {
+    ops.get_recommended_page_size = [](uma_memory_provider_native_handle_t obj,
+                                       auto... args) {
         static_assert(noexcept(
             reinterpret_cast<T *>(obj)->get_recommended_page_size(args...)));
         return reinterpret_cast<T *>(obj)->get_recommended_page_size(args...);
     };
-    ops.get_min_page_size = [](void *obj, auto... args) {
+    ops.get_min_page_size = [](uma_memory_provider_native_handle_t obj,
+                               auto... args) {
         static_assert(
             noexcept(reinterpret_cast<T *>(obj)->get_min_page_size(args...)));
         return reinterpret_cast<T *>(obj)->get_min_page_size(args...);
     };
-    ops.purge_lazy = [](void *obj, auto... args) {
+    ops.purge_lazy = [](uma_memory_provider_native_handle_t obj, auto... args) {
         static_assert(
             noexcept(reinterpret_cast<T *>(obj)->purge_lazy(args...)));
         return reinterpret_cast<T *>(obj)->purge_lazy(args...);
     };
-    ops.purge_force = [](void *obj, auto... args) {
+    ops.purge_force = [](uma_memory_provider_native_handle_t obj,
+                         auto... args) {
         static_assert(
             noexcept(reinterpret_cast<T *>(obj)->purge_force(args...)));
         return reinterpret_cast<T *>(obj)->purge_force(args...);
@@ -113,10 +120,11 @@ auto poolMakeUnique(uma_memory_provider_handle_t *providers,
 
     ops.version = UMA_VERSION_CURRENT;
     ops.initialize = [](uma_memory_provider_handle_t *providers,
-                        size_t numProviders, void *params, void **obj) {
+                        size_t numProviders, void *params,
+                        uma_memory_pool_native_handle_t *obj) {
         auto *tuple = reinterpret_cast<decltype(argsTuple) *>(params);
         auto pool = new T;
-        *obj = pool;
+        *obj = reinterpret_cast<uma_memory_pool_native_handle_t>(pool);
         auto ret = std::apply(
             &T::initialize,
             std::tuple_cat(std::make_tuple(pool, providers, numProviders),
@@ -126,34 +134,38 @@ auto poolMakeUnique(uma_memory_provider_handle_t *providers,
         }
         return ret;
     };
-    ops.finalize = [](void *obj) { delete reinterpret_cast<T *>(obj); };
-    ops.malloc = [](void *obj, auto... args) {
+    ops.finalize = [](uma_memory_pool_native_handle_t obj) {
+        delete reinterpret_cast<T *>(obj);
+    };
+    ops.malloc = [](uma_memory_pool_native_handle_t obj, auto... args) {
         static_assert(noexcept(reinterpret_cast<T *>(obj)->malloc(args...)));
         return reinterpret_cast<T *>(obj)->malloc(args...);
     };
-    ops.calloc = [](void *obj, auto... args) {
+    ops.calloc = [](uma_memory_pool_native_handle_t obj, auto... args) {
         static_assert(noexcept(reinterpret_cast<T *>(obj)->calloc(args...)));
         return reinterpret_cast<T *>(obj)->calloc(args...);
     };
-    ops.aligned_malloc = [](void *obj, auto... args) {
+    ops.aligned_malloc = [](uma_memory_pool_native_handle_t obj, auto... args) {
         static_assert(
             noexcept(reinterpret_cast<T *>(obj)->aligned_malloc(args...)));
         return reinterpret_cast<T *>(obj)->aligned_malloc(args...);
     };
-    ops.realloc = [](void *obj, auto... args) {
+    ops.realloc = [](uma_memory_pool_native_handle_t obj, auto... args) {
         static_assert(noexcept(reinterpret_cast<T *>(obj)->realloc(args...)));
         return reinterpret_cast<T *>(obj)->realloc(args...);
     };
-    ops.malloc_usable_size = [](void *obj, auto... args) {
+    ops.malloc_usable_size = [](uma_memory_pool_native_handle_t obj,
+                                auto... args) {
         static_assert(
             noexcept(reinterpret_cast<T *>(obj)->malloc_usable_size(args...)));
         return reinterpret_cast<T *>(obj)->malloc_usable_size(args...);
     };
-    ops.free = [](void *obj, auto... args) {
+    ops.free = [](uma_memory_pool_native_handle_t obj, auto... args) {
         static_assert(noexcept(reinterpret_cast<T *>(obj)->free(args...)));
         reinterpret_cast<T *>(obj)->free(args...);
     };
-    ops.get_last_result = [](void *obj, auto... args) {
+    ops.get_last_result = [](uma_memory_pool_native_handle_t obj,
+                             auto... args) {
         static_assert(
             noexcept(reinterpret_cast<T *>(obj)->get_last_result(args...)));
         return reinterpret_cast<T *>(obj)->get_last_result(args...);

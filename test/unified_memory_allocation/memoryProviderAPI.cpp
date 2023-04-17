@@ -61,6 +61,23 @@ TEST_F(test, memoryProviderTrace) {
     ASSERT_EQ(calls.size(), ++call_count);
 }
 
+TEST_F(test, memoryProviderGetNative) {
+    static uma_memory_provider_native_handle_t providerNativeHandle = nullptr;
+    struct provider : public uma_test::provider_base {
+        uma_result_t initialize() noexcept {
+            providerNativeHandle =
+                reinterpret_cast<uma_memory_provider_native_handle_t>(this);
+            return UMA_RESULT_SUCCESS;
+        }
+    };
+
+    auto ret = uma::memoryProviderMakeUnique<provider>();
+    ASSERT_EQ(ret.first, UMA_RESULT_SUCCESS);
+
+    ASSERT_EQ(providerNativeHandle,
+              umaProviderGetNativeHandle(ret.second.get()));
+}
+
 //////////////////////////// Negative test cases
 ///////////////////////////////////
 
