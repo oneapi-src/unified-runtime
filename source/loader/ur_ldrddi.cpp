@@ -331,6 +331,38 @@ __urdlllocal ur_result_t UR_APICALL urGetLastResult(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urPlatformGetExtensionProperties
+__urdlllocal ur_result_t UR_APICALL urPlatformGetExtensionProperties(
+    ur_platform_handle_t hPlatform, ///< [in] handle to the platform.
+    uint32_t count, ///< [in] number of extension properties to fetch.
+    ur_extension_properties_t *
+        pExtensionProperties, ///< [out][optional] array of supported extension.
+    uint32_t *
+        pCountRet ///< [out][optional] will be updated with the total count of supported
+                  ///< extensions.
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // extract platform's function pointer table
+    auto dditable =
+        reinterpret_cast<ur_platform_object_t *>(hPlatform)->dditable;
+    auto pfnGetExtensionProperties =
+        dditable->ur.Platform.pfnGetExtensionProperties;
+    if (nullptr == pfnGetExtensionProperties) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    hPlatform = reinterpret_cast<ur_platform_object_t *>(hPlatform)->handle;
+
+    // forward to device-platform
+    result = pfnGetExtensionProperties(hPlatform, count, pExtensionProperties,
+                                       pCountRet);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urDeviceGet
 __urdlllocal ur_result_t UR_APICALL urDeviceGet(
     ur_platform_handle_t hPlatform, ///< [in] handle of the platform instance
@@ -5240,6 +5272,8 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetPlatformProcAddrTable(
             pDdiTable->pfnGetApiVersion = ur_loader::urPlatformGetApiVersion;
             pDdiTable->pfnGetBackendOption =
                 ur_loader::urPlatformGetBackendOption;
+            pDdiTable->pfnGetExtensionProperties =
+                ur_loader::urPlatformGetExtensionProperties;
         } else {
             // return pointers directly to platform's DDIs
             *pDdiTable =

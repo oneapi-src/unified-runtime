@@ -242,3 +242,40 @@ etors:
     - name: HIP
       value: "4"
       desc: "The backend is HIP"
+--- #--------------------------------------------------------------------------
+type: macro
+desc: "Extension name maximum length."
+name: $X_MAX_EXTENSION_NAME_LENGTH
+value: "256"
+--- #--------------------------------------------------------------------------
+type: struct
+desc: "Extension properties."
+name: $x_extension_properties_t
+base: $x_base_properties_t
+class: $xPlatform
+members:
+    - type: char
+      name: name[$X_MAX_EXTENSION_NAME_LENGTH]
+      desc: "[in] null-terminated extension name."
+    - type: uint32_t
+      name: version
+      desc: "[in] version of the extension using $X_MAKE_VERSION."
+--- #--------------------------------------------------------------------------
+type: function
+desc: "Retrieve the set of supported extensions."
+class: $xPlatform
+name: GetExtensionProperties
+decl: static
+params:
+    - type: $x_platform_handle_t
+      name: hPlatform
+      desc: "[in] handle to the platform."
+    - type: uint32_t
+      name: count
+      desc: "[in] number of extension properties to fetch."
+    - type: $x_extension_properties_t*
+      name: pExtensionProperties
+      desc: "[out][optional] array of supported extension."
+    - type: uint32_t*
+      name: pCountRet
+      desc: "[out][optional] will be updated with the total count of supported extensions."

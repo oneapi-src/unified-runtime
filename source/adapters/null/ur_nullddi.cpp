@@ -219,6 +219,32 @@ __urdlllocal ur_result_t UR_APICALL urGetLastResult(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urPlatformGetExtensionProperties
+__urdlllocal ur_result_t UR_APICALL urPlatformGetExtensionProperties(
+    ur_platform_handle_t hPlatform, ///< [in] handle to the platform.
+    uint32_t count, ///< [in] number of extension properties to fetch.
+    ur_extension_properties_t *
+        pExtensionProperties, ///< [out][optional] array of supported extension.
+    uint32_t *
+        pCountRet ///< [out][optional] will be updated with the total count of supported
+                  ///< extensions.
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // if the driver has created a custom function, then call it instead of using the generic path
+    auto pfnGetExtensionProperties =
+        d_context.urDdiTable.Platform.pfnGetExtensionProperties;
+    if (nullptr != pfnGetExtensionProperties) {
+        result = pfnGetExtensionProperties(hPlatform, count,
+                                           pExtensionProperties, pCountRet);
+    } else {
+        // generic implementation
+    }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urDeviceGet
 __urdlllocal ur_result_t UR_APICALL urDeviceGet(
     ur_platform_handle_t hPlatform, ///< [in] handle of the platform instance
@@ -3439,6 +3465,9 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetPlatformProcAddrTable(
     pDdiTable->pfnGetApiVersion = driver::urPlatformGetApiVersion;
 
     pDdiTable->pfnGetBackendOption = driver::urPlatformGetBackendOption;
+
+    pDdiTable->pfnGetExtensionProperties =
+        driver::urPlatformGetExtensionProperties;
 
     return result;
 }

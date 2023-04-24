@@ -269,6 +269,40 @@ __urdlllocal ur_result_t UR_APICALL urGetLastResult(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urPlatformGetExtensionProperties
+__urdlllocal ur_result_t UR_APICALL urPlatformGetExtensionProperties(
+    ur_platform_handle_t hPlatform, ///< [in] handle to the platform.
+    uint32_t count, ///< [in] number of extension properties to fetch.
+    ur_extension_properties_t *
+        pExtensionProperties, ///< [out][optional] array of supported extension.
+    uint32_t *
+        pCountRet ///< [out][optional] will be updated with the total count of supported
+                  ///< extensions.
+) {
+    auto pfnGetExtensionProperties =
+        context.urDdiTable.Platform.pfnGetExtensionProperties;
+
+    if (nullptr == pfnGetExtensionProperties) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    ur_platform_get_extension_properties_params_t params = {
+        &hPlatform, &count, &pExtensionProperties, &pCountRet};
+    uint64_t instance =
+        context.notify_begin(UR_FUNCTION_PLATFORM_GET_EXTENSION_PROPERTIES,
+                             "urPlatformGetExtensionProperties", &params);
+
+    ur_result_t result = pfnGetExtensionProperties(
+        hPlatform, count, pExtensionProperties, pCountRet);
+
+    context.notify_end(UR_FUNCTION_PLATFORM_GET_EXTENSION_PROPERTIES,
+                       "urPlatformGetExtensionProperties", &params, &result,
+                       instance);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urDeviceGet
 __urdlllocal ur_result_t UR_APICALL urDeviceGet(
     ur_platform_handle_t hPlatform, ///< [in] handle of the platform instance
@@ -4225,6 +4259,10 @@ __urdlllocal ur_result_t UR_APICALL urGetPlatformProcAddrTable(
     dditable.pfnGetBackendOption = pDdiTable->pfnGetBackendOption;
     pDdiTable->pfnGetBackendOption =
         ur_tracing_layer::urPlatformGetBackendOption;
+
+    dditable.pfnGetExtensionProperties = pDdiTable->pfnGetExtensionProperties;
+    pDdiTable->pfnGetExtensionProperties =
+        ur_tracing_layer::urPlatformGetExtensionProperties;
 
     return result;
 }

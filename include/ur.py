@@ -324,6 +324,21 @@ class ur_platform_backend_t(c_int):
 
 
 ###############################################################################
+## @brief Extension name maximum length.
+UR_MAX_EXTENSION_NAME_LENGTH = 256
+
+###############################################################################
+## @brief Extension properties.
+class ur_extension_properties_t(Structure):
+    _fields_ = [
+        ("stype", ur_structure_type_t),                                 ## [in] type of this structure, must be
+                                                                        ## ::UR_STRUCTURE_TYPE_EXTENSION_PROPERTIES
+        ("pNext", c_void_p),                                            ## [in,out][optional] pointer to extension-specific structure
+        ("name", c_char * UR_MAX_EXTENSION_NAME_LENGTH),                ## [in] null-terminated extension name.
+        ("version", c_ulong)                                            ## [in] version of the extension using ::UR_MAKE_VERSION.
+    ]
+
+###############################################################################
 ## @brief Target identification strings for
 ##        ::ur_device_binary_t.pDeviceTargetSpec 
 ##        A device type represented by a particular target triple requires
@@ -1752,6 +1767,13 @@ if __use_win_types:
 else:
     _urPlatformGetBackendOption_t = CFUNCTYPE( ur_result_t, ur_platform_handle_t, c_char_p, POINTER(c_char_p) )
 
+###############################################################################
+## @brief Function-pointer for urPlatformGetExtensionProperties
+if __use_win_types:
+    _urPlatformGetExtensionProperties_t = WINFUNCTYPE( ur_result_t, ur_platform_handle_t, c_ulong, POINTER(ur_extension_properties_t), POINTER(c_ulong) )
+else:
+    _urPlatformGetExtensionProperties_t = CFUNCTYPE( ur_result_t, ur_platform_handle_t, c_ulong, POINTER(ur_extension_properties_t), POINTER(c_ulong) )
+
 
 ###############################################################################
 ## @brief Table of Platform functions pointers
@@ -1762,7 +1784,8 @@ class ur_platform_dditable_t(Structure):
         ("pfnGetNativeHandle", c_void_p),                               ## _urPlatformGetNativeHandle_t
         ("pfnCreateWithNativeHandle", c_void_p),                        ## _urPlatformCreateWithNativeHandle_t
         ("pfnGetApiVersion", c_void_p),                                 ## _urPlatformGetApiVersion_t
-        ("pfnGetBackendOption", c_void_p)                               ## _urPlatformGetBackendOption_t
+        ("pfnGetBackendOption", c_void_p),                              ## _urPlatformGetBackendOption_t
+        ("pfnGetExtensionProperties", c_void_p)                         ## _urPlatformGetExtensionProperties_t
     ]
 
 ###############################################################################
@@ -2761,6 +2784,7 @@ class UR_DDI:
         self.urPlatformCreateWithNativeHandle = _urPlatformCreateWithNativeHandle_t(self.__dditable.Platform.pfnCreateWithNativeHandle)
         self.urPlatformGetApiVersion = _urPlatformGetApiVersion_t(self.__dditable.Platform.pfnGetApiVersion)
         self.urPlatformGetBackendOption = _urPlatformGetBackendOption_t(self.__dditable.Platform.pfnGetBackendOption)
+        self.urPlatformGetExtensionProperties = _urPlatformGetExtensionProperties_t(self.__dditable.Platform.pfnGetExtensionProperties)
 
         # call driver to get function pointers
         Context = ur_context_dditable_t()

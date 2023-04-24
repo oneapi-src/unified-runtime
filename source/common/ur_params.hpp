@@ -134,6 +134,8 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_api_version_t value);
 inline std::ostream &operator<<(std::ostream &os,
                                 enum ur_platform_backend_t value);
 inline std::ostream &operator<<(std::ostream &os,
+                                const struct ur_extension_properties_t params);
+inline std::ostream &operator<<(std::ostream &os,
                                 const struct ur_device_binary_t params);
 inline std::ostream &operator<<(std::ostream &os, enum ur_device_type_t value);
 inline std::ostream &operator<<(std::ostream &os, enum ur_device_info_t value);
@@ -1060,6 +1062,32 @@ inline std::ostream &operator<<(std::ostream &os,
         os << "unknown enumerator";
         break;
     }
+    return os;
+}
+inline std::ostream &operator<<(std::ostream &os,
+                                const struct ur_extension_properties_t params) {
+    os << "(struct ur_extension_properties_t){";
+
+    os << ".stype = ";
+
+    os << (params.stype);
+
+    os << ", ";
+    os << ".pNext = ";
+
+    ur_params::serializeStruct(os, (params.pNext));
+
+    os << ", ";
+    os << ".name[UR_MAX_EXTENSION_NAME_LENGTH] = ";
+
+    os << (params.name[UR_MAX_EXTENSION_NAME_LENGTH]);
+
+    os << ", ";
+    os << ".version = ";
+
+    os << (params.version);
+
+    os << "}";
     return os;
 }
 inline std::ostream &operator<<(std::ostream &os,
@@ -10240,6 +10268,32 @@ operator<<(std::ostream &os,
 
 inline std::ostream &
 operator<<(std::ostream &os,
+           const struct ur_platform_get_extension_properties_params_t *params) {
+
+    os << ".hPlatform = ";
+
+    ur_params::serializePtr(os, *(params->phPlatform));
+
+    os << ", ";
+    os << ".count = ";
+
+    os << *(params->pcount);
+
+    os << ", ";
+    os << ".pExtensionProperties = ";
+
+    ur_params::serializePtr(os, *(params->ppExtensionProperties));
+
+    os << ", ";
+    os << ".pCountRet = ";
+
+    ur_params::serializePtr(os, *(params->ppCountRet));
+
+    return os;
+}
+
+inline std::ostream &
+operator<<(std::ostream &os,
            const struct ur_program_create_with_il_params_t *params) {
 
     os << ".hContext = ";
@@ -11462,6 +11516,10 @@ inline int serializeFunctionParams(std::ostream &os, uint32_t function,
     } break;
     case UR_FUNCTION_PLATFORM_GET_BACKEND_OPTION: {
         os << (const struct ur_platform_get_backend_option_params_t *)params;
+    } break;
+    case UR_FUNCTION_PLATFORM_GET_EXTENSION_PROPERTIES: {
+        os << (const struct ur_platform_get_extension_properties_params_t *)
+                params;
     } break;
     case UR_FUNCTION_PROGRAM_CREATE_WITH_IL: {
         os << (const struct ur_program_create_with_il_params_t *)params;

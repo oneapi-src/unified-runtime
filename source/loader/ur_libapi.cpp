@@ -334,6 +334,34 @@ ur_result_t UR_APICALL urGetLastResult(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Retrieve the set of supported extensions.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hPlatform`
+ur_result_t UR_APICALL urPlatformGetExtensionProperties(
+    ur_platform_handle_t hPlatform, ///< [in] handle to the platform.
+    uint32_t count, ///< [in] number of extension properties to fetch.
+    ur_extension_properties_t *
+        pExtensionProperties, ///< [out][optional] array of supported extension.
+    uint32_t *
+        pCountRet ///< [out][optional] will be updated with the total count of supported
+                  ///< extensions.
+) {
+    auto pfnGetExtensionProperties =
+        ur_lib::context->urDdiTable.Platform.pfnGetExtensionProperties;
+    if (nullptr == pfnGetExtensionProperties) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    return pfnGetExtensionProperties(hPlatform, count, pExtensionProperties,
+                                     pCountRet);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Retrieves devices within a platform
 ///
 /// @details
