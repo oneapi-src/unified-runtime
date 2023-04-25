@@ -1,11 +1,8 @@
 // Copyright (C) 2023 Intel Corporation
 // SPDX-License-Identifier: MIT
-
-// #include "ur_params.hpp"
 #include "vector_addition.h"
 
 int main(int argc, char *argv[]) {
-
     ///// Initialize UR.
     auto init = initUr();
     if (!(*init)) {
@@ -78,51 +75,41 @@ int main(int argc, char *argv[]) {
     }
     std::array<double, buffer_len> outputC{};
 
-    ///// Allocate Device Memory
-    auto InAPtr = GetDeviceAlloc(CtxPtr.get(), DevicePtr.get(), buffer_size);
-    if (!InAPtr->devicePtr) {
-        return EXIT_FAILURE;
-    }
-    auto InBPtr = GetDeviceAlloc(CtxPtr.get(), DevicePtr.get(), buffer_size);
-    if (!InBPtr->devicePtr) {
-        return EXIT_FAILURE;
-    }
-    auto OutCPtr = GetDeviceAlloc(CtxPtr.get(), DevicePtr.get(), buffer_size);
-    if (!OutCPtr->devicePtr) {
-        return EXIT_FAILURE;
-    }
-    std::cout << "Allocated USM on device.\n";
+    ///// Allocate buffers
+    auto InBufA = GetBuffer(CtxPtr.get(), buffer_size);
+    auto InBufB = GetBuffer(CtxPtr.get(), buffer_size);
+    auto OutBufC = GetBuffer(CtxPtr.get(), buffer_size);
+    std::cout << "Buffers allocated.\n";
 
-    //// Memcpy Host to device
-    UR_CHECK_ERR(urEnqueueUSMMemcpy(QueuePtr.get(), true, InAPtr->devicePtr,
-                                    inputA.data(), buffer_size, 0, nullptr,
-                                    nullptr),
-                 "Memcpy failed.", EXIT_FAILURE);
-
-    UR_CHECK_ERR(urEnqueueUSMMemcpy(QueuePtr.get(), true, InBPtr->devicePtr,
-                                    inputB.data(), buffer_size, 0, nullptr,
-                                    nullptr),
-                 "Memcpy failed.", EXIT_FAILURE);
-    UR_CHECK_ERR(urEnqueueUSMMemcpy(QueuePtr.get(), true, OutCPtr->devicePtr,
-                                    outputC.data(), buffer_size, 0, nullptr,
-                                    nullptr),
-                 "Memcpy failed.", EXIT_FAILURE);
-
-    std::cout << "Host memory copied to device.\n";
+    ///// Memcpy data to buffers
+    UR_CHECK_ERR(urEnqueueMemBufferWrite(QueuePtr.get(), InBufA.get(), true, 0,
+                                         buffer_size, inputA.data(), 0, nullptr,
+                                         nullptr),
+                 "Failed to write to input A buffer.", EXIT_FAILURE);
+    UR_CHECK_ERR(urEnqueueMemBufferWrite(QueuePtr.get(), InBufB.get(), true, 0,
+                                         buffer_size, inputB.data(), 0, nullptr,
+                                         nullptr),
+                 "Failed to write to input A buffer.", EXIT_FAILURE);
+    UR_CHECK_ERR(urEnqueueMemBufferWrite(QueuePtr.get(), OutBufC.get(), true, 0,
+                                         buffer_size, outputC.data(), 0,
+                                         nullptr, nullptr),
+                 "Failed to write to input A buffer.", EXIT_FAILURE);
+    std::cout << "Copied buffer data to device.\n";
 
     ////// Set the kernel arguments.
-    UR_CHECK_ERR(
-        urKernelSetArgPointer(KernelPtr.get(), 0, &(InAPtr->devicePtr)),
-        "Failed to set kernel arguments for input buffer A", EXIT_FAILURE);
-    UR_CHECK_ERR(
-        urKernelSetArgPointer(KernelPtr.get(), 1, &(InBPtr->devicePtr)),
-        "Failed to set kernel arguments for input buffer B", EXIT_FAILURE);
-    UR_CHECK_ERR(
-        urKernelSetArgPointer(KernelPtr.get(), 2, &(OutCPtr->devicePtr)),
-        "Failed to set kernel arguments for output buffer C", EXIT_FAILURE);
+    UR_CHECK_ERR(urKernelSetArgMemObj(KernelPtr.get(), 0, InBufA.get()),
+                 "Failed to set kernel arguments for input buffer A",
+                 EXIT_FAILURE);
+    UR_CHECK_ERR(urKernelSetArgMemObj(KernelPtr.get(), 1, InBufB.get()),
+                 "Failed to set kernel arguments for input buffer B",
+                 EXIT_FAILURE);
+    UR_CHECK_ERR(urKernelSetArgMemObj(KernelPtr.get(), 2, OutBufC.get()),
+                 "Failed to set kernel arguments for output buffer C",
+                 EXIT_FAILURE);
     int n = static_cast<int>(buffer_len);
     UR_CHECK_ERR(urKernelSetArgValue(KernelPtr.get(), 3, sizeof(n), &n),
                  "Failed to set kernel arguments for size n", EXIT_FAILURE);
+    std::cout << "Set Kernel Arguments.\n";
 
     ///// Enqueue the kernel
     std::array<size_t, 3> globalOffsets{0, 0, 0};
@@ -135,11 +122,12 @@ int main(int argc, char *argv[]) {
                  EXIT_FAILURE);
     std::cout << "Unified Runtime Kernel Execution Completed.\n";
 
-    ///// Read Data back from device
-    UR_CHECK_ERR(urEnqueueUSMMemcpy(QueuePtr.get(), true, outputC.data(),
-                                    OutCPtr->devicePtr, buffer_size, 0, nullptr,
-                                    nullptr),
-                 "Failed to copy data back to host.", EXIT_FAILURE);
+    ///// Copy data back to host
+    UR_CHECK_ERR(urEnqueueMemBufferRead(QueuePtr.get(), OutBufC.get(), true, 0,
+                                        buffer_size, outputC.data(), 0, nullptr,
+                                        nullptr),
+                 "Failed to copy buffer data back to host.", EXIT_FAILURE);
+    std::cout << "Data copied back to host.\n";
 
     for (size_t i = 0; i < buffer_len; ++i) {
         if (outputC[i] != inputA[i] + inputB[i]) {
