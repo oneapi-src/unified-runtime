@@ -16,14 +16,14 @@ in a later version of Unified Runtime, when agreed upon by the Working Group. Al
 optional and are not required to be implemented by any particular adapter, but are expected to 
 be widely available and possibly be required in a future version of the specification. Adapters 
 must report which extensions are supported through the ${x}PlatformGetExtensionProperties query.
-Each extensions may also impose additional restrictions on when it can be used - i.e. a platform
+Each extension may also impose additional restrictions on when it can be used - i.e. a platform
 or device query.
 
 There are two types of extensions defined by this specification:
 
 1. **Standard** -  extension will be included into the current and all future version of the specification.
 2. **Experimental** - extensions require additional experimentation and development, before becoming a standard extension. 
-Applications should not rely on experimental extensions in production.
+   Applications should not rely on experimental extensions in production.
 
 Requirements
 ============
@@ -78,8 +78,8 @@ convention and values should be assigned to avoid future compatibility issues.
 Extending Structures
 --------------------
 
-Any structure derived from `${x}_base_desc_t`` or `${x}_base_properties_t`` can be extended using structure chains. No other
-method of extending structures is allowed.
+Any structure derived from `${x}_base_desc_t`` or `${x}_base_properties_t`` can be extended using a structure chain
+by adding a pointer to the extended structure in `pNext` member variable. No other method of extending structures is allowed.
 
 A structure chain can contain more than one extension structure, in any order. Therefore, extensions should not
 be dependent on their order relative to other extensions and the implementation must be order agnostic. In addition,
