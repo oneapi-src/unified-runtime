@@ -302,6 +302,16 @@ etors:
       desc: $x_queue_native_properties_t
     - name: MEM_NATIVE_PROPERTIES
       desc: $x_mem_native_properties_t
+    - name: DEVICE_PARTITION_DESC
+      desc: $x_device_partition_desc_t
+    - name: DEVICE_PARTITION_EQUALLY_DESC
+      desc: $x_device_partition_equally_desc_t
+    - name: DEVICE_PARTITION_BY_COUNTS_DESC
+      desc: $x_device_partition_by_counts_desc_t
+    - name: DEVICE_PARTITION_BY_AFFINITY_DOMAIN_DESC
+      desc: $x_device_partition_by_affinity_domain_desc_t
+    - name: DEVICE_PARTITION_BY_CSLICE_DESC
+      desc: $x_device_partition_by_cslice_desc_t
 --- #--------------------------------------------------------------------------
 type: struct
 desc: "Base for all properties types"

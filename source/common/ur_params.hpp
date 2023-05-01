@@ -24,6 +24,8 @@ inline void
 serializeTaggedTyped_ur_platform_info_t(std::ostream &os, const void *ptr,
                                         enum ur_platform_info_t value,
                                         size_t size);
+inline void serializeFlag_ur_device_affinity_domain_flags_t(
+    std::ostream &os, ur_device_affinity_domain_flags_t flag);
 inline void serializeTaggedTyped_ur_device_info_t(std::ostream &os,
                                                   const void *ptr,
                                                   enum ur_device_info_t value,
@@ -32,8 +34,6 @@ inline void serializeFlag_ur_device_fp_capability_flags_t(
     std::ostream &os, ur_device_fp_capability_flags_t flag);
 inline void serializeFlag_ur_device_exec_capability_flags_t(
     std::ostream &os, ur_device_exec_capability_flags_t flag);
-inline void serializeFlag_ur_device_affinity_domain_flags_t(
-    std::ostream &os, ur_device_affinity_domain_flags_t flag);
 inline void serializeFlag_ur_memory_order_capability_flags_t(
     std::ostream &os, ur_memory_order_capability_flags_t flag);
 inline void serializeFlag_ur_memory_scope_capability_flags_t(
@@ -136,9 +136,25 @@ inline std::ostream &operator<<(std::ostream &os,
 inline std::ostream &operator<<(std::ostream &os,
                                 const struct ur_device_binary_t params);
 inline std::ostream &operator<<(std::ostream &os, enum ur_device_type_t value);
+inline std::ostream &operator<<(std::ostream &os,
+                                enum ur_device_affinity_domain_flag_t value);
 inline std::ostream &operator<<(std::ostream &os, enum ur_device_info_t value);
 inline std::ostream &operator<<(std::ostream &os,
                                 enum ur_device_partition_t value);
+inline std::ostream &operator<<(std::ostream &os,
+                                const struct ur_device_partition_desc_t params);
+inline std::ostream &
+operator<<(std::ostream &os,
+           const struct ur_device_partition_equally_desc_t params);
+inline std::ostream &
+operator<<(std::ostream &os,
+           const struct ur_device_partition_by_counts_desc_t params);
+inline std::ostream &
+operator<<(std::ostream &os,
+           const struct ur_device_partition_by_affinity_domain_desc_t params);
+inline std::ostream &
+operator<<(std::ostream &os,
+           const struct ur_device_partition_by_cslice_desc_t params);
 inline std::ostream &operator<<(std::ostream &os,
                                 enum ur_device_fp_capability_flag_t value);
 inline std::ostream &operator<<(std::ostream &os,
@@ -147,8 +163,6 @@ inline std::ostream &operator<<(std::ostream &os,
                                 enum ur_device_local_mem_type_t value);
 inline std::ostream &operator<<(std::ostream &os,
                                 enum ur_device_exec_capability_flag_t value);
-inline std::ostream &operator<<(std::ostream &os,
-                                enum ur_device_affinity_domain_flag_t value);
 inline std::ostream &operator<<(std::ostream &os,
                                 enum ur_memory_order_capability_flag_t value);
 inline std::ostream &operator<<(std::ostream &os,
@@ -632,6 +646,26 @@ inline std::ostream &operator<<(std::ostream &os,
     case UR_STRUCTURE_TYPE_MEM_NATIVE_PROPERTIES:
         os << "UR_STRUCTURE_TYPE_MEM_NATIVE_PROPERTIES";
         break;
+
+    case UR_STRUCTURE_TYPE_DEVICE_PARTITION_DESC:
+        os << "UR_STRUCTURE_TYPE_DEVICE_PARTITION_DESC";
+        break;
+
+    case UR_STRUCTURE_TYPE_DEVICE_PARTITION_EQUALLY_DESC:
+        os << "UR_STRUCTURE_TYPE_DEVICE_PARTITION_EQUALLY_DESC";
+        break;
+
+    case UR_STRUCTURE_TYPE_DEVICE_PARTITION_BY_COUNTS_DESC:
+        os << "UR_STRUCTURE_TYPE_DEVICE_PARTITION_BY_COUNTS_DESC";
+        break;
+
+    case UR_STRUCTURE_TYPE_DEVICE_PARTITION_BY_AFFINITY_DOMAIN_DESC:
+        os << "UR_STRUCTURE_TYPE_DEVICE_PARTITION_BY_AFFINITY_DOMAIN_DESC";
+        break;
+
+    case UR_STRUCTURE_TYPE_DEVICE_PARTITION_BY_CSLICE_DESC:
+        os << "UR_STRUCTURE_TYPE_DEVICE_PARTITION_BY_CSLICE_DESC";
+        break;
     default:
         os << "unknown enumerator";
         break;
@@ -757,6 +791,36 @@ inline void serializeStruct(std::ostream &os, const void *ptr) {
     case UR_STRUCTURE_TYPE_MEM_NATIVE_PROPERTIES: {
         const ur_mem_native_properties_t *pstruct =
             (const ur_mem_native_properties_t *)ptr;
+        ur_params::serializePtr(os, pstruct);
+    } break;
+
+    case UR_STRUCTURE_TYPE_DEVICE_PARTITION_DESC: {
+        const ur_device_partition_desc_t *pstruct =
+            (const ur_device_partition_desc_t *)ptr;
+        ur_params::serializePtr(os, pstruct);
+    } break;
+
+    case UR_STRUCTURE_TYPE_DEVICE_PARTITION_EQUALLY_DESC: {
+        const ur_device_partition_equally_desc_t *pstruct =
+            (const ur_device_partition_equally_desc_t *)ptr;
+        ur_params::serializePtr(os, pstruct);
+    } break;
+
+    case UR_STRUCTURE_TYPE_DEVICE_PARTITION_BY_COUNTS_DESC: {
+        const ur_device_partition_by_counts_desc_t *pstruct =
+            (const ur_device_partition_by_counts_desc_t *)ptr;
+        ur_params::serializePtr(os, pstruct);
+    } break;
+
+    case UR_STRUCTURE_TYPE_DEVICE_PARTITION_BY_AFFINITY_DOMAIN_DESC: {
+        const ur_device_partition_by_affinity_domain_desc_t *pstruct =
+            (const ur_device_partition_by_affinity_domain_desc_t *)ptr;
+        ur_params::serializePtr(os, pstruct);
+    } break;
+
+    case UR_STRUCTURE_TYPE_DEVICE_PARTITION_BY_CSLICE_DESC: {
+        const ur_device_partition_by_cslice_desc_t *pstruct =
+            (const ur_device_partition_by_cslice_desc_t *)ptr;
         ur_params::serializePtr(os, pstruct);
     } break;
     default:
@@ -1119,6 +1183,121 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_device_type_t value) {
     }
     return os;
 }
+inline std::ostream &operator<<(std::ostream &os,
+                                enum ur_device_affinity_domain_flag_t value) {
+    switch (value) {
+
+    case UR_DEVICE_AFFINITY_DOMAIN_FLAG_NUMA:
+        os << "UR_DEVICE_AFFINITY_DOMAIN_FLAG_NUMA";
+        break;
+
+    case UR_DEVICE_AFFINITY_DOMAIN_FLAG_L4_CACHE:
+        os << "UR_DEVICE_AFFINITY_DOMAIN_FLAG_L4_CACHE";
+        break;
+
+    case UR_DEVICE_AFFINITY_DOMAIN_FLAG_L3_CACHE:
+        os << "UR_DEVICE_AFFINITY_DOMAIN_FLAG_L3_CACHE";
+        break;
+
+    case UR_DEVICE_AFFINITY_DOMAIN_FLAG_L2_CACHE:
+        os << "UR_DEVICE_AFFINITY_DOMAIN_FLAG_L2_CACHE";
+        break;
+
+    case UR_DEVICE_AFFINITY_DOMAIN_FLAG_L1_CACHE:
+        os << "UR_DEVICE_AFFINITY_DOMAIN_FLAG_L1_CACHE";
+        break;
+
+    case UR_DEVICE_AFFINITY_DOMAIN_FLAG_NEXT_PARTITIONABLE:
+        os << "UR_DEVICE_AFFINITY_DOMAIN_FLAG_NEXT_PARTITIONABLE";
+        break;
+    default:
+        os << "unknown enumerator";
+        break;
+    }
+    return os;
+}
+namespace ur_params {
+inline void serializeFlag_ur_device_affinity_domain_flags_t(
+    std::ostream &os, ur_device_affinity_domain_flags_t flag) {
+    uint32_t val = flag;
+    bool first = true;
+
+    if ((val & UR_DEVICE_AFFINITY_DOMAIN_FLAG_NUMA) ==
+        (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_NUMA) {
+        val ^= (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_NUMA;
+        if (!first) {
+            os << " | ";
+        } else {
+            first = false;
+        }
+        os << UR_DEVICE_AFFINITY_DOMAIN_FLAG_NUMA;
+    }
+
+    if ((val & UR_DEVICE_AFFINITY_DOMAIN_FLAG_L4_CACHE) ==
+        (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_L4_CACHE) {
+        val ^= (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_L4_CACHE;
+        if (!first) {
+            os << " | ";
+        } else {
+            first = false;
+        }
+        os << UR_DEVICE_AFFINITY_DOMAIN_FLAG_L4_CACHE;
+    }
+
+    if ((val & UR_DEVICE_AFFINITY_DOMAIN_FLAG_L3_CACHE) ==
+        (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_L3_CACHE) {
+        val ^= (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_L3_CACHE;
+        if (!first) {
+            os << " | ";
+        } else {
+            first = false;
+        }
+        os << UR_DEVICE_AFFINITY_DOMAIN_FLAG_L3_CACHE;
+    }
+
+    if ((val & UR_DEVICE_AFFINITY_DOMAIN_FLAG_L2_CACHE) ==
+        (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_L2_CACHE) {
+        val ^= (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_L2_CACHE;
+        if (!first) {
+            os << " | ";
+        } else {
+            first = false;
+        }
+        os << UR_DEVICE_AFFINITY_DOMAIN_FLAG_L2_CACHE;
+    }
+
+    if ((val & UR_DEVICE_AFFINITY_DOMAIN_FLAG_L1_CACHE) ==
+        (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_L1_CACHE) {
+        val ^= (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_L1_CACHE;
+        if (!first) {
+            os << " | ";
+        } else {
+            first = false;
+        }
+        os << UR_DEVICE_AFFINITY_DOMAIN_FLAG_L1_CACHE;
+    }
+
+    if ((val & UR_DEVICE_AFFINITY_DOMAIN_FLAG_NEXT_PARTITIONABLE) ==
+        (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_NEXT_PARTITIONABLE) {
+        val ^= (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_NEXT_PARTITIONABLE;
+        if (!first) {
+            os << " | ";
+        } else {
+            first = false;
+        }
+        os << UR_DEVICE_AFFINITY_DOMAIN_FLAG_NEXT_PARTITIONABLE;
+    }
+    if (val != 0) {
+        std::bitset<32> bits(val);
+        if (!first) {
+            os << " | ";
+        }
+        os << "unknown bit flags " << bits;
+    } else if (first) {
+        os << "0";
+    }
+}
+} // namespace ur_params
 inline std::ostream &operator<<(std::ostream &os, enum ur_device_info_t value) {
     switch (value) {
 
@@ -2588,10 +2767,9 @@ inline void serializeTaggedTyped_ur_device_info_t(std::ostream &os,
 
     case UR_DEVICE_INFO_PARTITION_PROPERTIES: {
 
-        const ur_device_partition_property_t *tptr =
-            (const ur_device_partition_property_t *)ptr;
+        const ur_device_partition_t *tptr = (const ur_device_partition_t *)ptr;
         os << "[";
-        size_t nelems = size / sizeof(ur_device_partition_property_t);
+        size_t nelems = size / sizeof(ur_device_partition_t);
         for (size_t i = 0; i < nelems; ++i) {
             if (i != 0) {
                 os << ", ";
@@ -2633,19 +2811,19 @@ inline void serializeTaggedTyped_ur_device_info_t(std::ostream &os,
     } break;
 
     case UR_DEVICE_INFO_PARTITION_TYPE: {
-
-        const ur_device_partition_property_t *tptr =
-            (const ur_device_partition_property_t *)ptr;
-        os << "[";
-        size_t nelems = size / sizeof(ur_device_partition_property_t);
-        for (size_t i = 0; i < nelems; ++i) {
-            if (i != 0) {
-                os << ", ";
-            }
-
-            os << tptr[i];
+        const ur_device_partition_desc_t **tptr =
+            (const ur_device_partition_desc_t **)ptr;
+        if (sizeof(ur_device_partition_desc_t *) > size) {
+            os << "invalid size (is: " << size
+               << ", expected: >=" << sizeof(ur_device_partition_desc_t *)
+               << ")";
+            return;
         }
-        os << "]";
+        os << (void *)(tptr) << " (";
+
+        ur_params::serializePtr(os, *tptr);
+
+        os << ")";
     } break;
 
     case UR_DEVICE_INFO_MAX_NUM_SUB_GROUPS: {
@@ -3119,6 +3297,111 @@ inline std::ostream &operator<<(std::ostream &os,
     }
     return os;
 }
+inline std::ostream &
+operator<<(std::ostream &os, const struct ur_device_partition_desc_t params) {
+    os << "(struct ur_device_partition_desc_t){";
+
+    os << ".stype = ";
+
+    os << (params.stype);
+
+    os << ", ";
+    os << ".pNext = ";
+
+    ur_params::serializeStruct(os, (params.pNext));
+
+    os << "}";
+    return os;
+}
+inline std::ostream &
+operator<<(std::ostream &os,
+           const struct ur_device_partition_equally_desc_t params) {
+    os << "(struct ur_device_partition_equally_desc_t){";
+
+    os << ".stype = ";
+
+    os << (params.stype);
+
+    os << ", ";
+    os << ".pNext = ";
+
+    ur_params::serializeStruct(os, (params.pNext));
+
+    os << ", ";
+    os << ".counts = ";
+
+    os << (params.counts);
+
+    os << "}";
+    return os;
+}
+inline std::ostream &
+operator<<(std::ostream &os,
+           const struct ur_device_partition_by_counts_desc_t params) {
+    os << "(struct ur_device_partition_by_counts_desc_t){";
+
+    os << ".stype = ";
+
+    os << (params.stype);
+
+    os << ", ";
+    os << ".pNext = ";
+
+    ur_params::serializeStruct(os, (params.pNext));
+
+    os << ", ";
+    os << ".counts = ";
+
+    ur_params::serializePtr(os, (params.counts));
+
+    os << ", ";
+    os << ".size = ";
+
+    os << (params.size);
+
+    os << "}";
+    return os;
+}
+inline std::ostream &
+operator<<(std::ostream &os,
+           const struct ur_device_partition_by_affinity_domain_desc_t params) {
+    os << "(struct ur_device_partition_by_affinity_domain_desc_t){";
+
+    os << ".stype = ";
+
+    os << (params.stype);
+
+    os << ", ";
+    os << ".pNext = ";
+
+    ur_params::serializeStruct(os, (params.pNext));
+
+    os << ", ";
+    os << ".flags = ";
+
+    ur_params::serializeFlag_ur_device_affinity_domain_flags_t(os,
+                                                               (params.flags));
+
+    os << "}";
+    return os;
+}
+inline std::ostream &
+operator<<(std::ostream &os,
+           const struct ur_device_partition_by_cslice_desc_t params) {
+    os << "(struct ur_device_partition_by_cslice_desc_t){";
+
+    os << ".stype = ";
+
+    os << (params.stype);
+
+    os << ", ";
+    os << ".pNext = ";
+
+    ur_params::serializeStruct(os, (params.pNext));
+
+    os << "}";
+    return os;
+}
 inline std::ostream &operator<<(std::ostream &os,
                                 enum ur_device_fp_capability_flag_t value) {
     switch (value) {
@@ -3350,121 +3633,6 @@ inline void serializeFlag_ur_device_exec_capability_flags_t(
             first = false;
         }
         os << UR_DEVICE_EXEC_CAPABILITY_FLAG_NATIVE_KERNEL;
-    }
-    if (val != 0) {
-        std::bitset<32> bits(val);
-        if (!first) {
-            os << " | ";
-        }
-        os << "unknown bit flags " << bits;
-    } else if (first) {
-        os << "0";
-    }
-}
-} // namespace ur_params
-inline std::ostream &operator<<(std::ostream &os,
-                                enum ur_device_affinity_domain_flag_t value) {
-    switch (value) {
-
-    case UR_DEVICE_AFFINITY_DOMAIN_FLAG_NUMA:
-        os << "UR_DEVICE_AFFINITY_DOMAIN_FLAG_NUMA";
-        break;
-
-    case UR_DEVICE_AFFINITY_DOMAIN_FLAG_L4_CACHE:
-        os << "UR_DEVICE_AFFINITY_DOMAIN_FLAG_L4_CACHE";
-        break;
-
-    case UR_DEVICE_AFFINITY_DOMAIN_FLAG_L3_CACHE:
-        os << "UR_DEVICE_AFFINITY_DOMAIN_FLAG_L3_CACHE";
-        break;
-
-    case UR_DEVICE_AFFINITY_DOMAIN_FLAG_L2_CACHE:
-        os << "UR_DEVICE_AFFINITY_DOMAIN_FLAG_L2_CACHE";
-        break;
-
-    case UR_DEVICE_AFFINITY_DOMAIN_FLAG_L1_CACHE:
-        os << "UR_DEVICE_AFFINITY_DOMAIN_FLAG_L1_CACHE";
-        break;
-
-    case UR_DEVICE_AFFINITY_DOMAIN_FLAG_NEXT_PARTITIONABLE:
-        os << "UR_DEVICE_AFFINITY_DOMAIN_FLAG_NEXT_PARTITIONABLE";
-        break;
-    default:
-        os << "unknown enumerator";
-        break;
-    }
-    return os;
-}
-namespace ur_params {
-inline void serializeFlag_ur_device_affinity_domain_flags_t(
-    std::ostream &os, ur_device_affinity_domain_flags_t flag) {
-    uint32_t val = flag;
-    bool first = true;
-
-    if ((val & UR_DEVICE_AFFINITY_DOMAIN_FLAG_NUMA) ==
-        (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_NUMA) {
-        val ^= (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_NUMA;
-        if (!first) {
-            os << " | ";
-        } else {
-            first = false;
-        }
-        os << UR_DEVICE_AFFINITY_DOMAIN_FLAG_NUMA;
-    }
-
-    if ((val & UR_DEVICE_AFFINITY_DOMAIN_FLAG_L4_CACHE) ==
-        (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_L4_CACHE) {
-        val ^= (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_L4_CACHE;
-        if (!first) {
-            os << " | ";
-        } else {
-            first = false;
-        }
-        os << UR_DEVICE_AFFINITY_DOMAIN_FLAG_L4_CACHE;
-    }
-
-    if ((val & UR_DEVICE_AFFINITY_DOMAIN_FLAG_L3_CACHE) ==
-        (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_L3_CACHE) {
-        val ^= (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_L3_CACHE;
-        if (!first) {
-            os << " | ";
-        } else {
-            first = false;
-        }
-        os << UR_DEVICE_AFFINITY_DOMAIN_FLAG_L3_CACHE;
-    }
-
-    if ((val & UR_DEVICE_AFFINITY_DOMAIN_FLAG_L2_CACHE) ==
-        (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_L2_CACHE) {
-        val ^= (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_L2_CACHE;
-        if (!first) {
-            os << " | ";
-        } else {
-            first = false;
-        }
-        os << UR_DEVICE_AFFINITY_DOMAIN_FLAG_L2_CACHE;
-    }
-
-    if ((val & UR_DEVICE_AFFINITY_DOMAIN_FLAG_L1_CACHE) ==
-        (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_L1_CACHE) {
-        val ^= (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_L1_CACHE;
-        if (!first) {
-            os << " | ";
-        } else {
-            first = false;
-        }
-        os << UR_DEVICE_AFFINITY_DOMAIN_FLAG_L1_CACHE;
-    }
-
-    if ((val & UR_DEVICE_AFFINITY_DOMAIN_FLAG_NEXT_PARTITIONABLE) ==
-        (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_NEXT_PARTITIONABLE) {
-        val ^= (uint32_t)UR_DEVICE_AFFINITY_DOMAIN_FLAG_NEXT_PARTITIONABLE;
-        if (!first) {
-            os << " | ";
-        } else {
-            first = false;
-        }
-        os << UR_DEVICE_AFFINITY_DOMAIN_FLAG_NEXT_PARTITIONABLE;
     }
     if (val != 0) {
         std::bitset<32> bits(val);

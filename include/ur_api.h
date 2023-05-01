@@ -223,26 +223,31 @@ typedef enum ur_result_t {
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Defines structure types
 typedef enum ur_structure_type_t {
-    UR_STRUCTURE_TYPE_CONTEXT_PROPERTIES = 0,               ///< ::ur_context_properties_t
-    UR_STRUCTURE_TYPE_IMAGE_DESC = 1,                       ///< ::ur_image_desc_t
-    UR_STRUCTURE_TYPE_BUFFER_PROPERTIES = 2,                ///< ::ur_buffer_properties_t
-    UR_STRUCTURE_TYPE_BUFFER_REGION = 3,                    ///< ::ur_buffer_region_t
-    UR_STRUCTURE_TYPE_BUFFER_CHANNEL_PROPERTIES = 4,        ///< ::ur_buffer_channel_properties_t
-    UR_STRUCTURE_TYPE_BUFFER_ALLOC_LOCATION_PROPERTIES = 5, ///< ::ur_buffer_alloc_location_properties_t
-    UR_STRUCTURE_TYPE_PROGRAM_PROPERTIES = 6,               ///< ::ur_program_properties_t
-    UR_STRUCTURE_TYPE_USM_DESC = 7,                         ///< ::ur_usm_desc_t
-    UR_STRUCTURE_TYPE_USM_HOST_DESC = 8,                    ///< ::ur_usm_host_desc_t
-    UR_STRUCTURE_TYPE_USM_DEVICE_DESC = 9,                  ///< ::ur_usm_device_desc_t
-    UR_STRUCTURE_TYPE_USM_POOL_DESC = 10,                   ///< ::ur_usm_pool_desc_t
-    UR_STRUCTURE_TYPE_USM_POOL_LIMITS_DESC = 11,            ///< ::ur_usm_pool_limits_desc_t
-    UR_STRUCTURE_TYPE_DEVICE_BINARY = 12,                   ///< ::ur_device_binary_t
-    UR_STRUCTURE_TYPE_SAMPLER_DESC = 13,                    ///< ::ur_sampler_desc_t
-    UR_STRUCTURE_TYPE_QUEUE_PROPERTIES = 14,                ///< ::ur_queue_properties_t
-    UR_STRUCTURE_TYPE_QUEUE_INDEX_PROPERTIES = 15,          ///< ::ur_queue_properties_t
-    UR_STRUCTURE_TYPE_CONTEXT_NATIVE_PROPERTIES = 16,       ///< ::ur_context_native_properties_t
-    UR_STRUCTURE_TYPE_KERNEL_NATIVE_PROPERTIES = 17,        ///< ::ur_kernel_native_properties_t
-    UR_STRUCTURE_TYPE_QUEUE_NATIVE_PROPERTIES = 18,         ///< ::ur_queue_native_properties_t
-    UR_STRUCTURE_TYPE_MEM_NATIVE_PROPERTIES = 19,           ///< ::ur_mem_native_properties_t
+    UR_STRUCTURE_TYPE_CONTEXT_PROPERTIES = 0,                        ///< ::ur_context_properties_t
+    UR_STRUCTURE_TYPE_IMAGE_DESC = 1,                                ///< ::ur_image_desc_t
+    UR_STRUCTURE_TYPE_BUFFER_PROPERTIES = 2,                         ///< ::ur_buffer_properties_t
+    UR_STRUCTURE_TYPE_BUFFER_REGION = 3,                             ///< ::ur_buffer_region_t
+    UR_STRUCTURE_TYPE_BUFFER_CHANNEL_PROPERTIES = 4,                 ///< ::ur_buffer_channel_properties_t
+    UR_STRUCTURE_TYPE_BUFFER_ALLOC_LOCATION_PROPERTIES = 5,          ///< ::ur_buffer_alloc_location_properties_t
+    UR_STRUCTURE_TYPE_PROGRAM_PROPERTIES = 6,                        ///< ::ur_program_properties_t
+    UR_STRUCTURE_TYPE_USM_DESC = 7,                                  ///< ::ur_usm_desc_t
+    UR_STRUCTURE_TYPE_USM_HOST_DESC = 8,                             ///< ::ur_usm_host_desc_t
+    UR_STRUCTURE_TYPE_USM_DEVICE_DESC = 9,                           ///< ::ur_usm_device_desc_t
+    UR_STRUCTURE_TYPE_USM_POOL_DESC = 10,                            ///< ::ur_usm_pool_desc_t
+    UR_STRUCTURE_TYPE_USM_POOL_LIMITS_DESC = 11,                     ///< ::ur_usm_pool_limits_desc_t
+    UR_STRUCTURE_TYPE_DEVICE_BINARY = 12,                            ///< ::ur_device_binary_t
+    UR_STRUCTURE_TYPE_SAMPLER_DESC = 13,                             ///< ::ur_sampler_desc_t
+    UR_STRUCTURE_TYPE_QUEUE_PROPERTIES = 14,                         ///< ::ur_queue_properties_t
+    UR_STRUCTURE_TYPE_QUEUE_INDEX_PROPERTIES = 15,                   ///< ::ur_queue_properties_t
+    UR_STRUCTURE_TYPE_CONTEXT_NATIVE_PROPERTIES = 16,                ///< ::ur_context_native_properties_t
+    UR_STRUCTURE_TYPE_KERNEL_NATIVE_PROPERTIES = 17,                 ///< ::ur_kernel_native_properties_t
+    UR_STRUCTURE_TYPE_QUEUE_NATIVE_PROPERTIES = 18,                  ///< ::ur_queue_native_properties_t
+    UR_STRUCTURE_TYPE_MEM_NATIVE_PROPERTIES = 19,                    ///< ::ur_mem_native_properties_t
+    UR_STRUCTURE_TYPE_DEVICE_PARTITION_DESC = 20,                    ///< ::ur_device_partition_desc_t
+    UR_STRUCTURE_TYPE_DEVICE_PARTITION_EQUALLY_DESC = 21,            ///< ::ur_device_partition_equally_desc_t
+    UR_STRUCTURE_TYPE_DEVICE_PARTITION_BY_COUNTS_DESC = 22,          ///< ::ur_device_partition_by_counts_desc_t
+    UR_STRUCTURE_TYPE_DEVICE_PARTITION_BY_AFFINITY_DOMAIN_DESC = 23, ///< ::ur_device_partition_by_affinity_domain_desc_t
+    UR_STRUCTURE_TYPE_DEVICE_PARTITION_BY_CSLICE_DESC = 24,          ///< ::ur_device_partition_by_cslice_desc_t
     /// @cond
     UR_STRUCTURE_TYPE_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -701,6 +706,38 @@ typedef enum ur_device_type_t {
 } ur_device_type_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Device affinity domain
+typedef uint32_t ur_device_affinity_domain_flags_t;
+typedef enum ur_device_affinity_domain_flag_t {
+    UR_DEVICE_AFFINITY_DOMAIN_FLAG_NUMA = UR_BIT(0),               ///< Split the device into sub devices comprised of compute units that
+                                                                   ///< share a NUMA node.
+    UR_DEVICE_AFFINITY_DOMAIN_FLAG_L4_CACHE = UR_BIT(1),           ///< Split the device into sub devices comprised of compute units that
+                                                                   ///< share a level 4 data cache.
+    UR_DEVICE_AFFINITY_DOMAIN_FLAG_L3_CACHE = UR_BIT(2),           ///< Split the device into sub devices comprised of compute units that
+                                                                   ///< share a level 3 data cache.
+    UR_DEVICE_AFFINITY_DOMAIN_FLAG_L2_CACHE = UR_BIT(3),           ///< Split the device into sub devices comprised of compute units that
+                                                                   ///< share a level 2 data cache.
+    UR_DEVICE_AFFINITY_DOMAIN_FLAG_L1_CACHE = UR_BIT(4),           ///< Split the device into sub devices comprised of compute units that
+                                                                   ///< share a level 1 data cache.
+    UR_DEVICE_AFFINITY_DOMAIN_FLAG_NEXT_PARTITIONABLE = UR_BIT(5), ///< Split the device along the next partitionable affinity domain.
+                                                                   ///< The implementation shall find the first level along which the device
+                                                                   ///< or sub device may be further subdivided in the order:
+                                                                   ///< ::UR_DEVICE_AFFINITY_DOMAIN_FLAG_NUMA,
+                                                                   ///< ::UR_DEVICE_AFFINITY_DOMAIN_FLAG_L4_CACHE,
+                                                                   ///< ::UR_DEVICE_AFFINITY_DOMAIN_FLAG_L3_CACHE,
+                                                                   ///< ::UR_DEVICE_AFFINITY_DOMAIN_FLAG_L2_CACHE,
+                                                                   ///< ::UR_DEVICE_AFFINITY_DOMAIN_FLAG_L1_CACHE,
+                                                                   ///< and partition the device into sub devices comprised of compute units
+                                                                   ///< that share memory subsystems at this level.
+    /// @cond
+    UR_DEVICE_AFFINITY_DOMAIN_FLAG_FORCE_UINT32 = 0x7fffffff
+    /// @endcond
+
+} ur_device_affinity_domain_flag_t;
+/// @brief Bit Mask for validating ur_device_affinity_domain_flags_t
+#define UR_DEVICE_AFFINITY_DOMAIN_FLAGS_MASK 0xffffffc0
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Retrieves devices within a platform
 ///
 /// @details
@@ -832,16 +869,16 @@ typedef enum ur_device_info_t {
     UR_DEVICE_INFO_PREFERRED_INTEROP_USER_SYNC = 74,            ///< [::ur_bool_t] prefer user synchronization when sharing object with
                                                                 ///< other API
     UR_DEVICE_INFO_PARENT_DEVICE = 75,                          ///< [::ur_device_handle_t] return parent device handle
-    UR_DEVICE_INFO_PARTITION_PROPERTIES = 76,                   ///< [::ur_device_partition_property_t[]] Returns an array of partition
-                                                                ///< types supported by the device
+    UR_DEVICE_INFO_PARTITION_PROPERTIES = 76,                   ///< [::ur_device_partition_t[]] Returns an array of partition types
+                                                                ///< supported by the device
     UR_DEVICE_INFO_PARTITION_MAX_SUB_DEVICES = 77,              ///< [uint32_t] maximum number of sub-devices when the device is
                                                                 ///< partitioned
     UR_DEVICE_INFO_PARTITION_AFFINITY_DOMAIN = 78,              ///< [::ur_device_affinity_domain_flags_t] Returns a bit-field of the
                                                                 ///< supported affinity domains for partitioning.
                                                                 ///< If the device does not support any affinity domains, then 0 will be returned.
-    UR_DEVICE_INFO_PARTITION_TYPE = 79,                         ///< [::ur_device_partition_property_t[]] return an array of
-                                                                ///< ::ur_device_partition_property_t for properties specified in
-                                                                ///< ::urDevicePartition
+    UR_DEVICE_INFO_PARTITION_TYPE = 79,                         ///< [::ur_device_partition_desc_t*] return a pointer to the
+                                                                ///< ::ur_device_partition_desc_t* for properties specified in
+                                                                ///< ::urDevicePartition.
     UR_DEVICE_INFO_MAX_NUM_SUB_GROUPS = 80,                     ///< [uint32_t] max number of sub groups
     UR_DEVICE_INFO_SUB_GROUP_INDEPENDENT_FORWARD_PROGRESS = 81, ///< [::ur_bool_t] support sub group independent forward progress
     UR_DEVICE_INFO_SUB_GROUP_SIZES_INTEL = 82,                  ///< [uint32_t[]] return an array of sub group sizes supported on Intel
@@ -997,6 +1034,55 @@ typedef enum ur_device_partition_t {
 } ur_device_partition_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Device partition properties descriptor.
+typedef struct ur_device_partition_desc_t {
+    ur_structure_type_t stype; ///< [in] type of this structure, must be
+                               ///< ::UR_STRUCTURE_TYPE_DEVICE_PARTITION_DESC
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
+
+} ur_device_partition_desc_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Device partition equally descriptor.
+typedef struct ur_device_partition_equally_desc_t {
+    ur_structure_type_t stype; ///< [in] type of this structure, must be
+                               ///< ::UR_STRUCTURE_TYPE_DEVICE_PARTITION_EQUALLY_DESC
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
+    uint32_t counts;           ///< [in] n compute units per sub-device.
+
+} ur_device_partition_equally_desc_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Device partition by counts descriptor
+typedef struct ur_device_partition_by_counts_desc_t {
+    ur_structure_type_t stype; ///< [in] type of this structure, must be
+                               ///< ::UR_STRUCTURE_TYPE_DEVICE_PARTITION_BY_COUNTS_DESC
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
+    const uint32_t *counts;    ///< [in] Array of counts of compute units per sub-device
+    size_t size;               ///< [in] Length of counts array.
+
+} ur_device_partition_by_counts_desc_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Device partition by affinity domain descriptor.
+typedef struct ur_device_partition_by_affinity_domain_desc_t {
+    ur_structure_type_t stype;               ///< [in] type of this structure, must be
+                                             ///< ::UR_STRUCTURE_TYPE_DEVICE_PARTITION_BY_AFFINITY_DOMAIN_DESC
+    const void *pNext;                       ///< [in][optional] pointer to extension-specific structure
+    ur_device_affinity_domain_flags_t flags; ///< [in] Affinity domain flags
+
+} ur_device_partition_by_affinity_domain_desc_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Device partition by compute slice
+typedef struct ur_device_partition_by_cslice_desc_t {
+    ur_structure_type_t stype; ///< [in] type of this structure, must be
+                               ///< ::UR_STRUCTURE_TYPE_DEVICE_PARTITION_BY_CSLICE_DESC
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
+
+} ur_device_partition_by_cslice_desc_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Partition the device into sub-devices
 ///
 /// @details
@@ -1024,14 +1110,14 @@ typedef enum ur_device_partition_t {
 ///     - ::UR_RESULT_ERROR_INVALID_DEVICE_PARTITION_COUNT
 UR_APIEXPORT ur_result_t UR_APICALL
 urDevicePartition(
-    ur_device_handle_t hDevice,                        ///< [in] handle of the device to partition.
-    const ur_device_partition_property_t *pProperties, ///< [in] null-terminated array of <$_device_partition_t enum, value> pairs.
-    uint32_t NumDevices,                               ///< [in] the number of sub-devices.
-    ur_device_handle_t *phSubDevices,                  ///< [out][optional][range(0, NumDevices)] array of handle of devices.
-                                                       ///< If NumDevices is less than the number of sub-devices available, then
-                                                       ///< the function shall only retrieve that number of sub-devices.
-    uint32_t *pNumDevicesRet                           ///< [out][optional] pointer to the number of sub-devices the device can be
-                                                       ///< partitioned into according to the partitioning property.
+    ur_device_handle_t hDevice,                    ///< [in] handle of the device to partition.
+    const ur_device_partition_desc_t *pProperties, ///< [in] device partitioning descriptor structure chain.
+    uint32_t NumDevices,                           ///< [in] the number of sub-devices.
+    ur_device_handle_t *phSubDevices,              ///< [out][optional][range(0, NumDevices)] array of handle of devices.
+                                                   ///< If NumDevices is less than the number of sub-devices available, then
+                                                   ///< the function shall only retrieve that number of sub-devices.
+    uint32_t *pNumDevicesRet                       ///< [out][optional] pointer to the number of sub-devices the device can be
+                                                   ///< partitioned into according to the partitioning property.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1127,38 +1213,6 @@ typedef enum ur_device_exec_capability_flag_t {
 } ur_device_exec_capability_flag_t;
 /// @brief Bit Mask for validating ur_device_exec_capability_flags_t
 #define UR_DEVICE_EXEC_CAPABILITY_FLAGS_MASK 0xfffffffc
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Device affinity domain
-typedef uint32_t ur_device_affinity_domain_flags_t;
-typedef enum ur_device_affinity_domain_flag_t {
-    UR_DEVICE_AFFINITY_DOMAIN_FLAG_NUMA = UR_BIT(0),               ///< Split the device into sub devices comprised of compute units that
-                                                                   ///< share a NUMA node.
-    UR_DEVICE_AFFINITY_DOMAIN_FLAG_L4_CACHE = UR_BIT(1),           ///< Split the device into sub devices comprised of compute units that
-                                                                   ///< share a level 4 data cache.
-    UR_DEVICE_AFFINITY_DOMAIN_FLAG_L3_CACHE = UR_BIT(2),           ///< Split the device into sub devices comprised of compute units that
-                                                                   ///< share a level 3 data cache.
-    UR_DEVICE_AFFINITY_DOMAIN_FLAG_L2_CACHE = UR_BIT(3),           ///< Split the device into sub devices comprised of compute units that
-                                                                   ///< share a level 2 data cache.
-    UR_DEVICE_AFFINITY_DOMAIN_FLAG_L1_CACHE = UR_BIT(4),           ///< Split the device into sub devices comprised of compute units that
-                                                                   ///< share a level 1 data cache.
-    UR_DEVICE_AFFINITY_DOMAIN_FLAG_NEXT_PARTITIONABLE = UR_BIT(5), ///< Split the device along the next partitionable affinity domain.
-                                                                   ///< The implementation shall find the first level along which the device
-                                                                   ///< or sub device may be further subdivided in the order:
-                                                                   ///< ::UR_DEVICE_AFFINITY_DOMAIN_FLAG_NUMA,
-                                                                   ///< ::UR_DEVICE_AFFINITY_DOMAIN_FLAG_L4_CACHE,
-                                                                   ///< ::UR_DEVICE_AFFINITY_DOMAIN_FLAG_L3_CACHE,
-                                                                   ///< ::UR_DEVICE_AFFINITY_DOMAIN_FLAG_L2_CACHE,
-                                                                   ///< ::UR_DEVICE_AFFINITY_DOMAIN_FLAG_L1_CACHE,
-                                                                   ///< and partition the device into sub devices comprised of compute units
-                                                                   ///< that share memory subsystems at this level.
-    /// @cond
-    UR_DEVICE_AFFINITY_DOMAIN_FLAG_FORCE_UINT32 = 0x7fffffff
-    /// @endcond
-
-} ur_device_affinity_domain_flag_t;
-/// @brief Bit Mask for validating ur_device_affinity_domain_flags_t
-#define UR_DEVICE_AFFINITY_DOMAIN_FLAGS_MASK 0xffffffc0
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Return platform native device handle.
@@ -6879,7 +6933,7 @@ typedef struct ur_device_release_params_t {
 ///     allowing the callback the ability to modify the parameter's value
 typedef struct ur_device_partition_params_t {
     ur_device_handle_t *phDevice;
-    const ur_device_partition_property_t **ppProperties;
+    const ur_device_partition_desc_t **ppProperties;
     uint32_t *pNumDevices;
     ur_device_handle_t **pphSubDevices;
     uint32_t **ppNumDevicesRet;

@@ -219,6 +219,11 @@ class ur_structure_type_v(IntEnum):
     KERNEL_NATIVE_PROPERTIES = 17                   ## ::ur_kernel_native_properties_t
     QUEUE_NATIVE_PROPERTIES = 18                    ## ::ur_queue_native_properties_t
     MEM_NATIVE_PROPERTIES = 19                      ## ::ur_mem_native_properties_t
+    DEVICE_PARTITION_DESC = 20                      ## ::ur_device_partition_desc_t
+    DEVICE_PARTITION_EQUALLY_DESC = 21              ## ::ur_device_partition_equally_desc_t
+    DEVICE_PARTITION_BY_COUNTS_DESC = 22            ## ::ur_device_partition_by_counts_desc_t
+    DEVICE_PARTITION_BY_AFFINITY_DOMAIN_DESC = 23   ## ::ur_device_partition_by_affinity_domain_desc_t
+    DEVICE_PARTITION_BY_CSLICE_DESC = 24            ## ::ur_device_partition_by_cslice_desc_t
 
 class ur_structure_type_t(c_int):
     def __str__(self):
@@ -395,6 +400,35 @@ class ur_device_type_t(c_int):
 
 
 ###############################################################################
+## @brief Device affinity domain
+class ur_device_affinity_domain_flags_v(IntEnum):
+    NUMA = UR_BIT(0)                                ## Split the device into sub devices comprised of compute units that
+                                                    ## share a NUMA node.
+    L4_CACHE = UR_BIT(1)                            ## Split the device into sub devices comprised of compute units that
+                                                    ## share a level 4 data cache.
+    L3_CACHE = UR_BIT(2)                            ## Split the device into sub devices comprised of compute units that
+                                                    ## share a level 3 data cache.
+    L2_CACHE = UR_BIT(3)                            ## Split the device into sub devices comprised of compute units that
+                                                    ## share a level 2 data cache.
+    L1_CACHE = UR_BIT(4)                            ## Split the device into sub devices comprised of compute units that
+                                                    ## share a level 1 data cache.
+    NEXT_PARTITIONABLE = UR_BIT(5)                  ## Split the device along the next partitionable affinity domain. 
+                                                    ## The implementation shall find the first level along which the device
+                                                    ## or sub device may be further subdivided in the order: 
+                                                    ## ::UR_DEVICE_AFFINITY_DOMAIN_FLAG_NUMA,
+                                                    ## ::UR_DEVICE_AFFINITY_DOMAIN_FLAG_L4_CACHE,
+                                                    ## ::UR_DEVICE_AFFINITY_DOMAIN_FLAG_L3_CACHE,
+                                                    ## ::UR_DEVICE_AFFINITY_DOMAIN_FLAG_L2_CACHE,
+                                                    ## ::UR_DEVICE_AFFINITY_DOMAIN_FLAG_L1_CACHE, 
+                                                    ## and partition the device into sub devices comprised of compute units
+                                                    ## that share memory subsystems at this level. 
+
+class ur_device_affinity_domain_flags_t(c_int):
+    def __str__(self):
+        return hex(self.value)
+
+
+###############################################################################
 ## @brief Supported device info
 class ur_device_info_v(IntEnum):
     TYPE = 0                                        ## [::ur_device_type_t] type of the device
@@ -484,16 +518,16 @@ class ur_device_info_v(IntEnum):
     PREFERRED_INTEROP_USER_SYNC = 74                ## [::ur_bool_t] prefer user synchronization when sharing object with
                                                     ## other API
     PARENT_DEVICE = 75                              ## [::ur_device_handle_t] return parent device handle
-    PARTITION_PROPERTIES = 76                       ## [::ur_device_partition_property_t[]] Returns an array of partition
-                                                    ## types supported by the device
+    PARTITION_PROPERTIES = 76                       ## [::ur_device_partition_t[]] Returns an array of partition types
+                                                    ## supported by the device
     PARTITION_MAX_SUB_DEVICES = 77                  ## [uint32_t] maximum number of sub-devices when the device is
                                                     ## partitioned
     PARTITION_AFFINITY_DOMAIN = 78                  ## [::ur_device_affinity_domain_flags_t] Returns a bit-field of the
                                                     ## supported affinity domains for partitioning. 
                                                     ## If the device does not support any affinity domains, then 0 will be returned.
-    PARTITION_TYPE = 79                             ## [::ur_device_partition_property_t[]] return an array of
-                                                    ## ::ur_device_partition_property_t for properties specified in
-                                                    ## ::urDevicePartition
+    PARTITION_TYPE = 79                             ## [::ur_device_partition_desc_t*] return a pointer to the
+                                                    ## ::ur_device_partition_desc_t* for properties specified in
+                                                    ## ::urDevicePartition.
     MAX_NUM_SUB_GROUPS = 80                         ## [uint32_t] max number of sub groups
     SUB_GROUP_INDEPENDENT_FORWARD_PROGRESS = 81     ## [::ur_bool_t] support sub group independent forward progress
     SUB_GROUP_SIZES_INTEL = 82                      ## [uint32_t[]] return an array of sub group sizes supported on Intel
@@ -567,6 +601,55 @@ class ur_device_partition_t(c_int):
 
 
 ###############################################################################
+## @brief Device partition properties descriptor.
+class ur_device_partition_desc_t(Structure):
+    _fields_ = [
+        ("stype", ur_structure_type_t),                                 ## [in] type of this structure, must be
+                                                                        ## ::UR_STRUCTURE_TYPE_DEVICE_PARTITION_DESC
+        ("pNext", c_void_p)                                             ## [in][optional] pointer to extension-specific structure
+    ]
+
+###############################################################################
+## @brief Device partition equally descriptor.
+class ur_device_partition_equally_desc_t(Structure):
+    _fields_ = [
+        ("stype", ur_structure_type_t),                                 ## [in] type of this structure, must be
+                                                                        ## ::UR_STRUCTURE_TYPE_DEVICE_PARTITION_EQUALLY_DESC
+        ("pNext", c_void_p),                                            ## [in][optional] pointer to extension-specific structure
+        ("counts", c_ulong)                                             ## [in] n compute units per sub-device.
+    ]
+
+###############################################################################
+## @brief Device partition by counts descriptor
+class ur_device_partition_by_counts_desc_t(Structure):
+    _fields_ = [
+        ("stype", ur_structure_type_t),                                 ## [in] type of this structure, must be
+                                                                        ## ::UR_STRUCTURE_TYPE_DEVICE_PARTITION_BY_COUNTS_DESC
+        ("pNext", c_void_p),                                            ## [in][optional] pointer to extension-specific structure
+        ("counts", POINTER(c_ulong)),                                   ## [in] Array of counts of compute units per sub-device
+        ("size", c_size_t)                                              ## [in] Length of counts array.
+    ]
+
+###############################################################################
+## @brief Device partition by affinity domain descriptor.
+class ur_device_partition_by_affinity_domain_desc_t(Structure):
+    _fields_ = [
+        ("stype", ur_structure_type_t),                                 ## [in] type of this structure, must be
+                                                                        ## ::UR_STRUCTURE_TYPE_DEVICE_PARTITION_BY_AFFINITY_DOMAIN_DESC
+        ("pNext", c_void_p),                                            ## [in][optional] pointer to extension-specific structure
+        ("flags", ur_device_affinity_domain_flags_t)                    ## [in] Affinity domain flags
+    ]
+
+###############################################################################
+## @brief Device partition by compute slice
+class ur_device_partition_by_cslice_desc_t(Structure):
+    _fields_ = [
+        ("stype", ur_structure_type_t),                                 ## [in] type of this structure, must be
+                                                                        ## ::UR_STRUCTURE_TYPE_DEVICE_PARTITION_BY_CSLICE_DESC
+        ("pNext", c_void_p)                                             ## [in][optional] pointer to extension-specific structure
+    ]
+
+###############################################################################
 ## @brief FP capabilities
 class ur_device_fp_capability_flags_v(IntEnum):
     CORRECTLY_ROUNDED_DIVIDE_SQRT = UR_BIT(0)       ## Support correctly rounded divide and sqrt
@@ -614,35 +697,6 @@ class ur_device_exec_capability_flags_v(IntEnum):
     NATIVE_KERNEL = UR_BIT(1)                       ## Support native kernel execution
 
 class ur_device_exec_capability_flags_t(c_int):
-    def __str__(self):
-        return hex(self.value)
-
-
-###############################################################################
-## @brief Device affinity domain
-class ur_device_affinity_domain_flags_v(IntEnum):
-    NUMA = UR_BIT(0)                                ## Split the device into sub devices comprised of compute units that
-                                                    ## share a NUMA node.
-    L4_CACHE = UR_BIT(1)                            ## Split the device into sub devices comprised of compute units that
-                                                    ## share a level 4 data cache.
-    L3_CACHE = UR_BIT(2)                            ## Split the device into sub devices comprised of compute units that
-                                                    ## share a level 3 data cache.
-    L2_CACHE = UR_BIT(3)                            ## Split the device into sub devices comprised of compute units that
-                                                    ## share a level 2 data cache.
-    L1_CACHE = UR_BIT(4)                            ## Split the device into sub devices comprised of compute units that
-                                                    ## share a level 1 data cache.
-    NEXT_PARTITIONABLE = UR_BIT(5)                  ## Split the device along the next partitionable affinity domain. 
-                                                    ## The implementation shall find the first level along which the device
-                                                    ## or sub device may be further subdivided in the order: 
-                                                    ## ::UR_DEVICE_AFFINITY_DOMAIN_FLAG_NUMA,
-                                                    ## ::UR_DEVICE_AFFINITY_DOMAIN_FLAG_L4_CACHE,
-                                                    ## ::UR_DEVICE_AFFINITY_DOMAIN_FLAG_L3_CACHE,
-                                                    ## ::UR_DEVICE_AFFINITY_DOMAIN_FLAG_L2_CACHE,
-                                                    ## ::UR_DEVICE_AFFINITY_DOMAIN_FLAG_L1_CACHE, 
-                                                    ## and partition the device into sub devices comprised of compute units
-                                                    ## that share memory subsystems at this level. 
-
-class ur_device_affinity_domain_flags_t(c_int):
     def __str__(self):
         return hex(self.value)
 
@@ -2666,9 +2720,9 @@ else:
 ###############################################################################
 ## @brief Function-pointer for urDevicePartition
 if __use_win_types:
-    _urDevicePartition_t = WINFUNCTYPE( ur_result_t, ur_device_handle_t, POINTER(ur_device_partition_property_t), c_ulong, POINTER(ur_device_handle_t), POINTER(c_ulong) )
+    _urDevicePartition_t = WINFUNCTYPE( ur_result_t, ur_device_handle_t, POINTER(ur_device_partition_desc_t), c_ulong, POINTER(ur_device_handle_t), POINTER(c_ulong) )
 else:
-    _urDevicePartition_t = CFUNCTYPE( ur_result_t, ur_device_handle_t, POINTER(ur_device_partition_property_t), c_ulong, POINTER(ur_device_handle_t), POINTER(c_ulong) )
+    _urDevicePartition_t = CFUNCTYPE( ur_result_t, ur_device_handle_t, POINTER(ur_device_partition_desc_t), c_ulong, POINTER(ur_device_handle_t), POINTER(c_ulong) )
 
 ###############################################################################
 ## @brief Function-pointer for urDeviceSelectBinary
