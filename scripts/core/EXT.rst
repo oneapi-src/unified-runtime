@@ -4,7 +4,7 @@
     X=x.upper()
 %>
 ==============
- Extensions
+Extensions
 ==============
 
 Objective
@@ -87,5 +87,22 @@ the implementation will ignore extended structures that it does not support.
 
 The extension must document the specific structures and functions that may be extended using the structure chain.
 
+Adding an extension
+===================
 
-// TODO - list all extensions
+* Extend the specification with the functions, enumerations, macros, and structures required by the extension, ensuring that
+  all additions fully comply with the naming and ABI requirements detailed above.
+
+* Document the extension in `EXT_<ext-name>.rst` file based on the `EXT_Template.rst`, ensuring it is added to the list of
+  extensions below.
+
+* The extension will only be accepted if all conditions are met and its addition is agreed upon by the Working Group.
+
+
+List of Standard Extensions
+===========================
+// TODO - list all standard extensions
+
+List of Experimental Extensions
+===============================
+// TODO - list all experimental extensions

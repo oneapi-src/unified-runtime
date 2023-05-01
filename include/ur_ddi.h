@@ -61,14 +61,6 @@ typedef ur_result_t(UR_APICALL *ur_pfnPlatformGetBackendOption_t)(
     const char **);
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Function-pointer for urPlatformGetExtensionProperties
-typedef ur_result_t(UR_APICALL *ur_pfnPlatformGetExtensionProperties_t)(
-    ur_platform_handle_t,
-    uint32_t,
-    ur_extension_properties_t *,
-    uint32_t *);
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Table of Platform functions pointers
 typedef struct ur_platform_dditable_t {
     ur_pfnPlatformGet_t pfnGet;
@@ -77,7 +69,6 @@ typedef struct ur_platform_dditable_t {
     ur_pfnPlatformCreateWithNativeHandle_t pfnCreateWithNativeHandle;
     ur_pfnPlatformGetApiVersion_t pfnGetApiVersion;
     ur_pfnPlatformGetBackendOption_t pfnGetBackendOption;
-    ur_pfnPlatformGetExtensionProperties_t pfnGetExtensionProperties;
 } ur_platform_dditable_t;
 
 ///////////////////////////////////////////////////////////////////////////////

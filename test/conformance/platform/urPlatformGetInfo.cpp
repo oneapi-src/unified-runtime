@@ -28,6 +28,12 @@ TEST_P(urPlatformGetInfoTest, Success) {
     size_t size = 0;
     ur_platform_info_t info_type = GetParam();
     ASSERT_SUCCESS(urPlatformGetInfo(platform, info_type, 0, nullptr, &size));
+
+    // A platform that does not support any extensions can return a size of 0.
+    if (info_type == UR_PLATFORM_INFO_EXTENSIONS && size == 0) {
+        return;
+    }
+
     ASSERT_NE(size, 0);
     std::vector<char> name(size);
     ASSERT_SUCCESS(

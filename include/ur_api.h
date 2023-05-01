@@ -360,6 +360,20 @@ urTearDown(
 #pragma region platform
 #endif
 ///////////////////////////////////////////////////////////////////////////////
+#ifndef UR_MAX_EXTENSION_NAME_LENGTH
+/// @brief Extension name maximum length.
+#define UR_MAX_EXTENSION_NAME_LENGTH 256
+#endif // UR_MAX_EXTENSION_NAME_LENGTH
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Extension type.
+typedef struct ur_platform_extension_t {
+    char name[UR_MAX_EXTENSION_NAME_LENGTH]; ///< [in] null-terminated extension name.
+    uint32_t version;                        ///< [in] version of the extension using ::UR_MAKE_VERSION.
+
+} ur_platform_extension_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Retrieves all available platforms
 ///
 /// @details
@@ -398,8 +412,9 @@ typedef enum ur_platform_info_t {
                                       ///< size of the info needs to be dynamically queried.
     UR_PLATFORM_INFO_VERSION = 3,     ///< [char[]] The string denoting the version of the platform. The size of
                                       ///< the info needs to be dynamically queried.
-    UR_PLATFORM_INFO_EXTENSIONS = 4,  ///< [char[]] The string denoting extensions supported by the platform. The
-                                      ///< size of the info needs to be dynamically queried.
+    UR_PLATFORM_INFO_EXTENSIONS = 4,  ///< [::ur_platform_extension_t[]] an array of ::ur_platform_extension_t
+                                      ///< which express which extensions supported by the platform.
+                                      ///< The size of the info needs to be dynamically queried.
     UR_PLATFORM_INFO_PROFILE = 5,     ///< [char[]] The string denoting profile of the platform. The size of the
                                       ///< info needs to be dynamically queried.
     UR_PLATFORM_INFO_BACKEND = 6,     ///< [::ur_platform_backend_t] The backend of the platform. Identifies the
@@ -605,41 +620,6 @@ typedef enum ur_platform_backend_t {
     /// @endcond
 
 } ur_platform_backend_t;
-
-///////////////////////////////////////////////////////////////////////////////
-#ifndef UR_MAX_EXTENSION_NAME_LENGTH
-/// @brief Extension name maximum length.
-#define UR_MAX_EXTENSION_NAME_LENGTH 256
-#endif // UR_MAX_EXTENSION_NAME_LENGTH
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Extension properties.
-typedef struct ur_extension_properties_t {
-    ur_structure_type_t stype;               ///< [in] type of this structure, must be
-                                             ///< ::UR_STRUCTURE_TYPE_EXTENSION_PROPERTIES
-    void *pNext;                             ///< [in,out][optional] pointer to extension-specific structure
-    char name[UR_MAX_EXTENSION_NAME_LENGTH]; ///< [in] null-terminated extension name.
-    uint32_t version;                        ///< [in] version of the extension using ::UR_MAKE_VERSION.
-
-} ur_extension_properties_t;
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Retrieve the set of supported extensions.
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_UNINITIALIZED
-///     - ::UR_RESULT_ERROR_DEVICE_LOST
-///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
-///         + `NULL == hPlatform`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPlatformGetExtensionProperties(
-    ur_platform_handle_t hPlatform,                  ///< [in] handle to the platform.
-    uint32_t count,                                  ///< [in] number of extension properties to fetch.
-    ur_extension_properties_t *pExtensionProperties, ///< [out][optional] array of supported extension.
-    uint32_t *pCountRet                              ///< [out][optional] will be updated with the total count of supported
-                                                     ///< extensions.
-);
 
 #if !defined(__GNUC__)
 #pragma endregion
@@ -5705,17 +5685,6 @@ typedef struct ur_platform_get_backend_option_params_t {
     const char **ppFrontendOption;
     const char ***pppPlatformOption;
 } ur_platform_get_backend_option_params_t;
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function parameters for urPlatformGetExtensionProperties
-/// @details Each entry is a pointer to the parameter passed to the function;
-///     allowing the callback the ability to modify the parameter's value
-typedef struct ur_platform_get_extension_properties_params_t {
-    ur_platform_handle_t *phPlatform;
-    uint32_t *pcount;
-    ur_extension_properties_t **ppExtensionProperties;
-    uint32_t **ppCountRet;
-} ur_platform_get_extension_properties_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urContextCreate

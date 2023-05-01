@@ -274,6 +274,18 @@ class ur_device_init_flags_t(c_int):
 
 
 ###############################################################################
+## @brief Extension name maximum length.
+UR_MAX_EXTENSION_NAME_LENGTH = 256
+
+###############################################################################
+## @brief Extension type.
+class ur_platform_extension_t(Structure):
+    _fields_ = [
+        ("name", c_char * UR_MAX_EXTENSION_NAME_LENGTH),                ## [in] null-terminated extension name.
+        ("version", c_ulong)                                            ## [in] version of the extension using ::UR_MAKE_VERSION.
+    ]
+
+###############################################################################
 ## @brief Supported platform info
 class ur_platform_info_v(IntEnum):
     NAME = 1                                        ## [char[]] The string denoting name of the platform. The size of the
@@ -282,8 +294,9 @@ class ur_platform_info_v(IntEnum):
                                                     ## size of the info needs to be dynamically queried.
     VERSION = 3                                     ## [char[]] The string denoting the version of the platform. The size of
                                                     ## the info needs to be dynamically queried.
-    EXTENSIONS = 4                                  ## [char[]] The string denoting extensions supported by the platform. The
-                                                    ## size of the info needs to be dynamically queried.
+    EXTENSIONS = 4                                  ## [::ur_platform_extension_t[]] an array of ::ur_platform_extension_t
+                                                    ## which express which extensions supported by the platform. 
+                                                    ## The size of the info needs to be dynamically queried.
     PROFILE = 5                                     ## [char[]] The string denoting profile of the platform. The size of the
                                                     ## info needs to be dynamically queried.
     BACKEND = 6                                     ## [::ur_platform_backend_t] The backend of the platform. Identifies the
@@ -322,21 +335,6 @@ class ur_platform_backend_t(c_int):
     def __str__(self):
         return str(ur_platform_backend_v(self.value))
 
-
-###############################################################################
-## @brief Extension name maximum length.
-UR_MAX_EXTENSION_NAME_LENGTH = 256
-
-###############################################################################
-## @brief Extension properties.
-class ur_extension_properties_t(Structure):
-    _fields_ = [
-        ("stype", ur_structure_type_t),                                 ## [in] type of this structure, must be
-                                                                        ## ::UR_STRUCTURE_TYPE_EXTENSION_PROPERTIES
-        ("pNext", c_void_p),                                            ## [in,out][optional] pointer to extension-specific structure
-        ("name", c_char * UR_MAX_EXTENSION_NAME_LENGTH),                ## [in] null-terminated extension name.
-        ("version", c_ulong)                                            ## [in] version of the extension using ::UR_MAKE_VERSION.
-    ]
 
 ###############################################################################
 ## @brief Target identification strings for
@@ -1767,13 +1765,6 @@ if __use_win_types:
 else:
     _urPlatformGetBackendOption_t = CFUNCTYPE( ur_result_t, ur_platform_handle_t, c_char_p, POINTER(c_char_p) )
 
-###############################################################################
-## @brief Function-pointer for urPlatformGetExtensionProperties
-if __use_win_types:
-    _urPlatformGetExtensionProperties_t = WINFUNCTYPE( ur_result_t, ur_platform_handle_t, c_ulong, POINTER(ur_extension_properties_t), POINTER(c_ulong) )
-else:
-    _urPlatformGetExtensionProperties_t = CFUNCTYPE( ur_result_t, ur_platform_handle_t, c_ulong, POINTER(ur_extension_properties_t), POINTER(c_ulong) )
-
 
 ###############################################################################
 ## @brief Table of Platform functions pointers
@@ -1784,8 +1775,7 @@ class ur_platform_dditable_t(Structure):
         ("pfnGetNativeHandle", c_void_p),                               ## _urPlatformGetNativeHandle_t
         ("pfnCreateWithNativeHandle", c_void_p),                        ## _urPlatformCreateWithNativeHandle_t
         ("pfnGetApiVersion", c_void_p),                                 ## _urPlatformGetApiVersion_t
-        ("pfnGetBackendOption", c_void_p),                              ## _urPlatformGetBackendOption_t
-        ("pfnGetExtensionProperties", c_void_p)                         ## _urPlatformGetExtensionProperties_t
+        ("pfnGetBackendOption", c_void_p)                               ## _urPlatformGetBackendOption_t
     ]
 
 ###############################################################################
@@ -2784,7 +2774,6 @@ class UR_DDI:
         self.urPlatformCreateWithNativeHandle = _urPlatformCreateWithNativeHandle_t(self.__dditable.Platform.pfnCreateWithNativeHandle)
         self.urPlatformGetApiVersion = _urPlatformGetApiVersion_t(self.__dditable.Platform.pfnGetApiVersion)
         self.urPlatformGetBackendOption = _urPlatformGetBackendOption_t(self.__dditable.Platform.pfnGetBackendOption)
-        self.urPlatformGetExtensionProperties = _urPlatformGetExtensionProperties_t(self.__dditable.Platform.pfnGetExtensionProperties)
 
         # call driver to get function pointers
         Context = ur_context_dditable_t()
