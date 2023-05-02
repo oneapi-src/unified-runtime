@@ -368,8 +368,8 @@ urTearDown(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Extension type.
 typedef struct ur_platform_extension_t {
-    char name[UR_MAX_EXTENSION_NAME_LENGTH]; ///< [in] null-terminated extension name.
-    uint32_t version;                        ///< [in] version of the extension using ::UR_MAKE_VERSION.
+    char *name;       ///< [in] null-terminated extension name.
+    uint32_t version; ///< [in] version of the extension using ::UR_MAKE_VERSION.
 
 } ur_platform_extension_t;
 

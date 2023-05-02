@@ -281,7 +281,7 @@ UR_MAX_EXTENSION_NAME_LENGTH = 256
 ## @brief Extension type.
 class ur_platform_extension_t(Structure):
     _fields_ = [
-        ("name", c_char * UR_MAX_EXTENSION_NAME_LENGTH),                ## [in] null-terminated extension name.
+        ("name", c_char_p),                                             ## [in] null-terminated extension name.
         ("version", c_ulong)                                            ## [in] version of the extension using ::UR_MAKE_VERSION.
     ]
 

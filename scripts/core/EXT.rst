@@ -15,7 +15,7 @@ without affecting the core specification. Extensions may in future be promoted t
 in a later version of Unified Runtime, when agreed upon by the Working Group. All extensions are 
 optional and are not required to be implemented by any particular adapter, but are expected to 
 be widely available and possibly be required in a future version of the specification. Adapters 
-must report which extensions are supported through the ${x}PlatformGetExtensionProperties query.
+must report which extensions are supported through the ${X}_PLATFORM_INFO_EXTENSIONS platform info query.
 Each extension may also impose additional restrictions on when it can be used - i.e. a platform
 or device query.
 
@@ -29,7 +29,7 @@ Requirements
 ============
 
 - Extensions must use globally unique names for macros, enums, structures and functions
-- Extensions must have globally unique extension names reported from ${x}PlatformGetExtensionProperties
+- Extensions must have globally unique extension names reported from ${X}_PLATFORM_INFO_EXTENSIONS platform info query
 - All extensions must be defined in this specification
 - Extensions must not break backwards compatibility of the core APIs
 - Standard extension versions must be backwards compatible with prior versions

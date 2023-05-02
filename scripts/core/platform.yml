@@ -20,8 +20,9 @@ desc: "Extension type."
 name: $x_platform_extension_t
 class: $xPlatform
 members:
-    - type: char
-      name: name[$X_MAX_EXTENSION_NAME_LENGTH]
+    # TODO - this should be char[], but haven't got it to work with generator yet
+    - type: char*
+      name: name
       desc: "[in] null-terminated extension name."
     - type: uint32_t
       name: version

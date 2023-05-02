@@ -941,9 +941,9 @@ inline std::ostream &operator<<(std::ostream &os,
                                 const struct ur_platform_extension_t params) {
     os << "(struct ur_platform_extension_t){";
 
-    os << ".name[UR_MAX_EXTENSION_NAME_LENGTH] = ";
+    os << ".name = ";
 
-    os << (params.name[UR_MAX_EXTENSION_NAME_LENGTH]);
+    ur_params::serializePtr(os, (params.name));
 
     os << ", ";
     os << ".version = ";
