@@ -35,26 +35,29 @@ struct pool_descriptor {
 
 static inline std::pair<ur_result_t, std::vector<ur_device_handle_t>>
 urGetSubDevices(ur_device_handle_t hDevice) {
-    size_t nComputeUnits;
+    uint32_t nComputeUnits;
     auto ret = urDeviceGetInfo(hDevice, UR_DEVICE_INFO_MAX_COMPUTE_UNITS,
                                sizeof(nComputeUnits), &nComputeUnits, nullptr);
     if (ret != UR_RESULT_SUCCESS) {
         return {ret, {}};
     }
 
-    ur_device_partition_property_t properties[] = {
-        UR_DEVICE_PARTITION_EQUALLY,
-        static_cast<ur_device_partition_property_t>(nComputeUnits), 0};
+    ur_device_partition_equally_desc_t part_eq_desc{
+        UR_STRUCTURE_TYPE_DEVICE_PARTITION_EQUALLY_DESC, nullptr,
+        nComputeUnits};
+
+    ur_device_partition_desc_t part_desc{
+        UR_STRUCTURE_TYPE_DEVICE_PARTITION_DESC, &part_eq_desc};
 
     // Get the number of devices that will be created
     uint32_t deviceCount;
-    ret = urDevicePartition(hDevice, properties, 0, nullptr, &deviceCount);
+    ret = urDevicePartition(hDevice, &part_desc, 0, nullptr, &deviceCount);
     if (ret != UR_RESULT_SUCCESS) {
         return {ret, {}};
     }
 
     std::vector<ur_device_handle_t> sub_devices(deviceCount);
-    ret = urDevicePartition(hDevice, properties,
+    ret = urDevicePartition(hDevice, &part_desc,
                             static_cast<uint32_t>(sub_devices.size()),
                             sub_devices.data(), nullptr);
     if (ret != UR_RESULT_SUCCESS) {
@@ -135,7 +138,7 @@ inline bool pool_descriptor::equal(const pool_descriptor &lhs,
            (isSharedAllocationReadOnlyOnDevice(lhs) ==
             isSharedAllocationReadOnlyOnDevice(rhs)) &&
            lhs.poolHandle == rhs.poolHandle;
-};
+}
 
 inline std::size_t pool_descriptor::hash(const pool_descriptor &desc) {
     ur_native_handle_t native;
@@ -147,7 +150,7 @@ inline std::size_t pool_descriptor::hash(const pool_descriptor &desc) {
     return combine_hashes(0, desc.type, native,
                           isSharedAllocationReadOnlyOnDevice(desc),
                           desc.poolHandle);
-};
+}
 
 inline std::pair<ur_result_t, std::vector<pool_descriptor>>
 pool_descriptor::create(ur_usm_pool_handle_t poolHandle,

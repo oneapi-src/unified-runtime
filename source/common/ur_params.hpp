@@ -3280,10 +3280,6 @@ inline std::ostream &operator<<(std::ostream &os,
         os << "UR_DEVICE_PARTITION_BY_COUNTS";
         break;
 
-    case UR_DEVICE_PARTITION_BY_COUNTS_LIST_END:
-        os << "UR_DEVICE_PARTITION_BY_COUNTS_LIST_END";
-        break;
-
     case UR_DEVICE_PARTITION_BY_AFFINITY_DOMAIN:
         os << "UR_DEVICE_PARTITION_BY_AFFINITY_DOMAIN";
         break;
