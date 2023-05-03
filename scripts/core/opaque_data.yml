@@ -1,0 +1,33 @@
+#
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: MIT
+#
+# See YaML.md for syntax definition
+#
+--- #--------------------------------------------------------------------------
+type: header
+desc: "Intel $OneApi Unified Runtime APIs for Platform"
+ordinal: "2"
+--- #--------------------------------------------------------------------------
+type: macro
+desc: "Opaque Data extension."
+name: $X_OPAQUE_DATA_EXT_NAME
+value: '"$x_ext_opaque_data"'
+--- #--------------------------------------------------------------------------
+type: function
+desc: "Get Opaque data from the platform."
+class: $xPlatform
+name: GetOpaqueDataExt
+decl: static
+ordinal: "0"
+details: "Some details."
+params:
+  - type: void*
+    name: pOpaqueDataParam
+    desc: |
+          [in] unspecified argument, interpretation is specific per adapter.
+  - type: void**
+    name: ppOpaqueDataReturn
+    desc: |
+          [out] placeholder for the returned opaque data.

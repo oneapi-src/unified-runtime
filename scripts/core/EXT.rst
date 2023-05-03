@@ -1,4 +1,7 @@
 <%
+import re
+from templates import helper as th
+%><%
     OneApi=tags['$OneApi']
     x=tags['$x']
     X=x.upper()
@@ -78,7 +81,7 @@ convention and values should be assigned to avoid future compatibility issues.
 Extending Structures
 --------------------
 
-Any structure derived from `${x}_base_desc_t`` or `${x}_base_properties_t`` can be extended using a structure chain
+Any structure derived from ``${x}_base_desc_t`` or ``${x}_base_properties_t`` can be extended using a structure chain
 by adding a pointer to the extended structure in `pNext` member variable. No other method of extending structures is allowed.
 
 A structure chain can contain more than one extension structure, in any order. Therefore, extensions should not
@@ -101,7 +104,13 @@ Adding an extension
 
 List of Standard Extensions
 ===========================
-// TODO - list all standard extensions
+%for name in meta['macro']:
+%if name.endswith('EXT_NAME'):
+
+    - :ref:`${th.subt(namesapce, tags, meta['macro'][name]['values'][0])} <${th.subt(namesapce, tags, name)}>`
+
+%endif
+%endfor
 
 List of Experimental Extensions
 ===============================

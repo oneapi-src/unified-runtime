@@ -7510,6 +7510,10 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_function_t value) {
         os << "UR_FUNCTION_MEM_GET_NATIVE_HANDLE";
         break;
 
+    case UR_FUNCTION_PLATFORM_GET_OPAQUE_DATA_EXT:
+        os << "UR_FUNCTION_PLATFORM_GET_OPAQUE_DATA_EXT";
+        break;
+
     case UR_FUNCTION_MEM_GET_INFO:
         os << "UR_FUNCTION_MEM_GET_INFO";
         break;
@@ -10231,6 +10235,22 @@ inline std::ostream &operator<<(
 
 inline std::ostream &
 operator<<(std::ostream &os,
+           const struct ur_platform_get_opaque_data_ext_params_t *params) {
+
+    os << ".pOpaqueDataParam = ";
+
+    ur_params::serializePtr(os, *(params->ppOpaqueDataParam));
+
+    os << ", ";
+    os << ".ppOpaqueDataReturn = ";
+
+    ur_params::serializePtr(os, *(params->pppOpaqueDataReturn));
+
+    return os;
+}
+
+inline std::ostream &
+operator<<(std::ostream &os,
            const struct ur_platform_get_api_version_params_t *params) {
 
     os << ".hDriver = ";
@@ -11484,6 +11504,9 @@ inline int serializeFunctionParams(std::ostream &os, uint32_t function,
     case UR_FUNCTION_PLATFORM_CREATE_WITH_NATIVE_HANDLE: {
         os << (const struct ur_platform_create_with_native_handle_params_t *)
                 params;
+    } break;
+    case UR_FUNCTION_PLATFORM_GET_OPAQUE_DATA_EXT: {
+        os << (const struct ur_platform_get_opaque_data_ext_params_t *)params;
     } break;
     case UR_FUNCTION_PLATFORM_GET_API_VERSION: {
         os << (const struct ur_platform_get_api_version_params_t *)params;

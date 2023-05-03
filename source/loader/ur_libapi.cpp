@@ -684,6 +684,34 @@ ur_result_t UR_APICALL urDeviceGetGlobalTimestamps(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Get Opaque data from the platform.
+///
+/// @details
+/// Some details.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pOpaqueDataParam`
+///         + `NULL == ppOpaqueDataReturn`
+ur_result_t UR_APICALL urPlatformGetOpaqueDataExt(
+    void *
+        pOpaqueDataParam, ///< [in] unspecified argument, interpretation is specific per adapter.
+    void *
+        *ppOpaqueDataReturn ///< [out] placeholder for the returned opaque data.
+) {
+    auto pfnGetOpaqueDataExt =
+        ur_lib::context->urDdiTable.Platform.pfnGetOpaqueDataExt;
+    if (nullptr == pfnGetOpaqueDataExt) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    return pfnGetOpaqueDataExt(pOpaqueDataParam, ppOpaqueDataReturn);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Creates a context with the given devices.
 ///
 /// @details

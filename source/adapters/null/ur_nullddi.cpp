@@ -452,6 +452,28 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetGlobalTimestamps(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urPlatformGetOpaqueDataExt
+__urdlllocal ur_result_t UR_APICALL urPlatformGetOpaqueDataExt(
+    void *
+        pOpaqueDataParam, ///< [in] unspecified argument, interpretation is specific per adapter.
+    void *
+        *ppOpaqueDataReturn ///< [out] placeholder for the returned opaque data.
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // if the driver has created a custom function, then call it instead of using the generic path
+    auto pfnGetOpaqueDataExt =
+        d_context.urDdiTable.Platform.pfnGetOpaqueDataExt;
+    if (nullptr != pfnGetOpaqueDataExt) {
+        result = pfnGetOpaqueDataExt(pOpaqueDataParam, ppOpaqueDataReturn);
+    } else {
+        // generic implementation
+    }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urContextCreate
 __urdlllocal ur_result_t UR_APICALL urContextCreate(
     uint32_t DeviceCount, ///< [in] the number of devices given in phDevices
@@ -3435,6 +3457,8 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetPlatformProcAddrTable(
 
     pDdiTable->pfnCreateWithNativeHandle =
         driver::urPlatformCreateWithNativeHandle;
+
+    pDdiTable->pfnGetOpaqueDataExt = driver::urPlatformGetOpaqueDataExt;
 
     pDdiTable->pfnGetApiVersion = driver::urPlatformGetApiVersion;
 

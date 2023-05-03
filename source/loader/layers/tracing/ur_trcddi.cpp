@@ -549,6 +549,36 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetGlobalTimestamps(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urPlatformGetOpaqueDataExt
+__urdlllocal ur_result_t UR_APICALL urPlatformGetOpaqueDataExt(
+    void *
+        pOpaqueDataParam, ///< [in] unspecified argument, interpretation is specific per adapter.
+    void *
+        *ppOpaqueDataReturn ///< [out] placeholder for the returned opaque data.
+) {
+    auto pfnGetOpaqueDataExt = context.urDdiTable.Platform.pfnGetOpaqueDataExt;
+
+    if (nullptr == pfnGetOpaqueDataExt) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    ur_platform_get_opaque_data_ext_params_t params = {&pOpaqueDataParam,
+                                                       &ppOpaqueDataReturn};
+    uint64_t instance =
+        context.notify_begin(UR_FUNCTION_PLATFORM_GET_OPAQUE_DATA_EXT,
+                             "urPlatformGetOpaqueDataExt", &params);
+
+    ur_result_t result =
+        pfnGetOpaqueDataExt(pOpaqueDataParam, ppOpaqueDataReturn);
+
+    context.notify_end(UR_FUNCTION_PLATFORM_GET_OPAQUE_DATA_EXT,
+                       "urPlatformGetOpaqueDataExt", &params, &result,
+                       instance);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urContextCreate
 __urdlllocal ur_result_t UR_APICALL urContextCreate(
     uint32_t DeviceCount, ///< [in] the number of devices given in phDevices
@@ -4218,6 +4248,10 @@ __urdlllocal ur_result_t UR_APICALL urGetPlatformProcAddrTable(
     dditable.pfnCreateWithNativeHandle = pDdiTable->pfnCreateWithNativeHandle;
     pDdiTable->pfnCreateWithNativeHandle =
         ur_tracing_layer::urPlatformCreateWithNativeHandle;
+
+    dditable.pfnGetOpaqueDataExt = pDdiTable->pfnGetOpaqueDataExt;
+    pDdiTable->pfnGetOpaqueDataExt =
+        ur_tracing_layer::urPlatformGetOpaqueDataExt;
 
     dditable.pfnGetApiVersion = pDdiTable->pfnGetApiVersion;
     pDdiTable->pfnGetApiVersion = ur_tracing_layer::urPlatformGetApiVersion;

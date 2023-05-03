@@ -1306,6 +1306,38 @@ typedef enum ur_device_usm_access_capability_flag_t {
 #if !defined(__GNUC__)
 #pragma endregion
 #endif
+// Intel 'oneAPI' Unified Runtime APIs for Platform
+#if !defined(__GNUC__)
+#pragma region opaque_data
+#endif
+///////////////////////////////////////////////////////////////////////////////
+#ifndef UR_OPAQUE_DATA_EXT_NAME
+/// @brief Opaque Data extension.
+#define UR_OPAQUE_DATA_EXT_NAME "ur_ext_opaque_data"
+#endif // UR_OPAQUE_DATA_EXT_NAME
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get Opaque data from the platform.
+///
+/// @details
+/// Some details.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pOpaqueDataParam`
+///         + `NULL == ppOpaqueDataReturn`
+UR_APIEXPORT ur_result_t UR_APICALL
+urPlatformGetOpaqueDataExt(
+    void *pOpaqueDataParam,   ///< [in] unspecified argument, interpretation is specific per adapter.
+    void **ppOpaqueDataReturn ///< [out] placeholder for the returned opaque data.
+);
+
+#if !defined(__GNUC__)
+#pragma endregion
+#endif
 // Intel 'oneAPI' Unified Runtime APIs for Context
 #if !defined(__GNUC__)
 #pragma region context
@@ -4457,6 +4489,7 @@ typedef enum ur_function_t {
     UR_FUNCTION_MEM_RELEASE = 66,                           ///< Enumerator for ::urMemRelease
     UR_FUNCTION_MEM_BUFFER_PARTITION = 67,                  ///< Enumerator for ::urMemBufferPartition
     UR_FUNCTION_MEM_GET_NATIVE_HANDLE = 68,                 ///< Enumerator for ::urMemGetNativeHandle
+    UR_FUNCTION_PLATFORM_GET_OPAQUE_DATA_EXT = 69,          ///< Enumerator for ::urPlatformGetOpaqueDataExt
     UR_FUNCTION_MEM_GET_INFO = 70,                          ///< Enumerator for ::urMemGetInfo
     UR_FUNCTION_MEM_IMAGE_GET_INFO = 71,                    ///< Enumerator for ::urMemImageGetInfo
     UR_FUNCTION_PLATFORM_GET = 72,                          ///< Enumerator for ::urPlatformGet
@@ -5666,6 +5699,15 @@ typedef struct ur_platform_create_with_native_handle_params_t {
     ur_native_handle_t *phNativePlatform;
     ur_platform_handle_t **pphPlatform;
 } ur_platform_create_with_native_handle_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urPlatformGetOpaqueDataExt
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_platform_get_opaque_data_ext_params_t {
+    void **ppOpaqueDataParam;
+    void ***pppOpaqueDataReturn;
+} ur_platform_get_opaque_data_ext_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urPlatformGetApiVersion

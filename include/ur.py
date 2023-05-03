@@ -702,6 +702,10 @@ class ur_device_usm_access_capability_flags_t(c_int):
 
 
 ###############################################################################
+## @brief Opaque Data extension.
+UR_OPAQUE_DATA_EXT_NAME = "ur_ext_opaque_data"
+
+###############################################################################
 ## @brief Context property type
 class ur_context_flags_v(IntEnum):
     TBD = UR_BIT(0)                                 ## reserved for future use
@@ -1645,6 +1649,7 @@ class ur_function_v(IntEnum):
     MEM_RELEASE = 66                                ## Enumerator for ::urMemRelease
     MEM_BUFFER_PARTITION = 67                       ## Enumerator for ::urMemBufferPartition
     MEM_GET_NATIVE_HANDLE = 68                      ## Enumerator for ::urMemGetNativeHandle
+    PLATFORM_GET_OPAQUE_DATA_EXT = 69               ## Enumerator for ::urPlatformGetOpaqueDataExt
     MEM_GET_INFO = 70                               ## Enumerator for ::urMemGetInfo
     MEM_IMAGE_GET_INFO = 71                         ## Enumerator for ::urMemImageGetInfo
     PLATFORM_GET = 72                               ## Enumerator for ::urPlatformGet
@@ -1752,6 +1757,13 @@ else:
     _urPlatformCreateWithNativeHandle_t = CFUNCTYPE( ur_result_t, ur_native_handle_t, POINTER(ur_platform_handle_t) )
 
 ###############################################################################
+## @brief Function-pointer for urPlatformGetOpaqueDataExt
+if __use_win_types:
+    _urPlatformGetOpaqueDataExt_t = WINFUNCTYPE( ur_result_t, c_void_p, POINTER(c_void_p) )
+else:
+    _urPlatformGetOpaqueDataExt_t = CFUNCTYPE( ur_result_t, c_void_p, POINTER(c_void_p) )
+
+###############################################################################
 ## @brief Function-pointer for urPlatformGetApiVersion
 if __use_win_types:
     _urPlatformGetApiVersion_t = WINFUNCTYPE( ur_result_t, ur_platform_handle_t, POINTER(ur_api_version_t) )
@@ -1774,6 +1786,7 @@ class ur_platform_dditable_t(Structure):
         ("pfnGetInfo", c_void_p),                                       ## _urPlatformGetInfo_t
         ("pfnGetNativeHandle", c_void_p),                               ## _urPlatformGetNativeHandle_t
         ("pfnCreateWithNativeHandle", c_void_p),                        ## _urPlatformCreateWithNativeHandle_t
+        ("pfnGetOpaqueDataExt", c_void_p),                              ## _urPlatformGetOpaqueDataExt_t
         ("pfnGetApiVersion", c_void_p),                                 ## _urPlatformGetApiVersion_t
         ("pfnGetBackendOption", c_void_p)                               ## _urPlatformGetBackendOption_t
     ]
@@ -2772,6 +2785,7 @@ class UR_DDI:
         self.urPlatformGetInfo = _urPlatformGetInfo_t(self.__dditable.Platform.pfnGetInfo)
         self.urPlatformGetNativeHandle = _urPlatformGetNativeHandle_t(self.__dditable.Platform.pfnGetNativeHandle)
         self.urPlatformCreateWithNativeHandle = _urPlatformCreateWithNativeHandle_t(self.__dditable.Platform.pfnCreateWithNativeHandle)
+        self.urPlatformGetOpaqueDataExt = _urPlatformGetOpaqueDataExt_t(self.__dditable.Platform.pfnGetOpaqueDataExt)
         self.urPlatformGetApiVersion = _urPlatformGetApiVersion_t(self.__dditable.Platform.pfnGetApiVersion)
         self.urPlatformGetBackendOption = _urPlatformGetBackendOption_t(self.__dditable.Platform.pfnGetBackendOption)
 

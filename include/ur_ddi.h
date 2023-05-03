@@ -48,6 +48,12 @@ typedef ur_result_t(UR_APICALL *ur_pfnPlatformCreateWithNativeHandle_t)(
     ur_platform_handle_t *);
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for urPlatformGetOpaqueDataExt
+typedef ur_result_t(UR_APICALL *ur_pfnPlatformGetOpaqueDataExt_t)(
+    void *,
+    void **);
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Function-pointer for urPlatformGetApiVersion
 typedef ur_result_t(UR_APICALL *ur_pfnPlatformGetApiVersion_t)(
     ur_platform_handle_t,
@@ -67,6 +73,7 @@ typedef struct ur_platform_dditable_t {
     ur_pfnPlatformGetInfo_t pfnGetInfo;
     ur_pfnPlatformGetNativeHandle_t pfnGetNativeHandle;
     ur_pfnPlatformCreateWithNativeHandle_t pfnCreateWithNativeHandle;
+    ur_pfnPlatformGetOpaqueDataExt_t pfnGetOpaqueDataExt;
     ur_pfnPlatformGetApiVersion_t pfnGetApiVersion;
     ur_pfnPlatformGetBackendOption_t pfnGetBackendOption;
 } ur_platform_dditable_t;

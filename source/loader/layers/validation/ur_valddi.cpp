@@ -587,6 +587,36 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetGlobalTimestamps(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urPlatformGetOpaqueDataExt
+__urdlllocal ur_result_t UR_APICALL urPlatformGetOpaqueDataExt(
+    void *
+        pOpaqueDataParam, ///< [in] unspecified argument, interpretation is specific per adapter.
+    void *
+        *ppOpaqueDataReturn ///< [out] placeholder for the returned opaque data.
+) {
+    auto pfnGetOpaqueDataExt = context.urDdiTable.Platform.pfnGetOpaqueDataExt;
+
+    if (nullptr == pfnGetOpaqueDataExt) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    if (context.enableParameterValidation) {
+        if (NULL == pOpaqueDataParam) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (NULL == ppOpaqueDataReturn) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+    }
+
+    ur_result_t result =
+        pfnGetOpaqueDataExt(pOpaqueDataParam, ppOpaqueDataReturn);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urContextCreate
 __urdlllocal ur_result_t UR_APICALL urContextCreate(
     uint32_t DeviceCount, ///< [in] the number of devices given in phDevices
@@ -5118,6 +5148,10 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetPlatformProcAddrTable(
     dditable.pfnCreateWithNativeHandle = pDdiTable->pfnCreateWithNativeHandle;
     pDdiTable->pfnCreateWithNativeHandle =
         ur_validation_layer::urPlatformCreateWithNativeHandle;
+
+    dditable.pfnGetOpaqueDataExt = pDdiTable->pfnGetOpaqueDataExt;
+    pDdiTable->pfnGetOpaqueDataExt =
+        ur_validation_layer::urPlatformGetOpaqueDataExt;
 
     dditable.pfnGetApiVersion = pDdiTable->pfnGetApiVersion;
     pDdiTable->pfnGetApiVersion = ur_validation_layer::urPlatformGetApiVersion;
