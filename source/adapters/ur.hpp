@@ -22,16 +22,16 @@
 #include <ur_api.h>
 
 template <class To, class From> To ur_cast(From Value) {
-  // TODO: see if more sanity checks are possible.
-  assert(sizeof(From) == sizeof(To));
-  return (To)(Value);
+    // TODO: see if more sanity checks are possible.
+    assert(sizeof(From) == sizeof(To));
+    return (To)(Value);
 }
 
 template <> uint32_t inline ur_cast(uint64_t Value) {
-  // Cast value and check that we don't lose any information.
-  uint32_t CastedValue = (uint32_t)(Value);
-  assert((uint64_t)CastedValue == Value);
-  return CastedValue;
+    // Cast value and check that we don't lose any information.
+    uint32_t CastedValue = (uint32_t)(Value);
+    assert((uint64_t)CastedValue == Value);
+    return CastedValue;
 }
 
 // TODO: promote all of the below extensions to the Unified Runtime
@@ -92,75 +92,81 @@ const ur_kernel_exec_info_t UR_EXT_KERNEL_EXEC_INFO_CACHE_CONFIG =
     (ur_kernel_exec_info_t)(UR_KERNEL_EXEC_INFO_FORCE_UINT32 - 1);
 
 typedef enum {
-  // No preference for SLM or data cache.
-  UR_EXT_KERNEL_EXEC_INFO_CACHE_DEFAULT = 0x0,
-  // Large SLM size.
-  UR_EXT_KERNEL_EXEC_INFO_CACHE_LARGE_SLM = 0x1,
-  // Large General Data size.
-  UR_EXT_KERNEL_EXEC_INFO_CACHE_LARGE_DATA = 0x2
+    // No preference for SLM or data cache.
+    UR_EXT_KERNEL_EXEC_INFO_CACHE_DEFAULT = 0x0,
+    // Large SLM size.
+    UR_EXT_KERNEL_EXEC_INFO_CACHE_LARGE_SLM = 0x1,
+    // Large General Data size.
+    UR_EXT_KERNEL_EXEC_INFO_CACHE_LARGE_DATA = 0x2
 } ur_kernel_cache_config;
 
 // Terminates the process with a catastrophic error message.
 [[noreturn]] inline void die(const char *Message) {
-  std::cerr << "die: " << Message << std::endl;
-  std::terminate();
+    std::cerr << "die: " << Message << std::endl;
+    std::terminate();
 }
 
 // A single-threaded app has an opportunity to enable this mode to avoid
 // overhead from mutex locking. Default value is 0 which means that single
 // thread mode is disabled.
 static const bool SingleThreadMode = [] {
-  const char *Ret = std::getenv("SYCL_PI_LEVEL_ZERO_SINGLE_THREAD_MODE");
-  const bool RetVal = Ret ? std::stoi(Ret) : 0;
-  return RetVal;
+    const char *Ret = std::getenv("SYCL_PI_LEVEL_ZERO_SINGLE_THREAD_MODE");
+    const bool RetVal = Ret ? std::stoi(Ret) : 0;
+    return RetVal;
 }();
 
 // Class which acts like shared_mutex if SingleThreadMode variable is not set.
 // If SingleThreadMode variable is set then mutex operations are turned into
 // nop.
 class ur_shared_mutex {
-  std::shared_mutex Mutex;
+    std::shared_mutex Mutex;
 
-public:
-  void lock() {
-    if (!SingleThreadMode)
-      Mutex.lock();
-  }
-  bool try_lock() { return SingleThreadMode ? true : Mutex.try_lock(); }
-  void unlock() {
-    if (!SingleThreadMode)
-      Mutex.unlock();
-  }
+  public:
+    void lock() {
+        if (!SingleThreadMode) {
+            Mutex.lock();
+        }
+    }
+    bool try_lock() { return SingleThreadMode ? true : Mutex.try_lock(); }
+    void unlock() {
+        if (!SingleThreadMode) {
+            Mutex.unlock();
+        }
+    }
 
-  void lock_shared() {
-    if (!SingleThreadMode)
-      Mutex.lock_shared();
-  }
-  bool try_lock_shared() {
-    return SingleThreadMode ? true : Mutex.try_lock_shared();
-  }
-  void unlock_shared() {
-    if (!SingleThreadMode)
-      Mutex.unlock_shared();
-  }
+    void lock_shared() {
+        if (!SingleThreadMode) {
+            Mutex.lock_shared();
+        }
+    }
+    bool try_lock_shared() {
+        return SingleThreadMode ? true : Mutex.try_lock_shared();
+    }
+    void unlock_shared() {
+        if (!SingleThreadMode) {
+            Mutex.unlock_shared();
+        }
+    }
 };
 
 // Class which acts like std::mutex if SingleThreadMode variable is not set.
 // If SingleThreadMode variable is set then mutex operations are turned into
 // nop.
 class ur_mutex {
-  std::mutex Mutex;
+    std::mutex Mutex;
 
-public:
-  void lock() {
-    if (!SingleThreadMode)
-      Mutex.lock();
-  }
-  bool try_lock() { return SingleThreadMode ? true : Mutex.try_lock(); }
-  void unlock() {
-    if (!SingleThreadMode)
-      Mutex.unlock();
-  }
+  public:
+    void lock() {
+        if (!SingleThreadMode) {
+            Mutex.lock();
+        }
+    }
+    bool try_lock() { return SingleThreadMode ? true : Mutex.try_lock(); }
+    void unlock() {
+        if (!SingleThreadMode) {
+            Mutex.unlock();
+        }
+    }
 };
 
 /// SpinLock is a synchronization primitive, that uses atomic variable and
@@ -172,15 +178,16 @@ public:
 /// destructor, which makes it possible to use it in global context (unlike
 /// std::mutex, that doesn't provide such guarantees).
 class SpinLock {
-public:
-  void lock() {
-    while (MLock.test_and_set(std::memory_order_acquire))
-      std::this_thread::yield();
-  }
-  void unlock() { MLock.clear(std::memory_order_release); }
+  public:
+    void lock() {
+        while (MLock.test_and_set(std::memory_order_acquire)) {
+            std::this_thread::yield();
+        }
+    }
+    void unlock() { MLock.clear(std::memory_order_release); }
 
-private:
-  std::atomic_flag MLock = ATOMIC_FLAG_INIT;
+  private:
+    std::atomic_flag MLock = ATOMIC_FLAG_INIT;
 };
 
 // The wrapper for immutable data.
@@ -189,27 +196,27 @@ private:
 // the data just returns the already stored data.
 //
 template <class T> struct ZeCache : private T {
-  // The initialization function takes a reference to the data
-  // it is going to initialize, since it is private here in
-  // order to disallow access other than through "->".
-  //
-  using InitFunctionType = std::function<void(T &)>;
-  InitFunctionType Compute{nullptr};
-  std::once_flag Computed;
+    // The initialization function takes a reference to the data
+    // it is going to initialize, since it is private here in
+    // order to disallow access other than through "->".
+    //
+    using InitFunctionType = std::function<void(T &)>;
+    InitFunctionType Compute{nullptr};
+    std::once_flag Computed;
 
-  ZeCache() : T{} {}
+    ZeCache() : T{} {}
 
-  // Access to the fields of the original T data structure.
-  T *operator->() {
-    std::call_once(Computed, Compute, static_cast<T &>(*this));
-    return this;
-  }
+    // Access to the fields of the original T data structure.
+    T *operator->() {
+        std::call_once(Computed, Compute, static_cast<T &>(*this));
+        return this;
+    }
 };
 
 // Helper for one-liner validation
 #define UR_ASSERT(condition, error)                                            \
-  if (!(condition))                                                            \
-    return error;
+    if (!(condition))                                                          \
+        return error;
 
 // TODO: populate with target agnostic handling of UR platforms
 struct _ur_platform {};
@@ -234,98 +241,100 @@ ur_result_t getInfoImpl(size_t param_value_size, void *param_value,
                         size_t *param_value_size_ret, T value,
                         size_t value_size, Assign &&assign_func) {
 
-  if (param_value != nullptr) {
+    if (param_value != nullptr) {
 
-    if (param_value_size < value_size) {
-      return UR_RESULT_ERROR_INVALID_VALUE;
+        if (param_value_size < value_size) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
+
+        assign_func(param_value, value, value_size);
     }
 
-    assign_func(param_value, value, value_size);
-  }
+    if (param_value_size_ret != nullptr) {
+        *param_value_size_ret = value_size;
+    }
 
-  if (param_value_size_ret != nullptr) {
-    *param_value_size_ret = value_size;
-  }
-
-  return UR_RESULT_SUCCESS;
+    return UR_RESULT_SUCCESS;
 }
 
 template <typename T>
 ur_result_t getInfo(size_t param_value_size, void *param_value,
                     size_t *param_value_size_ret, T value) {
 
-  auto assignment = [](void *param_value, T value, size_t value_size) {
-    std::ignore = value_size;
-    *static_cast<T *>(param_value) = value;
-  };
+    auto assignment = [](void *param_value, T value, size_t value_size) {
+        std::ignore = value_size;
+        *static_cast<T *>(param_value) = value;
+    };
 
-  return getInfoImpl(param_value_size, param_value, param_value_size_ret, value,
-                     sizeof(T), assignment);
+    return getInfoImpl(param_value_size, param_value, param_value_size_ret,
+                       value, sizeof(T), assignment);
 }
 
 template <typename T>
 ur_result_t getInfoArray(size_t array_length, size_t param_value_size,
                          void *param_value, size_t *param_value_size_ret,
                          const T *value) {
-  return getInfoImpl(param_value_size, param_value, param_value_size_ret, value,
-                     array_length * sizeof(T), memcpy);
+    return getInfoImpl(param_value_size, param_value, param_value_size_ret,
+                       value, array_length * sizeof(T), memcpy);
 }
 
 template <typename T, typename RetType>
 ur_result_t getInfoArray(size_t array_length, size_t param_value_size,
                          void *param_value, size_t *param_value_size_ret,
                          const T *value) {
-  if (param_value) {
-    memset(param_value, 0, param_value_size);
-    for (uint32_t I = 0; I < array_length; I++)
-      ((RetType *)param_value)[I] = (RetType)value[I];
-  }
-  if (param_value_size_ret)
-    *param_value_size_ret = array_length * sizeof(RetType);
-  return UR_RESULT_SUCCESS;
+    if (param_value) {
+        memset(param_value, 0, param_value_size);
+        for (uint32_t I = 0; I < array_length; I++) {
+            ((RetType *)param_value)[I] = (RetType)value[I];
+        }
+    }
+    if (param_value_size_ret) {
+        *param_value_size_ret = array_length * sizeof(RetType);
+    }
+    return UR_RESULT_SUCCESS;
 }
 
 template <>
 inline ur_result_t
 getInfo<const char *>(size_t param_value_size, void *param_value,
                       size_t *param_value_size_ret, const char *value) {
-  return getInfoArray(strlen(value) + 1, param_value_size, param_value,
-                      param_value_size_ret, value);
+    return getInfoArray(strlen(value) + 1, param_value_size, param_value,
+                        param_value_size_ret, value);
 }
 
 class UrReturnHelper {
-public:
-  UrReturnHelper(size_t param_value_size, void *param_value,
-                 size_t *param_value_size_ret)
-      : param_value_size(param_value_size), param_value(param_value),
-        param_value_size_ret(param_value_size_ret) {}
+  public:
+    UrReturnHelper(size_t param_value_size, void *param_value,
+                   size_t *param_value_size_ret)
+        : param_value_size(param_value_size), param_value(param_value),
+          param_value_size_ret(param_value_size_ret) {}
 
-  // A version where in/out info size is represented by a single pointer
-  // to a value which is updated on return
-  UrReturnHelper(size_t *param_value_size, void *param_value)
-      : param_value_size(*param_value_size), param_value(param_value),
-        param_value_size_ret(param_value_size) {}
+    // A version where in/out info size is represented by a single pointer
+    // to a value which is updated on return
+    UrReturnHelper(size_t *param_value_size, void *param_value)
+        : param_value_size(*param_value_size), param_value(param_value),
+          param_value_size_ret(param_value_size) {}
 
-  // Scalar return value
-  template <class T> ur_result_t operator()(const T &t) {
-    return getInfo(param_value_size, param_value, param_value_size_ret, t);
-  }
+    // Scalar return value
+    template <class T> ur_result_t operator()(const T &t) {
+        return getInfo(param_value_size, param_value, param_value_size_ret, t);
+    }
 
-  // Array return value
-  template <class T> ur_result_t operator()(const T *t, size_t s) {
-    return getInfoArray(s, param_value_size, param_value, param_value_size_ret,
-                        t);
-  }
+    // Array return value
+    template <class T> ur_result_t operator()(const T *t, size_t s) {
+        return getInfoArray(s, param_value_size, param_value,
+                            param_value_size_ret, t);
+    }
 
-  // Array return value where element type is differrent from T
-  template <class RetType, class T>
-  ur_result_t operator()(const T *t, size_t s) {
-    return getInfoArray<T, RetType>(s, param_value_size, param_value,
-                                    param_value_size_ret, t);
-  }
+    // Array return value where element type is differrent from T
+    template <class RetType, class T>
+    ur_result_t operator()(const T *t, size_t s) {
+        return getInfoArray<T, RetType>(s, param_value_size, param_value,
+                                        param_value_size_ret, t);
+    }
 
-protected:
-  size_t param_value_size;
-  void *param_value;
-  size_t *param_value_size_ret;
+  protected:
+    size_t param_value_size;
+    void *param_value;
+    size_t *param_value_size_ret;
 };

@@ -10,8 +10,8 @@
 #include "ur_level_zero_common.hpp"
 
 struct ur_sampler_handle_t_ : _ur_object {
-  ur_sampler_handle_t_(ze_sampler_handle_t Sampler) : ZeSampler{Sampler} {}
+    ur_sampler_handle_t_(ze_sampler_handle_t Sampler) : ZeSampler{Sampler} {}
 
-  // Level Zero sampler handle.
-  ze_sampler_handle_t ZeSampler;
+    // Level Zero sampler handle.
+    ze_sampler_handle_t ZeSampler;
 };

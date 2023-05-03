@@ -12,12 +12,12 @@
 
 // Controls tracing UR calls from within the UR itself.
 bool PrintTrace = [] {
-  const char *Trace = std::getenv("SYCL_PI_TRACE");
-  const int TraceValue = Trace ? std::stoi(Trace) : 0;
-  if (TraceValue == -1 || TraceValue == 2) { // Means print all traces
-    return true;
-  }
-  return false;
+    const char *Trace = std::getenv("SYCL_PI_TRACE");
+    const int TraceValue = Trace ? std::stoi(Trace) : 0;
+    if (TraceValue == -1 || TraceValue == 2) { // Means print all traces
+        return true;
+    }
+    return false;
 }();
 
 // Apparatus for maintaining immutable cache of platforms.
