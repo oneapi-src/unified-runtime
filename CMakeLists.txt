@@ -243,6 +243,13 @@ if(UR_FORMAT_CPP_STYLE)
         COMMAND git diff --exit-code
         DEPENDS generate
     )
+    
+    add_custom_target(sphinx-autobuild 
+        COMMAND sphinx-autobuild -b html 
+        ${PROJECT_SOURCE_DIR}/docs/source ${PROJECT_SOURCE_DIR}/docs
+        DEPENDS generate
+        USES_TERMINAL COMMENT "Build/Serve Sphinx Documentation (Live Preview)"
+    )
 else()
     message(WARNING "UR_FORMAT_CPP_STYLE not set. Targets: 'generate' and 'check-generated' and not available")
 endif()

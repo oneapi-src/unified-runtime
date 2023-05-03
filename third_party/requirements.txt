@@ -34,6 +34,7 @@ sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.5
 sphinxcontrib-websupport==1.2.4
 sphinx-book-theme==0.3.3
+sphinx-autobuild==2021.3.14
 urllib3==1.25.7
 pytest>=7.0
 clang-format==15.0.7
