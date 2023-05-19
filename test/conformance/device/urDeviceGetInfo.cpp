@@ -251,10 +251,10 @@ TEST_P(urDeviceGetInfoTest, Success) {
                 expected_size != device_info_size_map.end()) {
                 ASSERT_EQ(expected_size->second, size);
             }
-            void *info_data = alloca(size);
-            ASSERT_SUCCESS(
-                urDeviceGetInfo(device, info_type, size, info_data, nullptr));
-            ASSERT_NE(info_data, nullptr);
+
+            std::vector<char> info_data(size);
+            ASSERT_SUCCESS(urDeviceGetInfo(device, info_type, size,
+                                           info_data.data(), nullptr));
         } else {
             ASSERT_EQ_RESULT(result, UR_RESULT_ERROR_INVALID_ENUMERATION);
         }
