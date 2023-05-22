@@ -429,7 +429,7 @@ analogue:
     - "**clRetainDevice**"
 details:
     - "Increments the device reference count if `hDevice` is a valid sub-device created by a call to `urDevicePartition`.
-    If `hDevice` is a root level device (e.g. obtained with `urDeviceGet`), the reference count remains unchanged."
+      If `hDevice` is a root level device (e.g. obtained with `urDeviceGet`), the reference count remains unchanged."
     - "It is not valid to use the device handle, which has all of its references released."
     - "The application may call this function from simultaneous threads for the same device."
     - "The implementation of this function should be thread-safe."
