@@ -30,7 +30,7 @@ TEST_P(urUSMFreeTest, SuccessDeviceAlloc) {
     ASSERT_SUCCESS(urUSMFree(context, ptr));
 }
 TEST_P(urUSMFreeTest, SuccessHostAlloc) {
-    ur_device_usm_access_capability_flags_t hostUSMSupport = false;
+    ur_device_usm_access_capability_flags_t hostUSMSupport = 0;
     ASSERT_SUCCESS(uur::GetDeviceUSMDeviceSupport(device, hostUSMSupport));
     if (!hostUSMSupport) {
         GTEST_SKIP() << "Host USM not supported.";
