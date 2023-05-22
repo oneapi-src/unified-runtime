@@ -33,7 +33,7 @@ struct urEnqueueUSMFillTestWithParam
         pattern = std::vector<uint8_t>(pattern_size);
         generatePattern();
 
-        ur_device_usm_access_capability_flags_t device_usm = false;
+        ur_device_usm_access_capability_flags_t device_usm = 0;
         ASSERT_SUCCESS(uur::GetDeviceUSMDeviceSupport(device, device_usm));
         if (!device_usm) {
             GTEST_SKIP() << "Device USM is not supported";
