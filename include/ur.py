@@ -50,7 +50,7 @@ def UR_MINOR_VERSION( _ver ):
 
 ###############################################################################
 ## @brief compiler-independent type
-class ur_bool_t(c_ubyte):
+class ur_bool_t(c_ulong):
     pass
 
 ###############################################################################
