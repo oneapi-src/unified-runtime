@@ -49,6 +49,7 @@ struct provider_base {
     enum uma_result_t purge_force(void *ptr, size_t size) noexcept {
         return UMA_RESULT_ERROR_UNKNOWN;
     }
+    enum uma_provider_type type() noexcept { return UMA_PROVIDER_UNKNOWN; }
 };
 
 struct provider_malloc : public provider_base {

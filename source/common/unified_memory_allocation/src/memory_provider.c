@@ -97,3 +97,8 @@ umaMemoryProviderPurgeForce(uma_memory_provider_handle_t hProvider, void *ptr,
                             size_t size) {
     return hProvider->ops.purge_force(hProvider->provider_priv, ptr, size);
 }
+
+enum uma_provider_type
+umaMemoryProviderType(uma_memory_provider_handle_t hProvider) {
+    return hProvider->ops.type(hProvider->provider_priv);
+}

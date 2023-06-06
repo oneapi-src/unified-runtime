@@ -59,6 +59,11 @@ TEST_F(test, memoryProviderTrace) {
     ASSERT_EQ(ret, UMA_RESULT_SUCCESS);
     ASSERT_EQ(calls["purge_force"], 1);
     ASSERT_EQ(calls.size(), ++call_count);
+
+    auto typeId = umaMemoryProviderType(tracingProvider.get());
+    ASSERT_EQ(typeId, UMA_PROVIDER_UNKNOWN);
+    ASSERT_EQ(calls["type"], 1);
+    ASSERT_EQ(calls.size(), ++call_count);
 }
 
 //////////////////////////// Negative test cases

@@ -17,6 +17,13 @@
 extern "C" {
 #endif
 
+enum uma_provider_type {
+    UMA_PROVIDER_UNKNOWN = 0,
+    UMA_PROVIDER_OS,
+    UMA_PROVIDER_USM,
+    UMA_PROVIDER_FORCE_UINT64 = UINT64_MAX
+};
+
 /// This structure comprises function pointers used by corresponding
 /// umaMemoryProvider* calls. Each memory provider implementation should
 /// initialize all function pointers.
@@ -49,6 +56,7 @@ struct uma_memory_provider_ops_t {
                                            size_t *pageSize);
     enum uma_result_t (*purge_lazy)(void *provider, void *ptr, size_t size);
     enum uma_result_t (*purge_force)(void *provider, void *ptr, size_t size);
+    enum uma_provider_type (*type)(void *provider);
 };
 
 #ifdef __cplusplus

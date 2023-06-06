@@ -72,6 +72,11 @@ static enum uma_result_t nullPurgeForce(void *provider, void *ptr,
     return UMA_RESULT_SUCCESS;
 }
 
+static enum uma_provider_type nullType(void *provider) {
+    (void)provider;
+    return UMA_PROVIDER_UNKNOWN;
+}
+
 uma_memory_provider_handle_t nullProviderCreate(void) {
     struct uma_memory_provider_ops_t ops = {
         .version = UMA_VERSION_CURRENT,
@@ -83,7 +88,8 @@ uma_memory_provider_handle_t nullProviderCreate(void) {
         .get_recommended_page_size = nullGetRecommendedPageSize,
         .get_min_page_size = nullGetPageSize,
         .purge_lazy = nullPurgeLazy,
-        .purge_force = nullPurgeForce};
+        .purge_force = nullPurgeForce,
+        .type = nullType};
 
     uma_memory_provider_handle_t hProvider;
     enum uma_result_t ret = umaMemoryProviderCreate(&ops, NULL, &hProvider);
@@ -171,6 +177,13 @@ static enum uma_result_t tracePurgeForce(void *provider, void *ptr,
                                        size);
 }
 
+static enum uma_provider_type traceType(void *provider) {
+    struct traceParams *traceProvider = (struct traceParams *)provider;
+
+    traceProvider->trace("type");
+    return umaMemoryProviderType(traceProvider->hUpstreamProvider);
+}
+
 uma_memory_provider_handle_t
 traceProviderCreate(uma_memory_provider_handle_t hUpstreamProvider,
                     void (*trace)(const char *)) {
@@ -184,7 +197,8 @@ traceProviderCreate(uma_memory_provider_handle_t hUpstreamProvider,
         .get_recommended_page_size = traceGetRecommendedPageSize,
         .get_min_page_size = traceGetPageSize,
         .purge_lazy = tracePurgeLazy,
-        .purge_force = tracePurgeForce};
+        .purge_force = tracePurgeForce,
+        .type = traceType};
 
     struct traceParams params = {.hUpstreamProvider = hUpstreamProvider,
                                  .trace = trace};

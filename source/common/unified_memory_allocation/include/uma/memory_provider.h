@@ -131,6 +131,12 @@ enum uma_result_t
 umaMemoryProviderPurgeForce(uma_memory_provider_handle_t hProvider, void *ptr,
                             size_t size);
 
+///
+/// \brief Retrive type of a given memory provider.
+/// \return type of the provider.
+enum uma_provider_type
+umaMemoryProviderType(uma_memory_provider_handle_t hProvider);
+
 #ifdef __cplusplus
 }
 #endif

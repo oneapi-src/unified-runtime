@@ -204,6 +204,12 @@ static enum uma_result_t trackingPurgeForce(void *provider, void *ptr,
     return umaMemoryProviderPurgeForce(p->hUpstream, ptr, size);
 }
 
+static enum uma_provider_type trackingType(void *provider) {
+    uma_tracking_memory_provider_t *p =
+        (uma_tracking_memory_provider_t *)provider;
+    return umaMemoryProviderType(p->hUpstream);
+}
+
 enum uma_result_t umaTrackingMemoryProviderCreate(
     uma_memory_provider_handle_t hUpstream, uma_memory_pool_handle_t hPool,
     uma_memory_provider_handle_t *hTrackingProvider) {
@@ -224,6 +230,7 @@ enum uma_result_t umaTrackingMemoryProviderCreate(
         trackingGetRecommendedPageSize;
     trackingMemoryProviderOps.purge_force = trackingPurgeForce;
     trackingMemoryProviderOps.purge_lazy = trackingPurgeLazy;
+    trackingMemoryProviderOps.type = trackingType;
 
     return umaMemoryProviderCreate(&trackingMemoryProviderOps, &params,
                                    hTrackingProvider);
