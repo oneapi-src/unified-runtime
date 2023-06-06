@@ -2768,6 +2768,45 @@ urUSMFree(
 );
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Import memory into USM
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hContext`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pMem`
+///     - ::UR_RESULT_ERROR_INVALID_MEM_OBJECT
+///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
+UR_APIEXPORT ur_result_t UR_APICALL
+urUSMImport(
+  ur_context_handle_t hContext, ///< [in] handle of the context object
+  void* pMem                    ///< [in] pointer to host memory object
+  size_t size                   ///< [in] size in bytes of the host memory object to be imported
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Release memory from USM
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hContext`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pMem`
+///     - ::UR_RESULT_ERROR_INVALID_MEM_OBJECT
+///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
+UR_APIEXPORT ur_result_t UR_APICALL
+urUSMRelease(
+  ur_context_handle_t hContext, ///< [in] handle of the context object
+  void* pMem                    ///< [in] pointer to USM memory object
+);
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Get USM memory object allocation information
 ///
 /// @returns
@@ -4769,6 +4808,8 @@ typedef enum ur_function_t {
     UR_FUNCTION_USM_POOL_RETAIN = 118,                      ///< Enumerator for ::urUSMPoolRetain
     UR_FUNCTION_USM_POOL_RELEASE = 119,                     ///< Enumerator for ::urUSMPoolRelease
     UR_FUNCTION_USM_POOL_GET_INFO = 120,                    ///< Enumerator for ::urUSMPoolGetInfo
+    UR_FUNCTION_USM_IMPORT = 121,                           ///< Enumerator for ::urUSMImport
+    UR_FUNCTION_USM_RELEASE = 122,                          ///< Enumerator for ::urUSMRelease
     /// @cond
     UR_FUNCTION_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -7191,6 +7232,25 @@ typedef struct ur_usm_shared_alloc_params_t {
 typedef struct ur_usm_free_params_t {
     ur_context_handle_t *phContext;
     void **ppMem;
+} ur_usm_free_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urUSMImport
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_usm_import_params_t {
+  ur_context_handle_t* phContext;
+  void* pMem;
+  size_t* psize;
+} ur_usm_free_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urUSMRelease
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_usm_release_params_t {
+  ur_context_handle_t* phContext;
+  void* pMem;
 } ur_usm_free_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////

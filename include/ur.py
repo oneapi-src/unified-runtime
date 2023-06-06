@@ -1817,6 +1817,8 @@ class ur_function_v(IntEnum):
     USM_POOL_RETAIN = 118                           ## Enumerator for ::urUSMPoolRetain
     USM_POOL_RELEASE = 119                          ## Enumerator for ::urUSMPoolRelease
     USM_POOL_GET_INFO = 120                         ## Enumerator for ::urUSMPoolGetInfo
+    USM_POOL_GET_INFO = 121                         ## Enumerator for ::urUSMImport
+    USM_POOL_GET_INFO = 122                         ## Enumerator for ::urUSMRelease
 
 class ur_function_t(c_int):
     def __str__(self):
@@ -2788,6 +2790,20 @@ if __use_win_types:
     _urUSMPoolGetInfo_t = WINFUNCTYPE( ur_result_t, ur_usm_pool_handle_t, ur_usm_pool_info_t, c_size_t, c_void_p, POINTER(c_size_t) )
 else:
     _urUSMPoolGetInfo_t = CFUNCTYPE( ur_result_t, ur_usm_pool_handle_t, ur_usm_pool_info_t, c_size_t, c_void_p, POINTER(c_size_t) )
+    
+###############################################################################
+## @brief Function-pointer for urUSMImport
+if __use_win_types:
+    _urUSMImport_t = WINFUNCTYPE( ur_result_t, ur_context_handle_t, c_void_p, c_size_t )
+else:
+    _urUSMImport_t = CFUNCTYPE( ur_result_t, ur_context_handle_t, c_void_p, c_size_t )
+
+###############################################################################
+## @brief Function-pointer for urUSMRelease
+if __use_win_types:
+    _urUSMRelease_t = WINFUNCTYPE( ur_result_t, ur_context_handle_t, c_void_p )
+else:
+    _urUSMRelease_t = CFUNCTYPE( ur_result_t, ur_context_handle_t, c_void_p )
 
 
 ###############################################################################
@@ -2803,6 +2819,8 @@ class ur_usm_dditable_t(Structure):
         ("pfnPoolRetain", c_void_p),                                    ## _urUSMPoolRetain_t
         ("pfnPoolRelease", c_void_p),                                   ## _urUSMPoolRelease_t
         ("pfnPoolGetInfo", c_void_p)                                    ## _urUSMPoolGetInfo_t
+        ("pfnImport", c_void_p)                                         ## _urUSMImport_t
+        ("pfnRelease", c_void_p)                                        ## _urUSMRelease_t
     ]
 
 ###############################################################################
@@ -3125,6 +3143,8 @@ class UR_DDI:
         self.urUSMPoolRetain = _urUSMPoolRetain_t(self.__dditable.USM.pfnPoolRetain)
         self.urUSMPoolRelease = _urUSMPoolRelease_t(self.__dditable.USM.pfnPoolRelease)
         self.urUSMPoolGetInfo = _urUSMPoolGetInfo_t(self.__dditable.USM.pfnPoolGetInfo)
+        self.urUSMImport = _urUSMImport_t(self.__dditable.USM.pfnImport)
+        self.urUSMRelease = _urUSMRelease_t(self.__dditable.USM.pfnRelease)
 
         # call driver to get function pointers
         Device = ur_device_dditable_t()
