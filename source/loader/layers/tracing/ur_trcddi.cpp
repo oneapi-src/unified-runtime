@@ -16,6 +16,55 @@
 
 namespace ur_tracing_layer {
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMImport
+__urdlllocal ur_result_t UR_APICALL urUSMImport(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    void *pMem,                   ///< [in] pointer to host memory object
+    size_t size ///< [in] size in bytes of the host memory object to be imported
+) {
+    auto pfnImport = context.urDdiTable.USM.pfnImport;
+
+    if (nullptr == pfnImport) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    ur_usm_import_params_t params = {&hContext, &pMem, &size};
+    uint64_t instance =
+        context.notify_begin(UR_FUNCTION_USM_IMPORT, "urUSMImport", &params);
+
+    ur_result_t result = pfnImport(hContext, pMem, size);
+
+    context.notify_end(UR_FUNCTION_USM_IMPORT, "urUSMImport", &params, &result,
+                       instance);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMRelease
+__urdlllocal ur_result_t UR_APICALL urUSMRelease(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    void *pMem                    ///< [in] pointer to host memory object
+) {
+    auto pfnRelease = context.urDdiTable.USM.pfnRelease;
+
+    if (nullptr == pfnRelease) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    ur_usm_release_params_t params = {&hContext, &pMem};
+    uint64_t instance =
+        context.notify_begin(UR_FUNCTION_USM_RELEASE, "urUSMRelease", &params);
+
+    ur_result_t result = pfnRelease(hContext, pMem);
+
+    context.notify_end(UR_FUNCTION_USM_RELEASE, "urUSMRelease", &params,
+                       &result, instance);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urInit
 __urdlllocal ur_result_t UR_APICALL urInit(
     ur_device_init_flags_t device_flags ///< [in] device initialization flags.
@@ -4636,6 +4685,12 @@ __urdlllocal ur_result_t UR_APICALL urGetUSMProcAddrTable(
 
     dditable.pfnPoolGetInfo = pDdiTable->pfnPoolGetInfo;
     pDdiTable->pfnPoolGetInfo = ur_tracing_layer::urUSMPoolGetInfo;
+
+    dditable.pfnImport = pDdiTable->pfnImport;
+    pDdiTable->pfnImport = ur_tracing_layer::urUSMImport;
+
+    dditable.pfnRelease = pDdiTable->pfnRelease;
+    pDdiTable->pfnRelease = ur_tracing_layer::urUSMRelease;
 
     return result;
 }

@@ -16,6 +16,66 @@
 extern "C" {
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Import memory into USM
+///
+/// @details
+///     - Import memory into USM
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hContext`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pMem`
+///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
+///     - ::UR_RESULT_ERROR_INVALID_SIZE
+ur_result_t UR_APICALL urUSMImport(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    void *pMem,                   ///< [in] pointer to host memory object
+    size_t size ///< [in] size in bytes of the host memory object to be imported
+    ) try {
+    auto pfnImport = ur_lib::context->urDdiTable.USM.pfnImport;
+    if (nullptr == pfnImport) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    return pfnImport(hContext, pMem, size);
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Release memory from USM
+///
+/// @details
+///     - Release memory from USM
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hContext`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pMem`
+///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
+ur_result_t UR_APICALL urUSMRelease(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    void *pMem                    ///< [in] pointer to host memory object
+    ) try {
+    auto pfnRelease = ur_lib::context->urDdiTable.USM.pfnRelease;
+    if (nullptr == pfnRelease) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    return pfnRelease(hContext, pMem);
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Initialize the 'oneAPI' adapter(s)
 ///
 /// @details

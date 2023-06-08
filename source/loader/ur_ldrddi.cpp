@@ -27,6 +27,55 @@ ur_mem_factory_t ur_mem_factory;
 ur_usm_pool_factory_t ur_usm_pool_factory;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMImport
+__urdlllocal ur_result_t UR_APICALL urUSMImport(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    void *pMem,                   ///< [in] pointer to host memory object
+    size_t size ///< [in] size in bytes of the host memory object to be imported
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // extract platform's function pointer table
+    auto dditable = reinterpret_cast<ur_context_object_t *>(hContext)->dditable;
+    auto pfnImport = dditable->ur.USM.pfnImport;
+    if (nullptr == pfnImport) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    hContext = reinterpret_cast<ur_context_object_t *>(hContext)->handle;
+
+    // forward to device-platform
+    result = pfnImport(hContext, pMem, size);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMRelease
+__urdlllocal ur_result_t UR_APICALL urUSMRelease(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    void *pMem                    ///< [in] pointer to host memory object
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // extract platform's function pointer table
+    auto dditable = reinterpret_cast<ur_context_object_t *>(hContext)->dditable;
+    auto pfnRelease = dditable->ur.USM.pfnRelease;
+    if (nullptr == pfnRelease) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    hContext = reinterpret_cast<ur_context_object_t *>(hContext)->handle;
+
+    // forward to device-platform
+    result = pfnRelease(hContext, pMem);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urInit
 __urdlllocal ur_result_t UR_APICALL urInit(
     ur_device_init_flags_t device_flags ///< [in] device initialization flags.
@@ -5563,6 +5612,8 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetUSMProcAddrTable(
             pDdiTable->pfnPoolRetain = ur_loader::urUSMPoolRetain;
             pDdiTable->pfnPoolRelease = ur_loader::urUSMPoolRelease;
             pDdiTable->pfnPoolGetInfo = ur_loader::urUSMPoolGetInfo;
+            pDdiTable->pfnImport = ur_loader::urUSMImport;
+            pDdiTable->pfnRelease = ur_loader::urUSMRelease;
         } else {
             // return pointers directly to platform's DDIs
             *pDdiTable = ur_loader::context->platforms.front().dditable.ur.USM;

@@ -15,6 +15,65 @@
 namespace ur_validation_layer {
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMImport
+__urdlllocal ur_result_t UR_APICALL urUSMImport(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    void *pMem,                   ///< [in] pointer to host memory object
+    size_t size ///< [in] size in bytes of the host memory object to be imported
+) {
+    auto pfnImport = context.urDdiTable.USM.pfnImport;
+
+    if (nullptr == pfnImport) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    if (context.enableParameterValidation) {
+        if (NULL == hContext) {
+            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
+        }
+
+        if (NULL == pMem) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+    }
+
+    ur_result_t result = pfnImport(hContext, pMem, size);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMRelease
+__urdlllocal ur_result_t UR_APICALL urUSMRelease(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    void *pMem                    ///< [in] pointer to host memory object
+) {
+    auto pfnRelease = context.urDdiTable.USM.pfnRelease;
+
+    if (nullptr == pfnRelease) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    if (context.enableParameterValidation) {
+        if (NULL == hContext) {
+            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
+        }
+
+        if (NULL == pMem) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+    }
+
+    ur_result_t result = pfnRelease(hContext, pMem);
+
+    if (context.enableLeakChecking && result == UR_RESULT_SUCCESS) {
+        refCountContext.decrementRefCount(pMem);
+    }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urInit
 __urdlllocal ur_result_t UR_APICALL urInit(
     ur_device_init_flags_t device_flags ///< [in] device initialization flags.
@@ -5730,6 +5789,12 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetUSMProcAddrTable(
 
     dditable.pfnPoolGetInfo = pDdiTable->pfnPoolGetInfo;
     pDdiTable->pfnPoolGetInfo = ur_validation_layer::urUSMPoolGetInfo;
+
+    dditable.pfnImport = pDdiTable->pfnImport;
+    pDdiTable->pfnImport = ur_validation_layer::urUSMImport;
+
+    dditable.pfnRelease = pDdiTable->pfnRelease;
+    pDdiTable->pfnRelease = ur_validation_layer::urUSMRelease;
 
     return result;
 }

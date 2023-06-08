@@ -1214,51 +1214,6 @@ typedef ur_result_t(UR_APICALL *ur_pfnGetQueueProcAddrTable_t)(
     ur_queue_dditable_t *);
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Function-pointer for urInit
-typedef ur_result_t(UR_APICALL *ur_pfnInit_t)(
-    ur_device_init_flags_t);
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function-pointer for urGetLastResult
-typedef ur_result_t(UR_APICALL *ur_pfnGetLastResult_t)(
-    ur_platform_handle_t,
-    const char **);
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function-pointer for urTearDown
-typedef ur_result_t(UR_APICALL *ur_pfnTearDown_t)(
-    void *);
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Table of Global functions pointers
-typedef struct ur_global_dditable_t {
-    ur_pfnInit_t pfnInit;
-    ur_pfnGetLastResult_t pfnGetLastResult;
-    ur_pfnTearDown_t pfnTearDown;
-} ur_global_dditable_t;
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Exported function for filling application's Global table
-///        with current process' addresses
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_UNINITIALIZED
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-UR_DLLEXPORT ur_result_t UR_APICALL
-urGetGlobalProcAddrTable(
-    ur_api_version_t version,       ///< [in] API version requested
-    ur_global_dditable_t *pDdiTable ///< [in,out] pointer to table of DDI function pointers
-);
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function-pointer for urGetGlobalProcAddrTable
-typedef ur_result_t(UR_APICALL *ur_pfnGetGlobalProcAddrTable_t)(
-    ur_api_version_t,
-    ur_global_dditable_t *);
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Function-pointer for urUSMHostAlloc
 typedef ur_result_t(UR_APICALL *ur_pfnUSMHostAlloc_t)(
     ur_context_handle_t,
@@ -1330,6 +1285,19 @@ typedef ur_result_t(UR_APICALL *ur_pfnUSMPoolGetInfo_t)(
     size_t *);
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for urUSMImport
+typedef ur_result_t(UR_APICALL *ur_pfnUSMImport_t)(
+    ur_context_handle_t,
+    void *,
+    size_t);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for urUSMRelease
+typedef ur_result_t(UR_APICALL *ur_pfnUSMRelease_t)(
+    ur_context_handle_t,
+    void *);
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Table of USM functions pointers
 typedef struct ur_usm_dditable_t {
     ur_pfnUSMHostAlloc_t pfnHostAlloc;
@@ -1341,6 +1309,8 @@ typedef struct ur_usm_dditable_t {
     ur_pfnUSMPoolRetain_t pfnPoolRetain;
     ur_pfnUSMPoolRelease_t pfnPoolRelease;
     ur_pfnUSMPoolGetInfo_t pfnPoolGetInfo;
+    ur_pfnUSMImport_t pfnImport;
+    ur_pfnUSMRelease_t pfnRelease;
 } ur_usm_dditable_t;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1363,6 +1333,51 @@ urGetUSMProcAddrTable(
 typedef ur_result_t(UR_APICALL *ur_pfnGetUSMProcAddrTable_t)(
     ur_api_version_t,
     ur_usm_dditable_t *);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for urInit
+typedef ur_result_t(UR_APICALL *ur_pfnInit_t)(
+    ur_device_init_flags_t);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for urGetLastResult
+typedef ur_result_t(UR_APICALL *ur_pfnGetLastResult_t)(
+    ur_platform_handle_t,
+    const char **);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for urTearDown
+typedef ur_result_t(UR_APICALL *ur_pfnTearDown_t)(
+    void *);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Table of Global functions pointers
+typedef struct ur_global_dditable_t {
+    ur_pfnInit_t pfnInit;
+    ur_pfnGetLastResult_t pfnGetLastResult;
+    ur_pfnTearDown_t pfnTearDown;
+} ur_global_dditable_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Exported function for filling application's Global table
+///        with current process' addresses
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+UR_DLLEXPORT ur_result_t UR_APICALL
+urGetGlobalProcAddrTable(
+    ur_api_version_t version,       ///< [in] API version requested
+    ur_global_dditable_t *pDdiTable ///< [in,out] pointer to table of DDI function pointers
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for urGetGlobalProcAddrTable
+typedef ur_result_t(UR_APICALL *ur_pfnGetGlobalProcAddrTable_t)(
+    ur_api_version_t,
+    ur_global_dditable_t *);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function-pointer for urDeviceGet
@@ -1477,8 +1492,8 @@ typedef struct ur_dditable_t {
     ur_mem_dditable_t Mem;
     ur_enqueue_dditable_t Enqueue;
     ur_queue_dditable_t Queue;
-    ur_global_dditable_t Global;
     ur_usm_dditable_t USM;
+    ur_global_dditable_t Global;
     ur_device_dditable_t Device;
 } ur_dditable_t;
 

@@ -13,6 +13,49 @@
 
 namespace driver {
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMImport
+__urdlllocal ur_result_t UR_APICALL urUSMImport(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    void *pMem,                   ///< [in] pointer to host memory object
+    size_t size ///< [in] size in bytes of the host memory object to be imported
+    ) try {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // if the driver has created a custom function, then call it instead of using the generic path
+    auto pfnImport = d_context.urDdiTable.USM.pfnImport;
+    if (nullptr != pfnImport) {
+        result = pfnImport(hContext, pMem, size);
+    } else {
+        // generic implementation
+    }
+
+    return result;
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMRelease
+__urdlllocal ur_result_t UR_APICALL urUSMRelease(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    void *pMem                    ///< [in] pointer to host memory object
+    ) try {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // if the driver has created a custom function, then call it instead of using the generic path
+    auto pfnRelease = d_context.urDdiTable.USM.pfnRelease;
+    if (nullptr != pfnRelease) {
+        result = pfnRelease(hContext, pMem);
+    } else {
+        // generic implementation
+    }
+
+    return result;
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urInit
 __urdlllocal ur_result_t UR_APICALL urInit(
     ur_device_init_flags_t device_flags ///< [in] device initialization flags.
@@ -4031,6 +4074,10 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetUSMProcAddrTable(
     pDdiTable->pfnPoolRelease = driver::urUSMPoolRelease;
 
     pDdiTable->pfnPoolGetInfo = driver::urUSMPoolGetInfo;
+
+    pDdiTable->pfnImport = driver::urUSMImport;
+
+    pDdiTable->pfnRelease = driver::urUSMRelease;
 
     return result;
 } catch (...) {
