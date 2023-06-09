@@ -1810,7 +1810,6 @@ class ur_function_v(IntEnum):
     USM_FREE = 110                                  ## Enumerator for ::urUSMFree
     USM_GET_MEM_ALLOC_INFO = 111                    ## Enumerator for ::urUSMGetMemAllocInfo
     USM_POOL_CREATE = 112                           ## Enumerator for ::urUSMPoolCreate
-    USM_IMPORT = 113                                ## Enumerator for ::urUSMImport
     PLATFORM_GET_BACKEND_OPTION = 114               ## Enumerator for ::urPlatformGetBackendOption
     MEM_BUFFER_CREATE_WITH_NATIVE_HANDLE = 115      ## Enumerator for ::urMemBufferCreateWithNativeHandle
     MEM_IMAGE_CREATE_WITH_NATIVE_HANDLE = 116       ## Enumerator for ::urMemImageCreateWithNativeHandle
@@ -1818,7 +1817,8 @@ class ur_function_v(IntEnum):
     USM_POOL_RETAIN = 118                           ## Enumerator for ::urUSMPoolRetain
     USM_POOL_RELEASE = 119                          ## Enumerator for ::urUSMPoolRelease
     USM_POOL_GET_INFO = 120                         ## Enumerator for ::urUSMPoolGetInfo
-    USM_RELEASE = 121                               ## Enumerator for ::urUSMRelease
+    USM_IMPORT_EXP = 122                            ## Enumerator for ::urUSMImportExp
+    USM_RELEASE_EXP = 123                           ## Enumerator for ::urUSMReleaseExp
 
 class ur_function_t(c_int):
     def __str__(self):
@@ -2760,20 +2760,6 @@ if __use_win_types:
 else:
     _urUSMPoolGetInfo_t = CFUNCTYPE( ur_result_t, ur_usm_pool_handle_t, ur_usm_pool_info_t, c_size_t, c_void_p, POINTER(c_size_t) )
 
-###############################################################################
-## @brief Function-pointer for urUSMImport
-if __use_win_types:
-    _urUSMImport_t = WINFUNCTYPE( ur_result_t, ur_context_handle_t, c_void_p, c_size_t )
-else:
-    _urUSMImport_t = CFUNCTYPE( ur_result_t, ur_context_handle_t, c_void_p, c_size_t )
-
-###############################################################################
-## @brief Function-pointer for urUSMRelease
-if __use_win_types:
-    _urUSMRelease_t = WINFUNCTYPE( ur_result_t, ur_context_handle_t, c_void_p )
-else:
-    _urUSMRelease_t = CFUNCTYPE( ur_result_t, ur_context_handle_t, c_void_p )
-
 
 ###############################################################################
 ## @brief Table of USM functions pointers
@@ -2787,9 +2773,30 @@ class ur_usm_dditable_t(Structure):
         ("pfnPoolCreate", c_void_p),                                    ## _urUSMPoolCreate_t
         ("pfnPoolRetain", c_void_p),                                    ## _urUSMPoolRetain_t
         ("pfnPoolRelease", c_void_p),                                   ## _urUSMPoolRelease_t
-        ("pfnPoolGetInfo", c_void_p),                                   ## _urUSMPoolGetInfo_t
-        ("pfnImport", c_void_p),                                        ## _urUSMImport_t
-        ("pfnRelease", c_void_p)                                        ## _urUSMRelease_t
+        ("pfnPoolGetInfo", c_void_p)                                    ## _urUSMPoolGetInfo_t
+    ]
+
+###############################################################################
+## @brief Function-pointer for urUSMImportExp
+if __use_win_types:
+    _urUSMImportExp_t = WINFUNCTYPE( ur_result_t, ur_context_handle_t, c_void_p, c_size_t )
+else:
+    _urUSMImportExp_t = CFUNCTYPE( ur_result_t, ur_context_handle_t, c_void_p, c_size_t )
+
+###############################################################################
+## @brief Function-pointer for urUSMReleaseExp
+if __use_win_types:
+    _urUSMReleaseExp_t = WINFUNCTYPE( ur_result_t, ur_context_handle_t, c_void_p )
+else:
+    _urUSMReleaseExp_t = CFUNCTYPE( ur_result_t, ur_context_handle_t, c_void_p )
+
+
+###############################################################################
+## @brief Table of USMExp functions pointers
+class ur_usm_exp_dditable_t(Structure):
+    _fields_ = [
+        ("pfnImportExp", c_void_p),                                     ## _urUSMImportExp_t
+        ("pfnReleaseExp", c_void_p)                                     ## _urUSMReleaseExp_t
     ]
 
 ###############################################################################
@@ -2915,6 +2922,7 @@ class ur_dditable_t(Structure):
         ("Enqueue", ur_enqueue_dditable_t),
         ("Queue", ur_queue_dditable_t),
         ("USM", ur_usm_dditable_t),
+        ("USMExp", ur_usm_exp_dditable_t),
         ("Global", ur_global_dditable_t),
         ("Device", ur_device_dditable_t)
     ]
@@ -3131,8 +3139,17 @@ class UR_DDI:
         self.urUSMPoolRetain = _urUSMPoolRetain_t(self.__dditable.USM.pfnPoolRetain)
         self.urUSMPoolRelease = _urUSMPoolRelease_t(self.__dditable.USM.pfnPoolRelease)
         self.urUSMPoolGetInfo = _urUSMPoolGetInfo_t(self.__dditable.USM.pfnPoolGetInfo)
-        self.urUSMImport = _urUSMImport_t(self.__dditable.USM.pfnImport)
-        self.urUSMRelease = _urUSMRelease_t(self.__dditable.USM.pfnRelease)
+
+        # call driver to get function pointers
+        USMExp = ur_usm_exp_dditable_t()
+        r = ur_result_v(self.__dll.urGetUSMExpProcAddrTable(version, byref(USMExp)))
+        if r != ur_result_v.SUCCESS:
+            raise Exception(r)
+        self.__dditable.USMExp = USMExp
+
+        # attach function interface to function address
+        self.urUSMImportExp = _urUSMImportExp_t(self.__dditable.USMExp.pfnImportExp)
+        self.urUSMReleaseExp = _urUSMReleaseExp_t(self.__dditable.USMExp.pfnReleaseExp)
 
         # call driver to get function pointers
         Global = ur_global_dditable_t()

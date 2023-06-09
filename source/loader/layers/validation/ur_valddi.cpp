@@ -15,15 +15,15 @@
 namespace ur_validation_layer {
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urUSMImport
-__urdlllocal ur_result_t UR_APICALL urUSMImport(
+/// @brief Intercept function for urUSMImportExp
+__urdlllocal ur_result_t UR_APICALL urUSMImportExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     void *pMem,                   ///< [in] pointer to host memory object
     size_t size ///< [in] size in bytes of the host memory object to be imported
 ) {
-    auto pfnImport = context.urDdiTable.USM.pfnImport;
+    auto pfnImportExp = context.urDdiTable.USMExp.pfnImportExp;
 
-    if (nullptr == pfnImport) {
+    if (nullptr == pfnImportExp) {
         return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
     }
 
@@ -37,20 +37,20 @@ __urdlllocal ur_result_t UR_APICALL urUSMImport(
         }
     }
 
-    ur_result_t result = pfnImport(hContext, pMem, size);
+    ur_result_t result = pfnImportExp(hContext, pMem, size);
 
     return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urUSMRelease
-__urdlllocal ur_result_t UR_APICALL urUSMRelease(
+/// @brief Intercept function for urUSMReleaseExp
+__urdlllocal ur_result_t UR_APICALL urUSMReleaseExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     void *pMem                    ///< [in] pointer to host memory object
 ) {
-    auto pfnRelease = context.urDdiTable.USM.pfnRelease;
+    auto pfnReleaseExp = context.urDdiTable.USMExp.pfnReleaseExp;
 
-    if (nullptr == pfnRelease) {
+    if (nullptr == pfnReleaseExp) {
         return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
     }
 
@@ -64,7 +64,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMRelease(
         }
     }
 
-    ur_result_t result = pfnRelease(hContext, pMem);
+    ur_result_t result = pfnReleaseExp(hContext, pMem);
 
     if (context.enableLeakChecking && result == UR_RESULT_SUCCESS) {
         refCountContext.decrementRefCount(pMem);
@@ -5790,11 +5790,42 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetUSMProcAddrTable(
     dditable.pfnPoolGetInfo = pDdiTable->pfnPoolGetInfo;
     pDdiTable->pfnPoolGetInfo = ur_validation_layer::urUSMPoolGetInfo;
 
-    dditable.pfnImport = pDdiTable->pfnImport;
-    pDdiTable->pfnImport = ur_validation_layer::urUSMImport;
+    return result;
+}
 
-    dditable.pfnRelease = pDdiTable->pfnRelease;
-    pDdiTable->pfnRelease = ur_validation_layer::urUSMRelease;
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Exported function for filling application's USMExp table
+///        with current process' addresses
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+UR_DLLEXPORT ur_result_t UR_APICALL urGetUSMExpProcAddrTable(
+    ur_api_version_t version, ///< [in] API version requested
+    ur_usm_exp_dditable_t
+        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
+) {
+    auto &dditable = ur_validation_layer::context.urDdiTable.USMExp;
+
+    if (nullptr == pDdiTable) {
+        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    if (UR_MAJOR_VERSION(ur_validation_layer::context.version) !=
+            UR_MAJOR_VERSION(version) ||
+        UR_MINOR_VERSION(ur_validation_layer::context.version) >
+            UR_MINOR_VERSION(version)) {
+        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+    }
+
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    dditable.pfnImportExp = pDdiTable->pfnImportExp;
+    pDdiTable->pfnImportExp = ur_validation_layer::urUSMImportExp;
+
+    dditable.pfnReleaseExp = pDdiTable->pfnReleaseExp;
+    pDdiTable->pfnReleaseExp = ur_validation_layer::urUSMReleaseExp;
 
     return result;
 }
@@ -5916,6 +5947,11 @@ ur_result_t context_t::init(ur_dditable_t *dditable) {
     if (UR_RESULT_SUCCESS == result) {
         result = ur_validation_layer::urGetUSMProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->USM);
+    }
+
+    if (UR_RESULT_SUCCESS == result) {
+        result = ur_validation_layer::urGetUSMExpProcAddrTable(
+            UR_API_VERSION_CURRENT, &dditable->USMExp);
     }
 
     if (UR_RESULT_SUCCESS == result) {

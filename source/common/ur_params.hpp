@@ -8135,10 +8135,6 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_function_t value) {
         os << "UR_FUNCTION_USM_POOL_CREATE";
         break;
 
-    case UR_FUNCTION_USM_IMPORT:
-        os << "UR_FUNCTION_USM_IMPORT";
-        break;
-
     case UR_FUNCTION_PLATFORM_GET_BACKEND_OPTION:
         os << "UR_FUNCTION_PLATFORM_GET_BACKEND_OPTION";
         break;
@@ -8167,8 +8163,12 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_function_t value) {
         os << "UR_FUNCTION_USM_POOL_GET_INFO";
         break;
 
-    case UR_FUNCTION_USM_RELEASE:
-        os << "UR_FUNCTION_USM_RELEASE";
+    case UR_FUNCTION_USM_IMPORT_EXP:
+        os << "UR_FUNCTION_USM_IMPORT_EXP";
+        break;
+
+    case UR_FUNCTION_USM_RELEASE_EXP:
+        os << "UR_FUNCTION_USM_RELEASE_EXP";
         break;
     default:
         os << "unknown enumerator";
@@ -11681,8 +11681,8 @@ operator<<(std::ostream &os,
     return os;
 }
 
-inline std::ostream &operator<<(std::ostream &os,
-                                const struct ur_usm_import_params_t *params) {
+inline std::ostream &
+operator<<(std::ostream &os, const struct ur_usm_import_exp_params_t *params) {
 
     os << ".hContext = ";
 
@@ -11701,8 +11701,8 @@ inline std::ostream &operator<<(std::ostream &os,
     return os;
 }
 
-inline std::ostream &operator<<(std::ostream &os,
-                                const struct ur_usm_release_params_t *params) {
+inline std::ostream &
+operator<<(std::ostream &os, const struct ur_usm_release_exp_params_t *params) {
 
     os << ".hContext = ";
 
@@ -12303,11 +12303,11 @@ inline int serializeFunctionParams(std::ostream &os, uint32_t function,
     case UR_FUNCTION_USM_POOL_GET_INFO: {
         os << (const struct ur_usm_pool_get_info_params_t *)params;
     } break;
-    case UR_FUNCTION_USM_IMPORT: {
-        os << (const struct ur_usm_import_params_t *)params;
+    case UR_FUNCTION_USM_IMPORT_EXP: {
+        os << (const struct ur_usm_import_exp_params_t *)params;
     } break;
-    case UR_FUNCTION_USM_RELEASE: {
-        os << (const struct ur_usm_release_params_t *)params;
+    case UR_FUNCTION_USM_RELEASE_EXP: {
+        os << (const struct ur_usm_release_exp_params_t *)params;
     } break;
     case UR_FUNCTION_DEVICE_GET: {
         os << (const struct ur_device_get_params_t *)params;

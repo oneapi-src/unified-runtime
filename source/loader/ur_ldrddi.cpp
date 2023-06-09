@@ -27,8 +27,8 @@ ur_mem_factory_t ur_mem_factory;
 ur_usm_pool_factory_t ur_usm_pool_factory;
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urUSMImport
-__urdlllocal ur_result_t UR_APICALL urUSMImport(
+/// @brief Intercept function for urUSMImportExp
+__urdlllocal ur_result_t UR_APICALL urUSMImportExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     void *pMem,                   ///< [in] pointer to host memory object
     size_t size ///< [in] size in bytes of the host memory object to be imported
@@ -37,8 +37,8 @@ __urdlllocal ur_result_t UR_APICALL urUSMImport(
 
     // extract platform's function pointer table
     auto dditable = reinterpret_cast<ur_context_object_t *>(hContext)->dditable;
-    auto pfnImport = dditable->ur.USM.pfnImport;
-    if (nullptr == pfnImport) {
+    auto pfnImportExp = dditable->ur.USMExp.pfnImportExp;
+    if (nullptr == pfnImportExp) {
         return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
@@ -46,14 +46,14 @@ __urdlllocal ur_result_t UR_APICALL urUSMImport(
     hContext = reinterpret_cast<ur_context_object_t *>(hContext)->handle;
 
     // forward to device-platform
-    result = pfnImport(hContext, pMem, size);
+    result = pfnImportExp(hContext, pMem, size);
 
     return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urUSMRelease
-__urdlllocal ur_result_t UR_APICALL urUSMRelease(
+/// @brief Intercept function for urUSMReleaseExp
+__urdlllocal ur_result_t UR_APICALL urUSMReleaseExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     void *pMem                    ///< [in] pointer to host memory object
 ) {
@@ -61,8 +61,8 @@ __urdlllocal ur_result_t UR_APICALL urUSMRelease(
 
     // extract platform's function pointer table
     auto dditable = reinterpret_cast<ur_context_object_t *>(hContext)->dditable;
-    auto pfnRelease = dditable->ur.USM.pfnRelease;
-    if (nullptr == pfnRelease) {
+    auto pfnReleaseExp = dditable->ur.USMExp.pfnReleaseExp;
+    if (nullptr == pfnReleaseExp) {
         return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
@@ -70,7 +70,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMRelease(
     hContext = reinterpret_cast<ur_context_object_t *>(hContext)->handle;
 
     // forward to device-platform
-    result = pfnRelease(hContext, pMem);
+    result = pfnReleaseExp(hContext, pMem);
 
     return result;
 }
@@ -5612,11 +5612,63 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetUSMProcAddrTable(
             pDdiTable->pfnPoolRetain = ur_loader::urUSMPoolRetain;
             pDdiTable->pfnPoolRelease = ur_loader::urUSMPoolRelease;
             pDdiTable->pfnPoolGetInfo = ur_loader::urUSMPoolGetInfo;
-            pDdiTable->pfnImport = ur_loader::urUSMImport;
-            pDdiTable->pfnRelease = ur_loader::urUSMRelease;
         } else {
             // return pointers directly to platform's DDIs
             *pDdiTable = ur_loader::context->platforms.front().dditable.ur.USM;
+        }
+    }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Exported function for filling application's USMExp table
+///        with current process' addresses
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+UR_DLLEXPORT ur_result_t UR_APICALL urGetUSMExpProcAddrTable(
+    ur_api_version_t version, ///< [in] API version requested
+    ur_usm_exp_dditable_t
+        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
+) {
+    if (nullptr == pDdiTable) {
+        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    if (ur_loader::context->version < version) {
+        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+    }
+
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // Load the device-platform DDI tables
+    for (auto &platform : ur_loader::context->platforms) {
+        if (platform.initStatus != UR_RESULT_SUCCESS) {
+            continue;
+        }
+        auto getTable = reinterpret_cast<ur_pfnGetUSMExpProcAddrTable_t>(
+            ur_loader::LibLoader::getFunctionPtr(platform.handle.get(),
+                                                 "urGetUSMExpProcAddrTable"));
+        if (!getTable) {
+            continue;
+        }
+        platform.initStatus = getTable(version, &platform.dditable.ur.USMExp);
+    }
+
+    if (UR_RESULT_SUCCESS == result) {
+        if (ur_loader::context->platforms.size() != 1 ||
+            ur_loader::context->forceIntercept) {
+            // return pointers to loader's DDIs
+            pDdiTable->pfnImportExp = ur_loader::urUSMImportExp;
+            pDdiTable->pfnReleaseExp = ur_loader::urUSMReleaseExp;
+        } else {
+            // return pointers directly to platform's DDIs
+            *pDdiTable =
+                ur_loader::context->platforms.front().dditable.ur.USMExp;
         }
     }
 

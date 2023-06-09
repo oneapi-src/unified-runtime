@@ -31,17 +31,17 @@ extern "C" {
 ///         + `NULL == pMem`
 ///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
-ur_result_t UR_APICALL urUSMImport(
+ur_result_t UR_APICALL urUSMImportExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     void *pMem,                   ///< [in] pointer to host memory object
     size_t size ///< [in] size in bytes of the host memory object to be imported
     ) try {
-    auto pfnImport = ur_lib::context->urDdiTable.USM.pfnImport;
-    if (nullptr == pfnImport) {
+    auto pfnImportExp = ur_lib::context->urDdiTable.USMExp.pfnImportExp;
+    if (nullptr == pfnImportExp) {
         return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
-    return pfnImport(hContext, pMem, size);
+    return pfnImportExp(hContext, pMem, size);
 } catch (...) {
     return exceptionToResult(std::current_exception());
 }
@@ -61,16 +61,16 @@ ur_result_t UR_APICALL urUSMImport(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `NULL == pMem`
 ///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
-ur_result_t UR_APICALL urUSMRelease(
+ur_result_t UR_APICALL urUSMReleaseExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     void *pMem                    ///< [in] pointer to host memory object
     ) try {
-    auto pfnRelease = ur_lib::context->urDdiTable.USM.pfnRelease;
-    if (nullptr == pfnRelease) {
+    auto pfnReleaseExp = ur_lib::context->urDdiTable.USMExp.pfnReleaseExp;
+    if (nullptr == pfnReleaseExp) {
         return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
-    return pfnRelease(hContext, pMem);
+    return pfnReleaseExp(hContext, pMem);
 } catch (...) {
     return exceptionToResult(std::current_exception());
 }

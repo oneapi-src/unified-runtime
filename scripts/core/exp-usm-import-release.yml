@@ -6,7 +6,7 @@ ordinal: "0"
 type: function
 desc: "Import memory into USM"
 class: $xUSM
-name: Import
+name: ImportExp
 details:
     - "Import memory into USM"
 params:
@@ -27,7 +27,7 @@ returns:
 type: function
 desc: "Release memory from USM"
 class: $xUSM
-name: Release
+name: ReleaseExp
 details:
     - "Release memory from USM"
 params:

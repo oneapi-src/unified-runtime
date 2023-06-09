@@ -316,7 +316,7 @@ typedef struct ur_rect_region_t {
 ///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 UR_APIEXPORT ur_result_t UR_APICALL
-urUSMImport(
+urUSMImportExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     void *pMem,                   ///< [in] pointer to host memory object
     size_t size                   ///< [in] size in bytes of the host memory object to be imported
@@ -338,7 +338,7 @@ urUSMImport(
 ///         + `NULL == pMem`
 ///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
 UR_APIEXPORT ur_result_t UR_APICALL
-urUSMRelease(
+urUSMReleaseExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     void *pMem                    ///< [in] pointer to host memory object
 );
@@ -4813,7 +4813,6 @@ typedef enum ur_function_t {
     UR_FUNCTION_USM_FREE = 110,                             ///< Enumerator for ::urUSMFree
     UR_FUNCTION_USM_GET_MEM_ALLOC_INFO = 111,               ///< Enumerator for ::urUSMGetMemAllocInfo
     UR_FUNCTION_USM_POOL_CREATE = 112,                      ///< Enumerator for ::urUSMPoolCreate
-    UR_FUNCTION_USM_IMPORT = 113,                           ///< Enumerator for ::urUSMImport
     UR_FUNCTION_PLATFORM_GET_BACKEND_OPTION = 114,          ///< Enumerator for ::urPlatformGetBackendOption
     UR_FUNCTION_MEM_BUFFER_CREATE_WITH_NATIVE_HANDLE = 115, ///< Enumerator for ::urMemBufferCreateWithNativeHandle
     UR_FUNCTION_MEM_IMAGE_CREATE_WITH_NATIVE_HANDLE = 116,  ///< Enumerator for ::urMemImageCreateWithNativeHandle
@@ -4821,7 +4820,8 @@ typedef enum ur_function_t {
     UR_FUNCTION_USM_POOL_RETAIN = 118,                      ///< Enumerator for ::urUSMPoolRetain
     UR_FUNCTION_USM_POOL_RELEASE = 119,                     ///< Enumerator for ::urUSMPoolRelease
     UR_FUNCTION_USM_POOL_GET_INFO = 120,                    ///< Enumerator for ::urUSMPoolGetInfo
-    UR_FUNCTION_USM_RELEASE = 121,                          ///< Enumerator for ::urUSMRelease
+    UR_FUNCTION_USM_IMPORT_EXP = 122,                       ///< Enumerator for ::urUSMImportExp
+    UR_FUNCTION_USM_RELEASE_EXP = 123,                      ///< Enumerator for ::urUSMReleaseExp
     /// @cond
     UR_FUNCTION_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -7273,23 +7273,23 @@ typedef struct ur_usm_pool_get_info_params_t {
 } ur_usm_pool_get_info_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Function parameters for urUSMImport
+/// @brief Function parameters for urUSMImportExp
 /// @details Each entry is a pointer to the parameter passed to the function;
 ///     allowing the callback the ability to modify the parameter's value
-typedef struct ur_usm_import_params_t {
+typedef struct ur_usm_import_exp_params_t {
     ur_context_handle_t *phContext;
     void **ppMem;
     size_t *psize;
-} ur_usm_import_params_t;
+} ur_usm_import_exp_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Function parameters for urUSMRelease
+/// @brief Function parameters for urUSMReleaseExp
 /// @details Each entry is a pointer to the parameter passed to the function;
 ///     allowing the callback the ability to modify the parameter's value
-typedef struct ur_usm_release_params_t {
+typedef struct ur_usm_release_exp_params_t {
     ur_context_handle_t *phContext;
     void **ppMem;
-} ur_usm_release_params_t;
+} ur_usm_release_exp_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urInit

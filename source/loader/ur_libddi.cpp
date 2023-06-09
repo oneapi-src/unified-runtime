@@ -74,6 +74,11 @@ __urdlllocal ur_result_t context_t::urInit() {
     }
 
     if (UR_RESULT_SUCCESS == result) {
+        result = urGetUSMExpProcAddrTable(UR_API_VERSION_CURRENT,
+                                          &urDdiTable.USMExp);
+    }
+
+    if (UR_RESULT_SUCCESS == result) {
         result = urGetDeviceProcAddrTable(UR_API_VERSION_CURRENT,
                                           &urDdiTable.Device);
     }

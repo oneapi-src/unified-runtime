@@ -343,9 +343,6 @@ etors:
 - name: USM_POOL_CREATE
   desc: Enumerator for $xUSMPoolCreate
   value: '112'
-- name: USM_IMPORT
-  desc: Enumerator for $xUSMImport
-  value: '113'
 - name: PLATFORM_GET_BACKEND_OPTION
   desc: Enumerator for $xPlatformGetBackendOption
   value: '114'
@@ -367,6 +364,9 @@ etors:
 - name: USM_POOL_GET_INFO
   desc: Enumerator for $xUSMPoolGetInfo
   value: '120'
-- name: USM_RELEASE
-  desc: Enumerator for $xUSMRelease
-  value: '121'
+- name: USM_IMPORT_EXP
+  desc: Enumerator for $xUSMImportExp
+  value: '122'
+- name: USM_RELEASE_EXP
+  desc: Enumerator for $xUSMReleaseExp
+  value: '123'
