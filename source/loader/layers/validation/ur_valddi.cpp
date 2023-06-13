@@ -15,65 +15,6 @@
 namespace ur_validation_layer {
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urUSMImportExp
-__urdlllocal ur_result_t UR_APICALL urUSMImportExp(
-    ur_context_handle_t hContext, ///< [in] handle of the context object
-    void *pMem,                   ///< [in] pointer to host memory object
-    size_t size ///< [in] size in bytes of the host memory object to be imported
-) {
-    auto pfnImportExp = context.urDdiTable.USMExp.pfnImportExp;
-
-    if (nullptr == pfnImportExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-    }
-
-    if (context.enableParameterValidation) {
-        if (NULL == hContext) {
-            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-        }
-
-        if (NULL == pMem) {
-            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-        }
-    }
-
-    ur_result_t result = pfnImportExp(hContext, pMem, size);
-
-    return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urUSMReleaseExp
-__urdlllocal ur_result_t UR_APICALL urUSMReleaseExp(
-    ur_context_handle_t hContext, ///< [in] handle of the context object
-    void *pMem                    ///< [in] pointer to host memory object
-) {
-    auto pfnReleaseExp = context.urDdiTable.USMExp.pfnReleaseExp;
-
-    if (nullptr == pfnReleaseExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-    }
-
-    if (context.enableParameterValidation) {
-        if (NULL == hContext) {
-            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-        }
-
-        if (NULL == pMem) {
-            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-        }
-    }
-
-    ur_result_t result = pfnReleaseExp(hContext, pMem);
-
-    if (context.enableLeakChecking && result == UR_RESULT_SUCCESS) {
-        refCountContext.decrementRefCount(pMem);
-    }
-
-    return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urInit
 __urdlllocal ur_result_t UR_APICALL urInit(
     ur_device_init_flags_t device_flags ///< [in] device initialization flags.
@@ -5084,6 +5025,65 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueWriteHostPipe(
     ur_result_t result =
         pfnWriteHostPipe(hQueue, hProgram, pipe_symbol, blocking, pSrc, size,
                          numEventsInWaitList, phEventWaitList, phEvent);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMImportExp
+__urdlllocal ur_result_t UR_APICALL urUSMImportExp(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    void *pMem,                   ///< [in] pointer to host memory object
+    size_t size ///< [in] size in bytes of the host memory object to be imported
+) {
+    auto pfnImportExp = context.urDdiTable.USMExp.pfnImportExp;
+
+    if (nullptr == pfnImportExp) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    if (context.enableParameterValidation) {
+        if (NULL == hContext) {
+            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
+        }
+
+        if (NULL == pMem) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+    }
+
+    ur_result_t result = pfnImportExp(hContext, pMem, size);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMReleaseExp
+__urdlllocal ur_result_t UR_APICALL urUSMReleaseExp(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    void *pMem                    ///< [in] pointer to host memory object
+) {
+    auto pfnReleaseExp = context.urDdiTable.USMExp.pfnReleaseExp;
+
+    if (nullptr == pfnReleaseExp) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    if (context.enableParameterValidation) {
+        if (NULL == hContext) {
+            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
+        }
+
+        if (NULL == pMem) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+    }
+
+    ur_result_t result = pfnReleaseExp(hContext, pMem);
+
+    if (context.enableLeakChecking && result == UR_RESULT_SUCCESS) {
+        refCountContext.decrementRefCount(pMem);
+    }
 
     return result;
 }

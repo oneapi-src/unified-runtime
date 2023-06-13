@@ -1,7 +1,7 @@
 --- #--------------------------------------------------------------------------
 type: header
 desc: "Intel $OneApi USM Import/Release Extension APIs"
-ordinal: "0"
+ordinal: "99"
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Import memory into USM"
@@ -21,7 +21,6 @@ params:
       desc: "[in] size in bytes of the host memory object to be imported"
 returns:
     - $X_RESULT_ERROR_INVALID_CONTEXT
-    - $X_RESULT_ERROR_INVALID_NULL_POINTER
     - $X_RESULT_ERROR_INVALID_SIZE
 --- #--------------------------------------------------------------------------
 type: function
@@ -39,4 +38,3 @@ params:
       desc: "[in] pointer to host memory object"
 returns:
     - $X_RESULT_ERROR_INVALID_CONTEXT
-    - $X_RESULT_ERROR_INVALID_NULL_POINTER

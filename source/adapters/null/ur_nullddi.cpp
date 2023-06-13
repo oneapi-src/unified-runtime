@@ -13,49 +13,6 @@
 
 namespace driver {
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urUSMImportExp
-__urdlllocal ur_result_t UR_APICALL urUSMImportExp(
-    ur_context_handle_t hContext, ///< [in] handle of the context object
-    void *pMem,                   ///< [in] pointer to host memory object
-    size_t size ///< [in] size in bytes of the host memory object to be imported
-    ) try {
-    ur_result_t result = UR_RESULT_SUCCESS;
-
-    // if the driver has created a custom function, then call it instead of using the generic path
-    auto pfnImportExp = d_context.urDdiTable.USMExp.pfnImportExp;
-    if (nullptr != pfnImportExp) {
-        result = pfnImportExp(hContext, pMem, size);
-    } else {
-        // generic implementation
-    }
-
-    return result;
-} catch (...) {
-    return exceptionToResult(std::current_exception());
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urUSMReleaseExp
-__urdlllocal ur_result_t UR_APICALL urUSMReleaseExp(
-    ur_context_handle_t hContext, ///< [in] handle of the context object
-    void *pMem                    ///< [in] pointer to host memory object
-    ) try {
-    ur_result_t result = UR_RESULT_SUCCESS;
-
-    // if the driver has created a custom function, then call it instead of using the generic path
-    auto pfnReleaseExp = d_context.urDdiTable.USMExp.pfnReleaseExp;
-    if (nullptr != pfnReleaseExp) {
-        result = pfnReleaseExp(hContext, pMem);
-    } else {
-        // generic implementation
-    }
-
-    return result;
-} catch (...) {
-    return exceptionToResult(std::current_exception());
-}
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urInit
 __urdlllocal ur_result_t UR_APICALL urInit(
     ur_device_init_flags_t device_flags ///< [in] device initialization flags.
@@ -3525,6 +3482,49 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueWriteHostPipe(
     } else {
         // generic implementation
         *phEvent = reinterpret_cast<ur_event_handle_t>(d_context.get());
+    }
+
+    return result;
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMImportExp
+__urdlllocal ur_result_t UR_APICALL urUSMImportExp(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    void *pMem,                   ///< [in] pointer to host memory object
+    size_t size ///< [in] size in bytes of the host memory object to be imported
+    ) try {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // if the driver has created a custom function, then call it instead of using the generic path
+    auto pfnImportExp = d_context.urDdiTable.USMExp.pfnImportExp;
+    if (nullptr != pfnImportExp) {
+        result = pfnImportExp(hContext, pMem, size);
+    } else {
+        // generic implementation
+    }
+
+    return result;
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMReleaseExp
+__urdlllocal ur_result_t UR_APICALL urUSMReleaseExp(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    void *pMem                    ///< [in] pointer to host memory object
+    ) try {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // if the driver has created a custom function, then call it instead of using the generic path
+    auto pfnReleaseExp = d_context.urDdiTable.USMExp.pfnReleaseExp;
+    if (nullptr != pfnReleaseExp) {
+        result = pfnReleaseExp(hContext, pMem);
+    } else {
+        // generic implementation
     }
 
     return result;

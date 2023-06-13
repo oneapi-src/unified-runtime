@@ -295,57 +295,6 @@ typedef struct ur_rect_region_t {
 #if !defined(__GNUC__)
 #pragma endregion
 #endif
-// Intel 'oneAPI' USM Import/Release Extension APIs
-#if !defined(__GNUC__)
-#pragma region usm import release(experimental)
-#endif
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Import memory into USM
-///
-/// @details
-///     - Import memory into USM
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_UNINITIALIZED
-///     - ::UR_RESULT_ERROR_DEVICE_LOST
-///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
-///         + `NULL == hContext`
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///         + `NULL == pMem`
-///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
-///     - ::UR_RESULT_ERROR_INVALID_SIZE
-UR_APIEXPORT ur_result_t UR_APICALL
-urUSMImportExp(
-    ur_context_handle_t hContext, ///< [in] handle of the context object
-    void *pMem,                   ///< [in] pointer to host memory object
-    size_t size                   ///< [in] size in bytes of the host memory object to be imported
-);
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Release memory from USM
-///
-/// @details
-///     - Release memory from USM
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_UNINITIALIZED
-///     - ::UR_RESULT_ERROR_DEVICE_LOST
-///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
-///         + `NULL == hContext`
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///         + `NULL == pMem`
-///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
-UR_APIEXPORT ur_result_t UR_APICALL
-urUSMReleaseExp(
-    ur_context_handle_t hContext, ///< [in] handle of the context object
-    void *pMem                    ///< [in] pointer to host memory object
-);
-
-#if !defined(__GNUC__)
-#pragma endregion
-#endif
 // Intel 'oneAPI' Unified Runtime APIs for Runtime
 #if !defined(__GNUC__)
 #pragma region runtime
@@ -6011,6 +5960,57 @@ urEnqueueWriteHostPipe(
                                               ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait event.
     ur_event_handle_t *phEvent                ///< [out] returns an event object that identifies this write command
                                               ///< and can be used to query or queue a wait for this command to complete.
+);
+
+#if !defined(__GNUC__)
+#pragma endregion
+#endif
+// Intel 'oneAPI' USM Import/Release Extension APIs
+#if !defined(__GNUC__)
+#pragma region usm import release(experimental)
+#endif
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Import memory into USM
+///
+/// @details
+///     - Import memory into USM
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hContext`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pMem`
+///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
+///     - ::UR_RESULT_ERROR_INVALID_SIZE
+UR_APIEXPORT ur_result_t UR_APICALL
+urUSMImportExp(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    void *pMem,                   ///< [in] pointer to host memory object
+    size_t size                   ///< [in] size in bytes of the host memory object to be imported
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Release memory from USM
+///
+/// @details
+///     - Release memory from USM
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hContext`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pMem`
+///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
+UR_APIEXPORT ur_result_t UR_APICALL
+urUSMReleaseExp(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    void *pMem                    ///< [in] pointer to host memory object
 );
 
 #if !defined(__GNUC__)
