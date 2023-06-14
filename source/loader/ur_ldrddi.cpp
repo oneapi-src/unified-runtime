@@ -25,6 +25,7 @@ ur_native_factory_t ur_native_factory;
 ur_sampler_factory_t ur_sampler_factory;
 ur_mem_factory_t ur_mem_factory;
 ur_usm_pool_factory_t ur_usm_pool_factory;
+ur_exp_command_buffer_factory_t ur_exp_command_buffer_factory;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urInit
@@ -675,15 +676,15 @@ __urdlllocal ur_result_t UR_APICALL urContextCreate(
     }
 
     // convert loader handles to platform handles
-    auto phDevicesLocal = new ur_device_handle_t[DeviceCount];
+    auto phDevicesLocal = std::vector<ur_device_handle_t>(DeviceCount);
     for (size_t i = 0; i < DeviceCount; ++i) {
         phDevicesLocal[i] =
             reinterpret_cast<ur_device_object_t *>(phDevices[i])->handle;
     }
 
     // forward to device-platform
-    result = pfnCreate(DeviceCount, phDevices, pProperties, phContext);
-    delete[] phDevicesLocal;
+    result =
+        pfnCreate(DeviceCount, phDevicesLocal.data(), pProperties, phContext);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -848,16 +849,16 @@ __urdlllocal ur_result_t UR_APICALL urContextCreateWithNativeHandle(
         reinterpret_cast<ur_native_object_t *>(hNativeContext)->handle;
 
     // convert loader handles to platform handles
-    auto phDevicesLocal = new ur_device_handle_t[numDevices];
+    auto phDevicesLocal = std::vector<ur_device_handle_t>(numDevices);
     for (size_t i = 0; i < numDevices; ++i) {
         phDevicesLocal[i] =
             reinterpret_cast<ur_device_object_t *>(phDevices[i])->handle;
     }
 
     // forward to device-platform
-    result = pfnCreateWithNativeHandle(hNativeContext, numDevices, phDevices,
-                                       pProperties, phContext);
-    delete[] phDevicesLocal;
+    result = pfnCreateWithNativeHandle(hNativeContext, numDevices,
+                                       phDevicesLocal.data(), pProperties,
+                                       phContext);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -1932,15 +1933,15 @@ __urdlllocal ur_result_t UR_APICALL urProgramLink(
     hContext = reinterpret_cast<ur_context_object_t *>(hContext)->handle;
 
     // convert loader handles to platform handles
-    auto phProgramsLocal = new ur_program_handle_t[count];
+    auto phProgramsLocal = std::vector<ur_program_handle_t>(count);
     for (size_t i = 0; i < count; ++i) {
         phProgramsLocal[i] =
             reinterpret_cast<ur_program_object_t *>(phPrograms[i])->handle;
     }
 
     // forward to device-platform
-    result = pfnLink(hContext, count, phPrograms, pOptions, phProgram);
-    delete[] phProgramsLocal;
+    result =
+        pfnLink(hContext, count, phProgramsLocal.data(), pOptions, phProgram);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -3037,15 +3038,14 @@ __urdlllocal ur_result_t UR_APICALL urEventWait(
     }
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEvents];
+    auto phEventWaitListLocal = std::vector<ur_event_handle_t>(numEvents);
     for (size_t i = 0; i < numEvents; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
     }
 
     // forward to device-platform
-    result = pfnWait(numEvents, phEventWaitList);
-    delete[] phEventWaitListLocal;
+    result = pfnWait(numEvents, phEventWaitListLocal.data());
 
     return result;
 }
@@ -3253,17 +3253,18 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunch(
     hKernel = reinterpret_cast<ur_kernel_object_t *>(hKernel)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
     }
 
     // forward to device-platform
-    result = pfnKernelLaunch(hQueue, hKernel, workDim, pGlobalWorkOffset,
-                             pGlobalWorkSize, pLocalWorkSize,
-                             numEventsInWaitList, phEventWaitList, phEvent);
-    delete[] phEventWaitListLocal;
+    result =
+        pfnKernelLaunch(hQueue, hKernel, workDim, pGlobalWorkOffset,
+                        pGlobalWorkSize, pLocalWorkSize, numEventsInWaitList,
+                        phEventWaitListLocal.data(), phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -3310,16 +3311,16 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWait(
     hQueue = reinterpret_cast<ur_queue_object_t *>(hQueue)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
     }
 
     // forward to device-platform
-    result =
-        pfnEventsWait(hQueue, numEventsInWaitList, phEventWaitList, phEvent);
-    delete[] phEventWaitListLocal;
+    result = pfnEventsWait(hQueue, numEventsInWaitList,
+                           phEventWaitListLocal.data(), phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -3367,7 +3368,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
     hQueue = reinterpret_cast<ur_queue_object_t *>(hQueue)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
@@ -3375,8 +3377,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
 
     // forward to device-platform
     result = pfnEventsWaitWithBarrier(hQueue, numEventsInWaitList,
-                                      phEventWaitList, phEvent);
-    delete[] phEventWaitListLocal;
+                                      phEventWaitListLocal.data(), phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -3430,7 +3431,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferRead(
     hBuffer = reinterpret_cast<ur_mem_object_t *>(hBuffer)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
@@ -3438,8 +3440,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferRead(
 
     // forward to device-platform
     result = pfnMemBufferRead(hQueue, hBuffer, blockingRead, offset, size, pDst,
-                              numEventsInWaitList, phEventWaitList, phEvent);
-    delete[] phEventWaitListLocal;
+                              numEventsInWaitList, phEventWaitListLocal.data(),
+                              phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -3495,17 +3497,17 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWrite(
     hBuffer = reinterpret_cast<ur_mem_object_t *>(hBuffer)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
     }
 
     // forward to device-platform
-    result =
-        pfnMemBufferWrite(hQueue, hBuffer, blockingWrite, offset, size, pSrc,
-                          numEventsInWaitList, phEventWaitList, phEvent);
-    delete[] phEventWaitListLocal;
+    result = pfnMemBufferWrite(hQueue, hBuffer, blockingWrite, offset, size,
+                               pSrc, numEventsInWaitList,
+                               phEventWaitListLocal.data(), phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -3571,7 +3573,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
     hBuffer = reinterpret_cast<ur_mem_object_t *>(hBuffer)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
@@ -3581,8 +3584,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
     result = pfnMemBufferReadRect(
         hQueue, hBuffer, blockingRead, bufferOrigin, hostOrigin, region,
         bufferRowPitch, bufferSlicePitch, hostRowPitch, hostSlicePitch, pDst,
-        numEventsInWaitList, phEventWaitList, phEvent);
-    delete[] phEventWaitListLocal;
+        numEventsInWaitList, phEventWaitListLocal.data(), phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -3651,7 +3653,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
     hBuffer = reinterpret_cast<ur_mem_object_t *>(hBuffer)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
@@ -3661,8 +3664,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
     result = pfnMemBufferWriteRect(
         hQueue, hBuffer, blockingWrite, bufferOrigin, hostOrigin, region,
         bufferRowPitch, bufferSlicePitch, hostRowPitch, hostSlicePitch, pSrc,
-        numEventsInWaitList, phEventWaitList, phEvent);
-    delete[] phEventWaitListLocal;
+        numEventsInWaitList, phEventWaitListLocal.data(), phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -3719,17 +3721,17 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopy(
     hBufferDst = reinterpret_cast<ur_mem_object_t *>(hBufferDst)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
     }
 
     // forward to device-platform
-    result =
-        pfnMemBufferCopy(hQueue, hBufferSrc, hBufferDst, srcOffset, dstOffset,
-                         size, numEventsInWaitList, phEventWaitList, phEvent);
-    delete[] phEventWaitListLocal;
+    result = pfnMemBufferCopy(hQueue, hBufferSrc, hBufferDst, srcOffset,
+                              dstOffset, size, numEventsInWaitList,
+                              phEventWaitListLocal.data(), phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -3795,7 +3797,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
     hBufferDst = reinterpret_cast<ur_mem_object_t *>(hBufferDst)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
@@ -3805,8 +3808,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
     result = pfnMemBufferCopyRect(
         hQueue, hBufferSrc, hBufferDst, srcOrigin, dstOrigin, region,
         srcRowPitch, srcSlicePitch, dstRowPitch, dstSlicePitch,
-        numEventsInWaitList, phEventWaitList, phEvent);
-    delete[] phEventWaitListLocal;
+        numEventsInWaitList, phEventWaitListLocal.data(), phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -3860,17 +3862,17 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferFill(
     hBuffer = reinterpret_cast<ur_mem_object_t *>(hBuffer)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
     }
 
     // forward to device-platform
-    result =
-        pfnMemBufferFill(hQueue, hBuffer, pPattern, patternSize, offset, size,
-                         numEventsInWaitList, phEventWaitList, phEvent);
-    delete[] phEventWaitListLocal;
+    result = pfnMemBufferFill(hQueue, hBuffer, pPattern, patternSize, offset,
+                              size, numEventsInWaitList,
+                              phEventWaitListLocal.data(), phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -3929,7 +3931,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageRead(
     hImage = reinterpret_cast<ur_mem_object_t *>(hImage)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
@@ -3938,8 +3941,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageRead(
     // forward to device-platform
     result = pfnMemImageRead(hQueue, hImage, blockingRead, origin, region,
                              rowPitch, slicePitch, pDst, numEventsInWaitList,
-                             phEventWaitList, phEvent);
-    delete[] phEventWaitListLocal;
+                             phEventWaitListLocal.data(), phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -3999,7 +4001,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageWrite(
     hImage = reinterpret_cast<ur_mem_object_t *>(hImage)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
@@ -4008,8 +4011,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageWrite(
     // forward to device-platform
     result = pfnMemImageWrite(hQueue, hImage, blockingWrite, origin, region,
                               rowPitch, slicePitch, pSrc, numEventsInWaitList,
-                              phEventWaitList, phEvent);
-    delete[] phEventWaitListLocal;
+                              phEventWaitListLocal.data(), phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -4072,17 +4074,17 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageCopy(
     hImageDst = reinterpret_cast<ur_mem_object_t *>(hImageDst)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
     }
 
     // forward to device-platform
-    result =
-        pfnMemImageCopy(hQueue, hImageSrc, hImageDst, srcOrigin, dstOrigin,
-                        region, numEventsInWaitList, phEventWaitList, phEvent);
-    delete[] phEventWaitListLocal;
+    result = pfnMemImageCopy(hQueue, hImageSrc, hImageDst, srcOrigin, dstOrigin,
+                             region, numEventsInWaitList,
+                             phEventWaitListLocal.data(), phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -4138,7 +4140,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferMap(
     hBuffer = reinterpret_cast<ur_mem_object_t *>(hBuffer)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
@@ -4146,9 +4149,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferMap(
 
     // forward to device-platform
     result = pfnMemBufferMap(hQueue, hBuffer, blockingMap, mapFlags, offset,
-                             size, numEventsInWaitList, phEventWaitList,
-                             phEvent, ppRetMap);
-    delete[] phEventWaitListLocal;
+                             size, numEventsInWaitList,
+                             phEventWaitListLocal.data(), phEvent, ppRetMap);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -4200,7 +4202,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemUnmap(
     hMem = reinterpret_cast<ur_mem_object_t *>(hMem)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
@@ -4208,8 +4211,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemUnmap(
 
     // forward to device-platform
     result = pfnMemUnmap(hQueue, hMem, pMappedPtr, numEventsInWaitList,
-                         phEventWaitList, phEvent);
-    delete[] phEventWaitListLocal;
+                         phEventWaitListLocal.data(), phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -4263,16 +4265,17 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill(
     hQueue = reinterpret_cast<ur_queue_object_t *>(hQueue)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
     }
 
     // forward to device-platform
-    result = pfnUSMFill(hQueue, ptr, patternSize, pPattern, size,
-                        numEventsInWaitList, phEventWaitList, phEvent);
-    delete[] phEventWaitListLocal;
+    result =
+        pfnUSMFill(hQueue, ptr, patternSize, pPattern, size,
+                   numEventsInWaitList, phEventWaitListLocal.data(), phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -4322,16 +4325,17 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy(
     hQueue = reinterpret_cast<ur_queue_object_t *>(hQueue)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
     }
 
     // forward to device-platform
-    result = pfnUSMMemcpy(hQueue, blocking, pDst, pSrc, size,
-                          numEventsInWaitList, phEventWaitList, phEvent);
-    delete[] phEventWaitListLocal;
+    result =
+        pfnUSMMemcpy(hQueue, blocking, pDst, pSrc, size, numEventsInWaitList,
+                     phEventWaitListLocal.data(), phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -4380,7 +4384,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMPrefetch(
     hQueue = reinterpret_cast<ur_queue_object_t *>(hQueue)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
@@ -4388,8 +4393,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMPrefetch(
 
     // forward to device-platform
     result = pfnUSMPrefetch(hQueue, pMem, size, flags, numEventsInWaitList,
-                            phEventWaitList, phEvent);
-    delete[] phEventWaitListLocal;
+                            phEventWaitListLocal.data(), phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -4490,7 +4494,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill2D(
     hQueue = reinterpret_cast<ur_queue_object_t *>(hQueue)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
@@ -4499,8 +4504,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill2D(
     // forward to device-platform
     result =
         pfnUSMFill2D(hQueue, pMem, pitch, patternSize, pPattern, width, height,
-                     numEventsInWaitList, phEventWaitList, phEvent);
-    delete[] phEventWaitListLocal;
+                     numEventsInWaitList, phEventWaitListLocal.data(), phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -4555,17 +4559,17 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
     hQueue = reinterpret_cast<ur_queue_object_t *>(hQueue)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
     }
 
     // forward to device-platform
-    result =
-        pfnUSMMemcpy2D(hQueue, blocking, pDst, dstPitch, pSrc, srcPitch, width,
-                       height, numEventsInWaitList, phEventWaitList, phEvent);
-    delete[] phEventWaitListLocal;
+    result = pfnUSMMemcpy2D(hQueue, blocking, pDst, dstPitch, pSrc, srcPitch,
+                            width, height, numEventsInWaitList,
+                            phEventWaitListLocal.data(), phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -4624,7 +4628,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
     hProgram = reinterpret_cast<ur_program_object_t *>(hProgram)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
@@ -4633,8 +4638,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
     // forward to device-platform
     result = pfnDeviceGlobalVariableWrite(
         hQueue, hProgram, name, blockingWrite, count, offset, pSrc,
-        numEventsInWaitList, phEventWaitList, phEvent);
-    delete[] phEventWaitListLocal;
+        numEventsInWaitList, phEventWaitListLocal.data(), phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -4693,7 +4697,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
     hProgram = reinterpret_cast<ur_program_object_t *>(hProgram)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
@@ -4702,8 +4707,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
     // forward to device-platform
     result = pfnDeviceGlobalVariableRead(
         hQueue, hProgram, name, blockingRead, count, offset, pDst,
-        numEventsInWaitList, phEventWaitList, phEvent);
-    delete[] phEventWaitListLocal;
+        numEventsInWaitList, phEventWaitListLocal.data(), phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -4765,17 +4769,17 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueReadHostPipe(
     hProgram = reinterpret_cast<ur_program_object_t *>(hProgram)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
     }
 
     // forward to device-platform
-    result =
-        pfnReadHostPipe(hQueue, hProgram, pipe_symbol, blocking, pDst, size,
-                        numEventsInWaitList, phEventWaitList, phEvent);
-    delete[] phEventWaitListLocal;
+    result = pfnReadHostPipe(hQueue, hProgram, pipe_symbol, blocking, pDst,
+                             size, numEventsInWaitList,
+                             phEventWaitListLocal.data(), phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -4837,17 +4841,17 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueWriteHostPipe(
     hProgram = reinterpret_cast<ur_program_object_t *>(hProgram)->handle;
 
     // convert loader handles to platform handles
-    auto phEventWaitListLocal = new ur_event_handle_t[numEventsInWaitList];
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
     for (size_t i = 0; i < numEventsInWaitList; ++i) {
         phEventWaitListLocal[i] =
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
     }
 
     // forward to device-platform
-    result =
-        pfnWriteHostPipe(hQueue, hProgram, pipe_symbol, blocking, pSrc, size,
-                         numEventsInWaitList, phEventWaitList, phEvent);
-    delete[] phEventWaitListLocal;
+    result = pfnWriteHostPipe(hQueue, hProgram, pipe_symbol, blocking, pSrc,
+                              size, numEventsInWaitList,
+                              phEventWaitListLocal.data(), phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -4913,6 +4917,393 @@ __urdlllocal ur_result_t UR_APICALL urUSMReleaseExp(
     return result;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urCommandBufferCreateExp
+__urdlllocal ur_result_t UR_APICALL urCommandBufferCreateExp(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    ur_device_handle_t hDevice,   ///< [in] handle of the device object
+    const ur_exp_command_buffer_desc_t
+        *pCommandBufferDesc, ///< [in][optional] CommandBuffer descriptor
+    ur_exp_command_buffer_handle_t
+        *phCommandBuffer ///< [out] pointer to Command-Buffer handle
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // extract platform's function pointer table
+    auto dditable = reinterpret_cast<ur_context_object_t *>(hContext)->dditable;
+    auto pfnCreateExp = dditable->ur.CommandBufferExp.pfnCreateExp;
+    if (nullptr == pfnCreateExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    hContext = reinterpret_cast<ur_context_object_t *>(hContext)->handle;
+
+    // convert loader handle to platform handle
+    hDevice = reinterpret_cast<ur_device_object_t *>(hDevice)->handle;
+
+    // forward to device-platform
+    result =
+        pfnCreateExp(hContext, hDevice, pCommandBufferDesc, phCommandBuffer);
+
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    try {
+        // convert platform handle to loader handle
+        *phCommandBuffer = reinterpret_cast<ur_exp_command_buffer_handle_t>(
+            ur_exp_command_buffer_factory.getInstance(*phCommandBuffer,
+                                                      dditable));
+    } catch (std::bad_alloc &) {
+        result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
+    }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urCommandBufferRetainExp
+__urdlllocal ur_result_t UR_APICALL urCommandBufferRetainExp(
+    ur_exp_command_buffer_handle_t
+        hCommandBuffer ///< [in] handle of the command-buffer object
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // extract platform's function pointer table
+    auto dditable =
+        reinterpret_cast<ur_exp_command_buffer_object_t *>(hCommandBuffer)
+            ->dditable;
+    auto pfnRetainExp = dditable->ur.CommandBufferExp.pfnRetainExp;
+    if (nullptr == pfnRetainExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    hCommandBuffer =
+        reinterpret_cast<ur_exp_command_buffer_object_t *>(hCommandBuffer)
+            ->handle;
+
+    // forward to device-platform
+    result = pfnRetainExp(hCommandBuffer);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urCommandBufferReleaseExp
+__urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseExp(
+    ur_exp_command_buffer_handle_t
+        hCommandBuffer ///< [in] handle of the command-buffer object
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // extract platform's function pointer table
+    auto dditable =
+        reinterpret_cast<ur_exp_command_buffer_object_t *>(hCommandBuffer)
+            ->dditable;
+    auto pfnReleaseExp = dditable->ur.CommandBufferExp.pfnReleaseExp;
+    if (nullptr == pfnReleaseExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    hCommandBuffer =
+        reinterpret_cast<ur_exp_command_buffer_object_t *>(hCommandBuffer)
+            ->handle;
+
+    // forward to device-platform
+    result = pfnReleaseExp(hCommandBuffer);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urCommandBufferFinalizeExp
+__urdlllocal ur_result_t UR_APICALL urCommandBufferFinalizeExp(
+    ur_exp_command_buffer_handle_t
+        hCommandBuffer ///< [in] handle of the command-buffer object
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // extract platform's function pointer table
+    auto dditable =
+        reinterpret_cast<ur_exp_command_buffer_object_t *>(hCommandBuffer)
+            ->dditable;
+    auto pfnFinalizeExp = dditable->ur.CommandBufferExp.pfnFinalizeExp;
+    if (nullptr == pfnFinalizeExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    hCommandBuffer =
+        reinterpret_cast<ur_exp_command_buffer_object_t *>(hCommandBuffer)
+            ->handle;
+
+    // forward to device-platform
+    result = pfnFinalizeExp(hCommandBuffer);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urCommandBufferAppendKernelLaunchExp
+__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
+    ur_exp_command_buffer_handle_t
+        hCommandBuffer,         ///< [in] handle of the command-buffer object
+    ur_kernel_handle_t hKernel, ///< [in] kernel to append
+    uint32_t workDim,           ///< [in] dimension of the kernel execution
+    const size_t
+        *pGlobalWorkOffset, ///< [in] Offset to use when executing kernel.
+    const size_t *
+        pGlobalWorkSize, ///< [in] Global work size to use when executing kernel.
+    const size_t
+        *pLocalWorkSize, ///< [in] Local work size to use when executing kernel.
+    uint32_t
+        numSyncPointsInWaitList, ///< [in] The number of sync points in the provided dependency list.
+    const ur_exp_command_buffer_sync_point_t *
+        pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on.
+    ur_exp_command_buffer_sync_point_t
+        *pSyncPoint ///< [out][optional] sync point associated with this command
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // extract platform's function pointer table
+    auto dditable =
+        reinterpret_cast<ur_exp_command_buffer_object_t *>(hCommandBuffer)
+            ->dditable;
+    auto pfnAppendKernelLaunchExp =
+        dditable->ur.CommandBufferExp.pfnAppendKernelLaunchExp;
+    if (nullptr == pfnAppendKernelLaunchExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    hCommandBuffer =
+        reinterpret_cast<ur_exp_command_buffer_object_t *>(hCommandBuffer)
+            ->handle;
+
+    // convert loader handle to platform handle
+    hKernel = reinterpret_cast<ur_kernel_object_t *>(hKernel)->handle;
+
+    // forward to device-platform
+    result = pfnAppendKernelLaunchExp(hCommandBuffer, hKernel, workDim,
+                                      pGlobalWorkOffset, pGlobalWorkSize,
+                                      pLocalWorkSize, numSyncPointsInWaitList,
+                                      pSyncPointWaitList, pSyncPoint);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urCommandBufferAppendMemcpyUSMExp
+__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemcpyUSMExp(
+    ur_exp_command_buffer_handle_t
+        hCommandBuffer, ///< [in] handle of the command-buffer object.
+    void *pDst,         ///< [in] Location the data will be copied to.
+    const void *pSrc,   ///< [in] The data to be copied.
+    size_t size,        ///< [in] The number of bytes to copy
+    uint32_t
+        numSyncPointsInWaitList, ///< [in] The number of sync points in the provided dependency list.
+    const ur_exp_command_buffer_sync_point_t *
+        pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on.
+    ur_exp_command_buffer_sync_point_t
+        *pSyncPoint ///< [out][optional] sync point associated with this command
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // extract platform's function pointer table
+    auto dditable =
+        reinterpret_cast<ur_exp_command_buffer_object_t *>(hCommandBuffer)
+            ->dditable;
+    auto pfnAppendMemcpyUSMExp =
+        dditable->ur.CommandBufferExp.pfnAppendMemcpyUSMExp;
+    if (nullptr == pfnAppendMemcpyUSMExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    hCommandBuffer =
+        reinterpret_cast<ur_exp_command_buffer_object_t *>(hCommandBuffer)
+            ->handle;
+
+    // forward to device-platform
+    result = pfnAppendMemcpyUSMExp(hCommandBuffer, pDst, pSrc, size,
+                                   numSyncPointsInWaitList, pSyncPointWaitList,
+                                   pSyncPoint);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urCommandBufferAppendMembufferCopyExp
+__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMembufferCopyExp(
+    ur_exp_command_buffer_handle_t
+        hCommandBuffer,      ///< [in] handle of the command-buffer object.
+    ur_mem_handle_t hSrcMem, ///< [in] The data to be copied.
+    ur_mem_handle_t hDstMem, ///< [in] The location the data will be copied to.
+    size_t srcOffset,        ///< [in] Offset into the source memory.
+    size_t dstOffset,        ///< [in] Offset into the destination memory
+    size_t size,             ///< [in] The number of bytes to be copied.
+    uint32_t
+        numSyncPointsInWaitList, ///< [in] The number of sync points in the provided dependency list.
+    const ur_exp_command_buffer_sync_point_t *
+        pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on.
+    ur_exp_command_buffer_sync_point_t
+        *pSyncPoint ///< [out][optional] sync point associated with this command
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // extract platform's function pointer table
+    auto dditable =
+        reinterpret_cast<ur_exp_command_buffer_object_t *>(hCommandBuffer)
+            ->dditable;
+    auto pfnAppendMembufferCopyExp =
+        dditable->ur.CommandBufferExp.pfnAppendMembufferCopyExp;
+    if (nullptr == pfnAppendMembufferCopyExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    hCommandBuffer =
+        reinterpret_cast<ur_exp_command_buffer_object_t *>(hCommandBuffer)
+            ->handle;
+
+    // convert loader handle to platform handle
+    hSrcMem = reinterpret_cast<ur_mem_object_t *>(hSrcMem)->handle;
+
+    // convert loader handle to platform handle
+    hDstMem = reinterpret_cast<ur_mem_object_t *>(hDstMem)->handle;
+
+    // forward to device-platform
+    result = pfnAppendMembufferCopyExp(
+        hCommandBuffer, hSrcMem, hDstMem, srcOffset, dstOffset, size,
+        numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urCommandBufferAppendMembufferCopyRectExp
+__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMembufferCopyRectExp(
+    ur_exp_command_buffer_handle_t
+        hCommandBuffer,      ///< [in] handle of the command-buffer object.
+    ur_mem_handle_t hSrcMem, ///< [in] The data to be copied.
+    ur_mem_handle_t hDstMem, ///< [in] The location the data will be copied to.
+    ur_rect_offset_t
+        srcOrigin, ///< [in] Origin for the region of data to be copied from the source.
+    ur_rect_offset_t
+        dstOrigin, ///< [in] Origin for the region of data to be copied to in the destination.
+    ur_rect_region_t
+        region, ///< [in] The extents describing the region to be copied.
+    size_t srcRowPitch,   ///< [in] Row pitch of the source memory.
+    size_t srcSlicePitch, ///< [in] Slice pitch of the source memory.
+    size_t dstRowPitch,   ///< [in] Row pitch of the destination memory.
+    size_t dstSlicePitch, ///< [in] Slice pitch of the destination memory.
+    uint32_t
+        numSyncPointsInWaitList, ///< [in] The number of sync points in the provided dependency list.
+    const ur_exp_command_buffer_sync_point_t *
+        pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on.
+    ur_exp_command_buffer_sync_point_t
+        *pSyncPoint ///< [out][optional] sync point associated with this command
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // extract platform's function pointer table
+    auto dditable =
+        reinterpret_cast<ur_exp_command_buffer_object_t *>(hCommandBuffer)
+            ->dditable;
+    auto pfnAppendMembufferCopyRectExp =
+        dditable->ur.CommandBufferExp.pfnAppendMembufferCopyRectExp;
+    if (nullptr == pfnAppendMembufferCopyRectExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    hCommandBuffer =
+        reinterpret_cast<ur_exp_command_buffer_object_t *>(hCommandBuffer)
+            ->handle;
+
+    // convert loader handle to platform handle
+    hSrcMem = reinterpret_cast<ur_mem_object_t *>(hSrcMem)->handle;
+
+    // convert loader handle to platform handle
+    hDstMem = reinterpret_cast<ur_mem_object_t *>(hDstMem)->handle;
+
+    // forward to device-platform
+    result = pfnAppendMembufferCopyRectExp(
+        hCommandBuffer, hSrcMem, hDstMem, srcOrigin, dstOrigin, region,
+        srcRowPitch, srcSlicePitch, dstRowPitch, dstSlicePitch,
+        numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urCommandBufferEnqueueExp
+__urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
+    ur_exp_command_buffer_handle_t
+        hCommandBuffer, ///< [in] handle of the command-buffer object.
+    ur_queue_handle_t
+        hQueue, ///< [in] the queue to submit this command-buffer for execution.
+    uint32_t numEventsInWaitList, ///< [in] size of the event wait list
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command-buffer execution.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating no wait
+    ///< events.
+    ur_event_handle_t *
+        phEvent ///< [out][optional] return an event object that identifies this particular
+                ///< command-buffer execution instance.
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // extract platform's function pointer table
+    auto dditable =
+        reinterpret_cast<ur_exp_command_buffer_object_t *>(hCommandBuffer)
+            ->dditable;
+    auto pfnEnqueueExp = dditable->ur.CommandBufferExp.pfnEnqueueExp;
+    if (nullptr == pfnEnqueueExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    hCommandBuffer =
+        reinterpret_cast<ur_exp_command_buffer_object_t *>(hCommandBuffer)
+            ->handle;
+
+    // convert loader handle to platform handle
+    hQueue = reinterpret_cast<ur_queue_object_t *>(hQueue)->handle;
+
+    // convert loader handles to platform handles
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
+    for (size_t i = 0; i < numEventsInWaitList; ++i) {
+        phEventWaitListLocal[i] =
+            reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
+    }
+
+    // forward to device-platform
+    result = pfnEnqueueExp(hCommandBuffer, hQueue, numEventsInWaitList,
+                           phEventWaitListLocal.data(), phEvent);
+
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    try {
+        // convert platform handle to loader handle
+        if (nullptr != phEvent) {
+            *phEvent = reinterpret_cast<ur_event_handle_t>(
+                ur_event_factory.getInstance(*phEvent, dditable));
+        }
+    } catch (std::bad_alloc &) {
+        result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
+    }
+
+    return result;
+}
+
 } // namespace ur_loader
 
 #if defined(__cplusplus)
@@ -4968,6 +5359,74 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetGlobalProcAddrTable(
             // return pointers directly to platform's DDIs
             *pDdiTable =
                 ur_loader::context->platforms.front().dditable.ur.Global;
+        }
+    }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Exported function for filling application's CommandBufferExp table
+///        with current process' addresses
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+UR_DLLEXPORT ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
+    ur_api_version_t version, ///< [in] API version requested
+    ur_command_buffer_exp_dditable_t
+        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
+) {
+    if (nullptr == pDdiTable) {
+        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    if (ur_loader::context->version < version) {
+        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+    }
+
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // Load the device-platform DDI tables
+    for (auto &platform : ur_loader::context->platforms) {
+        if (platform.initStatus != UR_RESULT_SUCCESS) {
+            continue;
+        }
+        auto getTable =
+            reinterpret_cast<ur_pfnGetCommandBufferExpProcAddrTable_t>(
+                ur_loader::LibLoader::getFunctionPtr(
+                    platform.handle.get(),
+                    "urGetCommandBufferExpProcAddrTable"));
+        if (!getTable) {
+            continue;
+        }
+        platform.initStatus =
+            getTable(version, &platform.dditable.ur.CommandBufferExp);
+    }
+
+    if (UR_RESULT_SUCCESS == result) {
+        if (ur_loader::context->platforms.size() != 1 ||
+            ur_loader::context->forceIntercept) {
+            // return pointers to loader's DDIs
+            pDdiTable->pfnCreateExp = ur_loader::urCommandBufferCreateExp;
+            pDdiTable->pfnRetainExp = ur_loader::urCommandBufferRetainExp;
+            pDdiTable->pfnReleaseExp = ur_loader::urCommandBufferReleaseExp;
+            pDdiTable->pfnFinalizeExp = ur_loader::urCommandBufferFinalizeExp;
+            pDdiTable->pfnAppendKernelLaunchExp =
+                ur_loader::urCommandBufferAppendKernelLaunchExp;
+            pDdiTable->pfnAppendMemcpyUSMExp =
+                ur_loader::urCommandBufferAppendMemcpyUSMExp;
+            pDdiTable->pfnAppendMembufferCopyExp =
+                ur_loader::urCommandBufferAppendMembufferCopyExp;
+            pDdiTable->pfnAppendMembufferCopyRectExp =
+                ur_loader::urCommandBufferAppendMembufferCopyRectExp;
+            pDdiTable->pfnEnqueueExp = ur_loader::urCommandBufferEnqueueExp;
+        } else {
+            // return pointers directly to platform's DDIs
+            *pDdiTable = ur_loader::context->platforms.front()
+                             .dditable.ur.CommandBufferExp;
         }
     }
 

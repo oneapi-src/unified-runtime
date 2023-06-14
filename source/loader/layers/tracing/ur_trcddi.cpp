@@ -3978,17 +3978,43 @@ __urdlllocal ur_result_t UR_APICALL urUSMImportExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urCommandBufferCreateExp
+__urdlllocal ur_result_t UR_APICALL urCommandBufferCreateExp(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    ur_device_handle_t hDevice,   ///< [in] handle of the device object
+    const ur_exp_command_buffer_desc_t
+        *pCommandBufferDesc, ///< [in][optional] CommandBuffer descriptor
+    ur_exp_command_buffer_handle_t
+        *phCommandBuffer ///< [out] pointer to Command-Buffer handle
+) {
+    auto pfnCreateExp = context.urDdiTable.CommandBufferExp.pfnCreateExp;
+
+    if (nullptr == pfnCreateExp) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    ur_command_buffer_create_exp_params_t params = {
+        &hContext, &hDevice, &pCommandBufferDesc, &phCommandBuffer};
+    uint64_t instance =
+        context.notify_begin(UR_FUNCTION_COMMAND_BUFFER_CREATE_EXP,
+                             "urCommandBufferCreateExp", &params);
+
+    ur_result_t result =
+        pfnCreateExp(hContext, hDevice, pCommandBufferDesc, phCommandBuffer);
+
+    context.notify_end(UR_FUNCTION_COMMAND_BUFFER_CREATE_EXP,
+                       "urCommandBufferCreateExp", &params, &result, instance);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMReleaseExp
 __urdlllocal ur_result_t UR_APICALL urUSMReleaseExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     void *pMem                    ///< [in] pointer to host memory object
 ) {
     auto pfnReleaseExp = context.urDdiTable.USMExp.pfnReleaseExp;
-
-    if (nullptr == pfnReleaseExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-    }
-
     ur_usm_release_exp_params_t params = {&hContext, &pMem};
     uint64_t instance = context.notify_begin(UR_FUNCTION_USM_RELEASE_EXP,
                                              "urUSMReleaseExp", &params);
@@ -4002,856 +4028,1282 @@ __urdlllocal ur_result_t UR_APICALL urUSMReleaseExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Exported function for filling application's Global table
-///        with current process' addresses
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetGlobalProcAddrTable(
-    ur_api_version_t version, ///< [in] API version requested
-    ur_global_dditable_t
-        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
+/// @brief Intercept function for urUSMReleaseExp
+__urdlllocal ur_result_t UR_APICALL urUSMReleaseExp(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    void *pMem                    ///< [in] pointer to host memory object
 ) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.Global;
+    auto pfnReleaseExp = context.urDdiTable.USMExp.pfnReleaseExp;
+    /// @brief Intercept function for urCommandBufferRetainExp
+    __urdlllocal ur_result_t UR_APICALL urCommandBufferRetainExp(
+        ur_exp_command_buffer_handle_t
+            hCommandBuffer ///< [in] handle of the command-buffer object
+    ) {
+        auto pfnRetainExp = context.urDdiTable.CommandBufferExp.pfnRetainExp;
 
-    if (nullptr == pDdiTable) {
-        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        if (nullptr == pfnRetainExp) {
+            return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        }
+
+        ur_command_buffer_retain_exp_params_t params = {&hCommandBuffer};
+        uint64_t instance =
+            context.notify_begin(UR_FUNCTION_COMMAND_BUFFER_RETAIN_EXP,
+                                 "urCommandBufferRetainExp", &params);
+
+        ur_result_t result = pfnRetainExp(hCommandBuffer);
+
+        context.notify_end(UR_FUNCTION_COMMAND_BUFFER_RETAIN_EXP,
+                           "urCommandBufferRetainExp", &params, &result,
+                           instance);
+
+        return result;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
-            UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
-            UR_MINOR_VERSION(version)) {
-        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Intercept function for urCommandBufferReleaseExp
+    __urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseExp(
+        ur_exp_command_buffer_handle_t
+            hCommandBuffer ///< [in] handle of the command-buffer object
+    ) {
+        auto pfnReleaseExp = context.urDdiTable.CommandBufferExp.pfnReleaseExp;
+
+        if (nullptr == pfnReleaseExp) {
+            return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        }
+
+        ur_command_buffer_release_exp_params_t params = {&hCommandBuffer};
+        uint64_t instance =
+            context.notify_begin(UR_FUNCTION_COMMAND_BUFFER_RELEASE_EXP,
+                                 "urCommandBufferReleaseExp", &params);
+
+        ur_result_t result = pfnReleaseExp(hCommandBuffer);
+
+        context.notify_end(UR_FUNCTION_COMMAND_BUFFER_RELEASE_EXP,
+                           "urCommandBufferReleaseExp", &params, &result,
+                           instance);
+
+        return result;
     }
 
-    ur_result_t result = UR_RESULT_SUCCESS;
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Intercept function for urCommandBufferFinalizeExp
+    __urdlllocal ur_result_t UR_APICALL urCommandBufferFinalizeExp(
+        ur_exp_command_buffer_handle_t
+            hCommandBuffer ///< [in] handle of the command-buffer object
+    ) {
+        auto pfnFinalizeExp =
+            context.urDdiTable.CommandBufferExp.pfnFinalizeExp;
 
-    dditable.pfnInit = pDdiTable->pfnInit;
-    pDdiTable->pfnInit = ur_tracing_layer::urInit;
+        if (nullptr == pfnFinalizeExp) {
+            return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        }
 
-    dditable.pfnGetLastResult = pDdiTable->pfnGetLastResult;
-    pDdiTable->pfnGetLastResult = ur_tracing_layer::urGetLastResult;
+        ur_command_buffer_finalize_exp_params_t params = {&hCommandBuffer};
+        uint64_t instance =
+            context.notify_begin(UR_FUNCTION_COMMAND_BUFFER_FINALIZE_EXP,
+                                 "urCommandBufferFinalizeExp", &params);
 
-    dditable.pfnTearDown = pDdiTable->pfnTearDown;
-    pDdiTable->pfnTearDown = ur_tracing_layer::urTearDown;
+        ur_result_t result = pfnFinalizeExp(hCommandBuffer);
 
-    return result;
-}
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Exported function for filling application's Context table
-///        with current process' addresses
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetContextProcAddrTable(
-    ur_api_version_t version, ///< [in] API version requested
-    ur_context_dditable_t
-        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
-) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.Context;
+        context.notify_end(UR_FUNCTION_COMMAND_BUFFER_FINALIZE_EXP,
+                           "urCommandBufferFinalizeExp", &params, &result,
+                           instance);
 
-    if (nullptr == pDdiTable) {
-        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        return result;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
-            UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
-            UR_MINOR_VERSION(version)) {
-        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Intercept function for urCommandBufferAppendKernelLaunchExp
+    __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
+        ur_exp_command_buffer_handle_t
+            hCommandBuffer, ///< [in] handle of the command-buffer object
+        ur_kernel_handle_t hKernel, ///< [in] kernel to append
+        uint32_t workDim,           ///< [in] dimension of the kernel execution
+        const size_t
+            *pGlobalWorkOffset, ///< [in] Offset to use when executing kernel.
+        const size_t *
+            pGlobalWorkSize, ///< [in] Global work size to use when executing kernel.
+        const size_t *
+            pLocalWorkSize, ///< [in] Local work size to use when executing kernel.
+        uint32_t
+            numSyncPointsInWaitList, ///< [in] The number of sync points in the provided dependency list.
+        const ur_exp_command_buffer_sync_point_t *
+            pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on.
+        ur_exp_command_buffer_sync_point_t *
+            pSyncPoint ///< [out][optional] sync point associated with this command
+    ) {
+        auto pfnAppendKernelLaunchExp =
+            context.urDdiTable.CommandBufferExp.pfnAppendKernelLaunchExp;
+
+        if (nullptr == pfnAppendKernelLaunchExp) {
+            return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        }
+
+        ur_command_buffer_append_kernel_launch_exp_params_t params = {
+            &hCommandBuffer,
+            &hKernel,
+            &workDim,
+            &pGlobalWorkOffset,
+            &pGlobalWorkSize,
+            &pLocalWorkSize,
+            &numSyncPointsInWaitList,
+            &pSyncPointWaitList,
+            &pSyncPoint};
+        uint64_t instance = context.notify_begin(
+            UR_FUNCTION_COMMAND_BUFFER_APPEND_KERNEL_LAUNCH_EXP,
+            "urCommandBufferAppendKernelLaunchExp", &params);
+
+        ur_result_t result = pfnAppendKernelLaunchExp(
+            hCommandBuffer, hKernel, workDim, pGlobalWorkOffset,
+            pGlobalWorkSize, pLocalWorkSize, numSyncPointsInWaitList,
+            pSyncPointWaitList, pSyncPoint);
+
+        context.notify_end(UR_FUNCTION_COMMAND_BUFFER_APPEND_KERNEL_LAUNCH_EXP,
+                           "urCommandBufferAppendKernelLaunchExp", &params,
+                           &result, instance);
+
+        return result;
     }
 
-    ur_result_t result = UR_RESULT_SUCCESS;
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Intercept function for urCommandBufferAppendMemcpyUSMExp
+    __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemcpyUSMExp(
+        ur_exp_command_buffer_handle_t
+            hCommandBuffer, ///< [in] handle of the command-buffer object.
+        void *pDst,         ///< [in] Location the data will be copied to.
+        const void *pSrc,   ///< [in] The data to be copied.
+        size_t size,        ///< [in] The number of bytes to copy
+        uint32_t
+            numSyncPointsInWaitList, ///< [in] The number of sync points in the provided dependency list.
+        const ur_exp_command_buffer_sync_point_t *
+            pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on.
+        ur_exp_command_buffer_sync_point_t *
+            pSyncPoint ///< [out][optional] sync point associated with this command
+    ) {
+        auto pfnAppendMemcpyUSMExp =
+            context.urDdiTable.CommandBufferExp.pfnAppendMemcpyUSMExp;
 
-    dditable.pfnCreate = pDdiTable->pfnCreate;
-    pDdiTable->pfnCreate = ur_tracing_layer::urContextCreate;
+        if (nullptr == pfnAppendMemcpyUSMExp) {
+            return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        }
 
-    dditable.pfnRetain = pDdiTable->pfnRetain;
-    pDdiTable->pfnRetain = ur_tracing_layer::urContextRetain;
+        ur_command_buffer_append_memcpy_usm_exp_params_t params = {
+            &hCommandBuffer,
+            &pDst,
+            &pSrc,
+            &size,
+            &numSyncPointsInWaitList,
+            &pSyncPointWaitList,
+            &pSyncPoint};
+        uint64_t instance = context.notify_begin(
+            UR_FUNCTION_COMMAND_BUFFER_APPEND_MEMCPY_USM_EXP,
+            "urCommandBufferAppendMemcpyUSMExp", &params);
 
-    dditable.pfnRelease = pDdiTable->pfnRelease;
-    pDdiTable->pfnRelease = ur_tracing_layer::urContextRelease;
+        ur_result_t result = pfnAppendMemcpyUSMExp(
+            hCommandBuffer, pDst, pSrc, size, numSyncPointsInWaitList,
+            pSyncPointWaitList, pSyncPoint);
 
-    dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
-    pDdiTable->pfnGetInfo = ur_tracing_layer::urContextGetInfo;
+        context.notify_end(UR_FUNCTION_COMMAND_BUFFER_APPEND_MEMCPY_USM_EXP,
+                           "urCommandBufferAppendMemcpyUSMExp", &params,
+                           &result, instance);
 
-    dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
-    pDdiTable->pfnGetNativeHandle = ur_tracing_layer::urContextGetNativeHandle;
-
-    dditable.pfnCreateWithNativeHandle = pDdiTable->pfnCreateWithNativeHandle;
-    pDdiTable->pfnCreateWithNativeHandle =
-        ur_tracing_layer::urContextCreateWithNativeHandle;
-
-    dditable.pfnSetExtendedDeleter = pDdiTable->pfnSetExtendedDeleter;
-    pDdiTable->pfnSetExtendedDeleter =
-        ur_tracing_layer::urContextSetExtendedDeleter;
-
-    return result;
-}
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Exported function for filling application's Enqueue table
-///        with current process' addresses
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetEnqueueProcAddrTable(
-    ur_api_version_t version, ///< [in] API version requested
-    ur_enqueue_dditable_t
-        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
-) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.Enqueue;
-
-    if (nullptr == pDdiTable) {
-        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        return result;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
-            UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
-            UR_MINOR_VERSION(version)) {
-        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Intercept function for urCommandBufferAppendMembufferCopyExp
+    __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMembufferCopyExp(
+        ur_exp_command_buffer_handle_t
+            hCommandBuffer,      ///< [in] handle of the command-buffer object.
+        ur_mem_handle_t hSrcMem, ///< [in] The data to be copied.
+        ur_mem_handle_t
+            hDstMem,      ///< [in] The location the data will be copied to.
+        size_t srcOffset, ///< [in] Offset into the source memory.
+        size_t dstOffset, ///< [in] Offset into the destination memory
+        size_t size,      ///< [in] The number of bytes to be copied.
+        uint32_t
+            numSyncPointsInWaitList, ///< [in] The number of sync points in the provided dependency list.
+        const ur_exp_command_buffer_sync_point_t *
+            pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on.
+        ur_exp_command_buffer_sync_point_t *
+            pSyncPoint ///< [out][optional] sync point associated with this command
+    ) {
+        auto pfnAppendMembufferCopyExp =
+            context.urDdiTable.CommandBufferExp.pfnAppendMembufferCopyExp;
+
+        if (nullptr == pfnAppendMembufferCopyExp) {
+            return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        }
+
+        ur_command_buffer_append_membuffer_copy_exp_params_t params = {
+            &hCommandBuffer,
+            &hSrcMem,
+            &hDstMem,
+            &srcOffset,
+            &dstOffset,
+            &size,
+            &numSyncPointsInWaitList,
+            &pSyncPointWaitList,
+            &pSyncPoint};
+        uint64_t instance = context.notify_begin(
+            UR_FUNCTION_COMMAND_BUFFER_APPEND_MEMBUFFER_COPY_EXP,
+            "urCommandBufferAppendMembufferCopyExp", &params);
+
+        ur_result_t result = pfnAppendMembufferCopyExp(
+            hCommandBuffer, hSrcMem, hDstMem, srcOffset, dstOffset, size,
+            numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
+
+        context.notify_end(UR_FUNCTION_COMMAND_BUFFER_APPEND_MEMBUFFER_COPY_EXP,
+                           "urCommandBufferAppendMembufferCopyExp", &params,
+                           &result, instance);
+
+        return result;
     }
 
-    ur_result_t result = UR_RESULT_SUCCESS;
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Intercept function for urCommandBufferAppendMembufferCopyRectExp
+    __urdlllocal ur_result_t UR_APICALL
+    urCommandBufferAppendMembufferCopyRectExp(
+        ur_exp_command_buffer_handle_t
+            hCommandBuffer,      ///< [in] handle of the command-buffer object.
+        ur_mem_handle_t hSrcMem, ///< [in] The data to be copied.
+        ur_mem_handle_t
+            hDstMem, ///< [in] The location the data will be copied to.
+        ur_rect_offset_t
+            srcOrigin, ///< [in] Origin for the region of data to be copied from the source.
+        ur_rect_offset_t
+            dstOrigin, ///< [in] Origin for the region of data to be copied to in the destination.
+        ur_rect_region_t
+            region, ///< [in] The extents describing the region to be copied.
+        size_t srcRowPitch,   ///< [in] Row pitch of the source memory.
+        size_t srcSlicePitch, ///< [in] Slice pitch of the source memory.
+        size_t dstRowPitch,   ///< [in] Row pitch of the destination memory.
+        size_t dstSlicePitch, ///< [in] Slice pitch of the destination memory.
+        uint32_t
+            numSyncPointsInWaitList, ///< [in] The number of sync points in the provided dependency list.
+        const ur_exp_command_buffer_sync_point_t *
+            pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on.
+        ur_exp_command_buffer_sync_point_t *
+            pSyncPoint ///< [out][optional] sync point associated with this command
+    ) {
+        auto pfnAppendMembufferCopyRectExp =
+            context.urDdiTable.CommandBufferExp.pfnAppendMembufferCopyRectExp;
 
-    dditable.pfnKernelLaunch = pDdiTable->pfnKernelLaunch;
-    pDdiTable->pfnKernelLaunch = ur_tracing_layer::urEnqueueKernelLaunch;
+        if (nullptr == pfnAppendMembufferCopyRectExp) {
+            return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        }
 
-    dditable.pfnEventsWait = pDdiTable->pfnEventsWait;
-    pDdiTable->pfnEventsWait = ur_tracing_layer::urEnqueueEventsWait;
+        ur_command_buffer_append_membuffer_copy_rect_exp_params_t params = {
+            &hCommandBuffer,
+            &hSrcMem,
+            &hDstMem,
+            &srcOrigin,
+            &dstOrigin,
+            &region,
+            &srcRowPitch,
+            &srcSlicePitch,
+            &dstRowPitch,
+            &dstSlicePitch,
+            &numSyncPointsInWaitList,
+            &pSyncPointWaitList,
+            &pSyncPoint};
+        uint64_t instance = context.notify_begin(
+            UR_FUNCTION_COMMAND_BUFFER_APPEND_MEMBUFFER_COPY_RECT_EXP,
+            "urCommandBufferAppendMembufferCopyRectExp", &params);
 
-    dditable.pfnEventsWaitWithBarrier = pDdiTable->pfnEventsWaitWithBarrier;
-    pDdiTable->pfnEventsWaitWithBarrier =
-        ur_tracing_layer::urEnqueueEventsWaitWithBarrier;
+        ur_result_t result = pfnAppendMembufferCopyRectExp(
+            hCommandBuffer, hSrcMem, hDstMem, srcOrigin, dstOrigin, region,
+            srcRowPitch, srcSlicePitch, dstRowPitch, dstSlicePitch,
+            numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
 
-    dditable.pfnMemBufferRead = pDdiTable->pfnMemBufferRead;
-    pDdiTable->pfnMemBufferRead = ur_tracing_layer::urEnqueueMemBufferRead;
+        context.notify_end(
+            UR_FUNCTION_COMMAND_BUFFER_APPEND_MEMBUFFER_COPY_RECT_EXP,
+            "urCommandBufferAppendMembufferCopyRectExp", &params, &result,
+            instance);
 
-    dditable.pfnMemBufferWrite = pDdiTable->pfnMemBufferWrite;
-    pDdiTable->pfnMemBufferWrite = ur_tracing_layer::urEnqueueMemBufferWrite;
-
-    dditable.pfnMemBufferReadRect = pDdiTable->pfnMemBufferReadRect;
-    pDdiTable->pfnMemBufferReadRect =
-        ur_tracing_layer::urEnqueueMemBufferReadRect;
-
-    dditable.pfnMemBufferWriteRect = pDdiTable->pfnMemBufferWriteRect;
-    pDdiTable->pfnMemBufferWriteRect =
-        ur_tracing_layer::urEnqueueMemBufferWriteRect;
-
-    dditable.pfnMemBufferCopy = pDdiTable->pfnMemBufferCopy;
-    pDdiTable->pfnMemBufferCopy = ur_tracing_layer::urEnqueueMemBufferCopy;
-
-    dditable.pfnMemBufferCopyRect = pDdiTable->pfnMemBufferCopyRect;
-    pDdiTable->pfnMemBufferCopyRect =
-        ur_tracing_layer::urEnqueueMemBufferCopyRect;
-
-    dditable.pfnMemBufferFill = pDdiTable->pfnMemBufferFill;
-    pDdiTable->pfnMemBufferFill = ur_tracing_layer::urEnqueueMemBufferFill;
-
-    dditable.pfnMemImageRead = pDdiTable->pfnMemImageRead;
-    pDdiTable->pfnMemImageRead = ur_tracing_layer::urEnqueueMemImageRead;
-
-    dditable.pfnMemImageWrite = pDdiTable->pfnMemImageWrite;
-    pDdiTable->pfnMemImageWrite = ur_tracing_layer::urEnqueueMemImageWrite;
-
-    dditable.pfnMemImageCopy = pDdiTable->pfnMemImageCopy;
-    pDdiTable->pfnMemImageCopy = ur_tracing_layer::urEnqueueMemImageCopy;
-
-    dditable.pfnMemBufferMap = pDdiTable->pfnMemBufferMap;
-    pDdiTable->pfnMemBufferMap = ur_tracing_layer::urEnqueueMemBufferMap;
-
-    dditable.pfnMemUnmap = pDdiTable->pfnMemUnmap;
-    pDdiTable->pfnMemUnmap = ur_tracing_layer::urEnqueueMemUnmap;
-
-    dditable.pfnUSMFill = pDdiTable->pfnUSMFill;
-    pDdiTable->pfnUSMFill = ur_tracing_layer::urEnqueueUSMFill;
-
-    dditable.pfnUSMMemcpy = pDdiTable->pfnUSMMemcpy;
-    pDdiTable->pfnUSMMemcpy = ur_tracing_layer::urEnqueueUSMMemcpy;
-
-    dditable.pfnUSMPrefetch = pDdiTable->pfnUSMPrefetch;
-    pDdiTable->pfnUSMPrefetch = ur_tracing_layer::urEnqueueUSMPrefetch;
-
-    dditable.pfnUSMAdvise = pDdiTable->pfnUSMAdvise;
-    pDdiTable->pfnUSMAdvise = ur_tracing_layer::urEnqueueUSMAdvise;
-
-    dditable.pfnUSMFill2D = pDdiTable->pfnUSMFill2D;
-    pDdiTable->pfnUSMFill2D = ur_tracing_layer::urEnqueueUSMFill2D;
-
-    dditable.pfnUSMMemcpy2D = pDdiTable->pfnUSMMemcpy2D;
-    pDdiTable->pfnUSMMemcpy2D = ur_tracing_layer::urEnqueueUSMMemcpy2D;
-
-    dditable.pfnDeviceGlobalVariableWrite =
-        pDdiTable->pfnDeviceGlobalVariableWrite;
-    pDdiTable->pfnDeviceGlobalVariableWrite =
-        ur_tracing_layer::urEnqueueDeviceGlobalVariableWrite;
-
-    dditable.pfnDeviceGlobalVariableRead =
-        pDdiTable->pfnDeviceGlobalVariableRead;
-    pDdiTable->pfnDeviceGlobalVariableRead =
-        ur_tracing_layer::urEnqueueDeviceGlobalVariableRead;
-
-    dditable.pfnReadHostPipe = pDdiTable->pfnReadHostPipe;
-    pDdiTable->pfnReadHostPipe = ur_tracing_layer::urEnqueueReadHostPipe;
-
-    dditable.pfnWriteHostPipe = pDdiTable->pfnWriteHostPipe;
-    pDdiTable->pfnWriteHostPipe = ur_tracing_layer::urEnqueueWriteHostPipe;
-
-    return result;
-}
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Exported function for filling application's Event table
-///        with current process' addresses
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetEventProcAddrTable(
-    ur_api_version_t version, ///< [in] API version requested
-    ur_event_dditable_t
-        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
-) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.Event;
-
-    if (nullptr == pDdiTable) {
-        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        return result;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
-            UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
-            UR_MINOR_VERSION(version)) {
-        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Intercept function for urCommandBufferEnqueueExp
+    __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
+        ur_exp_command_buffer_handle_t
+            hCommandBuffer, ///< [in] handle of the command-buffer object.
+        ur_queue_handle_t
+            hQueue, ///< [in] the queue to submit this command-buffer for execution.
+        uint32_t numEventsInWaitList, ///< [in] size of the event wait list
+        const ur_event_handle_t *
+            phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+        ///< events that must be complete before the command-buffer execution.
+        ///< If nullptr, the numEventsInWaitList must be 0, indicating no wait
+        ///< events.
+        ur_event_handle_t *
+            phEvent ///< [out][optional] return an event object that identifies this particular
+        ///< command-buffer execution instance.
+    ) {
+        auto pfnEnqueueExp = context.urDdiTable.CommandBufferExp.pfnEnqueueExp;
+
+        if (nullptr == pfnEnqueueExp) {
+            return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        }
+
+        ur_command_buffer_enqueue_exp_params_t params = {
+            &hCommandBuffer, &hQueue, &numEventsInWaitList, &phEventWaitList,
+            &phEvent};
+        uint64_t instance =
+            context.notify_begin(UR_FUNCTION_COMMAND_BUFFER_ENQUEUE_EXP,
+                                 "urCommandBufferEnqueueExp", &params);
+
+        ur_result_t result =
+            pfnEnqueueExp(hCommandBuffer, hQueue, numEventsInWaitList,
+                          phEventWaitList, phEvent);
+
+        context.notify_end(UR_FUNCTION_COMMAND_BUFFER_ENQUEUE_EXP,
+                           "urCommandBufferEnqueueExp", &params, &result,
+                           instance);
+
+        return result;
     }
 
-    ur_result_t result = UR_RESULT_SUCCESS;
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Exported function for filling application's Global table
+    ///        with current process' addresses
+    ///
+    /// @returns
+    ///     - ::UR_RESULT_SUCCESS
+    ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+    ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+    __urdlllocal ur_result_t UR_APICALL urGetGlobalProcAddrTable(
+        ur_api_version_t version, ///< [in] API version requested
+        ur_global_dditable_t *
+            pDdiTable ///< [in,out] pointer to table of DDI function pointers
+    ) {
+        auto &dditable = ur_tracing_layer::context.urDdiTable.Global;
 
-    dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
-    pDdiTable->pfnGetInfo = ur_tracing_layer::urEventGetInfo;
+        if (nullptr == pDdiTable) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
 
-    dditable.pfnGetProfilingInfo = pDdiTable->pfnGetProfilingInfo;
-    pDdiTable->pfnGetProfilingInfo = ur_tracing_layer::urEventGetProfilingInfo;
+        if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+                UR_MAJOR_VERSION(version) ||
+            UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+                UR_MINOR_VERSION(version)) {
+            return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+        }
 
-    dditable.pfnWait = pDdiTable->pfnWait;
-    pDdiTable->pfnWait = ur_tracing_layer::urEventWait;
+        ur_result_t result = UR_RESULT_SUCCESS;
 
-    dditable.pfnRetain = pDdiTable->pfnRetain;
-    pDdiTable->pfnRetain = ur_tracing_layer::urEventRetain;
+        dditable.pfnInit = pDdiTable->pfnInit;
+        pDdiTable->pfnInit = ur_tracing_layer::urInit;
 
-    dditable.pfnRelease = pDdiTable->pfnRelease;
-    pDdiTable->pfnRelease = ur_tracing_layer::urEventRelease;
+        dditable.pfnGetLastResult = pDdiTable->pfnGetLastResult;
+        pDdiTable->pfnGetLastResult = ur_tracing_layer::urGetLastResult;
 
-    dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
-    pDdiTable->pfnGetNativeHandle = ur_tracing_layer::urEventGetNativeHandle;
+        dditable.pfnTearDown = pDdiTable->pfnTearDown;
+        pDdiTable->pfnTearDown = ur_tracing_layer::urTearDown;
 
-    dditable.pfnCreateWithNativeHandle = pDdiTable->pfnCreateWithNativeHandle;
-    pDdiTable->pfnCreateWithNativeHandle =
-        ur_tracing_layer::urEventCreateWithNativeHandle;
+        return result;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Exported function for filling application's CommandBufferExp table
+    ///        with current process' addresses
+    ///
+    /// @returns
+    ///     - ::UR_RESULT_SUCCESS
+    ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+    ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+    __urdlllocal ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
+        ur_api_version_t version, ///< [in] API version requested
+        ur_command_buffer_exp_dditable_t *
+            pDdiTable ///< [in,out] pointer to table of DDI function pointers
+    ) {
+        auto &dditable = ur_tracing_layer::context.urDdiTable.CommandBufferExp;
 
-    dditable.pfnSetCallback = pDdiTable->pfnSetCallback;
-    pDdiTable->pfnSetCallback = ur_tracing_layer::urEventSetCallback;
+        if (nullptr == pDdiTable) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
 
-    return result;
-}
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Exported function for filling application's Kernel table
-///        with current process' addresses
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetKernelProcAddrTable(
-    ur_api_version_t version, ///< [in] API version requested
-    ur_kernel_dditable_t
-        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
-) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.Kernel;
+        if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+                UR_MAJOR_VERSION(version) ||
+            UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+                UR_MINOR_VERSION(version)) {
+            return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+        }
 
-    if (nullptr == pDdiTable) {
-        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        ur_result_t result = UR_RESULT_SUCCESS;
+
+        dditable.pfnCreateExp = pDdiTable->pfnCreateExp;
+        pDdiTable->pfnCreateExp = ur_tracing_layer::urCommandBufferCreateExp;
+
+        dditable.pfnRetainExp = pDdiTable->pfnRetainExp;
+        pDdiTable->pfnRetainExp = ur_tracing_layer::urCommandBufferRetainExp;
+
+        dditable.pfnReleaseExp = pDdiTable->pfnReleaseExp;
+        pDdiTable->pfnReleaseExp = ur_tracing_layer::urCommandBufferReleaseExp;
+
+        dditable.pfnFinalizeExp = pDdiTable->pfnFinalizeExp;
+        pDdiTable->pfnFinalizeExp =
+            ur_tracing_layer::urCommandBufferFinalizeExp;
+
+        dditable.pfnAppendKernelLaunchExp = pDdiTable->pfnAppendKernelLaunchExp;
+        pDdiTable->pfnAppendKernelLaunchExp =
+            ur_tracing_layer::urCommandBufferAppendKernelLaunchExp;
+
+        dditable.pfnAppendMemcpyUSMExp = pDdiTable->pfnAppendMemcpyUSMExp;
+        pDdiTable->pfnAppendMemcpyUSMExp =
+            ur_tracing_layer::urCommandBufferAppendMemcpyUSMExp;
+
+        dditable.pfnAppendMembufferCopyExp =
+            pDdiTable->pfnAppendMembufferCopyExp;
+        pDdiTable->pfnAppendMembufferCopyExp =
+            ur_tracing_layer::urCommandBufferAppendMembufferCopyExp;
+
+        dditable.pfnAppendMembufferCopyRectExp =
+            pDdiTable->pfnAppendMembufferCopyRectExp;
+        pDdiTable->pfnAppendMembufferCopyRectExp =
+            ur_tracing_layer::urCommandBufferAppendMembufferCopyRectExp;
+
+        dditable.pfnEnqueueExp = pDdiTable->pfnEnqueueExp;
+        pDdiTable->pfnEnqueueExp = ur_tracing_layer::urCommandBufferEnqueueExp;
+
+        return result;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Exported function for filling application's Context table
+    ///        with current process' addresses
+    ///
+    /// @returns
+    ///     - ::UR_RESULT_SUCCESS
+    ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+    ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+    __urdlllocal ur_result_t UR_APICALL urGetContextProcAddrTable(
+        ur_api_version_t version, ///< [in] API version requested
+        ur_context_dditable_t *
+            pDdiTable ///< [in,out] pointer to table of DDI function pointers
+    ) {
+        auto &dditable = ur_tracing_layer::context.urDdiTable.Context;
+
+        if (nullptr == pDdiTable) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+                UR_MAJOR_VERSION(version) ||
+            UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+                UR_MINOR_VERSION(version)) {
+            return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+        }
+
+        ur_result_t result = UR_RESULT_SUCCESS;
+
+        dditable.pfnCreate = pDdiTable->pfnCreate;
+        pDdiTable->pfnCreate = ur_tracing_layer::urContextCreate;
+
+        dditable.pfnRetain = pDdiTable->pfnRetain;
+        pDdiTable->pfnRetain = ur_tracing_layer::urContextRetain;
+
+        dditable.pfnRelease = pDdiTable->pfnRelease;
+        pDdiTable->pfnRelease = ur_tracing_layer::urContextRelease;
+
+        dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
+        pDdiTable->pfnGetInfo = ur_tracing_layer::urContextGetInfo;
+
+        dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
+        pDdiTable->pfnGetNativeHandle =
+            ur_tracing_layer::urContextGetNativeHandle;
+
+        dditable.pfnCreateWithNativeHandle =
+            pDdiTable->pfnCreateWithNativeHandle;
+        pDdiTable->pfnCreateWithNativeHandle =
+            ur_tracing_layer::urContextCreateWithNativeHandle;
+
+        dditable.pfnSetExtendedDeleter = pDdiTable->pfnSetExtendedDeleter;
+        pDdiTable->pfnSetExtendedDeleter =
+            ur_tracing_layer::urContextSetExtendedDeleter;
+
+        return result;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Exported function for filling application's Enqueue table
+    ///        with current process' addresses
+    ///
+    /// @returns
+    ///     - ::UR_RESULT_SUCCESS
+    ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+    ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+    __urdlllocal ur_result_t UR_APICALL urGetEnqueueProcAddrTable(
+        ur_api_version_t version, ///< [in] API version requested
+        ur_enqueue_dditable_t *
+            pDdiTable ///< [in,out] pointer to table of DDI function pointers
+    ) {
+        auto &dditable = ur_tracing_layer::context.urDdiTable.Enqueue;
+
+        if (nullptr == pDdiTable) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+                UR_MAJOR_VERSION(version) ||
+            UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+                UR_MINOR_VERSION(version)) {
+            return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+        }
+
+        ur_result_t result = UR_RESULT_SUCCESS;
+
+        dditable.pfnKernelLaunch = pDdiTable->pfnKernelLaunch;
+        pDdiTable->pfnKernelLaunch = ur_tracing_layer::urEnqueueKernelLaunch;
+
+        dditable.pfnEventsWait = pDdiTable->pfnEventsWait;
+        pDdiTable->pfnEventsWait = ur_tracing_layer::urEnqueueEventsWait;
+
+        dditable.pfnEventsWaitWithBarrier = pDdiTable->pfnEventsWaitWithBarrier;
+        pDdiTable->pfnEventsWaitWithBarrier =
+            ur_tracing_layer::urEnqueueEventsWaitWithBarrier;
+
+        dditable.pfnMemBufferRead = pDdiTable->pfnMemBufferRead;
+        pDdiTable->pfnMemBufferRead = ur_tracing_layer::urEnqueueMemBufferRead;
+
+        dditable.pfnMemBufferWrite = pDdiTable->pfnMemBufferWrite;
+        pDdiTable->pfnMemBufferWrite =
+            ur_tracing_layer::urEnqueueMemBufferWrite;
+
+        dditable.pfnMemBufferReadRect = pDdiTable->pfnMemBufferReadRect;
+        pDdiTable->pfnMemBufferReadRect =
+            ur_tracing_layer::urEnqueueMemBufferReadRect;
+
+        dditable.pfnMemBufferWriteRect = pDdiTable->pfnMemBufferWriteRect;
+        pDdiTable->pfnMemBufferWriteRect =
+            ur_tracing_layer::urEnqueueMemBufferWriteRect;
+
+        dditable.pfnMemBufferCopy = pDdiTable->pfnMemBufferCopy;
+        pDdiTable->pfnMemBufferCopy = ur_tracing_layer::urEnqueueMemBufferCopy;
+
+        dditable.pfnMemBufferCopyRect = pDdiTable->pfnMemBufferCopyRect;
+        pDdiTable->pfnMemBufferCopyRect =
+            ur_tracing_layer::urEnqueueMemBufferCopyRect;
+
+        dditable.pfnMemBufferFill = pDdiTable->pfnMemBufferFill;
+        pDdiTable->pfnMemBufferFill = ur_tracing_layer::urEnqueueMemBufferFill;
+
+        dditable.pfnMemImageRead = pDdiTable->pfnMemImageRead;
+        pDdiTable->pfnMemImageRead = ur_tracing_layer::urEnqueueMemImageRead;
+
+        dditable.pfnMemImageWrite = pDdiTable->pfnMemImageWrite;
+        pDdiTable->pfnMemImageWrite = ur_tracing_layer::urEnqueueMemImageWrite;
+
+        dditable.pfnMemImageCopy = pDdiTable->pfnMemImageCopy;
+        pDdiTable->pfnMemImageCopy = ur_tracing_layer::urEnqueueMemImageCopy;
+
+        dditable.pfnMemBufferMap = pDdiTable->pfnMemBufferMap;
+        pDdiTable->pfnMemBufferMap = ur_tracing_layer::urEnqueueMemBufferMap;
+
+        dditable.pfnMemUnmap = pDdiTable->pfnMemUnmap;
+        pDdiTable->pfnMemUnmap = ur_tracing_layer::urEnqueueMemUnmap;
+
+        dditable.pfnUSMFill = pDdiTable->pfnUSMFill;
+        pDdiTable->pfnUSMFill = ur_tracing_layer::urEnqueueUSMFill;
+
+        dditable.pfnUSMMemcpy = pDdiTable->pfnUSMMemcpy;
+        pDdiTable->pfnUSMMemcpy = ur_tracing_layer::urEnqueueUSMMemcpy;
+
+        dditable.pfnUSMPrefetch = pDdiTable->pfnUSMPrefetch;
+        pDdiTable->pfnUSMPrefetch = ur_tracing_layer::urEnqueueUSMPrefetch;
+
+        dditable.pfnUSMAdvise = pDdiTable->pfnUSMAdvise;
+        pDdiTable->pfnUSMAdvise = ur_tracing_layer::urEnqueueUSMAdvise;
+
+        dditable.pfnUSMFill2D = pDdiTable->pfnUSMFill2D;
+        pDdiTable->pfnUSMFill2D = ur_tracing_layer::urEnqueueUSMFill2D;
+
+        dditable.pfnUSMMemcpy2D = pDdiTable->pfnUSMMemcpy2D;
+        pDdiTable->pfnUSMMemcpy2D = ur_tracing_layer::urEnqueueUSMMemcpy2D;
+
+        dditable.pfnDeviceGlobalVariableWrite =
+            pDdiTable->pfnDeviceGlobalVariableWrite;
+        pDdiTable->pfnDeviceGlobalVariableWrite =
+            ur_tracing_layer::urEnqueueDeviceGlobalVariableWrite;
+
+        dditable.pfnDeviceGlobalVariableRead =
+            pDdiTable->pfnDeviceGlobalVariableRead;
+        pDdiTable->pfnDeviceGlobalVariableRead =
+            ur_tracing_layer::urEnqueueDeviceGlobalVariableRead;
+
+        dditable.pfnReadHostPipe = pDdiTable->pfnReadHostPipe;
+        pDdiTable->pfnReadHostPipe = ur_tracing_layer::urEnqueueReadHostPipe;
+
+        dditable.pfnWriteHostPipe = pDdiTable->pfnWriteHostPipe;
+        pDdiTable->pfnWriteHostPipe = ur_tracing_layer::urEnqueueWriteHostPipe;
+
+        return result;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Exported function for filling application's Event table
+    ///        with current process' addresses
+    ///
+    /// @returns
+    ///     - ::UR_RESULT_SUCCESS
+    ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+    ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+    __urdlllocal ur_result_t UR_APICALL urGetEventProcAddrTable(
+        ur_api_version_t version, ///< [in] API version requested
+        ur_event_dditable_t *
+            pDdiTable ///< [in,out] pointer to table of DDI function pointers
+    ) {
+        auto &dditable = ur_tracing_layer::context.urDdiTable.Event;
+
+        if (nullptr == pDdiTable) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+                UR_MAJOR_VERSION(version) ||
+            UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+                UR_MINOR_VERSION(version)) {
+            return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+        }
+
+        ur_result_t result = UR_RESULT_SUCCESS;
+
+        dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
+        pDdiTable->pfnGetInfo = ur_tracing_layer::urEventGetInfo;
+
+        dditable.pfnGetProfilingInfo = pDdiTable->pfnGetProfilingInfo;
+        pDdiTable->pfnGetProfilingInfo =
+            ur_tracing_layer::urEventGetProfilingInfo;
+
+        dditable.pfnWait = pDdiTable->pfnWait;
+        pDdiTable->pfnWait = ur_tracing_layer::urEventWait;
+
+        dditable.pfnRetain = pDdiTable->pfnRetain;
+        pDdiTable->pfnRetain = ur_tracing_layer::urEventRetain;
+
+        dditable.pfnRelease = pDdiTable->pfnRelease;
+        pDdiTable->pfnRelease = ur_tracing_layer::urEventRelease;
+
+        dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
+        pDdiTable->pfnGetNativeHandle =
+            ur_tracing_layer::urEventGetNativeHandle;
+
+        dditable.pfnCreateWithNativeHandle =
+            pDdiTable->pfnCreateWithNativeHandle;
+        pDdiTable->pfnCreateWithNativeHandle =
+            ur_tracing_layer::urEventCreateWithNativeHandle;
+
+        dditable.pfnSetCallback = pDdiTable->pfnSetCallback;
+        pDdiTable->pfnSetCallback = ur_tracing_layer::urEventSetCallback;
+
+        return result;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Exported function for filling application's Kernel table
+    ///        with current process' addresses
+    ///
+    /// @returns
+    ///     - ::UR_RESULT_SUCCESS
+    ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+    ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+    __urdlllocal ur_result_t UR_APICALL urGetKernelProcAddrTable(
+        ur_api_version_t version, ///< [in] API version requested
+        ur_kernel_dditable_t *
+            pDdiTable ///< [in,out] pointer to table of DDI function pointers
+    ) {
+        auto &dditable = ur_tracing_layer::context.urDdiTable.Kernel;
+
+        if (nullptr == pDdiTable) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+                UR_MAJOR_VERSION(version) ||
+            UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+                UR_MINOR_VERSION(version)) {
+            return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+        }
+
+        ur_result_t result = UR_RESULT_SUCCESS;
+
+        dditable.pfnCreate = pDdiTable->pfnCreate;
+        pDdiTable->pfnCreate = ur_tracing_layer::urKernelCreate;
+
+        dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
+        pDdiTable->pfnGetInfo = ur_tracing_layer::urKernelGetInfo;
+
+        dditable.pfnGetGroupInfo = pDdiTable->pfnGetGroupInfo;
+        pDdiTable->pfnGetGroupInfo = ur_tracing_layer::urKernelGetGroupInfo;
+
+        dditable.pfnGetSubGroupInfo = pDdiTable->pfnGetSubGroupInfo;
+        pDdiTable->pfnGetSubGroupInfo =
+            ur_tracing_layer::urKernelGetSubGroupInfo;
+
+        dditable.pfnRetain = pDdiTable->pfnRetain;
+        pDdiTable->pfnRetain = ur_tracing_layer::urKernelRetain;
+
+        dditable.pfnRelease = pDdiTable->pfnRelease;
+        pDdiTable->pfnRelease = ur_tracing_layer::urKernelRelease;
+
+        dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
+        pDdiTable->pfnGetNativeHandle =
+            ur_tracing_layer::urKernelGetNativeHandle;
+
+        dditable.pfnCreateWithNativeHandle =
+            pDdiTable->pfnCreateWithNativeHandle;
+        pDdiTable->pfnCreateWithNativeHandle =
+            ur_tracing_layer::urKernelCreateWithNativeHandle;
+
+        dditable.pfnSetArgValue = pDdiTable->pfnSetArgValue;
+        pDdiTable->pfnSetArgValue = ur_tracing_layer::urKernelSetArgValue;
+
+        dditable.pfnSetArgLocal = pDdiTable->pfnSetArgLocal;
+        pDdiTable->pfnSetArgLocal = ur_tracing_layer::urKernelSetArgLocal;
+
+        dditable.pfnSetArgPointer = pDdiTable->pfnSetArgPointer;
+        pDdiTable->pfnSetArgPointer = ur_tracing_layer::urKernelSetArgPointer;
+
+        dditable.pfnSetExecInfo = pDdiTable->pfnSetExecInfo;
+        pDdiTable->pfnSetExecInfo = ur_tracing_layer::urKernelSetExecInfo;
+
+        dditable.pfnSetArgSampler = pDdiTable->pfnSetArgSampler;
+        pDdiTable->pfnSetArgSampler = ur_tracing_layer::urKernelSetArgSampler;
+
+        dditable.pfnSetArgMemObj = pDdiTable->pfnSetArgMemObj;
+        pDdiTable->pfnSetArgMemObj = ur_tracing_layer::urKernelSetArgMemObj;
+
+        dditable.pfnSetSpecializationConstants =
+            pDdiTable->pfnSetSpecializationConstants;
+        pDdiTable->pfnSetSpecializationConstants =
+            ur_tracing_layer::urKernelSetSpecializationConstants;
+
+        return result;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Exported function for filling application's Mem table
+    ///        with current process' addresses
+    ///
+    /// @returns
+    ///     - ::UR_RESULT_SUCCESS
+    ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+    ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+    __urdlllocal ur_result_t UR_APICALL urGetMemProcAddrTable(
+        ur_api_version_t version, ///< [in] API version requested
+        ur_mem_dditable_t *
+            pDdiTable ///< [in,out] pointer to table of DDI function pointers
+    ) {
+        auto &dditable = ur_tracing_layer::context.urDdiTable.Mem;
+
+        if (nullptr == pDdiTable) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+                UR_MAJOR_VERSION(version) ||
+            UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+                UR_MINOR_VERSION(version)) {
+            return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+        }
+
+        ur_result_t result = UR_RESULT_SUCCESS;
+
+        dditable.pfnImageCreate = pDdiTable->pfnImageCreate;
+        pDdiTable->pfnImageCreate = ur_tracing_layer::urMemImageCreate;
+
+        dditable.pfnBufferCreate = pDdiTable->pfnBufferCreate;
+        pDdiTable->pfnBufferCreate = ur_tracing_layer::urMemBufferCreate;
+
+        dditable.pfnRetain = pDdiTable->pfnRetain;
+        pDdiTable->pfnRetain = ur_tracing_layer::urMemRetain;
+
+        dditable.pfnRelease = pDdiTable->pfnRelease;
+        pDdiTable->pfnRelease = ur_tracing_layer::urMemRelease;
+
+        dditable.pfnBufferPartition = pDdiTable->pfnBufferPartition;
+        pDdiTable->pfnBufferPartition = ur_tracing_layer::urMemBufferPartition;
+
+        dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
+        pDdiTable->pfnGetNativeHandle = ur_tracing_layer::urMemGetNativeHandle;
+
+        dditable.pfnBufferCreateWithNativeHandle =
+            pDdiTable->pfnBufferCreateWithNativeHandle;
+        pDdiTable->pfnBufferCreateWithNativeHandle =
+            ur_tracing_layer::urMemBufferCreateWithNativeHandle;
+
+        dditable.pfnImageCreateWithNativeHandle =
+            pDdiTable->pfnImageCreateWithNativeHandle;
+        pDdiTable->pfnImageCreateWithNativeHandle =
+            ur_tracing_layer::urMemImageCreateWithNativeHandle;
+
+        dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
+        pDdiTable->pfnGetInfo = ur_tracing_layer::urMemGetInfo;
+
+        dditable.pfnImageGetInfo = pDdiTable->pfnImageGetInfo;
+        pDdiTable->pfnImageGetInfo = ur_tracing_layer::urMemImageGetInfo;
+
+        return result;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Exported function for filling application's Platform table
+    ///        with current process' addresses
+    ///
+    /// @returns
+    ///     - ::UR_RESULT_SUCCESS
+    ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+    ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+    __urdlllocal ur_result_t UR_APICALL urGetPlatformProcAddrTable(
+        ur_api_version_t version, ///< [in] API version requested
+        ur_platform_dditable_t *
+            pDdiTable ///< [in,out] pointer to table of DDI function pointers
+    ) {
+        auto &dditable = ur_tracing_layer::context.urDdiTable.Platform;
+
+        if (nullptr == pDdiTable) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+                UR_MAJOR_VERSION(version) ||
+            UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+                UR_MINOR_VERSION(version)) {
+            return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+        }
+
+        ur_result_t result = UR_RESULT_SUCCESS;
+
+        dditable.pfnGet = pDdiTable->pfnGet;
+        pDdiTable->pfnGet = ur_tracing_layer::urPlatformGet;
+
+        dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
+        pDdiTable->pfnGetInfo = ur_tracing_layer::urPlatformGetInfo;
+
+        dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
+        pDdiTable->pfnGetNativeHandle =
+            ur_tracing_layer::urPlatformGetNativeHandle;
+
+        dditable.pfnCreateWithNativeHandle =
+            pDdiTable->pfnCreateWithNativeHandle;
+        pDdiTable->pfnCreateWithNativeHandle =
+            ur_tracing_layer::urPlatformCreateWithNativeHandle;
+
+        dditable.pfnGetApiVersion = pDdiTable->pfnGetApiVersion;
+        pDdiTable->pfnGetApiVersion = ur_tracing_layer::urPlatformGetApiVersion;
+
+        dditable.pfnGetBackendOption = pDdiTable->pfnGetBackendOption;
+        pDdiTable->pfnGetBackendOption =
+            ur_tracing_layer::urPlatformGetBackendOption;
+
+        return result;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Exported function for filling application's Program table
+    ///        with current process' addresses
+    ///
+    /// @returns
+    ///     - ::UR_RESULT_SUCCESS
+    ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+    ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+    __urdlllocal ur_result_t UR_APICALL urGetProgramProcAddrTable(
+        ur_api_version_t version, ///< [in] API version requested
+        ur_program_dditable_t *
+            pDdiTable ///< [in,out] pointer to table of DDI function pointers
+    ) {
+        auto &dditable = ur_tracing_layer::context.urDdiTable.Program;
+
+        if (nullptr == pDdiTable) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+                UR_MAJOR_VERSION(version) ||
+            UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+                UR_MINOR_VERSION(version)) {
+            return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+        }
+
+        ur_result_t result = UR_RESULT_SUCCESS;
+
+        dditable.pfnCreateWithIL = pDdiTable->pfnCreateWithIL;
+        pDdiTable->pfnCreateWithIL = ur_tracing_layer::urProgramCreateWithIL;
+
+        dditable.pfnCreateWithBinary = pDdiTable->pfnCreateWithBinary;
+        pDdiTable->pfnCreateWithBinary =
+            ur_tracing_layer::urProgramCreateWithBinary;
+
+        dditable.pfnBuild = pDdiTable->pfnBuild;
+        pDdiTable->pfnBuild = ur_tracing_layer::urProgramBuild;
+
+        dditable.pfnCompile = pDdiTable->pfnCompile;
+        pDdiTable->pfnCompile = ur_tracing_layer::urProgramCompile;
+
+        dditable.pfnLink = pDdiTable->pfnLink;
+        pDdiTable->pfnLink = ur_tracing_layer::urProgramLink;
+
+        dditable.pfnRetain = pDdiTable->pfnRetain;
+        pDdiTable->pfnRetain = ur_tracing_layer::urProgramRetain;
+
+        dditable.pfnRelease = pDdiTable->pfnRelease;
+        pDdiTable->pfnRelease = ur_tracing_layer::urProgramRelease;
+
+        dditable.pfnGetFunctionPointer = pDdiTable->pfnGetFunctionPointer;
+        pDdiTable->pfnGetFunctionPointer =
+            ur_tracing_layer::urProgramGetFunctionPointer;
+
+        dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
+        pDdiTable->pfnGetInfo = ur_tracing_layer::urProgramGetInfo;
+
+        dditable.pfnGetBuildInfo = pDdiTable->pfnGetBuildInfo;
+        pDdiTable->pfnGetBuildInfo = ur_tracing_layer::urProgramGetBuildInfo;
+
+        dditable.pfnSetSpecializationConstants =
+            pDdiTable->pfnSetSpecializationConstants;
+        pDdiTable->pfnSetSpecializationConstants =
+            ur_tracing_layer::urProgramSetSpecializationConstants;
+
+        dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
+        pDdiTable->pfnGetNativeHandle =
+            ur_tracing_layer::urProgramGetNativeHandle;
+
+        dditable.pfnCreateWithNativeHandle =
+            pDdiTable->pfnCreateWithNativeHandle;
+        pDdiTable->pfnCreateWithNativeHandle =
+            ur_tracing_layer::urProgramCreateWithNativeHandle;
+
+        return result;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Exported function for filling application's Queue table
+    ///        with current process' addresses
+    ///
+    /// @returns
+    ///     - ::UR_RESULT_SUCCESS
+    ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+    ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+    __urdlllocal ur_result_t UR_APICALL urGetQueueProcAddrTable(
+        ur_api_version_t version, ///< [in] API version requested
+        ur_queue_dditable_t *
+            pDdiTable ///< [in,out] pointer to table of DDI function pointers
+    ) {
+        auto &dditable = ur_tracing_layer::context.urDdiTable.Queue;
+
+        if (nullptr == pDdiTable) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+                UR_MAJOR_VERSION(version) ||
+            UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+                UR_MINOR_VERSION(version)) {
+            return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+        }
+
+        ur_result_t result = UR_RESULT_SUCCESS;
+
+        dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
+        pDdiTable->pfnGetInfo = ur_tracing_layer::urQueueGetInfo;
+
+        dditable.pfnCreate = pDdiTable->pfnCreate;
+        pDdiTable->pfnCreate = ur_tracing_layer::urQueueCreate;
+
+        dditable.pfnRetain = pDdiTable->pfnRetain;
+        pDdiTable->pfnRetain = ur_tracing_layer::urQueueRetain;
+
+        dditable.pfnRelease = pDdiTable->pfnRelease;
+        pDdiTable->pfnRelease = ur_tracing_layer::urQueueRelease;
+
+        dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
+        pDdiTable->pfnGetNativeHandle =
+            ur_tracing_layer::urQueueGetNativeHandle;
+
+        dditable.pfnCreateWithNativeHandle =
+            pDdiTable->pfnCreateWithNativeHandle;
+        pDdiTable->pfnCreateWithNativeHandle =
+            ur_tracing_layer::urQueueCreateWithNativeHandle;
+
+        dditable.pfnFinish = pDdiTable->pfnFinish;
+        pDdiTable->pfnFinish = ur_tracing_layer::urQueueFinish;
+
+        dditable.pfnFlush = pDdiTable->pfnFlush;
+        pDdiTable->pfnFlush = ur_tracing_layer::urQueueFlush;
+
+        return result;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Exported function for filling application's Sampler table
+    ///        with current process' addresses
+    ///
+    /// @returns
+    ///     - ::UR_RESULT_SUCCESS
+    ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+    ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+    __urdlllocal ur_result_t UR_APICALL urGetSamplerProcAddrTable(
+        ur_api_version_t version, ///< [in] API version requested
+        ur_sampler_dditable_t *
+            pDdiTable ///< [in,out] pointer to table of DDI function pointers
+    ) {
+        auto &dditable = ur_tracing_layer::context.urDdiTable.Sampler;
+
+        if (nullptr == pDdiTable) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+                UR_MAJOR_VERSION(version) ||
+            UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+                UR_MINOR_VERSION(version)) {
+            return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+        }
+
+        ur_result_t result = UR_RESULT_SUCCESS;
+
+        dditable.pfnCreate = pDdiTable->pfnCreate;
+        pDdiTable->pfnCreate = ur_tracing_layer::urSamplerCreate;
+
+        dditable.pfnRetain = pDdiTable->pfnRetain;
+        pDdiTable->pfnRetain = ur_tracing_layer::urSamplerRetain;
+
+        dditable.pfnRelease = pDdiTable->pfnRelease;
+        pDdiTable->pfnRelease = ur_tracing_layer::urSamplerRelease;
+
+        dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
+        pDdiTable->pfnGetInfo = ur_tracing_layer::urSamplerGetInfo;
+
+        dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
+        pDdiTable->pfnGetNativeHandle =
+            ur_tracing_layer::urSamplerGetNativeHandle;
+
+        dditable.pfnCreateWithNativeHandle =
+            pDdiTable->pfnCreateWithNativeHandle;
+        pDdiTable->pfnCreateWithNativeHandle =
+            ur_tracing_layer::urSamplerCreateWithNativeHandle;
+
+        return result;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Exported function for filling application's USM table
+    ///        with current process' addresses
+    ///
+    /// @returns
+    ///     - ::UR_RESULT_SUCCESS
+    ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+    ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+    __urdlllocal ur_result_t UR_APICALL urGetUSMProcAddrTable(
+        ur_api_version_t version, ///< [in] API version requested
+        ur_usm_dditable_t *
+            pDdiTable ///< [in,out] pointer to table of DDI function pointers
+    ) {
+        auto &dditable = ur_tracing_layer::context.urDdiTable.USM;
+
+        if (nullptr == pDdiTable) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+                UR_MAJOR_VERSION(version) ||
+            UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+                UR_MINOR_VERSION(version)) {
+            return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+        }
+
+        ur_result_t result = UR_RESULT_SUCCESS;
+
+        dditable.pfnHostAlloc = pDdiTable->pfnHostAlloc;
+        pDdiTable->pfnHostAlloc = ur_tracing_layer::urUSMHostAlloc;
+
+        dditable.pfnDeviceAlloc = pDdiTable->pfnDeviceAlloc;
+        pDdiTable->pfnDeviceAlloc = ur_tracing_layer::urUSMDeviceAlloc;
+
+        dditable.pfnSharedAlloc = pDdiTable->pfnSharedAlloc;
+        pDdiTable->pfnSharedAlloc = ur_tracing_layer::urUSMSharedAlloc;
+
+        dditable.pfnFree = pDdiTable->pfnFree;
+        pDdiTable->pfnFree = ur_tracing_layer::urUSMFree;
+
+        dditable.pfnGetMemAllocInfo = pDdiTable->pfnGetMemAllocInfo;
+        pDdiTable->pfnGetMemAllocInfo = ur_tracing_layer::urUSMGetMemAllocInfo;
+
+        dditable.pfnPoolCreate = pDdiTable->pfnPoolCreate;
+        pDdiTable->pfnPoolCreate = ur_tracing_layer::urUSMPoolCreate;
+
+        dditable.pfnPoolRetain = pDdiTable->pfnPoolRetain;
+        pDdiTable->pfnPoolRetain = ur_tracing_layer::urUSMPoolRetain;
+
+        dditable.pfnPoolRelease = pDdiTable->pfnPoolRelease;
+        pDdiTable->pfnPoolRelease = ur_tracing_layer::urUSMPoolRelease;
+
+        dditable.pfnPoolGetInfo = pDdiTable->pfnPoolGetInfo;
+        pDdiTable->pfnPoolGetInfo = ur_tracing_layer::urUSMPoolGetInfo;
+
+        return result;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Exported function for filling application's USMExp table
+    ///        with current process' addresses
+    ///
+    /// @returns
+    ///     - ::UR_RESULT_SUCCESS
+    ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+    ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+    __urdlllocal ur_result_t UR_APICALL urGetUSMExpProcAddrTable(
+        ur_api_version_t version, ///< [in] API version requested
+        ur_usm_exp_dditable_t *
+            pDdiTable ///< [in,out] pointer to table of DDI function pointers
+    ) {
+        auto &dditable = ur_tracing_layer::context.urDdiTable.USMExp;
+
+        if (nullptr == pDdiTable) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+                UR_MAJOR_VERSION(version) ||
+            UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+                UR_MINOR_VERSION(version)) {
+            return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+        }
+
+        ur_result_t result = UR_RESULT_SUCCESS;
+
+        dditable.pfnImportExp = pDdiTable->pfnImportExp;
+        pDdiTable->pfnImportExp = ur_tracing_layer::urUSMImportExp;
+
+        dditable.pfnReleaseExp = pDdiTable->pfnReleaseExp;
+        pDdiTable->pfnReleaseExp = ur_tracing_layer::urUSMReleaseExp;
+
+        return result;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Exported function for filling application's Device table
+    ///        with current process' addresses
+    ///
+    /// @returns
+    ///     - ::UR_RESULT_SUCCESS
+    ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+    ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+    __urdlllocal ur_result_t UR_APICALL urGetDeviceProcAddrTable(
+        ur_api_version_t version, ///< [in] API version requested
+        ur_device_dditable_t *
+            pDdiTable ///< [in,out] pointer to table of DDI function pointers
+    ) {
+        auto &dditable = ur_tracing_layer::context.urDdiTable.Device;
+
+        if (nullptr == pDdiTable) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+                UR_MAJOR_VERSION(version) ||
+            UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+                UR_MINOR_VERSION(version)) {
+            return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+        }
+
+        ur_result_t result = UR_RESULT_SUCCESS;
+
+        dditable.pfnGet = pDdiTable->pfnGet;
+        pDdiTable->pfnGet = ur_tracing_layer::urDeviceGet;
+
+        dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
+        pDdiTable->pfnGetInfo = ur_tracing_layer::urDeviceGetInfo;
+
+        dditable.pfnRetain = pDdiTable->pfnRetain;
+        pDdiTable->pfnRetain = ur_tracing_layer::urDeviceRetain;
+
+        dditable.pfnRelease = pDdiTable->pfnRelease;
+        pDdiTable->pfnRelease = ur_tracing_layer::urDeviceRelease;
+
+        dditable.pfnPartition = pDdiTable->pfnPartition;
+        pDdiTable->pfnPartition = ur_tracing_layer::urDevicePartition;
+
+        dditable.pfnSelectBinary = pDdiTable->pfnSelectBinary;
+        pDdiTable->pfnSelectBinary = ur_tracing_layer::urDeviceSelectBinary;
+
+        dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
+        pDdiTable->pfnGetNativeHandle =
+            ur_tracing_layer::urDeviceGetNativeHandle;
+
+        dditable.pfnCreateWithNativeHandle =
+            pDdiTable->pfnCreateWithNativeHandle;
+        pDdiTable->pfnCreateWithNativeHandle =
+            ur_tracing_layer::urDeviceCreateWithNativeHandle;
+
+        dditable.pfnGetGlobalTimestamps = pDdiTable->pfnGetGlobalTimestamps;
+        pDdiTable->pfnGetGlobalTimestamps =
+            ur_tracing_layer::urDeviceGetGlobalTimestamps;
+
+        return result;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
-            UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
-            UR_MINOR_VERSION(version)) {
-        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+    ur_result_t context_t::init(ur_dditable_t * dditable) {
+        ur_result_t result = UR_RESULT_SUCCESS;
+
+        if (UR_RESULT_SUCCESS == result) {
+            result = ur_tracing_layer::urGetGlobalProcAddrTable(
+                UR_API_VERSION_CURRENT, &dditable->Global);
+        }
+
+        if (UR_RESULT_SUCCESS == result) {
+            result = ur_tracing_layer::urGetCommandBufferExpProcAddrTable(
+                UR_API_VERSION_CURRENT, &dditable->CommandBufferExp);
+        }
+
+        if (UR_RESULT_SUCCESS == result) {
+            result = ur_tracing_layer::urGetContextProcAddrTable(
+                UR_API_VERSION_CURRENT, &dditable->Context);
+        }
+
+        if (UR_RESULT_SUCCESS == result) {
+            result = ur_tracing_layer::urGetEnqueueProcAddrTable(
+                UR_API_VERSION_CURRENT, &dditable->Enqueue);
+        }
+
+        if (UR_RESULT_SUCCESS == result) {
+            result = ur_tracing_layer::urGetEventProcAddrTable(
+                UR_API_VERSION_CURRENT, &dditable->Event);
+        }
+
+        if (UR_RESULT_SUCCESS == result) {
+            result = ur_tracing_layer::urGetKernelProcAddrTable(
+                UR_API_VERSION_CURRENT, &dditable->Kernel);
+        }
+
+        if (UR_RESULT_SUCCESS == result) {
+            result = ur_tracing_layer::urGetMemProcAddrTable(
+                UR_API_VERSION_CURRENT, &dditable->Mem);
+        }
+
+        if (UR_RESULT_SUCCESS == result) {
+            result = ur_tracing_layer::urGetPlatformProcAddrTable(
+                UR_API_VERSION_CURRENT, &dditable->Platform);
+        }
+
+        if (UR_RESULT_SUCCESS == result) {
+            result = ur_tracing_layer::urGetProgramProcAddrTable(
+                UR_API_VERSION_CURRENT, &dditable->Program);
+        }
+
+        if (UR_RESULT_SUCCESS == result) {
+            result = ur_tracing_layer::urGetQueueProcAddrTable(
+                UR_API_VERSION_CURRENT, &dditable->Queue);
+        }
+
+        if (UR_RESULT_SUCCESS == result) {
+            result = ur_tracing_layer::urGetSamplerProcAddrTable(
+                UR_API_VERSION_CURRENT, &dditable->Sampler);
+        }
+
+        if (UR_RESULT_SUCCESS == result) {
+            result = ur_tracing_layer::urGetUSMProcAddrTable(
+                UR_API_VERSION_CURRENT, &dditable->USM);
+        }
+
+        if (UR_RESULT_SUCCESS == result) {
+            result = ur_tracing_layer::urGetUSMExpProcAddrTable(
+                UR_API_VERSION_CURRENT, &dditable->USMExp);
+        }
+
+        if (UR_RESULT_SUCCESS == result) {
+            result = ur_tracing_layer::urGetDeviceProcAddrTable(
+                UR_API_VERSION_CURRENT, &dditable->Device);
+        }
+
+        return result;
     }
-
-    ur_result_t result = UR_RESULT_SUCCESS;
-
-    dditable.pfnCreate = pDdiTable->pfnCreate;
-    pDdiTable->pfnCreate = ur_tracing_layer::urKernelCreate;
-
-    dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
-    pDdiTable->pfnGetInfo = ur_tracing_layer::urKernelGetInfo;
-
-    dditable.pfnGetGroupInfo = pDdiTable->pfnGetGroupInfo;
-    pDdiTable->pfnGetGroupInfo = ur_tracing_layer::urKernelGetGroupInfo;
-
-    dditable.pfnGetSubGroupInfo = pDdiTable->pfnGetSubGroupInfo;
-    pDdiTable->pfnGetSubGroupInfo = ur_tracing_layer::urKernelGetSubGroupInfo;
-
-    dditable.pfnRetain = pDdiTable->pfnRetain;
-    pDdiTable->pfnRetain = ur_tracing_layer::urKernelRetain;
-
-    dditable.pfnRelease = pDdiTable->pfnRelease;
-    pDdiTable->pfnRelease = ur_tracing_layer::urKernelRelease;
-
-    dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
-    pDdiTable->pfnGetNativeHandle = ur_tracing_layer::urKernelGetNativeHandle;
-
-    dditable.pfnCreateWithNativeHandle = pDdiTable->pfnCreateWithNativeHandle;
-    pDdiTable->pfnCreateWithNativeHandle =
-        ur_tracing_layer::urKernelCreateWithNativeHandle;
-
-    dditable.pfnSetArgValue = pDdiTable->pfnSetArgValue;
-    pDdiTable->pfnSetArgValue = ur_tracing_layer::urKernelSetArgValue;
-
-    dditable.pfnSetArgLocal = pDdiTable->pfnSetArgLocal;
-    pDdiTable->pfnSetArgLocal = ur_tracing_layer::urKernelSetArgLocal;
-
-    dditable.pfnSetArgPointer = pDdiTable->pfnSetArgPointer;
-    pDdiTable->pfnSetArgPointer = ur_tracing_layer::urKernelSetArgPointer;
-
-    dditable.pfnSetExecInfo = pDdiTable->pfnSetExecInfo;
-    pDdiTable->pfnSetExecInfo = ur_tracing_layer::urKernelSetExecInfo;
-
-    dditable.pfnSetArgSampler = pDdiTable->pfnSetArgSampler;
-    pDdiTable->pfnSetArgSampler = ur_tracing_layer::urKernelSetArgSampler;
-
-    dditable.pfnSetArgMemObj = pDdiTable->pfnSetArgMemObj;
-    pDdiTable->pfnSetArgMemObj = ur_tracing_layer::urKernelSetArgMemObj;
-
-    dditable.pfnSetSpecializationConstants =
-        pDdiTable->pfnSetSpecializationConstants;
-    pDdiTable->pfnSetSpecializationConstants =
-        ur_tracing_layer::urKernelSetSpecializationConstants;
-
-    return result;
-}
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Exported function for filling application's Mem table
-///        with current process' addresses
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetMemProcAddrTable(
-    ur_api_version_t version, ///< [in] API version requested
-    ur_mem_dditable_t
-        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
-) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.Mem;
-
-    if (nullptr == pDdiTable) {
-        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-    }
-
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
-            UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
-            UR_MINOR_VERSION(version)) {
-        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
-    }
-
-    ur_result_t result = UR_RESULT_SUCCESS;
-
-    dditable.pfnImageCreate = pDdiTable->pfnImageCreate;
-    pDdiTable->pfnImageCreate = ur_tracing_layer::urMemImageCreate;
-
-    dditable.pfnBufferCreate = pDdiTable->pfnBufferCreate;
-    pDdiTable->pfnBufferCreate = ur_tracing_layer::urMemBufferCreate;
-
-    dditable.pfnRetain = pDdiTable->pfnRetain;
-    pDdiTable->pfnRetain = ur_tracing_layer::urMemRetain;
-
-    dditable.pfnRelease = pDdiTable->pfnRelease;
-    pDdiTable->pfnRelease = ur_tracing_layer::urMemRelease;
-
-    dditable.pfnBufferPartition = pDdiTable->pfnBufferPartition;
-    pDdiTable->pfnBufferPartition = ur_tracing_layer::urMemBufferPartition;
-
-    dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
-    pDdiTable->pfnGetNativeHandle = ur_tracing_layer::urMemGetNativeHandle;
-
-    dditable.pfnBufferCreateWithNativeHandle =
-        pDdiTable->pfnBufferCreateWithNativeHandle;
-    pDdiTable->pfnBufferCreateWithNativeHandle =
-        ur_tracing_layer::urMemBufferCreateWithNativeHandle;
-
-    dditable.pfnImageCreateWithNativeHandle =
-        pDdiTable->pfnImageCreateWithNativeHandle;
-    pDdiTable->pfnImageCreateWithNativeHandle =
-        ur_tracing_layer::urMemImageCreateWithNativeHandle;
-
-    dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
-    pDdiTable->pfnGetInfo = ur_tracing_layer::urMemGetInfo;
-
-    dditable.pfnImageGetInfo = pDdiTable->pfnImageGetInfo;
-    pDdiTable->pfnImageGetInfo = ur_tracing_layer::urMemImageGetInfo;
-
-    return result;
-}
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Exported function for filling application's Platform table
-///        with current process' addresses
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetPlatformProcAddrTable(
-    ur_api_version_t version, ///< [in] API version requested
-    ur_platform_dditable_t
-        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
-) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.Platform;
-
-    if (nullptr == pDdiTable) {
-        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-    }
-
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
-            UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
-            UR_MINOR_VERSION(version)) {
-        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
-    }
-
-    ur_result_t result = UR_RESULT_SUCCESS;
-
-    dditable.pfnGet = pDdiTable->pfnGet;
-    pDdiTable->pfnGet = ur_tracing_layer::urPlatformGet;
-
-    dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
-    pDdiTable->pfnGetInfo = ur_tracing_layer::urPlatformGetInfo;
-
-    dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
-    pDdiTable->pfnGetNativeHandle = ur_tracing_layer::urPlatformGetNativeHandle;
-
-    dditable.pfnCreateWithNativeHandle = pDdiTable->pfnCreateWithNativeHandle;
-    pDdiTable->pfnCreateWithNativeHandle =
-        ur_tracing_layer::urPlatformCreateWithNativeHandle;
-
-    dditable.pfnGetApiVersion = pDdiTable->pfnGetApiVersion;
-    pDdiTable->pfnGetApiVersion = ur_tracing_layer::urPlatformGetApiVersion;
-
-    dditable.pfnGetBackendOption = pDdiTable->pfnGetBackendOption;
-    pDdiTable->pfnGetBackendOption =
-        ur_tracing_layer::urPlatformGetBackendOption;
-
-    return result;
-}
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Exported function for filling application's Program table
-///        with current process' addresses
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetProgramProcAddrTable(
-    ur_api_version_t version, ///< [in] API version requested
-    ur_program_dditable_t
-        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
-) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.Program;
-
-    if (nullptr == pDdiTable) {
-        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-    }
-
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
-            UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
-            UR_MINOR_VERSION(version)) {
-        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
-    }
-
-    ur_result_t result = UR_RESULT_SUCCESS;
-
-    dditable.pfnCreateWithIL = pDdiTable->pfnCreateWithIL;
-    pDdiTable->pfnCreateWithIL = ur_tracing_layer::urProgramCreateWithIL;
-
-    dditable.pfnCreateWithBinary = pDdiTable->pfnCreateWithBinary;
-    pDdiTable->pfnCreateWithBinary =
-        ur_tracing_layer::urProgramCreateWithBinary;
-
-    dditable.pfnBuild = pDdiTable->pfnBuild;
-    pDdiTable->pfnBuild = ur_tracing_layer::urProgramBuild;
-
-    dditable.pfnCompile = pDdiTable->pfnCompile;
-    pDdiTable->pfnCompile = ur_tracing_layer::urProgramCompile;
-
-    dditable.pfnLink = pDdiTable->pfnLink;
-    pDdiTable->pfnLink = ur_tracing_layer::urProgramLink;
-
-    dditable.pfnRetain = pDdiTable->pfnRetain;
-    pDdiTable->pfnRetain = ur_tracing_layer::urProgramRetain;
-
-    dditable.pfnRelease = pDdiTable->pfnRelease;
-    pDdiTable->pfnRelease = ur_tracing_layer::urProgramRelease;
-
-    dditable.pfnGetFunctionPointer = pDdiTable->pfnGetFunctionPointer;
-    pDdiTable->pfnGetFunctionPointer =
-        ur_tracing_layer::urProgramGetFunctionPointer;
-
-    dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
-    pDdiTable->pfnGetInfo = ur_tracing_layer::urProgramGetInfo;
-
-    dditable.pfnGetBuildInfo = pDdiTable->pfnGetBuildInfo;
-    pDdiTable->pfnGetBuildInfo = ur_tracing_layer::urProgramGetBuildInfo;
-
-    dditable.pfnSetSpecializationConstants =
-        pDdiTable->pfnSetSpecializationConstants;
-    pDdiTable->pfnSetSpecializationConstants =
-        ur_tracing_layer::urProgramSetSpecializationConstants;
-
-    dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
-    pDdiTable->pfnGetNativeHandle = ur_tracing_layer::urProgramGetNativeHandle;
-
-    dditable.pfnCreateWithNativeHandle = pDdiTable->pfnCreateWithNativeHandle;
-    pDdiTable->pfnCreateWithNativeHandle =
-        ur_tracing_layer::urProgramCreateWithNativeHandle;
-
-    return result;
-}
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Exported function for filling application's Queue table
-///        with current process' addresses
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetQueueProcAddrTable(
-    ur_api_version_t version, ///< [in] API version requested
-    ur_queue_dditable_t
-        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
-) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.Queue;
-
-    if (nullptr == pDdiTable) {
-        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-    }
-
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
-            UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
-            UR_MINOR_VERSION(version)) {
-        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
-    }
-
-    ur_result_t result = UR_RESULT_SUCCESS;
-
-    dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
-    pDdiTable->pfnGetInfo = ur_tracing_layer::urQueueGetInfo;
-
-    dditable.pfnCreate = pDdiTable->pfnCreate;
-    pDdiTable->pfnCreate = ur_tracing_layer::urQueueCreate;
-
-    dditable.pfnRetain = pDdiTable->pfnRetain;
-    pDdiTable->pfnRetain = ur_tracing_layer::urQueueRetain;
-
-    dditable.pfnRelease = pDdiTable->pfnRelease;
-    pDdiTable->pfnRelease = ur_tracing_layer::urQueueRelease;
-
-    dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
-    pDdiTable->pfnGetNativeHandle = ur_tracing_layer::urQueueGetNativeHandle;
-
-    dditable.pfnCreateWithNativeHandle = pDdiTable->pfnCreateWithNativeHandle;
-    pDdiTable->pfnCreateWithNativeHandle =
-        ur_tracing_layer::urQueueCreateWithNativeHandle;
-
-    dditable.pfnFinish = pDdiTable->pfnFinish;
-    pDdiTable->pfnFinish = ur_tracing_layer::urQueueFinish;
-
-    dditable.pfnFlush = pDdiTable->pfnFlush;
-    pDdiTable->pfnFlush = ur_tracing_layer::urQueueFlush;
-
-    return result;
-}
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Exported function for filling application's Sampler table
-///        with current process' addresses
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetSamplerProcAddrTable(
-    ur_api_version_t version, ///< [in] API version requested
-    ur_sampler_dditable_t
-        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
-) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.Sampler;
-
-    if (nullptr == pDdiTable) {
-        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-    }
-
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
-            UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
-            UR_MINOR_VERSION(version)) {
-        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
-    }
-
-    ur_result_t result = UR_RESULT_SUCCESS;
-
-    dditable.pfnCreate = pDdiTable->pfnCreate;
-    pDdiTable->pfnCreate = ur_tracing_layer::urSamplerCreate;
-
-    dditable.pfnRetain = pDdiTable->pfnRetain;
-    pDdiTable->pfnRetain = ur_tracing_layer::urSamplerRetain;
-
-    dditable.pfnRelease = pDdiTable->pfnRelease;
-    pDdiTable->pfnRelease = ur_tracing_layer::urSamplerRelease;
-
-    dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
-    pDdiTable->pfnGetInfo = ur_tracing_layer::urSamplerGetInfo;
-
-    dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
-    pDdiTable->pfnGetNativeHandle = ur_tracing_layer::urSamplerGetNativeHandle;
-
-    dditable.pfnCreateWithNativeHandle = pDdiTable->pfnCreateWithNativeHandle;
-    pDdiTable->pfnCreateWithNativeHandle =
-        ur_tracing_layer::urSamplerCreateWithNativeHandle;
-
-    return result;
-}
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Exported function for filling application's USM table
-///        with current process' addresses
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetUSMProcAddrTable(
-    ur_api_version_t version, ///< [in] API version requested
-    ur_usm_dditable_t
-        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
-) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.USM;
-
-    if (nullptr == pDdiTable) {
-        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-    }
-
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
-            UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
-            UR_MINOR_VERSION(version)) {
-        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
-    }
-
-    ur_result_t result = UR_RESULT_SUCCESS;
-
-    dditable.pfnHostAlloc = pDdiTable->pfnHostAlloc;
-    pDdiTable->pfnHostAlloc = ur_tracing_layer::urUSMHostAlloc;
-
-    dditable.pfnDeviceAlloc = pDdiTable->pfnDeviceAlloc;
-    pDdiTable->pfnDeviceAlloc = ur_tracing_layer::urUSMDeviceAlloc;
-
-    dditable.pfnSharedAlloc = pDdiTable->pfnSharedAlloc;
-    pDdiTable->pfnSharedAlloc = ur_tracing_layer::urUSMSharedAlloc;
-
-    dditable.pfnFree = pDdiTable->pfnFree;
-    pDdiTable->pfnFree = ur_tracing_layer::urUSMFree;
-
-    dditable.pfnGetMemAllocInfo = pDdiTable->pfnGetMemAllocInfo;
-    pDdiTable->pfnGetMemAllocInfo = ur_tracing_layer::urUSMGetMemAllocInfo;
-
-    dditable.pfnPoolCreate = pDdiTable->pfnPoolCreate;
-    pDdiTable->pfnPoolCreate = ur_tracing_layer::urUSMPoolCreate;
-
-    dditable.pfnPoolRetain = pDdiTable->pfnPoolRetain;
-    pDdiTable->pfnPoolRetain = ur_tracing_layer::urUSMPoolRetain;
-
-    dditable.pfnPoolRelease = pDdiTable->pfnPoolRelease;
-    pDdiTable->pfnPoolRelease = ur_tracing_layer::urUSMPoolRelease;
-
-    dditable.pfnPoolGetInfo = pDdiTable->pfnPoolGetInfo;
-    pDdiTable->pfnPoolGetInfo = ur_tracing_layer::urUSMPoolGetInfo;
-
-    return result;
-}
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Exported function for filling application's USMExp table
-///        with current process' addresses
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetUSMExpProcAddrTable(
-    ur_api_version_t version, ///< [in] API version requested
-    ur_usm_exp_dditable_t
-        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
-) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.USMExp;
-
-    if (nullptr == pDdiTable) {
-        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-    }
-
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
-            UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
-            UR_MINOR_VERSION(version)) {
-        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
-    }
-
-    ur_result_t result = UR_RESULT_SUCCESS;
-
-    dditable.pfnImportExp = pDdiTable->pfnImportExp;
-    pDdiTable->pfnImportExp = ur_tracing_layer::urUSMImportExp;
-
-    dditable.pfnReleaseExp = pDdiTable->pfnReleaseExp;
-    pDdiTable->pfnReleaseExp = ur_tracing_layer::urUSMReleaseExp;
-
-    return result;
-}
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Exported function for filling application's Device table
-///        with current process' addresses
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetDeviceProcAddrTable(
-    ur_api_version_t version, ///< [in] API version requested
-    ur_device_dditable_t
-        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
-) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.Device;
-
-    if (nullptr == pDdiTable) {
-        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-    }
-
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
-            UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
-            UR_MINOR_VERSION(version)) {
-        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
-    }
-
-    ur_result_t result = UR_RESULT_SUCCESS;
-
-    dditable.pfnGet = pDdiTable->pfnGet;
-    pDdiTable->pfnGet = ur_tracing_layer::urDeviceGet;
-
-    dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
-    pDdiTable->pfnGetInfo = ur_tracing_layer::urDeviceGetInfo;
-
-    dditable.pfnRetain = pDdiTable->pfnRetain;
-    pDdiTable->pfnRetain = ur_tracing_layer::urDeviceRetain;
-
-    dditable.pfnRelease = pDdiTable->pfnRelease;
-    pDdiTable->pfnRelease = ur_tracing_layer::urDeviceRelease;
-
-    dditable.pfnPartition = pDdiTable->pfnPartition;
-    pDdiTable->pfnPartition = ur_tracing_layer::urDevicePartition;
-
-    dditable.pfnSelectBinary = pDdiTable->pfnSelectBinary;
-    pDdiTable->pfnSelectBinary = ur_tracing_layer::urDeviceSelectBinary;
-
-    dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
-    pDdiTable->pfnGetNativeHandle = ur_tracing_layer::urDeviceGetNativeHandle;
-
-    dditable.pfnCreateWithNativeHandle = pDdiTable->pfnCreateWithNativeHandle;
-    pDdiTable->pfnCreateWithNativeHandle =
-        ur_tracing_layer::urDeviceCreateWithNativeHandle;
-
-    dditable.pfnGetGlobalTimestamps = pDdiTable->pfnGetGlobalTimestamps;
-    pDdiTable->pfnGetGlobalTimestamps =
-        ur_tracing_layer::urDeviceGetGlobalTimestamps;
-
-    return result;
-}
-
-ur_result_t context_t::init(ur_dditable_t *dditable) {
-    ur_result_t result = UR_RESULT_SUCCESS;
-
-    if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetGlobalProcAddrTable(
-            UR_API_VERSION_CURRENT, &dditable->Global);
-    }
-
-    if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetContextProcAddrTable(
-            UR_API_VERSION_CURRENT, &dditable->Context);
-    }
-
-    if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetEnqueueProcAddrTable(
-            UR_API_VERSION_CURRENT, &dditable->Enqueue);
-    }
-
-    if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetEventProcAddrTable(
-            UR_API_VERSION_CURRENT, &dditable->Event);
-    }
-
-    if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetKernelProcAddrTable(
-            UR_API_VERSION_CURRENT, &dditable->Kernel);
-    }
-
-    if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetMemProcAddrTable(UR_API_VERSION_CURRENT,
-                                                         &dditable->Mem);
-    }
-
-    if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetPlatformProcAddrTable(
-            UR_API_VERSION_CURRENT, &dditable->Platform);
-    }
-
-    if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetProgramProcAddrTable(
-            UR_API_VERSION_CURRENT, &dditable->Program);
-    }
-
-    if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetQueueProcAddrTable(
-            UR_API_VERSION_CURRENT, &dditable->Queue);
-    }
-
-    if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetSamplerProcAddrTable(
-            UR_API_VERSION_CURRENT, &dditable->Sampler);
-    }
-
-    if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetUSMProcAddrTable(UR_API_VERSION_CURRENT,
-                                                         &dditable->USM);
-    }
-
-    if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetUSMExpProcAddrTable(
-            UR_API_VERSION_CURRENT, &dditable->USMExp);
-    }
-
-    if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetDeviceProcAddrTable(
-            UR_API_VERSION_CURRENT, &dditable->Device);
-    }
-
-    return result;
-}
 } /* namespace ur_tracing_layer */
