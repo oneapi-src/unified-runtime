@@ -144,6 +144,21 @@ def yamlRead(path):
         print("error: unable to read %s"%path)
         return None
 
+class quoted(str):
+    pass
+
+def quoted_presenter(dumper, data):
+    return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='"')
+
+def yamlWrite(path, data, **kwargs):
+    
+    try:
+        with open(path, 'w') as fout:
+            yaml.add_representer(quoted, quoted_presenter)
+            yaml.dump_all(data, fout, **kwargs)
+    except:
+        print(f"error: unable to write {path}")
+
 """
     generates file using template, args
 """

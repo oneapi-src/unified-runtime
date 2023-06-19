@@ -12,12 +12,6 @@ import yaml
 
 ENUM_NAME = '$x_function_t'
 
-class quoted(str):
-    pass
-
-def quoted_presenter(dumper, data):
-    return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='"')
-
 def generate_registry(path, specs):
     try:
         existing_registry = list(util.yamlRead(path))[1]['etors']
@@ -34,10 +28,8 @@ def generate_registry(path, specs):
             registry.append({'name': util.to_snake_case(fname).upper(), 'desc': 'Enumerator for $x'+fname, 'value': str(id)})
         registry = sorted(registry, key=lambda x: int(x['value']))
         wrapper = { 'name': ENUM_NAME, 'type': 'enum', 'desc': 'Defines unique stable identifiers for all functions' , 'etors': registry}
-        header = {'type': 'header', 'desc': quoted('Intel $OneApi Unified Runtime function registry'), 'ordinal': quoted(9)}
-        with open(path, 'w') as fout:
-            yaml.add_representer(quoted, quoted_presenter)
-            yaml.dump_all([header, wrapper], fout,
+        header = {'type': 'header', 'desc': util.quoted('Intel $OneApi Unified Runtime function registry'), 'ordinal': util.quoted(9)}
+        util.yamlWrite(path, [header, wrapper],
                 default_flow_style=False,
                 sort_keys=False,
                 explicit_start=True)
