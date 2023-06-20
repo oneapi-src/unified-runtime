@@ -60,8 +60,9 @@ class DisjointPool {
     class AllocImpl;
     using Config = DisjointPoolConfig;
 
-    uma_result_t initialize(uma_memory_provider_handle_t *providers,
-                            size_t numProviders, DisjointPoolConfig parameters);
+    uma_result_t initialize(uma_memory_provider_handle_t data_provider,
+                            uma_memory_provider_handle_t metadata_provider,
+                            DisjointPoolConfig parameters);
     void *malloc(size_t size);
     void *calloc(size_t, size_t);
     void *realloc(void *, size_t);
@@ -69,6 +70,8 @@ class DisjointPool {
     size_t malloc_usable_size(void *);
     void free(void *ptr);
     enum uma_result_t get_last_result(const char **ppMessage);
+    uma_memory_provider_handle_t get_data_memory_provider();
+    uma_memory_provider_handle_t get_metadata_memory_provider();
 
     DisjointPool();
     ~DisjointPool();

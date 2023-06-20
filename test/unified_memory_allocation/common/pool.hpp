@@ -28,7 +28,8 @@ auto wrapPoolUnique(uma_memory_pool_handle_t hPool) {
 }
 
 struct pool_base {
-    uma_result_t initialize(uma_memory_provider_handle_t *, size_t) noexcept {
+    uma_result_t initialize(uma_memory_provider_handle_t,
+                            uma_memory_provider_handle_t) noexcept {
         return UMA_RESULT_SUCCESS;
     };
     void *malloc(size_t size) noexcept { return nullptr; }
@@ -39,6 +40,12 @@ struct pool_base {
     void free(void *) noexcept {}
     enum uma_result_t get_last_result(const char **ppMessage) noexcept {
         return UMA_RESULT_ERROR_UNKNOWN;
+    }
+    uma_memory_provider_handle_t get_data_memory_provider() noexcept {
+        return NULL;
+    }
+    uma_memory_provider_handle_t get_metadata_memory_provider() noexcept {
+        return NULL;
     }
 };
 
@@ -69,9 +76,11 @@ struct malloc_pool : public pool_base {
 };
 
 struct proxy_pool : public pool_base {
-    uma_result_t initialize(uma_memory_provider_handle_t *providers,
-                            size_t numProviders) noexcept {
-        this->provider = providers[0];
+    uma_result_t
+    initialize(uma_memory_provider_handle_t data_provider,
+               uma_memory_provider_handle_t metadata_provider) noexcept {
+        this->provider = data_provider;
+        this->metadata_provider = metadata_provider;
         return UMA_RESULT_SUCCESS;
     }
     void *malloc(size_t size) noexcept { return aligned_malloc(size, 0); }
@@ -105,7 +114,14 @@ struct proxy_pool : public pool_base {
     enum uma_result_t get_last_result(const char **ppMessage) noexcept {
         return umaMemoryProviderGetLastResult(provider, ppMessage);
     }
+    uma_memory_provider_handle_t get_data_memory_provider() noexcept {
+        return provider;
+    }
+    uma_memory_provider_handle_t get_metadata_memory_provider() noexcept {
+        return metadata_provider;
+    }
     uma_memory_provider_handle_t provider;
+    uma_memory_provider_handle_t metadata_provider;
 };
 
 } // namespace uma_test

@@ -11,13 +11,13 @@
 #include <assert.h>
 #include <stdlib.h>
 
-static enum uma_result_t nullInitialize(uma_memory_provider_handle_t *providers,
-                                        size_t numProviders, void *params,
-                                        void **pool) {
-    (void)providers;
-    (void)numProviders;
+static enum uma_result_t
+nullInitialize(uma_memory_provider_handle_t data_provider,
+               uma_memory_provider_handle_t metadata_provider, void *params,
+               void **pool) {
+    (void)data_provider;
+    (void)metadata_provider;
     (void)params;
-    assert(providers && numProviders);
     *pool = NULL;
     return UMA_RESULT_SUCCESS;
 }
@@ -68,22 +68,34 @@ enum uma_result_t nullGetLastResult(void *pool, const char **ppMsg) {
     return UMA_RESULT_SUCCESS;
 }
 
-uma_memory_pool_handle_t nullPoolCreate(void) {
-    struct uma_memory_pool_ops_t ops = {.version = UMA_VERSION_CURRENT,
-                                        .initialize = nullInitialize,
-                                        .finalize = nullFinalize,
-                                        .malloc = nullMalloc,
-                                        .realloc = nullRealloc,
-                                        .calloc = nullCalloc,
-                                        .aligned_malloc = nullAlignedMalloc,
-                                        .malloc_usable_size =
-                                            nullMallocUsableSize,
-                                        .free = nullFree,
-                                        .get_last_result = nullGetLastResult};
+static uma_memory_provider_handle_t nullGetDataProvider(void *pool) {
+    (void)pool;
+    return NULL;
+}
 
-    uma_memory_provider_handle_t providerDesc = nullProviderCreate();
+static uma_memory_provider_handle_t nullGetMetadataProvider(void *pool) {
+    (void)pool;
+    return NULL;
+}
+
+uma_memory_pool_handle_t nullPoolCreate(void) {
+    struct uma_memory_pool_ops_t ops = {
+        .version = UMA_VERSION_CURRENT,
+        .initialize = nullInitialize,
+        .finalize = nullFinalize,
+        .malloc = nullMalloc,
+        .realloc = nullRealloc,
+        .calloc = nullCalloc,
+        .aligned_malloc = nullAlignedMalloc,
+        .malloc_usable_size = nullMallocUsableSize,
+        .free = nullFree,
+        .get_last_result = nullGetLastResult,
+        .get_data_memory_provider = nullGetDataProvider,
+        .get_metadata_memory_provider = nullGetMetadataProvider};
+
+    uma_memory_provider_handle_t provider = nullProviderCreate();
     uma_memory_pool_handle_t hPool;
-    enum uma_result_t ret = umaPoolCreate(&ops, &providerDesc, 1, NULL, &hPool);
+    enum uma_result_t ret = umaPoolCreate(&ops, provider, NULL, NULL, &hPool);
 
     (void)ret; /* silence unused variable warning */
     assert(ret == UMA_RESULT_SUCCESS);
@@ -100,15 +112,15 @@ struct tracePool {
 };
 
 static enum uma_result_t
-traceInitialize(uma_memory_provider_handle_t *providers, size_t numProviders,
-                void *params, void **pool) {
+traceInitialize(uma_memory_provider_handle_t data_provider,
+                uma_memory_provider_handle_t metadata_provider, void *params,
+                void **pool) {
     struct tracePool *tracePool =
         (struct tracePool *)malloc(sizeof(struct tracePool));
     tracePool->params = *((struct traceParams *)params);
 
-    (void)providers;
-    (void)numProviders;
-    assert(providers && numProviders);
+    (void)data_provider;
+    (void)metadata_provider;
 
     *pool = tracePool;
     return UMA_RESULT_SUCCESS;
@@ -166,28 +178,43 @@ enum uma_result_t traceGetLastResult(void *pool, const char **ppMsg) {
     return umaPoolGetLastResult(tracePool->params.hUpstreamPool, ppMsg);
 }
 
-uma_memory_pool_handle_t
-tracePoolCreate(uma_memory_pool_handle_t hUpstreamPool,
-                uma_memory_provider_handle_t providerDesc,
-                void (*trace)(const char *)) {
-    struct uma_memory_pool_ops_t ops = {.version = UMA_VERSION_CURRENT,
-                                        .initialize = traceInitialize,
-                                        .finalize = traceFinalize,
-                                        .malloc = traceMalloc,
-                                        .realloc = traceRealloc,
-                                        .calloc = traceCalloc,
-                                        .aligned_malloc = traceAlignedMalloc,
-                                        .malloc_usable_size =
-                                            traceMallocUsableSize,
-                                        .free = traceFree,
-                                        .get_last_result = traceGetLastResult};
+static uma_memory_provider_handle_t traceGetDataProvider(void *pool) {
+    struct tracePool *tracePool = (struct tracePool *)pool;
+
+    tracePool->params.trace("get_data_memory_provider");
+    return umaPoolGetDataMemoryProvider(tracePool->params.hUpstreamPool);
+}
+
+static uma_memory_provider_handle_t traceGetMetadataProvider(void *pool) {
+    struct tracePool *tracePool = (struct tracePool *)pool;
+
+    tracePool->params.trace("get_metadata_memory_provider");
+    return umaPoolGetMetadataMemoryProvider(tracePool->params.hUpstreamPool);
+}
+
+uma_memory_pool_handle_t tracePoolCreate(uma_memory_pool_handle_t hUpstreamPool,
+                                         void (*trace)(const char *)) {
+    struct uma_memory_pool_ops_t ops = {
+        .version = UMA_VERSION_CURRENT,
+        .initialize = traceInitialize,
+        .finalize = traceFinalize,
+        .malloc = traceMalloc,
+        .realloc = traceRealloc,
+        .calloc = traceCalloc,
+        .aligned_malloc = traceAlignedMalloc,
+        .malloc_usable_size = traceMallocUsableSize,
+        .free = traceFree,
+        .get_last_result = traceGetLastResult,
+        .get_data_memory_provider = traceGetDataProvider,
+        .get_metadata_memory_provider = traceGetMetadataProvider};
 
     struct traceParams params = {.hUpstreamPool = hUpstreamPool,
                                  .trace = trace};
 
     uma_memory_pool_handle_t hPool;
-    enum uma_result_t ret =
-        umaPoolCreate(&ops, &providerDesc, 1, &params, &hPool);
+    enum uma_result_t ret = umaPoolCreate(
+        &ops, umaPoolGetDataMemoryProvider(hUpstreamPool),
+        umaPoolGetMetadataMemoryProvider(hUpstreamPool), &params, &hPool);
 
     (void)ret; /* silence unused variable warning */
     assert(ret == UMA_RESULT_SUCCESS);

@@ -27,15 +27,15 @@ struct uma_memory_pool_ops_t {
 
     ///
     /// \brief Intializes memory pool.
-    /// \param providers array of memory providers that will be used for coarse-grain allocations.
-    ///        Should contain at least one memory provider.
-    /// \param numProvider number of elements in the providers array
+    /// \param data_provider memory provider that should be used for coarse-grain data allocation
+    /// \param metadata_provider [optional] memory provider that should be used for metadata allocations
     /// \param params pool-specific params
     /// \param pool [out] returns pointer to the pool
     /// \return UMA_RESULT_SUCCESS on success or appropriate error code on failure.
-    enum uma_result_t (*initialize)(uma_memory_provider_handle_t *providers,
-                                    size_t numProviders, void *params,
-                                    void **pool);
+    enum uma_result_t (*initialize)(
+        uma_memory_provider_handle_t data_provider,
+        uma_memory_provider_handle_t metadata_provider, void *params,
+        void **pool);
 
     ///
     /// \brief Finalizes memory pool
@@ -50,6 +50,8 @@ struct uma_memory_pool_ops_t {
     size_t (*malloc_usable_size)(void *pool, void *ptr);
     void (*free)(void *pool, void *);
     enum uma_result_t (*get_last_result)(void *pool, const char **ppMessage);
+    uma_memory_provider_handle_t (*get_data_memory_provider)(void *pool);
+    uma_memory_provider_handle_t (*get_metadata_memory_provider)(void *pool);
 };
 
 #ifdef __cplusplus

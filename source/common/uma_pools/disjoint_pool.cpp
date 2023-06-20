@@ -840,14 +840,12 @@ void DisjointPool::AllocImpl::printStats(bool &TitlePrinted,
     }
 }
 
-uma_result_t DisjointPool::initialize(uma_memory_provider_handle_t *providers,
-                                      size_t numProviders,
-                                      DisjointPoolConfig parameters) {
-    if (numProviders != 1 || !providers[0]) {
-        return UMA_RESULT_ERROR_INVALID_ARGUMENT;
-    }
-
-    impl = std::make_unique<AllocImpl>(providers[0], parameters);
+uma_result_t
+DisjointPool::initialize(uma_memory_provider_handle_t data_provider,
+                         uma_memory_provider_handle_t metadata_provider,
+                         DisjointPoolConfig parameters) {
+    (void)metadata_provider;
+    impl = std::make_unique<AllocImpl>(data_provider, parameters);
     return UMA_RESULT_SUCCESS;
 }
 
@@ -918,6 +916,14 @@ enum uma_result_t DisjointPool::get_last_result(const char **ppMessage) {
     // TODO: implement and return last error, we probably need something like
     // https://github.com/oneapi-src/unified-runtime/issues/500 in UMA
     return UMA_RESULT_ERROR_UNKNOWN;
+}
+
+uma_memory_provider_handle_t DisjointPool::get_data_memory_provider() {
+    return impl->getMemHandle();
+}
+
+uma_memory_provider_handle_t DisjointPool::get_metadata_memory_provider() {
+    return nullptr;
 }
 
 DisjointPool::DisjointPool() {}

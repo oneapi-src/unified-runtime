@@ -25,17 +25,16 @@ struct uma_memory_pool_ops_t;
 ///
 /// \brief Creates new memory pool.
 /// \param ops instance of uma_memory_pool_ops_t
-/// \param providers array of memory providers that will be used for coarse-grain allocations.
-///        Should contain at least one memory provider.
-/// \param numProvider number of elements in the providers array
+/// \param data_provider memory provider that should be used for coarse-grain data allocation
+/// \param metadata_provider [optional] memory provider that should be used for metadata allocations
 /// \param params pointer to pool-specific parameters
 /// \param hPool [out] handle to the newly created memory pool
 /// \return UMA_RESULT_SUCCESS on success or appropriate error code on failure.
 ///
 enum uma_result_t umaPoolCreate(struct uma_memory_pool_ops_t *ops,
-                                uma_memory_provider_handle_t *providers,
-                                size_t numProviders, void *params,
-                                uma_memory_pool_handle_t *hPool);
+                                uma_memory_provider_handle_t data_provider,
+                                uma_memory_provider_handle_t metadata_provider,
+                                void *params, uma_memory_pool_handle_t *hPool);
 
 ///
 /// \brief Destroys memory pool.
@@ -134,17 +133,18 @@ enum uma_result_t umaPoolGetLastResult(uma_memory_pool_handle_t hPool,
 uma_memory_pool_handle_t umaPoolByPtr(const void *ptr);
 
 ///
-/// \brief Retrieve memory providers associated with a given pool.
+/// \brief Retrieve metadata memory provider associated with a given pool.
 /// \param hPool specified memory pool
-/// \param hProviders [out] pointer to an array of memory providers. If numProviders is not equal to or
-///        greater than the real number of providers, UMA_RESULT_ERROR_INVALID_ARGUMENT is returned.
-/// \param numProviders [in] number of memory providers to return
-/// \param numProvidersRet pointer to the actual number of memory providers
-/// \return UMA_RESULT_SUCCESS on success or appropriate error code on failure.
-enum uma_result_t
-umaPoolGetMemoryProviders(uma_memory_pool_handle_t hPool, size_t numProviders,
-                          uma_memory_provider_handle_t *hProviders,
-                          size_t *numProvidersRet);
+/// \return handle to the metadata memory provider
+uma_memory_provider_handle_t
+umaPoolGetMetadataMemoryProvider(uma_memory_pool_handle_t hPool);
+
+///
+/// \brief Retrieve data memory provider associated with a given pool.
+/// \param hPool specified memory pool
+/// \return handle to the data memory provider
+uma_memory_provider_handle_t
+umaPoolGetDataMemoryProvider(uma_memory_pool_handle_t hPool);
 
 #ifdef __cplusplus
 }

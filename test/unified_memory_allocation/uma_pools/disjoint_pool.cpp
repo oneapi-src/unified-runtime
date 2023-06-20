@@ -29,7 +29,7 @@ static auto makePool() {
     EXPECT_EQ(ret, UMA_RESULT_SUCCESS);
     auto provider = providerUnique.release();
     auto [retp, pool] =
-        uma::poolMakeUnique<usm::DisjointPool>(&provider, 1, poolConfig());
+        uma::poolMakeUnique<usm::DisjointPool>(provider, nullptr, poolConfig());
     EXPECT_EQ(retp, UMA_RESULT_SUCCESS);
     auto dtor = [provider = provider](uma_memory_pool_handle_t hPool) {
         umaPoolDestroy(hPool);

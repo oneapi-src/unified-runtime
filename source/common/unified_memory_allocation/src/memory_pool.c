@@ -21,28 +21,18 @@ struct uma_memory_pool_t {
     void *pool_priv;
     struct uma_memory_pool_ops_t ops;
 
-    // Holds array of memory providers. All providers are wrapped
-    // by memory tracking providers (owned and released by UMA).
-    uma_memory_provider_handle_t *providers;
+    // All providers are wrapped by memory tracking providers (owned and released by UMA).
+    uma_memory_provider_handle_t data_provider;
+    uma_memory_provider_handle_t metadata_provider;
 
     size_t numProviders;
 };
 
-static void
-destroyMemoryProviderWrappers(uma_memory_provider_handle_t *providers,
-                              size_t numProviders) {
-    for (size_t i = 0; i < numProviders; i++) {
-        umaMemoryProviderDestroy(providers[i]);
-    }
-
-    free(providers);
-}
-
 enum uma_result_t umaPoolCreate(struct uma_memory_pool_ops_t *ops,
-                                uma_memory_provider_handle_t *providers,
-                                size_t numProviders, void *params,
-                                uma_memory_pool_handle_t *hPool) {
-    if (!numProviders || !providers) {
+                                uma_memory_provider_handle_t data_provider,
+                                uma_memory_provider_handle_t metadata_provider,
+                                void *params, uma_memory_pool_handle_t *hPool) {
+    if (!data_provider) {
         return UMA_RESULT_ERROR_INVALID_ARGUMENT;
     }
 
@@ -54,27 +44,25 @@ enum uma_result_t umaPoolCreate(struct uma_memory_pool_ops_t *ops,
 
     assert(ops->version == UMA_VERSION_CURRENT);
 
-    pool->providers =
-        calloc(numProviders, sizeof(uma_memory_provider_handle_t));
-    if (!pool->providers) {
-        ret = UMA_RESULT_ERROR_OUT_OF_HOST_MEMORY;
-        goto err_providers_alloc;
+    // Wrap each provider with memory tracking provider.
+    ret = umaTrackingMemoryProviderCreate(data_provider, pool,
+                                          &pool->data_provider);
+    if (ret != UMA_RESULT_SUCCESS) {
+        goto err_providers_wrap;
     }
 
-    size_t providerInd = 0;
-    pool->numProviders = numProviders;
-
-    // Wrap each provider with memory tracking provider.
-    for (providerInd = 0; providerInd < numProviders; providerInd++) {
-        ret = umaTrackingMemoryProviderCreate(providers[providerInd], pool,
-                                              &pool->providers[providerInd]);
+    if (metadata_provider) {
+        ret = umaTrackingMemoryProviderCreate(metadata_provider, pool,
+                                              &pool->metadata_provider);
         if (ret != UMA_RESULT_SUCCESS) {
-            goto err_providers_init;
+            goto err_providers_metadata_wrap;
         }
+    } else {
+        pool->metadata_provider = NULL;
     }
 
     pool->ops = *ops;
-    ret = ops->initialize(pool->providers, pool->numProviders, params,
+    ret = ops->initialize(pool->data_provider, pool->metadata_provider, params,
                           &pool->pool_priv);
     if (ret != UMA_RESULT_SUCCESS) {
         goto err_pool_init;
@@ -84,9 +72,12 @@ enum uma_result_t umaPoolCreate(struct uma_memory_pool_ops_t *ops,
     return UMA_RESULT_SUCCESS;
 
 err_pool_init:
-err_providers_init:
-    destroyMemoryProviderWrappers(pool->providers, providerInd);
-err_providers_alloc:
+    if (pool->metadata_provider) {
+        umaMemoryProviderDestroy(pool->metadata_provider);
+    }
+err_providers_metadata_wrap:
+    umaMemoryProviderDestroy(pool->data_provider);
+err_providers_wrap:
     free(pool);
 
     return ret;
@@ -94,7 +85,10 @@ err_providers_alloc:
 
 void umaPoolDestroy(uma_memory_pool_handle_t hPool) {
     hPool->ops.finalize(hPool->pool_priv);
-    destroyMemoryProviderWrappers(hPool->providers, hPool->numProviders);
+    if (hPool->metadata_provider) {
+        umaMemoryProviderDestroy(hPool->metadata_provider);
+    }
+    umaMemoryProviderDestroy(hPool->data_provider);
     free(hPool);
 }
 
@@ -139,24 +133,12 @@ uma_memory_pool_handle_t umaPoolByPtr(const void *ptr) {
     return umaMemoryTrackerGetPool(umaMemoryTrackerGet(), ptr);
 }
 
-enum uma_result_t
-umaPoolGetMemoryProviders(uma_memory_pool_handle_t hPool, size_t numProviders,
-                          uma_memory_provider_handle_t *hProviders,
-                          size_t *numProvidersRet) {
-    if (hProviders && numProviders < hPool->numProviders) {
-        return UMA_RESULT_ERROR_INVALID_ARGUMENT;
-    }
+uma_memory_provider_handle_t
+umaPoolGetMetadataMemoryProvider(uma_memory_pool_handle_t hPool) {
+    return hPool->ops.get_metadata_memory_provider(hPool->pool_priv);
+}
 
-    if (numProvidersRet) {
-        *numProvidersRet = hPool->numProviders;
-    }
-
-    if (hProviders) {
-        for (size_t i = 0; i < hPool->numProviders; i++) {
-            umaTrackingMemoryProviderGetUpstreamProvider(
-                umaMemoryProviderGetPriv(hPool->providers[i]), hProviders + i);
-        }
-    }
-
-    return UMA_RESULT_SUCCESS;
+uma_memory_provider_handle_t
+umaPoolGetDataMemoryProvider(uma_memory_pool_handle_t hPool) {
+    return hPool->ops.get_data_memory_provider(hPool->pool_priv);
 }

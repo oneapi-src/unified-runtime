@@ -235,13 +235,4 @@ enum uma_result_t umaTrackingMemoryProviderCreate(
     return umaMemoryProviderCreate(&trackingMemoryProviderOps, &params,
                                    hTrackingProvider);
 }
-
-void umaTrackingMemoryProviderGetUpstreamProvider(
-    uma_memory_provider_handle_t hTrackingProvider,
-    uma_memory_provider_handle_t *hUpstream) {
-    assert(hUpstream);
-    uma_tracking_memory_provider_t *p =
-        (uma_tracking_memory_provider_t *)hTrackingProvider;
-    *hUpstream = p->hUpstream;
-}
 }

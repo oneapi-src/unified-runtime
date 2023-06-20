@@ -106,14 +106,16 @@ auto memoryProviderMakeUnique(Args &&...args) {
 /// replaced by dtor). All arguments passed to this function are
 /// forwarded to T::initialize().
 template <typename T, typename... Args>
-auto poolMakeUnique(uma_memory_provider_handle_t *providers,
-                    size_t numProviders, Args &&...args) {
+auto poolMakeUnique(uma_memory_provider_handle_t data_provider,
+                    uma_memory_provider_handle_t metadata_provider,
+                    Args &&...args) {
     uma_memory_pool_ops_t ops;
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
 
     ops.version = UMA_VERSION_CURRENT;
-    ops.initialize = [](uma_memory_provider_handle_t *providers,
-                        size_t numProviders, void *params, void **obj) {
+    ops.initialize = [](uma_memory_provider_handle_t data_provider,
+                        uma_memory_provider_handle_t metadata_provider,
+                        void *params, void **obj) {
         auto *tuple = reinterpret_cast<decltype(argsTuple) *>(params);
         T *pool;
 
@@ -126,10 +128,11 @@ auto poolMakeUnique(uma_memory_provider_handle_t *providers,
         *obj = pool;
 
         try {
-            auto ret = std::apply(
-                &T::initialize,
-                std::tuple_cat(std::make_tuple(pool, providers, numProviders),
-                               *tuple));
+            auto ret =
+                std::apply(&T::initialize,
+                           std::tuple_cat(std::make_tuple(pool, data_provider,
+                                                          metadata_provider),
+                                          *tuple));
             if (ret != UMA_RESULT_SUCCESS) {
                 delete pool;
             }
@@ -148,9 +151,14 @@ auto poolMakeUnique(uma_memory_provider_handle_t *providers,
     UMA_ASSIGN_OP(ops, T, malloc_usable_size, ((size_t)0));
     UMA_ASSIGN_OP_NORETURN(ops, T, free);
     UMA_ASSIGN_OP(ops, T, get_last_result, UMA_RESULT_ERROR_UNKNOWN);
+    UMA_ASSIGN_OP(ops, T, get_data_memory_provider,
+                  (uma_memory_provider_handle_t) nullptr);
+    UMA_ASSIGN_OP(ops, T, get_metadata_memory_provider,
+                  (uma_memory_provider_handle_t) nullptr);
 
     uma_memory_pool_handle_t hPool = nullptr;
-    auto ret = umaPoolCreate(&ops, providers, numProviders, &argsTuple, &hPool);
+    auto ret = umaPoolCreate(&ops, data_provider, metadata_provider, &argsTuple,
+                             &hPool);
     return std::pair<uma_result_t, pool_unique_handle_t>{
         ret, pool_unique_handle_t(hPool, &umaPoolDestroy)};
 }

@@ -31,10 +31,6 @@ enum uma_result_t umaTrackingMemoryProviderCreate(
     uma_memory_provider_handle_t hUpstream, uma_memory_pool_handle_t hPool,
     uma_memory_provider_handle_t *hTrackingProvider);
 
-void umaTrackingMemoryProviderGetUpstreamProvider(
-    uma_memory_provider_handle_t hTrackingProvider,
-    uma_memory_provider_handle_t *hUpstream);
-
 #ifdef __cplusplus
 }
 #endif
