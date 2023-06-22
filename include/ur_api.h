@@ -129,6 +129,10 @@ typedef struct ur_sampler_handle_t_ *ur_sampler_handle_t;
 typedef struct ur_mem_handle_t_ *ur_mem_handle_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Handle of physical memory object
+typedef struct ur_physical_mem_handle_t_ *ur_physical_mem_handle_t;
+
+///////////////////////////////////////////////////////////////////////////////
 #ifndef UR_BIT
 /// @brief Generic macro for enumerator bit masks
 #define UR_BIT(_i) (1 << _i)
@@ -214,7 +218,7 @@ typedef enum ur_result_t {
     UR_RESULT_ERROR_INVALID_USM_SIZE = 65,                                    ///< Invalid USM size
     UR_RESULT_ERROR_OBJECT_ALLOCATION_FAILURE = 66,                           ///< Objection allocation failure
     UR_RESULT_ERROR_ADAPTER_SPECIFIC = 67,                                    ///< An adapter specific warning/error has been reported and can be
-                                                                              ///< retrieved via the urGetLastResult entry point.
+                                                                              ///< retrieved via the urPlatformGetLastError entry point.
     UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_EXP = 0x1000,                      ///< Invalid Command-Buffer
     UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_EXP = 0x1001,           ///< Sync point is not valid for the command-buffer
     UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP = 0x1002, ///< Sync point wait list is invalid
@@ -255,9 +259,10 @@ typedef enum ur_structure_type_t {
     UR_STRUCTURE_TYPE_SAMPLER_NATIVE_PROPERTIES = 24,       ///< ::ur_sampler_native_properties_t
     UR_STRUCTURE_TYPE_QUEUE_NATIVE_DESC = 25,               ///< ::ur_queue_native_desc_t
     UR_STRUCTURE_TYPE_DEVICE_PARTITION_PROPERTIES = 26,     ///< ::ur_device_partition_properties_t
-    UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_DESC = 27,         ///< ::ur_exp_command_buffer_desc_t
-    UR_STRUCTURE_TYPE_EXP_SAMPLER_MIP_PROPERTIES = 28,      ///< ::ur_exp_sampler_mip_properties_t
-    UR_STRUCTURE_TYPE_KERNEL_ARG_MEM_OBJ_PROPERTIES = 29,   ///< ::ur_kernel_arg_mem_obj_properties_t
+    UR_STRUCTURE_TYPE_KERNEL_ARG_MEM_OBJ_PROPERTIES = 27,   ///< ::ur_kernel_arg_mem_obj_properties_t
+    UR_STRUCTURE_TYPE_PHYSICAL_MEM_PROPERTIES = 28,         ///< ::ur_physical_mem_properties_t
+    UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_DESC = 0x1000,     ///< ::ur_exp_command_buffer_desc_t
+    UR_STRUCTURE_TYPE_EXP_SAMPLER_MIP_PROPERTIES = 0x2000,  ///< ::ur_exp_sampler_mip_properties_t
     /// @cond
     UR_STRUCTURE_TYPE_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -343,6 +348,7 @@ typedef enum ur_device_init_flag_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
 ///         + `::UR_DEVICE_INIT_FLAGS_MASK & device_flags`
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
@@ -359,6 +365,7 @@ urInit(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `NULL == pParams`
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
@@ -391,6 +398,7 @@ urTearDown(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 UR_APIEXPORT ur_result_t UR_APICALL
 urPlatformGet(
@@ -440,6 +448,7 @@ typedef enum ur_platform_info_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hPlatform`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
@@ -494,6 +503,7 @@ typedef enum ur_api_version_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hPlatform`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -520,6 +530,7 @@ urPlatformGetApiVersion(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hPlatform`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -555,6 +566,7 @@ typedef struct ur_platform_native_properties_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hNativePlatform`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -583,6 +595,7 @@ urPlatformCreateWithNativeHandle(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hPlatform`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -635,6 +648,7 @@ urPlatformGetBackendOption(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hPlatform`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -779,6 +793,7 @@ typedef enum ur_device_type_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hPlatform`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
@@ -1004,6 +1019,7 @@ typedef enum ur_device_info_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hDevice`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
@@ -1056,6 +1072,7 @@ urDeviceGetInfo(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hDevice`
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -1083,6 +1100,7 @@ urDeviceRetain(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hDevice`
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -1186,6 +1204,7 @@ typedef struct ur_device_partition_properties_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hDevice`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -1222,6 +1241,7 @@ urDevicePartition(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hDevice`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -1314,6 +1334,7 @@ typedef enum ur_device_exec_capability_flag_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hDevice`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -1349,6 +1370,7 @@ typedef struct ur_device_native_properties_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hNativeDevice`
 ///         + `NULL == hPlatform`
@@ -1378,6 +1400,7 @@ urDeviceCreateWithNativeHandle(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hDevice`
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -1491,6 +1514,7 @@ typedef struct ur_context_properties_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `NULL == phDevices`
 ///         + `NULL == phContext`
@@ -1523,6 +1547,7 @@ urContextCreate(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -1576,6 +1601,7 @@ typedef enum ur_context_info_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -1598,6 +1624,7 @@ urContextRelease(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
@@ -1643,6 +1670,7 @@ urContextGetInfo(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -1678,6 +1706,7 @@ typedef struct ur_context_native_properties_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hNativeContext`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -1715,6 +1744,7 @@ typedef void (*ur_context_extended_deleter_t)(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -1880,6 +1910,7 @@ typedef struct ur_image_desc_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
@@ -1971,6 +2002,7 @@ typedef struct ur_buffer_alloc_location_properties_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
@@ -2011,6 +2043,7 @@ urMemBufferCreate(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hMem`
 ///     - ::UR_RESULT_ERROR_INVALID_MEM_OBJECT
@@ -2033,6 +2066,7 @@ urMemRetain(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hMem`
 ///     - ::UR_RESULT_ERROR_INVALID_MEM_OBJECT
@@ -2073,6 +2107,7 @@ typedef enum ur_buffer_create_type_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hBuffer`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
@@ -2113,6 +2148,7 @@ urMemBufferPartition(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hMem`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -2147,6 +2183,7 @@ typedef struct ur_mem_native_properties_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hNativeMem`
 ///         + `NULL == hContext`
@@ -2172,6 +2209,7 @@ urMemBufferCreateWithNativeHandle(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hNativeMem`
 ///         + `NULL == hContext`
@@ -2203,6 +2241,7 @@ urMemImageCreateWithNativeHandle(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hMemory`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
@@ -2245,6 +2284,7 @@ urMemGetInfo(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hMemory`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
@@ -2339,6 +2379,7 @@ typedef struct ur_sampler_desc_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -2371,6 +2412,7 @@ urSamplerCreate(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hSampler`
 ///     - ::UR_RESULT_ERROR_INVALID_SAMPLER
@@ -2393,6 +2435,7 @@ urSamplerRetain(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hSampler`
 ///     - ::UR_RESULT_ERROR_INVALID_SAMPLER
@@ -2414,6 +2457,7 @@ urSamplerRelease(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hSampler`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
@@ -2455,6 +2499,7 @@ urSamplerGetInfo(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hSampler`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -2490,6 +2535,7 @@ typedef struct ur_sampler_native_properties_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hNativeSampler`
 ///         + `NULL == hContext`
@@ -2693,6 +2739,7 @@ typedef struct ur_usm_pool_limits_desc_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -2735,6 +2782,7 @@ urUSMHostAlloc(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///         + `NULL == hDevice`
@@ -2780,6 +2828,7 @@ urUSMDeviceAlloc(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///         + `NULL == hDevice`
@@ -2813,6 +2862,7 @@ urUSMSharedAlloc(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -2832,6 +2882,7 @@ urUSMFree(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -2865,6 +2916,7 @@ urUSMGetMemAllocInfo(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -2889,6 +2941,7 @@ urUSMPoolCreate(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == pPool`
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -2910,6 +2963,7 @@ urUSMPoolRetain(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == pPool`
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -2938,6 +2992,7 @@ typedef enum ur_usm_pool_info_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hPool`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
@@ -2960,6 +3015,293 @@ urUSMPoolGetInfo(
     void *pPropValue,            ///< [out][optional][typename(propName, propSize)] value of the pool
                                  ///< property
     size_t *pPropSizeRet         ///< [out][optional] size in bytes returned in pool property value
+);
+
+#if !defined(__GNUC__)
+#pragma endregion
+#endif
+// Intel 'oneAPI' Unified Runtime APIs
+#if !defined(__GNUC__)
+#pragma region virtual memory
+#endif
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Virtual memory granularity info
+typedef enum ur_virtual_mem_granularity_info_t {
+    UR_VIRTUAL_MEM_GRANULARITY_INFO_MINIMUM = 0x30100,     ///< [size_t] size in bytes of the minimum virtual memory granularity.
+    UR_VIRTUAL_MEM_GRANULARITY_INFO_RECOMMENDED = 0x30101, ///< [size_t] size in bytes of the recommended virtual memory granularity.
+    /// @cond
+    UR_VIRTUAL_MEM_GRANULARITY_INFO_FORCE_UINT32 = 0x7fffffff
+    /// @endcond
+
+} ur_virtual_mem_granularity_info_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get information about the minimum and recommended granularity of
+///        physical and virtual memory.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hContext`
+///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
+///         + `::UR_VIRTUAL_MEM_GRANULARITY_INFO_RECOMMENDED < propName`
+UR_APIEXPORT ur_result_t UR_APICALL
+urVirtualMemGranularityGetInfo(
+    ur_context_handle_t hContext,               ///< [in] handle of the context object.
+    ur_device_handle_t hDevice,                 ///< [in][optional] is the device to get the granularity from, if the
+                                                ///< device is null then the granularity is suitable for all devices in context.
+    ur_virtual_mem_granularity_info_t propName, ///< [in] type of the info to query.
+    size_t propSize,                            ///< [in] size in bytes of the memory pointed to by pPropValue.
+    void *pPropValue,                           ///< [out][optional][typename(propName, propSize)] array of bytes holding
+                                                ///< the info. If propSize is less than the real number of bytes needed to
+                                                ///< return the info then the ::UR_RESULT_ERROR_INVALID_SIZE error is
+                                                ///< returned and pPropValue is not used.
+    size_t *pPropSizeRet                        ///< [out][optional] pointer to the actual size in bytes of the queried propName."
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Reserve a virtual memory range.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hContext`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == ppStart`
+UR_APIEXPORT ur_result_t UR_APICALL
+urVirtualMemReserve(
+    ur_context_handle_t hContext, ///< [in] handle of the context object.
+    const void *pStart,           ///< [in][optional] pointer to the start of the virtual memory region to
+                                  ///< reserve, specifying a null value causes the implementation to select a
+                                  ///< start address.
+    size_t size,                  ///< [in] size in bytes of the virtual address range to reserve.
+    void **ppStart                ///< [out] pointer to the returned address at the start of reserved virtual
+                                  ///< memory range.
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Free a virtual memory range.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hContext`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pStart`
+UR_APIEXPORT ur_result_t UR_APICALL
+urVirtualMemFree(
+    ur_context_handle_t hContext, ///< [in] handle of the context object.
+    const void *pStart,           ///< [in] pointer to the start of the virtual memory range to free.
+    size_t size                   ///< [in] size in bytes of the virtual memory range to free.
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Virtual memory access mode flags.
+typedef uint32_t ur_virtual_mem_access_flags_t;
+typedef enum ur_virtual_mem_access_flag_t {
+    UR_VIRTUAL_MEM_ACCESS_FLAG_NONE = UR_BIT(0),       ///< Virtual memory has no access.
+    UR_VIRTUAL_MEM_ACCESS_FLAG_READ_WRITE = UR_BIT(1), ///< Virtual memory has both read and write access.
+    UR_VIRTUAL_MEM_ACCESS_FLAG_READ_ONLY = UR_BIT(2),  ///< Virtual memory has read only access.
+    /// @cond
+    UR_VIRTUAL_MEM_ACCESS_FLAG_FORCE_UINT32 = 0x7fffffff
+    /// @endcond
+
+} ur_virtual_mem_access_flag_t;
+/// @brief Bit Mask for validating ur_virtual_mem_access_flags_t
+#define UR_VIRTUAL_MEM_ACCESS_FLAGS_MASK 0xfffffff8
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Map a virtual memory range to a physical memory handle.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hContext`
+///         + `NULL == hPhysicalMem`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pStart`
+///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
+///         + `::UR_VIRTUAL_MEM_ACCESS_FLAGS_MASK & flags`
+UR_APIEXPORT ur_result_t UR_APICALL
+urVirtualMemMap(
+    ur_context_handle_t hContext,          ///< [in] handle to the context object.
+    const void *pStart,                    ///< [in] pointer to the start of the virtual memory range.
+    size_t size,                           ///< [in] size in bytes of the virtual memory range to map.
+    ur_physical_mem_handle_t hPhysicalMem, ///< [in] handle of the physical memory to map pStart to.
+    size_t offset,                         ///< [in] offset in bytes into the physical memory to map pStart to.
+    ur_virtual_mem_access_flags_t flags    ///< [in] access flags for the physical memory mapping.
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Unmap a virtual memory range previously mapped in a context.
+///
+/// @details
+///     - After a call to this function, the virtual memory range is left in a
+///       state ready to be remapped.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hContext`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pStart`
+UR_APIEXPORT ur_result_t UR_APICALL
+urVirtualMemUnmap(
+    ur_context_handle_t hContext, ///< [in] handle to the context object.
+    const void *pStart,           ///< [in] pointer to the start of the mapped virtual memory range
+    size_t size                   ///< [in] size in bytes of the virtual memory range.
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Set the access mode of a mapped virtual memory range.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hContext`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pStart`
+///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
+///         + `::UR_VIRTUAL_MEM_ACCESS_FLAGS_MASK & flags`
+UR_APIEXPORT ur_result_t UR_APICALL
+urVirtualMemSetAccess(
+    ur_context_handle_t hContext,       ///< [in] handle to the context object.
+    const void *pStart,                 ///< [in] pointer to the start of the virtual memory range.
+    size_t size,                        ///< [in] size in bytes of the virutal memory range.
+    ur_virtual_mem_access_flags_t flags ///< [in] access flags to set for the mapped virtual memory range.
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Virtual memory range info queries.
+typedef enum ur_virtual_mem_info_t {
+    UR_VIRTUAL_MEM_INFO_ACCESS_MODE = 0, ///< [::ur_virtual_mem_access_flags_t] access flags of a mapped virtual
+                                         ///< memory range.
+    /// @cond
+    UR_VIRTUAL_MEM_INFO_FORCE_UINT32 = 0x7fffffff
+    /// @endcond
+
+} ur_virtual_mem_info_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get information about a mapped virtual memory range.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hContext`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pStart`
+///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
+///         + `::UR_VIRTUAL_MEM_INFO_ACCESS_MODE < propName`
+UR_APIEXPORT ur_result_t UR_APICALL
+urVirtualMemGetInfo(
+    ur_context_handle_t hContext,   ///< [in] handle to the context object.
+    const void *pStart,             ///< [in] pointer to the start of the virtual memory range.
+    size_t size,                    ///< [in] size in bytes of the virtual memory range.
+    ur_virtual_mem_info_t propName, ///< [in] type of the info to query.
+    size_t propSize,                ///< [in] size in bytes of the memory pointed to by pPropValue.
+    void *pPropValue,               ///< [out][optional][typename(propName, propSize)] array of bytes holding
+                                    ///< the info. If propSize is less than the real number of bytes needed to
+                                    ///< return the info then the ::UR_RESULT_ERROR_INVALID_SIZE error is
+                                    ///< returned and pPropValue is not used.
+    size_t *pPropSizeRet            ///< [out][optional] pointer to the actual size in bytes of the queried propName."
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Physical memory creation properties.
+typedef uint32_t ur_physical_mem_flags_t;
+typedef enum ur_physical_mem_flag_t {
+    UR_PHYSICAL_MEM_FLAG_TBD = UR_BIT(0), ///< reserved for future use.
+    /// @cond
+    UR_PHYSICAL_MEM_FLAG_FORCE_UINT32 = 0x7fffffff
+    /// @endcond
+
+} ur_physical_mem_flag_t;
+/// @brief Bit Mask for validating ur_physical_mem_flags_t
+#define UR_PHYSICAL_MEM_FLAGS_MASK 0xfffffffe
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Physical memory creation properties.
+typedef struct ur_physical_mem_properties_t {
+    ur_structure_type_t stype;     ///< [in] type of this structure, must be
+                                   ///< ::UR_STRUCTURE_TYPE_PHYSICAL_MEM_PROPERTIES
+    void *pNext;                   ///< [in,out][optional] pointer to extension-specific structure
+    ur_physical_mem_flags_t flags; ///< [in] physical memory creation flags
+
+} ur_physical_mem_properties_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Create a physical memory handle that virtual memory can be mapped to.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hContext`
+///         + `NULL == hDevice`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == phPhysicalMem`
+UR_APIEXPORT ur_result_t UR_APICALL
+urPhysicalMemCreate(
+    ur_context_handle_t hContext,                    ///< [in] handle of the context object.
+    ur_device_handle_t hDevice,                      ///< [in] handle of the device object.
+    size_t size,                                     ///< [in] size in bytes of phyisical memory to allocate, must be a multiple
+                                                     ///< of ::UR_VIRTUAL_MEM_GRANULARITY_INFO_MINIMUM.
+    const ur_physical_mem_properties_t *pProperties, ///< [in][optional] pointer to physical memory creation properties.
+    ur_physical_mem_handle_t *phPhysicalMem          ///< [out] pointer to handle of physical memory object created.
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Retain a physical memory handle, increment its reference count.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hPhysicalMem`
+UR_APIEXPORT ur_result_t UR_APICALL
+urPhysicalMemRetain(
+    ur_physical_mem_handle_t hPhysicalMem ///< [in] handle of the physical memory object to retain.
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Release a physical memory handle, decrement its reference count.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hPhysicalMem`
+UR_APIEXPORT ur_result_t UR_APICALL
+urPhysicalMemRelease(
+    ur_physical_mem_handle_t hPhysicalMem ///< [in] handle of the physical memory object to release.
 );
 
 #if !defined(__GNUC__)
@@ -3033,6 +3375,7 @@ typedef struct ur_program_properties_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -3069,6 +3412,7 @@ urProgramCreateWithIL(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///         + `NULL == hDevice`
@@ -3108,6 +3452,7 @@ urProgramCreateWithBinary(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///         + `NULL == hProgram`
@@ -3139,6 +3484,7 @@ urProgramBuild(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///         + `NULL == hProgram`
@@ -3171,6 +3517,7 @@ urProgramCompile(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -3208,6 +3555,7 @@ urProgramLink(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hProgram`
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -3232,6 +3580,7 @@ urProgramRetain(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hProgram`
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -3259,6 +3608,7 @@ urProgramRelease(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hDevice`
 ///         + `NULL == hProgram`
@@ -3310,6 +3660,7 @@ typedef enum ur_program_info_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hProgram`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
@@ -3390,6 +3741,7 @@ typedef enum ur_program_build_info_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hProgram`
 ///         + `NULL == hDevice`
@@ -3435,6 +3787,7 @@ typedef struct ur_specialization_constant_info_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hProgram`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -3465,6 +3818,7 @@ urProgramSetSpecializationConstants(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hProgram`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -3500,6 +3854,7 @@ typedef struct ur_program_native_properties_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hNativeProgram`
 ///         + `NULL == hContext`
@@ -3533,6 +3888,7 @@ urProgramCreateWithNativeHandle(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hProgram`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -3559,6 +3915,7 @@ urKernelCreate(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hKernel`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -3585,6 +3942,7 @@ urKernelSetArgValue(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hKernel`
 ///     - ::UR_RESULT_ERROR_INVALID_KERNEL_ARGUMENT_INDEX
@@ -3682,6 +4040,7 @@ typedef enum ur_kernel_exec_info_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hKernel`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
@@ -3723,6 +4082,7 @@ urKernelGetInfo(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hKernel`
 ///         + `NULL == hDevice`
@@ -3747,6 +4107,7 @@ urKernelGetGroupInfo(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hKernel`
 ///         + `NULL == hDevice`
@@ -3781,6 +4142,7 @@ urKernelGetSubGroupInfo(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hKernel`
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -3805,6 +4167,7 @@ urKernelRetain(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hKernel`
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -3828,6 +4191,7 @@ urKernelRelease(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hKernel`
 ///     - ::UR_RESULT_ERROR_INVALID_KERNEL_ARGUMENT_INDEX
@@ -3856,6 +4220,7 @@ urKernelSetArgPointer(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hKernel`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
@@ -3883,6 +4248,7 @@ urKernelSetExecInfo(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hKernel`
 ///         + `NULL == hArgValue`
@@ -3917,6 +4283,7 @@ typedef struct ur_kernel_arg_mem_obj_properties_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hKernel`
 ///     - ::UR_RESULT_ERROR_INVALID_KERNEL_ARGUMENT_INDEX
@@ -3949,6 +4316,7 @@ urKernelSetArgMemObj(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hKernel`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -3980,6 +4348,7 @@ urKernelSetSpecializationConstants(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hKernel`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -4015,6 +4384,7 @@ typedef struct ur_kernel_native_properties_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hNativeKernel`
 ///         + `NULL == hContext`
@@ -4074,13 +4444,17 @@ typedef enum ur_queue_flag_t {
                                                              ///< semantics. Implementation chooses submission mode.
     UR_QUEUE_FLAG_SUBMISSION_IMMEDIATE = UR_BIT(8),          ///< Hint: enqueue and submit immediately. No change in queue semantics.
                                                              ///< Implementation chooses submission mode.
+    UR_QUEUE_FLAG_USE_DEFAULT_STREAM = UR_BIT(9),            ///< Use the default stream. Only meaningful for CUDA. Other platforms may
+                                                             ///< ignore this flag.
+    UR_QUEUE_FLAG_SYNC_WITH_DEFAULT_STREAM = UR_BIT(10),     ///< Synchronize with the default stream. Only meaningful for CUDA. Other
+                                                             ///< platforms may ignore this flag.
     /// @cond
     UR_QUEUE_FLAG_FORCE_UINT32 = 0x7fffffff
     /// @endcond
 
 } ur_queue_flag_t;
 /// @brief Bit Mask for validating ur_queue_flags_t
-#define UR_QUEUE_FLAGS_MASK 0xfffffe00
+#define UR_QUEUE_FLAGS_MASK 0xfffff800
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Query information about a command queue
@@ -4093,6 +4467,7 @@ typedef enum ur_queue_flag_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
@@ -4157,6 +4532,7 @@ typedef struct ur_queue_index_properties_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///         + `NULL == hDevice`
@@ -4192,6 +4568,7 @@ urQueueCreate(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///     - ::UR_RESULT_ERROR_INVALID_QUEUE
@@ -4220,6 +4597,7 @@ urQueueRetain(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///     - ::UR_RESULT_ERROR_INVALID_QUEUE
@@ -4262,6 +4640,7 @@ typedef struct ur_queue_native_desc_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -4298,6 +4677,7 @@ typedef struct ur_queue_native_properties_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hNativeQueue`
 ///         + `NULL == hContext`
@@ -4332,6 +4712,7 @@ urQueueCreateWithNativeHandle(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///     - ::UR_RESULT_ERROR_INVALID_QUEUE
@@ -4359,6 +4740,7 @@ urQueueFinish(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///     - ::UR_RESULT_ERROR_INVALID_QUEUE
@@ -4403,7 +4785,7 @@ typedef enum ur_command_t {
     UR_COMMAND_DEVICE_GLOBAL_VARIABLE_READ = 24,      ///< Event created by ::urEnqueueDeviceGlobalVariableRead
     UR_COMMAND_READ_HOST_PIPE = 25,                   ///< Event created by ::urEnqueueReadHostPipe
     UR_COMMAND_WRITE_HOST_PIPE = 26,                  ///< Event created by ::urEnqueueWriteHostPipe
-    UR_COMMAND_COMMAND_BUFFER_ENQUEUE_EXP = 27,       ///< Event created by ::urCommandBufferEnqueueExp
+    UR_COMMAND_COMMAND_BUFFER_ENQUEUE_EXP = 0x1000,   ///< Event created by ::urCommandBufferEnqueueExp
     UR_COMMAND_INTEROP_SEMAPHORE_WAIT_EXP = 0x2000,   ///< Event created by ::urBindlessImagesWaitExternalSemaphoreExp
     UR_COMMAND_INTEROP_SEMAPHORE_SIGNAL_EXP = 0x2001, ///< Event created by ::urBindlessImagesSignalExternalSemaphoreExp
     /// @cond
@@ -4473,6 +4855,7 @@ typedef enum ur_profiling_info_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hEvent`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
@@ -4510,6 +4893,7 @@ urEventGetInfo(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hEvent`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
@@ -4541,6 +4925,7 @@ urEventGetProfilingInfo(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `NULL == phEventWaitList`
 ///     - ::UR_RESULT_ERROR_INVALID_VALUE
@@ -4568,6 +4953,7 @@ urEventWait(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hEvent`
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT
@@ -4590,6 +4976,7 @@ urEventRetain(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hEvent`
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT
@@ -4616,6 +5003,7 @@ urEventRelease(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hEvent`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -4651,6 +5039,7 @@ typedef struct ur_event_native_properties_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hNativeEvent`
 ///         + `NULL == hContext`
@@ -4702,6 +5091,7 @@ typedef void (*ur_event_callback_t)(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hEvent`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
@@ -4761,8 +5151,6 @@ typedef enum ur_function_t {
     UR_FUNCTION_ENQUEUE_USM_MEMCPY = 33,                                       ///< Enumerator for ::urEnqueueUSMMemcpy
     UR_FUNCTION_ENQUEUE_USM_PREFETCH = 34,                                     ///< Enumerator for ::urEnqueueUSMPrefetch
     UR_FUNCTION_ENQUEUE_USM_ADVISE = 35,                                       ///< Enumerator for ::urEnqueueUSMAdvise
-    UR_FUNCTION_ENQUEUE_USM_FILL2_D = 36,                                      ///< Enumerator for ::urEnqueueUSMFill2D
-    UR_FUNCTION_ENQUEUE_USM_MEMCPY2_D = 37,                                    ///< Enumerator for ::urEnqueueUSMMemcpy2D
     UR_FUNCTION_ENQUEUE_DEVICE_GLOBAL_VARIABLE_WRITE = 38,                     ///< Enumerator for ::urEnqueueDeviceGlobalVariableWrite
     UR_FUNCTION_ENQUEUE_DEVICE_GLOBAL_VARIABLE_READ = 39,                      ///< Enumerator for ::urEnqueueDeviceGlobalVariableRead
     UR_FUNCTION_EVENT_GET_INFO = 40,                                           ///< Enumerator for ::urEventGetInfo
@@ -4872,6 +5260,23 @@ typedef enum ur_function_t {
     UR_FUNCTION_BINDLESS_IMAGES_WAIT_EXTERNAL_SEMAPHORE_EXP = 148,             ///< Enumerator for ::urBindlessImagesWaitExternalSemaphoreExp
     UR_FUNCTION_BINDLESS_IMAGES_SIGNAL_EXTERNAL_SEMAPHORE_EXP = 149,           ///< Enumerator for ::urBindlessImagesSignalExternalSemaphoreExp
     UR_FUNCTION_PLATFORM_GET_LAST_ERROR = 150,                                 ///< Enumerator for ::urPlatformGetLastError
+    UR_FUNCTION_ENQUEUE_USM_FILL_2D = 151,                                     ///< Enumerator for ::urEnqueueUSMFill2D
+    UR_FUNCTION_ENQUEUE_USM_MEMCPY_2D = 152,                                   ///< Enumerator for ::urEnqueueUSMMemcpy2D
+    UR_FUNCTION_VIRTUAL_MEM_GRANULARITY_GET_INFO = 153,                        ///< Enumerator for ::urVirtualMemGranularityGetInfo
+    UR_FUNCTION_VIRTUAL_MEM_RESERVE = 154,                                     ///< Enumerator for ::urVirtualMemReserve
+    UR_FUNCTION_VIRTUAL_MEM_FREE = 155,                                        ///< Enumerator for ::urVirtualMemFree
+    UR_FUNCTION_VIRTUAL_MEM_MAP = 156,                                         ///< Enumerator for ::urVirtualMemMap
+    UR_FUNCTION_VIRTUAL_MEM_UNMAP = 157,                                       ///< Enumerator for ::urVirtualMemUnmap
+    UR_FUNCTION_VIRTUAL_MEM_SET_ACCESS = 158,                                  ///< Enumerator for ::urVirtualMemSetAccess
+    UR_FUNCTION_VIRTUAL_MEM_GET_INFO = 159,                                    ///< Enumerator for ::urVirtualMemGetInfo
+    UR_FUNCTION_PHYSICAL_MEM_CREATE = 160,                                     ///< Enumerator for ::urPhysicalMemCreate
+    UR_FUNCTION_PHYSICAL_MEM_RETAIN = 161,                                     ///< Enumerator for ::urPhysicalMemRetain
+    UR_FUNCTION_PHYSICAL_MEM_RELEASE = 162,                                    ///< Enumerator for ::urPhysicalMemRelease
+    UR_FUNCTION_USM_IMPORT_EXP = 163,                                          ///< Enumerator for ::urUSMImportExp
+    UR_FUNCTION_USM_RELEASE_EXP = 164,                                         ///< Enumerator for ::urUSMReleaseExp
+    UR_FUNCTION_USM_P2P_ENABLE_PEER_ACCESS_EXP = 165,                          ///< Enumerator for ::urUsmP2PEnablePeerAccessExp
+    UR_FUNCTION_USM_P2P_DISABLE_PEER_ACCESS_EXP = 166,                         ///< Enumerator for ::urUsmP2PDisablePeerAccessExp
+    UR_FUNCTION_USM_P2P_PEER_ACCESS_GET_INFO_EXP = 167,                        ///< Enumerator for ::urUsmP2PPeerAccessGetInfoExp
     /// @cond
     UR_FUNCTION_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -4896,6 +5301,7 @@ typedef enum ur_function_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///         + `NULL == hKernel`
@@ -4956,6 +5362,7 @@ urEnqueueKernelLaunch(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///     - ::UR_RESULT_ERROR_INVALID_QUEUE
@@ -4999,6 +5406,7 @@ urEnqueueEventsWait(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///     - ::UR_RESULT_ERROR_INVALID_QUEUE
@@ -5038,6 +5446,7 @@ urEnqueueEventsWaitWithBarrier(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///         + `NULL == hBuffer`
@@ -5086,6 +5495,7 @@ urEnqueueMemBufferRead(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///         + `NULL == hBuffer`
@@ -5137,6 +5547,7 @@ urEnqueueMemBufferWrite(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///         + `NULL == hBuffer`
@@ -5202,6 +5613,7 @@ urEnqueueMemBufferReadRect(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///         + `NULL == hBuffer`
@@ -5261,6 +5673,7 @@ urEnqueueMemBufferWriteRect(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///         + `NULL == hBufferSrc`
@@ -5306,6 +5719,7 @@ urEnqueueMemBufferCopy(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///         + `NULL == hBufferSrc`
@@ -5362,6 +5776,7 @@ urEnqueueMemBufferCopyRect(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///         + `NULL == hBuffer`
@@ -5411,6 +5826,7 @@ urEnqueueMemBufferFill(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///         + `NULL == hImage`
@@ -5461,6 +5877,7 @@ urEnqueueMemImageRead(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///         + `NULL == hImage`
@@ -5506,6 +5923,7 @@ urEnqueueMemImageWrite(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///         + `NULL == hImageSrc`
@@ -5586,6 +6004,7 @@ typedef enum ur_usm_migration_flag_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///         + `NULL == hBuffer`
@@ -5635,6 +6054,7 @@ urEnqueueMemBufferMap(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///         + `NULL == hMem`
@@ -5670,6 +6090,7 @@ urEnqueueMemUnmap(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -5714,6 +6135,7 @@ urEnqueueUSMFill(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -5754,6 +6176,7 @@ urEnqueueUSMMemcpy(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -5794,6 +6217,7 @@ urEnqueueUSMPrefetch(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -5825,6 +6249,7 @@ urEnqueueUSMAdvise(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -5875,6 +6300,7 @@ urEnqueueUSMFill2D(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -5923,6 +6349,7 @@ urEnqueueUSMMemcpy2D(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///         + `NULL == hProgram`
@@ -5959,6 +6386,7 @@ urEnqueueDeviceGlobalVariableWrite(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///         + `NULL == hProgram`
@@ -5994,6 +6422,7 @@ urEnqueueDeviceGlobalVariableRead(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///         + `NULL == hProgram`
@@ -6031,6 +6460,7 @@ urEnqueueReadHostPipe(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///         + `NULL == hProgram`
@@ -6142,6 +6572,7 @@ typedef struct ur_exp_sampler_mip_properties_t {
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///         + `NULL == hDevice`
@@ -6183,6 +6614,7 @@ urUSMPitchedAllocExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///         + `NULL == hImage`
@@ -6205,6 +6637,7 @@ urBindlessImagesUnsampledImageHandleDestroyExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///         + `NULL == hImage`
@@ -6228,6 +6661,7 @@ urBindlessImagesSampledImageHandleDestroyExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -6259,6 +6693,7 @@ urBindlessImagesImageAllocateExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///         + `NULL == hImageMem`
@@ -6281,6 +6716,7 @@ urBindlessImagesImageFreeExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///         + `NULL == hImageMem`
@@ -6316,6 +6752,7 @@ urBindlessImagesUnsampledImageCreateExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///         + `NULL == hImageMem`
@@ -6357,6 +6794,7 @@ urBindlessImagesSampledImageCreateExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -6397,6 +6835,7 @@ urBindlessImagesImageCopyExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hImageMem`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
@@ -6429,6 +6868,7 @@ urBindlessImagesImageGetInfoExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///         + `NULL == hImageMem`
@@ -6455,6 +6895,7 @@ urBindlessImagesMipmapGetLevelExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///         + `NULL == hMem`
@@ -6477,6 +6918,7 @@ urBindlessImagesMipmapFreeExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -6499,6 +6941,7 @@ urBindlessImagesImportOpaqueFDExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///         + `NULL == hInteropMem`
@@ -6533,6 +6976,7 @@ urBindlessImagesMapExternalArrayExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///         + `NULL == hInteropMem`
@@ -6555,6 +6999,7 @@ urBindlessImagesReleaseInteropExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -6579,6 +7024,7 @@ urBindlessImagesImportExternalSemaphoreOpaqueFDExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///         + `NULL == hInteropSemaphore`
@@ -6601,6 +7047,7 @@ urBindlessImagesDestroyExternalSemaphoreExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///         + `NULL == hSemaphore`
@@ -6632,6 +7079,7 @@ urBindlessImagesWaitExternalSemaphoreExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hQueue`
 ///         + `NULL == hSemaphore`
@@ -6693,6 +7141,7 @@ typedef struct ur_exp_command_buffer_handle_t_ *ur_exp_command_buffer_handle_t;
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///         + `NULL == hDevice`
@@ -6717,6 +7166,7 @@ urCommandBufferCreateExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hCommandBuffer`
 ///     - ::UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_EXP
@@ -6735,6 +7185,7 @@ urCommandBufferRetainExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hCommandBuffer`
 ///     - ::UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_EXP
@@ -6753,6 +7204,7 @@ urCommandBufferReleaseExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hCommandBuffer`
 ///     - ::UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_EXP
@@ -6770,6 +7222,7 @@ urCommandBufferFinalizeExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hCommandBuffer`
 ///         + `NULL == hKernel`
@@ -6808,6 +7261,7 @@ urCommandBufferAppendKernelLaunchExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hCommandBuffer`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -6842,6 +7296,7 @@ urCommandBufferAppendMemcpyUSMExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hCommandBuffer`
 ///         + `NULL == hSrcMem`
@@ -6874,6 +7329,7 @@ urCommandBufferAppendMembufferCopyExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hCommandBuffer`
 ///         + `NULL == hSrcMem`
@@ -6910,6 +7366,7 @@ urCommandBufferAppendMembufferCopyRectExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hCommandBuffer`
 ///         + `NULL == hQueue`
@@ -6933,6 +7390,208 @@ urCommandBufferEnqueueExp(
                                                    ///< events.
     ur_event_handle_t *phEvent                     ///< [out][optional] return an event object that identifies this particular
                                                    ///< command-buffer execution instance.
+);
+
+#if !defined(__GNUC__)
+#pragma endregion
+#endif
+// Intel 'oneAPI' USM Import/Release Extension APIs
+#if !defined(__GNUC__)
+#pragma region usm import release(experimental)
+#endif
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Import memory into USM
+///
+/// @details
+///     - Import memory into USM
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hContext`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pMem`
+///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
+///     - ::UR_RESULT_ERROR_INVALID_SIZE
+UR_APIEXPORT ur_result_t UR_APICALL
+urUSMImportExp(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    void *pMem,                   ///< [in] pointer to host memory object
+    size_t size                   ///< [in] size in bytes of the host memory object to be imported
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Release memory from USM
+///
+/// @details
+///     - Release memory from USM
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hContext`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pMem`
+///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
+UR_APIEXPORT ur_result_t UR_APICALL
+urUSMReleaseExp(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    void *pMem                    ///< [in] pointer to host memory object
+);
+
+#if !defined(__GNUC__)
+#pragma endregion
+#endif
+// Intel 'oneAPI' Unified Runtime Experimental APIs for USM P2P
+#if !defined(__GNUC__)
+#pragma region usm p2p(experimental)
+#endif
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Supported peer info
+typedef enum ur_exp_peer_info_t {
+    UR_EXP_PEER_INFO_UR_PEER_ACCESS_SUPPORTED = 0,  ///< [uint32_t] 1 if P2P access is supported otherwise P2P access is not
+                                                    ///< supported.
+    UR_EXP_PEER_INFO_UR_PEER_ATOMICS_SUPPORTED = 1, ///< [uint32_t] 1 if atomic operations are supported over the P2P link,
+                                                    ///< otherwise such operations are not supported.
+    /// @cond
+    UR_EXP_PEER_INFO_FORCE_UINT32 = 0x7fffffff
+    /// @endcond
+
+} ur_exp_peer_info_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Enable access to peer device memory
+///
+/// @details
+///     - Enables the command device to access and write device memory
+///       allocations located on the peer device, provided that a P2P link
+///       between the two devices is available.
+///     - When Peer Access is successfully enabled, P2P memory accesses are
+///       guaranteed to be allowed on the peer device until
+///       ::urUsmP2PDisablePeerAccessExp is called.
+///     - Note that the function operands may, but aren't guaranteed to, commute
+///       for a given adapter: the peer device is not guaranteed to have access
+///       to device memory allocations located on the command device.
+///     - It is not guaranteed that the commutation relations of the function
+///       arguments are identical for peer access and peer copies: For example,
+///       for a given adapter the peer device may be able to copy data from the
+///       command device, but not access and write the same data on the command
+///       device.
+///     - Consult the appropriate adapter driver documentation for details of
+///       adapter specific behavior and native error codes that may be returned.
+///
+/// @remarks
+///   _Analogues_
+///     - **cuCtxEnablePeerAccess**
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == commandDevice`
+///         + `NULL == peerDevice`
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+UR_APIEXPORT ur_result_t UR_APICALL
+urUsmP2PEnablePeerAccessExp(
+    ur_device_handle_t commandDevice, ///< [in] handle of the command device object
+    ur_device_handle_t peerDevice     ///< [in] handle of the peer device object
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Disable access to peer device memory
+///
+/// @details
+///     - Disables the ability of the command device to access and write device
+///       memory allocations located on the peer device, provided that a P2P
+///       link between the two devices was enabled prior to the call.
+///     - Note that the function operands may, but aren't guaranteed to, commute
+///       for a given adapter. If, prior to the function call, the peer device
+///       had access to device memory allocations on the command device, it is
+///       not guaranteed to still have such access following the function
+///       return.
+///     - It is not guaranteed that the commutation relations of the function
+///       arguments are identical for peer access and peer copies: For example
+///       for a given adapter, if, prior to the call, the peer device had access
+///       to device memory allocations on the command device, the peer device
+///       may still, following the function call, be able to copy data from the
+///       command device, but not access and write the same data on the command
+///       device.
+///     - Consult the appropriate adapter driver documentation for details of
+///       adapter specific behavior and native error codes that may be returned.
+///
+/// @remarks
+///   _Analogues_
+///     - **cuCtxDisablePeerAccess**
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == commandDevice`
+///         + `NULL == peerDevice`
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+UR_APIEXPORT ur_result_t UR_APICALL
+urUsmP2PDisablePeerAccessExp(
+    ur_device_handle_t commandDevice, ///< [in] handle of the command device object
+    ur_device_handle_t peerDevice     ///< [in] handle of the peer device object
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Disable access to peer device memory
+///
+/// @details
+///     - Queries the peer access capabilities from the command device to the
+///       peer device according to the query `propName`.
+///
+/// @remarks
+///   _Analogues_
+///     - **cuDeviceGetP2PAttribute**
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == commandDevice`
+///         + `NULL == peerDevice`
+///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
+///         + `::UR_EXP_PEER_INFO_UR_PEER_ATOMICS_SUPPORTED < propName`
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
+///         + If `propName` is not supported by the adapter.
+///     - ::UR_RESULT_ERROR_INVALID_SIZE
+///         + `propSize == 0 && pPropValue != NULL`
+///         + If `propSize` is less than the real number of bytes needed to return the info.
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `propSize != 0 && pPropValue == NULL`
+///         + `pPropValue == NULL && pPropSizeRet == NULL`
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+UR_APIEXPORT ur_result_t UR_APICALL
+urUsmP2PPeerAccessGetInfoExp(
+    ur_device_handle_t commandDevice, ///< [in] handle of the command device object
+    ur_device_handle_t peerDevice,    ///< [in] handle of the peer device object
+    ur_exp_peer_info_t propName,      ///< [in] type of the info to retrieve
+    size_t propSize,                  ///< [in] the number of bytes pointed to by pPropValue.
+    void *pPropValue,                 ///< [out][optional][typename(propName, propSize)] array of bytes holding
+                                      ///< the info.
+                                      ///< If propSize is not equal to or greater than the real number of bytes
+                                      ///< needed to return the info
+                                      ///< then the ::UR_RESULT_ERROR_INVALID_SIZE error is returned and
+                                      ///< pPropValue is not used.
+    size_t *pPropSizeRet              ///< [out][optional] pointer to the actual size in bytes of the queried propName.
 );
 
 #if !defined(__GNUC__)
@@ -7628,6 +8287,34 @@ typedef struct ur_mem_image_get_info_params_t {
 } ur_mem_image_get_info_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urPhysicalMemCreate
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_physical_mem_create_params_t {
+    ur_context_handle_t *phContext;
+    ur_device_handle_t *phDevice;
+    size_t *psize;
+    const ur_physical_mem_properties_t **ppProperties;
+    ur_physical_mem_handle_t **pphPhysicalMem;
+} ur_physical_mem_create_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urPhysicalMemRetain
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_physical_mem_retain_params_t {
+    ur_physical_mem_handle_t *phPhysicalMem;
+} ur_physical_mem_retain_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urPhysicalMemRelease
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_physical_mem_release_params_t {
+    ur_physical_mem_handle_t *phPhysicalMem;
+} ur_physical_mem_release_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urEnqueueKernelLaunch
 /// @details Each entry is a pointer to the parameter passed to the function;
 ///     allowing the callback the ability to modify the parameter's value
@@ -7933,7 +8620,7 @@ typedef struct ur_enqueue_usm_advise_params_t {
 /// @brief Function parameters for urEnqueueUSMFill2D
 /// @details Each entry is a pointer to the parameter passed to the function;
 ///     allowing the callback the ability to modify the parameter's value
-typedef struct ur_enqueue_usm_fill2_d_params_t {
+typedef struct ur_enqueue_usm_fill_2d_params_t {
     ur_queue_handle_t *phQueue;
     void **ppMem;
     size_t *ppitch;
@@ -7944,13 +8631,13 @@ typedef struct ur_enqueue_usm_fill2_d_params_t {
     uint32_t *pnumEventsInWaitList;
     const ur_event_handle_t **pphEventWaitList;
     ur_event_handle_t **pphEvent;
-} ur_enqueue_usm_fill2_d_params_t;
+} ur_enqueue_usm_fill_2d_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urEnqueueUSMMemcpy2D
 /// @details Each entry is a pointer to the parameter passed to the function;
 ///     allowing the callback the ability to modify the parameter's value
-typedef struct ur_enqueue_usm_memcpy2_d_params_t {
+typedef struct ur_enqueue_usm_memcpy_2d_params_t {
     ur_queue_handle_t *phQueue;
     bool *pblocking;
     void **ppDst;
@@ -7962,7 +8649,7 @@ typedef struct ur_enqueue_usm_memcpy2_d_params_t {
     uint32_t *pnumEventsInWaitList;
     const ur_event_handle_t **pphEventWaitList;
     ur_event_handle_t **pphEvent;
-} ur_enqueue_usm_memcpy2_d_params_t;
+} ur_enqueue_usm_memcpy_2d_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urEnqueueDeviceGlobalVariableWrite
@@ -8409,6 +9096,25 @@ typedef struct ur_usm_pitched_alloc_exp_params_t {
 } ur_usm_pitched_alloc_exp_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urUSMImportExp
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_usm_import_exp_params_t {
+    ur_context_handle_t *phContext;
+    void **ppMem;
+    size_t *psize;
+} ur_usm_import_exp_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urUSMReleaseExp
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_usm_release_exp_params_t {
+    ur_context_handle_t *phContext;
+    void **ppMem;
+} ur_usm_release_exp_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urCommandBufferCreateExp
 /// @details Each entry is a pointer to the parameter passed to the function;
 ///     allowing the callback the ability to modify the parameter's value
@@ -8522,6 +9228,37 @@ typedef struct ur_command_buffer_enqueue_exp_params_t {
 } ur_command_buffer_enqueue_exp_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urUsmP2PEnablePeerAccessExp
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_usm_p2p_enable_peer_access_exp_params_t {
+    ur_device_handle_t *pcommandDevice;
+    ur_device_handle_t *ppeerDevice;
+} ur_usm_p2p_enable_peer_access_exp_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urUsmP2PDisablePeerAccessExp
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_usm_p2p_disable_peer_access_exp_params_t {
+    ur_device_handle_t *pcommandDevice;
+    ur_device_handle_t *ppeerDevice;
+} ur_usm_p2p_disable_peer_access_exp_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urUsmP2PPeerAccessGetInfoExp
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_usm_p2p_peer_access_get_info_exp_params_t {
+    ur_device_handle_t *pcommandDevice;
+    ur_device_handle_t *ppeerDevice;
+    ur_exp_peer_info_t *ppropName;
+    size_t *ppropSize;
+    void **ppPropValue;
+    size_t **ppPropSizeRet;
+} ur_usm_p2p_peer_access_get_info_exp_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urInit
 /// @details Each entry is a pointer to the parameter passed to the function;
 ///     allowing the callback the ability to modify the parameter's value
@@ -8536,6 +9273,88 @@ typedef struct ur_init_params_t {
 typedef struct ur_tear_down_params_t {
     void **ppParams;
 } ur_tear_down_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urVirtualMemGranularityGetInfo
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_virtual_mem_granularity_get_info_params_t {
+    ur_context_handle_t *phContext;
+    ur_device_handle_t *phDevice;
+    ur_virtual_mem_granularity_info_t *ppropName;
+    size_t *ppropSize;
+    void **ppPropValue;
+    size_t **ppPropSizeRet;
+} ur_virtual_mem_granularity_get_info_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urVirtualMemReserve
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_virtual_mem_reserve_params_t {
+    ur_context_handle_t *phContext;
+    const void **ppStart;
+    size_t *psize;
+    void ***pppStart;
+} ur_virtual_mem_reserve_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urVirtualMemFree
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_virtual_mem_free_params_t {
+    ur_context_handle_t *phContext;
+    const void **ppStart;
+    size_t *psize;
+} ur_virtual_mem_free_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urVirtualMemMap
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_virtual_mem_map_params_t {
+    ur_context_handle_t *phContext;
+    const void **ppStart;
+    size_t *psize;
+    ur_physical_mem_handle_t *phPhysicalMem;
+    size_t *poffset;
+    ur_virtual_mem_access_flags_t *pflags;
+} ur_virtual_mem_map_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urVirtualMemUnmap
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_virtual_mem_unmap_params_t {
+    ur_context_handle_t *phContext;
+    const void **ppStart;
+    size_t *psize;
+} ur_virtual_mem_unmap_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urVirtualMemSetAccess
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_virtual_mem_set_access_params_t {
+    ur_context_handle_t *phContext;
+    const void **ppStart;
+    size_t *psize;
+    ur_virtual_mem_access_flags_t *pflags;
+} ur_virtual_mem_set_access_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urVirtualMemGetInfo
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_virtual_mem_get_info_params_t {
+    ur_context_handle_t *phContext;
+    const void **ppStart;
+    size_t *psize;
+    ur_virtual_mem_info_t *ppropName;
+    size_t *ppropSize;
+    void **ppPropValue;
+    size_t **ppPropSizeRet;
+} ur_virtual_mem_get_info_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urDeviceGet
