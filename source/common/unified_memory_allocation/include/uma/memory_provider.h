@@ -63,7 +63,8 @@ enum uma_result_t umaMemoryProviderFree(uma_memory_provider_handle_t hProvider,
 ///
 /// \brief Retrieve string representation of the underlying provider specific
 ///        result reported by the last API that returned
-///        UMA_RESULT_ERROR_MEMORY_PROVIDER_SPECIFIC. Allows for a provider
+///        UMA_RESULT_ERROR_METADATA_MEMORY_PROVIDER_SPECIFIC or
+///        UMA_RESULT_ERROR_DATA_MEMORY_PROVIDER_SPECIFIC. Allows for a provider
 ///        independent way to return a provider specific result.
 ///
 /// \details

@@ -39,13 +39,16 @@ enum uma_result_t {
     UMA_RESULT_ERROR_POOL_SPECIFIC =
         2, ///< A pool specific warning/error has been reported and can be
            ///< Retrieved via the umaPoolGetLastResult entry point.
-    UMA_RESULT_ERROR_MEMORY_PROVIDER_SPECIFIC =
-        3, ///< A provider specific warning/error has been reported and can be
+    UMA_RESULT_ERROR_METADATA_MEMORY_PROVIDER_SPECIFIC =
+        3, ///< A metadata provider specific warning/error has been reported and can be
            ///< Retrieved via the umaMemoryProviderGetLastResult entry point.
+    UMA_RESULT_ERROR_DATA_MEMORY_PROVIDER_SPECIFIC =
+        4, ///< A data provider specific warning/error has been reported and can be
+    ///< Retrieved via the umaMemoryProviderGetLastNativeError entry point.
     UMA_RESULT_ERROR_INVALID_ARGUMENT =
-        4, ///< Generic error code for invalid arguments
-    UMA_RESULT_ERROR_INVALID_ALIGNMENT = 5, /// Invalid alignment of an argument
-    UMA_RESULT_ERROR_NOT_SUPPORTED = 6,     /// Operation not supported
+        5, ///< Generic error code for invalid arguments
+    UMA_RESULT_ERROR_INVALID_ALIGNMENT = 6, /// Invalid alignment of an argument
+    UMA_RESULT_ERROR_NOT_SUPPORTED = 7,     /// Operation not supported
 
     UMA_RESULT_ERROR_UNKNOWN = 0x7ffffffe ///< Unknown or internal error
 };

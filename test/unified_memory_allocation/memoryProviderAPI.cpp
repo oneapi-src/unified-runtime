@@ -76,7 +76,8 @@ INSTANTIATE_TEST_SUITE_P(
     providerInitializeTest, providerInitializeTest,
     ::testing::Values(UMA_RESULT_ERROR_OUT_OF_HOST_MEMORY,
                       UMA_RESULT_ERROR_POOL_SPECIFIC,
-                      UMA_RESULT_ERROR_MEMORY_PROVIDER_SPECIFIC,
+                      UMA_RESULT_ERROR_METADATA_MEMORY_PROVIDER_SPECIFIC,
+                      UMA_RESULT_ERROR_DATA_MEMORY_PROVIDER_SPECIFIC,
                       UMA_RESULT_ERROR_INVALID_ARGUMENT,
                       UMA_RESULT_ERROR_UNKNOWN));
 
