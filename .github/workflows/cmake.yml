@@ -17,6 +17,7 @@ jobs:
             build_type: Release
             compiler: {c: clang, cxx: clang++}
             libbacktrace: '-DVAL_USE_LIBBACKTRACE_BACKTRACE=OFF'
+            fuzztest: ON
           - os: 'ubuntu-22.04'
             build_type: Release
             compiler: {c: gcc, cxx: g++}
@@ -25,6 +26,7 @@ jobs:
             build_type: Release
             compiler: {c: clang, cxx: clang++}
             libbacktrace: '-DVAL_USE_LIBBACKTRACE_BACKTRACE=ON'
+            fuzztest: ON
           - os: 'ubuntu-20.04'
             build_type: Release
             compiler: {c: gcc-7, cxx: g++-7}
@@ -87,6 +89,11 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/build
       run: ctest -C ${{matrix.build_type}} --output-on-failure -L "python|umf|loader|validation|tracing|unit|urtrace"
+
+    - name: Fuzz test
+      working-directory: ${{github.workspace}}/build
+      if: matrix.fuzztest == 'ON'
+      run: ctest -C ${{matrix.build_type}} --output-on-failure -L "fuzz"
 
   adapter-build:
     name: Build - Adapters on Ubuntu
