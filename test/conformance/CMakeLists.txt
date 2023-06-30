@@ -44,6 +44,23 @@ function(add_conformance_test_with_platform_environment name)
     target_compile_definitions("test-${name}" PRIVATE PLATFORM_ENVIRONMENT)
 endfunction()
 
+function(add_fuzz_test name)
+    set(TEST_TARGET_NAME fuzztest-${name})
+    add_executable(${TEST_TARGET_NAME}
+        ${ARGN})
+    target_link_libraries(${TEST_TARGET_NAME}
+        PRIVATE
+        ${PROJECT_NAME}::loader
+        ${PROJECT_NAME}::headers
+        ${PROJECT_NAME}::common
+        -fsanitize=fuzzer)
+    add_test(NAME ${TEST_TARGET_NAME}
+        COMMAND ${TEST_TARGET_NAME} -max_total_time=10 -seed=1 -shrink=1
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+    set_tests_properties(${TEST_TARGET_NAME} PROPERTIES LABELS "fuzz")
+    target_compile_options(${TEST_TARGET_NAME} PRIVATE -g -fsanitize=fuzzer)
+endfunction()
+
 add_subdirectory(testing)
 
 add_subdirectory(platform)
@@ -73,4 +90,8 @@ if(DEFINED UR_DPCXX)
     add_subdirectory(kernel)
     add_subdirectory(program)
     add_subdirectory(enqueue)
+endif()
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    add_subdirectory(fuzz)
 endif()
