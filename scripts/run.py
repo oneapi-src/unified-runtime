@@ -1,5 +1,5 @@
 """
- Copyright (C) 2022 Intel Corporation
+ Copyright (C) 2022-2023 Intel Corporation
 
  Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
  See LICENSE.TXT
@@ -119,7 +119,6 @@ def main():
     parser.add_argument("--ver", type=str, default=get_version_from_cmakelists(),
                         required=False, help="specification version to generate.")
     parser.add_argument("--api-json", type=str, default="unified_runtime.json", required=False, help="json output file for the spec")
-    parser.add_argument("--clang-format", type=str, default="clang-format", required=False, help="path to clang-format executable")
     args = vars(parser.parse_args())
     args['rev'] = revision()
 
@@ -166,13 +165,6 @@ def main():
             if args[config['name']]:
 
                 generate_code.generate_api(incpath, srcpath, config['namespace'], config['tags'], args['ver'], args['rev'], specs, input['meta'])
-
-                # clang-format ur_api.h
-                proc = subprocess.run([args['clang_format'], "--style=file", "-i" , "ur_api.h"], stderr=subprocess.PIPE, cwd=incpath)
-                if proc.returncode != 0:
-                    print("-- clang-format failed with non-zero return code. --")
-                    print(proc.stderr.decode())
-                    raise Exception("Failed to format ur_api.h")
 
                 if args['rst']:
                     generate_docs.generate_rst(docpath, config['name'], config['namespace'], config['tags'], args['ver'], args['rev'], specs, input['meta'])
