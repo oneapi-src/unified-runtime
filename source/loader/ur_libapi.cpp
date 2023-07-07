@@ -7201,8 +7201,8 @@ ur_result_t UR_APICALL urCommandBufferEnqueueExp(
 ///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ur_result_t UR_APICALL urUSMImportExp(
-    ur_context_handle_t hContext, ///< [in] handle of the context object
-    void *pMem,                   ///< [in] pointer to host memory object
+    const ur_context_handle_t hContext, ///< [in] handle of the context object
+    const void *pMem,                   ///< [in] pointer to host memory object
     size_t size ///< [in] size in bytes of the host memory object to be imported
     ) try {
     auto pfnImportExp = ur_lib::context->urDdiTable.USMExp.pfnImportExp;
@@ -7232,8 +7232,8 @@ ur_result_t UR_APICALL urUSMImportExp(
 ///         + `NULL == pMem`
 ///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
 ur_result_t UR_APICALL urUSMReleaseExp(
-    ur_context_handle_t hContext, ///< [in] handle of the context object
-    void *pMem                    ///< [in] pointer to host memory object
+    const ur_context_handle_t hContext, ///< [in] handle of the context object
+    const void *pMem                    ///< [in] pointer to host memory object
     ) try {
     auto pfnReleaseExp = ur_lib::context->urDdiTable.USMExp.pfnReleaseExp;
     if (nullptr == pfnReleaseExp) {

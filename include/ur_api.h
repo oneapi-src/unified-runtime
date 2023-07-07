@@ -7685,9 +7685,9 @@ urCommandBufferEnqueueExp(
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMImportExp(
-    ur_context_handle_t hContext, ///< [in] handle of the context object
-    void *pMem,                   ///< [in] pointer to host memory object
-    size_t size                   ///< [in] size in bytes of the host memory object to be imported
+    const ur_context_handle_t hContext, ///< [in] handle of the context object
+    const void *pMem,                   ///< [in] pointer to host memory object
+    size_t size                         ///< [in] size in bytes of the host memory object to be imported
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -7708,8 +7708,8 @@ urUSMImportExp(
 ///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMReleaseExp(
-    ur_context_handle_t hContext, ///< [in] handle of the context object
-    void *pMem                    ///< [in] pointer to host memory object
+    const ur_context_handle_t hContext, ///< [in] handle of the context object
+    const void *pMem                    ///< [in] pointer to host memory object
 );
 
 #if !defined(__GNUC__)
@@ -9389,8 +9389,8 @@ typedef struct ur_usm_pitched_alloc_exp_params_t {
 /// @details Each entry is a pointer to the parameter passed to the function;
 ///     allowing the callback the ability to modify the parameter's value
 typedef struct ur_usm_import_exp_params_t {
-    ur_context_handle_t *phContext;
-    void **ppMem;
+    const ur_context_handle_t *phContext;
+    const void **ppMem;
     size_t *psize;
 } ur_usm_import_exp_params_t;
 
@@ -9399,8 +9399,8 @@ typedef struct ur_usm_import_exp_params_t {
 /// @details Each entry is a pointer to the parameter passed to the function;
 ///     allowing the callback the ability to modify the parameter's value
 typedef struct ur_usm_release_exp_params_t {
-    ur_context_handle_t *phContext;
-    void **ppMem;
+    const ur_context_handle_t *phContext;
+    const void **ppMem;
 } ur_usm_release_exp_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////

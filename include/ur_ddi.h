@@ -1593,15 +1593,15 @@ typedef ur_result_t(UR_APICALL *ur_pfnUSMPitchedAllocExp_t)(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function-pointer for urUSMImportExp
 typedef ur_result_t(UR_APICALL *ur_pfnUSMImportExp_t)(
-    ur_context_handle_t,
-    void *,
+    const ur_context_handle_t,
+    const void *,
     size_t);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function-pointer for urUSMReleaseExp
 typedef ur_result_t(UR_APICALL *ur_pfnUSMReleaseExp_t)(
-    ur_context_handle_t,
-    void *);
+    const ur_context_handle_t,
+    const void *);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Table of USMExp functions pointers

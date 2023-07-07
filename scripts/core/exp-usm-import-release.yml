@@ -10,10 +10,10 @@ name: ImportExp
 details:
     - "Import memory into USM"
 params:
-    - type: $x_context_handle_t
+    - type: "const $x_context_handle_t"
       name: hContext
       desc: "[in] handle of the context object"
-    - type: "void*"
+    - type: "const void*"
       name: pMem
       desc: "[in] pointer to host memory object"
     - type: "size_t"
@@ -30,10 +30,10 @@ name: ReleaseExp
 details:
     - "Release memory from USM"
 params:
-    - type: $x_context_handle_t
+    - type: "const $x_context_handle_t"
       name: hContext
       desc: "[in] handle of the context object"
-    - type: "void*"
+    - type: "const void*"
       name: pMem
       desc: "[in] pointer to host memory object"
 returns:

@@ -5524,8 +5524,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMImportExp
 __urdlllocal ur_result_t UR_APICALL urUSMImportExp(
-    ur_context_handle_t hContext, ///< [in] handle of the context object
-    void *pMem,                   ///< [in] pointer to host memory object
+    const ur_context_handle_t hContext, ///< [in] handle of the context object
+    const void *pMem,                   ///< [in] pointer to host memory object
     size_t size ///< [in] size in bytes of the host memory object to be imported
 ) {
     auto pfnImportExp = context.urDdiTable.USMExp.pfnImportExp;
@@ -5549,8 +5549,8 @@ __urdlllocal ur_result_t UR_APICALL urUSMImportExp(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMReleaseExp
 __urdlllocal ur_result_t UR_APICALL urUSMReleaseExp(
-    ur_context_handle_t hContext, ///< [in] handle of the context object
-    void *pMem                    ///< [in] pointer to host memory object
+    const ur_context_handle_t hContext, ///< [in] handle of the context object
+    const void *pMem                    ///< [in] pointer to host memory object
 ) {
     auto pfnReleaseExp = context.urDdiTable.USMExp.pfnReleaseExp;
 
