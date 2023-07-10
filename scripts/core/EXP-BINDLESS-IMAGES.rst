@@ -119,6 +119,7 @@ Types
 * ${x}_exp_image_mem_handle_t
 * ${x}_exp_interop_mem_handle_t
 * ${x}_exp_interop_semaphore_handle_t
+* ${x}_exp_file_descriptor_handle_t
 
 Functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -160,6 +161,8 @@ Changelog
 |          || Added mip filter mode.                                  |
 +----------+----------------------------------------------------------+
 | 3.0      | Added device query for bindless images on shared USM    |
++----------+---------------------------------------------------------+
+| 4.0      | Added opaque handle for file descriptors                |
 +----------+---------------------------------------------------------+
 
 Contributors

@@ -30,6 +30,7 @@ ur_exp_image_factory_t ur_exp_image_factory;
 ur_exp_image_mem_factory_t ur_exp_image_mem_factory;
 ur_exp_interop_mem_factory_t ur_exp_interop_mem_factory;
 ur_exp_interop_semaphore_factory_t ur_exp_interop_semaphore_factory;
+ur_exp_file_descriptor_factory_t ur_exp_file_descriptor_factory;
 ur_exp_command_buffer_factory_t ur_exp_command_buffer_factory;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -5725,7 +5726,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportOpaqueFDExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     size_t size,                  ///< [in] size of the external memory
-    uint32_t fileDescriptor,      ///< [in] the file descriptor
+    ur_exp_file_descriptor_handle_t
+        hFileDescriptor, ///< [in] the file descriptor handle
     ur_exp_interop_mem_handle_t
         *phInteropMem ///< [out] interop memory handle to the external memory
 ) {
@@ -5745,8 +5747,13 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportOpaqueFDExp(
     // convert loader handle to platform handle
     hDevice = reinterpret_cast<ur_device_object_t *>(hDevice)->handle;
 
+    // convert loader handle to platform handle
+    hFileDescriptor =
+        reinterpret_cast<ur_exp_file_descriptor_object_t *>(hFileDescriptor)
+            ->handle;
+
     // forward to device-platform
-    result = pfnImportOpaqueFDExp(hContext, hDevice, size, fileDescriptor,
+    result = pfnImportOpaqueFDExp(hContext, hDevice, size, hFileDescriptor,
                                   phInteropMem);
 
     if (UR_RESULT_SUCCESS != result) {
@@ -5856,7 +5863,8 @@ __urdlllocal ur_result_t UR_APICALL
 urBindlessImagesImportExternalSemaphoreOpaqueFDExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
-    uint32_t fileDescriptor,      ///< [in] the file descriptor
+    ur_exp_file_descriptor_handle_t
+        hFileDescriptor, ///< [in] the file descriptor handle
     ur_exp_interop_semaphore_handle_t *
         phInteropSemaphoreHandle ///< [out] interop semaphore handle to the external semaphore
 ) {
@@ -5876,9 +5884,14 @@ urBindlessImagesImportExternalSemaphoreOpaqueFDExp(
     // convert loader handle to platform handle
     hDevice = reinterpret_cast<ur_device_object_t *>(hDevice)->handle;
 
+    // convert loader handle to platform handle
+    hFileDescriptor =
+        reinterpret_cast<ur_exp_file_descriptor_object_t *>(hFileDescriptor)
+            ->handle;
+
     // forward to device-platform
     result = pfnImportExternalSemaphoreOpaqueFDExp(
-        hContext, hDevice, fileDescriptor, phInteropSemaphoreHandle);
+        hContext, hDevice, hFileDescriptor, phInteropSemaphoreHandle);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;

@@ -5325,6 +5325,7 @@ ur_result_t UR_APICALL urBindlessImagesMipmapFreeExp(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///         + `NULL == hDevice`
+///         + `NULL == hFileDescriptor`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `NULL == phInteropMem`
 ///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
@@ -5334,7 +5335,8 @@ ur_result_t UR_APICALL urBindlessImagesImportOpaqueFDExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     size_t size,                  ///< [in] size of the external memory
-    uint32_t fileDescriptor,      ///< [in] the file descriptor
+    ur_exp_file_descriptor_handle_t
+        hFileDescriptor, ///< [in] the file descriptor handle
     ur_exp_interop_mem_handle_t
         *phInteropMem ///< [out] interop memory handle to the external memory
 ) {
@@ -5423,6 +5425,7 @@ ur_result_t UR_APICALL urBindlessImagesReleaseInteropExp(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///         + `NULL == hDevice`
+///         + `NULL == hFileDescriptor`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `NULL == phInteropSemaphoreHandle`
 ///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
@@ -5430,7 +5433,8 @@ ur_result_t UR_APICALL urBindlessImagesReleaseInteropExp(
 ur_result_t UR_APICALL urBindlessImagesImportExternalSemaphoreOpaqueFDExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
-    uint32_t fileDescriptor,      ///< [in] the file descriptor
+    ur_exp_file_descriptor_handle_t
+        hFileDescriptor, ///< [in] the file descriptor handle
     ur_exp_interop_semaphore_handle_t *
         phInteropSemaphoreHandle ///< [out] interop semaphore handle to the external semaphore
 ) {

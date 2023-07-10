@@ -23,6 +23,11 @@ desc: "Handle of interop semaphore"
 class: $xBindlessImages
 name: "$x_exp_interop_semaphore_handle_t"
 --- #--------------------------------------------------------------------------
+type: handle
+desc: "Handle of file descriptor"
+class: $xBindlessImages
+name: "$x_exp_file_descriptor_handle_t"
+--- #--------------------------------------------------------------------------
 type: enum
 extend: true
 typed_etors: true
@@ -518,9 +523,9 @@ params:
     - type: size_t
       name: size
       desc: "[in] size of the external memory"
-    - type: uint32_t
-      name: fileDescriptor
-      desc: "[in] the file descriptor"
+    - type: $x_exp_file_descriptor_handle_t
+      name: hFileDescriptor
+      desc: "[in] the file descriptor handle"
     - type: $x_exp_interop_mem_handle_t*
       name: phInteropMem
       desc: "[out] interop memory handle to the external memory"
@@ -597,9 +602,9 @@ params:
     - type: $x_device_handle_t
       name: hDevice
       desc: "[in] handle of the device object"
-    - type: uint32_t
-      name: fileDescriptor
-      desc: "[in] the file descriptor"
+    - type: $x_exp_file_descriptor_handle_t
+      name: hFileDescriptor
+      desc: "[in] the file descriptor handle"
     - type: $x_exp_interop_semaphore_handle_t*
       name: phInteropSemaphoreHandle
       desc: "[out] interop semaphore handle to the external semaphore"

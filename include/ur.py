@@ -2085,6 +2085,11 @@ class ur_exp_interop_semaphore_handle_t(c_void_p):
     pass
 
 ###############################################################################
+## @brief Handle of file descriptor
+class ur_exp_file_descriptor_handle_t(c_void_p):
+    pass
+
+###############################################################################
 ## @brief Dictates the type of memory copy.
 class ur_exp_image_copy_flags_v(IntEnum):
     HOST_TO_DEVICE = UR_BIT(0)                      ## Host to device
@@ -3116,9 +3121,9 @@ else:
 ###############################################################################
 ## @brief Function-pointer for urBindlessImagesImportOpaqueFDExp
 if __use_win_types:
-    _urBindlessImagesImportOpaqueFDExp_t = WINFUNCTYPE( ur_result_t, ur_context_handle_t, ur_device_handle_t, c_size_t, c_ulong, POINTER(ur_exp_interop_mem_handle_t) )
+    _urBindlessImagesImportOpaqueFDExp_t = WINFUNCTYPE( ur_result_t, ur_context_handle_t, ur_device_handle_t, c_size_t, ur_exp_file_descriptor_handle_t, POINTER(ur_exp_interop_mem_handle_t) )
 else:
-    _urBindlessImagesImportOpaqueFDExp_t = CFUNCTYPE( ur_result_t, ur_context_handle_t, ur_device_handle_t, c_size_t, c_ulong, POINTER(ur_exp_interop_mem_handle_t) )
+    _urBindlessImagesImportOpaqueFDExp_t = CFUNCTYPE( ur_result_t, ur_context_handle_t, ur_device_handle_t, c_size_t, ur_exp_file_descriptor_handle_t, POINTER(ur_exp_interop_mem_handle_t) )
 
 ###############################################################################
 ## @brief Function-pointer for urBindlessImagesMapExternalArrayExp
@@ -3137,9 +3142,9 @@ else:
 ###############################################################################
 ## @brief Function-pointer for urBindlessImagesImportExternalSemaphoreOpaqueFDExp
 if __use_win_types:
-    _urBindlessImagesImportExternalSemaphoreOpaqueFDExp_t = WINFUNCTYPE( ur_result_t, ur_context_handle_t, ur_device_handle_t, c_ulong, POINTER(ur_exp_interop_semaphore_handle_t) )
+    _urBindlessImagesImportExternalSemaphoreOpaqueFDExp_t = WINFUNCTYPE( ur_result_t, ur_context_handle_t, ur_device_handle_t, ur_exp_file_descriptor_handle_t, POINTER(ur_exp_interop_semaphore_handle_t) )
 else:
-    _urBindlessImagesImportExternalSemaphoreOpaqueFDExp_t = CFUNCTYPE( ur_result_t, ur_context_handle_t, ur_device_handle_t, c_ulong, POINTER(ur_exp_interop_semaphore_handle_t) )
+    _urBindlessImagesImportExternalSemaphoreOpaqueFDExp_t = CFUNCTYPE( ur_result_t, ur_context_handle_t, ur_device_handle_t, ur_exp_file_descriptor_handle_t, POINTER(ur_exp_interop_semaphore_handle_t) )
 
 ###############################################################################
 ## @brief Function-pointer for urBindlessImagesDestroyExternalSemaphoreExp

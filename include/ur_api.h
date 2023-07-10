@@ -6601,6 +6601,10 @@ typedef struct ur_exp_interop_mem_handle_t_ *ur_exp_interop_mem_handle_t;
 typedef struct ur_exp_interop_semaphore_handle_t_ *ur_exp_interop_semaphore_handle_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Handle of file descriptor
+typedef struct ur_exp_file_descriptor_handle_t_ *ur_exp_file_descriptor_handle_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Dictates the type of memory copy.
 typedef uint32_t ur_exp_image_copy_flags_t;
 typedef enum ur_exp_image_copy_flag_t {
@@ -7032,6 +7036,7 @@ urBindlessImagesMipmapFreeExp(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///         + `NULL == hDevice`
+///         + `NULL == hFileDescriptor`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `NULL == phInteropMem`
 ///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
@@ -7039,11 +7044,11 @@ urBindlessImagesMipmapFreeExp(
 ///     - ::UR_RESULT_ERROR_INVALID_MEM_OBJECT
 UR_APIEXPORT ur_result_t UR_APICALL
 urBindlessImagesImportOpaqueFDExp(
-    ur_context_handle_t hContext,             ///< [in] handle of the context object
-    ur_device_handle_t hDevice,               ///< [in] handle of the device object
-    size_t size,                              ///< [in] size of the external memory
-    uint32_t fileDescriptor,                  ///< [in] the file descriptor
-    ur_exp_interop_mem_handle_t *phInteropMem ///< [out] interop memory handle to the external memory
+    ur_context_handle_t hContext,                    ///< [in] handle of the context object
+    ur_device_handle_t hDevice,                      ///< [in] handle of the device object
+    size_t size,                                     ///< [in] size of the external memory
+    ur_exp_file_descriptor_handle_t hFileDescriptor, ///< [in] the file descriptor handle
+    ur_exp_interop_mem_handle_t *phInteropMem        ///< [out] interop memory handle to the external memory
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -7119,6 +7124,7 @@ urBindlessImagesReleaseInteropExp(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///         + `NULL == hDevice`
+///         + `NULL == hFileDescriptor`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `NULL == phInteropSemaphoreHandle`
 ///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
@@ -7127,7 +7133,7 @@ UR_APIEXPORT ur_result_t UR_APICALL
 urBindlessImagesImportExternalSemaphoreOpaqueFDExp(
     ur_context_handle_t hContext,                               ///< [in] handle of the context object
     ur_device_handle_t hDevice,                                 ///< [in] handle of the device object
-    uint32_t fileDescriptor,                                    ///< [in] the file descriptor
+    ur_exp_file_descriptor_handle_t hFileDescriptor,            ///< [in] the file descriptor handle
     ur_exp_interop_semaphore_handle_t *phInteropSemaphoreHandle ///< [out] interop semaphore handle to the external semaphore
 );
 
@@ -9198,7 +9204,7 @@ typedef struct ur_bindless_images_import_opaque_fd_exp_params_t {
     ur_context_handle_t *phContext;
     ur_device_handle_t *phDevice;
     size_t *psize;
-    uint32_t *pfileDescriptor;
+    ur_exp_file_descriptor_handle_t *phFileDescriptor;
     ur_exp_interop_mem_handle_t **pphInteropMem;
 } ur_bindless_images_import_opaque_fd_exp_params_t;
 
@@ -9232,7 +9238,7 @@ typedef struct ur_bindless_images_release_interop_exp_params_t {
 typedef struct ur_bindless_images_import_external_semaphore_opaque_fd_exp_params_t {
     ur_context_handle_t *phContext;
     ur_device_handle_t *phDevice;
-    uint32_t *pfileDescriptor;
+    ur_exp_file_descriptor_handle_t *phFileDescriptor;
     ur_exp_interop_semaphore_handle_t **pphInteropSemaphoreHandle;
 } ur_bindless_images_import_external_semaphore_opaque_fd_exp_params_t;
 

@@ -4700,7 +4700,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportOpaqueFDExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     size_t size,                  ///< [in] size of the external memory
-    uint32_t fileDescriptor,      ///< [in] the file descriptor
+    ur_exp_file_descriptor_handle_t
+        hFileDescriptor, ///< [in] the file descriptor handle
     ur_exp_interop_mem_handle_t
         *phInteropMem ///< [out] interop memory handle to the external memory
 ) {
@@ -4712,13 +4713,13 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportOpaqueFDExp(
     }
 
     ur_bindless_images_import_opaque_fd_exp_params_t params = {
-        &hContext, &hDevice, &size, &fileDescriptor, &phInteropMem};
+        &hContext, &hDevice, &size, &hFileDescriptor, &phInteropMem};
     uint64_t instance =
         context.notify_begin(UR_FUNCTION_BINDLESS_IMAGES_IMPORT_OPAQUE_FD_EXP,
                              "urBindlessImagesImportOpaqueFDExp", &params);
 
     ur_result_t result = pfnImportOpaqueFDExp(hContext, hDevice, size,
-                                              fileDescriptor, phInteropMem);
+                                              hFileDescriptor, phInteropMem);
 
     context.notify_end(UR_FUNCTION_BINDLESS_IMAGES_IMPORT_OPAQUE_FD_EXP,
                        "urBindlessImagesImportOpaqueFDExp", &params, &result,
@@ -4800,7 +4801,8 @@ __urdlllocal ur_result_t UR_APICALL
 urBindlessImagesImportExternalSemaphoreOpaqueFDExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
-    uint32_t fileDescriptor,      ///< [in] the file descriptor
+    ur_exp_file_descriptor_handle_t
+        hFileDescriptor, ///< [in] the file descriptor handle
     ur_exp_interop_semaphore_handle_t *
         phInteropSemaphoreHandle ///< [out] interop semaphore handle to the external semaphore
 ) {
@@ -4813,13 +4815,13 @@ urBindlessImagesImportExternalSemaphoreOpaqueFDExp(
     }
 
     ur_bindless_images_import_external_semaphore_opaque_fd_exp_params_t params =
-        {&hContext, &hDevice, &fileDescriptor, &phInteropSemaphoreHandle};
+        {&hContext, &hDevice, &hFileDescriptor, &phInteropSemaphoreHandle};
     uint64_t instance = context.notify_begin(
         UR_FUNCTION_BINDLESS_IMAGES_IMPORT_EXTERNAL_SEMAPHORE_OPAQUE_FD_EXP,
         "urBindlessImagesImportExternalSemaphoreOpaqueFDExp", &params);
 
     ur_result_t result = pfnImportExternalSemaphoreOpaqueFDExp(
-        hContext, hDevice, fileDescriptor, phInteropSemaphoreHandle);
+        hContext, hDevice, hFileDescriptor, phInteropSemaphoreHandle);
 
     context.notify_end(
         UR_FUNCTION_BINDLESS_IMAGES_IMPORT_EXTERNAL_SEMAPHORE_OPAQUE_FD_EXP,

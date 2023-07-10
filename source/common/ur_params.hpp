@@ -9923,9 +9923,9 @@ inline std::ostream &operator<<(
     os << *(params->psize);
 
     os << ", ";
-    os << ".fileDescriptor = ";
+    os << ".hFileDescriptor = ";
 
-    os << *(params->pfileDescriptor);
+    ur_params::serializePtr(os, *(params->phFileDescriptor));
 
     os << ", ";
     os << ".phInteropMem = ";
@@ -10007,9 +10007,9 @@ operator<<(std::ostream &os, const struct
     ur_params::serializePtr(os, *(params->phDevice));
 
     os << ", ";
-    os << ".fileDescriptor = ";
+    os << ".hFileDescriptor = ";
 
-    os << *(params->pfileDescriptor);
+    ur_params::serializePtr(os, *(params->phFileDescriptor));
 
     os << ", ";
     os << ".phInteropSemaphoreHandle = ";

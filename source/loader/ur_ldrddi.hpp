@@ -83,6 +83,12 @@ using ur_exp_interop_semaphore_factory_t =
     singleton_factory_t<ur_exp_interop_semaphore_object_t,
                         ur_exp_interop_semaphore_handle_t>;
 
+using ur_exp_file_descriptor_object_t =
+    object_t<ur_exp_file_descriptor_handle_t>;
+using ur_exp_file_descriptor_factory_t =
+    singleton_factory_t<ur_exp_file_descriptor_object_t,
+                        ur_exp_file_descriptor_handle_t>;
+
 using ur_exp_command_buffer_object_t = object_t<ur_exp_command_buffer_handle_t>;
 using ur_exp_command_buffer_factory_t =
     singleton_factory_t<ur_exp_command_buffer_object_t,

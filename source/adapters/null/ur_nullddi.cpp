@@ -4128,7 +4128,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportOpaqueFDExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     size_t size,                  ///< [in] size of the external memory
-    uint32_t fileDescriptor,      ///< [in] the file descriptor
+    ur_exp_file_descriptor_handle_t
+        hFileDescriptor, ///< [in] the file descriptor handle
     ur_exp_interop_mem_handle_t
         *phInteropMem ///< [out] interop memory handle to the external memory
     ) try {
@@ -4138,7 +4139,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportOpaqueFDExp(
     auto pfnImportOpaqueFDExp =
         d_context.urDdiTable.BindlessImagesExp.pfnImportOpaqueFDExp;
     if (nullptr != pfnImportOpaqueFDExp) {
-        result = pfnImportOpaqueFDExp(hContext, hDevice, size, fileDescriptor,
+        result = pfnImportOpaqueFDExp(hContext, hDevice, size, hFileDescriptor,
                                       phInteropMem);
     } else {
         // generic implementation
@@ -4213,7 +4214,8 @@ __urdlllocal ur_result_t UR_APICALL
 urBindlessImagesImportExternalSemaphoreOpaqueFDExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
-    uint32_t fileDescriptor,      ///< [in] the file descriptor
+    ur_exp_file_descriptor_handle_t
+        hFileDescriptor, ///< [in] the file descriptor handle
     ur_exp_interop_semaphore_handle_t *
         phInteropSemaphoreHandle ///< [out] interop semaphore handle to the external semaphore
     ) try {
@@ -4225,7 +4227,7 @@ urBindlessImagesImportExternalSemaphoreOpaqueFDExp(
             .pfnImportExternalSemaphoreOpaqueFDExp;
     if (nullptr != pfnImportExternalSemaphoreOpaqueFDExp) {
         result = pfnImportExternalSemaphoreOpaqueFDExp(
-            hContext, hDevice, fileDescriptor, phInteropSemaphoreHandle);
+            hContext, hDevice, hFileDescriptor, phInteropSemaphoreHandle);
     } else {
         // generic implementation
         *phInteropSemaphoreHandle =
