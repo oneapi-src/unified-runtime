@@ -1593,14 +1593,14 @@ typedef ur_result_t(UR_APICALL *ur_pfnUSMPitchedAllocExp_t)(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function-pointer for urUSMImportExp
 typedef ur_result_t(UR_APICALL *ur_pfnUSMImportExp_t)(
-    const ur_context_handle_t,
+    ur_context_handle_t,
     const void *,
     size_t);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function-pointer for urUSMReleaseExp
 typedef ur_result_t(UR_APICALL *ur_pfnUSMReleaseExp_t)(
-    const ur_context_handle_t,
+    ur_context_handle_t,
     const void *);
 
 ///////////////////////////////////////////////////////////////////////////////

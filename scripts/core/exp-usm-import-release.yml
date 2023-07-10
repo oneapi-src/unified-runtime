@@ -10,7 +10,7 @@ name: ImportExp
 details:
     - "Import memory into USM"
 params:
-    - type: "const $x_context_handle_t"
+    - type: $x_context_handle_t
       name: hContext
       desc: "[in] handle of the context object"
     - type: "const void*"
@@ -30,7 +30,7 @@ name: ReleaseExp
 details:
     - "Release memory from USM"
 params:
-    - type: "const $x_context_handle_t"
+    - type: $x_context_handle_t
       name: hContext
       desc: "[in] handle of the context object"
     - type: "const void*"

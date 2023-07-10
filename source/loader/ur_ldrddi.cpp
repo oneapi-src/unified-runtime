@@ -6658,8 +6658,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMImportExp
 __urdlllocal ur_result_t UR_APICALL urUSMImportExp(
-    const ur_context_handle_t hContext, ///< [in] handle of the context object
-    const void *pMem,                   ///< [in] pointer to host memory object
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    const void *pMem,             ///< [in] pointer to host memory object
     size_t size ///< [in] size in bytes of the host memory object to be imported
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
@@ -6683,8 +6683,8 @@ __urdlllocal ur_result_t UR_APICALL urUSMImportExp(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMReleaseExp
 __urdlllocal ur_result_t UR_APICALL urUSMReleaseExp(
-    const ur_context_handle_t hContext, ///< [in] handle of the context object
-    const void *pMem                    ///< [in] pointer to host memory object
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    const void *pMem              ///< [in] pointer to host memory object
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
