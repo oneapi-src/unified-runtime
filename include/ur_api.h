@@ -20,7 +20,9 @@
 #include <stddef.h>
 #include <stdint.h>
 #if defined(_WIN32)
+#define NOMINMAX
 #include "windows.h"
+#undef NOMINMAX
 #endif
 
 #if defined(__cplusplus)

@@ -33,7 +33,9 @@ from templates import helper as th
 #include <stdint.h>
 #include <stddef.h>
 #if defined(_WIN32)
+#define NOMINMAX
 #include "windows.h"
+#undef NOMINMAX
 #endif
 %endif
 
