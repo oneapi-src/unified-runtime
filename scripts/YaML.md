@@ -140,7 +140,12 @@ n/a
 * A typedef requires the following scalar fields: {`desc`, `name`, `value`}
   - `desc` will be used as the typedef's description comment
   - `name` must be a unique ISO-C standard identifier, start with `$` tag, be snake_case and end with `_t`
-  - `value` must be an ISO-C standard identifier
+  - `value` must either be:
+      - an ISO-C standard identifier
+      - a list of objects
+        - `if` must be by one of {`Linux`, `Windows`, `Darwin`}
+        - `else` must be None
+        - `value` must be an ISO-C standard identifier
 * A typedef may take the following optional scalar fields: {`class`, `condition`, `altvalue`, `ordinal`, `version`}
   - `class` will be used to scope the typedef declaration within the specified C++ class
   - `condition` will be used as a C/C++ preprocessor `#if` conditional expression
