@@ -72,7 +72,22 @@ extern "C" {
 %endif
 ## TYPEDEF ####################################################################
 %elif re.match(r"typedef", obj['type']):
+%if isinstance(obj['value'], list):
+<% first = True%>\
+%for cond in obj['value']:
+%if cond.get('if') is not None:
+${"#if" if first else "#elif"} ${th.convert_platform_to_define(cond['if'])}
+<% first = False %>\
+typedef ${th.subt(n, tags, cond['value'])} ${th.make_type_name(n, tags, obj)};
+%elif cond.get('else') is not None:
+#else
+typedef ${th.subt(n, tags, cond['value'])} ${th.make_type_name(n, tags, obj)};
+%endif
+%endfor
+#endif
+%else:
 typedef ${th.subt(n, tags, obj['value'])} ${th.make_type_name(n, tags, obj)};
+%endif
 ## FPTR TYPEDEF ###############################################################
 %elif re.match(r"fptr_typedef", obj['type']):
 typedef ${th.subt(n, tags, obj['return'])} (*${th.make_func_name(n, tags, obj)})(

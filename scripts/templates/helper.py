@@ -1258,3 +1258,12 @@ def get_create_retain_release_functions(specs, namespace, tags):
     )
 
     return {"create": create_funcs, "retain": retain_funcs, "release": release_funcs}
+
+def convert_platform_to_define(platform:str ) -> str:
+    if platform == "Windows":
+        return "defined(_WIN32)"
+    if platform == "Linux":
+        return "defined(__linux__)"
+    if platform == "Darwin":
+        return "defined(__APPLE__)"
+    raise Exception(f"Invalid Platform: {platform}")

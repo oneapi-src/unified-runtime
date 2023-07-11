@@ -11,6 +11,7 @@
  """
 import platform
 from ctypes import *
+from ctypes.wintypes import HANDLE
 from enum import *
 
 # ctypes does not define c_intptr_t, so let's define it here manually
@@ -459,6 +460,15 @@ class ur_rect_region_t(Structure):
         ("height", c_ulonglong),                                        ## [in] height (scalar)
         ("depth", c_ulonglong)                                          ## [in] scalar (scalar)
     ]
+
+###############################################################################
+## @brief File Descriptor type.
+if platform.system() == "Windows":
+    class ur_file_descriptor_t(HANDLE):
+        pass
+else:
+    class ur_file_descriptor_t(c_int):
+        pass
 
 ###############################################################################
 ## @brief Supported device initialization flags

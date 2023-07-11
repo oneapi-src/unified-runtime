@@ -20,6 +20,7 @@ from templates import helper as th
  """
 import platform
 from ctypes import *
+from ctypes.wintypes import HANDLE
 from enum import *
 
 # ctypes does not define c_intptr_t, so let's define it here manually
@@ -50,8 +51,21 @@ ${th.make_macro_name(n, tags, obj)} = ${th.subt(n, tags, obj['value'])}
 %endif
 ## TYPEDEF ####################################################################
 %elif re.match(r"typedef", obj['type']):
+%if isinstance(obj['value'], list):
+<% first = True%>\
+%for cond in obj['value']:
+%if cond.get('if') is not None:
+${"if" if first else "elif"} platform.system() == "${cond['if']}":<% first = False %>
+%elif cond.get('else') is not None:
+else:
+%endif
+    class ${th.make_type_name(n, tags, obj)}(${th.get_ctype_name(n, tags, {'type': cond['value']})}):
+        pass
+%endfor
+%else:
 class ${th.make_type_name(n, tags, obj)}(${th.get_ctype_name(n, tags, {'type': obj['value']})}):
     pass
+%endif
 ## FPTR TYPEDEF ###############################################################
 %elif re.match(r"fptr_typedef", obj['type']):
 def ${th.make_type_name(n, tags, obj)}(user_defined_callback):

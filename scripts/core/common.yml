@@ -316,3 +316,12 @@ members:
     - type: uint64_t
       name: depth
       desc: "[in] scalar (scalar)"
+--- #--------------------------------------------------------------------------
+type: typedef
+desc: "File Descriptor type."
+name: $x_file_descriptor_t
+value:
+    - if: Windows
+      value: HANDLE
+    - else: ""
+      value: int

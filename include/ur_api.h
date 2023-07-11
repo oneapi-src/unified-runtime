@@ -490,6 +490,14 @@ typedef struct ur_rect_region_t {
 
 } ur_rect_region_t;
 
+///////////////////////////////////////////////////////////////////////////////
+/// @brief File Descriptor type.
+#if defined(_WIN32)
+typedef HANDLE ur_file_descriptor_t;
+#else
+typedef int ur_file_descriptor_t;
+#endif
+
 #if !defined(__GNUC__)
 #pragma endregion
 #endif
