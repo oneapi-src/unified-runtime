@@ -347,6 +347,22 @@ def _validate_doc(f, d, tags, line_num):
         if d.get('tag') is None:
             raise Exception(f"{d['name']} must include a 'tag' part of the union.")
         
+
+    def __validate_typedef_values(d):
+        if not isinstance(d['value'], list):
+            return
+    
+        for cond in d['value']:
+            if not ('if' in cond or 'else' in cond):
+                raise Exception("typedef values must include an 'if' or 'else' field")
+            
+            valid_platforms = ['Linux', 'Windows', 'Darwin']
+            if 'if' in cond and cond['if'] not in valid_platforms:
+                raise Exception(f"Invalid platform selected '{cond['if']}' : must be one of {valid_platforms}")
+            
+            if 'else' in cond and cond['else'] is not None:
+                raise Exception("typedef 'else' field is required to be None")
+
     try:
         if 'type' not in d:
             raise Exception("every document must have 'type'")
@@ -381,6 +397,7 @@ def _validate_doc(f, d, tags, line_num):
                 raise Exception("'typedef' requires the following scalar fields: {`desc`, `name`, `value`}")
 
             __validate_type(d, 'name', tags)
+            __validate_typedef_values(d)
             __validate_details(d)
             __validate_ordinal(d)
             __validate_version(d)

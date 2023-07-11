@@ -323,5 +323,5 @@ name: $x_file_descriptor_t
 value:
     - if: Windows
       value: HANDLE
-    - else: ""
+    - else:
       value: int

@@ -32,6 +32,9 @@ from templates import helper as th
 // standard headers
 #include <stdint.h>
 #include <stddef.h>
+#if defined(_WIN32)
+#include "windows.h"
+#endif
 %endif
 
 #if defined(__cplusplus)
@@ -75,14 +78,13 @@ extern "C" {
 %if isinstance(obj['value'], list):
 <% first = True%>\
 %for cond in obj['value']:
-%if cond.get('if') is not None:
+%if 'if' in cond:
 ${"#if" if first else "#elif"} ${th.convert_platform_to_define(cond['if'])}
 <% first = False %>\
-typedef ${th.subt(n, tags, cond['value'])} ${th.make_type_name(n, tags, obj)};
-%elif cond.get('else') is not None:
+%elif 'else' in cond:
 #else
-typedef ${th.subt(n, tags, cond['value'])} ${th.make_type_name(n, tags, obj)};
 %endif
+typedef ${th.subt(n, tags, cond['value'])} ${th.make_type_name(n, tags, obj)};
 %endfor
 #endif
 %else:

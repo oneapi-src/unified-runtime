@@ -54,9 +54,9 @@ ${th.make_macro_name(n, tags, obj)} = ${th.subt(n, tags, obj['value'])}
 %if isinstance(obj['value'], list):
 <% first = True%>\
 %for cond in obj['value']:
-%if cond.get('if') is not None:
+%if 'if' in cond:
 ${"if" if first else "elif"} platform.system() == "${cond['if']}":<% first = False %>
-%elif cond.get('else') is not None:
+%elif 'else' in cond:
 else:
 %endif
     class ${th.make_type_name(n, tags, obj)}(${th.get_ctype_name(n, tags, {'type': cond['value']})}):
