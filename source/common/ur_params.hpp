@@ -202,6 +202,10 @@ inline std::ostream &operator<<(std::ostream &os,
 inline std::ostream &operator<<(std::ostream &os,
                                 const struct ur_rect_region_t params);
 inline std::ostream &operator<<(std::ostream &os,
+                                const struct ur_file_descriptor_t params);
+inline std::ostream &
+operator<<(std::ostream &os, const struct ur_windows_file_descriptor_t params);
+inline std::ostream &operator<<(std::ostream &os,
                                 enum ur_device_init_flag_t value);
 inline std::ostream &operator<<(std::ostream &os,
                                 enum ur_platform_info_t value);
@@ -1206,6 +1210,14 @@ inline std::ostream &operator<<(std::ostream &os,
         os << "UR_STRUCTURE_TYPE_KERNEL_ARG_LOCAL_PROPERTIES";
         break;
 
+    case UR_STRUCTURE_TYPE_FILE_DESCRIPTOR:
+        os << "UR_STRUCTURE_TYPE_FILE_DESCRIPTOR";
+        break;
+
+    case UR_STRUCTURE_TYPE_WINDOWS_FILE_DESCRIPTOR:
+        os << "UR_STRUCTURE_TYPE_WINDOWS_FILE_DESCRIPTOR";
+        break;
+
     case UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_DESC:
         os << "UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_DESC";
         break;
@@ -1422,6 +1434,17 @@ inline void serializeStruct(std::ostream &os, const void *ptr) {
     case UR_STRUCTURE_TYPE_KERNEL_ARG_LOCAL_PROPERTIES: {
         const ur_kernel_arg_local_properties_t *pstruct =
             (const ur_kernel_arg_local_properties_t *)ptr;
+        ur_params::serializePtr(os, pstruct);
+    } break;
+
+    case UR_STRUCTURE_TYPE_FILE_DESCRIPTOR: {
+        const ur_file_descriptor_t *pstruct = (const ur_file_descriptor_t *)ptr;
+        ur_params::serializePtr(os, pstruct);
+    } break;
+
+    case UR_STRUCTURE_TYPE_WINDOWS_FILE_DESCRIPTOR: {
+        const ur_windows_file_descriptor_t *pstruct =
+            (const ur_windows_file_descriptor_t *)ptr;
         ur_params::serializePtr(os, pstruct);
     } break;
 
@@ -1808,6 +1831,48 @@ inline std::ostream &operator<<(std::ostream &os,
     os << ".depth = ";
 
     os << (params.depth);
+
+    os << "}";
+    return os;
+}
+inline std::ostream &operator<<(std::ostream &os,
+                                const struct ur_file_descriptor_t params) {
+    os << "(struct ur_file_descriptor_t){";
+
+    os << ".stype = ";
+
+    os << (params.stype);
+
+    os << ", ";
+    os << ".pNext = ";
+
+    ur_params::serializeStruct(os, (params.pNext));
+
+    os << ", ";
+    os << ".fd = ";
+
+    os << (params.fd);
+
+    os << "}";
+    return os;
+}
+inline std::ostream &
+operator<<(std::ostream &os, const struct ur_windows_file_descriptor_t params) {
+    os << "(struct ur_windows_file_descriptor_t){";
+
+    os << ".stype = ";
+
+    os << (params.stype);
+
+    os << ", ";
+    os << ".pNext = ";
+
+    ur_params::serializeStruct(os, (params.pNext));
+
+    os << ", ";
+    os << ".fd = ";
+
+    os << (params.fd);
 
     os << "}";
     return os;

@@ -316,3 +316,22 @@ members:
     - type: uint64_t
       name: depth
       desc: "[in] scalar (scalar)"
+--- #--------------------------------------------------------------------------
+type: struct
+desc: "File descriptor"
+name: $x_file_descriptor_t
+base: $x_base_desc_t
+members:
+    - type: int
+      name: fd
+      desc: "[in] A file descriptor used for Linux and & MacOS operating systems."
+--- #--------------------------------------------------------------------------
+type: struct
+desc: "Windows specific File Descriptor"
+name: $x_windows_file_descriptor_t
+base: $x_base_desc_t
+condition: "defined(_WIN32)"
+members:
+    - type: HANDLE
+      name: fd
+      desc: "[in] A windows file handle."

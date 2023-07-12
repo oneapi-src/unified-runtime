@@ -230,6 +230,8 @@ class ur_structure_type_v(IntEnum):
     KERNEL_EXEC_INFO_PROPERTIES = 31                ## ::ur_kernel_exec_info_properties_t
     KERNEL_ARG_VALUE_PROPERTIES = 32                ## ::ur_kernel_arg_value_properties_t
     KERNEL_ARG_LOCAL_PROPERTIES = 33                ## ::ur_kernel_arg_local_properties_t
+    FILE_DESCRIPTOR = 34                            ## ::ur_file_descriptor_t
+    WINDOWS_FILE_DESCRIPTOR = 36                    ## ::ur_windows_file_descriptor_t
     EXP_COMMAND_BUFFER_DESC = 0x1000                ## ::ur_exp_command_buffer_desc_t
     EXP_SAMPLER_MIP_PROPERTIES = 0x2000             ## ::ur_exp_sampler_mip_properties_t
 
@@ -458,6 +460,26 @@ class ur_rect_region_t(Structure):
         ("width", c_ulonglong),                                         ## [in] width (bytes)
         ("height", c_ulonglong),                                        ## [in] height (scalar)
         ("depth", c_ulonglong)                                          ## [in] scalar (scalar)
+    ]
+
+###############################################################################
+## @brief File descriptor
+class ur_file_descriptor_t(Structure):
+    _fields_ = [
+        ("stype", ur_structure_type_t),                                 ## [in] type of this structure, must be
+                                                                        ## ::UR_STRUCTURE_TYPE_FILE_DESCRIPTOR
+        ("pNext", c_void_p),                                            ## [in][optional] pointer to extension-specific structure
+        ("fd", c_int)                                                   ## [in] A file descriptor used for Linux and & MacOS operating systems.
+    ]
+
+###############################################################################
+## @brief Windows specific File Descriptor
+class ur_windows_file_descriptor_t(Structure):
+    _fields_ = [
+        ("stype", ur_structure_type_t),                                 ## [in] type of this structure, must be
+                                                                        ## ::UR_STRUCTURE_TYPE_WINDOWS_FILE_DESCRIPTOR
+        ("pNext", c_void_p),                                            ## [in][optional] pointer to extension-specific structure
+        ("fd", HANDLE)                                                  ## [in] A windows file handle.
     ]
 
 ###############################################################################

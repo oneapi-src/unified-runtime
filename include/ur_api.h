@@ -19,6 +19,13 @@
 // standard headers
 #include <stddef.h>
 #include <stdint.h>
+#if defined(_WIN32)
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#include "windows.h"
+#undef WIN32_LEAN_AND_MEAN
+#undef NOMINMAX
+#endif
 
 #if defined(__cplusplus)
 extern "C" {
@@ -239,6 +246,8 @@ typedef enum ur_structure_type_t {
     UR_STRUCTURE_TYPE_KERNEL_EXEC_INFO_PROPERTIES = 31,     ///< ::ur_kernel_exec_info_properties_t
     UR_STRUCTURE_TYPE_KERNEL_ARG_VALUE_PROPERTIES = 32,     ///< ::ur_kernel_arg_value_properties_t
     UR_STRUCTURE_TYPE_KERNEL_ARG_LOCAL_PROPERTIES = 33,     ///< ::ur_kernel_arg_local_properties_t
+    UR_STRUCTURE_TYPE_FILE_DESCRIPTOR = 34,                 ///< ::ur_file_descriptor_t
+    UR_STRUCTURE_TYPE_WINDOWS_FILE_DESCRIPTOR = 36,         ///< ::ur_windows_file_descriptor_t
     UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_DESC = 0x1000,     ///< ::ur_exp_command_buffer_desc_t
     UR_STRUCTURE_TYPE_EXP_SAMPLER_MIP_PROPERTIES = 0x2000,  ///< ::ur_exp_sampler_mip_properties_t
     /// @cond
@@ -489,6 +498,28 @@ typedef struct ur_rect_region_t {
     uint64_t depth;  ///< [in] scalar (scalar)
 
 } ur_rect_region_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief File descriptor
+typedef struct ur_file_descriptor_t {
+    ur_structure_type_t stype; ///< [in] type of this structure, must be
+                               ///< ::UR_STRUCTURE_TYPE_FILE_DESCRIPTOR
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
+    int fd;                    ///< [in] A file descriptor used for Linux and & MacOS operating systems.
+
+} ur_file_descriptor_t;
+
+///////////////////////////////////////////////////////////////////////////////
+#if defined(_WIN32)
+/// @brief Windows specific File Descriptor
+typedef struct ur_windows_file_descriptor_t {
+    ur_structure_type_t stype; ///< [in] type of this structure, must be
+                               ///< ::UR_STRUCTURE_TYPE_WINDOWS_FILE_DESCRIPTOR
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
+    HANDLE fd;                 ///< [in] A windows file handle.
+
+} ur_windows_file_descriptor_t;
+#endif // defined(_WIN32)
 
 #if !defined(__GNUC__)
 #pragma endregion
