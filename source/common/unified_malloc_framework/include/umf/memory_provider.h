@@ -37,6 +37,14 @@ umfMemoryProviderCreate(struct umf_memory_provider_ops_t *ops, void *params,
 ///
 void umfMemoryProviderDestroy(umf_memory_provider_handle_t hProvider);
 
+// TODO comment
+enum umf_result_t
+umfMemoryProviderRegister(struct umf_memory_provider_ops_t *ops, char *name);
+enum umf_result_t umfMemoryProvidersRegisterGetNames(char *providers,
+                                                     size_t *numProviders);
+umf_memory_provider_type_t umfMemoryProvidersRegisterGetType(char *name);
+struct umf_memory_provider_ops_t umfMemoryProvidersRegisterGetOps(char *name);
+
 ///
 /// \brief Allocates size bytes of uninitialized storage from memory provider
 ///        with specified alignment.
@@ -110,7 +118,7 @@ umfMemoryProviderGetMinPageSize(umf_memory_provider_handle_t hProvider,
 
 ///
 /// \brief Discard physical pages within the virtual memory mapping associated at given addr and size.
-///        This call is asynchronous and may delay puring the pages indefinitely.
+///        This call is asynchronous and may delay purging the pages indefinitely.
 /// \param hProvider handle to the memory provider
 /// \param ptr beginning of the virtual memory range
 /// \param size size of the virtual memory range

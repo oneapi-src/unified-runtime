@@ -13,6 +13,8 @@
  */
 #include "ur_lib.hpp"
 
+#include "../source/loader/ur_memory_provider.hpp"
+
 extern "C" {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,6 +49,29 @@ ur_result_t UR_APICALL urInit(
     static ur_result_t result = UR_RESULT_SUCCESS;
     std::call_once(ur_lib::context->initOnce, [device_flags]() {
         result = ur_lib::context->Init(device_flags);
+
+        // TODO move to func
+        uint32_t platformCount = 0;
+        std::vector<ur_platform_handle_t> platforms;
+        urPlatformGet(1, nullptr, &platformCount);
+
+        platforms.resize(platformCount);
+        urPlatformGet(platformCount, platforms.data(), nullptr);
+
+        for (auto p : platforms) {
+
+            // TODO add platform name to provider?
+            static const size_t PLATFORM_NAME_MAX_LEN = 1024;
+            std::vector<char> platform_name(PLATFORM_NAME_MAX_LEN);
+            urPlatformGetInfo(p, UR_PLATFORM_INFO_NAME,
+                              PLATFORM_NAME_MAX_LEN - 1, platform_name.data(),
+                              nullptr);
+
+            std::cout << "platform_name: " << platform_name.data() << "\n";
+
+            umfMemoryProviderRegister(&UR_MEMORY_PROVIDER_OPS,
+                                      platform_name.data());
+        }
     });
 
     if (UR_RESULT_SUCCESS != result) {

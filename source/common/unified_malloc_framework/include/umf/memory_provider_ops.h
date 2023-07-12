@@ -17,6 +17,18 @@
 extern "C" {
 #endif
 
+// TODO this is a fixed list - maybe this could be changed to a map?
+// or other dynamic struct?
+typedef enum umf_memory_provider_type_t {
+    UMF_MEMORY_PROVIDER_TYPE_INVALID = -1,
+    UMF_MEMORY_PROVIDER_TYPE_NUMA = 0,
+    UMF_MEMORY_PROVIDER_TYPE_USM,
+    UMF_MEMORY_PROVIDER_TYPE_FIXED,
+    UMF_MEMORY_PROVIDER_TYPE_FILE,
+    UMF_MEMORY_PROVIDER_TYPE_USER,
+    UMF_MEMORY_PROVIDER_TYPE_NUM = UMF_MEMORY_PROVIDER_TYPE_USER + 1
+} umf_memory_provider_type_t;
+
 /// This structure comprises function pointers used by corresponding
 /// umfMemoryProvider* calls. Each memory provider implementation should
 /// initialize all function pointers.
@@ -24,18 +36,19 @@ struct umf_memory_provider_ops_t {
     /// Version of the ops structure.
     /// Should be initialized using UMF_VERSION_CURRENT
     uint32_t version;
+    umf_memory_provider_type_t type; // TODO change to caps?
 
     ///
-    /// \brief Initializes memory pool.
-    /// \param params pool-specific params
-    /// \param pool returns pointer to the pool
+    /// \brief Initializes memory provider.
+    /// \param params provider-specific params
+    /// \param provider returns pointer to the provider
     /// \return UMF_RESULT_SUCCESS on success or appropriate error code on failure.
-    enum umf_result_t (*initialize)(void *params, void **pool);
+    enum umf_result_t (*initialize)(void *params, void **provider);
 
     ///
-    /// \brief Finalizes memory pool.
-    /// \param pool pool to finalize
-    void (*finalize)(void *pool);
+    /// \brief Finalizes memory provider.
+    /// \param provider provider to finalize
+    void (*finalize)(void *provider);
 
     /// Refer to memory_provider.h for description of those functions
     enum umf_result_t (*alloc)(void *provider, size_t size, size_t alignment,

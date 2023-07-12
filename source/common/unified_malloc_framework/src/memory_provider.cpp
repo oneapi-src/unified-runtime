@@ -8,22 +8,30 @@
  *
  */
 
-#include "memory_provider_internal.h"
-#include <umf/memory_provider.h>
-
 #include <assert.h>
 #include <stdlib.h>
+
+#include <cstring>
+#include <map>
+#include <string>
+
+#include <umf/memory_provider.h>
+
+#include "memory_provider_internal.h"
+#include "os_memory_provider.h"
 
 struct umf_memory_provider_t {
     struct umf_memory_provider_ops_t ops;
     void *provider_priv;
 };
 
+std::map<std::string, umf_memory_provider_ops_t> globalProviders;
+
 enum umf_result_t
 umfMemoryProviderCreate(struct umf_memory_provider_ops_t *ops, void *params,
                         umf_memory_provider_handle_t *hProvider) {
     umf_memory_provider_handle_t provider =
-        malloc(sizeof(struct umf_memory_provider_t));
+        (umf_memory_provider_t *)malloc(sizeof(struct umf_memory_provider_t));
     if (!provider) {
         return UMF_RESULT_ERROR_OUT_OF_HOST_MEMORY;
     }
@@ -44,6 +52,55 @@ umfMemoryProviderCreate(struct umf_memory_provider_ops_t *ops, void *params,
     *hProvider = provider;
 
     return UMF_RESULT_SUCCESS;
+}
+
+enum umf_result_t umfMemoryProviderRegister(umf_memory_provider_ops_t *ops,
+                                            char *name) {
+
+    // TODO improve - use the ops->get_name()
+    globalProviders[name] = *ops;
+
+    return UMF_RESULT_SUCCESS;
+}
+
+enum umf_result_t umfMemoryProvidersRegisterGetNames(char *providers,
+                                                     size_t *numProviders) {
+    // TODO improve
+    if (globalProviders.count("OS") == 0) {
+
+        umfMemoryProviderRegister(&OS_MEMORY_PROVIDER_OPS,
+                                  std::string("OS").data());
+
+        // TODO IMPORTANT
+        // as the NUMA (OS) memory provider is the default provider here in the UMF,
+        // it should be available (predefined) somehow so a user could use it
+        // without any umalloc or UR libs etc
+    }
+
+    if (providers == NULL) {
+        *numProviders = globalProviders.size();
+    } else {
+        // get min
+        //size_t num = (*numProviders > UMF_MEMORY_PROVIDER_TYPE_NUM)
+        //                 ? UMF_MEMORY_PROVIDER_TYPE_NUM
+        //                 : *numProviders;
+
+        for (auto p : globalProviders) {
+            std::strcat(providers, p.first.c_str());
+            std::strcat(providers, ";");
+        }
+    }
+
+    return UMF_RESULT_SUCCESS;
+}
+
+// TODO rename ;)
+umf_memory_provider_ops_t umfMemoryProvidersRegisterGetOps(char *name) {
+    return globalProviders[name];
+}
+
+umf_memory_provider_type_t umfMemoryProvidersRegisterGetType(char *name) {
+    return globalProviders[name].type;
 }
 
 void umfMemoryProviderDestroy(umf_memory_provider_handle_t hProvider) {

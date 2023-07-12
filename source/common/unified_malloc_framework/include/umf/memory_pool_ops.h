@@ -18,6 +18,8 @@
 extern "C" {
 #endif
 
+typedef struct umf_memory_provider_t *umf_memory_provider_handle_t;
+
 /// \brief This structure comprises function pointers used by corresponding umfPool*
 /// calls. Each memory pool implementation should initialize all function
 /// pointers.

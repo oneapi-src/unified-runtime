@@ -5,9 +5,10 @@
 
 set(UMF_SOURCES
     src/memory_pool.c
-    src/memory_provider.c
+    src/memory_provider.cpp
     src/memory_tracker.cpp
     src/memory_provider_get_last_failed.cpp
+    src/os_memory_provider.c
 )
 
 if(UMF_BUILD_SHARED_LIBRARY)
@@ -23,5 +24,6 @@ else()
 endif()
 
 add_library(${PROJECT_NAME}::unified_malloc_framework ALIAS unified_malloc_framework)
+target_link_libraries(unified_malloc_framework numa)
 
 target_include_directories(unified_malloc_framework PUBLIC include)

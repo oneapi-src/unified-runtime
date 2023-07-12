@@ -25,6 +25,8 @@ add_library(${PROJECT_NAME}::loader ALIAS ur_loader)
 target_include_directories(ur_loader PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/layers
+    ${CMAKE_CURRENT_SOURCE_DIR}/../unified_malloc_framework
+    ${CMAKE_CURRENT_SOURCE_DIR}/../unified_malloc_framework/include
 )
 
 set_target_properties(ur_loader PROPERTIES
@@ -80,6 +82,7 @@ target_sources(ur_loader
         ${CMAKE_CURRENT_SOURCE_DIR}/ur_libddi.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ur_lib.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ur_lib.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ur_memory_provider.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/validation/ur_valddi.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/validation/ur_validation_layer.cpp
 )
