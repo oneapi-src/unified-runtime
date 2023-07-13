@@ -247,7 +247,7 @@ typedef enum ur_structure_type_t {
     UR_STRUCTURE_TYPE_KERNEL_ARG_VALUE_PROPERTIES = 32,     ///< ::ur_kernel_arg_value_properties_t
     UR_STRUCTURE_TYPE_KERNEL_ARG_LOCAL_PROPERTIES = 33,     ///< ::ur_kernel_arg_local_properties_t
     UR_STRUCTURE_TYPE_FILE_DESCRIPTOR = 34,                 ///< ::ur_file_descriptor_t
-    UR_STRUCTURE_TYPE_WINDOWS_FILE_DESCRIPTOR = 36,         ///< ::ur_windows_file_descriptor_t
+    UR_STRUCTURE_TYPE_WIN32_HANDLE_DESC = 35,               ///< ::ur_win32_handle_desc_t
     UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_DESC = 0x1000,     ///< ::ur_exp_command_buffer_desc_t
     UR_STRUCTURE_TYPE_EXP_SAMPLER_MIP_PROPERTIES = 0x2000,  ///< ::ur_exp_sampler_mip_properties_t
     /// @cond
@@ -511,14 +511,14 @@ typedef struct ur_file_descriptor_t {
 
 ///////////////////////////////////////////////////////////////////////////////
 #if defined(_WIN32)
-/// @brief Windows specific File Descriptor
-typedef struct ur_windows_file_descriptor_t {
+/// @brief Windows specific file handle
+typedef struct ur_win32_handle_desc_t {
     ur_structure_type_t stype; ///< [in] type of this structure, must be
-                               ///< ::UR_STRUCTURE_TYPE_WINDOWS_FILE_DESCRIPTOR
+                               ///< ::UR_STRUCTURE_TYPE_WIN32_HANDLE_DESC
     const void *pNext;         ///< [in][optional] pointer to extension-specific structure
-    HANDLE fd;                 ///< [in] A windows file handle.
+    HANDLE fd;                 ///< [in] A win32 file handle.
 
-} ur_windows_file_descriptor_t;
+} ur_win32_handle_desc_t;
 #endif // defined(_WIN32)
 
 #if !defined(__GNUC__)

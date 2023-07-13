@@ -20,6 +20,7 @@ from templates import helper as th
  """
 import platform
 from ctypes import *
+from ctypes.wintypes import HANDLE
 from enum import *
 
 # ctypes does not define c_intptr_t, so let's define it here manually

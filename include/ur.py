@@ -11,6 +11,7 @@
  """
 import platform
 from ctypes import *
+from ctypes.wintypes import HANDLE
 from enum import *
 
 # ctypes does not define c_intptr_t, so let's define it here manually
@@ -231,7 +232,7 @@ class ur_structure_type_v(IntEnum):
     KERNEL_ARG_VALUE_PROPERTIES = 32                ## ::ur_kernel_arg_value_properties_t
     KERNEL_ARG_LOCAL_PROPERTIES = 33                ## ::ur_kernel_arg_local_properties_t
     FILE_DESCRIPTOR = 34                            ## ::ur_file_descriptor_t
-    WINDOWS_FILE_DESCRIPTOR = 36                    ## ::ur_windows_file_descriptor_t
+    WIN32_HANDLE_DESC = 35                          ## ::ur_win32_handle_desc_t
     EXP_COMMAND_BUFFER_DESC = 0x1000                ## ::ur_exp_command_buffer_desc_t
     EXP_SAMPLER_MIP_PROPERTIES = 0x2000             ## ::ur_exp_sampler_mip_properties_t
 
@@ -473,13 +474,13 @@ class ur_file_descriptor_t(Structure):
     ]
 
 ###############################################################################
-## @brief Windows specific File Descriptor
-class ur_windows_file_descriptor_t(Structure):
+## @brief Windows specific file handle
+class ur_win32_handle_desc_t(Structure):
     _fields_ = [
         ("stype", ur_structure_type_t),                                 ## [in] type of this structure, must be
-                                                                        ## ::UR_STRUCTURE_TYPE_WINDOWS_FILE_DESCRIPTOR
+                                                                        ## ::UR_STRUCTURE_TYPE_WIN32_HANDLE_DESC
         ("pNext", c_void_p),                                            ## [in][optional] pointer to extension-specific structure
-        ("fd", HANDLE)                                                  ## [in] A windows file handle.
+        ("fd", HANDLE)                                                  ## [in] A win32 file handle.
     ]
 
 ###############################################################################

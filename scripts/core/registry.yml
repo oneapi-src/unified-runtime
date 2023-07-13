@@ -612,6 +612,6 @@ etors:
 - name: FILE_DESCRIPTOR
   desc: $x_file_descriptor_t
   value: '34'
-- name: WINDOWS_FILE_DESCRIPTOR
-  desc: $x_windows_file_descriptor_t
-  value: '36'
+- name: WIN32_HANDLE_DESC
+  desc: $x_win32_handle_desc_t
+  value: '35'

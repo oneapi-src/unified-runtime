@@ -327,11 +327,11 @@ members:
       desc: "[in] A file descriptor used for Linux and & MacOS operating systems."
 --- #--------------------------------------------------------------------------
 type: struct
-desc: "Windows specific File Descriptor"
-name: $x_windows_file_descriptor_t
+desc: "Windows specific file handle"
+name: $x_win32_handle_desc_t
 base: $x_base_desc_t
 condition: "defined(_WIN32)"
 members:
     - type: HANDLE
       name: fd
-      desc: "[in] A windows file handle."
+      desc: "[in] A win32 file handle."
