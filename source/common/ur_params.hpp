@@ -203,8 +203,10 @@ inline std::ostream &operator<<(std::ostream &os,
                                 const struct ur_rect_region_t params);
 inline std::ostream &operator<<(std::ostream &os,
                                 const struct ur_file_descriptor_t params);
+#if defined(_WIN32)
 inline std::ostream &
 operator<<(std::ostream &os, const struct ur_windows_file_descriptor_t params);
+#endif
 inline std::ostream &operator<<(std::ostream &os,
                                 enum ur_device_init_flag_t value);
 inline std::ostream &operator<<(std::ostream &os,
@@ -1442,11 +1444,13 @@ inline void serializeStruct(std::ostream &os, const void *ptr) {
         ur_params::serializePtr(os, pstruct);
     } break;
 
+#if defined(_WIN32)
     case UR_STRUCTURE_TYPE_WINDOWS_FILE_DESCRIPTOR: {
         const ur_windows_file_descriptor_t *pstruct =
             (const ur_windows_file_descriptor_t *)ptr;
         ur_params::serializePtr(os, pstruct);
     } break;
+#endif
 
     case UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_DESC: {
         const ur_exp_command_buffer_desc_t *pstruct =
@@ -1856,6 +1860,7 @@ inline std::ostream &operator<<(std::ostream &os,
     os << "}";
     return os;
 }
+#if defined(_WIN32)
 inline std::ostream &
 operator<<(std::ostream &os, const struct ur_windows_file_descriptor_t params) {
     os << "(struct ur_windows_file_descriptor_t){";
@@ -1877,6 +1882,7 @@ operator<<(std::ostream &os, const struct ur_windows_file_descriptor_t params) {
     os << "}";
     return os;
 }
+#endif
 inline std::ostream &operator<<(std::ostream &os,
                                 enum ur_device_init_flag_t value) {
     switch (value) {

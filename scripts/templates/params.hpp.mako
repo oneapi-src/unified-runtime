@@ -49,6 +49,10 @@ def findUnionTag(_union):
 def findMemberType(_item):
     query = [_o for _s in specs for _o in _s['objects'] if _o['name'] == _item['type']]
     return query[0] if len(query) > 0 else None
+
+def findTypeInSpecs(typename):
+    query = [_o for _s in specs for _o in _s['objects'] if _o['name'] == typename]
+    return query[0] if len(query) > 0 else None
 %>
 
 <%def name="line(item, n, params, params_dict)">
@@ -128,17 +132,26 @@ template <typename T> inline void serializeTagged(std::ostream &os, const void *
 
 %for spec in specs:
 %for obj in spec['objects']:
+%if 'condition' in obj and obj['type'] != 'macro':
+#if ${obj['condition']}
+%endif
 ## ENUM #######################################################################
 %if re.match(r"enum", obj['type']):
     inline std::ostream &operator<<(std::ostream &os, enum ${th.make_enum_name(n, tags, obj)} value);
 %elif re.match(r"struct", obj['type']):
     inline std::ostream &operator<<(std::ostream &os, const ${obj['type']} ${th.make_type_name(n, tags, obj)} params);
 %endif
+%if 'condition' in obj and obj['type'] != 'macro':
+#endif
+%endif
 %endfor # obj in spec['objects']
 %endfor
 
 %for spec in specs:
 %for obj in spec['objects']:
+%if 'condition' in obj and obj['type'] != 'macro':
+#if ${obj['condition']}
+%endif
 ## ENUM #######################################################################
 %if re.match(r"enum", obj['type']):
     %if "api_version" in obj['name']:
@@ -233,10 +246,17 @@ template <typename T> inline void serializeTagged(std::ostream &os, const void *
                 <%
                 ename = th.make_etor_name(n, tags, obj['name'], item['name'])
                 %>
+                <% base_type = findTypeInSpecs(item['desc']) %>\
+                %if 'condition' in base_type:
+                    #if ${base_type['condition']}
+                %endif
                 case ${ename}: {
                     const ${th.subt(n, tags, item['desc'])} *pstruct = (const ${th.subt(n, tags, item['desc'])} *)ptr;
                     ${x}_params::serializePtr(os, pstruct);
                 } break;
+                %if 'condition' in base_type:
+                    #endif
+                %endif
             %endfor
                 default:
                     os << "unknown enumerator";
@@ -326,6 +346,9 @@ for item in obj['members']:
     }
     os << "}";
 }
+%endif
+%if 'condition' in obj and obj['type'] != 'macro':
+#endif
 %endif
 %endfor # obj in spec['objects']
 %endfor
