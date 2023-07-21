@@ -27,7 +27,9 @@ function(add_umf_test name)
     add_test(NAME  umf-${name}
         COMMAND ${TEST_TARGET_NAME}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-    set_tests_properties(umf-${name} PROPERTIES LABELS "umf")
+    set_tests_properties(umf-${name} PROPERTIES
+        LABELS "umf"
+        ENVIRONMENT "UMF_ENABLE_MEMORY_TRACKING=1")
 endfunction()
 
 add_subdirectory(umf_pools)
