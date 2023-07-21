@@ -15,12 +15,15 @@
 #include <umf/memory_pool.h>
 #include <umf/memory_provider.h>
 
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct umf_memory_tracker_t *umf_memory_tracker_handle_t;
 
+bool umfIsPoolTrackingEnabled(void);
 umf_memory_tracker_handle_t umfMemoryTrackerGet(void);
 void *umfMemoryTrackerGetPool(umf_memory_tracker_handle_t hTracker,
                               const void *ptr);

@@ -15,12 +15,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 inline bool umf_getenv_tobool(const char *name) {
 #if defined(_WIN32)
     const int buffer_size = 1024;
     char value[buffer_size] = "0";
-    auto rc = GetEnvironmentVariableA(name, buffer, buffer_size);
+    auto rc = GetEnvironmentVariableA(name, value, buffer_size);
     if (rc == 0) {
         return false;
     }

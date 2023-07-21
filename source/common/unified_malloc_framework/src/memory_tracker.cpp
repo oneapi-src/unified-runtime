@@ -8,6 +8,8 @@
  *
  */
 
+#include "util.hpp"
+
 #include "memory_tracker.h"
 #include <umf/memory_provider.h>
 #include <umf/memory_provider_ops.h>
@@ -109,6 +111,12 @@ void __attribute__((constructor)) createLibTracker() {
 
 void __attribute__((destructor)) deleteLibTracker() { delete tracker; }
 #endif
+
+bool umfIsPoolTrackingEnabled(void) {
+    static bool EnablePoolTracking =
+        umf_getenv_tobool("UMF_ENABLE_MEMORY_TRACKING");
+    return EnablePoolTracking;
+}
 
 umf_memory_tracker_handle_t umfMemoryTrackerGet(void) { return tracker; }
 

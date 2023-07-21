@@ -15,6 +15,7 @@
 #include <umf/memory_pool_ops.h>
 
 #include <assert.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
 struct umf_memory_pool_t {
@@ -64,12 +65,18 @@ enum umf_result_t umfPoolCreate(struct umf_memory_pool_ops_t *ops,
     size_t providerInd = 0;
     pool->numProviders = numProviders;
 
-    // Wrap each provider with memory tracking provider.
-    for (providerInd = 0; providerInd < numProviders; providerInd++) {
-        ret = umfTrackingMemoryProviderCreate(providers[providerInd], pool,
-                                              &pool->providers[providerInd]);
-        if (ret != UMF_RESULT_SUCCESS) {
-            goto err_providers_init;
+    if (umfIsPoolTrackingEnabled()) {
+        // Wrap each provider with memory tracking provider.
+        for (providerInd = 0; providerInd < numProviders; providerInd++) {
+            ret = umfTrackingMemoryProviderCreate(
+                providers[providerInd], pool, &pool->providers[providerInd]);
+            if (ret != UMF_RESULT_SUCCESS) {
+                goto err_providers_init;
+            }
+        }
+    } else {
+        for (providerInd = 0; providerInd < numProviders; providerInd++) {
+            pool->providers[providerInd] = providers[providerInd];
         }
     }
 
@@ -85,7 +92,9 @@ enum umf_result_t umfPoolCreate(struct umf_memory_pool_ops_t *ops,
 
 err_pool_init:
 err_providers_init:
-    destroyMemoryProviderWrappers(pool->providers, providerInd);
+    if (umfIsPoolTrackingEnabled()) {
+        destroyMemoryProviderWrappers(pool->providers, providerInd);
+    }
 err_providers_alloc:
     free(pool);
 
@@ -94,7 +103,9 @@ err_providers_alloc:
 
 void umfPoolDestroy(umf_memory_pool_handle_t hPool) {
     hPool->ops.finalize(hPool->pool_priv);
-    destroyMemoryProviderWrappers(hPool->providers, hPool->numProviders);
+    if (umfIsPoolTrackingEnabled()) {
+        destroyMemoryProviderWrappers(hPool->providers, hPool->numProviders);
+    }
     free(hPool);
 }
 
@@ -128,7 +139,8 @@ enum umf_result_t umfFree(void *ptr) {
     if (hPool) {
         return umfPoolFree(hPool, ptr);
     }
-    return UMF_RESULT_SUCCESS;
+
+    return UMF_RESULT_ERROR_NOT_SUPPORTED;
 }
 
 enum umf_result_t
@@ -137,6 +149,10 @@ umfPoolGetLastAllocationError(umf_memory_pool_handle_t hPool) {
 }
 
 umf_memory_pool_handle_t umfPoolByPtr(const void *ptr) {
+    if (!umfIsPoolTrackingEnabled()) {
+        return NULL;
+    }
+
     return umfMemoryTrackerGetPool(umfMemoryTrackerGet(), ptr);
 }
 
@@ -154,8 +170,13 @@ umfPoolGetMemoryProviders(umf_memory_pool_handle_t hPool, size_t numProviders,
 
     if (hProviders) {
         for (size_t i = 0; i < hPool->numProviders; i++) {
-            umfTrackingMemoryProviderGetUpstreamProvider(
-                umfMemoryProviderGetPriv(hPool->providers[i]), hProviders + i);
+            if (umfIsPoolTrackingEnabled()) {
+                umfTrackingMemoryProviderGetUpstreamProvider(
+                    umfMemoryProviderGetPriv(hPool->providers[i]),
+                    hProviders + i);
+            } else {
+                hProviders[i] = hPool->providers[i];
+            }
         }
     }
 
