@@ -47,6 +47,12 @@ struct provider_base {
     enum umf_result_t purge_force(void *ptr, size_t size) noexcept {
         return UMF_RESULT_ERROR_UNKNOWN;
     }
+    enum umf_result_t memcpy_to(umf_memory_provider_handle_t dstProvider, void *dst, const void *src, size_t size) noexcept {
+        return UMF_RESULT_ERROR_UNKNOWN;
+    }
+    enum umf_result_t memcpy_from(umf_memory_provider_handle_t srcProvider, void *dst, const void *src, size_t size) noexcept {
+        return UMF_RESULT_ERROR_UNKNOWN;
+    }
     const char *get_name() noexcept { return "base"; }
 };
 

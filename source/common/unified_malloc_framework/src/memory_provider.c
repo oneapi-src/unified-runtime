@@ -130,3 +130,13 @@ const char *umfMemoryProviderGetName(umf_memory_provider_handle_t hProvider) {
 umf_memory_provider_handle_t umfGetLastFailedMemoryProvider(void) {
     return *umfGetLastFailedMemoryProviderPtr();
 }
+
+enum umf_result_t umfMemoryProviderMemcpy(umf_memory_provider_handle_t dstProvider, umf_memory_provider_handle_t srcProvider, void *dst, const void *src, size_t size) {
+    enum umf_result_t ret = srcProvider->ops.memcpy_from(srcProvider->provider_priv, dstProvider, dst, src, size);
+    if (ret == UMF_RESULT_SUCCESS) {
+        return ret;
+    }
+    
+    return dstProvider->ops.memcpy_to(dstProvider->provider_priv, srcProvider, dst, src, size);
+    // TODO: if this returns unsupported, we can try copying through the host
+}

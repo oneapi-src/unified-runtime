@@ -50,6 +50,8 @@ struct umf_memory_provider_ops_t {
     enum umf_result_t (*purge_lazy)(void *provider, void *ptr, size_t size);
     enum umf_result_t (*purge_force)(void *provider, void *ptr, size_t size);
     const char *(*get_name)(void *provider);
+    enum umf_result_t (*memcpy_from)(void *srcProvider, umf_memory_provider_handle_t dstProvider, void *dst, const void *src, size_t size);
+    enum umf_result_t (*memcpy_to)(void *dstProvider, umf_memory_provider_handle_t srcProvider, void *dst, const void *src, size_t size);
 };
 
 #ifdef __cplusplus

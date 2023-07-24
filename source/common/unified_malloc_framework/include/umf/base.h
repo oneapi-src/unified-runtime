@@ -18,6 +18,9 @@
 extern "C" {
 #endif
 
+typedef struct umf_memory_pool_t *umf_memory_pool_handle_t;
+typedef struct umf_memory_provider_t *umf_memory_provider_handle_t;
+
 /// \brief Generates generic 'UMF' API versions
 #define UMF_MAKE_VERSION(_major, _minor)                                       \
     ((_major << 16) | (_minor & 0x0000ffff))

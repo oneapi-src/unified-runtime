@@ -18,8 +18,6 @@
 extern "C" {
 #endif
 
-typedef struct umf_memory_provider_t *umf_memory_provider_handle_t;
-
 ///
 /// \brief Creates new memory provider.
 /// \param ops instance of umf_memory_provider_ops_t
@@ -149,6 +147,10 @@ const char *umfMemoryProviderGetName(umf_memory_provider_handle_t hProvider);
 ///
 /// \return Handle to the memory provider
 umf_memory_provider_handle_t umfGetLastFailedMemoryProvider(void);
+
+///
+/// \brief Copy size bytes from the location pointed to by src to the location pointer to by dest. Location pointed to by src should reside in srcProvider. Location pointer to by dst should reside in dstProvider.
+enum umf_result_t umfMemoryProviderMemcpy(umf_memory_provider_handle_t dstProvider, umf_memory_provider_handle_t srcProvider, void *dst, const void *src, size_t size);
 
 #ifdef __cplusplus
 }

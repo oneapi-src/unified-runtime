@@ -161,3 +161,25 @@ umfPoolGetMemoryProviders(umf_memory_pool_handle_t hPool, size_t numProviders,
 
     return UMF_RESULT_SUCCESS;
 }
+
+enum umf_result_t umfPoolMemcpy(umf_memory_pool_handle_t dstPool, umf_memory_pool_handle_t srcPool, void *dst, const void *src, size_t size) {
+    umf_memory_provider_handle_t srcProvider;
+    umf_memory_provider_handle_t dstProvider;
+
+    // TODO: handle more than 1 provider case
+    enum umf_result_t ret = umfPoolGetMemoryProviders(srcPool, 1, &srcProvider, NULL);
+    if (ret != UMF_RESULT_SUCCESS) {
+        return ret;
+    }
+
+    ret = umfPoolGetMemoryProviders(dstPool, 1, &dstProvider, NULL);
+    if (ret != UMF_RESULT_SUCCESS) {
+        return ret;
+    }
+
+    return umfMemoryProviderMemcpy(srcProvider, dstProvider, dst, src, size);
+}
+
+enum umf_result_t umfMemcpy(void *dst, const void *src, size_t size) {
+    return umfPoolMemcpy(umfPoolByPtr(dst), umfPoolByPtr(src), dst, src, size);
+}

@@ -18,8 +18,6 @@
 extern "C" {
 #endif
 
-typedef struct umf_memory_pool_t *umf_memory_pool_handle_t;
-
 struct umf_memory_pool_ops_t;
 
 ///
@@ -146,6 +144,14 @@ enum umf_result_t
 umfPoolGetMemoryProviders(umf_memory_pool_handle_t hPool, size_t numProviders,
                           umf_memory_provider_handle_t *hProviders,
                           size_t *numProvidersRet);
+
+///
+/// \brief Copy size bytes from the location pointed to by src to the location pointer to by dest. Location pointed to by src should reside in srcPool. Location pointer to by dst should reside in dstPool.
+enum umf_result_t umfPoolMemcpy(umf_memory_pool_handle_t dstPool, umf_memory_pool_handle_t srcPool, void *dst, const void *src, size_t size);
+
+///
+/// \brief Copy size bytes from the location pointed to by src to the location pointer to by dest.
+enum umf_result_t umfMemcpy(void *dst, const void *src, size_t size);
 
 #ifdef __cplusplus
 }

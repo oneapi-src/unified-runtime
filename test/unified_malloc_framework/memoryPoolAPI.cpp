@@ -133,6 +133,54 @@ TEST_F(test, retrieveMemoryProviders) {
     ASSERT_EQ(retProviders, providers);
 }
 
+TEST_F(test, memoryPoolMemcpy) {
+    struct memory_provider : public umf_test::provider_base {
+        enum umf_result_t memcpy_to(umf_memory_provider_handle_t dstProvider, void *dst, const void *src, size_t size) noexcept {
+            return UMF_RESULT_ERROR_NOT_SUPPORTED;
+        }
+        enum umf_result_t memcpy_from(umf_memory_provider_handle_t srcProvider, void *dst, const void *src, size_t size) noexcept {
+            memcpy(dst, src, size);
+            return UMF_RESULT_SUCCESS;
+        }
+    };
+
+    auto [ret, providerUnique] =
+        umf::memoryProviderMakeUnique<memory_provider>();
+    ASSERT_EQ(ret, UMF_RESULT_SUCCESS);
+
+    auto hProvider = providerUnique.get();
+
+    auto [ret_p1, pool1] = umf::poolMakeUnique<umf_test::proxy_pool>(&hProvider, 1);
+    ASSERT_EQ(ret_p1, UMF_RESULT_SUCCESS);
+
+    auto [ret_p2, pool2] = umf::poolMakeUnique<umf_test::proxy_pool>(&hProvider, 1);
+    ASSERT_EQ(ret_p1, UMF_RESULT_SUCCESS);
+
+    static constexpr size_t size = 16;
+    auto *ptr1 = umfPoolMalloc(pool1.get(), size);
+    ASSERT_NE(ptr1, nullptr);
+    auto *ptr2 = umfPoolMalloc(pool1.get(), size);
+    ASSERT_NE(ptr2, nullptr);
+
+    memset(ptr1, 1, size);
+    memset(ptr2, 2, size);
+
+    // memcpy ptr2 -> ptr1
+    ret = umfMemcpy(ptr1, ptr2, size);
+    ASSERT_EQ(ret, UMF_RESULT_SUCCESS);
+    ASSERT_EQ(std::string_view((char*)ptr1, size), std::string_view((char*)ptr2, size));
+    ASSERT_EQ(*(char*)ptr1, 2);
+
+    memset(ptr1, 1, size);
+    memset(ptr2, 2, size);
+
+    // memcpy ptr1 -> ptr2
+    ret = umfMemcpy(ptr2, ptr1, size);
+    ASSERT_EQ(ret, UMF_RESULT_SUCCESS);
+    ASSERT_EQ(std::string_view((char*)ptr1, size), std::string_view((char*)ptr2, size));
+    ASSERT_EQ(*(char*)ptr1, 1);
+}
+
 INSTANTIATE_TEST_SUITE_P(
     mallocPoolTest, umfPoolTest, ::testing::Values([] {
         return umf::poolMakeUnique<umf_test::malloc_pool, 1>(

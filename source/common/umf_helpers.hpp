@@ -131,6 +131,8 @@ auto memoryProviderMakeUnique(Args &&...args) {
     UMF_ASSIGN_OP(ops, T, purge_lazy, UMF_RESULT_ERROR_UNKNOWN);
     UMF_ASSIGN_OP(ops, T, purge_force, UMF_RESULT_ERROR_UNKNOWN);
     UMF_ASSIGN_OP(ops, T, get_name, "");
+    UMF_ASSIGN_OP(ops, T, memcpy_to, UMF_RESULT_ERROR_UNKNOWN);
+    UMF_ASSIGN_OP(ops, T, memcpy_from, UMF_RESULT_ERROR_UNKNOWN);
 
     umf_memory_provider_handle_t hProvider = nullptr;
     auto ret = umfMemoryProviderCreate(&ops, &argsTuple, &hProvider);
