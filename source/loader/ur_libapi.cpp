@@ -2273,6 +2273,39 @@ ur_result_t UR_APICALL urUSMFree(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Free the USM memory object from the pool
+///
+/// @details
+///     - Calling this function is equivalent to urUSMFree but without the pool
+///       look-up overhead.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == pool`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pMem`
+///     - ::UR_RESULT_ERROR_INVALID_MEM_OBJECT
+///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
+ur_result_t UR_APICALL urUSMPoolFree(
+    ur_usm_pool_handle_t
+        pool,  ///< [in] Pointer to a pool created using urUSMPoolCreate
+    void *pMem ///< [in] pointer to USM memory object
+    ) try {
+    auto pfnPoolFree = ur_lib::context->urDdiTable.USM.pfnPoolFree;
+    if (nullptr == pfnPoolFree) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    return pfnPoolFree(pool, pMem);
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Get USM memory object allocation information
 ///
 /// @returns

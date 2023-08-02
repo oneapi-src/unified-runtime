@@ -1490,6 +1490,31 @@ __urdlllocal ur_result_t UR_APICALL urUSMFree(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMPoolFree
+__urdlllocal ur_result_t UR_APICALL urUSMPoolFree(
+    ur_usm_pool_handle_t
+        pool,  ///< [in] Pointer to a pool created using urUSMPoolCreate
+    void *pMem ///< [in] pointer to USM memory object
+) {
+    auto pfnPoolFree = context.urDdiTable.USM.pfnPoolFree;
+
+    if (nullptr == pfnPoolFree) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    ur_usm_pool_free_params_t params = {&pool, &pMem};
+    uint64_t instance = context.notify_begin(UR_FUNCTION_USM_POOL_FREE,
+                                             "urUSMPoolFree", &params);
+
+    ur_result_t result = pfnPoolFree(pool, pMem);
+
+    context.notify_end(UR_FUNCTION_USM_POOL_FREE, "urUSMPoolFree", &params,
+                       &result, instance);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMGetMemAllocInfo
 __urdlllocal ur_result_t UR_APICALL urUSMGetMemAllocInfo(
     ur_context_handle_t hContext, ///< [in] handle of the context object
@@ -6702,6 +6727,9 @@ __urdlllocal ur_result_t UR_APICALL urGetUSMProcAddrTable(
 
     dditable.pfnFree = pDdiTable->pfnFree;
     pDdiTable->pfnFree = ur_tracing_layer::urUSMFree;
+
+    dditable.pfnPoolFree = pDdiTable->pfnPoolFree;
+    pDdiTable->pfnPoolFree = ur_tracing_layer::urUSMPoolFree;
 
     dditable.pfnGetMemAllocInfo = pDdiTable->pfnGetMemAllocInfo;
     pDdiTable->pfnGetMemAllocInfo = ur_tracing_layer::urUSMGetMemAllocInfo;

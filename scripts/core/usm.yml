@@ -148,7 +148,7 @@ members:
             Must be zero or a power of 2.
             Must be equal to or smaller than the size of the largest data type supported by `hDevice`.
 --- #--------------------------------------------------------------------------
-type: struct 
+type: struct
 desc: "USM host allocation descriptor type."
 details:
   - Specify these properties in $xUSMHostAlloc and $xUSMSharedAlloc via $x_usm_desc_t
@@ -228,10 +228,10 @@ params:
     - type: void**
       name: ppMem
       desc: "[out] pointer to USM host memory object"
-returns:      
+returns:
     - $X_RESULT_ERROR_INVALID_CONTEXT
     - $X_RESULT_ERROR_INVALID_OPERATION:
-      - "If $X_DEVICE_INFO_USM_HOST_SUPPORT is false."    
+      - "If $X_DEVICE_INFO_USM_HOST_SUPPORT is false."
     - $X_RESULT_ERROR_INVALID_VALUE:
       - "`pUSMDesc && pUSMDesc->align != 0 && ((pUSMDesc->align & (pUSMDesc->align-1)) != 0)`" # alignment must be power of two
       - "If `align` is greater that the size of the largest data type supported by `hDevice`."
@@ -272,7 +272,7 @@ params:
     - type: void**
       name: ppMem
       desc: "[out] pointer to USM device memory object"
-returns:      
+returns:
     - $X_RESULT_ERROR_INVALID_CONTEXT
     - $X_RESULT_ERROR_INVALID_OPERATION:
       - "If $X_DEVICE_INFO_USM_HOST_SUPPORT is false."
@@ -317,7 +317,7 @@ params:
     - type: void**
       name: ppMem
       desc: "[out] pointer to USM shared memory object"
-returns:      
+returns:
     - $X_RESULT_ERROR_INVALID_CONTEXT
     - $X_RESULT_ERROR_INVALID_VALUE:
       - "`pUSMDesc && pUSMDesc->align != 0 && ((pUSMDesc->align & (pUSMDesc->align-1)) != 0)`" # alignment must be power of two
@@ -339,6 +339,24 @@ params:
     - type: $x_context_handle_t
       name: hContext
       desc: "[in] handle of the context object"
+    - type: void*
+      name: pMem
+      desc: "[in] pointer to USM memory object"
+returns:
+    - $X_RESULT_ERROR_INVALID_MEM_OBJECT
+    - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
+--- #--------------------------------------------------------------------------
+type: function
+desc: "Free the USM memory object from the pool"
+class: $xUSM
+name: PoolFree
+ordinal: "0"
+details:
+  - "Calling this function is equivalent to urUSMFree but without the pool look-up overhead."
+params:
+    - type: $x_usm_pool_handle_t
+      name: pool
+      desc: "[in] Pointer to a pool created using urUSMPoolCreate"
     - type: void*
       name: pMem
       desc: "[in] pointer to USM memory object"
@@ -436,7 +454,7 @@ etors:
     - name: REFERENCE_COUNT
       desc: |
             [uint32_t] Reference count of the pool object.
-            The reference count returned should be considered immediately stale. 
+            The reference count returned should be considered immediately stale.
             It is unsuitable for general use in applications. This feature is provided for identifying memory leaks.
     - name: CONTEXT
       desc: "[$x_context_handle_t] USM memory pool context info"

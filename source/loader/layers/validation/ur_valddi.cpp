@@ -1798,6 +1798,34 @@ __urdlllocal ur_result_t UR_APICALL urUSMFree(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMPoolFree
+__urdlllocal ur_result_t UR_APICALL urUSMPoolFree(
+    ur_usm_pool_handle_t
+        pool,  ///< [in] Pointer to a pool created using urUSMPoolCreate
+    void *pMem ///< [in] pointer to USM memory object
+) {
+    auto pfnPoolFree = context.urDdiTable.USM.pfnPoolFree;
+
+    if (nullptr == pfnPoolFree) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    if (context.enableParameterValidation) {
+        if (NULL == pool) {
+            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
+        }
+
+        if (NULL == pMem) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+    }
+
+    ur_result_t result = pfnPoolFree(pool, pMem);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMGetMemAllocInfo
 __urdlllocal ur_result_t UR_APICALL urUSMGetMemAllocInfo(
     ur_context_handle_t hContext, ///< [in] handle of the context object
@@ -8080,6 +8108,9 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetUSMProcAddrTable(
 
     dditable.pfnFree = pDdiTable->pfnFree;
     pDdiTable->pfnFree = ur_validation_layer::urUSMFree;
+
+    dditable.pfnPoolFree = pDdiTable->pfnPoolFree;
+    pDdiTable->pfnPoolFree = ur_validation_layer::urUSMPoolFree;
 
     dditable.pfnGetMemAllocInfo = pDdiTable->pfnGetMemAllocInfo;
     pDdiTable->pfnGetMemAllocInfo = ur_validation_layer::urUSMGetMemAllocInfo;

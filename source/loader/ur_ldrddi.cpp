@@ -1754,6 +1754,31 @@ __urdlllocal ur_result_t UR_APICALL urUSMFree(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMPoolFree
+__urdlllocal ur_result_t UR_APICALL urUSMPoolFree(
+    ur_usm_pool_handle_t
+        pool,  ///< [in] Pointer to a pool created using urUSMPoolCreate
+    void *pMem ///< [in] pointer to USM memory object
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // extract platform's function pointer table
+    auto dditable = reinterpret_cast<ur_usm_pool_object_t *>(pool)->dditable;
+    auto pfnPoolFree = dditable->ur.USM.pfnPoolFree;
+    if (nullptr == pfnPoolFree) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    pool = reinterpret_cast<ur_usm_pool_object_t *>(pool)->handle;
+
+    // forward to device-platform
+    result = pfnPoolFree(pool, pMem);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMGetMemAllocInfo
 __urdlllocal ur_result_t UR_APICALL urUSMGetMemAllocInfo(
     ur_context_handle_t hContext, ///< [in] handle of the context object
@@ -7866,6 +7891,7 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetUSMProcAddrTable(
             pDdiTable->pfnDeviceAlloc = ur_loader::urUSMDeviceAlloc;
             pDdiTable->pfnSharedAlloc = ur_loader::urUSMSharedAlloc;
             pDdiTable->pfnFree = ur_loader::urUSMFree;
+            pDdiTable->pfnPoolFree = ur_loader::urUSMPoolFree;
             pDdiTable->pfnGetMemAllocInfo = ur_loader::urUSMGetMemAllocInfo;
             pDdiTable->pfnPoolCreate = ur_loader::urUSMPoolCreate;
             pDdiTable->pfnPoolRetain = ur_loader::urUSMPoolRetain;

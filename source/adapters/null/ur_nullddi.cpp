@@ -1318,6 +1318,28 @@ __urdlllocal ur_result_t UR_APICALL urUSMFree(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMPoolFree
+__urdlllocal ur_result_t UR_APICALL urUSMPoolFree(
+    ur_usm_pool_handle_t
+        pool,  ///< [in] Pointer to a pool created using urUSMPoolCreate
+    void *pMem ///< [in] pointer to USM memory object
+    ) try {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // if the driver has created a custom function, then call it instead of using the generic path
+    auto pfnPoolFree = d_context.urDdiTable.USM.pfnPoolFree;
+    if (nullptr != pfnPoolFree) {
+        result = pfnPoolFree(pool, pMem);
+    } else {
+        // generic implementation
+    }
+
+    return result;
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMGetMemAllocInfo
 __urdlllocal ur_result_t UR_APICALL urUSMGetMemAllocInfo(
     ur_context_handle_t hContext, ///< [in] handle of the context object
@@ -5730,6 +5752,8 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetUSMProcAddrTable(
     pDdiTable->pfnSharedAlloc = driver::urUSMSharedAlloc;
 
     pDdiTable->pfnFree = driver::urUSMFree;
+
+    pDdiTable->pfnPoolFree = driver::urUSMPoolFree;
 
     pDdiTable->pfnGetMemAllocInfo = driver::urUSMGetMemAllocInfo;
 

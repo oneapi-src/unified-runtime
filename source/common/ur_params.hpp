@@ -1112,6 +1112,10 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_function_t value) {
     case UR_FUNCTION_ADAPTER_GET_INFO:
         os << "UR_FUNCTION_ADAPTER_GET_INFO";
         break;
+
+    case UR_FUNCTION_USM_POOL_FREE:
+        os << "UR_FUNCTION_USM_POOL_FREE";
+        break;
     default:
         os << "unknown enumerator";
         break;
@@ -14445,6 +14449,21 @@ inline std::ostream &operator<<(std::ostream &os,
 }
 
 inline std::ostream &
+operator<<(std::ostream &os, const struct ur_usm_pool_free_params_t *params) {
+
+    os << ".pool = ";
+
+    ur_params::serializePtr(os, *(params->ppool));
+
+    os << ", ";
+    os << ".pMem = ";
+
+    ur_params::serializePtr(os, *(params->ppMem));
+
+    return os;
+}
+
+inline std::ostream &
 operator<<(std::ostream &os,
            const struct ur_usm_get_mem_alloc_info_params_t *params) {
 
@@ -15627,6 +15646,9 @@ inline int serializeFunctionParams(std::ostream &os, uint32_t function,
     } break;
     case UR_FUNCTION_USM_FREE: {
         os << (const struct ur_usm_free_params_t *)params;
+    } break;
+    case UR_FUNCTION_USM_POOL_FREE: {
+        os << (const struct ur_usm_pool_free_params_t *)params;
     } break;
     case UR_FUNCTION_USM_GET_MEM_ALLOC_INFO: {
         os << (const struct ur_usm_get_mem_alloc_info_params_t *)params;

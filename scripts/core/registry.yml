@@ -529,6 +529,9 @@ etors:
 - name: ADAPTER_GET_INFO
   desc: Enumerator for $xAdapterGetInfo
   value: '181'
+- name: USM_POOL_FREE
+  desc: Enumerator for $xUSMPoolFree
+  value: '182'
 ---
 type: enum
 desc: Defines structure types

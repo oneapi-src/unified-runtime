@@ -196,6 +196,7 @@ class ur_function_v(IntEnum):
     ADAPTER_RETAIN = 179                            ## Enumerator for ::urAdapterRetain
     ADAPTER_GET_LAST_ERROR = 180                    ## Enumerator for ::urAdapterGetLastError
     ADAPTER_GET_INFO = 181                          ## Enumerator for ::urAdapterGetInfo
+    USM_POOL_FREE = 182                             ## Enumerator for ::urUSMPoolFree
 
 class ur_function_t(c_int):
     def __str__(self):
@@ -1548,7 +1549,7 @@ class ur_usm_pool_limits_desc_t(Structure):
 ## @brief Get USM memory pool information
 class ur_usm_pool_info_v(IntEnum):
     REFERENCE_COUNT = 0                             ## [uint32_t] Reference count of the pool object.
-                                                    ## The reference count returned should be considered immediately stale. 
+                                                    ## The reference count returned should be considered immediately stale.
                                                     ## It is unsuitable for general use in applications. This feature is
                                                     ## provided for identifying memory leaks.
     CONTEXT = 1                                     ## [::ur_context_handle_t] USM memory pool context info
@@ -3360,6 +3361,13 @@ else:
     _urUSMFree_t = CFUNCTYPE( ur_result_t, ur_context_handle_t, c_void_p )
 
 ###############################################################################
+## @brief Function-pointer for urUSMPoolFree
+if __use_win_types:
+    _urUSMPoolFree_t = WINFUNCTYPE( ur_result_t, ur_usm_pool_handle_t, c_void_p )
+else:
+    _urUSMPoolFree_t = CFUNCTYPE( ur_result_t, ur_usm_pool_handle_t, c_void_p )
+
+###############################################################################
 ## @brief Function-pointer for urUSMGetMemAllocInfo
 if __use_win_types:
     _urUSMGetMemAllocInfo_t = WINFUNCTYPE( ur_result_t, ur_context_handle_t, c_void_p, ur_usm_alloc_info_t, c_size_t, c_void_p, POINTER(c_size_t) )
@@ -3403,6 +3411,7 @@ class ur_usm_dditable_t(Structure):
         ("pfnDeviceAlloc", c_void_p),                                   ## _urUSMDeviceAlloc_t
         ("pfnSharedAlloc", c_void_p),                                   ## _urUSMSharedAlloc_t
         ("pfnFree", c_void_p),                                          ## _urUSMFree_t
+        ("pfnPoolFree", c_void_p),                                      ## _urUSMPoolFree_t
         ("pfnGetMemAllocInfo", c_void_p),                               ## _urUSMGetMemAllocInfo_t
         ("pfnPoolCreate", c_void_p),                                    ## _urUSMPoolCreate_t
         ("pfnPoolRetain", c_void_p),                                    ## _urUSMPoolRetain_t
@@ -4057,6 +4066,7 @@ class UR_DDI:
         self.urUSMDeviceAlloc = _urUSMDeviceAlloc_t(self.__dditable.USM.pfnDeviceAlloc)
         self.urUSMSharedAlloc = _urUSMSharedAlloc_t(self.__dditable.USM.pfnSharedAlloc)
         self.urUSMFree = _urUSMFree_t(self.__dditable.USM.pfnFree)
+        self.urUSMPoolFree = _urUSMPoolFree_t(self.__dditable.USM.pfnPoolFree)
         self.urUSMGetMemAllocInfo = _urUSMGetMemAllocInfo_t(self.__dditable.USM.pfnGetMemAllocInfo)
         self.urUSMPoolCreate = _urUSMPoolCreate_t(self.__dditable.USM.pfnPoolCreate)
         self.urUSMPoolRetain = _urUSMPoolRetain_t(self.__dditable.USM.pfnPoolRetain)

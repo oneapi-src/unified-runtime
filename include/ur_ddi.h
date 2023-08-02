@@ -1501,6 +1501,12 @@ typedef ur_result_t(UR_APICALL *ur_pfnUSMFree_t)(
     void *);
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for urUSMPoolFree
+typedef ur_result_t(UR_APICALL *ur_pfnUSMPoolFree_t)(
+    ur_usm_pool_handle_t,
+    void *);
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Function-pointer for urUSMGetMemAllocInfo
 typedef ur_result_t(UR_APICALL *ur_pfnUSMGetMemAllocInfo_t)(
     ur_context_handle_t,
@@ -1543,6 +1549,7 @@ typedef struct ur_usm_dditable_t {
     ur_pfnUSMDeviceAlloc_t pfnDeviceAlloc;
     ur_pfnUSMSharedAlloc_t pfnSharedAlloc;
     ur_pfnUSMFree_t pfnFree;
+    ur_pfnUSMPoolFree_t pfnPoolFree;
     ur_pfnUSMGetMemAllocInfo_t pfnGetMemAllocInfo;
     ur_pfnUSMPoolCreate_t pfnPoolCreate;
     ur_pfnUSMPoolRetain_t pfnPoolRetain;

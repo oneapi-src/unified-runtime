@@ -205,6 +205,7 @@ typedef enum ur_function_t {
     UR_FUNCTION_ADAPTER_RETAIN = 179,                                          ///< Enumerator for ::urAdapterRetain
     UR_FUNCTION_ADAPTER_GET_LAST_ERROR = 180,                                  ///< Enumerator for ::urAdapterGetLastError
     UR_FUNCTION_ADAPTER_GET_INFO = 181,                                        ///< Enumerator for ::urAdapterGetInfo
+    UR_FUNCTION_USM_POOL_FREE = 182,                                           ///< Enumerator for ::urUSMPoolFree
     /// @cond
     UR_FUNCTION_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -3384,6 +3385,30 @@ UR_APIEXPORT ur_result_t UR_APICALL
 urUSMFree(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     void *pMem                    ///< [in] pointer to USM memory object
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Free the USM memory object from the pool
+///
+/// @details
+///     - Calling this function is equivalent to urUSMFree but without the pool
+///       look-up overhead.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == pool`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pMem`
+///     - ::UR_RESULT_ERROR_INVALID_MEM_OBJECT
+///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
+UR_APIEXPORT ur_result_t UR_APICALL
+urUSMPoolFree(
+    ur_usm_pool_handle_t pool, ///< [in] Pointer to a pool created using urUSMPoolCreate
+    void *pMem                 ///< [in] pointer to USM memory object
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -9718,6 +9743,15 @@ typedef struct ur_usm_free_params_t {
     ur_context_handle_t *phContext;
     void **ppMem;
 } ur_usm_free_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urUSMPoolFree
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_usm_pool_free_params_t {
+    ur_usm_pool_handle_t *ppool;
+    void **ppMem;
+} ur_usm_pool_free_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urUSMGetMemAllocInfo
