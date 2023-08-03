@@ -15,7 +15,7 @@
 #include "provider.hpp"
 
 static usm::DisjointPool::Config poolConfig() {
-    usm::DisjointPool::Config config{};
+    usm::DisjointPool::Config config;
     config.SlabMinSize = 4096;
     config.MaxPoolableSize = 4096;
     config.Capacity = 4;

@@ -73,9 +73,6 @@ bool isCallocSupported(umf_memory_pool_handle_t hPool) {
 }
 
 struct pool_base {
-    umf_result_t initialize(umf_memory_provider_handle_t *, size_t) noexcept {
-        return UMF_RESULT_SUCCESS;
-    };
     void *malloc(size_t size) noexcept { return nullptr; }
     void *calloc(size_t, size_t) noexcept { return nullptr; }
     void *realloc(void *, size_t) noexcept { return nullptr; }
@@ -88,6 +85,9 @@ struct pool_base {
 };
 
 struct malloc_pool : public pool_base {
+    umf_result_t initialize(umf_memory_provider_handle_t *, size_t) noexcept {
+        return UMF_RESULT_SUCCESS;
+    };
     void *malloc(size_t size) noexcept { return ::malloc(size); }
     void *calloc(size_t num, size_t size) noexcept {
         return ::calloc(num, size);

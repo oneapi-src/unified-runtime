@@ -51,12 +51,49 @@ using provider_unique_handle_t =
     }
 
 namespace detail {
-template <typename T, typename ArgsTuple>
-umf_result_t initialize(T *obj, ArgsTuple &&args) {
+template <typename Arg> void *arg_to_ptr(Arg &&arg) { return (void *)&arg; }
+
+inline void *arg_to_ptr() { return nullptr; }
+
+template <typename Arg> Arg ptr_to_arg(void *ptr) {
+    return (Arg)(*reinterpret_cast<std::decay_t<Arg> *>(ptr));
+}
+
+template <typename T, typename... Args>
+auto initialize_impl(int, T *obj, Args &&...args)
+    -> decltype(obj->initialize(std::forward<Args>(args)...)) {
+    return obj->initialize(std::forward<Args>(args)...);
+}
+
+template <typename T, typename... Args>
+umf_result_t initialize_impl(double, T *obj, Args &&...args) {
+    return UMF_RESULT_ERROR_INVALID_ARGUMENT;
+}
+
+template <typename T, typename ParamRef, typename... Args>
+umf_result_t initialize(T *obj, void *params, Args &&...args) {
     try {
-        auto ret = std::apply(&T::initialize,
-                              std::tuple_cat(std::make_tuple(obj),
-                                             std::forward<ArgsTuple>(args)));
+        umf_result_t ret;
+        if constexpr (std::is_same_v<ParamRef, void>) {
+            // If intialize() does not accept any arguments, params should be NULL
+            if (params) {
+                ret = UMF_RESULT_ERROR_INVALID_ARGUMENT;
+            } else {
+                ret = obj->initialize(std::forward<Args>(args)...);
+            }
+        } else {
+            if (params) {
+                // If there's intialize() oeralod that accepts one argument and params is not NULL, call
+                // that overload.
+                ret = obj->initialize(std::forward<Args>(args)...,
+                                      ptr_to_arg<ParamRef>(params));
+            } else {
+                // Otherwise try to call initialize() with zero arguments, return
+                // UMF_RESULT_ERROR_INVALID_ARGUMENT if no such overload
+                ret = initialize_impl<T>(0, obj, std::forward<Args>(args)...);
+            }
+        }
+
         if (ret != UMF_RESULT_SUCCESS) {
             delete obj;
         }
@@ -66,9 +103,10 @@ umf_result_t initialize(T *obj, ArgsTuple &&args) {
         return UMF_RESULT_ERROR_UNKNOWN;
     }
 }
+} // namespace detail
 
-template <typename T, typename ArgsTuple>
-umf_memory_pool_ops_t poolMakeUniqueOps() {
+template <typename T, typename Param = void>
+umf_memory_pool_ops_t poolMakeOps() {
     umf_memory_pool_ops_t ops;
 
     ops.version = UMF_VERSION_CURRENT;
@@ -80,10 +118,8 @@ umf_memory_pool_ops_t poolMakeUniqueOps() {
             return UMF_RESULT_ERROR_OUT_OF_HOST_MEMORY;
         }
 
-        return detail::initialize<T>(
-            reinterpret_cast<T *>(*obj),
-            std::tuple_cat(std::make_tuple(providers, numProviders),
-                           *reinterpret_cast<ArgsTuple *>(params)));
+        return detail::initialize<T, Param>(reinterpret_cast<T *>(*obj), params,
+                                            providers, numProviders);
     };
     ops.finalize = [](void *obj) { delete reinterpret_cast<T *>(obj); };
 
@@ -97,17 +133,10 @@ umf_memory_pool_ops_t poolMakeUniqueOps() {
 
     return ops;
 }
-} // namespace detail
 
-/// @brief creates UMF memory provider based on given T type.
-/// T should implement all functions defined by
-/// umf_memory_provider_ops_t, except for finalize (it is
-/// replaced by dtor). All arguments passed to this function are
-/// forwarded to T::initialize().
-template <typename T, typename... Args>
-auto memoryProviderMakeUnique(Args &&...args) {
+template <typename T, typename Param = void>
+umf_memory_provider_ops_t providerMakeOps() {
     umf_memory_provider_ops_t ops;
-    auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
 
     ops.version = UMF_VERSION_CURRENT;
     ops.initialize = [](void *params, void **obj) {
@@ -117,9 +146,8 @@ auto memoryProviderMakeUnique(Args &&...args) {
             return UMF_RESULT_ERROR_OUT_OF_HOST_MEMORY;
         }
 
-        return detail::initialize<T>(
-            reinterpret_cast<T *>(*obj),
-            *reinterpret_cast<decltype(argsTuple) *>(params));
+        return detail::initialize<T, Param>(reinterpret_cast<T *>(*obj),
+                                            params);
     };
     ops.finalize = [](void *obj) { delete reinterpret_cast<T *>(obj); };
 
@@ -132,8 +160,20 @@ auto memoryProviderMakeUnique(Args &&...args) {
     UMF_ASSIGN_OP(ops, T, purge_force, UMF_RESULT_ERROR_UNKNOWN);
     UMF_ASSIGN_OP(ops, T, get_name, "");
 
+    return ops;
+}
+
+/// @brief creates UMF memory provider based on given T type.
+/// T should implement all functions defined by
+/// umf_memory_provider_ops_t, except for finalize (it is
+/// replaced by dtor). All arguments passed to this function are
+/// forwarded to T::initialize().
+template <typename T, typename... Args>
+auto memoryProviderMakeUnique(Args &&...args) {
+    umf_memory_provider_ops_t ops = providerMakeOps<T, decltype(args)...>();
     umf_memory_provider_handle_t hProvider = nullptr;
-    auto ret = umfMemoryProviderCreate(&ops, &argsTuple, &hProvider);
+    auto ret = umfMemoryProviderCreate(
+        &ops, detail::arg_to_ptr(std::forward<Args>(args)...), &hProvider);
     return std::pair<umf_result_t, provider_unique_handle_t>{
         ret, provider_unique_handle_t(hProvider, &umfMemoryProviderDestroy)};
 }
@@ -146,11 +186,11 @@ auto memoryProviderMakeUnique(Args &&...args) {
 template <typename T, typename... Args>
 auto poolMakeUnique(umf_memory_provider_handle_t *providers,
                     size_t numProviders, Args &&...args) {
-    auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
-    auto ops = detail::poolMakeUniqueOps<T, decltype(argsTuple)>();
-
+    auto ops = poolMakeOps<T, decltype(args)...>();
     umf_memory_pool_handle_t hPool = nullptr;
-    auto ret = umfPoolCreate(&ops, providers, numProviders, &argsTuple, &hPool);
+    auto ret =
+        umfPoolCreate(&ops, providers, numProviders,
+                      detail::arg_to_ptr(std::forward<Args>(args)...), &hPool);
     return std::pair<umf_result_t, pool_unique_handle_t>{
         ret, pool_unique_handle_t(hPool, &umfPoolDestroy)};
 }
@@ -161,9 +201,7 @@ auto poolMakeUnique(umf_memory_provider_handle_t *providers,
 template <typename T, size_t N, typename... Args>
 auto poolMakeUnique(std::array<provider_unique_handle_t, N> providers,
                     Args &&...args) {
-    auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
-    auto ops = detail::poolMakeUniqueOps<T, decltype(argsTuple)>();
-
+    auto ops = poolMakeOps<T, decltype(args)...>();
     std::array<umf_memory_provider_handle_t, N> provider_handles;
     for (size_t i = 0; i < N; i++) {
         provider_handles[i] = providers[i].release();
@@ -178,8 +216,9 @@ auto poolMakeUnique(std::array<provider_unique_handle_t, N> providers,
     };
 
     umf_memory_pool_handle_t hPool = nullptr;
-    auto ret = umfPoolCreate(&ops, provider_handles.data(),
-                             provider_handles.size(), &argsTuple, &hPool);
+    auto ret =
+        umfPoolCreate(&ops, provider_handles.data(), provider_handles.size(),
+                      detail::arg_to_ptr(std::forward<Args>(args)...), &hPool);
     return std::pair<umf_result_t, pool_unique_handle_t>{
         ret, pool_unique_handle_t(hPool, std::move(poolDestructor))};
 }

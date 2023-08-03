@@ -160,7 +160,7 @@ INSTANTIATE_TEST_SUITE_P(
 ////////////////// Negative test cases /////////////////
 
 TEST_F(test, memoryPoolInvalidProvidersNullptr) {
-    auto ret = umf::poolMakeUnique<umf_test::pool_base>(nullptr, 1);
+    auto ret = umf::poolMakeUnique<umf_test::malloc_pool>(nullptr, 1);
     ASSERT_EQ(ret.first, UMF_RESULT_ERROR_INVALID_ARGUMENT);
 }
 
@@ -168,7 +168,7 @@ TEST_F(test, memoryPoolInvalidProvidersNum) {
     auto nullProvider = umf_test::wrapProviderUnique(nullProviderCreate());
     umf_memory_provider_handle_t providers[] = {nullProvider.get()};
 
-    auto ret = umf::poolMakeUnique<umf_test::pool_base>(providers, 0);
+    auto ret = umf::poolMakeUnique<umf_test::malloc_pool>(providers, 0);
     ASSERT_EQ(ret.first, UMF_RESULT_ERROR_INVALID_ARGUMENT);
 }
 
@@ -297,4 +297,98 @@ TEST_F(test, getLastFailedMemoryProvider) {
     ASSERT_EQ(std::string_view(
                   umfMemoryProviderGetName(umfGetLastFailedMemoryProvider())),
               "provider2");
+}
+
+TEST_F(test, C_API_nullptr_arg) {
+    struct pool_no_arg_init : umf_test::pool_base {
+        umf_result_t initialize(umf_memory_provider_handle_t *hProviders,
+                                size_t numProviders) {
+            return UMF_RESULT_SUCCESS;
+        }
+    };
+
+    umf_memory_provider_handle_t provider = nullptr;
+    auto ops = umf::poolMakeOps<pool_no_arg_init, void>();
+
+    {
+        umf_memory_pool_handle_t hPool;
+        auto ret = umfPoolCreate(&ops, &provider, 1, nullptr, &hPool);
+        ASSERT_EQ(ret, UMF_RESULT_SUCCESS);
+
+        umfPoolDestroy(hPool);
+    }
+
+    {
+        umf_memory_pool_handle_t hPool;
+        void *non_null_ptr = &hPool;
+        auto ret = umfPoolCreate(&ops, &provider, 1, non_null_ptr, &hPool);
+        ASSERT_EQ(ret, UMF_RESULT_ERROR_INVALID_ARGUMENT);
+
+    }
+}
+
+TEST_F(test, C_API_arg) {
+    static int Arg = 0;
+    struct pool_arg_init : umf_test::pool_base {
+        umf_result_t initialize(umf_memory_provider_handle_t *hProviders,
+                                size_t numProviders, int arg) {
+            Arg = arg;
+            return UMF_RESULT_SUCCESS;
+        }
+    };
+
+    umf_memory_provider_handle_t provider = nullptr;
+    auto ops = umf::poolMakeOps<pool_arg_init, int>();
+
+    {
+        umf_memory_pool_handle_t hPool;
+        int arg = 1;
+        ASSERT_EQ(Arg, 0);
+        auto ret = umfPoolCreate(&ops, &provider, 1, (void *)&arg, &hPool);
+        ASSERT_EQ(ret, UMF_RESULT_SUCCESS);
+        ASSERT_EQ(Arg, 1);
+
+        umfPoolDestroy(hPool);
+    }
+
+    {
+        umf_memory_pool_handle_t hPool;
+        auto ret = umfPoolCreate(&ops, &provider, 1, nullptr, &hPool);
+        ASSERT_EQ(ret, UMF_RESULT_ERROR_INVALID_ARGUMENT);
+    }
+}
+
+TEST_F(test, C_API_optional_arg) {
+    static int Arg = 0;
+    struct pool_arg_default_init : umf_test::pool_base {
+        umf_result_t initialize(umf_memory_provider_handle_t *hProviders,
+                                size_t numProviders, int arg = 2) {
+            Arg = arg;
+            return UMF_RESULT_SUCCESS;
+        }
+    };
+
+    umf_memory_provider_handle_t provider = nullptr;
+    auto ops = umf::poolMakeOps<pool_arg_default_init, int>();
+
+    {
+        umf_memory_pool_handle_t hPool;
+        int arg = 1;
+        ASSERT_EQ(Arg, 0);
+        auto ret = umfPoolCreate(&ops, &provider, 1, (void *)&arg, &hPool);
+        ASSERT_EQ(ret, UMF_RESULT_SUCCESS);
+        ASSERT_EQ(Arg, 1);
+
+        umfPoolDestroy(hPool);
+    }
+    Arg = 0;
+    {
+        umf_memory_pool_handle_t hPool;
+        ASSERT_EQ(Arg, 0);
+        auto ret = umfPoolCreate(&ops, &provider, 1, nullptr, &hPool);
+        ASSERT_EQ(ret, UMF_RESULT_SUCCESS);
+        ASSERT_EQ(Arg, 2);
+
+        umfPoolDestroy(hPool);
+    }
 }
