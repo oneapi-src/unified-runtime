@@ -51,12 +51,10 @@ endif()
 message(STATUS "OpenCL_LIBRARY: ${OpenCL_LIBRARY}")
 message(STATUS "OpenCL_INCLUDE_DIR: ${OpenCL_INCLUDE_DIR}")
 
-if (NOT OpenCL_HEADERS)
-    FetchContent_Declare(ocl-headers
-            GIT_REPOSITORY    ${OCL_HEADERS_REPO}
-            GIT_TAG           ${OCL_HEADERS_TAG}
-    )
-endif()
+
+# Suppress a compiler message about undefined CL_TARGET_OPENCL_VERSION.
+# Define all symbols up to OpenCL 3.0.
+target_compile_definitions(ur_adapter_opencl PRIVATE CL_TARGET_OPENCL_VERSION=300)
 
 # Make imported library global to use it within the project.
 add_library(OpenCL-ICD SHARED IMPORTED GLOBAL)
