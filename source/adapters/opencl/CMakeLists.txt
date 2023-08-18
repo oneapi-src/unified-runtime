@@ -51,7 +51,6 @@ endif()
 message(STATUS "OpenCL_LIBRARY: ${OpenCL_LIBRARY}")
 message(STATUS "OpenCL_INCLUDE_DIR: ${OpenCL_INCLUDE_DIR}")
 
-
 # Suppress a compiler message about undefined CL_TARGET_OPENCL_VERSION.
 # Define all symbols up to OpenCL 3.0.
 target_compile_definitions(ur_adapter_opencl PRIVATE CL_TARGET_OPENCL_VERSION=300)
