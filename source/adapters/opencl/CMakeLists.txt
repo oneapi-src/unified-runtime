@@ -34,7 +34,6 @@ add_ur_adapter(${TARGET_NAME}
         ${OPENCL_DIR}/usm_p2p.cpp
         ${OPENCL_DIR}/../../ur.cpp
         ${OPENCL_DIR}/../../ur.hpp
-        ${OPENCL_DIR}/../../ur.hpp
 )
 
 set_target_properties(${TARGET_NAME} PROPERTIES
