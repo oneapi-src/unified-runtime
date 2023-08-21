@@ -261,6 +261,32 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: bin/codegen
 
+  adapter-build-devcloud:
+    name: Conformance test - Adapter L0 on devcloud Ubuntu
+    if: github.repository == 'oneapi-src/unified-runtime'  # run only on upstream; forks won't have the HW
+    strategy:
+      matrix:
+        build_type: [Debug, Release]
+        compiler: [{c: gcc, cxx: g++}, {c: clang, cxx: clang++}]
+        adapter: [{name: L0, triplet: spir64}]
+
+    runs-on: devcloud-pvc
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install pip packages
+      run: python3 -m pip install -r third_party/requirements.txt
+
+    - name: Download DPC++
+      run: |
+        wget -O ${{github.workspace}}/dpcpp_compiler.tar.gz https://github.com/intel/llvm/releases/download/nightly-2023-09-21/sycl_linux.tar.gz
+        mkdir dpcpp_compiler
+        tar -xvf ${{github.workspace}}/dpcpp_compiler.tar.gz -C dpcpp_compiler
+
+    - name: Execute CTS
+      run: >
+        srun -p pvc-shared .github/scripts/devcloud-test.sh ${{github.workspace}} ${{matrix.compiler.c}} ${{matrix.compiler.cxx}} ${{matrix.build_type}} ${{matrix.adapter.name}} ${{matrix.adapter.triplet}}
+
   windows-build:
     name: Build - Windows
     strategy:
@@ -312,7 +338,6 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/build
       run: ctest -C ${{matrix.build_type}} --output-on-failure -L "python|umf|loader|validation|tracing|unit|urtrace"
-
 
   macos-build:
     name: Build - MacOS
