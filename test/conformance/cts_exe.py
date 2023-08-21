@@ -20,16 +20,21 @@ if __name__ == '__main__':
     parser.add_argument("--test_command", help="Ctest test case")
 
     args = parser.parse_args()
-    result = subprocess.Popen([args.test_command, '--gtest_brief=1'], stdout = subprocess.PIPE, text = True)  # nosec B603
+    output_file = open("output.txt", "w")
+
+    result = subprocess.Popen([args.test_command, '--gtest_brief=1'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)  # nosec B603
 
     pat = re.compile(r'\[( )*FAILED( )*\]')
-    for line in result.stdout.readlines():
+
+    for line in result.stdout:
         if pat.search(line):
             test_case = line.split(" ")[5]
             test_case = test_case.rstrip(',')
             print(test_case)
+        output_file.write(line)
 
-    result.communicate()
-    rc = result.returncode
+    rc = result.communicate()
+    output_file.close()
+
     if rc < 0:
-        print(signal.strsignal(abs(result.returncode)))
+        print(signal.strsignal(abs(rc)))
