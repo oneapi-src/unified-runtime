@@ -45,6 +45,53 @@ inline std::ostream &operator<<(std::ostream &out, const Result &result) {
 #ifndef EXPECT_SUCCESS
 #define EXPECT_SUCCESS(ACTUAL) EXPECT_EQ_RESULT(UR_RESULT_SUCCESS, ACTUAL)
 #endif
+#ifndef EXPECT_NO_CRASH
+#define EXPECT_NO_CRASH(ACTUAL)                                                \
+    EXPECT_EXIT((ACTUAL, exit(0)), ::testing::ExitedWithCode(0), ".*");
+#endif
+
+// This is a copy of the TEST_P macro from googletest, instead TestBody is
+// defined to call InnerTestBody wrapped with EXPECT_NO_CRASH
+#ifndef CONF_TEST_P
+#define CONF_TEST_P(test_suite_name, test_name)                                \
+    class GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)                   \
+        : public test_suite_name {                                             \
+      public:                                                                  \
+        GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)() {}                \
+        void InnerTestBody() override;                                         \
+        void TestBody() override;                                              \
+                                                                               \
+      private:                                                                 \
+        static int AddToRegistry() {                                           \
+            ::testing::UnitTest::GetInstance()                                 \
+                ->parameterized_test_registry()                                \
+                .GetTestSuitePatternHolder<test_suite_name>(                   \
+                    GTEST_STRINGIFY_(test_suite_name),                         \
+                    ::testing::internal::CodeLocation(__FILE__, __LINE__))     \
+                ->AddTestPattern(                                              \
+                    GTEST_STRINGIFY_(test_suite_name),                         \
+                    GTEST_STRINGIFY_(test_name),                               \
+                    new ::testing::internal::TestMetaFactory<                  \
+                        GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)>(), \
+                    ::testing::internal::CodeLocation(__FILE__, __LINE__));    \
+            return 0;                                                          \
+        }                                                                      \
+        static int gtest_registering_dummy_ GTEST_ATTRIBUTE_UNUSED_;           \
+        GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)                     \
+        (const GTEST_TEST_CLASS_NAME_(test_suite_name, test_name) &) = delete; \
+        GTEST_TEST_CLASS_NAME_(test_suite_name, test_name) &operator=(         \
+            const GTEST_TEST_CLASS_NAME_(test_suite_name,                      \
+                                         test_name) &) = delete; /* NOLINT */  \
+    };                                                                         \
+    int GTEST_TEST_CLASS_NAME_(test_suite_name,                                \
+                               test_name)::gtest_registering_dummy_ =          \
+        GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::AddToRegistry();   \
+    void GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::TestBody() {      \
+        return EXPECT_NO_CRASH(GTEST_TEST_CLASS_NAME_(                         \
+            test_suite_name, test_name)::InnerTestBody());                     \
+    }                                                                          \
+    void GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::InnerTestBody()
+#endif
 
 inline std::ostream &operator<<(std::ostream &out,
                                 const ur_device_handle_t &device) {
