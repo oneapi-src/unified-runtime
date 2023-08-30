@@ -469,6 +469,10 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGet(
         if (UR_DEVICE_TYPE_VPU < DeviceType) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
+
+        if (NumEntries == 0 && phDevices != NULL) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
     }
 
     ur_result_t result =

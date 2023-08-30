@@ -139,6 +139,8 @@ params:
             [out][optional] pointer to the number of devices.
             pNumDevices will be updated with the total number of devices available.
 returns:
+    - $X_RESULT_ERROR_INVALID_SIZE:
+        - "`NumEntries == 0 && phDevices != NULL`"
     - $X_RESULT_ERROR_INVALID_VALUE
 --- #--------------------------------------------------------------------------
 type: enum

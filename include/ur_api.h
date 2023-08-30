@@ -1286,6 +1286,8 @@ typedef enum ur_device_type_t {
 ///         + `NULL == hPlatform`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
 ///         + `::UR_DEVICE_TYPE_VPU < DeviceType`
+///     - ::UR_RESULT_ERROR_INVALID_SIZE
+///         + `NumEntries == 0 && phDevices != NULL`
 ///     - ::UR_RESULT_ERROR_INVALID_VALUE
 UR_APIEXPORT ur_result_t UR_APICALL
 urDeviceGet(
