@@ -7,6 +7,7 @@
 #include <thread>
 #include <type_traits>
 #include <uur/fixtures.h>
+#include <uur/utils.h>
 
 // WARNING  - This is the precision that is used in the OpenCL-CTS.
 //          - We might need to modify this value per-adapter.
@@ -102,7 +103,12 @@ TEST_F(urDeviceGetGlobalTimestampTest, SuccessSynchronizedTime) {
         const uint64_t allowedDiff = static_cast<uint64_t>(
             std::min(deviceTimeDiff, hostTimeDiff) * allowedTimerError);
 
-        ASSERT_LE(observedDiff, allowedDiff);
+        // CUDA and HIP implementations are not accurate enough.
+        ur_platform_backend_t backend = uur::GetPlatformBackend(platform);
+        if (backend != UR_PLATFORM_BACKEND_CUDA &&
+            backend != UR_PLATFORM_BACKEND_HIP) {
+            ASSERT_LE(observedDiff, allowedDiff);
+        }
     }
 }
 

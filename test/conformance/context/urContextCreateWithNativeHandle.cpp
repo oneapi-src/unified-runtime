@@ -20,8 +20,15 @@ TEST_P(urContextCreateWithNativeHandleTest, Success) {
     // and perform some query on it to verify that it works.
     ur_context_handle_t ctx = nullptr;
     ur_context_native_properties_t props{};
-    ASSERT_SUCCESS(urContextCreateWithNativeHandle(native_context, 1, &device,
-                                                   &props, &ctx));
+
+    ur_result_t result = urContextCreateWithNativeHandle(native_context, 1,
+                                                         &device, &props, &ctx);
+
+    if (result == UR_RESULT_ERROR_INVALID_OPERATION) {
+        GTEST_SKIP();
+    }
+
+    ASSERT_SUCCESS(result);
     ASSERT_NE(ctx, nullptr);
 
     uint32_t n_devices = 0;

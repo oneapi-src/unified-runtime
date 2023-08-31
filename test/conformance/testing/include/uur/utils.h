@@ -155,6 +155,14 @@ ur_result_t GetObjectReferenceCount(T object, uint32_t &out_ref_count) {
     return UR_RESULT_ERROR_INVALID_VALUE;
 }
 
+inline ur_platform_backend_t
+GetPlatformBackend(ur_platform_handle_t hPlatform) {
+    ur_platform_backend_t backend;
+    GetPlatformInfo<ur_platform_backend_t>(hPlatform, UR_PLATFORM_INFO_BACKEND,
+                                           backend);
+    return backend;
+}
+
 inline std::string GetPlatformName(ur_platform_handle_t hPlatform) {
     std::string platform_name;
     GetPlatformInfo<std::string>(hPlatform, UR_PLATFORM_INFO_NAME,

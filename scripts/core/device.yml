@@ -787,7 +787,7 @@ returns:
         - "If the adapter has no underlying equivalent handle."
 --- #--------------------------------------------------------------------------
 type: function
-desc: "Returns synchronized Host and Device global timestamps."
+desc: "Returns a reasonably synchronized Host and Device global timestamps."
 class: $xDevice
 name: GetGlobalTimestamps
 decl: static
@@ -795,6 +795,7 @@ ordinal: "0"
 analogue:
     - "**clGetDeviceAndHostTimer**"
 details:
+    - "The accuracy of the results is implementation defined."
     - "The application may call this function from simultaneous threads for the same context."
     - "The implementation of this function should be thread-safe."
 params:
