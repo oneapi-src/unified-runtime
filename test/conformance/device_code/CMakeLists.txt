@@ -8,7 +8,15 @@ macro(add_device_binary SOURCE_FILE)
     set(DEVICE_BINARY_DIR "${UR_CONFORMANCE_DEVICE_BINARIES_DIR}/${KERNEL_NAME}")
     file(MAKE_DIRECTORY ${DEVICE_BINARY_DIR})
     foreach(TRIPLE ${TARGET_TRIPLES})
-        set(EXE_PATH "${DEVICE_BINARY_DIR}/${KERNEL_NAME}_${TRIPLE}")
+
+        if ("${TRIPLE}" MATCHES "spir64")
+            set(EXTENSION ".spv")
+        elseif("${TRIPLE}" MATCHES "nvptx64")
+            set(EXTENSION ".bin")
+        endif()
+
+        set(EXE_PATH "${DEVICE_BINARY_DIR}/${KERNEL_NAME}_${TRIPLE}${EXTENSION}")
+
         add_custom_command(OUTPUT ${EXE_PATH}
             COMMAND ${UR_DPCXX} -fsycl -fsycl-targets=${TRIPLE} -fsycl-device-code-split=off
             ${SOURCE_FILE} -o ${EXE_PATH}
