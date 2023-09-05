@@ -9,17 +9,19 @@
 
 ## Table of contents
 
-1. [Contents of the repo](#contents-of-the-repo)
-2. [Integration](#integration)
+- [Unified Runtime](#unified-runtime)
+  - [Table of contents](#table-of-contents)
+  - [Contents of the repo](#contents-of-the-repo)
+  - [Integration](#integration)
     - [Weekly tags](#weekly-tags)
-3. [Third-Party tools](#third-party-tools)
-4. [Building](#building)
+  - [Third-Party tools](#third-party-tools)
+  - [Building](#building)
     - [Requirements](#requirements)
     - [Windows](#windows)
     - [Linux](#linux)
     - [CMake standard options](#cmake-standard-options)
     - [Additional make targets](#additional-make-targets)
-5. [Contributions](#contributions)
+  - [Contributions](#contributions)
     - [Adapter naming convention](#adapter-naming-convention)
     - [Source code generation](#source-code-generation)
     - [Documentation](#documentation)
@@ -118,7 +120,7 @@ List of options provided by CMake:
 | UR_USE_UBSAN | Enable UndefinedBehavior Sanitizer | ON/OFF | OFF |
 | UR_USE_MSAN | Enable MemorySanitizer (clang only) | ON/OFF | OFF |
 | UR_ENABLE_TRACING | Enable XPTI-based tracing layer | ON/OFF | OFF |
-| UR_CONFORMANCE_TARGET_TRIPLES | SYCL triples to build CTS device binaries for | Comma-separated list | spir64 |
+| UR_CONFORMANCE_TARGET_TRIPLES | SYCL triples to build CTS device binaries for | Comma-separated list | |
 
 ### Additional make targets
 

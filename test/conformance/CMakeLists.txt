@@ -57,6 +57,7 @@ add_subdirectory(queue)
 add_subdirectory(sampler)
 add_subdirectory(virtual_memory)
 
+
 if(DEFINED UR_DPCXX)
     add_custom_target(generate_device_binaries)
 
@@ -66,12 +67,11 @@ if(DEFINED UR_DPCXX)
 
     if(NOT "${UR_CONFORMANCE_TARGET_TRIPLES}" STREQUAL "")
         string(REPLACE "," ";" TARGET_TRIPLES ${UR_CONFORMANCE_TARGET_TRIPLES})
+        add_subdirectory(device_code)
     else()
-        message(WARNING "UR_CONFORMANCE_TARGET_TRIPLES wasn't set, defaulting to only generate spir64 device binaries")
-        list(APPEND TARGET_TRIPLES "spir64")
+        message(WARNING "UR_CONFORMANCE_TARGET_TRIPLES wasn't set, device binaries will not be generated.")
     endif()
 
-    add_subdirectory(device_code)
     add_subdirectory(kernel)
     add_subdirectory(program)
     add_subdirectory(enqueue)
