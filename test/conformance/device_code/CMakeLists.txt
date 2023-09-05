@@ -13,7 +13,7 @@ macro(add_device_binary SOURCE_FILE)
             COMMAND ${UR_DPCXX} -fsycl -fsycl-targets=${TRIPLE} -fsycl-device-code-split=off
             ${SOURCE_FILE} -o ${EXE_PATH}
             COMMAND ${CMAKE_COMMAND} -E env SYCL_DUMP_IMAGES=true
-            ${EXE_PATH} || (exit 0)
+            ${EXE_PATH}
             WORKING_DIRECTORY "${DEVICE_BINARY_DIR}"
             DEPENDS ${SOURCE_FILE}
         )
