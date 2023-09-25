@@ -12657,6 +12657,24 @@ inline std::ostream &operator<<(
     ur_params::serializeFlag<ur_usm_advice_flag_t>(os, *(params->padvice));
 
     os << ", ";
+    os << ".numEventsInWaitList = ";
+
+    os << *(params->pnumEventsInWaitList);
+
+    os << ", ";
+    os << ".phEventWaitList = {";
+    for (size_t i = 0; *(params->pphEventWaitList) != NULL &&
+                       i < *params->pnumEventsInWaitList;
+         ++i) {
+        if (i != 0) {
+            os << ", ";
+        }
+
+        ur_params::serializePtr(os, (*(params->pphEventWaitList))[i]);
+    }
+    os << "}";
+
+    os << ", ";
     os << ".phEvent = ";
 
     ur_params::serializePtr(os, *(params->pphEvent));

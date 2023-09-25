@@ -4047,6 +4047,12 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMAdvise(
     const void *pMem,             ///< [in] pointer to the USM memory object
     size_t size,                  ///< [in] size in bytes to be advised
     ur_usm_advice_flags_t advice, ///< [in] USM memory advice
+    uint32_t numEventsInWaitList, ///< [in] size of the event wait list
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before this command can be executed.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating that this
+    ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
                 ///< command instance.
@@ -4057,12 +4063,15 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMAdvise(
         return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
     }
 
-    ur_enqueue_usm_advise_params_t params = {&hQueue, &pMem, &size, &advice,
-                                             &phEvent};
+    ur_enqueue_usm_advise_params_t params = {
+        &hQueue,          &pMem,   &size, &advice, &numEventsInWaitList,
+        &phEventWaitList, &phEvent};
     uint64_t instance = context.notify_begin(UR_FUNCTION_ENQUEUE_USM_ADVISE,
                                              "urEnqueueUSMAdvise", &params);
 
-    ur_result_t result = pfnUSMAdvise(hQueue, pMem, size, advice, phEvent);
+    ur_result_t result =
+        pfnUSMAdvise(hQueue, pMem, size, advice, numEventsInWaitList,
+                     phEventWaitList, phEvent);
 
     context.notify_end(UR_FUNCTION_ENQUEUE_USM_ADVISE, "urEnqueueUSMAdvise",
                        &params, &result, instance);

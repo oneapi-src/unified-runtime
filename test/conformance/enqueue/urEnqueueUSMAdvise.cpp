@@ -14,7 +14,7 @@ UUR_TEST_SUITE_P(urEnqueueUSMAdviseWithParamTest,
 TEST_P(urEnqueueUSMAdviseWithParamTest, Success) {
     ur_event_handle_t advise_event = nullptr;
     ASSERT_SUCCESS(urEnqueueUSMAdvise(queue, ptr, allocation_size, getParam(),
-                                      &advise_event));
+                                      0, nullptr, &advise_event));
 
     ASSERT_NE(advise_event, nullptr);
     ASSERT_SUCCESS(urQueueFlush(queue));
@@ -35,36 +35,42 @@ TEST_P(urEnqueueUSMAdviseTest, MultipleParamsSuccess) {
     ASSERT_SUCCESS(urEnqueueUSMAdvise(queue, ptr, allocation_size,
                                       UR_USM_ADVICE_FLAG_SET_READ_MOSTLY |
                                           UR_USM_ADVICE_FLAG_BIAS_CACHED,
-                                      nullptr));
+                                      0, nullptr, nullptr));
 }
 
 TEST_P(urEnqueueUSMAdviseTest, InvalidNullHandleQueue) {
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_HANDLE,
                      urEnqueueUSMAdvise(nullptr, ptr, allocation_size,
-                                        UR_USM_ADVICE_FLAG_DEFAULT, nullptr));
+                                        UR_USM_ADVICE_FLAG_DEFAULT, 0, nullptr,
+                                        nullptr));
 }
 
 TEST_P(urEnqueueUSMAdviseTest, InvalidNullPointerMem) {
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_POINTER,
                      urEnqueueUSMAdvise(queue, nullptr, allocation_size,
-                                        UR_USM_ADVICE_FLAG_DEFAULT, nullptr));
+                                        UR_USM_ADVICE_FLAG_DEFAULT, 0, nullptr,
+                                        nullptr));
 }
 
 TEST_P(urEnqueueUSMAdviseTest, InvalidEnumeration) {
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_ENUMERATION,
                      urEnqueueUSMAdvise(queue, ptr, allocation_size,
-                                        UR_USM_ADVICE_FLAG_FORCE_UINT32,
-                                        nullptr));
+                                        UR_USM_ADVICE_FLAG_FORCE_UINT32, 0,
+                                        nullptr, nullptr));
 }
 
 TEST_P(urEnqueueUSMAdviseTest, InvalidSizeZero) {
-    ASSERT_EQ_RESULT(
-        UR_RESULT_ERROR_INVALID_SIZE,
-        urEnqueueUSMAdvise(queue, ptr, 0, UR_USM_ADVICE_FLAG_DEFAULT, nullptr));
+    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
+                     urEnqueueUSMAdvise(queue, ptr, 0,
+                                        UR_USM_ADVICE_FLAG_DEFAULT, 0, nullptr,
+                                        nullptr));
 }
 
 TEST_P(urEnqueueUSMAdviseTest, InvalidSizeTooLarge) {
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
                      urEnqueueUSMAdvise(queue, ptr, allocation_size * 2,
-                                        UR_USM_ADVICE_FLAG_DEFAULT, nullptr));
+                                        UR_USM_ADVICE_FLAG_DEFAULT, 0, nullptr,
+                                        nullptr));
 }
+
+// TODO: Add tests for numEventsInWaitList/phEventWaitList.

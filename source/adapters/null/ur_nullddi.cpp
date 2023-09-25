@@ -3562,6 +3562,12 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMAdvise(
     const void *pMem,             ///< [in] pointer to the USM memory object
     size_t size,                  ///< [in] size in bytes to be advised
     ur_usm_advice_flags_t advice, ///< [in] USM memory advice
+    uint32_t numEventsInWaitList, ///< [in] size of the event wait list
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before this command can be executed.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating that this
+    ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
                 ///< command instance.
@@ -3571,7 +3577,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMAdvise(
     // if the driver has created a custom function, then call it instead of using the generic path
     auto pfnUSMAdvise = d_context.urDdiTable.Enqueue.pfnUSMAdvise;
     if (nullptr != pfnUSMAdvise) {
-        result = pfnUSMAdvise(hQueue, pMem, size, advice, phEvent);
+        result = pfnUSMAdvise(hQueue, pMem, size, advice, numEventsInWaitList,
+                              phEventWaitList, phEvent);
     } else {
         // generic implementation
         if (nullptr != phEvent) {

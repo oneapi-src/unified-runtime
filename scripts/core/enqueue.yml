@@ -1151,6 +1151,14 @@ params:
     - type: $x_usm_advice_flags_t
       name: advice
       desc: "[in] USM memory advice"
+    - type: uint32_t
+      name: numEventsInWaitList
+      desc: "[in] size of the event wait list"
+    - type: "const $x_event_handle_t*"
+      name: phEventWaitList
+      desc: |
+            [in][optional][range(0, numEventsInWaitList)] pointer to a list of events that must be complete before this command can be executed.
+            If nullptr, the numEventsInWaitList must be 0, indicating that this command does not wait on any event to complete.
     - type: $x_event_handle_t*
       name: phEvent
       desc: |

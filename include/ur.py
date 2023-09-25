@@ -3101,9 +3101,9 @@ else:
 ###############################################################################
 ## @brief Function-pointer for urEnqueueUSMAdvise
 if __use_win_types:
-    _urEnqueueUSMAdvise_t = WINFUNCTYPE( ur_result_t, ur_queue_handle_t, c_void_p, c_size_t, ur_usm_advice_flags_t, POINTER(ur_event_handle_t) )
+    _urEnqueueUSMAdvise_t = WINFUNCTYPE( ur_result_t, ur_queue_handle_t, c_void_p, c_size_t, ur_usm_advice_flags_t, c_ulong, POINTER(ur_event_handle_t), POINTER(ur_event_handle_t) )
 else:
-    _urEnqueueUSMAdvise_t = CFUNCTYPE( ur_result_t, ur_queue_handle_t, c_void_p, c_size_t, ur_usm_advice_flags_t, POINTER(ur_event_handle_t) )
+    _urEnqueueUSMAdvise_t = CFUNCTYPE( ur_result_t, ur_queue_handle_t, c_void_p, c_size_t, ur_usm_advice_flags_t, c_ulong, POINTER(ur_event_handle_t), POINTER(ur_event_handle_t) )
 
 ###############################################################################
 ## @brief Function-pointer for urEnqueueUSMFill2D
