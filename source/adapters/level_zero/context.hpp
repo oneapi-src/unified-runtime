@@ -51,6 +51,13 @@ struct ur_context_handle_t_ : _ur_object {
   std::vector<ur_device_handle_t> Devices;
   uint32_t NumDevices{};
 
+  // Selects the single device in the context to which the urProgramBuild
+  // should choose to build the program to.
+  // TODO: this should be removed and program should be built to all the
+  // devices in the context (possibly on demand only).
+  //
+  ur_device_handle_t Build2Device = nullptr;
+
   // Immediate Level Zero command list for the device in this context, to be
   // used for initializations. To be created as:
   // - Immediate command list: So any command appended to it is immediately

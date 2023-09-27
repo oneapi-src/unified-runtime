@@ -142,7 +142,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramBuild(
   ZeModuleDesc.pBuildFlags = Options;
   ZeModuleDesc.pConstants = Shim.ze();
 
-  ze_device_handle_t ZeDevice = Context->Devices[0]->ZeDevice;
+  auto Build2Device = Context->Build2Device;
+  if (!Build2Device)
+    Build2Device = Context->Devices[0];
+  ze_device_handle_t ZeDevice = Build2Device->ZeDevice;
   ze_context_handle_t ZeContext = Program->Context->ZeContext;
   ze_module_handle_t ZeModule = nullptr;
 
