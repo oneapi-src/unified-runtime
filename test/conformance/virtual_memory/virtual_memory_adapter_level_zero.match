@@ -101,3 +101,4 @@ urVirtualMemSetAccessTest.InvalidNullPointerStart/Intel_R__oneAPI_Unified_Runtim
 urVirtualMemUnmapTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
 urVirtualMemUnmapTest.InvalidNullHandleContext/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
 urVirtualMemUnmapTest.InvalidNullPointerStart/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
+{{OPT}}Segmentation fault
