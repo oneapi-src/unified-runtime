@@ -26,6 +26,7 @@
 #include "queue.hpp"
 
 #include <umf_helpers.hpp>
+#include <ur_pool_manager.hpp>
 
 struct ur_context_handle_t_ : _ur_object {
   ur_context_handle_t_(ze_context_handle_t ZeContext, uint32_t NumDevices,
@@ -96,15 +97,8 @@ struct ur_context_handle_t_ : _ur_object {
 
   // Store USM pool for USM shared and device allocations. There is 1 memory
   // pool per each pair of (context, device) per each memory type.
-  std::unordered_map<ze_device_handle_t, umf::pool_unique_handle_t>
-      DeviceMemPools;
-  std::unordered_map<ze_device_handle_t, umf::pool_unique_handle_t>
-      SharedMemPools;
-  std::unordered_map<ze_device_handle_t, umf::pool_unique_handle_t>
-      SharedReadOnlyMemPools;
-
-  // Store the host memory pool. It does not depend on any device.
-  umf::pool_unique_handle_t HostMemPool;
+  usm::pool_manager<usm::pool_descriptor> PoolManager;
+  usm::pool_manager<usm::pool_descriptor> ProxyPoolManager;
 
   // Allocation-tracking proxy pools for direct allocations. No pooling used.
   std::unordered_map<ze_device_handle_t, umf::pool_unique_handle_t>
@@ -252,3 +246,8 @@ private:
 // mutex guarding the container with contexts because the context can be removed
 // from the list of tracked contexts.
 ur_result_t ContextReleaseHelper(ur_context_handle_t Context);
+
+// Template helper function for creating USM pools for given pool descriptor.
+template <typename P, typename... Args>
+std::pair<ur_result_t, umf::pool_unique_handle_t>
+createUMFPoolForDesc(usm::pool_descriptor &Desc, Args &&...args);
