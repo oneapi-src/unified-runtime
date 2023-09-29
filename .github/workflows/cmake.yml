@@ -283,30 +283,11 @@ jobs:
         tar -xvf ${{github.workspace}}/dpcpp_compiler.tar.gz -C dpcpp_compiler
 
     - name: Execute CTS
-      run: >
-        srun -p pvc-shared scripts/devcloud-test.sh ${{github.workspace}} ${{matrix.compiler.c}} ${{matrix.compiler.cxx}} ${{matrix.build_type}}
+      run: srun -p pvc-shared scripts/devcloud-test.sh ${{github.workspace}} ${{matrix.compiler.c}} ${{matrix.compiler.cxx}} ${{matrix.build_type}}
 
     - name: CTS output
       if: always()
-      run: |
-        echo "#### sampler ####"
-        cat ${{github.workspace}}/build/test/conformance/sampler/output.txt
-        echo "#### memory ####"
-        cat ${{github.workspace}}/build/test/conformance/memory/output.txt
-        echo "#### virtual_memory ####"
-        cat ${{github.workspace}}/build/test/conformance/virtual_memory/output.txt
-        echo "#### device ####"
-        cat ${{github.workspace}}/build/test/conformance/device/output.txt
-        echo "#### runtime ####"
-        cat ${{github.workspace}}/build/test/conformance/runtime/output.txt
-        echo "#### queue ####"
-        cat ${{github.workspace}}/build/test/conformance/queue/output.txt
-        echo "#### context ####"
-        cat ${{github.workspace}}/build/test/conformance/context/output.txt
-        echo "#### event ####"
-        cat ${{github.workspace}}/build/test/conformance/event/output.txt
-        echo "#### usm ####"
-        cat ${{github.workspace}}/build/test/conformance/usm/output.txt
+      run: python3 ${{github.workspace}}/scripts/read_cts_output.py ${{github.workspace}}/build
 
   windows-build:
     name: Build - Windows

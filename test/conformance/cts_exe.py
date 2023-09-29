@@ -7,6 +7,8 @@
  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 """
+# Writing conformance test output from gtest to a file and checking failed tests with match files.
+# The match files contain tests that are expected to fail.
 
 import sys
 from argparse import ArgumentParser
@@ -22,10 +24,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
     output_file = open("output.txt", "w")
 
-    result = subprocess.Popen([args.test_command, '--gtest_brief=1'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)  # nosec B603
+    result = subprocess.Popen([args.test_command, '--gtest_brief=1'], stdout=subprocess.PIPE,
+                              stderr=subprocess.STDOUT, text=True)  # nosec B603
 
     pat = re.compile(r'\[( )*FAILED( )*\]')
-
     for line in result.stdout:
         if pat.search(line):
             test_case = line.split(" ")[5]
@@ -33,7 +35,7 @@ if __name__ == '__main__':
             print(test_case)
         output_file.write(line)
 
-    rc = result.communicate()
+    rc = result.wait()
     output_file.close()
 
     if rc < 0:
