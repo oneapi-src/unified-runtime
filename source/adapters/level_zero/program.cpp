@@ -113,6 +113,21 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramBuild(
     const char *Options          ///< [in][optional] pointer to build options
                                  ///< null-terminated string.
 ) {
+  return urProgramBuildExp(Context,
+                           Program,
+                           1,
+                           Context->Devices.data(),
+                           Options);
+}
+
+UR_APIEXPORT ur_result_t UR_APICALL urProgramBuildExp(
+    ur_context_handle_t Context, ///< [in] handle of the context instance.
+    ur_program_handle_t Program, ///< [in] Handle of the program to build.
+    uint32_t numDevices,
+    ur_device_handle_t *phDevices,
+    const char *Options          ///< [in][optional] pointer to build options
+                                 ///< null-terminated string.
+) {
   // TODO
   // Check if device belongs to associated context.
   // UR_ASSERT(Program->Context, UR_RESULT_ERROR_INVALID_PROGRAM);
@@ -142,7 +157,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramBuild(
   ZeModuleDesc.pBuildFlags = Options;
   ZeModuleDesc.pConstants = Shim.ze();
 
-  ze_device_handle_t ZeDevice = Context->Devices[0]->ZeDevice;
+  ze_device_handle_t ZeDevice = phDevices[0]->ZeDevice;
   ze_context_handle_t ZeContext = Program->Context->ZeContext;
   ze_module_handle_t ZeModule = nullptr;
 

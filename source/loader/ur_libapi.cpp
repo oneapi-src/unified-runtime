@@ -2929,6 +2929,24 @@ ur_result_t UR_APICALL urProgramBuild(
     return exceptionToResult(std::current_exception());
 }
 
+ur_result_t UR_APICALL urProgramBuildExp(
+    ur_context_handle_t hContext, ///< [in] handle of the context instance.
+    ur_program_handle_t hProgram, ///< [in] Handle of the program to build.
+    uint32_t numDevices,
+    ur_device_handle_t *phDevices,
+    const char *
+        pOptions ///< [in][optional] pointer to build options null-terminated string.
+    ) try {
+    auto pfnBuild = ur_lib::context->urDdiTable.Program.pfnBuildExp;
+    if (nullptr == pfnBuild) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    return pfnBuild(hContext, hProgram, numDevices, phDevices, pOptions);
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Produces an executable program from one or more programs.
 ///

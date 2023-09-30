@@ -2347,6 +2347,46 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuild(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urProgramBuild
+__urdlllocal ur_result_t UR_APICALL urProgramBuildExp(
+    ur_context_handle_t hContext, ///< [in] handle of the context instance.
+    ur_program_handle_t hProgram, ///< [in] Handle of the program to build.
+    uint32_t numDevices,
+    ur_device_handle_t *phDevices,
+    const char *
+        pOptions ///< [in][optional] pointer to build options null-terminated string.
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // extract platform's function pointer table
+    auto dditable = reinterpret_cast<ur_context_object_t *>(hContext)->dditable;
+    auto pfnBuild = dditable->ur.Program.pfnBuildExp;
+    if (nullptr == pfnBuild) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    hContext = reinterpret_cast<ur_context_object_t *>(hContext)->handle;
+
+    // convert loader handle to platform handle
+    hProgram = reinterpret_cast<ur_program_object_t *>(hProgram)->handle;
+
+    hProgram = reinterpret_cast<ur_program_object_t *>(hProgram)->handle;
+
+    // convert loader handles to platform handles
+    auto phDevicesLocal = std::vector<ur_device_handle_t>(numDevices);
+    for (size_t i = 0; i < numDevices; ++i) {
+        phDevicesLocal[i] =
+            reinterpret_cast<ur_device_object_t *>(phDevices[i])->handle;
+    }
+
+    // forward to device-platform
+    result = pfnBuild(hContext, hProgram, numDevices, phDevicesLocal.data(), pOptions);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramCompile
 __urdlllocal ur_result_t UR_APICALL urProgramCompile(
     ur_context_handle_t hContext, ///< [in] handle of the context instance.
@@ -7677,6 +7717,7 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetProgramProcAddrTable(
             pDdiTable->pfnCreateWithBinary =
                 ur_loader::urProgramCreateWithBinary;
             pDdiTable->pfnBuild = ur_loader::urProgramBuild;
+            pDdiTable->pfnBuildExp = ur_loader::urProgramBuildExp;
             pDdiTable->pfnCompile = ur_loader::urProgramCompile;
             pDdiTable->pfnLink = ur_loader::urProgramLink;
             pDdiTable->pfnRetain = ur_loader::urProgramRetain;

@@ -295,6 +295,14 @@ typedef ur_result_t(UR_APICALL *ur_pfnProgramBuild_t)(
     ur_program_handle_t,
     const char *);
 
+typedef ur_result_t(UR_APICALL *ur_pfnProgramBuildExp_t)(
+    ur_context_handle_t,
+    ur_program_handle_t,
+    uint32_t,
+    ur_device_handle_t *,
+    const char *);
+
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function-pointer for urProgramCompile
 typedef ur_result_t(UR_APICALL *ur_pfnProgramCompile_t)(
@@ -375,6 +383,7 @@ typedef struct ur_program_dditable_t {
     ur_pfnProgramCreateWithIL_t pfnCreateWithIL;
     ur_pfnProgramCreateWithBinary_t pfnCreateWithBinary;
     ur_pfnProgramBuild_t pfnBuild;
+    ur_pfnProgramBuildExp_t pfnBuildExp;
     ur_pfnProgramCompile_t pfnCompile;
     ur_pfnProgramLink_t pfnLink;
     ur_pfnProgramRetain_t pfnRetain;

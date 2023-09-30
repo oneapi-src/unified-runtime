@@ -2480,6 +2480,14 @@ else:
     _urProgramBuild_t = CFUNCTYPE( ur_result_t, ur_context_handle_t, ur_program_handle_t, c_char_p )
 
 ###############################################################################
+## @brief Function-pointer for urProgramBuildExpt
+if __use_win_types:
+    _urProgramBuildExp_t = WINFUNCTYPE( ur_result_t, ur_context_handle_t, ur_program_handle_t, c_ulong, POINTER(ur_device_handle_t), c_char_p )
+else:
+    _urProgramBuildExp_t = CFUNCTYPE( ur_result_t, ur_context_handle_t, ur_program_handle_t, c_ulong, POINTER(ur_device_handle_t), c_char_p )
+
+
+###############################################################################
 ## @brief Function-pointer for urProgramCompile
 if __use_win_types:
     _urProgramCompile_t = WINFUNCTYPE( ur_result_t, ur_context_handle_t, ur_program_handle_t, c_char_p )

@@ -4000,6 +4000,16 @@ urProgramBuild(
     const char *pOptions          ///< [in][optional] pointer to build options null-terminated string.
 );
 
+UR_APIEXPORT ur_result_t UR_APICALL
+urProgramBuildExp(
+    ur_context_handle_t hContext, ///< [in] handle of the context instance.
+    ur_program_handle_t hProgram, ///< [in] Handle of the program to build.
+    uint32_t numDevices,
+    ur_device_handle_t *phDevices,
+    const char *pOptions          ///< [in][optional] pointer to build options null-terminated string.
+);
+
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Produces an executable program from one or more programs.
 ///
