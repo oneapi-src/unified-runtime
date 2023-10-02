@@ -502,6 +502,9 @@ etors:
 - name: COMMAND_BUFFER_APPEND_MEMBUFFER_READ_RECT_EXP
   desc: Enumerator for $xCommandBufferAppendMembufferReadRectExp
   value: '171'
+- name: PROGRAM_BUILD_EXP
+  desc: Enumerator for $xProgramBuildExp
+  value: '172'
 ---
 type: enum
 desc: Defines structure types

@@ -196,6 +196,7 @@ typedef enum ur_function_t {
     UR_FUNCTION_COMMAND_BUFFER_APPEND_MEMBUFFER_READ_EXP = 169,                ///< Enumerator for ::urCommandBufferAppendMembufferReadExp
     UR_FUNCTION_COMMAND_BUFFER_APPEND_MEMBUFFER_WRITE_RECT_EXP = 170,          ///< Enumerator for ::urCommandBufferAppendMembufferWriteRectExp
     UR_FUNCTION_COMMAND_BUFFER_APPEND_MEMBUFFER_READ_RECT_EXP = 171,           ///< Enumerator for ::urCommandBufferAppendMembufferReadRectExp
+    UR_FUNCTION_PROGRAM_BUILD_EXP = 172,                                       ///< Enumerator for ::urProgramBuildExp
     /// @cond
     UR_FUNCTION_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -3682,6 +3683,43 @@ urProgramBuild(
     ur_context_handle_t hContext, ///< [in] handle of the context instance.
     ur_program_handle_t hProgram, ///< [in] Handle of the program to build.
     const char *pOptions          ///< [in][optional] pointer to build options null-terminated string.
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Produces an executable program from one program, negates need for the
+///        linking step.
+///
+/// @details
+///     - The application may call this function from simultaneous threads.
+///     - Following a successful call to this entry point, the program passed
+///       will contain a binary of the ::UR_PROGRAM_BINARY_TYPE_EXECUTABLE type
+///       for each device in `hContext`.
+///
+/// @remarks
+///   _Analogues_
+///     - **clBuildProgram**
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hContext`
+///         + `NULL == hProgram`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == phDevices`
+///     - ::UR_RESULT_ERROR_INVALID_PROGRAM
+///         + If `hProgram` isn't a valid program object.
+///     - ::UR_RESULT_ERROR_PROGRAM_BUILD_FAILURE
+///         + If an error occurred when building `hProgram`.
+UR_APIEXPORT ur_result_t UR_APICALL
+urProgramBuildExp(
+    ur_context_handle_t hContext,  ///< [in] handle of the context instance.
+    ur_program_handle_t hProgram,  ///< [in] Handle of the program to build.
+    uint32_t numDevices,           ///< [in] number of devices
+    ur_device_handle_t *phDevices, ///< [in][range(0, numDevices)] pointer to array of device handles
+    const char *pOptions           ///< [in][optional] pointer to build options null-terminated string.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -8167,6 +8205,18 @@ typedef struct ur_program_build_params_t {
     ur_program_handle_t *phProgram;
     const char **ppOptions;
 } ur_program_build_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urProgramBuildExp
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_program_build_exp_params_t {
+    ur_context_handle_t *phContext;
+    ur_program_handle_t *phProgram;
+    uint32_t *pnumDevices;
+    ur_device_handle_t **pphDevices;
+    const char **ppOptions;
+} ur_program_build_exp_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urProgramCompile
