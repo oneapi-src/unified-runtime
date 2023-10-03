@@ -13,16 +13,12 @@ build_type=$4
 set -e
 echo "Hostname: $(hostname)"
 
-#source /opt/intel/oneapi/setvars.sh
 export PATH=${workspace}/dpcpp_compiler/bin:$PATH
 export CPATH=${workspace}/dpcpp_compiler/include:$CPATH
-export LIBRARY_PATH=${workspace}/dpcpp_compiler/lib:$LIBRARY_PATH
-export LD_LIBRARY_PATH=${workspace}/dpcpp_compiler/lib:$LD_LIBRARY_PATH
-unset ONEAPI_DEVICE_SELECTOR
-export ONEAPI_DEVICE_SELECTOR=level_zero:0
 
-sycl-ls
-
+#These variables is needed only for cmake
+LIBRARY_PATH=${workspace}/dpcpp_compiler/lib \
+LD_LIBRARY_PATH=${workspace}/dpcpp_compiler/lib \
 cmake \
 -B${workspace}/build \
 -DCMAKE_C_COMPILER=${compiler_c} \
@@ -36,9 +32,6 @@ cmake \
 
 cmake --build ${workspace}/build -j $(nproc)
 
-# Unset these variables is needed for the conformance test
-unset LD_LIBRARY_PATH
-unset LIBRARY_PATH
 # Temporarily disabling platform test for L0, because of hang
 # See issue: #824
 cd ${workspace}/build
