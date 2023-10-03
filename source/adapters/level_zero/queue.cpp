@@ -1868,6 +1868,8 @@ ur_result_t ur_queue_handle_t_::createCommandList(
 
   ZeStruct<ze_command_list_desc_t> ZeCommandListDesc;
   ZeCommandListDesc.commandQueueGroupOrdinal = QueueGroupOrdinal;
+  if (isInOrderQueue())
+    ZeCommandListDesc.flags = ZE_COMMAND_LIST_FLAG_IN_ORDER;
 
   ZE2UR_CALL(zeCommandListCreate, (Context->ZeContext, Device->ZeDevice,
                                    &ZeCommandListDesc, &ZeCommandList));
@@ -1959,7 +1961,7 @@ bool ur_queue_handle_t_::useCopyEngine(bool PreferCopyEngine) const {
          (!isInOrderQueue() || UseCopyEngineForInOrderQueue);
 }
 
-// This function will return one of po6ssibly multiple available
+// This function will return one of possibly multiple available
 // immediate commandlists associated with this Queue.
 ur_command_list_ptr_t &ur_queue_handle_t_::ur_queue_group_t::getImmCmdList() {
 
@@ -1971,7 +1973,6 @@ ur_command_list_ptr_t &ur_queue_handle_t_::ur_queue_group_t::getImmCmdList() {
 
   ZeStruct<ze_command_queue_desc_t> ZeCommandQueueDesc;
   ZeCommandQueueDesc.ordinal = QueueOrdinal;
-  ZeCommandQueueDesc.index = QueueIndex;
   ZeCommandQueueDesc.mode = ZE_COMMAND_QUEUE_MODE_ASYNCHRONOUS;
   const char *Priority = "Normal";
   if (Queue->isPriorityLow()) {
@@ -1982,8 +1983,15 @@ ur_command_list_ptr_t &ur_queue_handle_t_::ur_queue_group_t::getImmCmdList() {
     Priority = "High";
   }
 
+  // Evaluate performance for in_order queues.
+  if (Queue->isInOrderQueue()) {
+    ZeCommandQueueDesc.index = 0;
+    ZeCommandQueueDesc.flags = ZE_COMMAND_QUEUE_FLAG_IN_ORDER;
+  }
+
   // Evaluate performance of explicit usage for "0" index.
   if (QueueIndex != 0) {
+    ZeCommandQueueDesc.index = QueueIndex;
     ZeCommandQueueDesc.flags = ZE_COMMAND_QUEUE_FLAG_EXPLICIT_ONLY;
   }
 
