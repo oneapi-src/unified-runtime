@@ -20,34 +20,6 @@
 
 #include <umf_helpers.hpp>
 
-ur_result_t umf2urResult(umf_result_t umfResult) {
-  if (umfResult == UMF_RESULT_SUCCESS)
-    return UR_RESULT_SUCCESS;
-
-  switch (umfResult) {
-  case UMF_RESULT_ERROR_OUT_OF_HOST_MEMORY:
-    return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
-  case UMF_RESULT_ERROR_MEMORY_PROVIDER_SPECIFIC: {
-    auto hProvider = umfGetLastFailedMemoryProvider();
-    if (hProvider == nullptr)
-      return UR_RESULT_ERROR_UNKNOWN;
-
-    ur_result_t Err = UR_RESULT_ERROR_UNKNOWN;
-    umfMemoryProviderGetLastNativeError(hProvider, nullptr,
-                                        reinterpret_cast<int32_t *>(&Err));
-    return Err;
-  }
-  case UMF_RESULT_ERROR_INVALID_ARGUMENT:
-    return UR_RESULT_ERROR_INVALID_ARGUMENT;
-  case UMF_RESULT_ERROR_INVALID_ALIGNMENT:
-    return UR_RESULT_ERROR_UNSUPPORTED_ALIGNMENT;
-  case UMF_RESULT_ERROR_NOT_SUPPORTED:
-    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-  default:
-    return UR_RESULT_ERROR_UNKNOWN;
-  };
-}
-
 usm::DisjointPoolAllConfigs InitializeDisjointPoolConfig() {
   const char *PoolUrTraceVal = std::getenv("UR_L0_USM_ALLOCATOR_TRACE");
   const char *PoolPiTraceVal =
@@ -362,7 +334,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMHostAlloc(
   *RetMem = umfPoolAlignedMalloc(hPoolInternal, Size, Align);
   if (*RetMem == nullptr) {
     auto umfRet = umfPoolGetLastAllocationError(hPoolInternal);
-    return umf2urResult(umfRet);
+    return umf::umf2urResult(umfRet);
   }
 
   if (IndirectAccessTrackingEnabled) {
@@ -444,7 +416,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMDeviceAlloc(
   *RetMem = umfPoolAlignedMalloc(hPoolInternal, Size, Alignment);
   if (*RetMem == nullptr) {
     auto umfRet = umfPoolGetLastAllocationError(hPoolInternal);
-    return umf2urResult(umfRet);
+    return umf::umf2urResult(umfRet);
   }
 
   if (IndirectAccessTrackingEnabled) {
@@ -547,7 +519,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMSharedAlloc(
   *RetMem = umfPoolAlignedMalloc(hPoolInternal, Size, Alignment);
   if (*RetMem == nullptr) {
     auto umfRet = umfPoolGetLastAllocationError(hPoolInternal);
-    return umf2urResult(umfRet);
+    return umf::umf2urResult(umfRet);
   }
 
   if (IndirectAccessTrackingEnabled) {
@@ -1032,7 +1004,7 @@ ur_result_t USMFreeHelper(ur_context_handle_t Context, void *Ptr,
   auto umfRet = umfPoolFree(hPool, Ptr);
   if (IndirectAccessTrackingEnabled)
     UR_CALL(ContextReleaseHelper(Context));
-  return umf2urResult(umfRet);
+  return umf::umf2urResult(umfRet);
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urUSMImportExp(ur_context_handle_t Context,
