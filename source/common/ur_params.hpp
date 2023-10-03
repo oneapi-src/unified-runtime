@@ -4592,6 +4592,20 @@ inline void serializeTagged(std::ostream &os, const void *ptr,
         os << ")";
     } break;
 
+    case UR_DEVICE_INFO_ESIMD_SUPPORT: {
+        const ur_bool_t *tptr = (const ur_bool_t *)ptr;
+        if (sizeof(ur_bool_t) > size) {
+            os << "invalid size (is: " << size
+               << ", expected: >=" << sizeof(ur_bool_t) << ")";
+            return;
+        }
+        os << (void *)(tptr) << " (";
+
+        os << *tptr;
+
+        os << ")";
+    } break;
+
     case UR_DEVICE_INFO_BINDLESS_IMAGES_SUPPORT_EXP: {
         const ur_bool_t *tptr = (const ur_bool_t *)ptr;
         if (sizeof(ur_bool_t) > size) {

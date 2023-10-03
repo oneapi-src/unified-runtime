@@ -5,21 +5,29 @@
 [![Bandit](https://github.com/oneapi-src/unified-runtime/actions/workflows/bandit.yml/badge.svg)](https://github.com/oneapi-src/unified-runtime/actions/workflows/bandit.yml)
 [![Coverity](https://scan.coverity.com/projects/28213/badge.svg)](https://scan.coverity.com/projects/oneapi-src-unified-runtime)
 
+## Adapters
+Adapter implementations for Unified Runtime currently reside in the [SYCL repository](https://github.com/intel/llvm/tree/sycl/sycl/plugins/unified_runtime/ur). This branch contains scripts to automatically
+fetch and build them directly in the UR tree. The adapters are disabled by default,
+see cmake options for details.
+
 <!-- TODO: add general description and purpose of the project -->
 
 ## Table of contents
 
-1. [Contents of the repo](#contents-of-the-repo)
-2. [Integration](#integration)
+- [Unified Runtime](#unified-runtime)
+  - [Adapters](#adapters)
+  - [Table of contents](#table-of-contents)
+  - [Contents of the repo](#contents-of-the-repo)
+  - [Integration](#integration)
     - [Weekly tags](#weekly-tags)
-3. [Third-Party tools](#third-party-tools)
-4. [Building](#building)
+  - [Third-Party tools](#third-party-tools)
+  - [Building](#building)
     - [Requirements](#requirements)
     - [Windows](#windows)
     - [Linux](#linux)
     - [CMake standard options](#cmake-standard-options)
     - [Additional make targets](#additional-make-targets)
-5. [Contributions](#contributions)
+  - [Contributions](#contributions)
     - [Adapter naming convention](#adapter-naming-convention)
     - [Source code generation](#source-code-generation)
     - [Documentation](#documentation)
@@ -85,6 +93,9 @@ Required packages:
 - [CMake](https://cmake.org/) >= 3.14.0
 - Python v3.6.6 or later
 
+For development and contributions:
+- clang-format-15.0 (can be installed with `python -m pip install clang-format==15.0.7`)
+
 ### Windows
 
 Generating Visual Studio Project. EXE and binaries will be in **build/bin/{build_config}**
@@ -122,6 +133,11 @@ List of options provided by CMake:
 | UR_USE_MSAN | Enable MemorySanitizer (clang only) | ON/OFF | OFF |
 | UR_ENABLE_TRACING | Enable XPTI-based tracing layer | ON/OFF | OFF |
 | UR_CONFORMANCE_TARGET_TRIPLES | SYCL triples to build CTS device binaries for | Comma-separated list | spir64 |
+| UR_BUILD_ADAPTER_L0     | Fetch and use level-zero adapter from SYCL             | ON/OFF     | OFF     |
+| UR_BUILD_ADAPTER_OPENCL | Fetch and use opencl adapter from SYCL                 | ON/OFF     | OFF     |
+| UR_BUILD_ADAPTER_CUDA   | Fetch and use cuda adapter from SYCL                   | ON/OFF     | OFF     |
+| UR_BUILD_ADAPTER_HIP    | Fetch and use hip adapter from SYCL                    | ON/OFF     | OFF     |
+| UR_HIP_PLATFORM         | Build hip adapter for AMD or NVIDIA platform           | AMD/NVIDIA | AMD     |
 
 ### Additional make targets
 

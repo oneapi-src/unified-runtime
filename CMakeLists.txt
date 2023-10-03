@@ -36,6 +36,11 @@ option(UR_USE_TSAN "enable ThreadSanitizer" OFF)
 option(UR_ENABLE_TRACING "enable api tracing through xpti" OFF)
 option(UMF_BUILD_SHARED_LIBRARY "Build UMF as shared library" OFF)
 option(UMF_ENABLE_POOL_TRACKING "Build UMF with pool tracking" OFF)
+option(UR_BUILD_ADAPTER_L0 "build level 0 adapter from SYCL" OFF)
+option(UR_BUILD_ADAPTER_OPENCL "build opencl adapter from SYCL" OFF)
+option(UR_BUILD_ADAPTER_CUDA "build cuda adapter from SYCL" OFF)
+option(UR_BUILD_ADAPTER_HIP "build hip adapter from SYCL" OFF)
+option(UR_BUILD_EXAMPLE_CODEGEN "Build the codegen example." OFF)
 option(VAL_USE_LIBBACKTRACE_BACKTRACE "enable libbacktrace validation backtrace for linux" OFF)
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -89,7 +94,7 @@ if(UR_ENABLE_TRACING)
     set(XPTI_DIR ${xpti_SOURCE_DIR})
     set(XPTI_ENABLE_TESTS OFF CACHE INTERNAL "Turn off xptifw tests")
 
-    FetchContentSparse_Declare(xptifw https://github.com/intel/llvm.git "sycl-nightly/20230304" "xptifw")
+    FetchContentSparse_Declare(xptifw https://github.com/intel/llvm.git "sycl-nightly/20230703" "xptifw")
 
     FetchContent_MakeAvailable(xptifw)
 
