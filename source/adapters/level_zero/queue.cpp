@@ -1987,10 +1987,8 @@ ur_command_list_ptr_t &ur_queue_handle_t_::ur_queue_group_t::getImmCmdList() {
   if (Queue->isInOrderQueue()) {
     ZeCommandQueueDesc.index = 0;
     ZeCommandQueueDesc.flags = ZE_COMMAND_QUEUE_FLAG_IN_ORDER;
-  }
-
-  // Evaluate performance of explicit usage for "0" index.
-  if (QueueIndex != 0) {
+  } else {
+    // Evaluate performance of explicit usage for "0" index.
     ZeCommandQueueDesc.index = QueueIndex;
     ZeCommandQueueDesc.flags = ZE_COMMAND_QUEUE_FLAG_EXPLICIT_ONLY;
   }
