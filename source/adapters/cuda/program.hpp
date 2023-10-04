@@ -24,6 +24,7 @@ struct ur_program_handle_t_ {
   size_t BinarySizeInBytes;
   std::atomic_uint32_t RefCount;
   ur_context_handle_t Context;
+  ur_program_binary_type_t BinaryType = UR_PROGRAM_BINARY_TYPE_NONE;
 
   // Metadata
   std::unordered_map<std::string, std::tuple<uint32_t, uint32_t, uint32_t>>

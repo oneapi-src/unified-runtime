@@ -185,7 +185,9 @@ urProgramCreateWithIL(ur_context_handle_t hContext, const void *pIL,
 UR_APIEXPORT ur_result_t UR_APICALL
 urProgramCompile(ur_context_handle_t hContext, ur_program_handle_t hProgram,
                  const char *pOptions) {
-  return urProgramBuild(hContext, hProgram, pOptions);
+  UR_CHECK_ERROR(urProgramBuild(hContext, hProgram, pOptions));
+  hProgram->BinaryType = UR_PROGRAM_BINARY_TYPE_COMPILED_OBJECT;
+  return UR_RESULT_SUCCESS;
 }
 
 /// Loads the images from a UR program into a CUmodule that can be
@@ -202,6 +204,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramBuild(ur_context_handle_t hContext,
     ScopedContext Active(hProgram->getContext());
 
     hProgram->buildProgram(pOptions);
+    hProgram->BinaryType = UR_PROGRAM_BINARY_TYPE_EXECUTABLE;
 
   } catch (ur_result_t Err) {
     Result = Err;
@@ -241,6 +244,7 @@ urProgramLink(ur_context_handle_t hContext, uint32_t count,
           RetProgram->setBinary(static_cast<const char *>(CuBin), CuBinSize);
 
       Result = RetProgram->buildProgram(pOptions);
+      RetProgram->BinaryType = UR_PROGRAM_BINARY_TYPE_EXECUTABLE;
     } catch (...) {
       // Upon error attempt cleanup
       UR_CHECK_ERROR(cuLinkDestroy(State));
@@ -287,6 +291,9 @@ urProgramGetBuildInfo(ur_program_handle_t hProgram, ur_device_handle_t hDevice,
     return ReturnValue(hProgram->BuildOptions.c_str());
   case UR_PROGRAM_BUILD_INFO_LOG:
     return ReturnValue(hProgram->InfoLog, hProgram->MaxLogSize);
+  case UR_PROGRAM_BUILD_INFO_BINARY_TYPE: {
+    return ReturnValue(hProgram->BinaryType);
+  }
   default:
     break;
   }
