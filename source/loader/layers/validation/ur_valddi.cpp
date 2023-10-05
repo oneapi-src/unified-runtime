@@ -3966,7 +3966,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunch(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -4016,7 +4016,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWait(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -4066,7 +4066,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -4127,7 +4127,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferRead(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -4191,7 +4191,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWrite(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -4305,7 +4305,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -4424,7 +4424,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -4487,7 +4487,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopy(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -4594,7 +4594,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -4677,7 +4677,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferFill(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -4748,7 +4748,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageRead(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -4820,7 +4820,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageWrite(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -4892,7 +4892,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageCopy(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -4960,7 +4960,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferMap(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -5020,7 +5020,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemUnmap(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -5101,7 +5101,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -5166,7 +5166,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -5230,7 +5230,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMPrefetch(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -5371,7 +5371,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill2D(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -5457,7 +5457,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -5528,7 +5528,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -5599,7 +5599,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -5673,7 +5673,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueReadHostPipe(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -5747,7 +5747,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueWriteHostPipe(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -6176,7 +6176,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageCopyExp(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -6550,7 +6550,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesWaitExternalSemaphoreExp(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -6598,7 +6598,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesSignalExternalSemaphoreExp(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -7470,7 +7470,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
@@ -7548,7 +7548,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint i = 0; i < numEventsInWaitList; ++i) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (*(phEventWaitList + i) == NULL) {
                     return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                 }
