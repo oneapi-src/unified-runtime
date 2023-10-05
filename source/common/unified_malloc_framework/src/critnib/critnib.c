@@ -58,7 +58,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "../utils/utils.h"
+#include "../utils/utils_concurrency.h"
 #include "critnib.h"
 
 /*

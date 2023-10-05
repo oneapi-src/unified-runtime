@@ -6,6 +6,7 @@
 add_ur_library(disjoint_pool STATIC
     disjoint_pool.cpp
     disjoint_pool_config_parser.cpp
+    ../unified_malloc_framework/src/utils/utils_math.cpp
 )
 
 add_library(${PROJECT_NAME}::disjoint_pool ALIAS disjoint_pool)

@@ -10,7 +10,7 @@
 
 #include <mutex>
 
-#include "utils.h"
+#include "utils_concurrency.h"
 
 struct os_mutex_t *util_mutex_create(void) {
     return reinterpret_cast<struct os_mutex_t *>(new std::mutex);

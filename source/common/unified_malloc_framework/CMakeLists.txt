@@ -12,9 +12,9 @@ set(UMF_SOURCES
 )
 
 if(MSVC)
-    set(UMF_SOURCES ${UMF_SOURCES} src/utils/utils_windows.cpp src/memory_tracker_windows.cpp)
+    set(UMF_SOURCES ${UMF_SOURCES} src/utils/utils_windows_concurrency.cpp src/memory_tracker_windows.cpp)
 else()
-    set(UMF_SOURCES ${UMF_SOURCES} src/utils/utils_posix.c)
+    set(UMF_SOURCES ${UMF_SOURCES} src/utils/utils_posix_concurrency.c)
 endif()
 
 if(UMF_BUILD_SHARED_LIBRARY)
