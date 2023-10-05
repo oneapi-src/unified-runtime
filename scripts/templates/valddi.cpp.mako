@@ -63,7 +63,7 @@ namespace ur_validation_layer
             %if func_name in th.get_event_wait_list_functions(specs, n, tags):
             if (phEventWaitList != NULL && numEventsInWaitList > 0) {
                 for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
-                    if (*(phEventWaitList + i) == NULL) {
+                    if (phEventWaitList[i] == NULL) {
                         return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
                     }
                 }
