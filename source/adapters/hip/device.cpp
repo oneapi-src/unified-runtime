@@ -210,7 +210,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     return ReturnValue(uint64_t{MaxAlloc});
   }
   case UR_DEVICE_INFO_IMAGE_SUPPORTED: {
-    return ReturnValue(uint32_t{true});
+    return ReturnValue(ur_bool_t{true});
   }
   case UR_DEVICE_INFO_MAX_READ_IMAGE_ARGS: {
     // This call doesn't match to HIP as it doesn't have images, but instead
@@ -339,7 +339,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     return ReturnValue(0u);
   }
   case UR_DEVICE_INFO_SINGLE_FP_CONFIG: {
-    uint64_t Config =
+    ur_device_fp_capability_flags_t Config =
         UR_DEVICE_FP_CAPABILITY_FLAG_DENORM |
         UR_DEVICE_FP_CAPABILITY_FLAG_INF_NAN |
         UR_DEVICE_FP_CAPABILITY_FLAG_ROUND_TO_NEAREST |
@@ -350,12 +350,13 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     return ReturnValue(Config);
   }
   case UR_DEVICE_INFO_DOUBLE_FP_CONFIG: {
-    uint64_t Config = UR_DEVICE_FP_CAPABILITY_FLAG_DENORM |
-                      UR_DEVICE_FP_CAPABILITY_FLAG_INF_NAN |
-                      UR_DEVICE_FP_CAPABILITY_FLAG_ROUND_TO_NEAREST |
-                      UR_DEVICE_FP_CAPABILITY_FLAG_ROUND_TO_ZERO |
-                      UR_DEVICE_FP_CAPABILITY_FLAG_ROUND_TO_INF |
-                      UR_DEVICE_FP_CAPABILITY_FLAG_FMA;
+    ur_device_fp_capability_flags_t Config =
+        UR_DEVICE_FP_CAPABILITY_FLAG_DENORM |
+        UR_DEVICE_FP_CAPABILITY_FLAG_INF_NAN |
+        UR_DEVICE_FP_CAPABILITY_FLAG_ROUND_TO_NEAREST |
+        UR_DEVICE_FP_CAPABILITY_FLAG_ROUND_TO_ZERO |
+        UR_DEVICE_FP_CAPABILITY_FLAG_ROUND_TO_INF |
+        UR_DEVICE_FP_CAPABILITY_FLAG_FMA;
     return ReturnValue(Config);
   }
   case UR_DEVICE_INFO_GLOBAL_MEM_CACHE_TYPE: {
@@ -459,14 +460,15 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   }
   case UR_DEVICE_INFO_QUEUE_ON_DEVICE_PROPERTIES: {
     // The mandated minimum capability:
-    uint64_t Capability = UR_QUEUE_FLAG_PROFILING_ENABLE |
-                          UR_QUEUE_FLAG_OUT_OF_ORDER_EXEC_MODE_ENABLE;
+    ur_queue_flags_t Capability = UR_QUEUE_FLAG_PROFILING_ENABLE |
+                                  UR_QUEUE_FLAG_OUT_OF_ORDER_EXEC_MODE_ENABLE;
     return ReturnValue(Capability);
   }
   case UR_DEVICE_INFO_QUEUE_ON_HOST_PROPERTIES:
   case UR_DEVICE_INFO_QUEUE_PROPERTIES: {
     // The mandated minimum capability:
-    uint64_t Capability = UR_QUEUE_FLAG_PROFILING_ENABLE;
+    ur_memory_order_capability_flags_t Capability =
+        UR_QUEUE_FLAG_PROFILING_ENABLE;
     return ReturnValue(Capability);
   }
   case UR_DEVICE_INFO_BUILT_IN_KERNELS: {
@@ -811,6 +813,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     return ReturnValue(false);
   case UR_DEVICE_INFO_ESIMD_SUPPORT:
     return ReturnValue(false);
+  case UR_DEVICE_INFO_VIRTUAL_MEMORY_SUPPORT:
+    return ReturnValue(ur_bool_t{false});
+  case UR_DEVICE_INFO_KERNEL_SET_SPECIALIZATION_CONSTANTS:
+    return ReturnValue(ur_bool_t{false});
 
   // TODO: Investigate if this information is available on HIP.
   case UR_DEVICE_INFO_GPU_EU_COUNT:
@@ -821,7 +827,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_GPU_HW_THREADS_PER_EU:
   case UR_DEVICE_INFO_MAX_MEMORY_BANDWIDTH:
   case UR_DEVICE_INFO_BFLOAT16:
-    return UR_RESULT_ERROR_INVALID_ENUMERATION;
+  case UR_DEVICE_INFO_MAX_READ_WRITE_IMAGE_ARGS:
+  case UR_DEVICE_INFO_IL_VERSION:
+  case UR_DEVICE_INFO_ASYNC_BARRIER:
+    return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
 
   default:
     break;
@@ -896,7 +905,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetNativeHandle(
 UR_APIEXPORT ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
     ur_native_handle_t, ur_platform_handle_t,
     const ur_device_native_properties_t *, ur_device_handle_t *) {
-  return UR_RESULT_ERROR_INVALID_OPERATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 /// \return UR_RESULT_SUCCESS If available, the first binary that is PTX

@@ -133,13 +133,22 @@ struct ur_mem_handle_t_ {
     struct SurfaceMem {
       hipArray *Array;
       hipSurfaceObject_t SurfObj;
-      ur_mem_type_t ImageType;
+      ur_image_desc_t ImageDesc;
+      ur_image_format_t ImageFormat;
 
       hipArray *getArray() const noexcept { return Array; }
 
       hipSurfaceObject_t getSurface() const noexcept { return SurfObj; }
 
-      ur_mem_type_t getImageType() const noexcept { return ImageType; }
+      ur_image_format_t getImageFormat() const noexcept { return ImageFormat; }
+      ur_mem_type_t getImageType() const noexcept { return ImageDesc.type; }
+      size_t getImageWidth() const noexcept { return ImageDesc.width; }
+      size_t getImageHeight() const noexcept { return ImageDesc.height; }
+      size_t getImageDepth() const noexcept { return ImageDesc.depth; }
+      size_t getImageRowPitch() const noexcept { return ImageDesc.rowPitch; }
+      size_t getImageSlicePitch() const noexcept {
+        return ImageDesc.slicePitch;
+      }
     } SurfaceMem;
   } Mem;
 
@@ -166,10 +175,14 @@ struct ur_mem_handle_t_ {
 
   /// Constructs the UR allocation for an Image object
   ur_mem_handle_t_(ur_context Ctxt, hipArray *Array, hipSurfaceObject_t Surf,
-                   ur_mem_flags_t MemFlags, ur_mem_type_t ImageType, void *)
+                   ur_mem_flags_t MemFlags, ur_image_desc_t ImageDesc,
+                   ur_image_format_t ImageFormat, void *)
       : Context{Ctxt}, RefCount{1}, MemType{Type::Surface}, MemFlags{MemFlags} {
     Mem.SurfaceMem.Array = Array;
-    Mem.SurfaceMem.ImageType = ImageType;
+    // disable pNext for ImageDesc
+    ImageDesc.pNext = nullptr;
+    Mem.SurfaceMem.ImageDesc = ImageDesc;
+    Mem.SurfaceMem.ImageFormat = ImageFormat;
     Mem.SurfaceMem.SurfObj = Surf;
     urContextRetain(Context);
   }

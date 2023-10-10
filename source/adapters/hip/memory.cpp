@@ -251,7 +251,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemGetInfo(ur_mem_handle_t hMemory,
   case UR_MEM_INFO_SIZE: {
     try {
       size_t AllocSize = 0;
-      UR_CHECK_ERROR(hipMemGetAddressRange(nullptr, &AllocSize,
+      hipDeviceptr_t BasePtr = nullptr;
+      UR_CHECK_ERROR(hipMemGetAddressRange(&BasePtr, &AllocSize,
                                            hMemory->Mem.BufferMem.Ptr));
       return ReturnValue(AllocSize);
     } catch (ur_result_t Err) {
@@ -471,8 +472,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreate(
     hipSurfaceObject_t Surface;
     UR_CHECK_ERROR(hipCreateSurfaceObject(&Surface, &ImageResDesc));
 
-    auto URMemObj = std::unique_ptr<ur_mem_handle_t_>(new ur_mem_handle_t_{
-        hContext, ImageArray, Surface, flags, pImageDesc->type, pHost});
+    auto URMemObj =
+        std::make_unique<ur_mem_handle_t_>(hContext, ImageArray, Surface, flags,
+                                           *pImageDesc, *pImageFormat, pHost);
 
     if (URMemObj == nullptr) {
       return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
