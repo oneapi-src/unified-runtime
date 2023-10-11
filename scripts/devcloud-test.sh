@@ -35,4 +35,4 @@ cmake --build ${workspace}/build -j $(nproc)
 # Temporarily disabling platform test for L0, because of hang
 # See issue: #824
 cd ${workspace}/build
-ctest -C ${build_type} --output-on-failure -L "conformance" -E "platform-adapter_level_zero" --timeout 180 -VV
+DEVICE_NUMBER=4 ctest -C ${build_type} --output-on-failure -L "conformance" -E "platform-adapter_level_zero" --timeout 180 -VV

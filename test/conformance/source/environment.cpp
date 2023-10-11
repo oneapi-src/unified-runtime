@@ -15,6 +15,7 @@
 #include <uur/environment.h>
 #include <uur/utils.h>
 
+#include <algorithm>
 namespace uur {
 
 constexpr char ERROR_NO_ADAPTER[] = "Could not load adapter";
@@ -200,8 +201,12 @@ DevicesEnvironment::DevicesEnvironment(int argc, char **argv)
         return;
     }
     // TODO: Add a parameter to make the test work on one device only
-    devices.resize(1);
-    if (urDeviceGet(platform, UR_DEVICE_TYPE_ALL, 1, devices.data(),
+    uint32_t device_num=static_cast<uint32_t>(atoi(getenv("DEVICE_NUMBER")));
+    if(device_num)  {
+        count=std::min(count, device_num);
+    }
+    devices.resize(count);
+    if (urDeviceGet(platform, UR_DEVICE_TYPE_ALL, count, devices.data(),
                     nullptr)) {
         error = "urDeviceGet() failed to get devices.";
         return;
