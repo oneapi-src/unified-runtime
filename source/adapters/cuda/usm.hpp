@@ -12,6 +12,7 @@
 
 #include <umf_helpers.hpp>
 #include <umf_pools/disjoint_pool_config_parser.hpp>
+#include <ur_pool_manager.hpp>
 
 usm::DisjointPoolAllConfigs InitializeDisjointPoolConfig();
 
@@ -23,9 +24,7 @@ struct ur_usm_pool_handle_t_ {
   usm::DisjointPoolAllConfigs DisjointPoolConfigs =
       usm::DisjointPoolAllConfigs();
 
-  umf::pool_unique_handle_t DeviceMemPool;
-  umf::pool_unique_handle_t SharedMemPool;
-  umf::pool_unique_handle_t HostMemPool;
+  usm::pool_manager<usm::pool_descriptor> PoolManager;
 
   ur_usm_pool_handle_t_(ur_context_handle_t Context,
                         ur_usm_pool_desc_t *PoolDesc);
