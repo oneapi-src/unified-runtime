@@ -107,6 +107,12 @@ etors:
     - name: EXP_WIN32_HANDLE
       desc: $x_exp_win32_handle_t
       value: "0x2004"
+    - name: EXP_IMAGE_TYPE_DESC
+      desc: $x_exp_image_type_desc_t
+      value: "0x2005"
+    - name: EXP_SAMPLER_CUBEMAP_PROPERTIES
+      desc: $x_exp_sampler_cubemap_properties_t
+      value: "0x2006"
 --- #--------------------------------------------------------------------------
 type: enum
 extend: true
@@ -131,6 +137,36 @@ etors:
     desc: "Device to host"
   - name: DEVICE_TO_DEVICE
     desc: "Device to device"
+--- #--------------------------------------------------------------------------
+type: enum
+desc: "Dictates the image type to distinguish between image types that can be represented equivalently in memory."
+class: $xBindlessImages
+name: $x_exp_image_type_t
+etors:
+  - name: 1D
+    desc: "1D image type"
+  - name: 2D
+    desc: "2D image type"
+  - name: 3D
+    desc: "3D image type"
+  - name: CUBEMAP
+    desc: "Cubemap image type"
+  - name: 1D_ARRAY
+    desc: "1D image array type"
+  - name: 2D_ARRAY
+    desc: "2D image array type"
+  - name: CUBEMAP_ARRAY
+    desc: "Cubemap array image type"
+--- #--------------------------------------------------------------------------
+type: enum
+desc: "Sampler cubemap seamless filtering mode."
+class: $xBindlessImages
+name: $x_exp_sampler_cubemap_filter_mode_t
+etors:
+  - name: SEAMLESS
+    desc: "Seamless filtering"
+  - name: DISJOINTED
+    desc: "Disable seamless filtering"
 --- #--------------------------------------------------------------------------
 type: struct
 desc: "File descriptor"
@@ -173,6 +209,19 @@ members:
       desc: "[in] mipmap filter mode used for filtering between mipmap levels"
 --- #--------------------------------------------------------------------------
 type: struct
+desc: "Describes cubemap sampler properties"
+details:
+    - Specify these properties in $xSamplerCreate via $x_sampler_desc_t as part
+      of a `pNext` chain.
+class: $xBindlessImages
+name: $x_exp_sampler_cubemap_properties_t
+base: $x_base_properties_t
+members:
+    - type: $x_exp_sampler_cubemap_filter_mode_t
+      name: cubemapFilterMode
+      desc: "[in] enables or disables seamless cubemap filtering between cubemap faces"
+--- #--------------------------------------------------------------------------
+type: struct
 desc: "Describes an interop memory resource descriptor"
 class: $xBindlessImages
 name: $x_exp_interop_mem_desc_t
@@ -185,6 +234,19 @@ class: $xBindlessImages
 name: $x_exp_interop_semaphore_desc_t
 base: $x_base_desc_t
 members: []
+--- #--------------------------------------------------------------------------
+type: struct
+desc: "Describes image type properties"
+details:
+    - Specify these properties in $xBindlessImagesImageAllocateExp via 
+      $x_image_desc_t as part of a `pNext` chain.
+class: $xBindlessImages
+name: $x_exp_image_type_desc_t
+base: $x_base_desc_t
+members:
+    - type: ur_exp_image_type_t
+      name: type
+      desc: "[in] indicates image type"
 --- #--------------------------------------------------------------------------
 type: function
 desc: "USM allocate pitched memory"

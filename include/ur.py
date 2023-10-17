@@ -245,6 +245,8 @@ class ur_structure_type_v(IntEnum):
     EXP_INTEROP_SEMAPHORE_DESC = 0x2002             ## ::ur_exp_interop_semaphore_desc_t
     EXP_FILE_DESCRIPTOR = 0x2003                    ## ::ur_exp_file_descriptor_t
     EXP_WIN32_HANDLE = 0x2004                       ## ::ur_exp_win32_handle_t
+    EXP_IMAGE_TYPE_DESC = 0x2005                    ## ::ur_exp_image_type_desc_t
+    EXP_SAMPLER_CUBEMAP_PROPERTIES = 0x2006         ## ::ur_exp_sampler_cubemap_properties_t
 
 class ur_structure_type_t(c_int):
     def __str__(self):
@@ -2171,6 +2173,34 @@ class ur_exp_image_copy_flags_t(c_int):
 
 
 ###############################################################################
+## @brief Dictates the image type to distinguish between image types that can be
+##        represented equivalently in memory.
+class ur_exp_image_type_v(IntEnum):
+    _1D = 0                                         ## 1D image type
+    _2D = 1                                         ## 2D image type
+    _3D = 2                                         ## 3D image type
+    CUBEMAP = 3                                     ## Cubemap image type
+    _1D_ARRAY = 4                                   ## 1D image array type
+    _2D_ARRAY = 5                                   ## 2D image array type
+    CUBEMAP_ARRAY = 6                               ## Cubemap array image type
+
+class ur_exp_image_type_t(c_int):
+    def __str__(self):
+        return str(ur_exp_image_type_v(self.value))
+
+
+###############################################################################
+## @brief Sampler cubemap seamless filtering mode.
+class ur_exp_sampler_cubemap_filter_mode_v(IntEnum):
+    SEAMLESS = 0                                    ## Seamless filtering
+    DISJOINTED = 1                                  ## Disable seamless filtering
+
+class ur_exp_sampler_cubemap_filter_mode_t(c_int):
+    def __str__(self):
+        return str(ur_exp_sampler_cubemap_filter_mode_v(self.value))
+
+
+###############################################################################
 ## @brief File descriptor
 class ur_exp_file_descriptor_t(Structure):
     _fields_ = [
@@ -2211,6 +2241,21 @@ class ur_exp_sampler_mip_properties_t(Structure):
     ]
 
 ###############################################################################
+## @brief Describes cubemap sampler properties
+## 
+## @details
+##     - Specify these properties in ::urSamplerCreate via ::ur_sampler_desc_t
+##       as part of a `pNext` chain.
+class ur_exp_sampler_cubemap_properties_t(Structure):
+    _fields_ = [
+        ("stype", ur_structure_type_t),                                 ## [in] type of this structure, must be
+                                                                        ## ::UR_STRUCTURE_TYPE_EXP_SAMPLER_CUBEMAP_PROPERTIES
+        ("pNext", c_void_p),                                            ## [in,out][optional] pointer to extension-specific structure
+        ("cubemapFilterMode", ur_exp_sampler_cubemap_filter_mode_t)     ## [in] enables or disables seamless cubemap filtering between cubemap
+                                                                        ## faces
+    ]
+
+###############################################################################
 ## @brief Describes an interop memory resource descriptor
 class ur_exp_interop_mem_desc_t(Structure):
     _fields_ = [
@@ -2226,6 +2271,20 @@ class ur_exp_interop_semaphore_desc_t(Structure):
         ("stype", ur_structure_type_t),                                 ## [in] type of this structure, must be
                                                                         ## ::UR_STRUCTURE_TYPE_EXP_INTEROP_SEMAPHORE_DESC
         ("pNext", c_void_p)                                             ## [in][optional] pointer to extension-specific structure
+    ]
+
+###############################################################################
+## @brief Describes image type properties
+## 
+## @details
+##     - Specify these properties in ::urBindlessImagesImageAllocateExp via
+##       ::ur_image_desc_t as part of a `pNext` chain.
+class ur_exp_image_type_desc_t(Structure):
+    _fields_ = [
+        ("stype", ur_structure_type_t),                                 ## [in] type of this structure, must be
+                                                                        ## ::UR_STRUCTURE_TYPE_EXP_IMAGE_TYPE_DESC
+        ("pNext", c_void_p),                                            ## [in][optional] pointer to extension-specific structure
+        ("type", ur_exp_image_type_t)                                   ## [in] indicates image type
     ]
 
 ###############################################################################

@@ -50,6 +50,7 @@ Runtime:
   * Sampled images
   * Unsampled images
   * Mipmaps
+  * Cubemaps
   * USM backed images
 
 * Interoperability support
@@ -68,6 +69,8 @@ Enums
     ${X}_STRUCTURE_TYPE_EXP_INTEROP_SEMAPHORE_DESC
     ${X}_STRUCTURE_TYPE_EXP_FILE_DESCRIPTOR
     ${X}_STRUCTURE_TYPE_EXP_WIN32_HANDLE
+    ${X}_STRUCTURE_TYPE_EXP_IMAGE_TYPE_DESC
+    ${X}_STRUCTURE_TYPE_EXP_SAMPLER_CUBEMAP_PROPERTIES
 
 * ${x}_device_info_t
     * ${X}_DEVICE_INFO_BINDLESS_IMAGES_SUPPORT_EXP
@@ -95,6 +98,19 @@ Enums
     * ${X}_EXP_IMAGE_COPY_FLAG_HOST_TO_DEVICE
     * ${X}_EXP_IMAGE_COPY_FLAG_DEVICE_TO_HOST
     * ${X}_EXP_IMAGE_COPY_FLAG_DEVICE_TO_DEVICE
+
+* ${x}_exp_image_type_t
+    * ${X}_EXP_IMAGE_TYPE_1D
+    * ${X}_EXP_IMAGE_TYPE_2D
+    * ${X}_EXP_IMAGE_TYPE_3D
+    * ${X}_EXP_IMAGE_TYPE_CUBEMAP
+    * ${X}_EXP_IMAGE_TYPE_1D_ARRAY
+    * ${X}_EXP_IMAGE_TYPE_2D_ARRAY
+    * ${X}_EXP_IMAGE_TYPE_CUBEMAP_ARRAY
+
+* ${x}_exp_sampler_cubemap_filter_mode_t
+    * ${X}_EXP_SAMPLER_CUBEMAP_FILTER_MODE_SEAMLESS
+    * ${X}_EXP_SAMPLER_CUBEMAP_FILTER_MODE_DISJOINTED
 
 * ${x}_function_t
     * ${X}_FUNCTION_USM_PITCHED_ALLOC_EXP
@@ -127,6 +143,8 @@ Types
 * ${x}_exp_interop_semaphore_desc_t
 * ${x}_exp_file_descriptor_t
 * ${x}_exp_win32_handle_t
+* ${x}_exp_image_type_desc_t
+* ${x}_exp_sampler_cubemap_properties_t
 
 Functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -175,6 +193,9 @@ Changelog
 | 5.0      | Update interop struct and func param names to adhere to convention. |
 +----------+-------------------------------------------------------------+
 | 6.0      | Fix semaphore import function parameter name.               |
++----------+-------------------------------------------------------------+
+| 7.0      | Add image type descriptor, image type enum, and cubemap     |
+|          | sampling properties.                                        |
 +----------+-------------------------------------------------------------+
 
 Contributors
