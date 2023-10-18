@@ -44,11 +44,11 @@ set_target_properties(${TARGET_NAME} PROPERTIES
 find_package(Threads REQUIRED)
 
 # The OpenCL target can be set manually on upstream cmake to avoid using find_package().
-if (NOT OPENCL_TARGET)
+if (NOT UR_OPENCL_ICD_LOADER_LIBRARY)
     find_package(OpenCL REQUIRED)
     message(STATUS "OpenCL_LIBRARY: ${OpenCL_LIBRARY}")
     message(STATUS "OpenCL_INCLUDE_DIR: ${OpenCL_INCLUDE_DIR}")
-    set(OPENCL_TARGET OpenCL::OpenCL)
+    set(UR_OPENCL_ICD_LOADER_LIBRARY OpenCL::OpenCL)
 endif()
 
 # Suppress a compiler message about undefined CL_TARGET_OPENCL_VERSION.
@@ -60,7 +60,7 @@ target_link_libraries(${TARGET_NAME} PRIVATE
         ${PROJECT_NAME}::common
         ${PROJECT_NAME}::unified_malloc_framework
         Threads::Threads
-        ${OPENCL_TARGET}
+        ${UR_OPENCL_ICD_LOADER_LIBRARY}
 )
 
 target_include_directories(${TARGET_NAME} PRIVATE
