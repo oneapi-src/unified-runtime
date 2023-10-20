@@ -3,6 +3,8 @@
 # See LICENSE.TXT
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
+include(cmake/helpers.cmake)
+
 set(UMF_SOURCES
     src/memory_pool.c
     src/memory_provider.c
@@ -21,11 +23,11 @@ if(UMF_BUILD_SHARED_LIBRARY)
     message(WARNING "Unified Malloc Framework is still an early work in progress."
                      "There are no API/ABI backward compatibility guarantees. There will be breakages."
                      "Do not use the shared library in production software.")
-    add_ur_library(unified_malloc_framework SHARED
+    add_umf_library(unified_malloc_framework SHARED
         ${UMF_SOURCES})
     target_compile_definitions(unified_malloc_framework PUBLIC UMF_SHARED_LIBRARY)
 else()
-    add_ur_library(unified_malloc_framework STATIC
+    add_umf_library(unified_malloc_framework STATIC
         ${UMF_SOURCES})
 endif()
 
