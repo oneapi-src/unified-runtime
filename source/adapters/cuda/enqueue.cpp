@@ -1366,24 +1366,20 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
   UR_ASSERT(size <= PointerRangeSize, UR_RESULT_ERROR_INVALID_SIZE);
   ur_device_handle_t Device = hQueue->getContext()->getDevice();
 
+  bool Supported = true;
   // Certain cuda devices and Windows do not have support for some Unified
   // Memory features. cuMemPrefetchAsync requires concurrent memory access
   // for managed memory. Therefore, ignore prefetch hint if concurrent managed
   // memory access is not available.
   if (!getAttribute(Device, CU_DEVICE_ATTRIBUTE_CONCURRENT_MANAGED_ACCESS)) {
-    setErrorMessage("Prefetch hint ignored as device does not support "
-                    "concurrent managed access",
-                    UR_RESULT_SUCCESS);
-    return UR_RESULT_ERROR_ADAPTER_SPECIFIC;
+    Supported = false;
   }
 
   unsigned int IsManaged;
   UR_CHECK_ERROR(cuPointerGetAttribute(
       &IsManaged, CU_POINTER_ATTRIBUTE_IS_MANAGED, (CUdeviceptr)pMem));
   if (!IsManaged) {
-    setErrorMessage("Prefetch hint ignored as prefetch only works with USM",
-                    UR_RESULT_SUCCESS);
-    return UR_RESULT_ERROR_ADAPTER_SPECIFIC;
+    Supported = false;
   }
 
   ur_result_t Result = UR_RESULT_SUCCESS;
@@ -1400,8 +1396,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
               UR_COMMAND_MEM_BUFFER_COPY, hQueue, CuStream));
       UR_CHECK_ERROR(EventPtr->start());
     }
-    UR_CHECK_ERROR(
-        cuMemPrefetchAsync((CUdeviceptr)pMem, size, Device->get(), CuStream));
+    if (Supported) {
+      UR_CHECK_ERROR(
+          cuMemPrefetchAsync((CUdeviceptr)pMem, size, Device->get(), CuStream));
+    }
     if (phEvent) {
       UR_CHECK_ERROR(EventPtr->record());
       *phEvent = EventPtr.release();
@@ -1421,6 +1419,7 @@ urEnqueueUSMAdvise(ur_queue_handle_t hQueue, const void *pMem, size_t size,
       &PointerRangeSize, CU_POINTER_ATTRIBUTE_RANGE_SIZE, (CUdeviceptr)pMem));
   UR_ASSERT(size <= PointerRangeSize, UR_RESULT_ERROR_INVALID_SIZE);
 
+  bool Supported = true;
   // Certain cuda devices and Windows do not have support for some Unified
   // Memory features. Passing CU_MEM_ADVISE_SET/CLEAR_PREFERRED_LOCATION and
   // to cuMemAdvise on a GPU device requires the GPU device to report a non-zero
@@ -1433,10 +1432,7 @@ urEnqueueUSMAdvise(ur_queue_handle_t hQueue, const void *pMem, size_t size,
       (advice & UR_USM_ADVICE_FLAG_DEFAULT)) {
     ur_device_handle_t Device = hQueue->getContext()->getDevice();
     if (!getAttribute(Device, CU_DEVICE_ATTRIBUTE_CONCURRENT_MANAGED_ACCESS)) {
-      setErrorMessage("Mem advise ignored as device does not support "
-                      "concurrent managed access",
-                      UR_RESULT_SUCCESS);
-      return UR_RESULT_ERROR_ADAPTER_SPECIFIC;
+      Supported = false;
     }
 
     // TODO: If ptr points to valid system-allocated pageable memory we should
@@ -1448,10 +1444,7 @@ urEnqueueUSMAdvise(ur_queue_handle_t hQueue, const void *pMem, size_t size,
   UR_CHECK_ERROR(cuPointerGetAttribute(
       &IsManaged, CU_POINTER_ATTRIBUTE_IS_MANAGED, (CUdeviceptr)pMem));
   if (!IsManaged) {
-    setErrorMessage(
-        "Memory advice ignored as memory advices only works with USM",
-        UR_RESULT_SUCCESS);
-    return UR_RESULT_ERROR_ADAPTER_SPECIFIC;
+    Supported = false;
   }
 
   ur_result_t Result = UR_RESULT_SUCCESS;
@@ -1467,19 +1460,21 @@ urEnqueueUSMAdvise(ur_queue_handle_t hQueue, const void *pMem, size_t size,
       UR_CHECK_ERROR(EventPtr->start());
     }
 
-    if (advice & UR_USM_ADVICE_FLAG_DEFAULT) {
-      UR_CHECK_ERROR(cuMemAdvise((CUdeviceptr)pMem, size,
-                                 CU_MEM_ADVISE_UNSET_READ_MOSTLY,
-                                 hQueue->getContext()->getDevice()->get()));
-      UR_CHECK_ERROR(cuMemAdvise((CUdeviceptr)pMem, size,
-                                 CU_MEM_ADVISE_UNSET_PREFERRED_LOCATION,
-                                 hQueue->getContext()->getDevice()->get()));
-      UR_CHECK_ERROR(cuMemAdvise((CUdeviceptr)pMem, size,
-                                 CU_MEM_ADVISE_UNSET_ACCESSED_BY,
-                                 hQueue->getContext()->getDevice()->get()));
-    } else {
-      Result = setCuMemAdvise((CUdeviceptr)pMem, size, advice,
-                              hQueue->getContext()->getDevice()->get());
+    if (Supported) {
+      if (advice & UR_USM_ADVICE_FLAG_DEFAULT) {
+        UR_CHECK_ERROR(cuMemAdvise((CUdeviceptr)pMem, size,
+                                   CU_MEM_ADVISE_UNSET_READ_MOSTLY,
+                                   hQueue->getContext()->getDevice()->get()));
+        UR_CHECK_ERROR(cuMemAdvise((CUdeviceptr)pMem, size,
+                                   CU_MEM_ADVISE_UNSET_PREFERRED_LOCATION,
+                                   hQueue->getContext()->getDevice()->get()));
+        UR_CHECK_ERROR(cuMemAdvise((CUdeviceptr)pMem, size,
+                                   CU_MEM_ADVISE_UNSET_ACCESSED_BY,
+                                   hQueue->getContext()->getDevice()->get()));
+      } else {
+        Result = setCuMemAdvise((CUdeviceptr)pMem, size, advice,
+                                hQueue->getContext()->getDevice()->get());
+      }
     }
 
     if (phEvent) {
