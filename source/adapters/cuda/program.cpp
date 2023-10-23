@@ -165,6 +165,47 @@ ur_result_t getKernelNames(ur_program_handle_t) {
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
+/// Loads images from a list of PTX or CUBIN binaries.
+/// Note: No calls to CUDA driver API in this function, only store binaries
+/// for later.
+///
+/// Note: Only supports one device
+///
+ur_result_t createProgram(ur_context_handle_t hContext,
+                          ur_device_handle_t hDevice, size_t size,
+                          const uint8_t *pBinary,
+                          const ur_program_properties_t *pProperties,
+                          ur_program_handle_t *phProgram) {
+  UR_ASSERT(hContext->getDevice()->get() == hDevice->get(),
+            UR_RESULT_ERROR_INVALID_CONTEXT);
+  UR_ASSERT(size, UR_RESULT_ERROR_INVALID_SIZE);
+
+  ur_result_t Result = UR_RESULT_SUCCESS;
+
+  std::unique_ptr<ur_program_handle_t_> RetProgram{
+      new ur_program_handle_t_{hContext}};
+
+  if (pProperties) {
+    if (pProperties->count > 0 && pProperties->pMetadatas == nullptr) {
+      return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+    } else if (pProperties->count == 0 && pProperties->pMetadatas != nullptr) {
+      return UR_RESULT_ERROR_INVALID_SIZE;
+    }
+    Result =
+        RetProgram->setMetadata(pProperties->pMetadatas, pProperties->count);
+  }
+  UR_ASSERT(Result == UR_RESULT_SUCCESS, Result);
+
+  auto pBinary_string = reinterpret_cast<const char *>(pBinary);
+
+  Result = RetProgram->setBinary(pBinary_string, size);
+  UR_ASSERT(Result == UR_RESULT_SUCCESS, Result);
+
+  *phProgram = RetProgram.release();
+
+  return Result;
+}
+
 /// CUDA will handle the PTX/CUBIN binaries internally through CUmodule object.
 /// So, urProgramCreateWithIL and urProgramCreateWithBinary are equivalent in
 /// terms of CUDA adapter. See \ref urProgramCreateWithBinary.
@@ -175,8 +216,8 @@ urProgramCreateWithIL(ur_context_handle_t hContext, const void *pIL,
   ur_device_handle_t hDevice = hContext->getDevice();
   auto pBinary = reinterpret_cast<const uint8_t *>(pIL);
 
-  return urProgramCreateWithBinary(hContext, hDevice, length, pBinary,
-                                   pProperties, phProgram);
+  return createProgram(hContext, hDevice, length, pBinary, pProperties,
+                       phProgram);
 }
 
 /// CUDA will handle the PTX/CUBIN binaries internally through a call to
@@ -391,44 +432,16 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramGetNativeHandle(
   return UR_RESULT_SUCCESS;
 }
 
-/// Loads images from a list of PTX or CUBIN binaries.
-/// Note: No calls to CUDA driver API in this function, only store binaries
-/// for later.
-///
-/// Note: Only supports one device
-///
 UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
     ur_context_handle_t hContext, ur_device_handle_t hDevice, size_t size,
     const uint8_t *pBinary, const ur_program_properties_t *pProperties,
     ur_program_handle_t *phProgram) {
-  UR_ASSERT(hContext->getDevice()->get() == hDevice->get(),
-            UR_RESULT_ERROR_INVALID_CONTEXT);
-  UR_ASSERT(size, UR_RESULT_ERROR_INVALID_SIZE);
 
-  ur_result_t Result = UR_RESULT_SUCCESS;
+  UR_CHECK_ERROR(
+      createProgram(hContext, hDevice, size, pBinary, pProperties, phProgram));
+  (*phProgram)->BinaryType = UR_PROGRAM_BINARY_TYPE_COMPILED_OBJECT;
 
-  std::unique_ptr<ur_program_handle_t_> RetProgram{
-      new ur_program_handle_t_{hContext}};
-
-  if (pProperties) {
-    if (pProperties->count > 0 && pProperties->pMetadatas == nullptr) {
-      return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-    } else if (pProperties->count == 0 && pProperties->pMetadatas != nullptr) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
-    Result =
-        RetProgram->setMetadata(pProperties->pMetadatas, pProperties->count);
-  }
-  UR_ASSERT(Result == UR_RESULT_SUCCESS, Result);
-
-  auto pBinary_string = reinterpret_cast<const char *>(pBinary);
-
-  Result = RetProgram->setBinary(pBinary_string, size);
-  UR_ASSERT(Result == UR_RESULT_SUCCESS, Result);
-
-  *phProgram = RetProgram.release();
-
-  return Result;
+  return UR_RESULT_SUCCESS;
 }
 
 // This entry point is only used for native specialization constants (SPIR-V),
