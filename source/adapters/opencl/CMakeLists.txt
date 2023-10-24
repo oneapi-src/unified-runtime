@@ -43,6 +43,34 @@ set_target_properties(${TARGET_NAME} PROPERTIES
 
 find_package(Threads REQUIRED)
 
+if(NOT OpenCL_INCLUDE_DIR)
+    set(OPENCL_HEADERS_REPO "https://github.com/KhronosGroup/OpenCL-Headers.git")
+    set(OPENCL_HEADERS_HASH 9ddb236e6eb3cf844f9e2f81677e1045f9bf838e)
+
+    FetchContent_Declare(ocl-headers
+            GIT_REPOSITORY    ${OPENCL_HEADERS_REPO}
+            GIT_TAG           ${OPENCL_HEADERS_HASH}
+    )
+    FetchContent_MakeAvailable(ocl-headers)
+    FetchContent_GetProperties(ocl-headers)
+
+    set(OpenCL_INCLUDE_DIR ${ocl-headers_SOURCE_DIR} CACHE PATH "Path to OpenCL Headers")
+endif()
+
+if(NOT OpenCL_LIBRARY)
+    set(OPENCL_ICD_LOADER_REPO "https://github.com/KhronosGroup/OpenCL-ICD-Loader.git")
+    set(OPENCL_ICD_LOADER_HASH 9a3e962f16f5097d2054233ad8b6dad51b6f41b7)
+
+    FetchContent_Declare(ocl-icd-loader
+            GIT_REPOSITORY    ${OPENCL_ICD_LOADER_REPO}
+            GIT_TAG           ${OPENCL_ICD_LOADER_HASH}
+    )
+    FetchContent_MakeAvailable(ocl-icd-loader)
+    FetchContent_GetProperties(ocl-icd-loader)
+
+    set(OpenCL_LIBRARY ${PROJECT_BINARY_DIR}/lib/libOpenCL.so CACHE PATH "Path to OpenCL ICD Loader")
+endif()
+
 # The OpenCL target can be set manually on upstream cmake to avoid using find_package().
 if (NOT UR_OPENCL_ICD_LOADER_LIBRARY)
     find_package(OpenCL REQUIRED)

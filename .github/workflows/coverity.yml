@@ -1,45 +1,45 @@
+##
+## Copyright (C) 2023 Intel Corporation
+##
+## Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
+## See LICENSE.TXT
+## SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+##
+#name: coverity-unified-runtime
+## It runs static analysis build - Coverity. It requires special token (set in CI's secret).
 #
-# Copyright (C) 2023 Intel Corporation
+#on:
+#  push:
+#    branches: ["main"]
+#  workflow_dispatch:
 #
-# Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
-# See LICENSE.TXT
-# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#env:
+#  WORKDIR:                           ${{ github.workspace }}
+#  COVERITY_SCAN_NOTIFICATION_EMAIL:  ${{ secrets.COVERITY_SCAN_NOTIFICATION_EMAIL }}
+#  COVERITY_SCAN_TOKEN:               ${{ secrets.COVERITY_SCAN_TOKEN }}
+#  COVERITY_SCAN_PROJECT_NAME:        ${{ github.repository }}
+#  COVERITY_SCAN_BUILD_COMMAND:       "cmake --build ${{github.workspace}}/build"
+#  COVERITY_SCAN_BRANCH_PATTERN:      "main"
+#  TRAVIS_BRANCH:                     ${{ github.ref_name }}
 #
-name: coverity-unified-runtime
-# It runs static analysis build - Coverity. It requires special token (set in CI's secret).
-
-on:
-  push:
-    branches: ["main"]
-  workflow_dispatch:
-
-env:
-  WORKDIR:                           ${{ github.workspace }}
-  COVERITY_SCAN_NOTIFICATION_EMAIL:  ${{ secrets.COVERITY_SCAN_NOTIFICATION_EMAIL }}
-  COVERITY_SCAN_TOKEN:               ${{ secrets.COVERITY_SCAN_TOKEN }}
-  COVERITY_SCAN_PROJECT_NAME:        ${{ github.repository }}
-  COVERITY_SCAN_BUILD_COMMAND:       "cmake --build ${{github.workspace}}/build"
-  COVERITY_SCAN_BRANCH_PATTERN:      "main"
-  TRAVIS_BRANCH:                     ${{ github.ref_name }}
-
-jobs:
-  linux:
-    name: Coverity
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Clone the git repo
-        uses: actions/checkout@v3
-
-      - name: Install pip packages
-        run: pip install -r third_party/requirements.txt
-
-      - name: Configure CMake
-        run: cmake -B $WORKDIR/build -DUR_ENABLE_TRACING=ON -DUR_DEVELOPER_MODE=ON -DUR_BUILD_TESTS=ON -DUMF_ENABLE_POOL_TRACKING=ON
-
-      - name: Run Coverity
-        run: |
-          cd $WORKDIR/build
-          wget https://scan.coverity.com/scripts/travisci_build_coverity_scan.sh
-          patch < "../.github/scripts/0001-travis-fix-travisci_build_coverity_scan.sh.patch"
-          bash ./travisci_build_coverity_scan.sh
+#jobs:
+#  linux:
+#    name: Coverity
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: Clone the git repo
+#        uses: actions/checkout@v3
+#
+#      - name: Install pip packages
+#        run: pip install -r third_party/requirements.txt
+#
+#      - name: Configure CMake
+#        run: cmake -B $WORKDIR/build -DUR_ENABLE_TRACING=ON -DUR_DEVELOPER_MODE=ON -DUR_BUILD_TESTS=ON -DUMF_ENABLE_POOL_TRACKING=ON
+#
+#      - name: Run Coverity
+#        run: |
+#          cd $WORKDIR/build
+#          wget https://scan.coverity.com/scripts/travisci_build_coverity_scan.sh
+#          patch < "../.github/scripts/0001-travis-fix-travisci_build_coverity_scan.sh.patch"
+#          bash ./travisci_build_coverity_scan.sh

@@ -9,6 +9,9 @@ function(add_test_adapter name adapter)
     set(TEST_TARGET_NAME test-${name})
     set(TEST_NAME ${name}-${adapter})
 
+#    add_test(NAME ${TEST_NAME}
+#            COMMAND ${TEST_TARGET_NAME}
+#            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
     add_test(NAME ${TEST_NAME}
         COMMAND ${CMAKE_COMMAND}
         -D TEST_FILE=${Python3_EXECUTABLE}
