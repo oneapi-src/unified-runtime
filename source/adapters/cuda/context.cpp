@@ -13,6 +13,37 @@
 
 #include <cassert>
 
+ur_result_t ur_context_handle_t_::initialize() {
+  auto Context = reinterpret_cast<ur_context_handle_t>(this);
+
+  ur_result_t Ret;
+  std::tie(Ret, ProxyPoolManager) =
+      usm::pool_manager<usm::pool_descriptor>::create();
+  if (Ret)
+    return Ret;
+
+  auto Device = Context->DeviceID;
+
+  // TODO: Replace this with appropriate usm::pool_descriptor 'create' static
+  // function.
+  usm::pool_descriptor Descs[] = {
+      {nullptr, Context, nullptr, UR_USM_TYPE_HOST, false},
+      {nullptr, Context, Device, UR_USM_TYPE_DEVICE, false},
+      {nullptr, Context, Device, UR_USM_TYPE_SHARED, false}};
+
+  for (auto &Desc : Descs) {
+    umf::pool_unique_handle_t ProxyPool = nullptr;
+    std::tie(Ret, ProxyPool) = createUMFPoolForDesc<USMProxyPool>(Desc);
+    if (Ret) {
+      throw UsmAllocationException(Ret);
+    }
+
+    ProxyPoolManager.addPool(Desc, ProxyPool);
+  }
+
+  return UR_RESULT_SUCCESS;
+}
+
 void ur_context_handle_t_::addPool(ur_usm_pool_handle_t Pool) {
   std::lock_guard<std::mutex> Lock(Mutex);
   PoolHandles.insert(Pool);
@@ -56,6 +87,8 @@ urContextCreate(uint32_t DeviceCount, const ur_device_handle_t *phDevices,
   try {
     ContextPtr = std::unique_ptr<ur_context_handle_t_>(
         new ur_context_handle_t_{*phDevices});
+    ContextPtr->initialize();
+
     *phContext = ContextPtr.release();
   } catch (ur_result_t Err) {
     RetErr = Err;

@@ -31,13 +31,15 @@ urUSMHostAlloc(ur_context_handle_t hContext, const ur_usm_desc_t *pUSMDesc,
                 (alignment == 0 || ((alignment & (alignment - 1)) == 0)),
             UR_RESULT_ERROR_INVALID_VALUE);
 
-  if (!hPool) {
-    return USMHostAllocImpl(ppMem, hContext, nullptr, size, alignment);
-  }
-
+  std::optional<umf_memory_pool_handle_t> hPoolInternalOpt = std::nullopt;
   usm::pool_descriptor Desc = {hPool, hContext, nullptr, UR_USM_TYPE_HOST,
                                false};
-  auto hPoolInternalOpt = hPool->PoolManager.getPool(Desc);
+  if (hPool) {
+    hPoolInternalOpt = hPool->PoolManager.getPool(Desc);
+  } else {
+    hPoolInternalOpt = hContext->ProxyPoolManager.getPool(Desc);
+  }
+
   if (!hPoolInternalOpt.has_value()) {
     // Internal error, every L0 context and usm pool should have Host, Device,
     // Shared and SharedReadOnly UMF pools.
@@ -64,14 +66,15 @@ urUSMDeviceAlloc(ur_context_handle_t hContext, ur_device_handle_t hDevice,
                 (alignment == 0 || ((alignment & (alignment - 1)) == 0)),
             UR_RESULT_ERROR_INVALID_VALUE);
 
-  if (!hPool) {
-    return USMDeviceAllocImpl(ppMem, hContext, hDevice, nullptr, size,
-                              alignment);
-  }
-
+  std::optional<umf_memory_pool_handle_t> hPoolInternalOpt = std::nullopt;
   usm::pool_descriptor Desc = {hPool, hContext, hDevice, UR_USM_TYPE_DEVICE,
                                false};
-  auto hPoolInternalOpt = hPool->PoolManager.getPool(Desc);
+  if (hPool) {
+    hPoolInternalOpt = hPool->PoolManager.getPool(Desc);
+  } else {
+    hPoolInternalOpt = hContext->ProxyPoolManager.getPool(Desc);
+  }
+
   if (!hPoolInternalOpt.has_value()) {
     // Internal error, every L0 context and usm pool should have Host, Device,
     // Shared and SharedReadOnly UMF pools.
@@ -98,14 +101,15 @@ urUSMSharedAlloc(ur_context_handle_t hContext, ur_device_handle_t hDevice,
                 (alignment == 0 || ((alignment & (alignment - 1)) == 0)),
             UR_RESULT_ERROR_INVALID_VALUE);
 
-  if (!hPool) {
-    return USMSharedAllocImpl(ppMem, hContext, hDevice, nullptr, nullptr, size,
-                              alignment);
-  }
-
+  std::optional<umf_memory_pool_handle_t> hPoolInternalOpt = std::nullopt;
   usm::pool_descriptor Desc = {hPool, hContext, hDevice, UR_USM_TYPE_SHARED,
                                false};
-  auto hPoolInternalOpt = hPool->PoolManager.getPool(Desc);
+  if (hPool) {
+    hPoolInternalOpt = hPool->PoolManager.getPool(Desc);
+  } else {
+    hPoolInternalOpt = hContext->ProxyPoolManager.getPool(Desc);
+  }
+
   if (!hPoolInternalOpt.has_value()) {
     // Internal error, every L0 context and usm pool should have Host, Device,
     // Shared and SharedReadOnly UMF pools.
@@ -121,40 +125,13 @@ urUSMSharedAlloc(ur_context_handle_t hContext, ur_device_handle_t hDevice,
   return UR_RESULT_SUCCESS;
 }
 
-ur_result_t USMFreeImpl(ur_context_handle_t Context, void *Pointer) {
-  ur_result_t Result = UR_RESULT_SUCCESS;
-  try {
-    ScopedContext Active(Context);
-    bool IsManaged;
-    unsigned int Type;
-    void *AttributeValues[2] = {&IsManaged, &Type};
-    CUpointer_attribute Attributes[2] = {CU_POINTER_ATTRIBUTE_IS_MANAGED,
-                                         CU_POINTER_ATTRIBUTE_MEMORY_TYPE};
-    UR_CHECK_ERROR(cuPointerGetAttributes(2, Attributes, AttributeValues,
-                                          (CUdeviceptr)Pointer));
-    UR_ASSERT(Type == CU_MEMORYTYPE_DEVICE || Type == CU_MEMORYTYPE_HOST,
-              UR_RESULT_ERROR_INVALID_MEM_OBJECT);
-    if (IsManaged || Type == CU_MEMORYTYPE_DEVICE) {
-      // Memory allocated with cuMemAlloc and cuMemAllocManaged must be freed
-      // with cuMemFree
-      UR_CHECK_ERROR(cuMemFree((CUdeviceptr)Pointer));
-    } else {
-      // Memory allocated with cuMemAllocHost must be freed with cuMemFreeHost
-      UR_CHECK_ERROR(cuMemFreeHost(Pointer));
-    }
-  } catch (ur_result_t Err) {
-    Result = Err;
-  }
-  return Result;
-}
-
 /// USM: Frees the given USM pointer associated with the context.
 ///
 UR_APIEXPORT ur_result_t UR_APICALL urUSMFree(ur_context_handle_t hContext,
                                               void *pMem) {
   if (auto Pool = umfPoolByPtr(pMem))
     return umf::umf2urResult(umfPoolFree(Pool, pMem));
-  return USMFreeImpl(hContext, pMem);
+  return UR_RESULT_ERROR_INVALID_MEM_OBJECT;
 }
 
 ur_result_t USMDeviceAllocImpl(void **ResultPtr, ur_context_handle_t Context,
@@ -214,6 +191,29 @@ ur_result_t USMHostAllocImpl(void **ResultPtr, ur_context_handle_t Context,
           reinterpret_cast<std::uintptr_t>(*ResultPtr) % Alignment == 0));
 #endif
   return UR_RESULT_SUCCESS;
+}
+
+ur_result_t USMFreeImpl(ur_context_handle_t Context, void *Pointer) {
+  ur_result_t Result = UR_RESULT_SUCCESS;
+  try {
+    // Memory allocated with cuMemAlloc and cuMemAllocManaged must be freed
+    // with cuMemFree
+    UR_CHECK_ERROR(cuMemFree((CUdeviceptr)Pointer));
+  } catch (ur_result_t Err) {
+    Result = Err;
+  }
+  return Result;
+}
+
+ur_result_t USMHostFreeImpl(ur_context_handle_t Context, void *Pointer) {
+  ur_result_t Result = UR_RESULT_SUCCESS;
+  try {
+    // Memory allocated with cuMemAllocHost must be freed with cuMemFreeHost
+    UR_CHECK_ERROR(cuMemFreeHost(Pointer));
+  } catch (ur_result_t Err) {
+    Result = Err;
+  }
+  return Result;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -364,7 +364,7 @@ enum umf_result_t USMMemoryProvider::alloc(size_t Size, size_t Align,
 enum umf_result_t USMMemoryProvider::free(void *Ptr, size_t Size) {
   (void)Size;
 
-  auto Res = USMFreeImpl(Context, Ptr);
+  auto Res = freeImpl(Context, Ptr);
   if (Res != UR_RESULT_SUCCESS) {
     getLastStatusRef() = Res;
     return UMF_RESULT_ERROR_MEMORY_PROVIDER_SPECIFIC;
@@ -392,10 +392,20 @@ ur_result_t USMSharedMemoryProvider::allocateImpl(void **ResultPtr, size_t Size,
                             Alignment);
 }
 
+ur_result_t USMSharedMemoryProvider::freeImpl(ur_context_handle_t Context,
+                                              void *Ptr) {
+  return USMFreeImpl(Context, Ptr);
+}
+
 ur_result_t USMDeviceMemoryProvider::allocateImpl(void **ResultPtr, size_t Size,
                                                   uint32_t Alignment) {
   return USMDeviceAllocImpl(ResultPtr, Context, Device, nullptr, Size,
                             Alignment);
+}
+
+ur_result_t USMDeviceMemoryProvider::freeImpl(ur_context_handle_t Context,
+                                              void *Ptr) {
+  return USMFreeImpl(Context, Ptr);
 }
 
 ur_result_t USMHostMemoryProvider::allocateImpl(void **ResultPtr, size_t Size,

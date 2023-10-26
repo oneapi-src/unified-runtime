@@ -21,6 +21,7 @@
 #include "device.hpp"
 
 #include <umf/memory_pool.h>
+#include <ur_pool_manager.hpp>
 
 typedef void (*ur_context_extended_deleter_t)(void *user_data);
 
@@ -77,6 +78,9 @@ struct ur_context_handle_t_ {
   native_type CUContext;
   ur_device_handle_t DeviceID;
   std::atomic_uint32_t RefCount;
+  // Stores pools designated for direct allocations, utilizing UMF tracking
+  // capabilities. These pools don't perform any pooling.
+  usm::pool_manager<usm::pool_descriptor> ProxyPoolManager;
 
   ur_context_handle_t_(ur_device_handle_t_ *DevID)
       : CUContext{DevID->getContext()}, DeviceID{DevID}, RefCount{1} {
@@ -84,6 +88,8 @@ struct ur_context_handle_t_ {
   };
 
   ~ur_context_handle_t_() { urDeviceRelease(DeviceID); }
+
+  ur_result_t initialize();
 
   void invokeExtendedDeleters() {
     std::lock_guard<std::mutex> Guard(Mutex);
