@@ -3,6 +3,7 @@
 // See LICENSE.TXT
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
+#include <algorithm>
 #include <cstring>
 #include <fstream>
 
@@ -12,6 +13,7 @@
 #include "kernel_entry_points.h"
 #endif
 
+#include <ur_util.hpp>
 #include <uur/environment.h>
 #include <uur/utils.h>
 
@@ -184,6 +186,7 @@ PlatformEnvironment::parsePlatformOptions(int argc, char **argv) {
 
 DevicesEnvironment *DevicesEnvironment::instance = nullptr;
 
+// The third (optional) parameter is expected to be 'test_devices_count'.
 DevicesEnvironment::DevicesEnvironment(int argc, char **argv)
     : PlatformEnvironment(argc, argv) {
     instance = this;
@@ -198,6 +201,19 @@ DevicesEnvironment::DevicesEnvironment(int argc, char **argv)
     if (count == 0) {
         error = "Could not find any devices associated with the platform";
         return;
+    }
+    // Get the argument (test_devices_count) to limit test devices count.
+    u_long count_set = 0;
+    if (argc >= 3) {
+        count_set = std::strtoul(argv[2], nullptr, 10);
+    }
+    // In case, the count_set is "0", the variable count will not be changed.
+    // The CTS will run on all devices.
+    if (count_set > (std::numeric_limits<uint32_t>::max)()) {
+        error = "Invalid test_devices_count argument";
+        return;
+    } else if (count_set > 0) {
+        count = (std::min)(count, static_cast<uint32_t>(count_set));
     }
     devices.resize(count);
     if (urDeviceGet(platform, UR_DEVICE_TYPE_ALL, count, devices.data(),

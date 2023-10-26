@@ -32,7 +32,8 @@ cmake \
 -DUR_BUILD_TESTS=ON \
 -DUR_FORMAT_CPP_STYLE=OFF \
 -DUR_BUILD_ADAPTER_${adapter_name}=ON \
--DUR_CONFORMANCE_TARGET_TRIPLES=${adapter.triplet}
+-DUR_CONFORMANCE_TARGET_TRIPLES=${adapter.triplet} \
+-DUR_TEST_DEVICES_COUNT=1
 
 cmake --build ${workspace}/build -j $(nproc)
 
