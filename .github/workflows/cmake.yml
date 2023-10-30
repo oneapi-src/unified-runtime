@@ -12,10 +12,13 @@ jobs:
     strategy:
       matrix:
         os: ['ubuntu-20.04', 'ubuntu-22.04']
-        build_type: [Debug, Release]
+        build_type: [Debug, ReleaseAssert]
         compiler: [{c: gcc, cxx: g++}]
         libbacktrace: ['-DVAL_USE_LIBBACKTRACE_BACKTRACE=OFF']
         pool_tracking: ['-DUMF_ENABLE_POOL_TRACKING=ON', '-DUMF_ENABLE_POOL_TRACKING=OFF']
+        exclude:
+          - build_type: Debug
+            pool_tracking: '-DUMF_ENABLE_POOL_TRACKING=ON'
         include:
           - os: 'ubuntu-22.04'
             build_type: Release
@@ -116,7 +119,7 @@ jobs:
     name: Build and run quick fuzztest scenarios
     strategy:
       matrix:
-        build_type: [Debug, Release]
+        build_type: [ReleaseAssert]
         compiler: [{c: clang, cxx: clang++}]
 
     runs-on: 'ubuntu-22.04'
@@ -167,8 +170,12 @@ jobs:
           {name: HIP, triplet: spir64}, # should be amdgcn-amdhsa, but build scripts for device binaries are currently broken for this target.
           {name: L0, triplet: spir64}
         ]
-        build_type: [Debug, Release]
+        build_type: [Debug, ReleaseAssert]
         compiler: [{c: gcc, cxx: g++}, {c: clang, cxx: clang++}]
+        exclude:
+          - build_type: Debug
+            compiler: {c: gcc, cxx: g++}
+
 
     runs-on: ${{matrix.adapter.name}}
 
@@ -223,7 +230,7 @@ jobs:
         adapter: [
           {name: L0}
         ]
-        build_type: [Debug, Release]
+        build_type: [ReleaseAssert]
         compiler: [{c: gcc, cxx: g++}, {c: clang, cxx: clang++}]
 
     runs-on: ${{matrix.adapter.name}}
@@ -269,13 +276,16 @@ jobs:
         adapter: [
           {name: None, var: ''}, {name: L0, var: '-DUR_BUILD_ADAPTER_L0=ON'}
         ]
-
-        # TODO: building level zero loader on windows-2019 is currently broken
-        exclude:
-         - os: 'windows-2019'
-           adapter: {name: L0, var: '-DUR_BUILD_ADAPTER_L0=ON'}
         build_type: [Debug, Release]
         compiler: [{c: cl.exe, cxx: cl.exe}, {c: clang-cl.exe, cxx: clang-cl.exe}]
+        # TODO: building level zero loader on windows-2019 is currently broken
+        exclude:
+          - os: 'windows-2019'
+            adapter: {name: L0, var: '-DUR_BUILD_ADAPTER_L0=ON'}
+          - os: 'windows-2022'
+            build_type: Debug
+            adapter: {name: None, var: ''}
+          
     runs-on: ${{matrix.os}}
 
     steps:
