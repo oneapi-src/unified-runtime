@@ -43,6 +43,8 @@ option(UR_BUILD_EXAMPLE_CODEGEN "Build the codegen example." OFF)
 option(VAL_USE_LIBBACKTRACE_BACKTRACE "enable libbacktrace validation backtrace for linux" OFF)
 option(UR_ENABLE_ASSERTIONS "Enable assertions for all build types" OFF)
 
+include(Assertions)
+
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -76,32 +78,6 @@ if(NOT MSVC)
         # is available we still need to link this library.
         link_libraries(stdc++fs)
     endif()
-endif()
-
-# This is copied wholesale from the implementation of LLVM_ENABLE_ASSERTIONS
-if(UR_ENABLE_ASSERTIONS)
-  # MSVC doesn't like _DEBUG on release builds
-  if( NOT MSVC )
-    add_compile_definitions(_DEBUG)
-  endif()
-  # On non-Debug builds cmake automatically defines NDEBUG, so we
-  # explicitly undefine it:
-  if( NOT uppercase_CMAKE_BUILD_TYPE STREQUAL "DEBUG" )
-    add_compile_options($<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-UNDEBUG>)
-    if (MSVC)
-      # Also remove /D NDEBUG to avoid MSVC warnings about conflicting defines.
-      foreach (flags_var_to_scrub
-          CMAKE_CXX_FLAGS_RELEASE
-          CMAKE_CXX_FLAGS_RELWITHDEBINFO
-          CMAKE_CXX_FLAGS_MINSIZEREL
-          CMAKE_C_FLAGS_RELEASE
-          CMAKE_C_FLAGS_RELWITHDEBINFO
-          CMAKE_C_FLAGS_MINSIZEREL)
-        string (REGEX REPLACE "(^| )[/-]D *NDEBUG($| )" " "
-          "${flags_var_to_scrub}" "${${flags_var_to_scrub}}")
-      endforeach()
-    endif()
-  endif()
 endif()
 
 if(UR_ENABLE_TRACING)
