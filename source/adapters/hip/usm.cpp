@@ -193,9 +193,9 @@ urUSMGetMemAllocInfo(ur_context_handle_t hContext, const void *pMem,
     case UR_USM_ALLOC_INFO_BASE_PTR: {
 #if (HIP_VERSION_MAJOR >= 5)
       void *Base;
-      UR_CHECK_ERROR(hipPointerGetAttribute(
-          &Base, HIP_POINTER_ATTRIBUTE_RANGE_START_ADDR,
-          const_cast<hipDeviceptr_t>(pMem)));
+      UR_CHECK_ERROR(
+          hipPointerGetAttribute(&Base, HIP_POINTER_ATTRIBUTE_RANGE_START_ADDR,
+                                 const_cast<hipDeviceptr_t>(pMem)));
       return ReturnValue(Base);
 #else
       return UR_RESULT_ERROR_INVALID_VALUE;
@@ -204,9 +204,9 @@ urUSMGetMemAllocInfo(ur_context_handle_t hContext, const void *pMem,
     case UR_USM_ALLOC_INFO_SIZE: {
 #if (HIP_VERSION_MAJOR >= 5)
       size_t Value;
-      UR_CHECK_ERROR(hipPointerGetAttribute(
-          &Value, HIP_POINTER_ATTRIBUTE_RANGE_SIZE,
-          const_cast<hipDeviceptr_t>(pMem)));
+      UR_CHECK_ERROR(hipPointerGetAttribute(&Value,
+                                            HIP_POINTER_ATTRIBUTE_RANGE_SIZE,
+                                            const_cast<hipDeviceptr_t>(pMem)));
       return ReturnValue(Value);
 #else
       return UR_RESULT_ERROR_INVALID_VALUE;
