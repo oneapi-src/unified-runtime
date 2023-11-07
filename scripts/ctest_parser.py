@@ -19,7 +19,7 @@ def get_cts_test_suite_names(working_directory):
                     stdout=PIPE, env=os.environ.copy())
     out,_ = process.communicate()
     testsuites = json.loads(out)
-    return [test['name']for test in testsuites['tests']]
+    return [ts['name'][:ts['name'].rfind('-')] for ts in testsuites]
 
 def percent(amount, total):
     return round((amount / total) * 100, 2)
