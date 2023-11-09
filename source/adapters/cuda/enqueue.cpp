@@ -76,7 +76,6 @@ void getUSMHostOrDevicePtr(PtrT USMPtr, CUmemorytype *OutMemType,
 ur_result_t setCuMemAdvise(CUdeviceptr DevPtr, size_t Size,
                            ur_usm_advice_flags_t URAdviceFlags,
                            CUdevice Device) {
-
   std::unordered_map<ur_usm_advice_flags_t, CUmem_advise>
       URToCUMemAdviseDeviceFlagsMap = {
           {UR_USM_ADVICE_FLAG_SET_READ_MOSTLY, CU_MEM_ADVISE_SET_READ_MOSTLY},
@@ -1403,7 +1402,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
     }
     UR_CHECK_ERROR(
         cuMemPrefetchAsync((CUdeviceptr)pMem, size, Device->get(), CuStream));
-
     if (phEvent) {
       UR_CHECK_ERROR(EventPtr->record());
       *phEvent = EventPtr.release();
