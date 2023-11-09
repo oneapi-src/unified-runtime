@@ -725,7 +725,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferEnqueueExp(
   if (NumEventsInWaitList) {
     _ur_ze_event_list_t TmpWaitList;
     UR_CALL(TmpWaitList.createAndRetainUrZeEventList(
-        NumEventsInWaitList, EventWaitList, Queue, UseCopyEngine));
+        NumEventsInWaitList, EventWaitList, Queue, UseCopyEngine, nullptr));
 
     UR_CALL(Queue->Context->getAvailableCommandList(Queue, WaitCommandList,
                                                     false, false))
