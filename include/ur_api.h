@@ -6619,7 +6619,6 @@ urEnqueueMemUnmap(
 ///         + `patternSize > size`
 ///         + `(patternSize & (patternSize - 1)) != 0`
 ///         + `size % patternSize != 0`
-///         + If `size` is higher than the allocation size of `ptr`
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
 ///         + `phEventWaitList == NULL && numEventsInWaitList > 0`
 ///         + `phEventWaitList != NULL && numEventsInWaitList == 0`
@@ -6661,7 +6660,6 @@ urEnqueueUSMFill(
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         + `size == 0`
-///         + If `size` is higher than the allocation size of `pSrc` or `pDst`
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
 ///         + `phEventWaitList == NULL && numEventsInWaitList > 0`
 ///         + `phEventWaitList != NULL && numEventsInWaitList == 0`
@@ -6708,7 +6706,6 @@ urEnqueueUSMMemcpy(
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         + `size == 0`
-///         + If `size` is higher than the allocation size of `pMem`
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
 ///         + `phEventWaitList == NULL && numEventsInWaitList > 0`
 ///         + `phEventWaitList != NULL && numEventsInWaitList == 0`
@@ -6754,7 +6751,6 @@ urEnqueueUSMPrefetch(
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         + `size == 0`
-///         + If `size` is higher than the allocation size of `pMem`
 ///     - ::UR_RESULT_ERROR_INVALID_MEM_OBJECT
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
@@ -6790,7 +6786,6 @@ urEnqueueUSMAdvise(
 ///         + `width == 0`
 ///         + `height == 0`
 ///         + `width * height % patternSize != 0`
-///         + If `pitch * height` is higher than the allocation size of `pMem`
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
 ///         + `phEventWaitList == NULL && numEventsInWaitList > 0`
 ///         + `phEventWaitList != NULL && numEventsInWaitList == 0`
@@ -6838,8 +6833,6 @@ urEnqueueUSMFill2D(
 ///         + `srcPitch < width`
 ///         + `dstPitch < width`
 ///         + `height == 0`
-///         + If `srcPitch * height` is higher than the allocation size of `pSrc`
-///         + If `dstPitch * height` is higher than the allocation size of `pDst`
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
 ///         + `phEventWaitList == NULL && numEventsInWaitList > 0`
 ///         + `phEventWaitList != NULL && numEventsInWaitList == 0`

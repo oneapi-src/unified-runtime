@@ -227,22 +227,6 @@ TEST_P(urEnqueueUSMFill2DNegativeTest, InvalidSize) {
                      UR_RESULT_ERROR_INVALID_SIZE);
 }
 
-TEST_P(urEnqueueUSMFill2DNegativeTest, OutOfBounds) {
-    size_t out_of_bounds = pitch * height + 1;
-
-    /* Interpret memory as having just one row */
-    ASSERT_EQ_RESULT(urEnqueueUSMFill2D(queue, ptr, out_of_bounds, pattern_size,
-                                        pattern.data(), width, 1, 0, nullptr,
-                                        nullptr),
-                     UR_RESULT_ERROR_INVALID_SIZE);
-
-    /* Interpret memory as having just one column */
-    ASSERT_EQ_RESULT(urEnqueueUSMFill2D(queue, ptr, out_of_bounds, pattern_size,
-                                        pattern.data(), 1, height, 0, nullptr,
-                                        nullptr),
-                     UR_RESULT_ERROR_INVALID_SIZE);
-}
-
 TEST_P(urEnqueueUSMFill2DNegativeTest, invalidPatternSize) {
     /* pattern size is 0 */
     ASSERT_EQ_RESULT(urEnqueueUSMFill2D(queue, ptr, pitch, 0, pattern.data(),

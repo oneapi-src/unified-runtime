@@ -153,18 +153,6 @@ TEST_P(urEnqueueUSMMemcpy2DNegativeTest, InvalidSize) {
                      urEnqueueUSMMemcpy2D(queue, true, pDst, pitch, pSrc, pitch,
                                           width + 1, height, 0, nullptr,
                                           nullptr));
-
-    // `dstPitch * height` is higher than the allocation size of `pDst`
-    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
-                     urEnqueueUSMMemcpy2D(queue, true, pDst, pitch + 1, pSrc,
-                                          pitch, width, height, 0, nullptr,
-                                          nullptr));
-
-    // `srcPitch * height` is higher than the allocation size of `pSrc`
-    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
-                     urEnqueueUSMMemcpy2D(queue, true, pDst, pitch, pSrc,
-                                          pitch + 1, width, height, 0, nullptr,
-                                          nullptr));
 }
 
 TEST_P(urEnqueueUSMMemcpy2DNegativeTest, InvalidEventWaitList) {

@@ -168,13 +168,6 @@ TEST_P(urEnqueueUSMFillNegativeTest, InvalidSize) {
                      UR_RESULT_ERROR_INVALID_SIZE);
 }
 
-TEST_P(urEnqueueUSMFillNegativeTest, OutOfBounds) {
-    size_t out_of_bounds = size + 1;
-    ASSERT_EQ_RESULT(urEnqueueUSMFill(queue, ptr, pattern_size, pattern.data(),
-                                      out_of_bounds, 0, nullptr, nullptr),
-                     UR_RESULT_ERROR_INVALID_SIZE);
-}
-
 TEST_P(urEnqueueUSMFillNegativeTest, invalidPatternSize) {
     /* pattern_size is 0 */
     ASSERT_EQ_RESULT(urEnqueueUSMFill(queue, ptr, 0, pattern.data(), size, 0,

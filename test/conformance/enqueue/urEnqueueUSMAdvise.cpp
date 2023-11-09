@@ -62,9 +62,3 @@ TEST_P(urEnqueueUSMAdviseTest, InvalidSizeZero) {
         UR_RESULT_ERROR_INVALID_SIZE,
         urEnqueueUSMAdvise(queue, ptr, 0, UR_USM_ADVICE_FLAG_DEFAULT, nullptr));
 }
-
-TEST_P(urEnqueueUSMAdviseTest, InvalidSizeTooLarge) {
-    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
-                     urEnqueueUSMAdvise(queue, ptr, allocation_size * 2,
-                                        UR_USM_ADVICE_FLAG_DEFAULT, nullptr));
-}

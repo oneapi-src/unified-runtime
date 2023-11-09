@@ -102,13 +102,6 @@ TEST_P(urEnqueueUSMPrefetchTest, InvalidSizeZero) {
                                           nullptr, nullptr));
 }
 
-TEST_P(urEnqueueUSMPrefetchTest, InvalidSizeTooLarge) {
-    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
-                     urEnqueueUSMPrefetch(queue, ptr, allocation_size * 2,
-                                          UR_USM_MIGRATION_FLAG_DEFAULT, 0,
-                                          nullptr, nullptr));
-}
-
 TEST_P(urEnqueueUSMPrefetchTest, InvalidEventWaitList) {
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST,
                      urEnqueueUSMPrefetch(queue, ptr, allocation_size,
