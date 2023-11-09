@@ -73,12 +73,16 @@ params:
           [in] Adapter handle to retain
 --- #--------------------------------------------------------------------------
 type: function
-desc: "Get the last adapter specific error."
+desc: "Get the last adapter specific warning or error."
 details: |
     To be used after another entry-point has returned
     $X_RESULT_ERROR_ADAPTER_SPECIFIC in order to retrieve a message describing
     the circumstances of the underlying driver error and the error code
     returned by the failed driver entry-point.
+  
+    * If `pError` is $X_RESULT_SUCCESS, $X_RESULT_ERROR_ADAPTER_SPECIFIC
+    represents a warning instead. This means that the entry-point call did not
+    fail. However it might not have behaved as expected.
 
     * Implementations *must* store the message and error code in thread-local
       storage prior to returning $X_RESULT_ERROR_ADAPTER_SPECIFIC.
