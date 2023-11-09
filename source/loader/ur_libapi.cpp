@@ -723,6 +723,10 @@ ur_result_t UR_APICALL urPlatformGetBackendOption(
 ///         + `NULL == hPlatform`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
 ///         + `::UR_DEVICE_TYPE_VPU < DeviceType`
+///     - ::UR_RESULT_ERROR_INVALID_SIZE
+///         + `NumEntries == 0 && phDevices != NULL`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NumEntries > 0 && phDevices == NULL`
 ///     - ::UR_RESULT_ERROR_INVALID_VALUE
 ur_result_t UR_APICALL urDeviceGet(
     ur_platform_handle_t hPlatform, ///< [in] handle of the platform instance

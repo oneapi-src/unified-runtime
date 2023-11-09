@@ -15,6 +15,58 @@
 namespace ur_validation_layer {
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urInit
+__urdlllocal ur_result_t UR_APICALL urInit(
+    ur_device_init_flags_t device_flags, ///< [in] device initialization flags.
+    ///< must be 0 (default) or a combination of ::ur_device_init_flag_t.
+    ur_loader_config_handle_t
+        hLoaderConfig ///< [in][optional] Handle of loader config handle.
+) {
+    auto pfnInit = context.urDdiTable.Global.pfnInit;
+
+    if (nullptr == pfnInit) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    if (context.enableParameterValidation) {
+        if (UR_DEVICE_INIT_FLAGS_MASK & device_flags) {
+            return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        }
+    }
+
+    ur_result_t result = pfnInit(device_flags, hLoaderConfig);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urTearDown
+__urdlllocal ur_result_t UR_APICALL urTearDown(
+    void *pParams ///< [in] pointer to tear down parameters
+) {
+    auto pfnTearDown = context.urDdiTable.Global.pfnTearDown;
+
+    if (nullptr == pfnTearDown) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    if (context.enableParameterValidation) {
+        if (NULL == pParams) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+    }
+
+    ur_result_t result = pfnTearDown(pParams);
+
+    if (context.enableLeakChecking) {
+        refCountContext.logInvalidReferences();
+        refCountContext.clear();
+    }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urAdapterGet
 __urdlllocal ur_result_t UR_APICALL urAdapterGet(
     uint32_t
@@ -40,11 +92,6 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGet(
 
     ur_result_t result = pfnAdapterGet(NumEntries, phAdapters, pNumAdapters);
 
-    if (context.enableLeakChecking && phAdapters &&
-        result == UR_RESULT_SUCCESS) {
-        refCountContext.createOrIncrementRefCount(*phAdapters, true);
-    }
-
     return result;
 }
 
@@ -68,7 +115,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterRelease(
     ur_result_t result = pfnAdapterRelease(hAdapter);
 
     if (context.enableLeakChecking && result == UR_RESULT_SUCCESS) {
-        refCountContext.decrementRefCount(hAdapter, true);
+        refCountContext.decrementRefCount(hAdapter);
     }
 
     return result;
@@ -94,7 +141,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterRetain(
     ur_result_t result = pfnAdapterRetain(hAdapter);
 
     if (context.enableLeakChecking && result == UR_RESULT_SUCCESS) {
-        refCountContext.decrementRefCount(hAdapter, true);
+        refCountContext.incrementRefCount(hAdapter);
     }
 
     return result;
@@ -213,10 +260,6 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGet(
     if (context.enableParameterValidation) {
         if (NULL == phAdapters) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-        }
-
-        if (NumEntries == 0 && phPlatforms != NULL) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
         }
     }
 
@@ -402,8 +445,8 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGet(
     ur_device_type_t DeviceType,    ///< [in] the type of the devices.
     uint32_t
         NumEntries, ///< [in] the number of devices to be added to phDevices.
-    ///< If phDevices is not NULL, then NumEntries should be greater than zero.
-    ///< Otherwise ::UR_RESULT_ERROR_INVALID_SIZE
+    ///< If phDevices in not NULL then NumEntries should be greater than zero,
+    ///< otherwise ::UR_RESULT_ERROR_INVALID_VALUE,
     ///< will be returned.
     ur_device_handle_t *
         phDevices, ///< [out][optional][range(0, NumEntries)] array of handle of devices.
@@ -3888,12 +3931,8 @@ __urdlllocal ur_result_t UR_APICALL urEventSetCallback(
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
 
-        if (UR_EXECUTION_INFO_QUEUED < execStatus) {
+        if (UR_EXECUTION_INFO_EXECUTION_INFO_QUEUED < execStatus) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
-        }
-
-        if (execStatus == UR_EXECUTION_INFO_QUEUED) {
-            return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
         }
     }
 
@@ -4656,26 +4695,6 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferFill(
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
 
-        if (patternSize == 0 || size == 0) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-
-        if (patternSize > size) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-
-        if ((patternSize & (patternSize - 1)) != 0) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-
-        if (size % patternSize != 0) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-
-        if (offset % patternSize != 0) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
             for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (phEventWaitList[i] == NULL) {
@@ -4741,10 +4760,6 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageRead(
 
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
-
-        if (region.width == 0 || region.height == 0 || region.depth == 0) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
@@ -4815,10 +4830,6 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageWrite(
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
 
-        if (region.width == 0 || region.height == 0 || region.depth == 0) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
             for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
                 if (phEventWaitList[i] == NULL) {
@@ -4885,10 +4896,6 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageCopy(
 
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
-
-        if (region.width == 0 || region.height == 0 || region.depth == 0) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
@@ -5712,7 +5719,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueWriteHostPipe(
     ///< events that must be complete before the host pipe write.
     ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait event.
     ur_event_handle_t *
-        phEvent ///< [out][optional] returns an event object that identifies this write command
+        phEvent ///< [out] returns an event object that identifies this write command
     ///< and can be used to query or queue a wait for this command to complete.
 ) {
     auto pfnWriteHostPipe = context.urDdiTable.Enqueue.pfnWriteHostPipe;
@@ -5735,6 +5742,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueWriteHostPipe(
         }
 
         if (NULL == pSrc) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (NULL == phEvent) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
 
@@ -6791,8 +6802,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferAppendUSMMemcpyExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMMemcpyExp(
+/// @brief Intercept function for urCommandBufferAppendMemcpyUSMExp
+__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemcpyUSMExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer, ///< [in] handle of the command-buffer object.
     void *pDst,         ///< [in] Location the data will be copied to.
@@ -6805,10 +6816,10 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMMemcpyExp(
     ur_exp_command_buffer_sync_point_t
         *pSyncPoint ///< [out][optional] sync point associated with this command
 ) {
-    auto pfnAppendUSMMemcpyExp =
-        context.urDdiTable.CommandBufferExp.pfnAppendUSMMemcpyExp;
+    auto pfnAppendMemcpyUSMExp =
+        context.urDdiTable.CommandBufferExp.pfnAppendMemcpyUSMExp;
 
-    if (nullptr == pfnAppendUSMMemcpyExp) {
+    if (nullptr == pfnAppendMemcpyUSMExp) {
         return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
@@ -6838,7 +6849,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMMemcpyExp(
         }
     }
 
-    ur_result_t result = pfnAppendUSMMemcpyExp(hCommandBuffer, pDst, pSrc, size,
+    ur_result_t result = pfnAppendMemcpyUSMExp(hCommandBuffer, pDst, pSrc, size,
                                                numSyncPointsInWaitList,
                                                pSyncPointWaitList, pSyncPoint);
 
@@ -6846,77 +6857,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMMemcpyExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferAppendUSMFillExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMFillExp(
-    ur_exp_command_buffer_handle_t
-        hCommandBuffer,   ///< [in] handle of the command-buffer object.
-    void *pMemory,        ///< [in] pointer to USM allocated memory to fill.
-    const void *pPattern, ///< [in] pointer to the fill pattern.
-    size_t patternSize,   ///< [in] size in bytes of the pattern.
-    size_t
-        size, ///< [in] fill size in bytes, must be a multiple of patternSize.
-    uint32_t
-        numSyncPointsInWaitList, ///< [in] The number of sync points in the provided dependency list.
-    const ur_exp_command_buffer_sync_point_t *
-        pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on.
-    ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] sync point associated with this command.
-) {
-    auto pfnAppendUSMFillExp =
-        context.urDdiTable.CommandBufferExp.pfnAppendUSMFillExp;
-
-    if (nullptr == pfnAppendUSMFillExp) {
-        return UR_RESULT_ERROR_UNINITIALIZED;
-    }
-
-    if (context.enableParameterValidation) {
-        if (NULL == hCommandBuffer) {
-            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-        }
-
-        if (NULL == pMemory) {
-            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-        }
-
-        if (NULL == pPattern) {
-            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-        }
-
-        if (patternSize == 0 || size == 0) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-
-        if (patternSize > size) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-
-        if ((patternSize & (patternSize - 1)) != 0) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-
-        if (size % patternSize != 0) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-
-        if (pSyncPointWaitList == NULL && numSyncPointsInWaitList > 0) {
-            return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
-        }
-
-        if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
-            return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
-        }
-    }
-
-    ur_result_t result = pfnAppendUSMFillExp(
-        hCommandBuffer, pMemory, pPattern, patternSize, size,
-        numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
-
-    return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferAppendMemBufferCopyExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
+/// @brief Intercept function for urCommandBufferAppendMembufferCopyExp
+__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMembufferCopyExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer,      ///< [in] handle of the command-buffer object.
     ur_mem_handle_t hSrcMem, ///< [in] The data to be copied.
@@ -6931,10 +6873,10 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
     ur_exp_command_buffer_sync_point_t
         *pSyncPoint ///< [out][optional] sync point associated with this command
 ) {
-    auto pfnAppendMemBufferCopyExp =
-        context.urDdiTable.CommandBufferExp.pfnAppendMemBufferCopyExp;
+    auto pfnAppendMembufferCopyExp =
+        context.urDdiTable.CommandBufferExp.pfnAppendMembufferCopyExp;
 
-    if (nullptr == pfnAppendMemBufferCopyExp) {
+    if (nullptr == pfnAppendMembufferCopyExp) {
         return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
@@ -6960,7 +6902,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
         }
     }
 
-    ur_result_t result = pfnAppendMemBufferCopyExp(
+    ur_result_t result = pfnAppendMembufferCopyExp(
         hCommandBuffer, hSrcMem, hDstMem, srcOffset, dstOffset, size,
         numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
 
@@ -6968,8 +6910,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferAppendMemBufferWriteExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
+/// @brief Intercept function for urCommandBufferAppendMembufferWriteExp
+__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMembufferWriteExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer,      ///< [in] handle of the command-buffer object.
     ur_mem_handle_t hBuffer, ///< [in] handle of the buffer object.
@@ -6984,10 +6926,10 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
     ur_exp_command_buffer_sync_point_t
         *pSyncPoint ///< [out][optional] sync point associated with this command
 ) {
-    auto pfnAppendMemBufferWriteExp =
-        context.urDdiTable.CommandBufferExp.pfnAppendMemBufferWriteExp;
+    auto pfnAppendMembufferWriteExp =
+        context.urDdiTable.CommandBufferExp.pfnAppendMembufferWriteExp;
 
-    if (nullptr == pfnAppendMemBufferWriteExp) {
+    if (nullptr == pfnAppendMembufferWriteExp) {
         return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
@@ -7013,7 +6955,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
         }
     }
 
-    ur_result_t result = pfnAppendMemBufferWriteExp(
+    ur_result_t result = pfnAppendMembufferWriteExp(
         hCommandBuffer, hBuffer, offset, size, pSrc, numSyncPointsInWaitList,
         pSyncPointWaitList, pSyncPoint);
 
@@ -7021,8 +6963,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferAppendMemBufferReadExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
+/// @brief Intercept function for urCommandBufferAppendMembufferReadExp
+__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMembufferReadExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer,      ///< [in] handle of the command-buffer object.
     ur_mem_handle_t hBuffer, ///< [in] handle of the buffer object.
@@ -7036,10 +6978,10 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
     ur_exp_command_buffer_sync_point_t
         *pSyncPoint ///< [out][optional] sync point associated with this command
 ) {
-    auto pfnAppendMemBufferReadExp =
-        context.urDdiTable.CommandBufferExp.pfnAppendMemBufferReadExp;
+    auto pfnAppendMembufferReadExp =
+        context.urDdiTable.CommandBufferExp.pfnAppendMembufferReadExp;
 
-    if (nullptr == pfnAppendMemBufferReadExp) {
+    if (nullptr == pfnAppendMembufferReadExp) {
         return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
@@ -7065,7 +7007,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
         }
     }
 
-    ur_result_t result = pfnAppendMemBufferReadExp(
+    ur_result_t result = pfnAppendMembufferReadExp(
         hCommandBuffer, hBuffer, offset, size, pDst, numSyncPointsInWaitList,
         pSyncPointWaitList, pSyncPoint);
 
@@ -7073,8 +7015,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferAppendMemBufferCopyRectExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
+/// @brief Intercept function for urCommandBufferAppendMembufferCopyRectExp
+__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMembufferCopyRectExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer,      ///< [in] handle of the command-buffer object.
     ur_mem_handle_t hSrcMem, ///< [in] The data to be copied.
@@ -7096,10 +7038,10 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
     ur_exp_command_buffer_sync_point_t
         *pSyncPoint ///< [out][optional] sync point associated with this command
 ) {
-    auto pfnAppendMemBufferCopyRectExp =
-        context.urDdiTable.CommandBufferExp.pfnAppendMemBufferCopyRectExp;
+    auto pfnAppendMembufferCopyRectExp =
+        context.urDdiTable.CommandBufferExp.pfnAppendMembufferCopyRectExp;
 
-    if (nullptr == pfnAppendMemBufferCopyRectExp) {
+    if (nullptr == pfnAppendMembufferCopyRectExp) {
         return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
@@ -7125,7 +7067,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
         }
     }
 
-    ur_result_t result = pfnAppendMemBufferCopyRectExp(
+    ur_result_t result = pfnAppendMembufferCopyRectExp(
         hCommandBuffer, hSrcMem, hDstMem, srcOrigin, dstOrigin, region,
         srcRowPitch, srcSlicePitch, dstRowPitch, dstSlicePitch,
         numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
@@ -7134,8 +7076,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferAppendMemBufferWriteRectExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
+/// @brief Intercept function for urCommandBufferAppendMembufferWriteRectExp
+__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMembufferWriteRectExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer,      ///< [in] handle of the command-buffer object.
     ur_mem_handle_t hBuffer, ///< [in] handle of the buffer object.
@@ -7163,10 +7105,10 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
     ur_exp_command_buffer_sync_point_t
         *pSyncPoint ///< [out][optional] sync point associated with this command
 ) {
-    auto pfnAppendMemBufferWriteRectExp =
-        context.urDdiTable.CommandBufferExp.pfnAppendMemBufferWriteRectExp;
+    auto pfnAppendMembufferWriteRectExp =
+        context.urDdiTable.CommandBufferExp.pfnAppendMembufferWriteRectExp;
 
-    if (nullptr == pfnAppendMemBufferWriteRectExp) {
+    if (nullptr == pfnAppendMembufferWriteRectExp) {
         return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
@@ -7192,7 +7134,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
         }
     }
 
-    ur_result_t result = pfnAppendMemBufferWriteRectExp(
+    ur_result_t result = pfnAppendMembufferWriteRectExp(
         hCommandBuffer, hBuffer, bufferOffset, hostOffset, region,
         bufferRowPitch, bufferSlicePitch, hostRowPitch, hostSlicePitch, pSrc,
         numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
@@ -7201,8 +7143,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferAppendMemBufferReadRectExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
+/// @brief Intercept function for urCommandBufferAppendMembufferReadRectExp
+__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMembufferReadRectExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer,      ///< [in] handle of the command-buffer object.
     ur_mem_handle_t hBuffer, ///< [in] handle of the buffer object.
@@ -7228,10 +7170,10 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
     ur_exp_command_buffer_sync_point_t
         *pSyncPoint ///< [out][optional] sync point associated with this command
 ) {
-    auto pfnAppendMemBufferReadRectExp =
-        context.urDdiTable.CommandBufferExp.pfnAppendMemBufferReadRectExp;
+    auto pfnAppendMembufferReadRectExp =
+        context.urDdiTable.CommandBufferExp.pfnAppendMembufferReadRectExp;
 
-    if (nullptr == pfnAppendMemBufferReadRectExp) {
+    if (nullptr == pfnAppendMembufferReadRectExp) {
         return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
@@ -7257,174 +7199,10 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
         }
     }
 
-    ur_result_t result = pfnAppendMemBufferReadRectExp(
+    ur_result_t result = pfnAppendMembufferReadRectExp(
         hCommandBuffer, hBuffer, bufferOffset, hostOffset, region,
         bufferRowPitch, bufferSlicePitch, hostRowPitch, hostSlicePitch, pDst,
         numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
-
-    return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferAppendMemBufferFillExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
-    ur_exp_command_buffer_handle_t
-        hCommandBuffer,      ///< [in] handle of the command-buffer object.
-    ur_mem_handle_t hBuffer, ///< [in] handle of the buffer object.
-    const void *pPattern,    ///< [in] pointer to the fill pattern.
-    size_t patternSize,      ///< [in] size in bytes of the pattern.
-    size_t offset,           ///< [in] offset into the buffer.
-    size_t
-        size, ///< [in] fill size in bytes, must be a multiple of patternSize.
-    uint32_t
-        numSyncPointsInWaitList, ///< [in] The number of sync points in the provided dependency list.
-    const ur_exp_command_buffer_sync_point_t *
-        pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on.
-    ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] sync point associated with this command.
-) {
-    auto pfnAppendMemBufferFillExp =
-        context.urDdiTable.CommandBufferExp.pfnAppendMemBufferFillExp;
-
-    if (nullptr == pfnAppendMemBufferFillExp) {
-        return UR_RESULT_ERROR_UNINITIALIZED;
-    }
-
-    if (context.enableParameterValidation) {
-        if (NULL == hCommandBuffer) {
-            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-        }
-
-        if (NULL == hBuffer) {
-            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-        }
-
-        if (NULL == pPattern) {
-            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-        }
-
-        if (pSyncPointWaitList == NULL && numSyncPointsInWaitList > 0) {
-            return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
-        }
-
-        if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
-            return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
-        }
-    }
-
-    ur_result_t result = pfnAppendMemBufferFillExp(
-        hCommandBuffer, hBuffer, pPattern, patternSize, offset, size,
-        numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
-
-    return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferAppendUSMPrefetchExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMPrefetchExp(
-    ur_exp_command_buffer_handle_t
-        hCommandBuffer,  ///< [in] handle of the command-buffer object.
-    const void *pMemory, ///< [in] pointer to USM allocated memory to prefetch.
-    size_t size,         ///< [in] size in bytes to be fetched.
-    ur_usm_migration_flags_t flags, ///< [in] USM prefetch flags
-    uint32_t
-        numSyncPointsInWaitList, ///< [in] The number of sync points in the provided dependency list.
-    const ur_exp_command_buffer_sync_point_t *
-        pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on.
-    ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] sync point associated with this command.
-) {
-    auto pfnAppendUSMPrefetchExp =
-        context.urDdiTable.CommandBufferExp.pfnAppendUSMPrefetchExp;
-
-    if (nullptr == pfnAppendUSMPrefetchExp) {
-        return UR_RESULT_ERROR_UNINITIALIZED;
-    }
-
-    if (context.enableParameterValidation) {
-        if (NULL == hCommandBuffer) {
-            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-        }
-
-        if (NULL == pMemory) {
-            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-        }
-
-        if (UR_USM_MIGRATION_FLAGS_MASK & flags) {
-            return UR_RESULT_ERROR_INVALID_ENUMERATION;
-        }
-
-        if (pSyncPointWaitList == NULL && numSyncPointsInWaitList > 0) {
-            return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
-        }
-
-        if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
-            return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
-        }
-
-        if (size == 0) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-    }
-
-    ur_result_t result = pfnAppendUSMPrefetchExp(
-        hCommandBuffer, pMemory, size, flags, numSyncPointsInWaitList,
-        pSyncPointWaitList, pSyncPoint);
-
-    return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferAppendUSMAdviseExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMAdviseExp(
-    ur_exp_command_buffer_handle_t
-        hCommandBuffer,           ///< [in] handle of the command-buffer object.
-    const void *pMemory,          ///< [in] pointer to the USM memory object.
-    size_t size,                  ///< [in] size in bytes to be advised.
-    ur_usm_advice_flags_t advice, ///< [in] USM memory advice
-    uint32_t
-        numSyncPointsInWaitList, ///< [in] The number of sync points in the provided dependency list.
-    const ur_exp_command_buffer_sync_point_t *
-        pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on.
-    ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] sync point associated with this command.
-) {
-    auto pfnAppendUSMAdviseExp =
-        context.urDdiTable.CommandBufferExp.pfnAppendUSMAdviseExp;
-
-    if (nullptr == pfnAppendUSMAdviseExp) {
-        return UR_RESULT_ERROR_UNINITIALIZED;
-    }
-
-    if (context.enableParameterValidation) {
-        if (NULL == hCommandBuffer) {
-            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-        }
-
-        if (NULL == pMemory) {
-            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-        }
-
-        if (UR_USM_ADVICE_FLAGS_MASK & advice) {
-            return UR_RESULT_ERROR_INVALID_ENUMERATION;
-        }
-
-        if (pSyncPointWaitList == NULL && numSyncPointsInWaitList > 0) {
-            return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
-        }
-
-        if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
-            return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
-        }
-
-        if (size == 0) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-    }
-
-    ur_result_t result = pfnAppendUSMAdviseExp(hCommandBuffer, pMemory, size,
-                                               advice, numSyncPointsInWaitList,
-                                               pSyncPointWaitList, pSyncPoint);
 
     return result;
 }
@@ -7480,114 +7258,6 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
 
     ur_result_t result = pfnEnqueueExp(
         hCommandBuffer, hQueue, numEventsInWaitList, phEventWaitList, phEvent);
-
-    return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urEnqueueCooperativeKernelLaunchExp
-__urdlllocal ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
-    ur_queue_handle_t hQueue,   ///< [in] handle of the queue object
-    ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
-    uint32_t
-        workDim, ///< [in] number of dimensions, from 1 to 3, to specify the global and
-                 ///< work-group work-items
-    const size_t *
-        pGlobalWorkOffset, ///< [in] pointer to an array of workDim unsigned values that specify the
-    ///< offset used to calculate the global ID of a work-item
-    const size_t *
-        pGlobalWorkSize, ///< [in] pointer to an array of workDim unsigned values that specify the
-    ///< number of global work-items in workDim that will execute the kernel
-    ///< function
-    const size_t *
-        pLocalWorkSize, ///< [in][optional] pointer to an array of workDim unsigned values that
-    ///< specify the number of local work-items forming a work-group that will
-    ///< execute the kernel function.
-    ///< If nullptr, the runtime implementation will choose the work-group
-    ///< size.
-    uint32_t numEventsInWaitList, ///< [in] size of the event wait list
-    const ur_event_handle_t *
-        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
-    ///< events that must be complete before the kernel execution.
-    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait
-    ///< event.
-    ur_event_handle_t *
-        phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< kernel execution instance.
-) {
-    auto pfnCooperativeKernelLaunchExp =
-        context.urDdiTable.EnqueueExp.pfnCooperativeKernelLaunchExp;
-
-    if (nullptr == pfnCooperativeKernelLaunchExp) {
-        return UR_RESULT_ERROR_UNINITIALIZED;
-    }
-
-    if (context.enableParameterValidation) {
-        if (NULL == hQueue) {
-            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-        }
-
-        if (NULL == hKernel) {
-            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-        }
-
-        if (NULL == pGlobalWorkOffset) {
-            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-        }
-
-        if (NULL == pGlobalWorkSize) {
-            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-        }
-
-        if (phEventWaitList == NULL && numEventsInWaitList > 0) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
-
-        if (phEventWaitList != NULL && numEventsInWaitList == 0) {
-            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-        }
-
-        if (phEventWaitList != NULL && numEventsInWaitList > 0) {
-            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
-                if (phEventWaitList[i] == NULL) {
-                    return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
-                }
-            }
-        }
-    }
-
-    ur_result_t result = pfnCooperativeKernelLaunchExp(
-        hQueue, hKernel, workDim, pGlobalWorkOffset, pGlobalWorkSize,
-        pLocalWorkSize, numEventsInWaitList, phEventWaitList, phEvent);
-
-    return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urKernelSuggestMaxCooperativeGroupCountExp
-__urdlllocal ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
-    ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
-    uint32_t *pGroupCountRet    ///< [out] pointer to maximum number of groups
-) {
-    auto pfnSuggestMaxCooperativeGroupCountExp =
-        context.urDdiTable.KernelExp.pfnSuggestMaxCooperativeGroupCountExp;
-
-    if (nullptr == pfnSuggestMaxCooperativeGroupCountExp) {
-        return UR_RESULT_ERROR_UNINITIALIZED;
-    }
-
-    if (context.enableParameterValidation) {
-        if (NULL == hKernel) {
-            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-        }
-
-        if (NULL == pGroupCountRet) {
-            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-        }
-    }
-
-    ur_result_t result =
-        pfnSuggestMaxCooperativeGroupCountExp(hKernel, pGroupCountRet);
 
     return result;
 }
@@ -7795,6 +7465,12 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetGlobalProcAddrTable(
 
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    dditable.pfnInit = pDdiTable->pfnInit;
+    pDdiTable->pfnInit = ur_validation_layer::urInit;
+
+    dditable.pfnTearDown = pDdiTable->pfnTearDown;
+    pDdiTable->pfnTearDown = ur_validation_layer::urTearDown;
+
     dditable.pfnAdapterGet = pDdiTable->pfnAdapterGet;
     pDdiTable->pfnAdapterGet = ur_validation_layer::urAdapterGet;
 
@@ -7963,52 +7639,36 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
     pDdiTable->pfnAppendKernelLaunchExp =
         ur_validation_layer::urCommandBufferAppendKernelLaunchExp;
 
-    dditable.pfnAppendUSMMemcpyExp = pDdiTable->pfnAppendUSMMemcpyExp;
-    pDdiTable->pfnAppendUSMMemcpyExp =
-        ur_validation_layer::urCommandBufferAppendUSMMemcpyExp;
+    dditable.pfnAppendMemcpyUSMExp = pDdiTable->pfnAppendMemcpyUSMExp;
+    pDdiTable->pfnAppendMemcpyUSMExp =
+        ur_validation_layer::urCommandBufferAppendMemcpyUSMExp;
 
-    dditable.pfnAppendUSMFillExp = pDdiTable->pfnAppendUSMFillExp;
-    pDdiTable->pfnAppendUSMFillExp =
-        ur_validation_layer::urCommandBufferAppendUSMFillExp;
+    dditable.pfnAppendMembufferCopyExp = pDdiTable->pfnAppendMembufferCopyExp;
+    pDdiTable->pfnAppendMembufferCopyExp =
+        ur_validation_layer::urCommandBufferAppendMembufferCopyExp;
 
-    dditable.pfnAppendMemBufferCopyExp = pDdiTable->pfnAppendMemBufferCopyExp;
-    pDdiTable->pfnAppendMemBufferCopyExp =
-        ur_validation_layer::urCommandBufferAppendMemBufferCopyExp;
+    dditable.pfnAppendMembufferWriteExp = pDdiTable->pfnAppendMembufferWriteExp;
+    pDdiTable->pfnAppendMembufferWriteExp =
+        ur_validation_layer::urCommandBufferAppendMembufferWriteExp;
 
-    dditable.pfnAppendMemBufferWriteExp = pDdiTable->pfnAppendMemBufferWriteExp;
-    pDdiTable->pfnAppendMemBufferWriteExp =
-        ur_validation_layer::urCommandBufferAppendMemBufferWriteExp;
+    dditable.pfnAppendMembufferReadExp = pDdiTable->pfnAppendMembufferReadExp;
+    pDdiTable->pfnAppendMembufferReadExp =
+        ur_validation_layer::urCommandBufferAppendMembufferReadExp;
 
-    dditable.pfnAppendMemBufferReadExp = pDdiTable->pfnAppendMemBufferReadExp;
-    pDdiTable->pfnAppendMemBufferReadExp =
-        ur_validation_layer::urCommandBufferAppendMemBufferReadExp;
+    dditable.pfnAppendMembufferCopyRectExp =
+        pDdiTable->pfnAppendMembufferCopyRectExp;
+    pDdiTable->pfnAppendMembufferCopyRectExp =
+        ur_validation_layer::urCommandBufferAppendMembufferCopyRectExp;
 
-    dditable.pfnAppendMemBufferCopyRectExp =
-        pDdiTable->pfnAppendMemBufferCopyRectExp;
-    pDdiTable->pfnAppendMemBufferCopyRectExp =
-        ur_validation_layer::urCommandBufferAppendMemBufferCopyRectExp;
+    dditable.pfnAppendMembufferWriteRectExp =
+        pDdiTable->pfnAppendMembufferWriteRectExp;
+    pDdiTable->pfnAppendMembufferWriteRectExp =
+        ur_validation_layer::urCommandBufferAppendMembufferWriteRectExp;
 
-    dditable.pfnAppendMemBufferWriteRectExp =
-        pDdiTable->pfnAppendMemBufferWriteRectExp;
-    pDdiTable->pfnAppendMemBufferWriteRectExp =
-        ur_validation_layer::urCommandBufferAppendMemBufferWriteRectExp;
-
-    dditable.pfnAppendMemBufferReadRectExp =
-        pDdiTable->pfnAppendMemBufferReadRectExp;
-    pDdiTable->pfnAppendMemBufferReadRectExp =
-        ur_validation_layer::urCommandBufferAppendMemBufferReadRectExp;
-
-    dditable.pfnAppendMemBufferFillExp = pDdiTable->pfnAppendMemBufferFillExp;
-    pDdiTable->pfnAppendMemBufferFillExp =
-        ur_validation_layer::urCommandBufferAppendMemBufferFillExp;
-
-    dditable.pfnAppendUSMPrefetchExp = pDdiTable->pfnAppendUSMPrefetchExp;
-    pDdiTable->pfnAppendUSMPrefetchExp =
-        ur_validation_layer::urCommandBufferAppendUSMPrefetchExp;
-
-    dditable.pfnAppendUSMAdviseExp = pDdiTable->pfnAppendUSMAdviseExp;
-    pDdiTable->pfnAppendUSMAdviseExp =
-        ur_validation_layer::urCommandBufferAppendUSMAdviseExp;
+    dditable.pfnAppendMembufferReadRectExp =
+        pDdiTable->pfnAppendMembufferReadRectExp;
+    pDdiTable->pfnAppendMembufferReadRectExp =
+        ur_validation_layer::urCommandBufferAppendMembufferReadRectExp;
 
     dditable.pfnEnqueueExp = pDdiTable->pfnEnqueueExp;
     pDdiTable->pfnEnqueueExp = ur_validation_layer::urCommandBufferEnqueueExp;
@@ -8186,42 +7846,6 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetEnqueueProcAddrTable(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Exported function for filling application's EnqueueExp table
-///        with current process' addresses
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-UR_DLLEXPORT ur_result_t UR_APICALL urGetEnqueueExpProcAddrTable(
-    ur_api_version_t version, ///< [in] API version requested
-    ur_enqueue_exp_dditable_t
-        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
-) {
-    auto &dditable = ur_validation_layer::context.urDdiTable.EnqueueExp;
-
-    if (nullptr == pDdiTable) {
-        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-    }
-
-    if (UR_MAJOR_VERSION(ur_validation_layer::context.version) !=
-            UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_validation_layer::context.version) >
-            UR_MINOR_VERSION(version)) {
-        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
-    }
-
-    ur_result_t result = UR_RESULT_SUCCESS;
-
-    dditable.pfnCooperativeKernelLaunchExp =
-        pDdiTable->pfnCooperativeKernelLaunchExp;
-    pDdiTable->pfnCooperativeKernelLaunchExp =
-        ur_validation_layer::urEnqueueCooperativeKernelLaunchExp;
-
-    return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's Event table
 ///        with current process' addresses
 ///
@@ -8355,42 +7979,6 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetKernelProcAddrTable(
         pDdiTable->pfnSetSpecializationConstants;
     pDdiTable->pfnSetSpecializationConstants =
         ur_validation_layer::urKernelSetSpecializationConstants;
-
-    return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Exported function for filling application's KernelExp table
-///        with current process' addresses
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-UR_DLLEXPORT ur_result_t UR_APICALL urGetKernelExpProcAddrTable(
-    ur_api_version_t version, ///< [in] API version requested
-    ur_kernel_exp_dditable_t
-        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
-) {
-    auto &dditable = ur_validation_layer::context.urDdiTable.KernelExp;
-
-    if (nullptr == pDdiTable) {
-        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-    }
-
-    if (UR_MAJOR_VERSION(ur_validation_layer::context.version) !=
-            UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_validation_layer::context.version) >
-            UR_MINOR_VERSION(version)) {
-        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
-    }
-
-    ur_result_t result = UR_RESULT_SUCCESS;
-
-    dditable.pfnSuggestMaxCooperativeGroupCountExp =
-        pDdiTable->pfnSuggestMaxCooperativeGroupCountExp;
-    pDdiTable->pfnSuggestMaxCooperativeGroupCountExp =
-        ur_validation_layer::urKernelSuggestMaxCooperativeGroupCountExp;
 
     return result;
 }
@@ -9036,11 +8624,6 @@ ur_result_t context_t::init(ur_dditable_t *dditable,
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_validation_layer::urGetEnqueueExpProcAddrTable(
-            UR_API_VERSION_CURRENT, &dditable->EnqueueExp);
-    }
-
-    if (UR_RESULT_SUCCESS == result) {
         result = ur_validation_layer::urGetEventProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->Event);
     }
@@ -9048,11 +8631,6 @@ ur_result_t context_t::init(ur_dditable_t *dditable,
     if (UR_RESULT_SUCCESS == result) {
         result = ur_validation_layer::urGetKernelProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->Kernel);
-    }
-
-    if (UR_RESULT_SUCCESS == result) {
-        result = ur_validation_layer::urGetKernelExpProcAddrTable(
-            UR_API_VERSION_CURRENT, &dditable->KernelExp);
     }
 
     if (UR_RESULT_SUCCESS == result) {
@@ -9110,16 +8688,6 @@ ur_result_t context_t::init(ur_dditable_t *dditable,
             UR_API_VERSION_CURRENT, &dditable->Device);
     }
 
-    return result;
-}
-
-ur_result_t context_t::tearDown() {
-    ur_result_t result = UR_RESULT_SUCCESS;
-
-    if (enableLeakChecking) {
-        refCountContext.logInvalidReferences();
-        refCountContext.clear();
-    }
     return result;
 }
 
