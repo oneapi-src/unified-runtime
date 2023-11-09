@@ -1421,7 +1421,9 @@ ur_result_t ur_queue_handle_t_::synchronize() {
     // zero handle can have device scope, so we can't synchronize the last
     // event.
     if (isInOrderQueue() && !LastCommandEvent->IsDiscarded) {
-      ZE2UR_CALL(zeHostSynchronize, (LastCommandEvent->ZeEvent));
+      if (LastCommandEvent->ZeEvent) {
+        ZE2UR_CALL(zeHostSynchronize, (LastCommandEvent->ZeEvent));
+      }
 
       // clean up all events known to have been completed as well,
       // so they can be reused later
@@ -1885,7 +1887,7 @@ ur_queue_handle_t_::insertActiveBarriers(ur_command_list_ptr_t &CmdList,
   _ur_ze_event_list_t ActiveBarriersWaitList;
   UR_CALL(ActiveBarriersWaitList.createAndRetainUrZeEventList(
       ActiveBarriers.vector().size(), ActiveBarriers.vector().data(),
-      reinterpret_cast<ur_queue_handle_t>(this), UseCopyEngine));
+      reinterpret_cast<ur_queue_handle_t>(this), UseCopyEngine, nullptr));
 
   // We can now replace active barriers with the ones in the wait list.
   UR_CALL(ActiveBarriers.clear());

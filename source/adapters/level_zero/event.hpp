@@ -87,7 +87,8 @@ struct _ur_ze_event_list_t {
   ur_result_t createAndRetainUrZeEventList(uint32_t EventListLength,
                                            const ur_event_handle_t *EventList,
                                            ur_queue_handle_t CurQueue,
-                                           bool UseCopyEngine);
+                                           bool UseCopyEngine,
+                                           bool *LastCommandEventIncluded);
 
   // Add all the events in this object's UrEventList to the end
   // of the list EventsToBeReleased. Destroy ur_ze_event_list_t data
