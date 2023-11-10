@@ -180,8 +180,6 @@ ur_result_t createProgram(ur_context_handle_t hContext,
             UR_RESULT_ERROR_INVALID_CONTEXT);
   UR_ASSERT(size, UR_RESULT_ERROR_INVALID_SIZE);
 
-  ur_result_t Result = UR_RESULT_SUCCESS;
-
   std::unique_ptr<ur_program_handle_t_> RetProgram{
       new ur_program_handle_t_{hContext}};
 
@@ -191,19 +189,16 @@ ur_result_t createProgram(ur_context_handle_t hContext,
     } else if (pProperties->count == 0 && pProperties->pMetadatas != nullptr) {
       return UR_RESULT_ERROR_INVALID_SIZE;
     }
-    Result =
-        RetProgram->setMetadata(pProperties->pMetadatas, pProperties->count);
+    UR_CHECK_ERROR(
+        RetProgram->setMetadata(pProperties->pMetadatas, pProperties->count));
   }
-  UR_ASSERT(Result == UR_RESULT_SUCCESS, Result);
 
   auto pBinary_string = reinterpret_cast<const char *>(pBinary);
 
-  Result = RetProgram->setBinary(pBinary_string, size);
-  UR_ASSERT(Result == UR_RESULT_SUCCESS, Result);
-
+  UR_CHECK_ERROR(RetProgram->setBinary(pBinary_string, size));
   *phProgram = RetProgram.release();
 
-  return Result;
+  return UR_RESULT_SUCCESS;
 }
 
 /// CUDA will handle the PTX/CUBIN binaries internally through CUmodule object.
