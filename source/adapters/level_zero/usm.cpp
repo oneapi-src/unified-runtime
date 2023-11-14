@@ -12,6 +12,7 @@
 #include <climits>
 #include <string.h>
 
+#include "common.hpp"
 #include "context.hpp"
 #include "event.hpp"
 #include "usm.hpp"
@@ -327,6 +328,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMHostAlloc(
   if (!hPoolInternalOpt.has_value()) {
     // Internal error, every L0 context and usm pool should have Host, Device,
     // Shared and SharedReadOnly UMF pools.
+    urPrint("urUSMHostAlloc: unexpected internal error\n");
     return UR_RESULT_ERROR_UNKNOWN;
   }
 
@@ -409,6 +411,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMDeviceAlloc(
   if (!hPoolInternalOpt.has_value()) {
     // Internal error, every L0 context and usm pool should have Host, Device,
     // Shared and SharedReadOnly UMF pools.
+    urPrint("urUSMDeviceAlloc: unexpected internal error\n");
     return UR_RESULT_ERROR_UNKNOWN;
   }
 
@@ -512,6 +515,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMSharedAlloc(
   if (!hPoolInternalOpt.has_value()) {
     // Internal error, every L0 context and usm pool should have Host, Device,
     // Shared and SharedReadOnly UMF pools.
+    urPrint("urUSMSharedAlloc: unexpected internal error\n");
     return UR_RESULT_ERROR_UNKNOWN;
   }
 
