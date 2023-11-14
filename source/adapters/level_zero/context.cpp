@@ -239,19 +239,25 @@ ur_result_t ur_context_handle_t_::initialize() {
   // Initialize pool managers.
   std::tie(Ret, PoolManager) =
       usm::pool_manager<usm::pool_descriptor>::create();
-  if (Ret)
+  if (Ret) {
+    urPrint("urContextCreate: unexpected internal error\n");
     return Ret;
+  }
 
   std::tie(Ret, ProxyPoolManager) =
       usm::pool_manager<usm::pool_descriptor>::create();
-  if (Ret)
+  if (Ret) {
+    urPrint("urContextCreate: unexpected internal error\n");
     return Ret;
+  }
 
   std::vector<usm::pool_descriptor> Descs;
   // Create pool descriptor for every device and subdevice.
   std::tie(Ret, Descs) = usm::pool_descriptor::create(nullptr, Context);
-  if (Ret)
+  if (Ret) {
+    urPrint("urContextCreate: unexpected internal error\n");
     return Ret;
+  }
 
   auto descTypeToDisjointPoolType =
       [](usm::pool_descriptor &Desc) -> usm::DisjointPoolMemType {
@@ -264,14 +270,8 @@ ur_result_t ur_context_handle_t_::initialize() {
       return (Desc.deviceReadOnly) ? usm::DisjointPoolMemType::SharedReadOnly
                                    : usm::DisjointPoolMemType::Shared;
     default:
-<<<<<<< Updated upstream
-      assert(0 && "Invalid pool descriptor type!");
-      // Added to suppress 'not all control paths return a value' warning.
-      return usm::DisjointPoolMemType::All;
-=======
       // Should not be reached.
       ur::unreachable();
->>>>>>> Stashed changes
     }
   };
 
@@ -282,15 +282,19 @@ ur_result_t ur_context_handle_t_::initialize() {
 
     std::tie(Ret, Pool) = createUMFPoolForDesc<usm::DisjointPool>(
         Desc, DisjointPoolConfigInstance.Configs[PoolType]);
-    if (Ret)
+    if (Ret) {
+      urPrint("urContextCreate: unexpected internal error\n");
       return Ret;
+    }
 
     PoolManager.addPool(Desc, Pool);
 
     umf::pool_unique_handle_t ProxyPool = nullptr;
     std::tie(Ret, ProxyPool) = createUMFPoolForDesc<USMProxyPool>(Desc);
-    if (Ret)
+    if (Ret) {
+      urPrint("urContextCreate: unexpected internal error\n");
       return Ret;
+    }
 
     ProxyPoolManager.addPool(Desc, ProxyPool);
   }
