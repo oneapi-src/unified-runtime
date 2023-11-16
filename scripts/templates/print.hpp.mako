@@ -394,7 +394,7 @@ for item in obj['members']:
 /// @brief Print operator for the ${th.make_pfncb_param_type(n, tags, obj)} type
 /// @returns
 ///     std::ostream &
-inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ${th.make_pfncb_param_type(n, tags, obj)} *params) {
+${X}_APIEXPORT inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ${th.make_pfncb_param_type(n, tags, obj)} *params) {
     <%
         params_dict = dict()
         for item in obj['params']:
