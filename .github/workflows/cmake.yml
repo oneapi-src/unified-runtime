@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         adapter: [
-          {name: OPENCL, runner: OPENCL, triplet: spir64}
+          {name: OPENCL, runner: OPENCL, platform: "Intel(R) OpenCL", triplet: spir64}
         ]
         build_type: [Release]
         compiler: [{c: clang, cxx: clang++}]
@@ -84,5 +84,5 @@ jobs:
     - name: Test adapters
       if: matrix.adapter.name != 'L0'
       working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{matrix.build_type}} --output-on-failure -L "conformance" --timeout 180
+      run: env UR_CTS_ADAPTER_PLATFORM="${{matrix.adapter.platform}}" ctest -C ${{matrix.build_type}} --output-on-failure -L "conformance" --timeout 180
 
