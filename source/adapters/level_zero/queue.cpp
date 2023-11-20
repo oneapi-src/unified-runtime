@@ -2004,6 +2004,11 @@ ur_command_list_ptr_t &ur_queue_handle_t_::ur_queue_group_t::getImmCmdList() {
     }
   }
 
+  if (Queue->Device->useDriverInOrderLists() && Queue->isInOrderQueue()) {
+    ZeCommandQueueDesc.flags = ZE_COMMAND_QUEUE_FLAG_IN_ORDER;
+    urPrint("Using in-order driver implementation\n");
+  }
+
   // If cache didn't contain a command list, create one.
   if (!ZeCommandList) {
     urPrint("[getZeQueue]: create queue ordinal = %d, index = %d "
