@@ -31,12 +31,6 @@ struct ur_program_handle_t_ {
    * device. */
   ur_program_binary_type_t BinaryType = UR_PROGRAM_BINARY_TYPE_NONE;
 
-  /* The ur_program_binary_type_t property is defined individually for every
-   * device in a program. However, since the CUDA adapter only has 1 device per
-   * context / program, there is no need to keep track of its value for each
-   * device. */
-  ur_program_binary_type_t BinaryType = UR_PROGRAM_BINARY_TYPE_NONE;
-
   // Metadata
   std::unordered_map<std::string, std::tuple<uint32_t, uint32_t, uint32_t>>
       KernelReqdWorkGroupSizeMD;
