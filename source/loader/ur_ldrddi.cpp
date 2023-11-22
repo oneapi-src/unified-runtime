@@ -549,6 +549,19 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetInfo(
     // forward to device-platform
     result = pfnGetInfo(hDevice, propName, propSize, pPropValue, pPropSizeRet);
 
+    if (UR_RESULT_SUCCESS == result && pPropValue) {
+        try {
+            if (propName == UR_DEVICE_INFO_PARENT_DEVICE) {
+                auto phDevice =
+                    reinterpret_cast<ur_device_handle_t *>(pPropValue);
+                *phDevice = reinterpret_cast<ur_device_handle_t>(
+                    ur_device_factory.getInstance(*phDevice, dditable));
+            }
+        } catch (std::bad_alloc &) {
+            result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
+        }
+    }
+
     return result;
 }
 
@@ -918,6 +931,23 @@ __urdlllocal ur_result_t UR_APICALL urContextGetInfo(
 
     // forward to device-platform
     result = pfnGetInfo(hContext, propName, propSize, pPropValue, pPropSizeRet);
+
+    if (UR_RESULT_SUCCESS == result && pPropValue) {
+        try {
+            if (propName == UR_CONTEXT_INFO_DEVICES) {
+                std::vector<ur_device_handle_t> hDevices;
+                auto phDevices =
+                    reinterpret_cast<ur_device_handle_t *>(pPropValue);
+                for (size_t i = 0; i < *pPropSizeRet; ++i) {
+                    hDevices[i] = reinterpret_cast<ur_device_handle_t>(
+                        ur_device_factory.getInstance(phDevices[i], dditable));
+                }
+                std::copy(hDevices.begin(), hDevices.end(), phDevices);
+            }
+        } catch (std::bad_alloc &) {
+            result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
+        }
+    }
 
     return result;
 }
@@ -1379,6 +1409,19 @@ __urdlllocal ur_result_t UR_APICALL urMemGetInfo(
     // forward to device-platform
     result = pfnGetInfo(hMemory, propName, propSize, pPropValue, pPropSizeRet);
 
+    if (UR_RESULT_SUCCESS == result && pPropValue) {
+        try {
+            if (propName == UR_MEM_INFO_CONTEXT) {
+                auto phContext =
+                    reinterpret_cast<ur_context_handle_t *>(pPropValue);
+                *phContext = reinterpret_cast<ur_context_handle_t>(
+                    ur_context_factory.getInstance(*phContext, dditable));
+            }
+        } catch (std::bad_alloc &) {
+            result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
+        }
+    }
+
     return result;
 }
 
@@ -1530,6 +1573,19 @@ __urdlllocal ur_result_t UR_APICALL urSamplerGetInfo(
 
     // forward to device-platform
     result = pfnGetInfo(hSampler, propName, propSize, pPropValue, pPropSizeRet);
+
+    if (UR_RESULT_SUCCESS == result && pPropValue) {
+        try {
+            if (propName == UR_SAMPLER_INFO_CONTEXT) {
+                auto phContext =
+                    reinterpret_cast<ur_context_handle_t *>(pPropValue);
+                *phContext = reinterpret_cast<ur_context_handle_t>(
+                    ur_context_factory.getInstance(*phContext, dditable));
+            }
+        } catch (std::bad_alloc &) {
+            result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
+        }
+    }
 
     return result;
 }
@@ -1899,6 +1955,19 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolGetInfo(
     // forward to device-platform
     result =
         pfnPoolGetInfo(hPool, propName, propSize, pPropValue, pPropSizeRet);
+
+    if (UR_RESULT_SUCCESS == result && pPropValue) {
+        try {
+            if (propName == UR_USM_POOL_INFO_CONTEXT) {
+                auto phContext =
+                    reinterpret_cast<ur_context_handle_t *>(pPropValue);
+                *phContext = reinterpret_cast<ur_context_handle_t>(
+                    ur_context_factory.getInstance(*phContext, dditable));
+            }
+        } catch (std::bad_alloc &) {
+            result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
+        }
+    }
 
     return result;
 }
@@ -2539,6 +2608,30 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetInfo(
     // forward to device-platform
     result = pfnGetInfo(hProgram, propName, propSize, pPropValue, pPropSizeRet);
 
+    if (UR_RESULT_SUCCESS == result && pPropValue) {
+        try {
+            if (propName == UR_PROGRAM_INFO_CONTEXT) {
+                auto phContext =
+                    reinterpret_cast<ur_context_handle_t *>(pPropValue);
+                *phContext = reinterpret_cast<ur_context_handle_t>(
+                    ur_context_factory.getInstance(*phContext, dditable));
+            } else if (propName == UR_PROGRAM_INFO_DEVICES) {
+                const size_t NumDevices =
+                    *pPropSizeRet / sizeof(ur_device_handle_t);
+                auto phDevices =
+                    reinterpret_cast<ur_device_handle_t *>(pPropValue);
+                std::vector<ur_device_handle_t> hDevices(NumDevices);
+                for (size_t i = 0; i < NumDevices; ++i) {
+                    hDevices[i] = reinterpret_cast<ur_device_handle_t>(
+                        ur_program_factory.getInstance(phDevices[i], dditable));
+                }
+                std::copy(hDevices.begin(), hDevices.end(), phDevices);
+            }
+        } catch (std::bad_alloc &) {
+            result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
+        }
+    }
+
     return result;
 }
 
@@ -2821,6 +2914,24 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetInfo(
 
     // forward to device-platform
     result = pfnGetInfo(hKernel, propName, propSize, pPropValue, pPropSizeRet);
+
+    if (UR_RESULT_SUCCESS == result && pPropValue) {
+        try {
+            if (propName == UR_KERNEL_INFO_CONTEXT) {
+                auto phContext =
+                    reinterpret_cast<ur_context_handle_t *>(pPropValue);
+                *phContext = reinterpret_cast<ur_context_handle_t>(
+                    ur_device_factory.getInstance(*phContext, dditable));
+            } else if (propName == UR_KERNEL_INFO_PROGRAM) {
+                auto phProgram =
+                    reinterpret_cast<ur_program_handle_t *>(pPropValue);
+                *phProgram = reinterpret_cast<ur_program_handle_t>(
+                    ur_device_factory.getInstance(*phProgram, dditable));
+            }
+        } catch (std::bad_alloc &) {
+            result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
+        }
+    }
 
     return result;
 }
