@@ -101,14 +101,17 @@ uur::PlatformEnvironment::PlatformEnvironment(int argc, char **argv)
     }
 
     if (platform_options.platform_name.empty()) {
-        if (platforms.size() == 1) {
+        std::cout << "platforms_count" << platform_options.platforms_count << std::endl;
+
+        if (platforms.size() == 1 || platform_options.platforms_count == 1) {
             platform = platforms[0];
         } else {
             std::stringstream ss_error;
             ss_error << "Select a single platform from below using the "
                         "--platform=NAME "
                         "command-line option:"
-                     << platforms;
+                     << platforms
+                     << "or set --platforms_count.";
             error = ss_error.str();
             return;
         }
@@ -179,6 +182,18 @@ PlatformEnvironment::parsePlatformOptions(int argc, char **argv) {
                        arg, "--platform=", sizeof("--platform=") - 1) == 0) {
             options.platform_name =
                 std::string(&arg[std::strlen("--platform=")]);
+        } else if (std::strncmp(
+                       arg, "--device=", sizeof("--device=") - 1) == 0) {
+            options.device_name =
+                std::string(&arg[std::strlen("--device=")]);
+        } else if (std::strncmp(
+                       arg, "--platforms_count=", sizeof("--platforms_count=") - 1) == 0) {
+            options.platforms_count =
+                std::strtoul(&arg[std::strlen("--platforms_count=")], nullptr, 10);
+        } else if (std::strncmp(
+                       arg, "--devices_count=", sizeof("--devices_count=") - 1) == 0) {
+            options.devices_count =
+                std::strtoul(&arg[std::strlen("--devices_count=")], nullptr, 10);
         }
     }
     return options;
@@ -202,20 +217,13 @@ DevicesEnvironment::DevicesEnvironment(int argc, char **argv)
         return;
     }
     // Get the argument (test_devices_count) to limit test devices count.
-    u_long count_set = 0;
-    for (int i = 1; i < argc; ++i) {
-        if (std::strcmp(argv[i], "--test_devices_count") == 0 && i + 1 < argc) {
-            count_set = std::strtoul(argv[i + 1], nullptr, 10);
-            break;
-        }
-    }
     // In case, the count_set is "0", the variable count will not be changed.
     // The CTS will run on all devices.
-    if (count_set > (std::numeric_limits<uint32_t>::max)()) {
+    if (platform_options.devices_count > (std::numeric_limits<uint32_t>::max)()) {
         error = "Invalid test_devices_count argument";
         return;
-    } else if (count_set > 0) {
-        count = (std::min)(count, static_cast<uint32_t>(count_set));
+    } else if (platform_options.devices_count > 0) {
+        count = (std::min)(count, static_cast<uint32_t>(platform_options.devices_count));
     }
     devices.resize(count);
     if (urDeviceGet(platform, UR_DEVICE_TYPE_ALL, count, devices.data(),
@@ -223,6 +231,27 @@ DevicesEnvironment::DevicesEnvironment(int argc, char **argv)
         error = "urDeviceGet() failed to get devices.";
         return;
     }
+    for (u_long i = 0; i<devices.size(); i++) {
+            size_t size;
+            if (urDeviceGetInfo(devices[i], UR_DEVICE_INFO_NAME, 0, nullptr,
+                                  &size)) {
+                error = "urPlatformGetInfoFailed";
+                return;
+            }
+            std::vector<char> device_name(size);
+            if (urDeviceGetInfo(devices[i], UR_DEVICE_INFO_NAME, size,
+                                  device_name.data(), nullptr)) {
+                error = "urPlatformGetInfo() failed";
+                return;
+            }
+            if (platform_options.device_name == device_name.data()) {
+                ur_device_handle_t device = devices[i];
+                devices.clear();
+                devices.resize(1);
+                devices[0] = device;
+                break;
+            }
+        }
 }
 
 void DevicesEnvironment::SetUp() {

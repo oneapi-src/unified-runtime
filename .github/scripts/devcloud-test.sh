@@ -34,7 +34,8 @@ cmake \
 -DUR_BUILD_ADAPTER_${adapter_name}=ON \
 -DUR_SYCL_LIBRARY_DIR=${workspace}/dpcpp_compiler/lib \
 -DUR_CONFORMANCE_TARGET_TRIPLES=${adapter_triplet} \
--DUR_TEST_DEVICES_COUNT=1
+-DUR_TEST_DEVICES_COUNT=1 \
+-DUR_TEST_PLATFORMS_COUNT=1
 
 cmake --build ${workspace}/build -j $(nproc)
 

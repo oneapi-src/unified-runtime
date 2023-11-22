@@ -17,6 +17,9 @@ struct PlatformEnvironment : ::testing::Environment {
 
     struct PlatformOptions {
         std::string platform_name;
+        std::string device_name;
+        u_long platforms_count;
+        u_long devices_count;
     };
 
     PlatformEnvironment(int argc, char **argv);
