@@ -23,7 +23,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreate(
   std::ignore = pHost;
   std::ignore = phMem;
 
-  DIE_NO_IMPLEMENTATION
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
@@ -65,7 +65,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
 UR_APIEXPORT ur_result_t UR_APICALL urMemRetain(ur_mem_handle_t hMem) {
   std::ignore = hMem;
 
-  DIE_NO_IMPLEMENTATION
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urMemRelease(ur_mem_handle_t hMem) {
@@ -93,8 +93,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferPartition(
   std::shared_lock<ur_shared_mutex> Guard(hBuffer->Mutex);
 
   if (flags != UR_MEM_FLAG_READ_WRITE) {
-    die("urMemBufferPartition: NativeCPU implements only read-write buffer,"
-        "no read-only or write-only yet.");
+    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
   try {
@@ -115,7 +114,7 @@ urMemGetNativeHandle(ur_mem_handle_t hMem, ur_native_handle_t *phNativeMem) {
   std::ignore = hMem;
   std::ignore = phNativeMem;
 
-  DIE_NO_IMPLEMENTATION
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
@@ -126,7 +125,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
   std::ignore = pProperties;
   std::ignore = phMem;
 
-  DIE_NO_IMPLEMENTATION
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
@@ -140,7 +139,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
   std::ignore = pProperties;
   std::ignore = phMem;
 
-  DIE_NO_IMPLEMENTATION
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urMemGetInfo(ur_mem_handle_t hMemory,
@@ -154,7 +153,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemGetInfo(ur_mem_handle_t hMemory,
   std::ignore = pPropValue;
   std::ignore = pPropSizeRet;
 
-  DIE_NO_IMPLEMENTATION
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urMemImageGetInfo(ur_mem_handle_t hMemory,
@@ -168,5 +167,5 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageGetInfo(ur_mem_handle_t hMemory,
   std::ignore = pPropValue;
   std::ignore = pPropSizeRet;
 
-  DIE_NO_IMPLEMENTATION
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }

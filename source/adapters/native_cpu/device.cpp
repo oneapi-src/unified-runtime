@@ -300,14 +300,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   }
   case UR_DEVICE_INFO_ESIMD_SUPPORT:
     return ReturnValue(false);
-
-    CASE_UR_UNSUPPORTED(UR_DEVICE_INFO_MAX_MEMORY_BANDWIDTH);
   case UR_DEVICE_INFO_VIRTUAL_MEMORY_SUPPORT:
     return ReturnValue(false);
   default:
-    DIE_NO_IMPLEMENTATION;
+    return UR_RESULT_ERROR_INVALID_ENUMERATION;
   }
-  return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urDeviceRetain(ur_device_handle_t hDevice) {
@@ -333,7 +330,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDevicePartition(
   std::ignore = phSubDevices;
   std::ignore = pNumDevicesRet;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetNativeHandle(
@@ -341,7 +338,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetNativeHandle(
   std::ignore = hDevice;
   std::ignore = phNativeDevice;
 
-  DIE_NO_IMPLEMENTATION
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
@@ -353,7 +350,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
   std::ignore = pProperties;
   std::ignore = phDevice;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetGlobalTimestamps(

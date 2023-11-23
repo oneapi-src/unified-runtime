@@ -81,7 +81,7 @@ urPlatformGetInfo(ur_platform_handle_t hPlatform, ur_platform_info_t propName,
     // https://github.com/oneapi-src/unified-runtime
     return ReturnValue(UR_PLATFORM_BACKEND_NATIVE_CPU);
   default:
-    DIE_NO_IMPLEMENTATION;
+    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
   return UR_RESULT_SUCCESS;
@@ -94,7 +94,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPlatformGetBackendOption(
   std::ignore = pFrontendOption;
   std::ignore = ppPlatformOption;
 
-  CONTINUE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
@@ -105,7 +105,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
   std::ignore = pProperties;
   std::ignore = phPlatform;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urPlatformGetNativeHandle(
@@ -113,5 +113,5 @@ UR_APIEXPORT ur_result_t UR_APICALL urPlatformGetNativeHandle(
   std::ignore = hPlatform;
   std::ignore = phNativePlatform;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }

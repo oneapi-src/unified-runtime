@@ -17,25 +17,6 @@
 
 namespace {
 
-static size_t imageElementByteSize(hipArray_Format ArrayFormat) {
-  switch (ArrayFormat) {
-  case HIP_AD_FORMAT_UNSIGNED_INT8:
-  case HIP_AD_FORMAT_SIGNED_INT8:
-    return 1;
-  case HIP_AD_FORMAT_UNSIGNED_INT16:
-  case HIP_AD_FORMAT_SIGNED_INT16:
-  case HIP_AD_FORMAT_HALF:
-    return 2;
-  case HIP_AD_FORMAT_UNSIGNED_INT32:
-  case HIP_AD_FORMAT_SIGNED_INT32:
-  case HIP_AD_FORMAT_FLOAT:
-    return 4;
-  default:
-    detail::ur::die("Invalid image format.");
-  }
-  return 0;
-}
-
 ur_result_t enqueueEventsWait(ur_queue_handle_t, hipStream_t Stream,
                               uint32_t NumEventsInWaitList,
                               const ur_event_handle_t *EventWaitList) {
@@ -1075,7 +1056,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemImageRead(
     size_t NumChannels;
     UR_CHECK_ERROR(getArrayDesc(Array, Format, NumChannels));
 
-    int ElementByteSize = imageElementByteSize(Format);
+    int ElementByteSize = 0;
+    UR_RETURN_ON_FAILURE(GetHipFormatPixelSize(Format, &ElementByteSize));
 
     size_t ByteOffsetX = origin.x * ElementByteSize * NumChannels;
     size_t BytesToCopy = ElementByteSize * NumChannels * region.depth;
@@ -1136,7 +1118,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemImageWrite(
     size_t NumChannels;
     UR_CHECK_ERROR(getArrayDesc(Array, Format, NumChannels));
 
-    int ElementByteSize = imageElementByteSize(Format);
+    int ElementByteSize = 0;
+    UR_RETURN_ON_FAILURE(GetHipFormatPixelSize(Format, &ElementByteSize));
 
     size_t ByteOffsetX = origin.x * ElementByteSize * NumChannels;
     size_t BytesToCopy = ElementByteSize * NumChannels * region.depth;
@@ -1210,7 +1193,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemImageCopy(
     UR_ASSERT(SrcNumChannels == DstNumChannels,
               UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR);
 
-    int ElementByteSize = imageElementByteSize(SrcFormat);
+    int ElementByteSize = 0;
+    UR_RETURN_ON_FAILURE(GetHipFormatPixelSize(SrcFormat, &ElementByteSize));
 
     size_t DstByteOffsetX = dstOrigin.x * ElementByteSize * SrcNumChannels;
     size_t SrcByteOffsetX = srcOrigin.x * ElementByteSize * DstNumChannels;

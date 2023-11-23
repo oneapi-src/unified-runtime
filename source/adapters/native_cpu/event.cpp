@@ -23,7 +23,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetInfo(ur_event_handle_t hEvent,
   std::ignore = pPropValue;
   std::ignore = pPropSizeRet;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEventGetProfilingInfo(
@@ -35,7 +35,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetProfilingInfo(
   std::ignore = pPropValue;
   std::ignore = pPropSizeRet;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -49,12 +49,12 @@ urEventWait(uint32_t numEvents, const ur_event_handle_t *phEventWaitList) {
 UR_APIEXPORT ur_result_t UR_APICALL urEventRetain(ur_event_handle_t hEvent) {
   std::ignore = hEvent;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEventRelease(ur_event_handle_t hEvent) {
   std::ignore = hEvent;
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEventGetNativeHandle(
@@ -62,7 +62,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetNativeHandle(
   std::ignore = hEvent;
   std::ignore = phNativeEvent;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEventCreateWithNativeHandle(
@@ -74,7 +74,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventCreateWithNativeHandle(
   std::ignore = pProperties;
   std::ignore = phEvent;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -85,5 +85,5 @@ urEventSetCallback(ur_event_handle_t hEvent, ur_execution_info_t execStatus,
   std::ignore = pfnNotify;
   std::ignore = pUserData;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }

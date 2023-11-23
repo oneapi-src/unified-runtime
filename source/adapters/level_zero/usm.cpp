@@ -949,7 +949,7 @@ ur_result_t ZeMemFreeHelper(ur_context_handle_t Context, void *Ptr) {
     ContextsLock.lock();
     auto It = Context->MemAllocs.find(Ptr);
     if (It == std::end(Context->MemAllocs)) {
-      die("All memory allocations must be tracked!");
+      return UR_RESULT_ERROR_INVALID_OPERATION;
     }
     if (!It->second.RefCount.decrementAndTest()) {
       // Memory can't be deallocated yet.
@@ -996,7 +996,7 @@ ur_result_t USMFreeHelper(ur_context_handle_t Context, void *Ptr,
   if (IndirectAccessTrackingEnabled) {
     auto It = Context->MemAllocs.find(Ptr);
     if (It == std::end(Context->MemAllocs)) {
-      die("All memory allocations must be tracked!");
+      return UR_RESULT_ERROR_INVALID_OPERATION;
     }
     if (!It->second.RefCount.decrementAndTest()) {
       // Memory can't be deallocated yet.

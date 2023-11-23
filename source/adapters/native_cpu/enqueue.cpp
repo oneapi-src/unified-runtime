@@ -57,7 +57,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
   UR_ASSERT(workDim < 4, UR_RESULT_ERROR_INVALID_WORK_DIMENSION);
 
   if (*pGlobalWorkSize == 0) {
-    DIE_NO_IMPLEMENTATION;
+    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
   // TODO: add proper error checking
@@ -103,7 +103,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWait(
   std::ignore = phEventWaitList;
   std::ignore = phEvent;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
@@ -114,7 +114,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
   std::ignore = phEventWaitList;
   std::ignore = phEvent;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 template <bool IsRead>
@@ -282,7 +282,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemImageRead(
   std::ignore = phEventWaitList;
   std::ignore = phEvent;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemImageWrite(
@@ -302,7 +302,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemImageWrite(
   std::ignore = phEventWaitList;
   std::ignore = phEvent;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemImageCopy(
@@ -321,7 +321,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemImageCopy(
   std::ignore = phEventWaitList;
   std::ignore = phEvent;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferMap(
@@ -406,7 +406,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
   std::ignore = phEventWaitList;
   std::ignore = phEvent;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -418,7 +418,7 @@ urEnqueueUSMAdvise(ur_queue_handle_t hQueue, const void *pMem, size_t size,
   std::ignore = advice;
   std::ignore = phEvent;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMFill2D(
@@ -437,7 +437,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMFill2D(
   std::ignore = phEventWaitList;
   std::ignore = phEvent;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
@@ -457,7 +457,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
   std::ignore = phEventWaitList;
   std::ignore = phEvent;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
@@ -476,7 +476,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
   std::ignore = phEventWaitList;
   std::ignore = phEvent;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
@@ -495,7 +495,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
   std::ignore = phEventWaitList;
   std::ignore = phEvent;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEnqueueReadHostPipe(
@@ -513,7 +513,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueReadHostPipe(
   std::ignore = phEventWaitList;
   std::ignore = phEvent;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEnqueueWriteHostPipe(
@@ -531,5 +531,5 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueWriteHostPipe(
   std::ignore = phEventWaitList;
   std::ignore = phEvent;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }

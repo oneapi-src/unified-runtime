@@ -287,12 +287,13 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
   UR_CHECK_ERROR(hipStreamGetFlags(HIPStream, &HIPFlags));
 
   ur_queue_flags_t Flags = 0;
-  if (HIPFlags == hipStreamDefault)
+  if (HIPFlags == hipStreamDefault) {
     Flags = UR_QUEUE_FLAG_USE_DEFAULT_STREAM;
-  else if (HIPFlags == hipStreamNonBlocking)
+  } else if (HIPFlags == hipStreamNonBlocking) {
     Flags = UR_QUEUE_FLAG_SYNC_WITH_DEFAULT_STREAM;
-  else
-    detail::ur::die("Unknown hip stream");
+  } else {
+    return UR_RESULT_ERROR_INVALID_OPERATION;
+  }
 
   std::vector<hipStream_t> ComputeHIPStreams(1, HIPStream);
   std::vector<hipStream_t> TransferHIPStreams(0);

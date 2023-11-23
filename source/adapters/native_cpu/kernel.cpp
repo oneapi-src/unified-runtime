@@ -97,6 +97,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelGetInfo(ur_kernel_handle_t hKernel,
   default:
     return UR_RESULT_ERROR_INVALID_VALUE;
   }
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -179,7 +180,7 @@ urKernelGetSubGroupInfo(ur_kernel_handle_t hKernel, ur_device_handle_t hDevice,
 #endif
   }
   }
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urKernelRetain(ur_kernel_handle_t hKernel) {
@@ -234,7 +235,7 @@ urKernelSetArgSampler(ur_kernel_handle_t hKernel, uint32_t argIndex,
   std::ignore = pProperties;
   std::ignore = hArgValue;
 
-  DIE_NO_IMPLEMENTATION
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -265,7 +266,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelSetSpecializationConstants(
   std::ignore = count;
   std::ignore = pSpecConstants;
 
-  DIE_NO_IMPLEMENTATION
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urKernelGetNativeHandle(
@@ -273,7 +274,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelGetNativeHandle(
   std::ignore = hKernel;
   std::ignore = phNativeKernel;
 
-  DIE_NO_IMPLEMENTATION
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
@@ -287,5 +288,5 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
   std::ignore = pProperties;
   std::ignore = phKernel;
 
-  DIE_NO_IMPLEMENTATION
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }

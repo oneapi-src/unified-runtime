@@ -19,6 +19,16 @@
 #include <hip/hip_runtime.h>
 #include <ur/ur.hpp>
 
+/**
+ * Call an UR API and, if the result is not UR_RESULT_SUCCESS, automatically
+ * return from the current function.
+ */
+#define UR_RETURN_ON_FAILURE(urCall)                                           \
+  if (const ur_result_t ur_result_macro = urCall;                              \
+      ur_result_macro != UR_RESULT_SUCCESS) {                                  \
+    return ur_result_macro;                                                    \
+  }
+
 // Before ROCm 6, hipify doesn't support cuArrayGetDescriptor, on AMD the
 // hipArray can just be indexed, but on NVidia it is an opaque type and needs to
 // go through cuArrayGetDescriptor so implement a utility function to get the
@@ -117,16 +127,8 @@ extern thread_local char ErrorMessage[MaxMessageSize];
 namespace detail {
 namespace ur {
 
-// Report error and no return (keeps compiler from printing warnings).
-// TODO: Probably change that to throw a catchable exception,
-//       but for now it is useful to see every failure.
-//
-[[noreturn]] void die(const char *pMessage);
-
 // Reports error messages
 void hipPrint(const char *pMessage);
-
-void assertion(bool Condition, const char *pMessage = nullptr);
 
 } // namespace ur
 } // namespace detail
@@ -187,7 +189,8 @@ public:
         // HIP error for which it is unclear if the function that reported it
         // succeeded or not. Either way, the state of the program is compromised
         // and likely unrecoverable.
-        detail::ur::die("Unrecoverable program state reached in piMemRelease");
+        detail::ur::hipPrint(
+            "Unrecoverable program state reached in piMemRelease");
       }
     }
   }
@@ -204,3 +207,5 @@ public:
   /// UR object.
   void dismiss() { Captive = nullptr; }
 };
+
+ur_result_t GetHipFormatPixelSize(hipArray_Format Format, int *Size);
