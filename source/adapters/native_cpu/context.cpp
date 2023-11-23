@@ -75,7 +75,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextGetNativeHandle(
     ur_context_handle_t hContext, ur_native_handle_t *phNativeContext) {
   std::ignore = hContext;
   std::ignore = phNativeContext;
-  DIE_NO_IMPLEMENTATION
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urContextCreateWithNativeHandle(
@@ -89,7 +89,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextCreateWithNativeHandle(
   std::ignore = pProperties;
   std::ignore = phContext;
 
-  DIE_NO_IMPLEMENTATION
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urContextSetExtendedDeleter(
@@ -99,5 +99,5 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextSetExtendedDeleter(
   std::ignore = pfnDeleter;
   std::ignore = pUserData;
 
-  DIE_NO_IMPLEMENTATION
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }

@@ -12,6 +12,16 @@
 #include <cuda.h>
 #include <ur/ur.hpp>
 
+/**
+ * Call an UR API and, if the result is not UR_RESULT_SUCCESS, automatically
+ * return from the current function.
+ */
+#define UR_RETURN_ON_FAILURE(urCall)                                           \
+  if (const ur_result_t ur_result_macro = urCall;                              \
+      ur_result_macro != UR_RESULT_SUCCESS) {                                  \
+    return ur_result_macro;                                                    \
+  }
+
 ur_result_t mapErrorUR(CUresult Result);
 
 /// Converts CUDA error into UR error codes, and outputs error information
@@ -46,16 +56,8 @@ void setPluginSpecificMessage(CUresult cu_res);
 namespace detail {
 namespace ur {
 
-// Report error and no return (keeps compiler from printing warnings).
-// TODO: Probably change that to throw a catchable exception,
-//       but for now it is useful to see every failure.
-//
-[[noreturn]] void die(const char *Message);
-
 // Reports error messages
 void cuPrint(const char *Message);
-
-void assertion(bool Condition, const char *Message = nullptr);
 
 } // namespace ur
 } // namespace detail

@@ -162,13 +162,13 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueGetInfo(
   case UR_QUEUE_INFO_REFERENCE_COUNT:
     return ReturnValue(uint32_t{Queue->RefCount.load()});
   case UR_QUEUE_INFO_FLAGS:
-    die("UR_QUEUE_INFO_FLAGS in urQueueGetInfo not implemented\n");
+    return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
     break;
   case UR_QUEUE_INFO_SIZE:
-    die("UR_QUEUE_INFO_SIZE in urQueueGetInfo not implemented\n");
+    return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
     break;
   case UR_QUEUE_INFO_DEVICE_DEFAULT:
-    die("UR_QUEUE_INFO_DEVICE_DEFAULT in urQueueGetInfo not implemented\n");
+    return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
     break;
   case UR_QUEUE_INFO_EMPTY: {
     // We can exit early if we have in-order queue.
@@ -792,7 +792,7 @@ static const zeCommandListBatchConfig ZeCommandListBatchConfig(bool IsCopy) {
           Config.NumTimesClosedFullThreshold = Val;
           break;
         default:
-          die("Unexpected batch config");
+          urPrint("Unexpected batch config");
         }
         if (IsCopy)
           urPrint("UR_L0_COPY_BATCH_SIZE: dynamic batch param "
@@ -910,7 +910,7 @@ ur_queue_handle_t_::ur_queue_handle_t_(
       ComputeQueueGroup.UpperIndex = FilterUpperIndex;
       ComputeQueueGroup.NextIndex = ComputeQueueGroup.LowerIndex;
     } else {
-      die("No compute queue available/allowed.");
+      urPrint("No compute queue available/allowed.");
     }
   }
   if (UsingImmCmdLists) {
@@ -1067,8 +1067,7 @@ ur_queue_handle_t_::executeCommandList(ur_command_list_ptr_t CommandList,
 
       if (hasOpenCommandList(UseCopyEngine) &&
           CommandBatch.OpenCommandList != CommandList)
-        die("executeCommandList: OpenCommandList should be equal to"
-            "null or CommandList");
+        return UR_RESULT_ERROR_INVALID_ARGUMENT;
 
       if (CommandList->second.size() < CommandBatch.QueueBatchSize) {
         CommandBatch.OpenCommandList = CommandList;
@@ -1830,7 +1829,7 @@ ur_queue_handle_t_::ur_queue_group_t::getZeQueue(uint32_t *QueueGroupOrdinal) {
       zeCommandQueueCreate, (Queue->Context->ZeContext, Queue->Device->ZeDevice,
                              &ZeCommandQueueDesc, &ZeQueue));
   if (ZeResult) {
-    die("[L0] getZeQueue: failed to create queue");
+    urPrint("[L0] getZeQueue: failed to create queue");
   }
 
   return ZeQueue;

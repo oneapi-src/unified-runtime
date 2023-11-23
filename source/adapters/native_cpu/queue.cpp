@@ -25,7 +25,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueGetInfo(ur_queue_handle_t hQueue,
   std::ignore = pPropValue;
   std::ignore = pPropSizeRet;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urQueueCreate(
@@ -38,7 +38,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreate(
   auto Queue = new ur_queue_handle_t_();
   *phQueue = Queue;
 
-  CONTINUE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urQueueRetain(ur_queue_handle_t hQueue) {
@@ -61,7 +61,7 @@ urQueueGetNativeHandle(ur_queue_handle_t hQueue, ur_queue_native_desc_t *pDesc,
   std::ignore = pDesc;
   std::ignore = phNativeQueue;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
@@ -74,7 +74,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
   std::ignore = pProperties;
   std::ignore = phQueue;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urQueueFinish(ur_queue_handle_t hQueue) {
@@ -86,5 +86,5 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueFinish(ur_queue_handle_t hQueue) {
 UR_APIEXPORT ur_result_t UR_APICALL urQueueFlush(ur_queue_handle_t hQueue) {
   std::ignore = hQueue;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }

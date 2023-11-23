@@ -898,7 +898,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urBindlessImagesImageGetInfoExp(
       ChannelOrder = UR_IMAGE_CHANNEL_ORDER_RGBA;
       break;
     default:
-      die("Unexpected NumChannels returned by CUDA");
+      return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
     }
     if (pPropValue) {
       ((ur_image_format_t *)pPropValue)->channelType = ChannelType;

@@ -149,7 +149,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemRelease(ur_mem_handle_t hMem) {
     // error for which it is unclear if the function that reported it succeeded
     // or not. Either way, the state of the program is compromised and likely
     // unrecoverable.
-    detail::ur::die("Unrecoverable program state reached in urMemRelease");
+    return UR_RESULT_ERROR_INVALID_OPERATION;
   }
 
   return UR_RESULT_SUCCESS;
@@ -306,8 +306,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreate(
     PixelTypeSizeBytes = 4;
     break;
   default:
-    detail::ur::die(
-        "urMemImageCreate given unsupported image_channel_data_type");
+    return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
   }
 
   // When a dimension isn't used pImageDesc has the size set to 1

@@ -54,12 +54,6 @@ const ur_command_t UR_EXT_COMMAND_TYPE_USER =
 #define __SYCL_UR_PROGRAM_METADATA_GLOBAL_ID_MAPPING "@global_id_mapping"
 #define __SYCL_UR_PROGRAM_METADATA_TAG_NEED_FINALIZATION "Requires finalization"
 
-// Terminates the process with a catastrophic error message.
-[[noreturn]] inline void die(const char *Message) {
-  std::cerr << "die: " << Message << std::endl;
-  std::terminate();
-}
-
 // A single-threaded app has an opportunity to enable this mode to avoid
 // overhead from mutex locking. Default value is 0 which means that single
 // thread mode is disabled.

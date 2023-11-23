@@ -86,7 +86,7 @@ urUSMGetMemAllocInfo(ur_context_handle_t hContext, const void *pMem,
   std::ignore = pPropValue;
   std::ignore = pPropSizeRet;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -96,21 +96,21 @@ urUSMPoolCreate(ur_context_handle_t hContext, ur_usm_pool_desc_t *pPoolDesc,
   std::ignore = pPoolDesc;
   std::ignore = ppPool;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMPoolRetain(ur_usm_pool_handle_t pPool) {
   std::ignore = pPool;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMPoolRelease(ur_usm_pool_handle_t pPool) {
   std::ignore = pPool;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -122,7 +122,7 @@ urUSMPoolGetInfo(ur_usm_pool_handle_t hPool, ur_usm_pool_info_t propName,
   std::ignore = pPropValue;
   std::ignore = pPropSizeRet;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urUSMImportExp(ur_context_handle_t Context,
@@ -130,12 +130,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMImportExp(ur_context_handle_t Context,
   std::ignore = Context;
   std::ignore = HostPtr;
   std::ignore = Size;
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urUSMReleaseExp(ur_context_handle_t Context,
                                                     void *HostPtr) {
   std::ignore = Context;
   std::ignore = HostPtr;
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }

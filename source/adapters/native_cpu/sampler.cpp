@@ -19,21 +19,21 @@ urSamplerCreate(ur_context_handle_t hContext, const ur_sampler_desc_t *pDesc,
   std::ignore = pDesc;
   std::ignore = phSampler;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urSamplerRetain(ur_sampler_handle_t hSampler) {
   std::ignore = hSampler;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urSamplerRelease(ur_sampler_handle_t hSampler) {
   std::ignore = hSampler;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -45,7 +45,7 @@ urSamplerGetInfo(ur_sampler_handle_t hSampler, ur_sampler_info_t propName,
   std::ignore = pPropValue;
   std::ignore = pPropSizeRet;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urSamplerGetNativeHandle(
@@ -53,7 +53,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urSamplerGetNativeHandle(
   std::ignore = hSampler;
   std::ignore = phNativeSampler;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urSamplerCreateWithNativeHandle(
@@ -65,5 +65,5 @@ UR_APIEXPORT ur_result_t UR_APICALL urSamplerCreateWithNativeHandle(
   std::ignore = pProperties;
   std::ignore = phSampler;
 
-  DIE_NO_IMPLEMENTATION;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }

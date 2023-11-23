@@ -23,7 +23,7 @@ urProgramCreateWithIL(ur_context_handle_t hContext, const void *pIL,
   std::ignore = pProperties;
   std::ignore = phProgram;
 
-  DIE_NO_IMPLEMENTATION
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
@@ -71,7 +71,7 @@ urProgramCompile(ur_context_handle_t hContext, ur_program_handle_t hProgram,
   std::ignore = hProgram;
   std::ignore = pOptions;
 
-  DIE_NO_IMPLEMENTATION
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -84,7 +84,7 @@ urProgramLink(ur_context_handle_t hContext, uint32_t count,
   std::ignore = pOptions;
   std::ignore = phProgram;
 
-  DIE_NO_IMPLEMENTATION
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urProgramCompileExp(ur_program_handle_t,
@@ -127,7 +127,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramGetFunctionPointer(
   std::ignore = pFunctionName;
   std::ignore = ppFunctionPointer;
 
-  DIE_NO_IMPLEMENTATION
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urProgramGetGlobalVariablePointer(
@@ -185,7 +185,7 @@ urProgramGetBuildInfo(ur_program_handle_t hProgram, ur_device_handle_t hDevice,
   std::ignore = pPropValue;
   std::ignore = pPropSizeRet;
 
-  CONTINUE_NO_IMPLEMENTATION
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urProgramSetSpecializationConstants(
@@ -195,7 +195,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramSetSpecializationConstants(
   std::ignore = count;
   std::ignore = pSpecConstants;
 
-  DIE_NO_IMPLEMENTATION
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urProgramGetNativeHandle(
@@ -203,7 +203,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramGetNativeHandle(
   std::ignore = hProgram;
   std::ignore = phNativeProgram;
 
-  DIE_NO_IMPLEMENTATION
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithNativeHandle(
@@ -215,5 +215,5 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithNativeHandle(
   std::ignore = pProperties;
   std::ignore = phProgram;
 
-  DIE_NO_IMPLEMENTATION
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }

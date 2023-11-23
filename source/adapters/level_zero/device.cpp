@@ -662,7 +662,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
     case UR_DEVICE_INFO_USM_SYSTEM_SHARED_SUPPORT:
       return ReturnValue(MapCaps(Props->sharedSystemAllocCapabilities));
     default:
-      die("urDeviceGetInfo: unexpected ParamName.");
+      return UR_RESULT_ERROR_INVALID_ENUMERATION;
     }
   }
 

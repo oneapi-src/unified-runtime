@@ -718,7 +718,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramGetInfo(
       return UR_RESULT_ERROR_UNKNOWN;
     }
   default:
-    die("urProgramGetInfo: not implemented");
+    return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
   }
 
   return UR_RESULT_SUCCESS;

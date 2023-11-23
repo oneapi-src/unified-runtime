@@ -149,8 +149,10 @@ ur_result_t ur_program_handle_t_::finalizeRelocatable() {
 
   std::string ISA = "amdgcn-amd-amdhsa--";
   hipDeviceProp_t Props;
-  detail::ur::assertion(hipGetDeviceProperties(&Props, getDevice()->get()) ==
-                        hipSuccess);
+  if (hipGetDeviceProperties(&Props, Context->getDevice()->get()) !=
+      hipSuccess) {
+    return UR_RESULT_ERROR_INVALID_OPERATION;
+  }
   ISA += Props.gcnArchName;
   UR_CHECK_ERROR(amd_comgr_action_info_set_isa_name(Action, ISA.data()));
 

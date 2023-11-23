@@ -629,8 +629,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelGetSubGroupInfo(
   } else if (PropName == UR_KERNEL_SUB_GROUP_INFO_SUB_GROUP_SIZE_INTEL) {
     ReturnValue(uint32_t{Kernel->ZeKernelProperties->requiredSubgroupSize});
   } else {
-    die("urKernelGetSubGroupInfo: parameter not implemented");
-    return {};
+    return UR_RESULT_ERROR_INVALID_ENUMERATION;
   }
   return UR_RESULT_SUCCESS;
 }

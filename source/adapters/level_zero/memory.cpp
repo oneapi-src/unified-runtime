@@ -1443,7 +1443,7 @@ static ur_result_t ur2zeImageDesc(const ur_image_format_t *ImageFormat,
   }
   default:
     urPrint("format layout = %d\n", ImageFormat->channelOrder);
-    die("urMemImageCreate: unsupported image format layout\n");
+    return UR_RESULT_ERROR_UNSUPPORTED_IMAGE_FORMAT;
     break;
   }
 
@@ -1498,8 +1498,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreate(
 ) {
   // TODO: implement read-only, write-only
   if ((Flags & UR_MEM_FLAG_READ_WRITE) == 0) {
-    die("urMemImageCreate: Level-Zero implements only read-write buffer,"
-        "no read-only or write-only yet.");
+    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
   std::shared_lock<ur_shared_mutex> Lock(Context->Mutex);
@@ -1655,7 +1654,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
     } else if (Flags == 0 || (Flags == UR_MEM_FLAG_READ_WRITE)) {
       // Nothing more to do.
     } else
-      die("urMemBufferCreate: not implemented");
+      return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
   }
 
   *RetBuffer = reinterpret_cast<ur_mem_handle_t>(Buffer);
@@ -1713,8 +1712,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferPartition(
   std::shared_lock<ur_shared_mutex> Guard(Buffer->Mutex);
 
   if (Flags != UR_MEM_FLAG_READ_WRITE) {
-    die("urMemBufferPartition: Level-Zero implements only read-write buffer,"
-        "no read-only or write-only yet.");
+    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
   try {
@@ -1780,7 +1778,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
     // Memory allocation is unrelated to the context
     return UR_RESULT_ERROR_INVALID_CONTEXT;
   default:
-    die("Unexpected memory type");
+    return UR_RESULT_ERROR_MEM_OBJECT_ALLOCATION_FAILURE;
   }
 
   ur_device_handle_t Device{};
@@ -1877,7 +1875,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemGetInfo(
     return ReturnValue(size_t{Buffer->Size});
   }
   default: {
-    die("urMemGetInfo: Parameter is not implemented");
+    return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
   }
   }
 
@@ -2061,7 +2059,7 @@ ur_result_t _ur_buffer::getZeHandle(char *&ZeHandle, access_mode_t AccessMode,
   if (!Allocation.Valid) {
     // LastDeviceWithValidAllocation should always have valid allocation.
     if (Device == LastDeviceWithValidAllocation)
-      die("getZeHandle: last used allocation is not valid");
+      return UR_RESULT_ERROR_INVALID_OPERATION;
 
     // For write-only access the allocation contents is not going to be used.
     // So don't do anything to make it "valid".
@@ -2195,7 +2193,7 @@ ur_result_t _ur_buffer::free() {
       ZeUSMImport.doZeUSMRelease(UrContext->getPlatform()->ZeDriver, ZeHandle);
       break;
     default:
-      die("_ur_buffer::free(): Unhandled release action");
+      return UR_RESULT_ERROR_INVALID_OPERATION;
     }
     ZeHandle = nullptr; // don't leave hanging pointers
   }
