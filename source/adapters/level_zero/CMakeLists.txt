@@ -127,3 +127,7 @@ target_include_directories(${TARGET_NAME} PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/../../"
     LevelZeroLoader-Headers
 )
+if (WIN32)
+ target_link_libraries(pi_level_zero PRIVATE delayimp)
+ target_link_options(pi_level_zero PRIVATE /DELAYLOAD:ze_loader.dll)
+ endif()

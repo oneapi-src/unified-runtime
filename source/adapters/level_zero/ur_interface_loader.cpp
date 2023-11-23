@@ -10,6 +10,30 @@
 
 #include <ur_api.h>
 #include <ur_ddi.h>
+#ifdef _WIN32
+#include <Windows.h>
+#include <delayimp.h>
+#endif
+
+#ifdef _WIN32
+FARPROC WINAPI delayHook(unsigned dliNotify, PDelayLoadInfo pdli) {
+  switch (dliNotify) {
+  case dliStartProcessing:
+    break;
+  case dliNotePreLoadLibrary: {
+    std::string delayLib = "ze_loader.dll";
+    if (strncmp(pdli->szDll, delayLib.c_str(), delayLib.length()) == 0) {
+      return (FARPROC)LoadLibraryExA(delayLib.c_str(), nullptr,
+                                     LOAD_LIBRARY_SEARCH_SYSTEM32);
+    }
+  }
+  }
+  return NULL;
+}
+
+ExternC const PfnDliHook __pfnDliNotifyHook2 = delayHook;
+ExternC const PfnDliHook __pfnDliFailureHook2 = delayHook;
+#endif
 
 ur_result_t validateProcInputs(ur_api_version_t version, void *pDdiTable) {
   if (nullptr == pDdiTable) {
