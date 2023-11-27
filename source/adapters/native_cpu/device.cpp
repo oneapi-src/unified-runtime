@@ -313,6 +313,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_COMMAND_BUFFER_UPDATE_SUPPORT_EXP:
     return ReturnValue(false);
 
+  case UR_DEVICE_INFO_QUEUE_ON_DEVICE_PROPERTIES: {
+    ur_queue_flags_t QueueOnDevice = 0;
+    return ReturnValue(QueueOnDevice);
+  }
   default:
     DIE_NO_IMPLEMENTATION;
   }

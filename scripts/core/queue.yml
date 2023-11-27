@@ -23,16 +23,23 @@ etors:
     - name: DEVICE
       desc: "[$x_device_handle_t] device associated with this queue."
     - name: DEVICE_DEFAULT
-      desc: "[$x_queue_handle_t] the current default queue of the underlying device."
+      desc: |
+            [$x_queue_handle_t] the current default queue of the underlying
+            device. Only returns a value if a queue associated with the
+            underlying device has been created with `$X_QUEUE_FLAG_ON_DEVICE_DEFAULT`.
     - name: FLAGS
       desc: "[$x_queue_flags_t] the properties associated with $x_queue_properties_t::flags."
     - name: REFERENCE_COUNT
       desc: |
             [uint32_t] Reference count of the queue object.
             The reference count returned should be considered immediately stale. 
-            It is unsuitable for general use in applications. This feature is provided for identifying memory leaks.
+            It is unsuitable for general use in applications. This feature is
+            provided for identifying memory leaks.
     - name: SIZE
-      desc: "[uint32_t] The size of the queue"
+      desc: |
+            [uint32_t] The size of the queue on the device. Only a valid query
+            if the queue was created with the `ON_DEVICE` queue flag, otherwise
+            `$xQueueGetInfo` will return `$X_RESULT_ERROR_INVALID_QUEUE`.
     - name: EMPTY
       desc: "[$x_bool_t] return true if the queue was empty at the time of the query"
 --- #--------------------------------------------------------------------------
@@ -49,7 +56,7 @@ etors:
       desc: "Enable/disable profiling"
     - name: ON_DEVICE
       value: "$X_BIT(2)"
-      desc: "Is a device queue"
+      desc: "Is a device queue. If this is enabled `$X_QUEUE_FLAG_OUT_OF_ORDER_EXEC_MODE_ENABLE` must also be enabled."
     - name: ON_DEVICE_DEFAULT
       value: "$X_BIT(3)"
       desc: "Is the default queue for a device"
@@ -107,7 +114,8 @@ returns:
     - $X_RESULT_ERROR_INVALID_NULL_POINTER:
         - "`propSize != 0 && pPropValue == NULL`"
         - "`pPropValue == NULL && pPropSizeRet == NULL`"
-    - $X_RESULT_ERROR_INVALID_QUEUE
+    - $X_RESULT_ERROR_INVALID_QUEUE:
+        - "If `hQueue` isn't a valid queue handle or if `propName` isn't supported by `hQueue`."
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
 --- #--------------------------------------------------------------------------
