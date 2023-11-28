@@ -128,6 +128,6 @@ target_include_directories(${TARGET_NAME} PRIVATE
     LevelZeroLoader-Headers
 )
 if (WIN32)
- target_link_libraries(libur_adapter_level_zero PRIVATE delayimp)
- target_link_options(libur_adapter_level_zero PRIVATE /DELAYLOAD:ze_loader.dll)
+ target_link_libraries(ur_adapter_level_zero PRIVATE delayimp)
+ target_link_options(ur_adapter_level_zero PRIVATE /DELAYLOAD:ze_loader.dll)
  endif()
