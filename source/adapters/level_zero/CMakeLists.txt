@@ -128,6 +128,6 @@ target_include_directories(${TARGET_NAME} PRIVATE
     LevelZeroLoader-Headers
 )
 if (WIN32)
- target_link_libraries(pi_level_zero PRIVATE delayimp)
- target_link_options(pi_level_zero PRIVATE /DELAYLOAD:ze_loader.dll)
+ target_link_libraries(ur_level_zero PRIVATE delayimp)
+ target_link_options(ur_level_zero PRIVATE /DELAYLOAD:ze_loader.dll)
  endif()
