@@ -268,7 +268,7 @@ inline std::optional<EnvVarMap> getenv_to_map(const char *env_var_name,
             }
             values_vec.push_back(value);
         }
-        map[key] = values_vec;
+        map[key] = std::move(values_vec);
     }
     return map;
 }
@@ -283,7 +283,7 @@ inline std::size_t combine_hashes(std::size_t seed, const T &v, Args... args) {
 inline ur_result_t exceptionToResult(std::exception_ptr eptr) {
     try {
         if (eptr) {
-            std::rethrow_exception(eptr);
+            std::rethrow_exception(std::move(eptr));
         }
         return UR_RESULT_SUCCESS;
     } catch (std::bad_alloc &) {
