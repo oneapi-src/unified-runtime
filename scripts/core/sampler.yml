@@ -67,7 +67,7 @@ type: struct
 desc: "Sampler description."
 class: $xSampler
 name: $x_sampler_desc_t
-base: $x_base_desc_t
+base: $x_base_properties_t
 members:
     - type: bool
       name: normalizedCoords

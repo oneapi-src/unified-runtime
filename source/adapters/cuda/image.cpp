@@ -850,8 +850,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urBindlessImagesImportOpaqueFDExp(
 
     void *pNext = const_cast<void *>(pInteropMemDesc->pNext);
     while (pNext != nullptr) {
-      const ur_base_desc_t *BaseDesc =
-          reinterpret_cast<const ur_base_desc_t *>(pNext);
+      const auto *BaseDesc =
+          reinterpret_cast<const ur_base_properties_t *>(pNext);
       if (BaseDesc->stype == UR_STRUCTURE_TYPE_EXP_FILE_DESCRIPTOR) {
         const ur_exp_file_descriptor_t *FileDescriptor =
             reinterpret_cast<const ur_exp_file_descriptor_t *>(pNext);
@@ -956,8 +956,8 @@ urBindlessImagesImportExternalSemaphoreOpaqueFDExp(
 
     void *pNext = const_cast<void *>(pInteropSemaphoreDesc->pNext);
     while (pNext != nullptr) {
-      const ur_base_desc_t *BaseDesc =
-          reinterpret_cast<const ur_base_desc_t *>(pNext);
+      const auto *BaseDesc =
+          reinterpret_cast<const ur_base_properties_t *>(pNext);
       if (BaseDesc->stype == UR_STRUCTURE_TYPE_EXP_FILE_DESCRIPTOR) {
         const ur_exp_file_descriptor_t *FileDescriptor =
             reinterpret_cast<const ur_exp_file_descriptor_t *>(pNext);

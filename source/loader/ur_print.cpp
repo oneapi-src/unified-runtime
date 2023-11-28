@@ -67,13 +67,6 @@ ur_result_t urPrintBaseProperties(const struct ur_base_properties_t params,
     return str_copy(&ss, buffer, buff_size, out_size);
 }
 
-ur_result_t urPrintBaseDesc(const struct ur_base_desc_t params, char *buffer,
-                            const size_t buff_size, size_t *out_size) {
-    std::stringstream ss;
-    ss << params;
-    return str_copy(&ss, buffer, buff_size, out_size);
-}
-
 ur_result_t urPrintRectOffset(const struct ur_rect_offset_t params,
                               char *buffer, const size_t buff_size,
                               size_t *out_size) {

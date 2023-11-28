@@ -208,7 +208,6 @@ inline std::ostream &operator<<(std::ostream &os, ur_function_t value);
 inline std::ostream &operator<<(std::ostream &os, ur_structure_type_t value);
 inline std::ostream &operator<<(std::ostream &os, ur_result_t value);
 inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_base_properties_t params);
-inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_base_desc_t params);
 inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_rect_offset_t params);
 inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_rect_region_t params);
 inline std::ostream &operator<<(std::ostream &os, ur_device_init_flag_t value);
@@ -1487,26 +1486,6 @@ inline std::ostream &operator<<(std::ostream &os, ur_result_t value) {
 ///     std::ostream &
 inline std::ostream &operator<<(std::ostream &os, const struct ur_base_properties_t params) {
     os << "(struct ur_base_properties_t){";
-
-    os << ".stype = ";
-
-    os << (params.stype);
-
-    os << ", ";
-    os << ".pNext = ";
-
-    ur::details::printStruct(os,
-                             (params.pNext));
-
-    os << "}";
-    return os;
-}
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the ur_base_desc_t type
-/// @returns
-///     std::ostream &
-inline std::ostream &operator<<(std::ostream &os, const struct ur_base_desc_t params) {
-    os << "(struct ur_base_desc_t){";
 
     os << ".stype = ";
 

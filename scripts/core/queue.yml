@@ -214,7 +214,7 @@ details:
       as part of a `pNext` chain.
 class: $xQueue
 name: $x_queue_native_desc_t
-base: $x_base_desc_t
+base: $x_base_properties_t
 members:
     - type: "void*"
       name: pNativeData

@@ -138,7 +138,7 @@ etors:
 type: struct
 desc: "File descriptor"
 name: $x_exp_file_descriptor_t
-base: $x_base_desc_t
+base: $x_base_properties_t
 members:
     - type: int
       name: fd
@@ -147,7 +147,7 @@ members:
 type: struct
 desc: "Windows specific file handle"
 name: $x_exp_win32_handle_t
-base: $x_base_desc_t
+base: $x_base_properties_t
 members:
     - type: void*
       name: handle
@@ -192,14 +192,14 @@ type: struct
 desc: "Describes an interop memory resource descriptor"
 class: $xBindlessImages
 name: $x_exp_interop_mem_desc_t
-base: $x_base_desc_t
+base: $x_base_properties_t
 members: []
 --- #--------------------------------------------------------------------------
 type: struct
 desc: "Describes an interop semaphore resource descriptor"
 class: $xBindlessImages
 name: $x_exp_interop_semaphore_desc_t
-base: $x_base_desc_t
+base: $x_base_properties_t
 members: []
 --- #--------------------------------------------------------------------------
 type: function

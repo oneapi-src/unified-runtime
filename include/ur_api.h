@@ -494,17 +494,9 @@ typedef enum ur_result_t {
 /// @brief Base for all properties types
 typedef struct ur_base_properties_t {
     ur_structure_type_t stype; ///< [in] type of this structure
-    void *pNext;               ///< [in,out][optional] pointer to extension-specific structure
-
-} ur_base_properties_t;
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Base for all descriptor types
-typedef struct ur_base_desc_t {
-    ur_structure_type_t stype; ///< [in] type of this structure
     const void *pNext;         ///< [in][optional] pointer to extension-specific structure
 
-} ur_base_desc_t;
+} ur_base_properties_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief 3D offset argument passed to buffer rect operations
@@ -1149,7 +1141,7 @@ urPlatformGetNativeHandle(
 typedef struct ur_platform_native_properties_t {
     ur_structure_type_t stype; ///< [in] type of this structure, must be
                                ///< ::UR_STRUCTURE_TYPE_PLATFORM_NATIVE_PROPERTIES
-    void *pNext;               ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
     bool isNativeHandleOwned;  ///< [in] Indicates UR owns the native handle or if it came from an
                                ///< interoperability operation in the application that asked to not
                                ///< transfer the ownership to the unified-runtime.
@@ -1742,7 +1734,7 @@ typedef struct ur_device_partition_property_t {
 typedef struct ur_device_partition_properties_t {
     ur_structure_type_t stype;                         ///< [in] type of this structure, must be
                                                        ///< ::UR_STRUCTURE_TYPE_DEVICE_PARTITION_PROPERTIES
-    void *pNext;                                       ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;                                 ///< [in][optional] pointer to extension-specific structure
     const ur_device_partition_property_t *pProperties; ///< [in] Pointer to the beginning of the properties array.
     size_t PropCount;                                  ///< [in] The length of properties pointed to by `pProperties`.
 
@@ -1917,7 +1909,7 @@ urDeviceGetNativeHandle(
 typedef struct ur_device_native_properties_t {
     ur_structure_type_t stype; ///< [in] type of this structure, must be
                                ///< ::UR_STRUCTURE_TYPE_DEVICE_NATIVE_PROPERTIES
-    void *pNext;               ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
     bool isNativeHandleOwned;  ///< [in] Indicates UR owns the native handle or if it came from an
                                ///< interoperability operation in the application that asked to not
                                ///< transfer the ownership to the unified-runtime.
@@ -2055,7 +2047,7 @@ typedef enum ur_context_flag_t {
 typedef struct ur_context_properties_t {
     ur_structure_type_t stype; ///< [in] type of this structure, must be
                                ///< ::UR_STRUCTURE_TYPE_CONTEXT_PROPERTIES
-    void *pNext;               ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
     ur_context_flags_t flags;  ///< [in] context creation flags.
 
 } ur_context_properties_t;
@@ -2258,7 +2250,7 @@ urContextGetNativeHandle(
 typedef struct ur_context_native_properties_t {
     ur_structure_type_t stype; ///< [in] type of this structure, must be
                                ///< ::UR_STRUCTURE_TYPE_CONTEXT_NATIVE_PROPERTIES
-    void *pNext;               ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
     bool isNativeHandleOwned;  ///< [in] Indicates UR owns the native handle or if it came from an interoperability
                                ///< operation in the application that asked to not transfer the ownership to
                                ///< the unified-runtime.
@@ -2517,7 +2509,7 @@ urMemImageCreate(
 typedef struct ur_buffer_properties_t {
     ur_structure_type_t stype; ///< [in] type of this structure, must be
                                ///< ::UR_STRUCTURE_TYPE_BUFFER_PROPERTIES
-    void *pNext;               ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
     void *pHost;               ///< [in][optional] pointer to the buffer data
 
 } ur_buffer_properties_t;
@@ -2535,7 +2527,7 @@ typedef struct ur_buffer_properties_t {
 typedef struct ur_buffer_channel_properties_t {
     ur_structure_type_t stype; ///< [in] type of this structure, must be
                                ///< ::UR_STRUCTURE_TYPE_BUFFER_CHANNEL_PROPERTIES
-    void *pNext;               ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
     uint32_t channel;          ///< [in] Identifies the channel/region to which the buffer should be mapped.
 
 } ur_buffer_channel_properties_t;
@@ -2553,7 +2545,7 @@ typedef struct ur_buffer_channel_properties_t {
 typedef struct ur_buffer_alloc_location_properties_t {
     ur_structure_type_t stype; ///< [in] type of this structure, must be
                                ///< ::UR_STRUCTURE_TYPE_BUFFER_ALLOC_LOCATION_PROPERTIES
-    void *pNext;               ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
     uint32_t location;         ///< [in] Identifies the ID of global memory partition to which the memory
                                ///< should be allocated.
 
@@ -2738,7 +2730,7 @@ urMemGetNativeHandle(
 typedef struct ur_mem_native_properties_t {
     ur_structure_type_t stype; ///< [in] type of this structure, must be
                                ///< ::UR_STRUCTURE_TYPE_MEM_NATIVE_PROPERTIES
-    void *pNext;               ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
     bool isNativeHandleOwned;  ///< [in] Indicates UR owns the native handle or if it came from an
                                ///< interoperability operation in the application that asked to not
                                ///< transfer the ownership to the unified-runtime.
@@ -3104,7 +3096,7 @@ urSamplerGetNativeHandle(
 typedef struct ur_sampler_native_properties_t {
     ur_structure_type_t stype; ///< [in] type of this structure, must be
                                ///< ::UR_STRUCTURE_TYPE_SAMPLER_NATIVE_PROPERTIES
-    void *pNext;               ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
     bool isNativeHandleOwned;  ///< [in] Indicates UR owns the native handle or if it came from an
                                ///< interoperability operation in the application that asked to not
                                ///< transfer the ownership to the unified-runtime.
@@ -3876,7 +3868,7 @@ typedef enum ur_physical_mem_flag_t {
 typedef struct ur_physical_mem_properties_t {
     ur_structure_type_t stype;     ///< [in] type of this structure, must be
                                    ///< ::UR_STRUCTURE_TYPE_PHYSICAL_MEM_PROPERTIES
-    void *pNext;                   ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;             ///< [in][optional] pointer to extension-specific structure
     ur_physical_mem_flags_t flags; ///< [in] physical memory creation flags
 
 } ur_physical_mem_properties_t;
@@ -3988,7 +3980,7 @@ typedef struct ur_program_metadata_t {
 typedef struct ur_program_properties_t {
     ur_structure_type_t stype;               ///< [in] type of this structure, must be
                                              ///< ::UR_STRUCTURE_TYPE_PROGRAM_PROPERTIES
-    void *pNext;                             ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;                       ///< [in][optional] pointer to extension-specific structure
     uint32_t count;                          ///< [in] the number of entries in pMetadatas, if count is greater than
                                              ///< zero then pMetadatas must not be null.
     const ur_program_metadata_t *pMetadatas; ///< [in][optional][range(0,count)] pointer to array of metadata entries.
@@ -4473,7 +4465,7 @@ urProgramGetNativeHandle(
 typedef struct ur_program_native_properties_t {
     ur_structure_type_t stype; ///< [in] type of this structure, must be
                                ///< ::UR_STRUCTURE_TYPE_PROGRAM_NATIVE_PROPERTIES
-    void *pNext;               ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
     bool isNativeHandleOwned;  ///< [in] Indicates UR owns the native handle or if it came from an
                                ///< interoperability operation in the application that asked to not
                                ///< transfer the ownership to the unified-runtime.
@@ -4546,7 +4538,7 @@ urKernelCreate(
 typedef struct ur_kernel_arg_value_properties_t {
     ur_structure_type_t stype; ///< [in] type of this structure, must be
                                ///< ::UR_STRUCTURE_TYPE_KERNEL_ARG_VALUE_PROPERTIES
-    void *pNext;               ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
 
 } ur_kernel_arg_value_properties_t;
 
@@ -4583,7 +4575,7 @@ urKernelSetArgValue(
 typedef struct ur_kernel_arg_local_properties_t {
     ur_structure_type_t stype; ///< [in] type of this structure, must be
                                ///< ::UR_STRUCTURE_TYPE_KERNEL_ARG_LOCAL_PROPERTIES
-    void *pNext;               ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
 
 } ur_kernel_arg_local_properties_t;
 
@@ -4838,7 +4830,7 @@ urKernelRelease(
 typedef struct ur_kernel_arg_pointer_properties_t {
     ur_structure_type_t stype; ///< [in] type of this structure, must be
                                ///< ::UR_STRUCTURE_TYPE_KERNEL_ARG_POINTER_PROPERTIES
-    void *pNext;               ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
 
 } ur_kernel_arg_pointer_properties_t;
 
@@ -4877,7 +4869,7 @@ urKernelSetArgPointer(
 typedef struct ur_kernel_exec_info_properties_t {
     ur_structure_type_t stype; ///< [in] type of this structure, must be
                                ///< ::UR_STRUCTURE_TYPE_KERNEL_EXEC_INFO_PROPERTIES
-    void *pNext;               ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
 
 } ur_kernel_exec_info_properties_t;
 
@@ -4919,7 +4911,7 @@ urKernelSetExecInfo(
 typedef struct ur_kernel_arg_sampler_properties_t {
     ur_structure_type_t stype; ///< [in] type of this structure, must be
                                ///< ::UR_STRUCTURE_TYPE_KERNEL_ARG_SAMPLER_PROPERTIES
-    void *pNext;               ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
 
 } ur_kernel_arg_sampler_properties_t;
 
@@ -4953,7 +4945,7 @@ urKernelSetArgSampler(
 typedef struct ur_kernel_arg_mem_obj_properties_t {
     ur_structure_type_t stype;   ///< [in] type of this structure, must be
                                  ///< ::UR_STRUCTURE_TYPE_KERNEL_ARG_MEM_OBJ_PROPERTIES
-    void *pNext;                 ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;           ///< [in][optional] pointer to extension-specific structure
     ur_mem_flags_t memoryAccess; ///< [in] Memory access flag. Allowed values are: ::UR_MEM_FLAG_READ_WRITE,
                                  ///< ::UR_MEM_FLAG_WRITE_ONLY, ::UR_MEM_FLAG_READ_ONLY.
 
@@ -5056,7 +5048,7 @@ urKernelGetNativeHandle(
 typedef struct ur_kernel_native_properties_t {
     ur_structure_type_t stype; ///< [in] type of this structure, must be
                                ///< ::UR_STRUCTURE_TYPE_KERNEL_NATIVE_PROPERTIES
-    void *pNext;               ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
     bool isNativeHandleOwned;  ///< [in] Indicates UR owns the native handle or if it came from an interoperability
                                ///< operation in the application that asked to not transfer the ownership to
                                ///< the unified-runtime.
@@ -5191,7 +5183,7 @@ urQueueGetInfo(
 typedef struct ur_queue_properties_t {
     ur_structure_type_t stype; ///< [in] type of this structure, must be
                                ///< ::UR_STRUCTURE_TYPE_QUEUE_PROPERTIES
-    void *pNext;               ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
     ur_queue_flags_t flags;    ///< [in] Bitfield of queue creation flags
 
 } ur_queue_properties_t;
@@ -5205,7 +5197,7 @@ typedef struct ur_queue_properties_t {
 typedef struct ur_queue_index_properties_t {
     ur_structure_type_t stype; ///< [in] type of this structure, must be
                                ///< ::UR_STRUCTURE_TYPE_QUEUE_INDEX_PROPERTIES
-    void *pNext;               ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
     uint32_t computeIndex;     ///< [in] Specifies the compute index as described in the
                                ///< sycl_ext_intel_queue_index extension.
 
@@ -5355,7 +5347,7 @@ urQueueGetNativeHandle(
 typedef struct ur_queue_native_properties_t {
     ur_structure_type_t stype; ///< [in] type of this structure, must be
                                ///< ::UR_STRUCTURE_TYPE_QUEUE_NATIVE_PROPERTIES
-    void *pNext;               ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
     bool isNativeHandleOwned;  ///< [in] Indicates UR owns the native handle or if it came from an interoperability
                                ///< operation in the application that asked to not transfer the ownership to
                                ///< the unified-runtime.
@@ -5722,7 +5714,7 @@ urEventGetNativeHandle(
 typedef struct ur_event_native_properties_t {
     ur_structure_type_t stype; ///< [in] type of this structure, must be
                                ///< ::UR_STRUCTURE_TYPE_EVENT_NATIVE_PROPERTIES
-    void *pNext;               ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;         ///< [in][optional] pointer to extension-specific structure
     bool isNativeHandleOwned;  ///< [in] Indicates UR owns the native handle or if it came from an interoperability
                                ///< operation in the application that asked to not transfer the ownership to
                                ///< the unified-runtime.
@@ -7111,7 +7103,7 @@ typedef struct ur_exp_win32_handle_t {
 typedef struct ur_exp_sampler_mip_properties_t {
     ur_structure_type_t stype;              ///< [in] type of this structure, must be
                                             ///< ::UR_STRUCTURE_TYPE_EXP_SAMPLER_MIP_PROPERTIES
-    void *pNext;                            ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;                      ///< [in][optional] pointer to extension-specific structure
     float minMipmapLevelClamp;              ///< [in] minimum mipmap level from which we can sample, minimum value
                                             ///< being 0
     float maxMipmapLevelClamp;              ///< [in] maximum mipmap level from which we can sample, maximum value
@@ -7131,7 +7123,7 @@ typedef struct ur_exp_sampler_mip_properties_t {
 typedef struct ur_exp_sampler_addr_modes_t {
     ur_structure_type_t stype;                 ///< [in] type of this structure, must be
                                                ///< ::UR_STRUCTURE_TYPE_EXP_SAMPLER_ADDR_MODES
-    void *pNext;                               ///< [in,out][optional] pointer to extension-specific structure
+    const void *pNext;                         ///< [in][optional] pointer to extension-specific structure
     ur_sampler_addressing_mode_t addrModes[3]; ///< [in] Specify the address mode of the sampler per dimension
 
 } ur_exp_sampler_addr_modes_t;

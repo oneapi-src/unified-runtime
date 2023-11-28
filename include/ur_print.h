@@ -59,16 +59,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintResult(enum ur_result_t value, char *
 UR_APIEXPORT ur_result_t UR_APICALL urPrintBaseProperties(const struct ur_base_properties_t params, char *buffer, const size_t buff_size, size_t *out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Print ur_base_desc_t struct
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///         - `NULL == buffer`
-///     - ::UR_RESULT_ERROR_INVALID_SIZE
-///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintBaseDesc(const struct ur_base_desc_t params, char *buffer, const size_t buff_size, size_t *out_size);
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_rect_offset_t struct
 /// @returns
 ///     - ::UR_RESULT_SUCCESS

@@ -69,7 +69,7 @@ value: "\"native_cpu\""
 type: struct
 desc: "Device Binary Type"
 name: $x_device_binary_t
-base: $x_base_desc_t
+base: $x_base_properties_t
 members:
     - type: const char*
       name: pDeviceTargetSpec

@@ -465,8 +465,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMSharedAlloc(
 
   void *pNext = USMDesc ? const_cast<void *>(USMDesc->pNext) : nullptr;
   while (pNext != nullptr) {
-    const ur_base_desc_t *BaseDesc =
-        reinterpret_cast<const ur_base_desc_t *>(pNext);
+    const auto *BaseDesc =
+        reinterpret_cast<const ur_base_properties_t *>(pNext);
     if (BaseDesc->stype == UR_STRUCTURE_TYPE_USM_DEVICE_DESC) {
       const ur_usm_device_desc_t *UsmDeviceDesc =
           reinterpret_cast<const ur_usm_device_desc_t *>(pNext);
@@ -809,8 +809,8 @@ ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t Context,
 
   void *pNext = const_cast<void *>(PoolDesc->pNext);
   while (pNext != nullptr) {
-    const ur_base_desc_t *BaseDesc =
-        reinterpret_cast<const ur_base_desc_t *>(pNext);
+    const auto *BaseDesc =
+        reinterpret_cast<const ur_base_properties_t *>(pNext);
     switch (BaseDesc->stype) {
     case UR_STRUCTURE_TYPE_USM_POOL_LIMITS_DESC: {
       const ur_usm_pool_limits_desc_t *Limits =

@@ -53,7 +53,7 @@ value: "\"$x_exp_command_buffer\""
 type: struct
 desc: "Command-Buffer Descriptor Type"
 name: $x_exp_command_buffer_desc_t
-base: $x_base_desc_t
+base: $x_base_properties_t
 members: []
 --- #--------------------------------------------------------------------------
 type: typedef

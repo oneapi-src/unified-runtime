@@ -365,8 +365,7 @@ The following naming conventions must be followed:
 
 The following coding conventions must be followed:
 
-*   All descriptor structures must be derived from ${x}_base_desc_t
-*   All property structures must be derived from ${x}_base_properties_t
+*   All descriptor or property structures must be derived from ${x}_base_properties_t
 *   All function input parameters must precede output parameters
 *   All functions must return ${x}_result_t
 

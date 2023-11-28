@@ -136,7 +136,7 @@ type: struct
 desc: "USM allocation descriptor type."
 class: $xUSM
 name: $x_usm_desc_t
-base: $x_base_desc_t
+base: $x_base_properties_t
 members:
     - type: $x_usm_advice_flags_t
       name: hints
@@ -155,7 +155,7 @@ details:
     as part of a `pNext` chain.
 class: $xUSM
 name: $x_usm_host_desc_t
-base: $x_base_desc_t
+base: $x_base_properties_t
 members:
     - type: $x_usm_host_mem_flags_t
       name: flags
@@ -168,7 +168,7 @@ details:
     as part of a `pNext` chain.
 class: $xUSM
 name: $x_usm_device_desc_t
-base: $x_base_desc_t
+base: $x_base_properties_t
 members:
     - type: $x_usm_device_mem_flags_t
       name: flags
@@ -183,7 +183,7 @@ analogue:
     - "cl_intel_mem_alloc_buffer_location"
 class: $xUSM
 name: $x_usm_alloc_location_desc_t
-base: $x_base_desc_t
+base: $x_base_properties_t
 members:
     - type: uint32_t
       name: location
@@ -195,7 +195,7 @@ type: struct
 desc: "USM pool descriptor type"
 class: $xUSM
 name: $x_usm_pool_desc_t
-base: $x_base_desc_t
+base: $x_base_properties_t
 members:
     - type: $x_usm_pool_flags_t
       name:  flags
@@ -208,7 +208,7 @@ details:
     as part of a `pNext` chain.
 class: $xUSM
 name: $x_usm_pool_limits_desc_t
-base: $x_base_desc_t
+base: $x_base_properties_t
 members:
     - type: "size_t"
       name:  maxPoolableSize

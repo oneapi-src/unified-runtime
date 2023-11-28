@@ -32,7 +32,7 @@ deviceDescToClFlags(const ur_usm_device_desc_t &desc) {
 }
 
 ur_result_t
-usmDescToCLMemProperties(const ur_base_desc_t *Desc,
+usmDescToCLMemProperties(const ur_base_properties_t *Desc,
                          std::vector<cl_mem_properties_intel> &Properties) {
   cl_mem_alloc_flags_intel AllocFlags = 0;
   const auto *Next = Desc;
@@ -66,7 +66,7 @@ usmDescToCLMemProperties(const ur_base_desc_t *Desc,
       return UR_RESULT_ERROR_INVALID_VALUE;
     }
 
-    Next = Next->pNext ? static_cast<const ur_base_desc_t *>(Next->pNext)
+    Next = Next->pNext ? static_cast<const ur_base_properties_t *>(Next->pNext)
                        : nullptr;
   } while (Next);
 
@@ -89,7 +89,8 @@ urUSMHostAlloc(ur_context_handle_t hContext, const ur_usm_desc_t *pUSMDesc,
   std::vector<cl_mem_properties_intel> AllocProperties;
   if (pUSMDesc && pUSMDesc->pNext) {
     UR_RETURN_ON_FAILURE(usmDescToCLMemProperties(
-        static_cast<const ur_base_desc_t *>(pUSMDesc->pNext), AllocProperties));
+        static_cast<const ur_base_properties_t *>(pUSMDesc->pNext),
+        AllocProperties));
   }
 
   // First we need to look up the function pointer
@@ -132,7 +133,8 @@ urUSMDeviceAlloc(ur_context_handle_t hContext, ur_device_handle_t hDevice,
   std::vector<cl_mem_properties_intel> AllocProperties;
   if (pUSMDesc && pUSMDesc->pNext) {
     UR_RETURN_ON_FAILURE(usmDescToCLMemProperties(
-        static_cast<const ur_base_desc_t *>(pUSMDesc->pNext), AllocProperties));
+        static_cast<const ur_base_properties_t *>(pUSMDesc->pNext),
+        AllocProperties));
   }
 
   // First we need to look up the function pointer
@@ -175,7 +177,8 @@ urUSMSharedAlloc(ur_context_handle_t hContext, ur_device_handle_t hDevice,
   std::vector<cl_mem_properties_intel> AllocProperties;
   if (pUSMDesc && pUSMDesc->pNext) {
     UR_RETURN_ON_FAILURE(usmDescToCLMemProperties(
-        static_cast<const ur_base_desc_t *>(pUSMDesc->pNext), AllocProperties));
+        static_cast<const ur_base_properties_t *>(pUSMDesc->pNext),
+        AllocProperties));
   }
 
   // First we need to look up the function pointer

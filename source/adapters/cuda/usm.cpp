@@ -378,7 +378,7 @@ ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t Context,
     : Context(Context) {
   const void *pNext = PoolDesc->pNext;
   while (pNext != nullptr) {
-    const ur_base_desc_t *BaseDesc = static_cast<const ur_base_desc_t *>(pNext);
+    const auto *BaseDesc = static_cast<const ur_base_properties_t *>(pNext);
     switch (BaseDesc->stype) {
     case UR_STRUCTURE_TYPE_USM_POOL_LIMITS_DESC: {
       const ur_usm_pool_limits_desc_t *Limits =

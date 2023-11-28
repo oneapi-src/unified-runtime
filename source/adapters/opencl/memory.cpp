@@ -239,25 +239,27 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
             cl_ext::CreateBufferWithPropertiesName, &FuncPtr);
     if (FuncPtr) {
       std::vector<cl_mem_properties_intel> PropertiesIntel;
-      auto Prop = static_cast<ur_base_properties_t *>(pProperties->pNext);
+      const auto *Prop =
+          static_cast<const ur_base_properties_t *>(pProperties->pNext);
       while (Prop) {
         switch (Prop->stype) {
         case UR_STRUCTURE_TYPE_BUFFER_CHANNEL_PROPERTIES: {
           auto BufferChannelProperty =
-              reinterpret_cast<ur_buffer_channel_properties_t *>(Prop);
+              reinterpret_cast<const ur_buffer_channel_properties_t *>(Prop);
           PropertiesIntel.push_back(CL_MEM_CHANNEL_INTEL);
           PropertiesIntel.push_back(BufferChannelProperty->channel);
         } break;
         case UR_STRUCTURE_TYPE_BUFFER_ALLOC_LOCATION_PROPERTIES: {
           auto BufferLocationProperty =
-              reinterpret_cast<ur_buffer_alloc_location_properties_t *>(Prop);
+              reinterpret_cast<const ur_buffer_alloc_location_properties_t *>(
+                  Prop);
           PropertiesIntel.push_back(CL_MEM_ALLOC_FLAGS_INTEL);
           PropertiesIntel.push_back(BufferLocationProperty->location);
         } break;
         default:
           break;
         }
-        Prop = static_cast<ur_base_properties_t *>(Prop->pNext);
+        Prop = static_cast<const ur_base_properties_t *>(Prop->pNext);
       }
       PropertiesIntel.push_back(0);
 

@@ -544,7 +544,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
 
   if (NativeProperties) {
     OwnNativeHandle = NativeProperties->isNativeHandleOwned;
-    void *pNext = NativeProperties->pNext;
+    const void *pNext = NativeProperties->pNext;
     while (pNext) {
       const ur_base_properties_t *extendedProperties =
           reinterpret_cast<const ur_base_properties_t *>(pNext);
