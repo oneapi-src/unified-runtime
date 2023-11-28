@@ -365,6 +365,9 @@ ur_result_t UR_APICALL urAdapterRetain(
 /// represents a warning instead. This means that the entry-point call did not
 /// fail. However it might not have behaved as expected.
 ///
+/// * Using ::UR_RESULT_ERROR_ADAPTER_SPECIFIC to emit warnings is an optional
+/// feature. Its usage is left at the discretion of adapter maintainers.
+///
 /// * Implementations *must* store the message and error code in thread-local
 ///   storage prior to returning ::UR_RESULT_ERROR_ADAPTER_SPECIFIC.
 ///
