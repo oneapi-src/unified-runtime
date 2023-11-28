@@ -13,6 +13,7 @@
 #ifdef _WIN32
 #include <Windows.h>
 #include <delayimp.h>
+#include <string>
 #endif
 
 #ifdef _WIN32
