@@ -87,6 +87,12 @@ Enums
     * ${X}_DEVICE_INFO_INTEROP_MEMORY_EXPORT_SUPPORT_EXP
     * ${X}_DEVICE_INFO_INTEROP_SEMAPHORE_IMPORT_SUPPORT_EXP
     * ${X}_DEVICE_INFO_INTEROP_SEMAPHORE_EXPORT_SUPPORT_EXP
+    * ${X}_DEVICE_INFO_BINDLESS_SAMPLED_IMAGE_FETCH_1D_USM_EXP
+    * ${X}_DEVICE_INFO_BINDLESS_SAMPLED_IMAGE_FETCH_1D_EXP
+    * ${X}_DEVICE_INFO_BINDLESS_SAMPLED_IMAGE_FETCH_2D_USM_EXP
+    * ${X}_DEVICE_INFO_BINDLESS_SAMPLED_IMAGE_FETCH_2D_EXP
+    * ${X}_DEVICE_INFO_BINDLESS_SAMPLED_IMAGE_FETCH_3D_USM_EXP
+    * ${X}_DEVICE_INFO_BINDLESS_SAMPLED_IMAGE_FETCH_3D_EXP
 
 * ${x}_command_t
     * ${X}_COMMAND_INTEROP_SEMAPHORE_WAIT_EXP
@@ -184,6 +190,8 @@ Changelog
 +------------------------------------------------------------------------+
 | 9.0      | Remove layered image properties struct.                     |
 +------------------------------------------------------------------------+
+| 10.0     | Added device queries for sampled image fetch capabilities.  |
++----------+-------------------------------------------------------------+
 
 Contributors
 --------------------------------------------------------------------------------
