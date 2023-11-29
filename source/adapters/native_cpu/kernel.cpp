@@ -87,7 +87,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelGetInfo(ur_kernel_handle_t hKernel,
     if (hKernel->_name) {
       return ReturnValue(hKernel->_name);
     }
-    return UR_RESULT_ERROR_INVALID_FUNCTION_NAME;
+    return UR_RESULT_ERROR_INVALID_KERNEL;
     //  case UR_KERNEL_INFO_NUM_ARGS:
     //    return ReturnValue(uint32_t{ Kernel->ZeKernelProperties->numKernelArgs
     //    });
