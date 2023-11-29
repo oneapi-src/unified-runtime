@@ -250,6 +250,16 @@ install(
 set(API_JSON_FILE ${PROJECT_BINARY_DIR}/unified_runtime.json)
 
 if(UR_FORMAT_CPP_STYLE)
+    execute_process(
+        COMMAND ${Python3_EXECUTABLE} -c "import mako"
+        ERROR_VARIABLE err
+        RESULT_VARIABLE res
+        OUTPUT_QUIET)
+    if(NOT res EQUAL 0)
+      message(FATAL_ERROR
+        "could not import python mako module needed by `generate`: '${err}'")
+    endif()
+
     # Generate source from the specification
     add_custom_target(generate-code USES_TERMINAL
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/scripts
