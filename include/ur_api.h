@@ -856,11 +856,11 @@ urAdapterRetain(
 /// returned by the failed driver entry-point.
 ///
 /// * If `pError` is ::UR_RESULT_SUCCESS, ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
-/// represents a warning instead. This means that the entry-point call did not
-/// fail. However it might not have behaved as expected.
+///   represents a warning instead. This means that the entry-point call did not
+///   fail. However it might not have behaved as expected.
 ///
 /// * Using ::UR_RESULT_ERROR_ADAPTER_SPECIFIC to emit warnings is an optional
-/// feature. Its usage is left at the discretion of adapter maintainers.
+///   feature. Its usage is left at the discretion of adapter maintainers.
 ///
 /// * Implementations *must* store the message and error code in thread-local
 ///   storage prior to returning ::UR_RESULT_ERROR_ADAPTER_SPECIFIC.
