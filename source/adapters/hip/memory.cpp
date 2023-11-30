@@ -71,7 +71,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemRelease(ur_mem_handle_t hMem) {
     // error for which it is unclear if the function that reported it succeeded
     // or not. Either way, the state of the program is compromised and likely
     // unrecoverable.
-    return UR_RESULT_ERROR_INVALID_OPERATION;
+    assert(!"Unrecoverable program state reached in urMemRelease");
   }
 
   return UR_RESULT_SUCCESS;
@@ -246,9 +246,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemGetInfo(ur_mem_handle_t hMemory,
 #else
           HIP_ARRAY3D_DESCRIPTOR ArrayDescriptor;
           UR_CHECK_ERROR(hipArray3DGetDescriptor(&ArrayDescriptor, Mem.Array));
-          auto PixelSize = 0;
+          int PixelSize = 0;
           UR_RETURN_ON_FAILURE(
-              GetHipFormatPixelSize(ArrayDescriptor.Format, &PixelSize));
+              imageElementByteSize(ArrayDescriptor.Format, &PixelSize));
           const auto PixelSizeBytes = PixelSize * ArrayDescriptor.NumChannels;
           const auto ImageSizeBytes =
               PixelSizeBytes *
@@ -397,7 +397,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageGetInfo(ur_mem_handle_t hMemory,
       return ReturnValue(ArrayInfo.Depth);
     case UR_IMAGE_INFO_ELEMENT_SIZE: {
       int Size = 0;
-      UR_RETURN_ON_FAILURE(GetHipFormatPixelSize(ArrayInfo.Format, &Size));
+      UR_RETURN_ON_FAILURE(imageElementByteSize(ArrayInfo.Format, &Size));
       return ReturnValue(Size);
     }
     case UR_IMAGE_INFO_ROW_PITCH:

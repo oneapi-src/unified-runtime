@@ -179,19 +179,22 @@ ur_result_t urGetLastResult(ur_platform_handle_t, const char **ppMessage) {
   return ErrorMessageCode;
 }
 
-ur_result_t GetHipFormatPixelSize(hipArray_Format Format, int *Size) {
+ur_result_t imageElementByteSize(hipArray_Format Format, unsigned int *Size) {
   switch (Format) {
   case HIP_AD_FORMAT_UNSIGNED_INT8:
   case HIP_AD_FORMAT_SIGNED_INT8:
     *Size = 1;
+    break;
   case HIP_AD_FORMAT_UNSIGNED_INT16:
   case HIP_AD_FORMAT_SIGNED_INT16:
   case HIP_AD_FORMAT_HALF:
     *Size = 2;
+    break;
   case HIP_AD_FORMAT_UNSIGNED_INT32:
   case HIP_AD_FORMAT_SIGNED_INT32:
   case HIP_AD_FORMAT_FLOAT:
     *Size = 4;
+    break;
   default:
     return UR_RESULT_ERROR_IMAGE_FORMAT_NOT_SUPPORTED;
   }

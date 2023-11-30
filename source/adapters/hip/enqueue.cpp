@@ -1057,7 +1057,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemImageRead(
     UR_CHECK_ERROR(getArrayDesc(Array, Format, NumChannels));
 
     int ElementByteSize = 0;
-    UR_RETURN_ON_FAILURE(GetHipFormatPixelSize(Format, &ElementByteSize));
+    UR_RETURN_ON_FAILURE(imageElementByteSize(Format, &ElementByteSize));
 
     size_t ByteOffsetX = origin.x * ElementByteSize * NumChannels;
     size_t BytesToCopy = ElementByteSize * NumChannels * region.depth;
@@ -1119,7 +1119,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemImageWrite(
     UR_CHECK_ERROR(getArrayDesc(Array, Format, NumChannels));
 
     int ElementByteSize = 0;
-    UR_RETURN_ON_FAILURE(GetHipFormatPixelSize(Format, &ElementByteSize));
+    UR_RETURN_ON_FAILURE(imageElementByteSize(Format, &ElementByteSize));
 
     size_t ByteOffsetX = origin.x * ElementByteSize * NumChannels;
     size_t BytesToCopy = ElementByteSize * NumChannels * region.depth;
@@ -1194,7 +1194,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemImageCopy(
               UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR);
 
     int ElementByteSize = 0;
-    UR_RETURN_ON_FAILURE(GetHipFormatPixelSize(SrcFormat, &ElementByteSize));
+    UR_RETURN_ON_FAILURE(imageElementByteSize(SrcFormat, &ElementByteSize));
 
     size_t DstByteOffsetX = dstOrigin.x * ElementByteSize * SrcNumChannels;
     size_t SrcByteOffsetX = srcOrigin.x * ElementByteSize * DstNumChannels;

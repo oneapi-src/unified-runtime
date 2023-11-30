@@ -13,7 +13,7 @@
 #include <ur/ur.hpp>
 
 /**
- * Call an UR API and, if the result is not UR_RESULT_SUCCESS, automatically
+ * Call a UR API and, if the result is not UR_RESULT_SUCCESS, automatically
  * return from the current function.
  */
 #define UR_RETURN_ON_FAILURE(urCall)                                           \

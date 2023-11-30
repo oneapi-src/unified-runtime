@@ -144,13 +144,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemRelease(ur_mem_handle_t hMem) {
     Result = UR_RESULT_ERROR_OUT_OF_RESOURCES;
   }
 
-  if (Result != UR_RESULT_SUCCESS) {
-    // A reported CUDA error is either an implementation or an asynchronous CUDA
-    // error for which it is unclear if the function that reported it succeeded
-    // or not. Either way, the state of the program is compromised and likely
-    // unrecoverable.
-    return UR_RESULT_ERROR_INVALID_OPERATION;
-  }
+  // A reported CUDA error is either an implementation or an asynchronous CUDA
+  // error for which it is unclear if the function that reported it succeeded
+  // or not. Either way, the state of the program is compromised and likely
+  // unrecoverable.
+  assert(Result != UR_RESULT_SUCCESS && "Unrecoverable program state reached in urMemRelease.");
 
   return UR_RESULT_SUCCESS;
 }
@@ -306,7 +304,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreate(
     PixelTypeSizeBytes = 4;
     break;
   default:
-    return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
+    return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
   }
 
   // When a dimension isn't used pImageDesc has the size set to 1
