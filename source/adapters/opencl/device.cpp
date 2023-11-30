@@ -81,7 +81,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGet(ur_platform_handle_t hPlatform,
     return UR_RESULT_ERROR_INVALID_ENUMERATION;
   }
 
-  cl_int Result = clGetDeviceIDs(cl_adapter::cast<cl_platform_id>(hPlatform),
+  cl_int Result = clGetDeviceIDs(hPlatform->get(),
                                  Type, cl_adapter::cast<cl_uint>(NumEntries),
                                  cl_adapter::cast<cl_device_id *>(phDevices),
                                  cl_adapter::cast<cl_uint *>(pNumDevices));

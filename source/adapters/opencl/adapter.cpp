@@ -22,10 +22,7 @@ urAdapterGet(uint32_t NumEntries, ur_adapter_handle_t *phAdapters,
              uint32_t *pNumAdapters) {
   if (NumEntries > 0 && phAdapters) {
     std::lock_guard<std::mutex> Lock{adapter.Mutex};
-    if (adapter.RefCount++ == 0) {
-      cl_ext::ExtFuncPtrCache = std::make_unique<cl_ext::ExtFuncPtrCacheT>();
-    }
-
+    adapter.RefCount++;
     *phAdapters = &adapter;
   }
 
@@ -43,9 +40,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urAdapterRetain(ur_adapter_handle_t) {
 
 UR_APIEXPORT ur_result_t UR_APICALL urAdapterRelease(ur_adapter_handle_t) {
   std::lock_guard<std::mutex> Lock{adapter.Mutex};
-  if (--adapter.RefCount == 0) {
-    cl_ext::ExtFuncPtrCache.reset();
-  }
+  --adapter.RefCount;
   return UR_RESULT_SUCCESS;
 }
 
