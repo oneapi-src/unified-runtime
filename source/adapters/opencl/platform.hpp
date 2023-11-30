@@ -145,21 +145,17 @@ struct ExtFuncPtrT {
   clDeviceMemAllocINTEL_fn clDeviceMemAllocINTELCache;
   clSharedMemAllocINTEL_fn clSharedMemAllocINTELCache;
   clGetDeviceFunctionPointer_fn clGetDeviceFunctionPointerCache;
-  clCreateBufferWithPropertiesINTEL_fn
-      clCreateBufferWithPropertiesINTELCache;
+  clCreateBufferWithPropertiesINTEL_fn clCreateBufferWithPropertiesINTELCache;
   clMemBlockingFreeINTEL_fn clMemBlockingFreeINTELCache;
-  clSetKernelArgMemPointerINTEL_fn
-      clSetKernelArgMemPointerINTELCache;
+  clSetKernelArgMemPointerINTEL_fn clSetKernelArgMemPointerINTELCache;
   clEnqueueMemFillINTEL_fn clEnqueueMemFillINTELCache;
   clEnqueueMemcpyINTEL_fn clEnqueueMemcpyINTELCache;
   clGetMemAllocInfoINTEL_fn clGetMemAllocInfoINTELCache;
-  clEnqueueWriteGlobalVariable_fn
-      clEnqueueWriteGlobalVariableCache;
+  clEnqueueWriteGlobalVariable_fn clEnqueueWriteGlobalVariableCache;
   clEnqueueReadGlobalVariable_fn clEnqueueReadGlobalVariableCache;
   clEnqueueReadHostPipeINTEL_fn clEnqueueReadHostPipeINTELCache;
   clEnqueueWriteHostPipeINTEL_fn clEnqueueWriteHostPipeINTELCache;
-  clSetProgramSpecializationConstant_fn
-      clSetProgramSpecializationConstantCache;
+  clSetProgramSpecializationConstant_fn clSetProgramSpecializationConstantCache;
   clCreateCommandBufferKHR_fn clCreateCommandBufferKHRCache;
   clRetainCommandBufferKHR_fn clRetainCommandBufferKHRCache;
   clReleaseCommandBufferKHR_fn clReleaseCommandBufferKHRCache;
@@ -170,36 +166,32 @@ struct ExtFuncPtrT {
   clCommandFillBufferKHR_fn clCommandFillBufferKHRCache;
   clEnqueueCommandBufferKHR_fn clEnqueueCommandBufferKHRCache;
 };
-}
+} // namespace cl_adapter
 
 struct ur_platform_handle_t_ {
-    using native_type = cl_platform_id;
-    native_type Platform;
-    std::unique_ptr<cl_adapter::ExtFuncPtrT> ExtFuncPtr;
+  using native_type = cl_platform_id;
+  native_type Platform;
+  std::unique_ptr<cl_adapter::ExtFuncPtrT> ExtFuncPtr;
 
-    ur_platform_handle_t_(native_type Plat):Platform(Plat) {
-        std::make_unique<cl_adapter::ExtFuncPtrT>();
+  ur_platform_handle_t_(native_type Plat) : Platform(Plat) {
+    std::make_unique<cl_adapter::ExtFuncPtrT>();
+  }
+
+  ~ur_platform_handle_t_() { ExtFuncPtr.reset(); }
+
+  template <typename T>
+  ur_result_t getExtFunc(T CachedExtFunc, const char *FuncName, T *Fptr) {
+    if (!CachedExtFunc) {
+      // TODO: check that the function is available
+      CachedExtFunc = reinterpret_cast<T>(
+          clGetExtensionFunctionAddressForPlatform(Platform, FuncName));
+      if (!CachedExtFunc) {
+        return UR_RESULT_ERROR_INVALID_VALUE;
+      }
     }
+    *Fptr = CachedExtFunc;
+    return UR_RESULT_SUCCESS;
+  }
 
-    ~ur_platform_handle_t_() {
-        ExtFuncPtr.reset();
-    }
-
-    ur_result_t getPlatformVersion(oclv::OpenCLVersion &Version);
-
-    template <typename T>
-    ur_result_t getExtFunc(T CachedExtFunc, const char *FuncName, T *Fptr) {
-        if (!CachedExtFunc) {
-            // TODO: check that the function is available
-            CachedExtFunc = reinterpret_cast<T>(
-                clGetExtensionFunctionAddressForPlatform(Platform, FuncName));
-            if (!CachedExtFunc) {
-                return UR_RESULT_ERROR_INVALID_VALUE;
-            }
-        }
-        *Fptr = CachedExtFunc;
-        return UR_RESULT_SUCCESS;
-    }
-
-    native_type get() { return Platform; }
+  native_type get() { return Platform; }
 };

@@ -8,6 +8,7 @@
 //
 //===----------------------------------------------------------------------===//
 #include "common.hpp"
+#include "device.hpp"
 
 #include <algorithm>
 #include <memory>
@@ -135,16 +136,15 @@ urKernelGetGroupInfo(ur_kernel_handle_t hKernel, ur_device_handle_t hDevice,
   // to deter naive use of the query.
   if (propName == UR_KERNEL_GROUP_INFO_GLOBAL_WORK_SIZE) {
     cl_device_type ClDeviceType;
-    CL_RETURN_ON_FAILURE(
-        clGetDeviceInfo(cl_adapter::cast<cl_device_id>(hDevice), CL_DEVICE_TYPE,
-                        sizeof(ClDeviceType), &ClDeviceType, nullptr));
+    CL_RETURN_ON_FAILURE(clGetDeviceInfo(hDevice->get(), CL_DEVICE_TYPE,
+                                         sizeof(ClDeviceType), &ClDeviceType,
+                                         nullptr));
     if (ClDeviceType != CL_DEVICE_TYPE_CUSTOM) {
       return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
     }
   }
   CL_RETURN_ON_FAILURE(clGetKernelWorkGroupInfo(
-      cl_adapter::cast<cl_kernel>(hKernel),
-      cl_adapter::cast<cl_device_id>(hDevice),
+      cl_adapter::cast<cl_kernel>(hKernel), hDevice->get(),
       mapURKernelGroupInfoToCL(propName), propSize, pPropValue, pPropSizeRet));
 
   return UR_RESULT_SUCCESS;
@@ -197,11 +197,10 @@ urKernelGetSubGroupInfo(ur_kernel_handle_t hKernel, ur_device_handle_t hDevice,
     InputValueSize = MaxDims * sizeof(size_t);
   }
 
-  cl_int Ret = clGetKernelSubGroupInfo(cl_adapter::cast<cl_kernel>(hKernel),
-                                       cl_adapter::cast<cl_device_id>(hDevice),
-                                       mapURKernelSubGroupInfoToCL(propName),
-                                       InputValueSize, InputValue.get(),
-                                       sizeof(size_t), &RetVal, pPropSizeRet);
+  cl_int Ret = clGetKernelSubGroupInfo(
+      cl_adapter::cast<cl_kernel>(hKernel), hDevice->get(),
+      mapURKernelSubGroupInfoToCL(propName), InputValueSize, InputValue.get(),
+      sizeof(size_t), &RetVal, pPropSizeRet);
 
   if (Ret == CL_INVALID_OPERATION) {
     // clGetKernelSubGroupInfo returns CL_INVALID_OPERATION if the device does
