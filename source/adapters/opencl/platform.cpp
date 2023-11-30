@@ -28,6 +28,23 @@ ur_result_t cl_adapter::getPlatformVersion(cl_platform_id Plat,
 
   return UR_RESULT_SUCCESS;
 }
+ur_result_t ur_platform_handle_t_::getPlatformVersion(oclv::OpenCLVersion &Version) {
+
+  size_t PlatVerSize = 0;
+  CL_RETURN_ON_FAILURE(
+      clGetPlatformInfo(Platform, CL_PLATFORM_VERSION, 0, nullptr, &PlatVerSize));
+
+  std::string PlatVer(PlatVerSize, '\0');
+  CL_RETURN_ON_FAILURE(clGetPlatformInfo(Platform, CL_PLATFORM_VERSION, PlatVerSize,
+                                         PlatVer.data(), nullptr));
+
+  Version = oclv::OpenCLVersion(PlatVer);
+  if (!Version.isValid()) {
+    return UR_RESULT_ERROR_INVALID_PLATFORM;
+  }
+
+  return UR_RESULT_SUCCESS;
+}
 
 static cl_int mapURPlatformInfoToCL(ur_platform_info_t URPropName) {
 
@@ -63,7 +80,7 @@ urPlatformGetInfo(ur_platform_handle_t hPlatform, ur_platform_info_t propName,
   case UR_PLATFORM_INFO_EXTENSIONS:
   case UR_PLATFORM_INFO_PROFILE: {
     CL_RETURN_ON_FAILURE(
-        clGetPlatformInfo(cl_adapter::cast<cl_platform_id>(hPlatform),
+        clGetPlatformInfo(hPlatform->get(),
                           CLPropName, propSize, pPropValue, pSizeRet));
     return UR_RESULT_SUCCESS;
   }
@@ -83,11 +100,11 @@ UR_APIEXPORT ur_result_t UR_APICALL
 urPlatformGet(ur_adapter_handle_t *, uint32_t, uint32_t NumEntries,
               ur_platform_handle_t *phPlatforms, uint32_t *pNumPlatforms) {
 
+  std::vector<cl_platform_id> CLPlatforms(NumEntries);
   cl_int Result =
       clGetPlatformIDs(cl_adapter::cast<cl_uint>(NumEntries),
-                       cl_adapter::cast<cl_platform_id *>(phPlatforms),
+                       CLPlatforms.data(),
                        cl_adapter::cast<cl_uint *>(pNumPlatforms));
-
   /* Absorb the CL_PLATFORM_NOT_FOUND_KHR and just return 0 in num_platforms */
   if (Result == CL_PLATFORM_NOT_FOUND_KHR) {
     Result = CL_SUCCESS;
@@ -95,20 +112,25 @@ urPlatformGet(ur_adapter_handle_t *, uint32_t, uint32_t NumEntries,
       *pNumPlatforms = 0;
     }
   }
-
+  if (NumEntries) {
+    for (uint32_t i = 0; i < NumEntries; i++) {
+      phPlatforms[i] = new ur_platform_handle_t_(CLPlatforms[i]);
+    }
+  }
   return mapCLErrorToUR(Result);
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urPlatformGetNativeHandle(
     ur_platform_handle_t hPlatform, ur_native_handle_t *phNativePlatform) {
-  *phNativePlatform = reinterpret_cast<ur_native_handle_t>(hPlatform);
+  *phNativePlatform = reinterpret_cast<ur_native_handle_t>(hPlatform->get());
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
     ur_native_handle_t hNativePlatform, const ur_platform_native_properties_t *,
     ur_platform_handle_t *phPlatform) {
-  *phPlatform = reinterpret_cast<ur_platform_handle_t>(hNativePlatform);
+  cl_platform_id NativeHandle = reinterpret_cast<cl_platform_id>(hNativePlatform);
+  *phPlatform = new ur_platform_handle_t_(NativeHandle);
   return UR_RESULT_SUCCESS;
 }
 
