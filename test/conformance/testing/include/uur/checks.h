@@ -9,6 +9,7 @@
 #include <gtest/gtest.h>
 #include <ur_api.h>
 #include <ur_print.hpp>
+#include <ur_util.hpp>
 #include <uur/utils.h>
 
 namespace uur {
@@ -20,6 +21,26 @@ struct Result {
         return value == rhs.value;
     }
 
+    inline Result &filter_warnings() {
+        if (this->value == UR_RESULT_ERROR_ADAPTER_SPECIFIC) {
+            const char *message;
+            int32_t last_error;
+            EXPECT_EQ(UR_RESULT_SUCCESS,
+                      urAdapterGetLastError(
+                          uur::PlatformEnvironment::instance->adapter, &message,
+                          &last_error));
+
+            if (static_cast<ur_result_t>(last_error) == UR_RESULT_SUCCESS) {
+                this->value = UR_RESULT_SUCCESS;
+                auto print_warning = ur_getenv("UR_CTS_PRINT_ADAPTER_WARNINGS");
+                if (print_warning.has_value()) {
+                    std::cerr << message << "\n";
+                }
+            }
+        }
+        return *this;
+    }
+
     ur_result_t value;
 };
 
@@ -27,12 +48,11 @@ inline std::ostream &operator<<(std::ostream &out, const Result &result) {
     out << result.value;
     return out;
 }
-
 } // namespace uur
 
 #ifndef ASSERT_EQ_RESULT
 #define ASSERT_EQ_RESULT(EXPECTED, ACTUAL)                                     \
-    ASSERT_EQ(uur::Result(EXPECTED), uur::Result(ACTUAL))
+    ASSERT_EQ(uur::Result(EXPECTED), uur::Result(ACTUAL).filter_warnings())
 #endif
 #ifndef ASSERT_SUCCESS
 #define ASSERT_SUCCESS(ACTUAL) ASSERT_EQ_RESULT(UR_RESULT_SUCCESS, ACTUAL)
@@ -40,7 +60,7 @@ inline std::ostream &operator<<(std::ostream &out, const Result &result) {
 
 #ifndef EXPECT_EQ_RESULT
 #define EXPECT_EQ_RESULT(EXPECTED, ACTUAL)                                     \
-    EXPECT_EQ(uur::Result(EXPECTED), uur::Result(ACTUAL))
+    EXPECT_EQ(uur::Result(EXPECTED), uur::Result(ACTUAL).filter_warnings())
 #endif
 #ifndef EXPECT_SUCCESS
 #define EXPECT_SUCCESS(ACTUAL) EXPECT_EQ_RESULT(UR_RESULT_SUCCESS, ACTUAL)

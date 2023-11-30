@@ -78,30 +78,43 @@ uur::PlatformEnvironment::PlatformEnvironment(int argc, char **argv)
 
     uint32_t adapter_count = 0;
     urAdapterGet(0, nullptr, &adapter_count);
-    adapters.resize(adapter_count);
+
+    std::vector<ur_adapter_handle_t> adapters(adapter_count);
     urAdapterGet(adapter_count, adapters.data(), nullptr);
 
-    uint32_t count = 0;
-    if (urPlatformGet(adapters.data(), adapter_count, 0, nullptr, &count)) {
-        error = "urPlatformGet() failed to get number of platforms.";
-        return;
+    std::vector<ur_platform_handle_t> platforms{};
+    std::unordered_map<ur_platform_handle_t, ur_adapter_handle_t>
+        map_platform_to_adapter{};
+
+    for (auto &a : adapters) {
+        uint32_t num_platforms = 0;
+        if (urPlatformGet(&a, 1, 0, nullptr, &num_platforms)) {
+            error = "urPlatformGet() failed to get number of platforms.";
+            return;
+        }
+
+        std::vector<ur_platform_handle_t> adapter_platforms(num_platforms);
+
+        if (urPlatformGet(&a, 1, num_platforms, adapter_platforms.data(),
+                          nullptr)) {
+            error = "urPlatformGet failed to get platforms.";
+            return;
+        }
+
+        for (auto &p : adapter_platforms) {
+            map_platform_to_adapter.insert({p, a});
+        }
+
+        platforms.insert(platforms.end(), adapter_platforms.begin(),
+                         adapter_platforms.end());
     }
 
-    if (count == 0) {
-        error = "Failed to find any platforms.";
-        return;
-    }
-
-    std::vector<ur_platform_handle_t> platforms(count);
-    if (urPlatformGet(adapters.data(), adapter_count, count, platforms.data(),
-                      nullptr)) {
-        error = "urPlatformGet failed to get platforms.";
-        return;
-    }
+    assert(map_platform_to_adapter.size() == platforms.size());
 
     if (platform_options.platform_name.empty()) {
         if (platforms.size() == 1) {
             platform = platforms[0];
+            adapter = map_platform_to_adapter.at(platform);
         } else {
             std::stringstream ss_error;
             ss_error << "Select a single platform from below using the "
@@ -127,6 +140,7 @@ uur::PlatformEnvironment::PlatformEnvironment(int argc, char **argv)
             }
             if (platform_options.platform_name == platform_name.data()) {
                 platform = candidate;
+                adapter = map_platform_to_adapter.at(platform);
                 break;
             }
         }
@@ -138,6 +152,14 @@ uur::PlatformEnvironment::PlatformEnvironment(int argc, char **argv)
                         "--platform=NAME command-line options:"
                      << platforms;
             error = ss_error.str();
+            return;
+        }
+    }
+
+    /* Release unused adapters */
+    for (auto &a : adapters) {
+        if (a != this->adapter && urAdapterRelease(adapter)) {
+            error = "urAdapterRelease failed";
             return;
         }
     }
@@ -157,8 +179,8 @@ void uur::PlatformEnvironment::TearDown() {
     if (error == ERROR_NO_ADAPTER) {
         return;
     }
-    for (auto adapter : adapters) {
-        urAdapterRelease(adapter);
+    if (urAdapterRelease(adapter)) {
+        FAIL() << "urAdapterRelease failed";
     }
     if (urLoaderTearDown()) {
         FAIL() << "urLoaderTearDown() failed";

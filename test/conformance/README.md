@@ -9,3 +9,9 @@ this solution will no longer be necessary.
 When you fix any test, the match file must be updated
 Empty match files indicate that there are no failing tests
 in a particular group for the corresponding adapter.
+
+## Adapter Warnings
+
+By default, conformance tests ignore all warning messages returned by 
+UR adapters. The environment variable `UR_CTS_PRINT_ADAPTER_WARNINGS`
+can be set to print all warnings to stderr when running the tests.
