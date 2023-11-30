@@ -594,9 +594,7 @@ ur_result_t ur_event_handle_t_::getOrCreateHostVisibleEvent(
                                                           this->Mutex);
 
   if (!HostVisibleEvent) {
-    if (UrQueue->ZeEventsScope != OnDemandHostVisibleProxy) {
-      return UR_RESULT_ERROR_INVALID_EVENT;
-    }
+    assert(UrQueue->ZeEventsScope != OnDemandHostVisibleProxy && "getOrCreateHostVisibleEvent: missing host-visible event");
 
     // Submit the command(s) signalling the proxy event to the queue.
     // We have to first submit a wait for the device-only event for which this
@@ -644,9 +642,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventWait(
       //
       ur_event_handle_t_ *Event =
           ur_cast<ur_event_handle_t_ *>(EventWaitList[I]);
-      if (!Event->hasExternalRefs()) {
-        return UR_RESULT_ERROR_INVALID_OPERATION;
-      }
+      assert(!Event->hasExternalRefs() && "urEventsWait must not be called for an internal event");
 
       ze_event_handle_t ZeHostVisibleEvent;
       if (auto Res = Event->getOrCreateHostVisibleEvent(ZeHostVisibleEvent))
@@ -671,15 +667,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventWait(
           ur_cast<ur_event_handle_t_ *>(EventWaitList[I]);
       {
         std::shared_lock<ur_shared_mutex> EventLock(Event->Mutex);
-        if (!Event->hasExternalRefs()) {
-          return UR_RESULT_ERROR_INVALID_OPERATION;
-        }
+        assert(!Event->hasExternalRefs() && "urEventWait must not be called for an internal event");
 
         if (!Event->Completed) {
           auto HostVisibleEvent = Event->HostVisibleEvent;
-          if (!HostVisibleEvent) {
-            return UR_RESULT_ERROR_INVALID_EVENT;
-          }
+          assert(!HostVisibleEvent && "The host-visible proxy event missing");
 
           ze_event_handle_t ZeEvent = HostVisibleEvent->ZeEvent;
           urPrint("ZeEvent = %#llx\n", ur_cast<std::uintptr_t>(ZeEvent));

@@ -792,7 +792,7 @@ static const zeCommandListBatchConfig ZeCommandListBatchConfig(bool IsCopy) {
           Config.NumTimesClosedFullThreshold = Val;
           break;
         default:
-          urPrint("Unexpected batch config");
+          assert(!"Unexpected batch config");
         }
         if (IsCopy)
           urPrint("UR_L0_COPY_BATCH_SIZE: dynamic batch param "
@@ -910,7 +910,7 @@ ur_queue_handle_t_::ur_queue_handle_t_(
       ComputeQueueGroup.UpperIndex = FilterUpperIndex;
       ComputeQueueGroup.NextIndex = ComputeQueueGroup.LowerIndex;
     } else {
-      urPrint("No compute queue available/allowed.");
+      assert(!"No compute queue available/allowed.");
     }
   }
   if (UsingImmCmdLists) {
@@ -1065,9 +1065,9 @@ ur_queue_handle_t_::executeCommandList(ur_command_list_ptr_t CommandList,
     if (OKToBatchCommand && this->isBatchingAllowed(UseCopyEngine) &&
         (!ZeCommandListBatchConfig.dynamic() || !CurrentlyEmpty)) {
 
-      if (hasOpenCommandList(UseCopyEngine) &&
-          CommandBatch.OpenCommandList != CommandList)
-        return UR_RESULT_ERROR_INVALID_ARGUMENT;
+      assert((hasOpenCommandList(UseCopyEngine) &&
+          CommandBatch.OpenCommandList != CommandList) && "executeCommandList: OpenCommandList should be equal to"
+            "null or CommandList");
 
       if (CommandList->second.size() < CommandBatch.QueueBatchSize) {
         CommandBatch.OpenCommandList = CommandList;
@@ -1829,7 +1829,7 @@ ur_queue_handle_t_::ur_queue_group_t::getZeQueue(uint32_t *QueueGroupOrdinal) {
       zeCommandQueueCreate, (Queue->Context->ZeContext, Queue->Device->ZeDevice,
                              &ZeCommandQueueDesc, &ZeQueue));
   if (ZeResult) {
-    urPrint("[L0] getZeQueue: failed to create queue");
+    assert(!"[L0] getZeQueue: failed to create queue");
   }
 
   return ZeQueue;

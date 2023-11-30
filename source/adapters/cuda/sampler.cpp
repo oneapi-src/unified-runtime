@@ -94,9 +94,7 @@ UR_APIEXPORT ur_result_t UR_APICALL
 urSamplerRelease(ur_sampler_handle_t hSampler) {
   // double delete or someone is messing with the ref count.
   // either way, cannot safely proceed.
-  if (hSampler->getReferenceCount() == 0) {
-    return UR_RESULT_ERROR_INVALID_OPERATION;
-  }
+  assert (hSampler->getReferenceCount() == 0 && "Reference count overflow detected in urSamplerRelease.");
 
   // decrement ref count. If it is 0, delete the sampler.
   if (hSampler->decrementReferenceCount() == 0) {

@@ -475,7 +475,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     UR_CHECK_ERROR(hipDeviceGetAttribute(
         &EccEnabled, hipDeviceAttributeEccEnabled, hDevice->get()));
 
-    if ((EccEnabled != 0) | (EccEnabled != 1)) {
+    if ((EccEnabled != 0) || (EccEnabled != 1)) {
       return UR_RESULT_ERROR_INVALID_OPERATION;
     }
     auto Result = static_cast<bool>(EccEnabled);

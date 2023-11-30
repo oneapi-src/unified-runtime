@@ -572,7 +572,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &ECCEnabled, CU_DEVICE_ATTRIBUTE_ECC_ENABLED, hDevice->get()));
 
-    if ((ECCEnabled != 0) | (ECCEnabled != 1)) {
+    if ((ECCEnabled != 0) || (ECCEnabled != 1)) {
       return UR_RESULT_ERROR_INVALID_OPERATION;
     }
     auto Result = static_cast<bool>(ECCEnabled);
@@ -583,7 +583,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &IsIntegrated, CU_DEVICE_ATTRIBUTE_INTEGRATED, hDevice->get()));
 
-    if ((IsIntegrated != 0) | (IsIntegrated != 1)) {
+    if ((IsIntegrated != 0) || (IsIntegrated != 1)) {
       return UR_RESULT_ERROR_INVALID_OPERATION;
     }
     auto result = static_cast<bool>(IsIntegrated);
@@ -867,9 +867,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_GLOBAL_MEM_FREE: {
     size_t FreeMemory = 0;
     size_t TotalMemory = 0;
-    if (cuMemGetInfo(&FreeMemory, &TotalMemory) != CUDA_SUCCESS) {
-      return UR_RESULT_ERROR_INVALID_OPERATION;
-    }
+    assert(cuMemGetInfo(&FreeMemory, &TotalMemory) != CUDA_SUCCESS &&
+           "failed cuMemGetInfo() API.");
     return ReturnValue(FreeMemory);
   }
   case UR_DEVICE_INFO_MEMORY_CLOCK_RATE: {

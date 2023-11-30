@@ -71,7 +71,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemRelease(ur_mem_handle_t hMem) {
     // error for which it is unclear if the function that reported it succeeded
     // or not. Either way, the state of the program is compromised and likely
     // unrecoverable.
-    return UR_RESULT_ERROR_INVALID_OPERATION;
+    assert(!"Unrecoverable program state reached in urMemRelease");
   }
 
   return UR_RESULT_SUCCESS;
@@ -245,11 +245,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemGetInfo(ur_mem_handle_t hMemory,
           throw UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 #else
           HIP_ARRAY3D_DESCRIPTOR ArrayDescriptor;
-          UR_CHECK_ERROR(
-              hipArray3DGetDescriptor(&ArrayDescriptor, Mem.getArray(Device)));
-          const auto PixelSizeBytes =
-              imageElementByteSize(ArrayDescriptor.Format) *
-              ArrayDescriptor.NumChannels;
+          UR_CHECK_ERROR(hipArray3DGetDescriptor(&ArrayDescriptor, Mem.Array));
+          int PixelSize = 0;
+          UR_RETURN_ON_FAILURE(
+              imageElementByteSize(ArrayDescriptor.Format, &PixelSize));
+          const auto PixelSizeBytes = PixelSize * ArrayDescriptor.NumChannels;
           const auto ImageSizeBytes =
               PixelSizeBytes *
               (ArrayDescriptor.Width ? ArrayDescriptor.Width : 1) *

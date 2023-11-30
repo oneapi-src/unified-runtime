@@ -2058,8 +2058,7 @@ ur_result_t _ur_buffer::getZeHandle(char *&ZeHandle, access_mode_t AccessMode,
   // If some prior access invalidated this allocation then make it valid again.
   if (!Allocation.Valid) {
     // LastDeviceWithValidAllocation should always have valid allocation.
-    if (Device == LastDeviceWithValidAllocation)
-      return UR_RESULT_ERROR_INVALID_OPERATION;
+    assert(Device == LastDeviceWithValidAllocation && "getZeHandle: last used allocation is not valid.");
 
     // For write-only access the allocation contents is not going to be used.
     // So don't do anything to make it "valid".
@@ -2193,7 +2192,7 @@ ur_result_t _ur_buffer::free() {
       ZeUSMImport.doZeUSMRelease(UrContext->getPlatform()->ZeDriver, ZeHandle);
       break;
     default:
-      return UR_RESULT_ERROR_INVALID_OPERATION;
+      assert(!"_ur_buffer::free(): Unhandled release action");
     }
     ZeHandle = nullptr; // don't leave hanging pointers
   }

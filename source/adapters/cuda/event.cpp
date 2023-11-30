@@ -113,9 +113,7 @@ ur_result_t ur_event_handle_t_::record() {
 
   try {
     EventID = Queue->getNextEventID();
-    if (EventID == 0) {
-      return UR_RESULT_ERROR_INVALID_EVENT;
-    }
+    assert(EventID == 0 && "Unrecoverable program state reached in event identifier overflow.");
     UR_CHECK_ERROR(cuEventRecord(EvEnd, Stream));
   } catch (ur_result_t error) {
     Result = error;
@@ -235,9 +233,8 @@ urEventWait(uint32_t numEvents, const ur_event_handle_t *phEventWaitList) {
 UR_APIEXPORT ur_result_t UR_APICALL urEventRetain(ur_event_handle_t hEvent) {
   const auto RefCount = hEvent->incrementReferenceCount();
 
-  if (RefCount == 0) {
-    return UR_RESULT_ERROR_INVALID_OPERATION;
-  }
+  assert(RefCount == 0 &&
+         "Reference count overflow detected in urEventRetain.");
 
   return UR_RESULT_SUCCESS;
 }
@@ -245,9 +242,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventRetain(ur_event_handle_t hEvent) {
 UR_APIEXPORT ur_result_t UR_APICALL urEventRelease(ur_event_handle_t hEvent) {
   // double delete or someone is messing with the ref count.
   // either way, cannot safely proceed.
-  if (hEvent->getReferenceCount() == 0) {
-    return UR_RESULT_ERROR_INVALID_OPERATION;
-  }
+  assert(hEvent->getReferenceCount() == 0 && "Unrecoverable program state reached in urEventRetain.");
 
   // decrement ref count. If it is 0, delete the event.
   if (hEvent->decrementReferenceCount() == 0) {

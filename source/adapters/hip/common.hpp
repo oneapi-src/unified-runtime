@@ -20,7 +20,7 @@
 #include <ur/ur.hpp>
 
 /**
- * Call an UR API and, if the result is not UR_RESULT_SUCCESS, automatically
+ * Call a UR API and, if the result is not UR_RESULT_SUCCESS, automatically
  * return from the current function.
  */
 #define UR_RETURN_ON_FAILURE(urCall)                                           \
@@ -189,8 +189,8 @@ public:
         // HIP error for which it is unclear if the function that reported it
         // succeeded or not. Either way, the state of the program is compromised
         // and likely unrecoverable.
-        detail::ur::hipPrint(
-            "Unrecoverable program state reached in piMemRelease");
+        assert(
+            !"Unrecoverable program state reached in piMemRelease");
       }
     }
   }
@@ -208,4 +208,4 @@ public:
   void dismiss() { Captive = nullptr; }
 };
 
-ur_result_t GetHipFormatPixelSize(hipArray_Format Format, int *Size);
+ur_result_t imageElementByteSize(hipArray_Format Format, int *Size);
