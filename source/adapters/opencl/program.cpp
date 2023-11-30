@@ -120,7 +120,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
     const uint8_t *pBinary, const ur_program_properties_t *,
     ur_program_handle_t *phProgram) {
 
-  const cl_device_id Devices[1] = {cl_adapter::cast<cl_device_id>(hDevice)};
+  const cl_device_id Devices[1] = {hDevice->get()};
   const size_t Lengths[1] = {size};
   cl_int BinaryStatus[1];
   cl_int CLResult;
@@ -287,17 +287,16 @@ urProgramGetBuildInfo(ur_program_handle_t hProgram, ur_device_handle_t hDevice,
     UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
     cl_program_binary_type BinaryType;
     CL_RETURN_ON_FAILURE(clGetProgramBuildInfo(
-        cl_adapter::cast<cl_program>(hProgram),
-        cl_adapter::cast<cl_device_id>(hDevice),
+        cl_adapter::cast<cl_program>(hProgram), hDevice->get(),
         mapURProgramBuildInfoToCL(propName), sizeof(cl_program_binary_type),
         &BinaryType, nullptr));
     return ReturnValue(mapCLBinaryTypeToUR(BinaryType));
   }
   size_t CheckPropSize = 0;
-  cl_int ClErr = clGetProgramBuildInfo(cl_adapter::cast<cl_program>(hProgram),
-                                       cl_adapter::cast<cl_device_id>(hDevice),
-                                       mapURProgramBuildInfoToCL(propName),
-                                       propSize, pPropValue, &CheckPropSize);
+  cl_int ClErr =
+      clGetProgramBuildInfo(cl_adapter::cast<cl_program>(hProgram),
+                            hDevice->get(), mapURProgramBuildInfoToCL(propName),
+                            propSize, pPropValue, &CheckPropSize);
   if (pPropValue && CheckPropSize != propSize) {
     return UR_RESULT_ERROR_INVALID_SIZE;
   }
@@ -480,9 +479,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramGetFunctionPointer(
   }
 
   const cl_int CLResult =
-      FuncT(cl_adapter::cast<cl_device_id>(hDevice),
-            cl_adapter::cast<cl_program>(hProgram), pFunctionName,
-            reinterpret_cast<cl_ulong *>(ppFunctionPointer));
+      FuncT(hDevice->get(), cl_adapter::cast<cl_program>(hProgram),
+            pFunctionName, reinterpret_cast<cl_ulong *>(ppFunctionPointer));
   // GPU runtime sometimes returns CL_INVALID_ARG_VALUE if the function address
   // cannot be found but the kernel exists. As the kernel does exist, return
   // that the function name is invalid.

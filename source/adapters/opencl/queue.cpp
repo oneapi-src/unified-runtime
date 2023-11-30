@@ -7,6 +7,7 @@
 //===-----------------------------------------------------------------===//
 
 #include "common.hpp"
+#include "device.hpp"
 #include "platform.hpp"
 
 cl_command_queue_info mapURQueueInfoToCL(const ur_queue_info_t PropName) {
@@ -73,9 +74,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreate(
 
   cl_platform_id CurPlatform;
   CL_RETURN_ON_FAILURE_AND_SET_NULL(
-      clGetDeviceInfo(cl_adapter::cast<cl_device_id>(hDevice),
-                      CL_DEVICE_PLATFORM, sizeof(cl_platform_id), &CurPlatform,
-                      nullptr),
+      clGetDeviceInfo(hDevice->get(), CL_DEVICE_PLATFORM,
+                      sizeof(cl_platform_id), &CurPlatform, nullptr),
       phQueue);
 
   cl_command_queue_properties CLProperties =
@@ -93,10 +93,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreate(
   cl_int RetErr = CL_INVALID_OPERATION;
 
   if (Version < oclv::V2_0) {
-    *phQueue = cl_adapter::cast<ur_queue_handle_t>(
-        clCreateCommandQueue(cl_adapter::cast<cl_context>(hContext),
-                             cl_adapter::cast<cl_device_id>(hDevice),
-                             CLProperties & SupportByOpenCL, &RetErr));
+    *phQueue = cl_adapter::cast<ur_queue_handle_t>(clCreateCommandQueue(
+        cl_adapter::cast<cl_context>(hContext), hDevice->get(),
+        CLProperties & SupportByOpenCL, &RetErr));
     CL_RETURN_ON_FAILURE(RetErr);
     return UR_RESULT_SUCCESS;
   }
@@ -106,9 +105,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreate(
       CL_QUEUE_PROPERTIES, CLProperties & SupportByOpenCL, 0};
   *phQueue =
       cl_adapter::cast<ur_queue_handle_t>(clCreateCommandQueueWithProperties(
-          cl_adapter::cast<cl_context>(hContext),
-          cl_adapter::cast<cl_device_id>(hDevice), CreationFlagProperties,
-          &RetErr));
+          cl_adapter::cast<cl_context>(hContext), hDevice->get(),
+          CreationFlagProperties, &RetErr));
   CL_RETURN_ON_FAILURE(RetErr);
   return UR_RESULT_SUCCESS;
 }

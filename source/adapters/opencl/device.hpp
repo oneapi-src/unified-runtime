@@ -18,3 +18,16 @@ ur_result_t checkDeviceExtensions(cl_device_id Dev,
                                   const std::vector<std::string> &Exts,
                                   bool &Supported);
 } // namespace cl_adapter
+
+struct ur_device_handle_t_ {
+  using native_type = cl_device_id;
+  native_type Device;
+  ur_platform_handle_t Platform;
+
+  ur_device_handle_t_(native_type Dev, ur_platform_handle_t Plat)
+      : Device(Dev), Platform(Plat) {}
+
+  ~ur_device_handle_t_() {}
+
+  native_type get() { return Device; }
+};
