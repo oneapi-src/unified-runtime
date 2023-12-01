@@ -396,6 +396,8 @@ etors:
       desc: "[$x_bool_t] return true if the device supports virtual memory."
     - name: ESIMD_SUPPORT
       desc: "[$x_bool_t] return true if the device supports ESIMD."
+    - name: GLOBAL_VARIABLE_SUPPORT
+      desc: "[$x_bool_t] return true if the device supports the `EnqueueDeviceGlobalVariableWrite` and `EnqueueDeviceGlobalVariableRead` entry points."
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Retrieves various information about device"

@@ -1530,6 +1530,9 @@ typedef enum ur_device_info_t {
                                                                     ///< version than older devices.
     UR_DEVICE_INFO_VIRTUAL_MEMORY_SUPPORT = 114,                    ///< [::ur_bool_t] return true if the device supports virtual memory.
     UR_DEVICE_INFO_ESIMD_SUPPORT = 115,                             ///< [::ur_bool_t] return true if the device supports ESIMD.
+    UR_DEVICE_INFO_GLOBAL_VARIABLE_SUPPORT = 116,                   ///< [::ur_bool_t] return true if the device supports the
+                                                                    ///< `EnqueueDeviceGlobalVariableWrite` and
+                                                                    ///< `EnqueueDeviceGlobalVariableRead` entry points.
     UR_DEVICE_INFO_BINDLESS_IMAGES_SUPPORT_EXP = 0x2000,            ///< [::ur_bool_t] returns true if the device supports the creation of
                                                                     ///< bindless images
     UR_DEVICE_INFO_BINDLESS_IMAGES_SHARED_USM_SUPPORT_EXP = 0x2001, ///< [::ur_bool_t] returns true if the device supports the creation of

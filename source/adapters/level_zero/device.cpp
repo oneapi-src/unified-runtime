@@ -823,6 +823,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
     return ReturnValue(result);
   }
 
+  case UR_DEVICE_INFO_GLOBAL_VARIABLE_SUPPORT:
+    return ReturnValue(true);
+
   default:
     urPrint("Unsupported ParamName in urGetDeviceInfo\n");
     urPrint("ParamName=%d(0x%x)\n", ParamName, ParamName);

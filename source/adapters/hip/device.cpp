@@ -823,7 +823,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     return ReturnValue(false);
   case UR_DEVICE_INFO_ESIMD_SUPPORT:
     return ReturnValue(false);
-
+  case UR_DEVICE_INFO_GLOBAL_VARIABLE_SUPPORT:
+    return ReturnValue(false);
   // TODO: Investigate if this information is available on HIP.
   case UR_DEVICE_INFO_GPU_EU_COUNT:
   case UR_DEVICE_INFO_GPU_EU_SIMD_WIDTH:

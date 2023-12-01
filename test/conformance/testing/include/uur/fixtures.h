@@ -1271,6 +1271,13 @@ struct urGlobalVariableTest : uur::urKernelExecutionTest {
         program_name = "device_global";
         global_var = {"_Z7dev_var", 0};
         UUR_RETURN_ON_FATAL_FAILURE(uur::urKernelExecutionTest::SetUp());
+        bool global_var_support = false;
+        ASSERT_SUCCESS(urDeviceGetInfo(
+            device, UR_DEVICE_INFO_GLOBAL_VARIABLE_SUPPORT,
+            sizeof(global_var_support), &global_var_support, nullptr));
+        if (!global_var_support) {
+            GTEST_SKIP() << "Global variable access is not supported";
+        }
     }
 
     GlobalVar<int> global_var;
