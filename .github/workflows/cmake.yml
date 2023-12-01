@@ -171,6 +171,10 @@ jobs:
         build_type: [Debug, Release]
         compiler: [{c: gcc, cxx: g++}, {c: clang, cxx: clang++}]
 
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}-${{matrix.adapter.name}}
+      cancel-in-progress: true
+
     runs-on: ${{matrix.adapter.name}}
 
     steps:
