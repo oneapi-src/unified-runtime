@@ -1534,6 +1534,9 @@ typedef enum ur_device_info_t {
                                                                     ///< this composite device.
     UR_DEVICE_INFO_COMPOSITE_DEVICE = 117,                          ///< [::ur_device_handle_t] The composite device containing this component
                                                                     ///< device.
+    UR_DEVICE_INFO_GLOBAL_VARIABLE_SUPPORT = 118,                   ///< [::ur_bool_t] return true if the device supports the
+                                                                    ///< `EnqueueDeviceGlobalVariableWrite` and
+                                                                    ///< `EnqueueDeviceGlobalVariableRead` entry points.
     UR_DEVICE_INFO_BINDLESS_IMAGES_SUPPORT_EXP = 0x2000,            ///< [::ur_bool_t] returns true if the device supports the creation of
                                                                     ///< bindless images
     UR_DEVICE_INFO_BINDLESS_IMAGES_SHARED_USM_SUPPORT_EXP = 0x2001, ///< [::ur_bool_t] returns true if the device supports the creation of
