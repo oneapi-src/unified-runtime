@@ -2,10 +2,6 @@ name: Build and test
 
 on: [push, pull_request]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
-
 jobs:
   ubuntu-build:
     name: Build - Ubuntu
@@ -32,6 +28,10 @@ jobs:
           - os: 'ubuntu-20.04'
             build_type: Release
             compiler: {c: gcc-7, cxx: g++-7}
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+      cancel-in-progress: true
 
     runs-on: ${{matrix.os}}
 
@@ -118,6 +118,10 @@ jobs:
       matrix:
         build_type: [Debug, Release]
         compiler: [{c: clang, cxx: clang++}]
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+      cancel-in-progress: true
 
     runs-on: 'ubuntu-22.04'
 
@@ -241,6 +245,10 @@ jobs:
         build_type: [Debug, Release]
         compiler: [{c: gcc, cxx: g++}, {c: clang, cxx: clang++}]
 
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+      cancel-in-progress: true
+
     runs-on: ${{matrix.adapter.name}}
 
     steps:
@@ -307,6 +315,11 @@ jobs:
         include:
           - compiler: {c: clang-cl, cxx: clang-cl}
             toolset: "-T ClangCL"
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+      cancel-in-progress: true
+
     runs-on: ${{matrix.os}}
 
     steps:
@@ -359,6 +372,10 @@ jobs:
         matrix:
           os: ['macos-12', 'macos-13']
     runs-on: ${{matrix.os}}
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+      cancel-in-progress: true
 
     steps:
     - uses: actions/checkout@v3
