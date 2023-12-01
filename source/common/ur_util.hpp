@@ -22,6 +22,7 @@
 #include <vector>
 
 #ifdef _WIN32
+#define NOMINMAX
 #include <windows.h>
 inline int ur_getpid(void) { return static_cast<int>(GetCurrentProcessId()); }
 #else
