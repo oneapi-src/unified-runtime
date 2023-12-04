@@ -33,3 +33,4 @@
 {{OPT}}urEnqueueUSMMemcpy2DNegativeTest.InvalidSize/Intel_R__OpenCL___{{.*}}_
 {{OPT}}urEnqueueUSMMemcpy2DNegativeTest.InvalidEventWaitList/Intel_R__OpenCL___{{.*}}_
 {{OPT}}urEnqueueUSMPrefetchTest.InvalidSizeTooLarge/Intel_R__OpenCL___{{.*}}_
+{{OPT}}Segmentation Fault
