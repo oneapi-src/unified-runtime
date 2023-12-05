@@ -63,7 +63,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWait(
 
     _ur_ze_event_list_t TmpWaitList = {};
     UR_CALL(TmpWaitList.createAndRetainUrZeEventList(
-        NumEventsInWaitList, EventWaitList, Queue, UseCopyEngine));
+        NumEventsInWaitList, EventWaitList, Queue, UseCopyEngine, nullptr));
 
     // Get a new command list to be used on this call
     ur_command_list_ptr_t CommandList{};
@@ -235,7 +235,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
     // Retain the events as they will be owned by the result event.
     _ur_ze_event_list_t TmpWaitList;
     UR_CALL(TmpWaitList.createAndRetainUrZeEventList(
-        NumEventsInWaitList, EventWaitList, Queue, false /*UseCopyEngine=*/));
+        NumEventsInWaitList, EventWaitList, Queue, false /*UseCopyEngine=*/,
+        nullptr));
 
     // Get an arbitrary command-list in the queue.
     ur_command_list_ptr_t CmdList;
@@ -333,7 +334,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
     UR_CALL(BaseWaitList.createAndRetainUrZeEventList(
         EventWaitVector.size(),
         reinterpret_cast<const ur_event_handle_t *>(EventWaitVector.data()),
-        Queue, ConvergenceCmdList->second.isCopy(Queue)));
+        Queue, ConvergenceCmdList->second.isCopy(Queue), nullptr));
 
     // Insert a barrier with the events from each command-queue into the
     // convergence command list. The resulting event signals the convergence of
@@ -1033,13 +1034,16 @@ ur_result_t ur_event_handle_t_::reset() {
   if (!isHostVisible())
     HostVisibleEvent = nullptr;
 
-  ZE2UR_CALL(zeEventHostReset, (ZeEvent));
+  if (ZeEvent) {
+    ZE2UR_CALL(zeEventHostReset, (ZeEvent));
+  }
   return UR_RESULT_SUCCESS;
 }
 
 ur_result_t _ur_ze_event_list_t::createAndRetainUrZeEventList(
     uint32_t EventListLength, const ur_event_handle_t *EventList,
-    ur_queue_handle_t CurQueue, bool UseCopyEngine) {
+    ur_queue_handle_t CurQueue, bool UseCopyEngine,
+    bool *LastCommandEventIncluded) {
   this->Length = 0;
   this->ZeEventList = nullptr;
   this->UrEventList = nullptr;
@@ -1099,6 +1103,9 @@ ur_result_t _ur_ze_event_list_t::createAndRetainUrZeEventList(
     if (IncludeLastCommandEvent) {
       this->ZeEventList = new ze_event_handle_t[EventListLength + 1];
       this->UrEventList = new ur_event_handle_t[EventListLength + 1];
+      if (LastCommandEventIncluded) {
+        *LastCommandEventIncluded = true;
+      }
       std::shared_lock<ur_shared_mutex> Lock(CurQueue->LastCommandEvent->Mutex);
       this->ZeEventList[0] = CurQueue->LastCommandEvent->ZeEvent;
       this->UrEventList[0] = CurQueue->LastCommandEvent;
