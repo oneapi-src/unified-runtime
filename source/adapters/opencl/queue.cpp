@@ -9,6 +9,7 @@
 #include "common.hpp"
 #include "device.hpp"
 #include "platform.hpp"
+#include "context.hpp"
 
 cl_command_queue_info mapURQueueInfoToCL(const ur_queue_info_t PropName) {
 
@@ -94,7 +95,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreate(
 
   if (Version < oclv::V2_0) {
     *phQueue = cl_adapter::cast<ur_queue_handle_t>(clCreateCommandQueue(
-        cl_adapter::cast<cl_context>(hContext), hDevice->get(),
+        hContext->get(), hDevice->get(),
         CLProperties & SupportByOpenCL, &RetErr));
     CL_RETURN_ON_FAILURE(RetErr);
     return UR_RESULT_SUCCESS;
@@ -105,7 +106,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreate(
       CL_QUEUE_PROPERTIES, CLProperties & SupportByOpenCL, 0};
   *phQueue =
       cl_adapter::cast<ur_queue_handle_t>(clCreateCommandQueueWithProperties(
-          cl_adapter::cast<cl_context>(hContext), hDevice->get(),
+          hContext->get(), hDevice->get(),
           CreationFlagProperties, &RetErr));
   CL_RETURN_ON_FAILURE(RetErr);
   return UR_RESULT_SUCCESS;

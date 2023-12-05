@@ -10,6 +10,7 @@
 
 #include "command_buffer.hpp"
 #include "common.hpp"
+#include "context.hpp"
 
 UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferCreateExp(
     ur_context_handle_t hContext, ur_device_handle_t hDevice,
@@ -19,7 +20,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferCreateExp(
   ur_queue_handle_t Queue = nullptr;
   UR_RETURN_ON_FAILURE(urQueueCreate(hContext, hDevice, nullptr, &Queue));
 
-  cl_context CLContext = cl_adapter::cast<cl_context>(hContext);
+  cl_context CLContext = hContext->get();
   cl_ext::clCreateCommandBufferKHR_fn clCreateCommandBufferKHR = nullptr;
   cl_int Res =
       cl_ext::getExtFuncFromContext<decltype(clCreateCommandBufferKHR)>(
@@ -49,7 +50,7 @@ UR_APIEXPORT ur_result_t UR_APICALL
 urCommandBufferRetainExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
   UR_RETURN_ON_FAILURE(urQueueRetain(hCommandBuffer->hInternalQueue));
 
-  cl_context CLContext = cl_adapter::cast<cl_context>(hCommandBuffer->hContext);
+  cl_context CLContext = hCommandBuffer->hContext->get();
   cl_ext::clRetainCommandBufferKHR_fn clRetainCommandBuffer = nullptr;
   cl_int Res = cl_ext::getExtFuncFromContext<decltype(clRetainCommandBuffer)>(
       CLContext, cl_ext::ExtFuncPtrCache->clRetainCommandBufferKHRCache,
@@ -66,7 +67,7 @@ UR_APIEXPORT ur_result_t UR_APICALL
 urCommandBufferReleaseExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
   UR_RETURN_ON_FAILURE(urQueueRelease(hCommandBuffer->hInternalQueue));
 
-  cl_context CLContext = cl_adapter::cast<cl_context>(hCommandBuffer->hContext);
+  cl_context CLContext = hCommandBuffer->hContext->get();
   cl_ext::clReleaseCommandBufferKHR_fn clReleaseCommandBufferKHR = nullptr;
   cl_int Res =
       cl_ext::getExtFuncFromContext<decltype(clReleaseCommandBufferKHR)>(
@@ -83,7 +84,7 @@ urCommandBufferReleaseExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urCommandBufferFinalizeExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
-  cl_context CLContext = cl_adapter::cast<cl_context>(hCommandBuffer->hContext);
+  cl_context CLContext = hCommandBuffer->hContext->get();
   cl_ext::clFinalizeCommandBufferKHR_fn clFinalizeCommandBufferKHR = nullptr;
   cl_int Res =
       cl_ext::getExtFuncFromContext<decltype(clFinalizeCommandBufferKHR)>(
@@ -107,7 +108,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
     ur_exp_command_buffer_sync_point_t *pSyncPoint,
     ur_exp_command_buffer_command_handle_t *) {
 
-  cl_context CLContext = cl_adapter::cast<cl_context>(hCommandBuffer->hContext);
+  cl_context CLContext = hCommandBuffer->hContext->get();
   cl_ext::clCommandNDRangeKernelKHR_fn clCommandNDRangeKernelKHR = nullptr;
   cl_int Res =
       cl_ext::getExtFuncFromContext<decltype(clCommandNDRangeKernelKHR)>(
@@ -155,7 +156,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
     const ur_exp_command_buffer_sync_point_t *pSyncPointWaitList,
     ur_exp_command_buffer_sync_point_t *pSyncPoint) {
 
-  cl_context CLContext = cl_adapter::cast<cl_context>(hCommandBuffer->hContext);
+  cl_context CLContext = hCommandBuffer->hContext->get();
   cl_ext::clCommandCopyBufferKHR_fn clCommandCopyBufferKHR = nullptr;
   cl_int Res = cl_ext::getExtFuncFromContext<decltype(clCommandCopyBufferKHR)>(
       CLContext, cl_ext::ExtFuncPtrCache->clCommandCopyBufferKHRCache,
@@ -191,7 +192,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
   size_t OpenCLDstRect[3]{dstOrigin.x, dstOrigin.y, dstOrigin.z};
   size_t OpenCLRegion[3]{region.width, region.height, region.depth};
 
-  cl_context CLContext = cl_adapter::cast<cl_context>(hCommandBuffer->hContext);
+  cl_context CLContext = hCommandBuffer->hContext->get();
   cl_ext::clCommandCopyBufferRectKHR_fn clCommandCopyBufferRectKHR = nullptr;
   cl_int Res =
       cl_ext::getExtFuncFromContext<decltype(clCommandCopyBufferRectKHR)>(
@@ -281,7 +282,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
     const ur_exp_command_buffer_sync_point_t *pSyncPointWaitList,
     ur_exp_command_buffer_sync_point_t *pSyncPoint) {
 
-  cl_context CLContext = cl_adapter::cast<cl_context>(hCommandBuffer->hContext);
+  cl_context CLContext = hCommandBuffer->hContext->get();
   cl_ext::clCommandFillBufferKHR_fn clCommandFillBufferKHR = nullptr;
   cl_int Res = cl_ext::getExtFuncFromContext<decltype(clCommandFillBufferKHR)>(
       CLContext, cl_ext::ExtFuncPtrCache->clCommandFillBufferKHRCache,
@@ -337,7 +338,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferEnqueueExp(
     uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
     ur_event_handle_t *phEvent) {
 
-  cl_context CLContext = cl_adapter::cast<cl_context>(hCommandBuffer->hContext);
+  cl_context CLContext = hCommandBuffer->hContext->get();
   cl_ext::clEnqueueCommandBufferKHR_fn clEnqueueCommandBufferKHR = nullptr;
   cl_int Res =
       cl_ext::getExtFuncFromContext<decltype(clEnqueueCommandBufferKHR)>(

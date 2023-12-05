@@ -10,6 +10,9 @@
 #pragma once
 
 #include "common.hpp"
+#include "device.hpp"
+
+#include <vector>
 
 namespace cl_adapter {
 ur_result_t getPlatformVersion(cl_platform_id Plat,
@@ -170,11 +173,12 @@ struct ExtFuncPtrT {
 
 struct ur_platform_handle_t_ {
   using native_type = cl_platform_id;
-  native_type Platform;
+  native_type Platform = nullptr;
   std::unique_ptr<cl_adapter::ExtFuncPtrT> ExtFuncPtr;
+  std::vector<ur_device_handle_t> Devices;
 
   ur_platform_handle_t_(native_type Plat) : Platform(Plat) {
-    std::make_unique<cl_adapter::ExtFuncPtrT>();
+    ExtFuncPtr = std::make_unique<cl_adapter::ExtFuncPtrT>();
   }
 
   ~ur_platform_handle_t_() { ExtFuncPtr.reset(); }
@@ -194,4 +198,19 @@ struct ur_platform_handle_t_ {
   }
 
   native_type get() { return Platform; }
+
+  ur_result_t GetDevices(cl_device_type Type) {
+    cl_uint DeviceNum = 0;
+    CL_RETURN_ON_FAILURE(clGetDeviceIDs(Platform, Type, 0, nullptr, &DeviceNum));
+
+    std::vector<cl_device_id> CLDevices(DeviceNum);
+    CL_RETURN_ON_FAILURE(clGetDeviceIDs(Platform, Type, DeviceNum, CLDevices.data(), nullptr));
+
+    Devices = std::vector<ur_device_handle_t>(DeviceNum);
+    for (size_t i = 0; i < DeviceNum; i++) {
+        Devices[i] = new ur_device_handle_t_(CLDevices[i], this);
+    }
+
+    return UR_RESULT_SUCCESS;
+  }
 };

@@ -80,7 +80,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithIL(
     }
 
     *phProgram = cl_adapter::cast<ur_program_handle_t>(clCreateProgramWithIL(
-        cl_adapter::cast<cl_context>(hContext), pIL, length, &Err));
+        hContext->get(), pIL, length, &Err));
     CL_RETURN_ON_FAILURE(Err);
   } else {
 
@@ -108,7 +108,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithIL(
     assert(FuncPtr != nullptr);
 
     *phProgram = cl_adapter::cast<ur_program_handle_t>(
-        FuncPtr(cl_adapter::cast<cl_context>(hContext), pIL, length, &Err));
+        FuncPtr(hContext->get(), pIL, length, &Err));
     CL_RETURN_ON_FAILURE(Err);
   }
 
@@ -125,7 +125,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
   cl_int BinaryStatus[1];
   cl_int CLResult;
   *phProgram = cl_adapter::cast<ur_program_handle_t>(clCreateProgramWithBinary(
-      cl_adapter::cast<cl_context>(hContext), cl_adapter::cast<cl_uint>(1u),
+      hContext->get(), cl_adapter::cast<cl_uint>(1u),
       Devices, Lengths, &pBinary, BinaryStatus, &CLResult));
   CL_RETURN_ON_FAILURE(BinaryStatus[0]);
   CL_RETURN_ON_FAILURE(CLResult);
@@ -211,7 +211,7 @@ urProgramLink(ur_context_handle_t hContext, uint32_t count,
 
   cl_int CLResult;
   *phProgram = cl_adapter::cast<ur_program_handle_t>(
-      clLinkProgram(cl_adapter::cast<cl_context>(hContext), 0, nullptr,
+      clLinkProgram(hContext->get(), 0, nullptr,
                     pOptions, cl_adapter::cast<cl_uint>(count),
                     cl_adapter::cast<const cl_program *>(phPrograms), nullptr,
                     nullptr, &CLResult));

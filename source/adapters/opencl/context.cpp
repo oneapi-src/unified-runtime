@@ -18,20 +18,16 @@ ur_result_t cl_adapter::getDevicesFromContext(
     ur_context_handle_t hContext,
     std::unique_ptr<std::vector<cl_device_id>> &DevicesInCtx) {
 
-  cl_uint DeviceCount;
-  CL_RETURN_ON_FAILURE(clGetContextInfo(cl_adapter::cast<cl_context>(hContext),
-                                        CL_CONTEXT_NUM_DEVICES, sizeof(cl_uint),
-                                        &DeviceCount, nullptr));
+  cl_uint DeviceCount = hContext->DeviceCount;
 
   if (DeviceCount < 1) {
     return UR_RESULT_ERROR_INVALID_CONTEXT;
   }
 
   DevicesInCtx = std::make_unique<std::vector<cl_device_id>>(DeviceCount);
-
-  CL_RETURN_ON_FAILURE(clGetContextInfo(
-      cl_adapter::cast<cl_context>(hContext), CL_CONTEXT_DEVICES,
-      DeviceCount * sizeof(cl_device_id), (*DevicesInCtx).data(), nullptr));
+  for (size_t i = 0; i < DeviceCount; i++) {
+    (*DevicesInCtx)[i] = hContext->Devices[i]->get();
+  }
 
   return UR_RESULT_SUCCESS;
 }
@@ -41,11 +37,16 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextCreate(
     const ur_context_properties_t *, ur_context_handle_t *phContext) {
 
   cl_int Ret;
-  *phContext = cl_adapter::cast<ur_context_handle_t>(
-      clCreateContext(nullptr, cl_adapter::cast<cl_uint>(DeviceCount),
-                      cl_adapter::cast<const cl_device_id *>(phDevices),
-                      nullptr, nullptr, cl_adapter::cast<cl_int *>(&Ret)));
+  std::vector<cl_device_id> CLDevices(DeviceCount);
+  for (size_t i = 0; i < DeviceCount; i++) {
+    CLDevices[i] = phDevices[i]->get();
+  }
 
+  cl_context Ctx = clCreateContext(nullptr, cl_adapter::cast<cl_uint>(DeviceCount),
+                      CLDevices.data(),
+                      nullptr, nullptr, cl_adapter::cast<cl_int *>(&Ret));
+
+  *phContext = new ur_context_handle_t_(Ctx, DeviceCount, phDevices);
   return mapCLErrorToUR(Ret);
 }
 
@@ -95,7 +96,7 @@ urContextGetInfo(ur_context_handle_t hContext, ur_context_info_t propName,
   case UR_CONTEXT_INFO_REFERENCE_COUNT: {
     size_t CheckPropSize = 0;
     auto ClResult =
-        clGetContextInfo(cl_adapter::cast<cl_context>(hContext), CLPropName,
+        clGetContextInfo(hContext->get(), CLPropName,
                          propSize, pPropValue, &CheckPropSize);
     if (pPropValue && CheckPropSize != propSize) {
       return UR_RESULT_ERROR_INVALID_SIZE;
@@ -114,32 +115,33 @@ urContextGetInfo(ur_context_handle_t hContext, ur_context_info_t propName,
 UR_APIEXPORT ur_result_t UR_APICALL
 urContextRelease(ur_context_handle_t hContext) {
 
-  cl_int Ret = clReleaseContext(cl_adapter::cast<cl_context>(hContext));
+  cl_int Ret = clReleaseContext(hContext->get());
   return mapCLErrorToUR(Ret);
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urContextRetain(ur_context_handle_t hContext) {
 
-  cl_int Ret = clRetainContext(cl_adapter::cast<cl_context>(hContext));
+  cl_int Ret = clRetainContext(hContext->get());
   return mapCLErrorToUR(Ret);
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urContextGetNativeHandle(
     ur_context_handle_t hContext, ur_native_handle_t *phNativeContext) {
 
-  *phNativeContext = reinterpret_cast<ur_native_handle_t>(hContext);
+  *phNativeContext = reinterpret_cast<ur_native_handle_t>(hContext->get());
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urContextCreateWithNativeHandle(
-    ur_native_handle_t hNativeContext, uint32_t, const ur_device_handle_t *,
-    const ur_context_native_properties_t *pProperties,
-    ur_context_handle_t *phContext) {
+    ur_native_handle_t hNativeContext, uint32_t numDevices, const ur_device_handle_t *phDevices,
+    const ur_context_native_properties_t *pProperties, ur_context_handle_t *phContext) {
 
-  *phContext = reinterpret_cast<ur_context_handle_t>(hNativeContext);
+  cl_context NativeHandle =
+      reinterpret_cast<cl_context>(hNativeContext);
+  *phContext = new ur_context_handle_t_(NativeHandle, numDevices, phDevices);
   if (!pProperties || !pProperties->isNativeHandleOwned) {
-    return urContextRetain(*phContext);
+    return clRetainContext(NativeHandle);
   }
   return UR_RESULT_SUCCESS;
 }
@@ -191,7 +193,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextSetExtendedDeleter(
     C->execute();
   };
   CL_RETURN_ON_FAILURE(clSetContextDestructorCallback(
-      cl_adapter::cast<cl_context>(hContext), ClCallback, Callback));
+      hContext->get(), ClCallback, Callback));
 
   return UR_RESULT_SUCCESS;
 }

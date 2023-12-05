@@ -75,31 +75,31 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGet(ur_platform_handle_t hPlatform,
     Type = CL_DEVICE_TYPE_ACCELERATOR;
     break;
   case UR_DEVICE_TYPE_DEFAULT:
-    Type = CL_DEVICE_TYPE_DEFAULT;
+    Type = UR_DEVICE_TYPE_DEFAULT;
     break;
   default:
     return UR_RESULT_ERROR_INVALID_ENUMERATION;
   }
 
-  std::vector<cl_device_id> CLDevices(NumEntries);
-  cl_int Result = clGetDeviceIDs(
-      hPlatform->get(), Type, cl_adapter::cast<cl_uint>(NumEntries),
-      CLDevices.data(), cl_adapter::cast<cl_uint *>(pNumDevices));
-
-  // Absorb the CL_DEVICE_NOT_FOUND and just return 0 in num_devices
-  if (Result == CL_DEVICE_NOT_FOUND) {
-    Result = CL_SUCCESS;
+  CL_RETURN_ON_FAILURE(hPlatform->GetDevices(Type));
+  size_t NumDevices = hPlatform->Devices.size();
+  try {
     if (pNumDevices) {
-      *pNumDevices = 0;
+      *pNumDevices = NumDevices;
     }
-  }
-  if (NumEntries && phDevices) {
-    for (uint32_t i = 0; i < NumEntries; i++) {
-      phDevices[i] = new ur_device_handle_t_(CLDevices[i], hPlatform);
-    }
-  }
 
-  return mapCLErrorToUR(Result);
+    if (phDevices) {
+      for (size_t i = 0; i < std::min(size_t(NumEntries), NumDevices); ++i) {
+        phDevices[i] = hPlatform->Devices[i];
+      }
+    }
+
+    return UR_RESULT_SUCCESS;
+  } catch (ur_result_t Err) {
+    return Err;
+  } catch (...) {
+    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+  }
 }
 
 static ur_device_fp_capability_flags_t
@@ -861,7 +861,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_MAX_PARAMETER_SIZE:
   case UR_DEVICE_INFO_PROFILING_TIMER_RESOLUTION:
   case UR_DEVICE_INFO_PRINTF_BUFFER_SIZE:
-  case UR_DEVICE_INFO_PLATFORM:
   case UR_DEVICE_INFO_PARENT_DEVICE:
   case UR_DEVICE_INFO_IL_VERSION:
   case UR_DEVICE_INFO_NAME:
@@ -889,6 +888,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
                                          pPropValue, pPropSizeRet));
 
     return UR_RESULT_SUCCESS;
+  }
+  case UR_DEVICE_INFO_PLATFORM: {
+    if (hDevice->Platform && hDevice->Platform->get()) {
+      return ReturnValue(hDevice->Platform);
+    }
+    return UR_RESULT_ERROR_INVALID_DEVICE;
   }
   case UR_DEVICE_INFO_EXTENSIONS: {
     cl_device_id Dev = hDevice->get();

@@ -10,6 +10,9 @@
 #pragma once
 
 #include "common.hpp"
+#include "device.hpp"
+
+#include <vector>
 
 namespace cl_adapter {
 ur_result_t
@@ -17,21 +20,19 @@ getDevicesFromContext(ur_context_handle_t hContext,
                       std::unique_ptr<std::vector<cl_device_id>> &DevicesInCtx);
 }
 
-// struct ur_context_handle_t_ {
-//     using native_type = cl_context;
-//     native_type Context;
-//     std::atomic_uint32_t RefCount;
-//     ur_platform_handle_t Platform;
+struct ur_context_handle_t_ {
+    using native_type = cl_context;
+    native_type Context;
+    std::vector<ur_device_handle_t> Devices;
+    uint32_t DeviceCount;
 
-//     ur_context_handle_t_(native_type Ctx):Context(Ctx) {}
+    ur_context_handle_t_(native_type Ctx, uint32_t DevCount, const ur_device_handle_t *phDevices) : Context(Ctx), DeviceCount(DevCount) {
+        for (uint32_t i = 0; i < DeviceCount; i++) {
+            Devices.emplace_back(phDevices[i]);
+        }
+    }
 
-//     ~ur_context_handle_t_() {}
+    ~ur_context_handle_t_() {}
 
-//     native_type get() { return Context; }
-
-//     uint32_t incrementReferenceCount() noexcept { return ++RefCount; }
-
-//     uint32_t decrementReferenceCount() noexcept { return --RefCount; }
-
-//     uint32_t getReferenceCount() const noexcept { return RefCount; }
-// };
+    native_type get() { return Context; }
+};
