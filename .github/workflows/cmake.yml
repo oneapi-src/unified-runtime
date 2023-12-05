@@ -246,7 +246,7 @@ jobs:
       run: pip install -r third_party/requirements.txt
     
     - name: Init conda env
-      uses: conda-incubator/setup-miniconda@v2
+      uses: conda-incubator/setup-miniconda@v3
       with:
           miniconda-version: "latest"
           activate-environment: examples
