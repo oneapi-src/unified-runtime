@@ -10,6 +10,7 @@
 
 #include "common.hpp"
 #include "device.hpp"
+#include "context.hpp"
 
 inline cl_mem_alloc_flags_intel
 hostDescToClFlags(const ur_usm_host_desc_t &desc) {
@@ -95,7 +96,7 @@ urUSMHostAlloc(ur_context_handle_t hContext, const ur_usm_desc_t *pUSMDesc,
 
   // First we need to look up the function pointer
   clHostMemAllocINTEL_fn FuncPtr = nullptr;
-  cl_context CLContext = cl_adapter::cast<cl_context>(hContext);
+  cl_context CLContext = hContext->get();
   if (auto UrResult = cl_ext::getExtFuncFromContext<clHostMemAllocINTEL_fn>(
           CLContext, cl_ext::ExtFuncPtrCache->clHostMemAllocINTELCache,
           cl_ext::HostMemAllocName, &FuncPtr)) {
@@ -138,7 +139,7 @@ urUSMDeviceAlloc(ur_context_handle_t hContext, ur_device_handle_t hDevice,
 
   // First we need to look up the function pointer
   clDeviceMemAllocINTEL_fn FuncPtr = nullptr;
-  cl_context CLContext = cl_adapter::cast<cl_context>(hContext);
+  cl_context CLContext = hContext->get();
   if (auto UrResult = cl_ext::getExtFuncFromContext<clDeviceMemAllocINTEL_fn>(
           CLContext, cl_ext::ExtFuncPtrCache->clDeviceMemAllocINTELCache,
           cl_ext::DeviceMemAllocName, &FuncPtr)) {
@@ -181,7 +182,7 @@ urUSMSharedAlloc(ur_context_handle_t hContext, ur_device_handle_t hDevice,
 
   // First we need to look up the function pointer
   clSharedMemAllocINTEL_fn FuncPtr = nullptr;
-  cl_context CLContext = cl_adapter::cast<cl_context>(hContext);
+  cl_context CLContext = hContext->get();
   if (auto UrResult = cl_ext::getExtFuncFromContext<clSharedMemAllocINTEL_fn>(
           CLContext, cl_ext::ExtFuncPtrCache->clSharedMemAllocINTELCache,
           cl_ext::SharedMemAllocName, &FuncPtr)) {
@@ -214,7 +215,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMFree(ur_context_handle_t hContext,
   // might be still running.
   clMemBlockingFreeINTEL_fn FuncPtr = nullptr;
 
-  cl_context CLContext = cl_adapter::cast<cl_context>(hContext);
+  cl_context CLContext = hContext->get();
   ur_result_t RetVal = UR_RESULT_ERROR_INVALID_OPERATION;
   RetVal = cl_ext::getExtFuncFromContext<clMemBlockingFreeINTEL_fn>(
       CLContext, cl_ext::ExtFuncPtrCache->clMemBlockingFreeINTELCache,
@@ -526,7 +527,7 @@ urUSMGetMemAllocInfo(ur_context_handle_t hContext, const void *pMem,
                      void *pPropValue, size_t *pPropSizeRet) {
 
   clGetMemAllocInfoINTEL_fn GetMemAllocInfo = nullptr;
-  cl_context CLContext = cl_adapter::cast<cl_context>(hContext);
+  cl_context CLContext = hContext->get();
   UR_RETURN_ON_FAILURE(cl_ext::getExtFuncFromContext<clGetMemAllocInfoINTEL_fn>(
       CLContext, cl_ext::ExtFuncPtrCache->clGetMemAllocInfoINTELCache,
       cl_ext::GetMemAllocInfoName, &GetMemAllocInfo));
@@ -551,7 +552,7 @@ urUSMGetMemAllocInfo(ur_context_handle_t hContext, const void *pMem,
 
   size_t CheckPropSize = 0;
   cl_int ClErr =
-      GetMemAllocInfo(cl_adapter::cast<cl_context>(hContext), pMem, PropNameCL,
+      GetMemAllocInfo(hContext->get(), pMem, PropNameCL,
                       propSize, pPropValue, &CheckPropSize);
   if (pPropValue && CheckPropSize != propSize) {
     return UR_RESULT_ERROR_INVALID_SIZE;

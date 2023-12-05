@@ -9,6 +9,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "common.hpp"
+#include "context.hpp"
 
 cl_image_format mapURImageFormatToCL(const ur_image_format_t *PImageFormat) {
   cl_image_format CLImageFormat;
@@ -230,7 +231,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
     // TODO: need to check if all properties are supported by OpenCL RT and
     // ignore unsupported
     clCreateBufferWithPropertiesINTEL_fn FuncPtr = nullptr;
-    cl_context CLContext = cl_adapter::cast<cl_context>(hContext);
+    cl_context CLContext = hContext->get();
     // First we need to look up the function pointer
     RetErr =
         cl_ext::getExtFuncFromContext<clCreateBufferWithPropertiesINTEL_fn>(
@@ -270,7 +271,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
 
   void *HostPtr = pProperties ? pProperties->pHost : nullptr;
   *phBuffer = reinterpret_cast<ur_mem_handle_t>(clCreateBuffer(
-      cl_adapter::cast<cl_context>(hContext), static_cast<cl_mem_flags>(flags),
+      hContext->get(), static_cast<cl_mem_flags>(flags),
       size, HostPtr, cl_adapter::cast<cl_int *>(&RetErr)));
   CL_RETURN_ON_FAILURE(RetErr);
 
@@ -289,7 +290,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreate(
   cl_map_flags MapFlags = convertURMemFlagsToCL(flags);
 
   *phMem = reinterpret_cast<ur_mem_handle_t>(clCreateImage(
-      cl_adapter::cast<cl_context>(hContext), MapFlags, &ImageFormat,
+      hContext->get(), MapFlags, &ImageFormat,
       &ImageDesc, pHost, cl_adapter::cast<cl_int *>(&RetErr)));
   CL_RETURN_ON_FAILURE(RetErr);
 
