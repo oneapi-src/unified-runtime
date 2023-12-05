@@ -52,7 +52,7 @@ ur_result_t enqueueMemCopyHelper(ur_command_t CommandType,
 
   _ur_ze_event_list_t TmpWaitList;
   UR_CALL(TmpWaitList.createAndRetainUrZeEventList(
-      NumEventsInWaitList, EventWaitList, Queue, UseCopyEngine));
+      NumEventsInWaitList, EventWaitList, Queue, UseCopyEngine, nullptr));
 
   // We want to batch these commands to avoid extra submissions (costly)
   bool OkToBatch = true;
@@ -102,7 +102,7 @@ ur_result_t enqueueMemCopyRectHelper(
 
   _ur_ze_event_list_t TmpWaitList;
   UR_CALL(TmpWaitList.createAndRetainUrZeEventList(
-      NumEventsInWaitList, EventWaitList, Queue, UseCopyEngine));
+      NumEventsInWaitList, EventWaitList, Queue, UseCopyEngine, nullptr));
 
   // We want to batch these commands to avoid extra submissions (costly)
   bool OkToBatch = true;
@@ -214,7 +214,7 @@ static ur_result_t enqueueMemFillHelper(ur_command_t CommandType,
 
   _ur_ze_event_list_t TmpWaitList;
   UR_CALL(TmpWaitList.createAndRetainUrZeEventList(
-      NumEventsInWaitList, EventWaitList, Queue, UseCopyEngine));
+      NumEventsInWaitList, EventWaitList, Queue, UseCopyEngine, nullptr));
 
   ur_command_list_ptr_t CommandList{};
   // We want to batch these commands to avoid extra submissions (costly)
@@ -346,7 +346,7 @@ static ur_result_t enqueueMemImageCommandHelper(
 
   _ur_ze_event_list_t TmpWaitList;
   UR_CALL(TmpWaitList.createAndRetainUrZeEventList(
-      NumEventsInWaitList, EventWaitList, Queue, UseCopyEngine));
+      NumEventsInWaitList, EventWaitList, Queue, UseCopyEngine, nullptr));
 
   // We want to batch these commands to avoid extra submissions (costly)
   bool OkToBatch = true;
@@ -909,7 +909,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferMap(
 
     _ur_ze_event_list_t TmpWaitList;
     UR_CALL(TmpWaitList.createAndRetainUrZeEventList(
-        NumEventsInWaitList, EventWaitList, Queue, UseCopyEngine));
+        NumEventsInWaitList, EventWaitList, Queue, UseCopyEngine, nullptr));
 
     UR_CALL(
         createEventAndAssociateQueue(Queue, Event, UR_COMMAND_MEM_BUFFER_MAP,
@@ -931,7 +931,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferMap(
     } else if (MapFlags & UR_MAP_FLAG_WRITE)
       AccessMode = ur_mem_handle_t_::write_only;
   }
-
   UR_ASSERT(AccessMode != ur_mem_handle_t_::unknown,
             UR_RESULT_ERROR_INVALID_VALUE);
 
@@ -1067,7 +1066,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemUnmap(
 
     _ur_ze_event_list_t TmpWaitList;
     UR_CALL(TmpWaitList.createAndRetainUrZeEventList(
-        NumEventsInWaitList, EventWaitList, Queue, UseCopyEngine));
+        NumEventsInWaitList, EventWaitList, Queue, UseCopyEngine, nullptr));
 
     UR_CALL(createEventAndAssociateQueue(Queue, Event, UR_COMMAND_MEM_UNMAP,
                                          Queue->CommandListMap.end(),
@@ -1247,7 +1246,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
   //
   _ur_ze_event_list_t TmpWaitList;
   UR_CALL(TmpWaitList.createAndRetainUrZeEventList(
-      NumEventsInWaitList, EventWaitList, Queue, UseCopyEngine));
+      NumEventsInWaitList, EventWaitList, Queue, UseCopyEngine, nullptr));
 
   // Get a new command list to be used on this call
   ur_command_list_ptr_t CommandList{};
@@ -1302,7 +1301,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMAdvise(
 
   _ur_ze_event_list_t TmpWaitList;
   UR_CALL(TmpWaitList.createAndRetainUrZeEventList(0, nullptr, Queue,
-                                                   UseCopyEngine));
+                                                   UseCopyEngine, nullptr));
 
   // Get a new command list to be used on this call
   ur_command_list_ptr_t CommandList{};
