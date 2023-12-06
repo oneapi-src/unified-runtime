@@ -202,9 +202,6 @@ ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
     [[maybe_unused]] const ur_exp_command_buffer_sync_point_t
         *pSyncPointWaitList,
     [[maybe_unused]] ur_exp_command_buffer_sync_point_t *pSyncPoint) {
-
-  cl_adapter::die("Experimental Command-buffer feature is not "
-                  "implemented for OpenCL adapter.");
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 

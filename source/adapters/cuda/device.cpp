@@ -60,9 +60,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &ComputeUnits, CU_DEVICE_ATTRIBUTE_MULTIPROCESSOR_COUNT,
         hDevice->get()));
-    if (ComputeUnits < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(ComputeUnits >= 0);
     return ReturnValue(static_cast<uint32_t>(ComputeUnits));
   }
   case UR_DEVICE_INFO_MAX_WORK_ITEM_DIMENSIONS: {
@@ -76,21 +74,15 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     int MaxX = 0, MaxY = 0, MaxZ = 0;
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &MaxX, CU_DEVICE_ATTRIBUTE_MAX_BLOCK_DIM_X, hDevice->get()));
-    if (MaxX < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(MaxX > 0);
 
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &MaxY, CU_DEVICE_ATTRIBUTE_MAX_BLOCK_DIM_Y, hDevice->get()));
-    if (MaxY < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(MaxY > 0);
 
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &MaxZ, CU_DEVICE_ATTRIBUTE_MAX_BLOCK_DIM_Z, hDevice->get()));
-    if (MaxZ < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(MaxZ > 0);
 
     ReturnSizes.Sizes[0] = size_t(MaxX);
     ReturnSizes.Sizes[1] = size_t(MaxY);
@@ -105,21 +97,15 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     int MaxX = 0, MaxY = 0, MaxZ = 0;
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &MaxX, CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_X, hDevice->get()));
-    if (MaxX < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(MaxX > 0);
 
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &MaxY, CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_Y, hDevice->get()));
-    if (MaxY < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(MaxY > 0);
 
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &MaxZ, CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_Z, hDevice->get()));
-    if (MaxZ < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(MaxZ > 0);
 
     ReturnSizes.Sizes[0] = size_t(MaxX);
     ReturnSizes.Sizes[1] = size_t(MaxY);
@@ -132,10 +118,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &MaxWorkGroupSize, CU_DEVICE_ATTRIBUTE_MAX_THREADS_PER_BLOCK,
         hDevice->get()));
-
-    if (MaxWorkGroupSize < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(MaxWorkGroupSize > 0);
 
     return ReturnValue(size_t(MaxWorkGroupSize));
   }
@@ -292,9 +275,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     int ClockFreq = 0;
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &ClockFreq, CU_DEVICE_ATTRIBUTE_CLOCK_RATE, hDevice->get()));
-    if (ClockFreq < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(ClockFreq > 0);
     return ReturnValue(static_cast<uint32_t>(ClockFreq) / 1000u);
   }
   case UR_DEVICE_INFO_ADDRESS_BITS: {
@@ -338,16 +319,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &TexHeight, CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_HEIGHT,
         hDevice->get()));
-    if (TexHeight < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(TexHeight > 0);
     int SurfHeight = 0;
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &SurfHeight, CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE2D_HEIGHT,
         hDevice->get()));
-    if (SurfHeight < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(SurfHeight > 0);
 
     int Min = std::min(TexHeight, SurfHeight);
 
@@ -359,16 +336,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &TexWidth, CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_WIDTH,
         hDevice->get()));
-    if (TexWidth < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(TexWidth > 0);
     int SurfWidth = 0;
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &SurfWidth, CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE2D_WIDTH,
         hDevice->get()));
-    if (SurfWidth < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(SurfWidth > 0);
 
     int Min = std::min(TexWidth, SurfWidth);
 
@@ -380,16 +353,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &TexHeight, CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE3D_HEIGHT,
         hDevice->get()));
-    if (TexHeight < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(TexHeight > 0);
     int SurfHeight = 0;
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &SurfHeight, CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE3D_HEIGHT,
         hDevice->get()));
-    if (SurfHeight < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(SurfHeight > 0);
 
     int Min = std::min(TexHeight, SurfHeight);
 
@@ -401,16 +370,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &TexWidth, CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE3D_WIDTH,
         hDevice->get()));
-    if (TexWidth < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(TexWidth > 0);
     int SurfWidth = 0;
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &SurfWidth, CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE3D_WIDTH,
         hDevice->get()));
-    if (SurfWidth < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(SurfWidth > 0);
 
     int Min = std::min(TexWidth, SurfWidth);
 
@@ -422,16 +387,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &TexDepth, CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE3D_DEPTH,
         hDevice->get()));
-    if (TexDepth < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(TexDepth > 0);
     int SurfDepth = 0;
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &SurfDepth, CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE3D_DEPTH,
         hDevice->get()));
-    if (SurfDepth < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(SurfDepth > 0);
 
     int Min = std::min(TexDepth, SurfDepth);
 
@@ -443,16 +404,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &TexWidth, CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE1D_WIDTH,
         hDevice->get()));
-    if (TexWidth < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(TexWidth > 0);
     int SurfWidth = 0;
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &SurfWidth, CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE1D_WIDTH,
         hDevice->get()));
-    if (SurfWidth < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(SurfWidth > 0);
 
     int Min = std::min(TexWidth, SurfWidth);
 
@@ -521,18 +478,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     int CacheSize = 0;
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &CacheSize, CU_DEVICE_ATTRIBUTE_L2_CACHE_SIZE, hDevice->get()));
-    if (CacheSize < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(CacheSize > 0);
     // The L2 cache is global to the GPU.
     return ReturnValue(static_cast<uint64_t>(CacheSize));
   }
   case UR_DEVICE_INFO_GLOBAL_MEM_SIZE: {
     size_t Bytes = 0;
     // Runtime API has easy access to this value, driver API info is scarse.
-    if (cuDeviceTotalMem(&Bytes, hDevice->get()) != CUDA_SUCCESS) {
-      return UR_RESULT_ERROR_INVALID_OPERATION;
-    }
+    UR_CHECK_ERROR(cuDeviceTotalMem(&Bytes, hDevice->get()));
     return ReturnValue(uint64_t{Bytes});
   }
   case UR_DEVICE_INFO_MAX_CONSTANT_BUFFER_SIZE: {
@@ -540,9 +493,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &ConstantMemory, CU_DEVICE_ATTRIBUTE_TOTAL_CONSTANT_MEMORY,
         hDevice->get()));
-    if (ConstantMemory < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(ConstantMemory > 0);
 
     return ReturnValue(static_cast<uint64_t>(ConstantMemory));
   }
@@ -572,9 +523,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &ECCEnabled, CU_DEVICE_ATTRIBUTE_ECC_ENABLED, hDevice->get()));
 
-    if ((ECCEnabled != 0) || (ECCEnabled != 1)) {
-      return UR_RESULT_ERROR_INVALID_OPERATION;
-    }
+    assert(ECCEnabled == 0 || ECCEnabled == 1);
+
     auto Result = static_cast<bool>(ECCEnabled);
     return ReturnValue(Result);
   }
@@ -583,9 +533,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &IsIntegrated, CU_DEVICE_ATTRIBUTE_INTEGRATED, hDevice->get()));
 
-    if ((IsIntegrated != 0) || (IsIntegrated != 1)) {
-      return UR_RESULT_ERROR_INVALID_OPERATION;
-    }
+    assert(IsIntegrated == 0 || IsIntegrated == 1);
+
     auto result = static_cast<bool>(IsIntegrated);
     return ReturnValue(result);
   }
@@ -867,17 +816,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_GLOBAL_MEM_FREE: {
     size_t FreeMemory = 0;
     size_t TotalMemory = 0;
-    assert(cuMemGetInfo(&FreeMemory, &TotalMemory) != CUDA_SUCCESS &&
-           "failed cuMemGetInfo() API.");
+    UR_CHECK_ERROR(cuMemGetInfo(&FreeMemory, &TotalMemory));
     return ReturnValue(FreeMemory);
   }
   case UR_DEVICE_INFO_MEMORY_CLOCK_RATE: {
     int Value = 0;
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &Value, CU_DEVICE_ATTRIBUTE_MEMORY_CLOCK_RATE, hDevice->get()));
-    if (Value < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(Value > 0);
     // Convert kilohertz to megahertz when returning.
     return ReturnValue(Value / 1000);
   }
@@ -885,9 +831,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     int Value = 0;
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &Value, CU_DEVICE_ATTRIBUTE_GLOBAL_MEMORY_BUS_WIDTH, hDevice->get()));
-    if (Value < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(Value > 0);
     return ReturnValue(Value);
   }
   case UR_DEVICE_INFO_MAX_COMPUTE_QUEUE_INDICES: {
@@ -983,21 +927,15 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     int Value = 0;
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &Value, CU_DEVICE_ATTRIBUTE_PCI_DEVICE_ID, hDevice->get()));
-    if (Value < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(Value > 0);
     return ReturnValue(Value);
   }
   case UR_DEVICE_INFO_UUID: {
     CUuuid UUID;
 #if (CUDA_VERSION >= 11040)
-    if (cuDeviceGetUuid_v2(&UUID, hDevice->get()) != CUDA_SUCCESS) {
-      return UR_RESULT_ERROR_INVALID_DEVICE;
-    }
+    UR_CHECK_ERROR(cuDeviceGetUuid_v2(&UUID, hDevice->get()));
 #else
-    if (cuDeviceGetUuid(&UUID, hDevice->get()) != CUDA_SUCCESS) {
-      return UR_RESULT_ERROR_INVALID_DEVICE;
-    }
+    UR_CHECK_ERROR(cuDeviceGetUuid(&UUID, hDevice->get()));
 #endif
     std::array<unsigned char, 16> Name;
     std::copy(UUID.bytes, UUID.bytes + 16, Name.begin());
@@ -1076,9 +1014,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
         &MaxRegisters, CU_DEVICE_ATTRIBUTE_MAX_REGISTERS_PER_BLOCK,
         hDevice->get()));
 
-    if (MaxRegisters < 0) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
+    assert(MaxRegisters > 0);
 
     return ReturnValue(static_cast<uint32_t>(MaxRegisters));
   }
@@ -1092,9 +1028,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     UR_CHECK_ERROR(
         cuDeviceGetPCIBusId(AddressBuffer, AddressBufferSize, hDevice->get()));
     // CUDA API (8.x - 12.1) guarantees 12 bytes + \0 are written
-    if (strnlen(AddressBuffer, AddressBufferSize) != 12) {
-      return UR_RESULT_ERROR_INVALID_OPERATION;
-    }
+    assert(strnlen(AddressBuffer, AddressBufferSize) != 12);
     return ReturnValue(AddressBuffer,
                        strnlen(AddressBuffer, AddressBufferSize - 1) + 1);
   }
