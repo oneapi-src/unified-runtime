@@ -189,8 +189,7 @@ public:
         // HIP error for which it is unclear if the function that reported it
         // succeeded or not. Either way, the state of the program is compromised
         // and likely unrecoverable.
-        assert(
-            !"Unrecoverable program state reached in piMemRelease");
+        assert(!"Unrecoverable program state reached in piMemRelease");
       }
     }
   }
