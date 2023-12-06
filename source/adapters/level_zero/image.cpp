@@ -316,8 +316,7 @@ ur_result_t ur2zeImageDesc(const ur_image_format_t *ImageFormat,
   }
   default:
     urPrint("format channel order = %d\n", ImageFormat->channelOrder);
-    die("ur2zeImageDesc: unsupported image channel order\n");
-    break;
+    return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
   }
 
   ze_image_format_t ZeFormatDesc = {
@@ -345,7 +344,7 @@ ur_result_t ur2zeImageDesc(const ur_image_format_t *ImageFormat,
     break;
   default:
     urPrint("ur2zeImageDesc: unsupported image type\n");
-    return UR_RESULT_ERROR_INVALID_VALUE;
+    return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
   }
 
   ZeImageDesc.stype = ZE_STRUCTURE_TYPE_IMAGE_DESC;

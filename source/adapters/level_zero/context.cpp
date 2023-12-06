@@ -584,7 +584,8 @@ ur_context_handle_t_::decrementUnreleasedEventsInPool(ur_event_handle_t Event) {
       Event->isHostVisible(), Event->isProfilingEnabled(), ZeDevice);
 
   // Put the empty pool to the cache of the pools.
-  assert(NumEventsUnreleasedInEventPool[Event->ZeEventPool] == 0 && "Invalid event release: event pool doesn't have unreleased events");
+  assert(NumEventsUnreleasedInEventPool[Event->ZeEventPool] == 0 &&
+         "Invalid event release: event pool doesn't have unreleased events");
   if (--NumEventsUnreleasedInEventPool[Event->ZeEventPool] == 0) {
     if (ZePoolCache->front() != Event->ZeEventPool) {
       ZePoolCache->push_back(Event->ZeEventPool);

@@ -12,6 +12,7 @@
 
 #include "asan_interceptor.hpp"
 #include "ur_sanitizer_layer.hpp"
+#include <cassert>
 
 namespace ur_sanitizer_layer {
 
@@ -541,11 +542,11 @@ ur_result_t context_t::init(ur_dditable_t *dditable,
     if (context.enabledType == SanitizerType::AddressSanitizer) {
         if (!(dditable->VirtualMem.pfnReserve && dditable->VirtualMem.pfnMap &&
               dditable->VirtualMem.pfnGranularityGetInfo)) {
-            die("Some VirtualMem APIs are needed to enable UR_LAYER_ASAN");
+            assert(!"Some VirtualMem APIs are needed to enable UR_LAYER_ASAN");
         }
 
         if (!dditable->PhysicalMem.pfnCreate) {
-            die("Some PhysicalMem APIs are needed to enable UR_LAYER_ASAN");
+            assert(!"Some PhysicalMem APIs are needed to enable UR_LAYER_ASAN");
         }
     }
 

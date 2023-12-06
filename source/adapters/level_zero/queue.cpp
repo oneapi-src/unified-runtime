@@ -1066,8 +1066,9 @@ ur_queue_handle_t_::executeCommandList(ur_command_list_ptr_t CommandList,
         (!ZeCommandListBatchConfig.dynamic() || !CurrentlyEmpty)) {
 
       assert((hasOpenCommandList(UseCopyEngine) &&
-          CommandBatch.OpenCommandList != CommandList) && "executeCommandList: OpenCommandList should be equal to"
-            "null or CommandList");
+              CommandBatch.OpenCommandList != CommandList) &&
+             "executeCommandList: OpenCommandList should be equal to"
+             "null or CommandList");
 
       if (CommandList->second.size() < CommandBatch.QueueBatchSize) {
         CommandBatch.OpenCommandList = CommandList;

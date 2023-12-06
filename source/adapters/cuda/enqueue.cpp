@@ -855,9 +855,11 @@ static ur_result_t imageElementByteSize(CUDA_ARRAY_DESCRIPTOR ArrayDesc,
     *Size = 4;
     break;
   default:
-    return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
     *Size = 0;
+    return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
   }
+
+  return UR_RESULT_SUCCESS;
 }
 
 /// General ND memory copy operation for images.

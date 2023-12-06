@@ -2058,7 +2058,8 @@ ur_result_t _ur_buffer::getZeHandle(char *&ZeHandle, access_mode_t AccessMode,
   // If some prior access invalidated this allocation then make it valid again.
   if (!Allocation.Valid) {
     // LastDeviceWithValidAllocation should always have valid allocation.
-    assert(Device == LastDeviceWithValidAllocation && "getZeHandle: last used allocation is not valid.");
+    assert(Device == LastDeviceWithValidAllocation &&
+           "getZeHandle: last used allocation is not valid.");
 
     // For write-only access the allocation contents is not going to be used.
     // So don't do anything to make it "valid".

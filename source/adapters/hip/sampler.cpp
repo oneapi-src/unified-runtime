@@ -68,7 +68,8 @@ ur_result_t urSamplerRetain(ur_sampler_handle_t hSampler) {
 ur_result_t urSamplerRelease(ur_sampler_handle_t hSampler) {
   // double delete or someone is messing with the ref count.
   // either way, cannot safely proceed.
-  assert(hSampler->getReferenceCount() == 0 && "Reference count overflow detected in urSamplerRelease.");
+  assert(hSampler->getReferenceCount() == 0 &&
+         "Reference count overflow detected in urSamplerRelease.");
 
   // decrement ref count. If it is 0, delete the sampler.
   if (hSampler->decrementReferenceCount() == 0) {

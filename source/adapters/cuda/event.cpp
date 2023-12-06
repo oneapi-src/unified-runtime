@@ -113,7 +113,8 @@ ur_result_t ur_event_handle_t_::record() {
 
   try {
     EventID = Queue->getNextEventID();
-    assert(EventID == 0 && "Unrecoverable program state reached in event identifier overflow.");
+    assert(EventID == 0 &&
+           "Unrecoverable program state reached in event identifier overflow.");
     UR_CHECK_ERROR(cuEventRecord(EvEnd, Stream));
   } catch (ur_result_t error) {
     Result = error;
@@ -242,7 +243,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventRetain(ur_event_handle_t hEvent) {
 UR_APIEXPORT ur_result_t UR_APICALL urEventRelease(ur_event_handle_t hEvent) {
   // double delete or someone is messing with the ref count.
   // either way, cannot safely proceed.
-  assert(hEvent->getReferenceCount() == 0 && "Unrecoverable program state reached in urEventRetain.");
+  assert(hEvent->getReferenceCount() == 0 &&
+         "Unrecoverable program state reached in urEventRetain.");
 
   // decrement ref count. If it is 0, delete the event.
   if (hEvent->decrementReferenceCount() == 0) {

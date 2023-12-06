@@ -245,7 +245,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemGetInfo(ur_mem_handle_t hMemory,
           throw UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 #else
           HIP_ARRAY3D_DESCRIPTOR ArrayDescriptor;
-          UR_CHECK_ERROR(hipArray3DGetDescriptor(&ArrayDescriptor, Mem.Array));
+          UR_CHECK_ERROR(
+              hipArray3DGetDescriptor(&ArrayDescriptor, Mem.getArray(Device)));
           int PixelSize = 0;
           UR_RETURN_ON_FAILURE(
               imageElementByteSize(ArrayDescriptor.Format, &PixelSize));
