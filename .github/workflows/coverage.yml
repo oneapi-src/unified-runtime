@@ -6,8 +6,8 @@ permissions:
   contents: read
 
 jobs:
-  ubuntu-build:
-    name: Build - Ubuntu
+  coverage-ubuntu:
+    name: Coverage
     strategy:
       matrix:
         os: ['ubuntu-22.04']
@@ -76,6 +76,6 @@ jobs:
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
+      continue-on-error: true
       with:
         gcov: true
-        gcov_include: source
