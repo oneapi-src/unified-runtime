@@ -179,6 +179,7 @@ struct ur_platform_handle_t_ {
 
   ur_platform_handle_t_(native_type Plat) : Platform(Plat) {
     ExtFuncPtr = std::make_unique<cl_adapter::ExtFuncPtrT>();
+    InitDevices();
   }
 
   ~ur_platform_handle_t_() { ExtFuncPtr.reset(); }
@@ -199,16 +200,16 @@ struct ur_platform_handle_t_ {
 
   native_type get() { return Platform; }
 
-  ur_result_t GetDevices(cl_device_type Type) {
+  ur_result_t InitDevices() {
     cl_uint DeviceNum = 0;
-    CL_RETURN_ON_FAILURE(clGetDeviceIDs(Platform, Type, 0, nullptr, &DeviceNum));
+    CL_RETURN_ON_FAILURE(clGetDeviceIDs(Platform, CL_DEVICE_TYPE_ALL, 0, nullptr, &DeviceNum));
 
     std::vector<cl_device_id> CLDevices(DeviceNum);
-    CL_RETURN_ON_FAILURE(clGetDeviceIDs(Platform, Type, DeviceNum, CLDevices.data(), nullptr));
+    CL_RETURN_ON_FAILURE(clGetDeviceIDs(Platform, CL_DEVICE_TYPE_ALL, DeviceNum, CLDevices.data(), nullptr));
 
     Devices = std::vector<ur_device_handle_t>(DeviceNum);
     for (size_t i = 0; i < DeviceNum; i++) {
-        Devices[i] = new ur_device_handle_t_(CLDevices[i], this);
+        Devices[i] = new ur_device_handle_t_(CLDevices[i], this, nullptr);
     }
 
     return UR_RESULT_SUCCESS;

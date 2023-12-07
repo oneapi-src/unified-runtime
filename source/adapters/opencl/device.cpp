@@ -54,7 +54,7 @@ ur_result_t cl_adapter::checkDeviceExtensions(
 
 UR_APIEXPORT ur_result_t UR_APICALL urDeviceGet(ur_platform_handle_t hPlatform,
                                                 ur_device_type_t DeviceType,
-                                                uint32_t NumEntries,
+                                                [[maybe_unused]] uint32_t NumEntries,
                                                 ur_device_handle_t *phDevices,
                                                 uint32_t *pNumDevices) {
 
@@ -75,23 +75,25 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGet(ur_platform_handle_t hPlatform,
     Type = CL_DEVICE_TYPE_ACCELERATOR;
     break;
   case UR_DEVICE_TYPE_DEFAULT:
-    Type = UR_DEVICE_TYPE_DEFAULT;
+    Type = CL_DEVICE_TYPE_DEFAULT;
     break;
   default:
     return UR_RESULT_ERROR_INVALID_ENUMERATION;
   }
-
-  CL_RETURN_ON_FAILURE(hPlatform->GetDevices(Type));
-  size_t NumDevices = hPlatform->Devices.size();
   try {
-    if (pNumDevices) {
-      *pNumDevices = NumDevices;
-    }
-
-    if (phDevices) {
-      for (size_t i = 0; i < std::min(size_t(NumEntries), NumDevices); ++i) {
-        phDevices[i] = hPlatform->Devices[i];
+    uint32_t AllDevicesNum = hPlatform->Devices.size();
+    uint32_t DeviceNumIter = 0;
+    for (uint32_t i = 0; i < AllDevicesNum; i++) {
+      cl_device_type DeviceType = hPlatform->Devices[i]->Type;
+      if (DeviceType == Type || Type == CL_DEVICE_TYPE_ALL) {
+        if (phDevices) {
+          phDevices[DeviceNumIter] = hPlatform->Devices[i];
+        }
+        DeviceNumIter++;
       }
+    }
+    if (pNumDevices) {
+      *pNumDevices = DeviceNumIter;
     }
 
     return UR_RESULT_SUCCESS;
@@ -329,9 +331,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
    * to UR */
   switch (static_cast<uint32_t>(propName)) {
   case UR_DEVICE_INFO_TYPE: {
-    cl_device_type CLType;
-    CL_RETURN_ON_FAILURE(clGetDeviceInfo(
-        hDevice->get(), CLPropName, sizeof(cl_device_type), &CLType, nullptr));
+    cl_device_type CLType = hDevice->Type;
 
     /* TODO UR: If the device is an Accelerator (FPGA, VPU, etc.), there is not
      * enough information in the OpenCL runtime to know exactly which type it
@@ -861,7 +861,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_MAX_PARAMETER_SIZE:
   case UR_DEVICE_INFO_PROFILING_TIMER_RESOLUTION:
   case UR_DEVICE_INFO_PRINTF_BUFFER_SIZE:
-  case UR_DEVICE_INFO_PARENT_DEVICE:
   case UR_DEVICE_INFO_IL_VERSION:
   case UR_DEVICE_INFO_NAME:
   case UR_DEVICE_INFO_VENDOR:
@@ -894,6 +893,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
       return ReturnValue(hDevice->Platform);
     }
     return UR_RESULT_ERROR_INVALID_DEVICE;
+  }
+  case UR_DEVICE_INFO_PARENT_DEVICE: {
+    return ReturnValue(hDevice->ParentDevice);
   }
   case UR_DEVICE_INFO_EXTENSIONS: {
     cl_device_id Dev = hDevice->get();
@@ -1019,9 +1021,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urDevicePartition(
     CL_RETURN_ON_FAILURE(clCreateSubDevices(hDevice->get(), CLProperties.data(),
                                             CLNumDevicesRet,
                                             CLSubDevices.data(), nullptr));
-
-    std::memcpy(phSubDevices, CLSubDevices.data(),
-                sizeof(cl_device_id) * NumDevices);
+    for (uint32_t i = 0; i < NumDevices; i++) {
+      phSubDevices[i] = new ur_device_handle_t_(CLSubDevices[i], hDevice->Platform, hDevice);
+    }
   }
 
   return UR_RESULT_SUCCESS;
@@ -1053,7 +1055,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
     ur_native_handle_t hNativeDevice, ur_platform_handle_t hPlatform,
     const ur_device_native_properties_t *, ur_device_handle_t *phDevice) {
   cl_device_id NativeHandle = reinterpret_cast<cl_device_id>(hNativeDevice);
-  *phDevice = new ur_device_handle_t_(NativeHandle, hPlatform);
+  *phDevice = new ur_device_handle_t_(NativeHandle, hPlatform, nullptr);
   return UR_RESULT_SUCCESS;
 }
 
