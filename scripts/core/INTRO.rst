@@ -179,6 +179,31 @@ Unified Runtime loader implements tracing support through the `XPTI framework <h
        | **user_data**: A pointer to `function_with_args_t` object, that includes function ID, name, arguments, and return value.
      - None
 
+.. list-table:: UR Stream `"ur.adapter.cuda.call"` Notification Signatures
+   :header-rows: 1
+
+   * - Trace Point Type
+     - Parameter Description
+     -  Metadata
+   * - `function_with_args_begin`
+     - | **trace_type**: `xpti::trace_point_type_t::function_with_args_begin` that marks the beginning of a function
+       | **parent**: nullptr
+       | **event**: nullptr
+       | **instance**: Unique ID to allow the correlation of the `function_with_args_begin` event with the `function_with_args_end` event.
+       | **user_data**: A pointer to `function_with_args_t` object, that includes function ID, name, and arguments.
+       | `function_with_args_t::args_data` contains a pointer to `CUpti_CallbackData::functionParams`. See CUPTI documentation for more info:
+       | https://docs.nvidia.com/cupti/annotated.html#structCUpti__CallbackData
+     - None
+   * - `function_with_args_end`
+     - | **trace_type**: `xpti::trace_point_type_t::function_with_args_end` that marks the end of a function
+       | **parent**: nullptr
+       | **event**: nullptr
+       | **instance**: Unique ID to allow the correlation of the `function_with_args_end` event with the `function_with_args_begin` event.
+       | **user_data**: A pointer to `function_with_args_t` object, that includes function ID, name, arguments, and return value.
+       | `function_with_args_t::args_data` contains a pointer to `CUpti_CallbackData::functionParams`. See CUPTI documentation for more info:
+       | https://docs.nvidia.com/cupti/annotated.html#structCUpti__CallbackData
+     - None
+
 Logging
 ---------------------
 

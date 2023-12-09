@@ -84,3 +84,7 @@ target_link_libraries(${TARGET_NAME} PRIVATE
 target_include_directories(${TARGET_NAME} PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/../../"
 )
+
+if (UR_ENABLE_TRACING)
+  target_link_libraries(${TARGET_NAME} PRIVATE ${CUDA_cupti_LIBRARY})
+endif()
