@@ -9,8 +9,8 @@
 //===----------------------------------------------------------------------===//
 
 #include "common.hpp"
-#include "device.hpp"
 #include "context.hpp"
+#include "device.hpp"
 
 inline cl_mem_alloc_flags_intel
 hostDescToClFlags(const ur_usm_host_desc_t &desc) {
@@ -149,8 +149,8 @@ urUSMDeviceAlloc(ur_context_handle_t hContext, ur_device_handle_t hDevice,
   if (FuncPtr) {
     cl_int ClResult = CL_SUCCESS;
     Ptr = FuncPtr(CLContext, hDevice->get(),
-                  AllocProperties.empty() ? nullptr : AllocProperties.data(), size,
-                  Alignment, &ClResult);
+                  AllocProperties.empty() ? nullptr : AllocProperties.data(),
+                  size, Alignment, &ClResult);
     if (ClResult == CL_INVALID_BUFFER_SIZE) {
       return UR_RESULT_ERROR_INVALID_USM_SIZE;
     }
@@ -192,8 +192,8 @@ urUSMSharedAlloc(ur_context_handle_t hContext, ur_device_handle_t hDevice,
   if (FuncPtr) {
     cl_int ClResult = CL_SUCCESS;
     Ptr = FuncPtr(CLContext, hDevice->get(),
-                  AllocProperties.empty() ? nullptr : AllocProperties.data(), size,
-                  Alignment, cl_adapter::cast<cl_int *>(&ClResult));
+                  AllocProperties.empty() ? nullptr : AllocProperties.data(),
+                  size, Alignment, cl_adapter::cast<cl_int *>(&ClResult));
     if (ClResult == CL_INVALID_BUFFER_SIZE) {
       return UR_RESULT_ERROR_INVALID_USM_SIZE;
     }
@@ -551,9 +551,8 @@ urUSMGetMemAllocInfo(ur_context_handle_t hContext, const void *pMem,
   }
 
   size_t CheckPropSize = 0;
-  cl_int ClErr =
-      GetMemAllocInfo(hContext->get(), pMem, PropNameCL,
-                      propSize, pPropValue, &CheckPropSize);
+  cl_int ClErr = GetMemAllocInfo(hContext->get(), pMem, PropNameCL, propSize,
+                                 pPropValue, &CheckPropSize);
   if (pPropValue && CheckPropSize != propSize) {
     return UR_RESULT_ERROR_INVALID_SIZE;
   }

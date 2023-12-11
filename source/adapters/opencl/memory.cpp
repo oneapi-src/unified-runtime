@@ -270,9 +270,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
   }
 
   void *HostPtr = pProperties ? pProperties->pHost : nullptr;
-  *phBuffer = reinterpret_cast<ur_mem_handle_t>(clCreateBuffer(
-      hContext->get(), static_cast<cl_mem_flags>(flags),
-      size, HostPtr, cl_adapter::cast<cl_int *>(&RetErr)));
+  *phBuffer = reinterpret_cast<ur_mem_handle_t>(
+      clCreateBuffer(hContext->get(), static_cast<cl_mem_flags>(flags), size,
+                     HostPtr, cl_adapter::cast<cl_int *>(&RetErr)));
   CL_RETURN_ON_FAILURE(RetErr);
 
   return UR_RESULT_SUCCESS;
@@ -289,9 +289,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreate(
   cl_image_desc ImageDesc = mapURImageDescToCL(pImageDesc);
   cl_map_flags MapFlags = convertURMemFlagsToCL(flags);
 
-  *phMem = reinterpret_cast<ur_mem_handle_t>(clCreateImage(
-      hContext->get(), MapFlags, &ImageFormat,
-      &ImageDesc, pHost, cl_adapter::cast<cl_int *>(&RetErr)));
+  *phMem = reinterpret_cast<ur_mem_handle_t>(
+      clCreateImage(hContext->get(), MapFlags, &ImageFormat, &ImageDesc, pHost,
+                    cl_adapter::cast<cl_int *>(&RetErr)));
   CL_RETURN_ON_FAILURE(RetErr);
 
   return UR_RESULT_SUCCESS;

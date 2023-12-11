@@ -345,9 +345,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
   if (!F || Res != CL_SUCCESS)
     return UR_RESULT_ERROR_INVALID_OPERATION;
 
-  Res = F(cl_adapter::cast<cl_command_queue>(hQueue),
-          hProgram->get(), name, blockingWrite, count,
-          offset, pSrc, numEventsInWaitList,
+  Res = F(cl_adapter::cast<cl_command_queue>(hQueue), hProgram->get(), name,
+          blockingWrite, count, offset, pSrc, numEventsInWaitList,
           cl_adapter::cast<const cl_event *>(phEventWaitList),
           cl_adapter::cast<cl_event *>(phEvent));
 
@@ -376,9 +375,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
   if (!F || Res != CL_SUCCESS)
     return UR_RESULT_ERROR_INVALID_OPERATION;
 
-  Res = F(cl_adapter::cast<cl_command_queue>(hQueue),
-          hProgram->get(), name, blockingRead, count,
-          offset, pDst, numEventsInWaitList,
+  Res = F(cl_adapter::cast<cl_command_queue>(hQueue), hProgram->get(), name,
+          blockingRead, count, offset, pDst, numEventsInWaitList,
           cl_adapter::cast<const cl_event *>(phEventWaitList),
           cl_adapter::cast<cl_event *>(phEvent));
 
@@ -407,9 +405,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueReadHostPipe(
 
   if (FuncPtr) {
     RetVal = mapCLErrorToUR(
-        FuncPtr(cl_adapter::cast<cl_command_queue>(hQueue),
-                hProgram->get(), pipe_symbol, blocking,
-                pDst, size, numEventsInWaitList,
+        FuncPtr(cl_adapter::cast<cl_command_queue>(hQueue), hProgram->get(),
+                pipe_symbol, blocking, pDst, size, numEventsInWaitList,
                 cl_adapter::cast<const cl_event *>(phEventWaitList),
                 cl_adapter::cast<cl_event *>(phEvent)));
   }
@@ -439,9 +436,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueWriteHostPipe(
 
   if (FuncPtr) {
     RetVal = mapCLErrorToUR(
-        FuncPtr(cl_adapter::cast<cl_command_queue>(hQueue),
-                hProgram->get(), pipe_symbol, blocking,
-                pSrc, size, numEventsInWaitList,
+        FuncPtr(cl_adapter::cast<cl_command_queue>(hQueue), hProgram->get(),
+                pipe_symbol, blocking, pSrc, size, numEventsInWaitList,
                 cl_adapter::cast<const cl_event *>(phEventWaitList),
                 cl_adapter::cast<cl_event *>(phEvent)));
   }

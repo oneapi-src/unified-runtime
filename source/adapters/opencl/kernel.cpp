@@ -19,8 +19,8 @@ urKernelCreate(ur_program_handle_t hProgram, const char *pKernelName,
                ur_kernel_handle_t *phKernel) {
 
   cl_int CLResult;
-  *phKernel = cl_adapter::cast<ur_kernel_handle_t>(clCreateKernel(
-      hProgram->get(), pKernelName, &CLResult));
+  *phKernel = cl_adapter::cast<ur_kernel_handle_t>(
+      clCreateKernel(hProgram->get(), pKernelName, &CLResult));
   CL_RETURN_ON_FAILURE(CLResult);
   return UR_RESULT_SUCCESS;
 }

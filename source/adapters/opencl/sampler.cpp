@@ -145,9 +145,8 @@ ur_result_t urSamplerCreate(ur_context_handle_t hContext,
 
   // Always call OpenCL 1.0 API
   *phSampler = cl_adapter::cast<ur_sampler_handle_t>(clCreateSampler(
-      hContext->get(),
-      static_cast<cl_bool>(pDesc->normalizedCoords), AddressingMode, FilterMode,
-      cl_adapter::cast<cl_int *>(&ErrorCode)));
+      hContext->get(), static_cast<cl_bool>(pDesc->normalizedCoords),
+      AddressingMode, FilterMode, cl_adapter::cast<cl_int *>(&ErrorCode)));
 
   return mapCLErrorToUR(ErrorCode);
 }
