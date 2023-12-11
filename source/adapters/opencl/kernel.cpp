@@ -9,6 +9,7 @@
 //===----------------------------------------------------------------------===//
 #include "common.hpp"
 #include "device.hpp"
+#include "program.hpp"
 
 #include <algorithm>
 #include <memory>
@@ -19,7 +20,7 @@ urKernelCreate(ur_program_handle_t hProgram, const char *pKernelName,
 
   cl_int CLResult;
   *phKernel = cl_adapter::cast<ur_kernel_handle_t>(clCreateKernel(
-      cl_adapter::cast<cl_program>(hProgram), pKernelName, &CLResult));
+      hProgram->get(), pKernelName, &CLResult));
   CL_RETURN_ON_FAILURE(CLResult);
   return UR_RESULT_SUCCESS;
 }
