@@ -9,6 +9,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "common.hpp"
+#include "program.hpp"
 
 cl_map_flags convertURMapFlagsToCL(ur_map_flags_t URFlags) {
   cl_map_flags CLFlags = 0;
@@ -355,7 +356,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
     return UR_RESULT_ERROR_INVALID_OPERATION;
 
   Res = F(cl_adapter::cast<cl_command_queue>(hQueue),
-          cl_adapter::cast<cl_program>(hProgram), name, blockingWrite, count,
+          hProgram->get(), name, blockingWrite, count,
           offset, pSrc, numEventsInWaitList,
           cl_adapter::cast<const cl_event *>(phEventWaitList),
           cl_adapter::cast<cl_event *>(phEvent));
@@ -386,7 +387,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
     return UR_RESULT_ERROR_INVALID_OPERATION;
 
   Res = F(cl_adapter::cast<cl_command_queue>(hQueue),
-          cl_adapter::cast<cl_program>(hProgram), name, blockingRead, count,
+          hProgram->get(), name, blockingRead, count,
           offset, pDst, numEventsInWaitList,
           cl_adapter::cast<const cl_event *>(phEventWaitList),
           cl_adapter::cast<cl_event *>(phEvent));
@@ -417,7 +418,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueReadHostPipe(
   if (FuncPtr) {
     RetVal = mapCLErrorToUR(
         FuncPtr(cl_adapter::cast<cl_command_queue>(hQueue),
-                cl_adapter::cast<cl_program>(hProgram), pipe_symbol, blocking,
+                hProgram->get(), pipe_symbol, blocking,
                 pDst, size, numEventsInWaitList,
                 cl_adapter::cast<const cl_event *>(phEventWaitList),
                 cl_adapter::cast<cl_event *>(phEvent)));
@@ -449,7 +450,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueWriteHostPipe(
   if (FuncPtr) {
     RetVal = mapCLErrorToUR(
         FuncPtr(cl_adapter::cast<cl_command_queue>(hQueue),
-                cl_adapter::cast<cl_program>(hProgram), pipe_symbol, blocking,
+                hProgram->get(), pipe_symbol, blocking,
                 pSrc, size, numEventsInWaitList,
                 cl_adapter::cast<const cl_event *>(phEventWaitList),
                 cl_adapter::cast<cl_event *>(phEvent)));
