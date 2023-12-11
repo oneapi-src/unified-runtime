@@ -8,6 +8,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "memory.hpp"
 #include "common.hpp"
 #include "context.hpp"
 
@@ -262,18 +263,20 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
       }
       PropertiesIntel.push_back(0);
 
-      *phBuffer = reinterpret_cast<ur_mem_handle_t>(FuncPtr(
+      cl_mem Buffer = FuncPtr(
           CLContext, PropertiesIntel.data(), static_cast<cl_mem_flags>(flags),
-          size, pProperties->pHost, cl_adapter::cast<cl_int *>(&RetErr)));
+          size, pProperties->pHost, cl_adapter::cast<cl_int *>(&RetErr));
+      *phBuffer = new ur_mem_handle_t_(Buffer, hContext);
       return mapCLErrorToUR(RetErr);
     }
   }
 
   void *HostPtr = pProperties ? pProperties->pHost : nullptr;
-  *phBuffer = reinterpret_cast<ur_mem_handle_t>(
+  cl_mem Buffer =
       clCreateBuffer(hContext->get(), static_cast<cl_mem_flags>(flags), size,
-                     HostPtr, cl_adapter::cast<cl_int *>(&RetErr)));
+                     HostPtr, cl_adapter::cast<cl_int *>(&RetErr));
   CL_RETURN_ON_FAILURE(RetErr);
+  *phBuffer = new ur_mem_handle_t_(Buffer, hContext);
 
   return UR_RESULT_SUCCESS;
 }
@@ -289,10 +292,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreate(
   cl_image_desc ImageDesc = mapURImageDescToCL(pImageDesc);
   cl_map_flags MapFlags = convertURMemFlagsToCL(flags);
 
-  *phMem = reinterpret_cast<ur_mem_handle_t>(
+  cl_mem Mem =
       clCreateImage(hContext->get(), MapFlags, &ImageFormat, &ImageDesc, pHost,
-                    cl_adapter::cast<cl_int *>(&RetErr)));
+                    cl_adapter::cast<cl_int *>(&RetErr));
   CL_RETURN_ON_FAILURE(RetErr);
+  *phMem = new ur_mem_handle_t_(Mem, hContext);
 
   return UR_RESULT_SUCCESS;
 }
@@ -318,30 +322,29 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferPartition(
   BufferRegion.size = pRegion->size;
 
   *phMem = reinterpret_cast<ur_mem_handle_t>(clCreateSubBuffer(
-      cl_adapter::cast<cl_mem>(hBuffer), static_cast<cl_mem_flags>(flags),
-      BufferCreateType, &BufferRegion, cl_adapter::cast<cl_int *>(&RetErr)));
+      hBuffer->get(), static_cast<cl_mem_flags>(flags), BufferCreateType,
+      &BufferRegion, cl_adapter::cast<cl_int *>(&RetErr)));
 
   if (RetErr == CL_INVALID_VALUE) {
     size_t BufferSize = 0;
-    CL_RETURN_ON_FAILURE(clGetMemObjectInfo(cl_adapter::cast<cl_mem>(hBuffer),
-                                            CL_MEM_SIZE, sizeof(BufferSize),
-                                            &BufferSize, nullptr));
+    CL_RETURN_ON_FAILURE(clGetMemObjectInfo(
+        hBuffer->get(), CL_MEM_SIZE, sizeof(BufferSize), &BufferSize, nullptr));
     if (BufferRegion.size + BufferRegion.origin > BufferSize)
       return UR_RESULT_ERROR_INVALID_BUFFER_SIZE;
   }
   return mapCLErrorToUR(RetErr);
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urMemGetNativeHandle(
-    ur_mem_handle_t hMem, ur_device_handle_t, ur_native_handle_t *phNativeMem) {
-  return getNativeHandle(hMem, phNativeMem);
+UR_APIEXPORT ur_result_t UR_APICALL
+urMemGetNativeHandle(ur_mem_handle_t hMem, ur_native_handle_t *phNativeMem) {
+  return getNativeHandle(hMem->get(), phNativeMem);
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
-    ur_native_handle_t hNativeMem,
-    [[maybe_unused]] ur_context_handle_t hContext,
+    ur_native_handle_t hNativeMem, ur_context_handle_t hContext,
     const ur_mem_native_properties_t *pProperties, ur_mem_handle_t *phMem) {
-  *phMem = reinterpret_cast<ur_mem_handle_t>(hNativeMem);
+  cl_mem NativeHandle = reinterpret_cast<cl_mem>(hNativeMem);
+  *phMem = new ur_mem_handle_t_(NativeHandle, hContext);
   if (!pProperties || !pProperties->isNativeHandleOwned) {
     return urMemRetain(*phMem);
   }
@@ -349,12 +352,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
-    ur_native_handle_t hNativeMem,
-    [[maybe_unused]] ur_context_handle_t hContext,
+    ur_native_handle_t hNativeMem, ur_context_handle_t hContext,
     [[maybe_unused]] const ur_image_format_t *pImageFormat,
     [[maybe_unused]] const ur_image_desc_t *pImageDesc,
     const ur_mem_native_properties_t *pProperties, ur_mem_handle_t *phMem) {
-  *phMem = reinterpret_cast<ur_mem_handle_t>(hNativeMem);
+  cl_mem NativeHandle = reinterpret_cast<cl_mem>(hNativeMem);
+  *phMem = new ur_mem_handle_t_(NativeHandle, hContext);
   if (!pProperties || !pProperties->isNativeHandleOwned) {
     return urMemRetain(*phMem);
   }
@@ -370,17 +373,24 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemGetInfo(ur_mem_handle_t hMemory,
   UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
   const cl_int CLPropName = mapURMemInfoToCL(propName);
 
-  size_t CheckPropSize = 0;
-  auto ClResult =
-      clGetMemObjectInfo(cl_adapter::cast<cl_mem>(hMemory), CLPropName,
-                         propSize, pPropValue, &CheckPropSize);
-  if (pPropValue && CheckPropSize != propSize) {
-    return UR_RESULT_ERROR_INVALID_SIZE;
+  switch (static_cast<uint32_t>(propName)) {
+  case UR_PROGRAM_INFO_CONTEXT: {
+    return ReturnValue(hMemory->Context);
   }
-  CL_RETURN_ON_FAILURE(ClResult);
-  if (pPropSizeRet) {
-    *pPropSizeRet = CheckPropSize;
+  default: {
+    size_t CheckPropSize = 0;
+    auto ClResult = clGetMemObjectInfo(hMemory->get(), CLPropName, propSize,
+                                       pPropValue, &CheckPropSize);
+    if (pPropValue && CheckPropSize != propSize) {
+      return UR_RESULT_ERROR_INVALID_SIZE;
+    }
+    CL_RETURN_ON_FAILURE(ClResult);
+    if (pPropSizeRet) {
+      *pPropSizeRet = CheckPropSize;
+    }
   }
+  }
+
   return UR_RESULT_SUCCESS;
 }
 
@@ -394,8 +404,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageGetInfo(ur_mem_handle_t hMemory,
   const cl_int CLPropName = mapURMemImageInfoToCL(propName);
 
   size_t CheckPropSize = 0;
-  auto ClResult = clGetImageInfo(cl_adapter::cast<cl_mem>(hMemory), CLPropName,
-                                 propSize, pPropValue, &CheckPropSize);
+  auto ClResult = clGetImageInfo(hMemory->get(), CLPropName, propSize,
+                                 pPropValue, &CheckPropSize);
   if (pPropValue && CheckPropSize != propSize) {
     return UR_RESULT_ERROR_INVALID_SIZE;
   }
@@ -407,11 +417,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageGetInfo(ur_mem_handle_t hMemory,
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urMemRetain(ur_mem_handle_t hMem) {
-  CL_RETURN_ON_FAILURE(clRetainMemObject(cl_adapter::cast<cl_mem>(hMem)));
+  CL_RETURN_ON_FAILURE(clRetainMemObject(hMem->get()));
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urMemRelease(ur_mem_handle_t hMem) {
-  CL_RETURN_ON_FAILURE(clReleaseMemObject(cl_adapter::cast<cl_mem>(hMem)));
+  CL_RETURN_ON_FAILURE(clReleaseMemObject(hMem->get()));
   return UR_RESULT_SUCCESS;
 }

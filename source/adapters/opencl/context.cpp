@@ -91,8 +91,12 @@ urContextGetInfo(ur_context_handle_t hContext, ur_context_info_t propName,
      * queries of each device separately and building the intersection set. */
     return UR_RESULT_ERROR_INVALID_ARGUMENT;
   }
-  case UR_CONTEXT_INFO_NUM_DEVICES:
-  case UR_CONTEXT_INFO_DEVICES:
+  case UR_CONTEXT_INFO_NUM_DEVICES: {
+    return ReturnValue(hContext->DeviceCount);
+  }
+  case UR_CONTEXT_INFO_DEVICES: {
+    return ReturnValue(hContext->Devices);
+  }
   case UR_CONTEXT_INFO_REFERENCE_COUNT: {
     size_t CheckPropSize = 0;
     auto ClResult = clGetContextInfo(hContext->get(), CLPropName, propSize,
