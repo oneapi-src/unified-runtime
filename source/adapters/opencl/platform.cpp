@@ -66,9 +66,9 @@ urPlatformGetInfo(ur_platform_handle_t hPlatform, ur_platform_info_t propName,
     if (hPlatform) {
       Plat = hPlatform->get();
     }
-    CL_RETURN_ON_FAILURE(clGetPlatformInfo(Plat, CLPropName,
-                                           propSize, pPropValue, pSizeRet));
-    
+    CL_RETURN_ON_FAILURE(
+        clGetPlatformInfo(Plat, CLPropName, propSize, pPropValue, pSizeRet));
+
     return UR_RESULT_SUCCESS;
   }
   default:
@@ -93,26 +93,25 @@ urPlatformGet(ur_adapter_handle_t *, uint32_t, uint32_t NumEntries,
   cl_int Result = CL_SUCCESS;
 
   std::call_once(
-    InitFlag,
-    [](cl_int &Result) {
-      Result = clGetPlatformIDs(0, nullptr, &NumPlatforms);
-      if (Result != CL_SUCCESS) {
+      InitFlag,
+      [](cl_int &Result) {
+        Result = clGetPlatformIDs(0, nullptr, &NumPlatforms);
+        if (Result != CL_SUCCESS) {
+          return Result;
+        }
+        std::vector<cl_platform_id> CLPlatforms(NumPlatforms);
+        Result = clGetPlatformIDs(cl_adapter::cast<cl_uint>(NumPlatforms),
+                                  CLPlatforms.data(), nullptr);
+        if (Result != CL_SUCCESS) {
+          return Result;
+        }
+        URPlatforms.resize(NumPlatforms);
+        for (uint32_t i = 0; i < NumPlatforms; i++) {
+          URPlatforms[i] = new ur_platform_handle_t_(CLPlatforms[i]);
+        }
         return Result;
-      }
-      std::vector<cl_platform_id> CLPlatforms(NumPlatforms);
-      Result = clGetPlatformIDs(cl_adapter::cast<cl_uint>(NumPlatforms),
-                                CLPlatforms.data(),
-                                nullptr);
-      if (Result != CL_SUCCESS) {
-        return Result;
-      }
-      URPlatforms.resize(NumPlatforms);
-      for (uint32_t i = 0; i < NumPlatforms; i++) {
-        URPlatforms[i] = new ur_platform_handle_t_(CLPlatforms[i]);
-      }
-      return Result;
-    },
-    Result);
+      },
+      Result);
 
   /* Absorb the CL_PLATFORM_NOT_FOUND_KHR and just return 0 in num_platforms */
   if (Result == CL_PLATFORM_NOT_FOUND_KHR) {

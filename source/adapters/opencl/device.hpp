@@ -24,14 +24,16 @@ struct ur_device_handle_t_ {
   native_type Device;
   ur_platform_handle_t Platform;
   cl_device_type Type = 0;
-  ur_device_handle_t ParentDevice = nullptr; 
+  ur_device_handle_t ParentDevice = nullptr;
 
-  ur_device_handle_t_(native_type Dev, ur_platform_handle_t Plat, ur_device_handle_t Parent)
+  ur_device_handle_t_(native_type Dev, ur_platform_handle_t Plat,
+                      ur_device_handle_t Parent)
       : Device(Dev), Platform(Plat), ParentDevice(Parent) {
     if (Parent) {
       Type = Parent->Type;
     } else {
-      clGetDeviceInfo(Device, CL_DEVICE_TYPE, sizeof(cl_device_type), &Type, nullptr);
+      clGetDeviceInfo(Device, CL_DEVICE_TYPE, sizeof(cl_device_type), &Type,
+                      nullptr);
     }
   }
 

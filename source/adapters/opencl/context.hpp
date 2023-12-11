@@ -21,18 +21,20 @@ getDevicesFromContext(ur_context_handle_t hContext,
 }
 
 struct ur_context_handle_t_ {
-    using native_type = cl_context;
-    native_type Context;
-    std::vector<ur_device_handle_t> Devices;
-    uint32_t DeviceCount;
+  using native_type = cl_context;
+  native_type Context;
+  std::vector<ur_device_handle_t> Devices;
+  uint32_t DeviceCount;
 
-    ur_context_handle_t_(native_type Ctx, uint32_t DevCount, const ur_device_handle_t *phDevices) : Context(Ctx), DeviceCount(DevCount) {
-        for (uint32_t i = 0; i < DeviceCount; i++) {
-            Devices.emplace_back(phDevices[i]);
-        }
+  ur_context_handle_t_(native_type Ctx, uint32_t DevCount,
+                       const ur_device_handle_t *phDevices)
+      : Context(Ctx), DeviceCount(DevCount) {
+    for (uint32_t i = 0; i < DeviceCount; i++) {
+      Devices.emplace_back(phDevices[i]);
     }
+  }
 
-    ~ur_context_handle_t_() {}
+  ~ur_context_handle_t_() {}
 
-    native_type get() { return Context; }
+  native_type get() { return Context; }
 };

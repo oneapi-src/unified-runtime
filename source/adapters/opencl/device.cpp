@@ -52,11 +52,10 @@ ur_result_t cl_adapter::checkDeviceExtensions(
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urDeviceGet(ur_platform_handle_t hPlatform,
-                                                ur_device_type_t DeviceType,
-                                                [[maybe_unused]] uint32_t NumEntries,
-                                                ur_device_handle_t *phDevices,
-                                                uint32_t *pNumDevices) {
+UR_APIEXPORT ur_result_t UR_APICALL
+urDeviceGet(ur_platform_handle_t hPlatform, ur_device_type_t DeviceType,
+            [[maybe_unused]] uint32_t NumEntries, ur_device_handle_t *phDevices,
+            uint32_t *pNumDevices) {
 
   cl_device_type Type;
   switch (DeviceType) {
@@ -1022,7 +1021,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urDevicePartition(
                                             CLNumDevicesRet,
                                             CLSubDevices.data(), nullptr));
     for (uint32_t i = 0; i < NumDevices; i++) {
-      phSubDevices[i] = new ur_device_handle_t_(CLSubDevices[i], hDevice->Platform, hDevice);
+      phSubDevices[i] =
+          new ur_device_handle_t_(CLSubDevices[i], hDevice->Platform, hDevice);
     }
   }
 

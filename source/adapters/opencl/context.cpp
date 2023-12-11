@@ -42,9 +42,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextCreate(
     CLDevices[i] = phDevices[i]->get();
   }
 
-  cl_context Ctx = clCreateContext(nullptr, cl_adapter::cast<cl_uint>(DeviceCount),
-                      CLDevices.data(),
-                      nullptr, nullptr, cl_adapter::cast<cl_int *>(&Ret));
+  cl_context Ctx = clCreateContext(
+      nullptr, cl_adapter::cast<cl_uint>(DeviceCount), CLDevices.data(),
+      nullptr, nullptr, cl_adapter::cast<cl_int *>(&Ret));
 
   *phContext = new ur_context_handle_t_(Ctx, DeviceCount, phDevices);
   return mapCLErrorToUR(Ret);
@@ -95,9 +95,8 @@ urContextGetInfo(ur_context_handle_t hContext, ur_context_info_t propName,
   case UR_CONTEXT_INFO_DEVICES:
   case UR_CONTEXT_INFO_REFERENCE_COUNT: {
     size_t CheckPropSize = 0;
-    auto ClResult =
-        clGetContextInfo(hContext->get(), CLPropName,
-                         propSize, pPropValue, &CheckPropSize);
+    auto ClResult = clGetContextInfo(hContext->get(), CLPropName, propSize,
+                                     pPropValue, &CheckPropSize);
     if (pPropValue && CheckPropSize != propSize) {
       return UR_RESULT_ERROR_INVALID_SIZE;
     }
@@ -137,8 +136,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextCreateWithNativeHandle(
     ur_native_handle_t hNativeContext, uint32_t numDevices, const ur_device_handle_t *phDevices,
     const ur_context_native_properties_t *pProperties, ur_context_handle_t *phContext) {
 
-  cl_context NativeHandle =
-      reinterpret_cast<cl_context>(hNativeContext);
+  cl_context NativeHandle = reinterpret_cast<cl_context>(hNativeContext);
   *phContext = new ur_context_handle_t_(NativeHandle, numDevices, phDevices);
   if (!pProperties || !pProperties->isNativeHandleOwned) {
     return clRetainContext(NativeHandle);
@@ -192,8 +190,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextSetExtendedDeleter(
     auto *C = static_cast<ContextCallback *>(pUserData);
     C->execute();
   };
-  CL_RETURN_ON_FAILURE(clSetContextDestructorCallback(
-      hContext->get(), ClCallback, Callback));
+  CL_RETURN_ON_FAILURE(
+      clSetContextDestructorCallback(hContext->get(), ClCallback, Callback));
 
   return UR_RESULT_SUCCESS;
 }
