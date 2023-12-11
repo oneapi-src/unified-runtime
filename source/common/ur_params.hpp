@@ -337,6 +337,8 @@ inline std::ostream &operator<<(std::ostream &os,
                                 const struct ur_usm_host_desc_t params);
 inline std::ostream &operator<<(std::ostream &os,
                                 const struct ur_usm_device_desc_t params);
+inline std::ostream &
+operator<<(std::ostream &os, const struct ur_usm_alloc_location_desc_t params);
 inline std::ostream &operator<<(std::ostream &os,
                                 const struct ur_usm_pool_desc_t params);
 inline std::ostream &operator<<(std::ostream &os,
@@ -1299,6 +1301,10 @@ inline std::ostream &operator<<(std::ostream &os,
         os << "UR_STRUCTURE_TYPE_KERNEL_ARG_LOCAL_PROPERTIES";
         break;
 
+    case UR_STRUCTURE_TYPE_USM_ALLOC_LOCATION_DESC:
+        os << "UR_STRUCTURE_TYPE_USM_ALLOC_LOCATION_DESC";
+        break;
+
     case UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_DESC:
         os << "UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_DESC";
         break;
@@ -1531,6 +1537,12 @@ inline void serializeStruct(std::ostream &os, const void *ptr) {
     case UR_STRUCTURE_TYPE_KERNEL_ARG_LOCAL_PROPERTIES: {
         const ur_kernel_arg_local_properties_t *pstruct =
             (const ur_kernel_arg_local_properties_t *)ptr;
+        ur_params::serializePtr(os, pstruct);
+    } break;
+
+    case UR_STRUCTURE_TYPE_USM_ALLOC_LOCATION_DESC: {
+        const ur_usm_alloc_location_desc_t *pstruct =
+            (const ur_usm_alloc_location_desc_t *)ptr;
         ur_params::serializePtr(os, pstruct);
     } break;
 
@@ -7340,6 +7352,27 @@ inline std::ostream &operator<<(std::ostream &os,
     os << ".flags = ";
 
     ur_params::serializeFlag<ur_usm_device_mem_flag_t>(os, (params.flags));
+
+    os << "}";
+    return os;
+}
+inline std::ostream &
+operator<<(std::ostream &os, const struct ur_usm_alloc_location_desc_t params) {
+    os << "(struct ur_usm_alloc_location_desc_t){";
+
+    os << ".stype = ";
+
+    os << (params.stype);
+
+    os << ", ";
+    os << ".pNext = ";
+
+    ur_params::serializeStruct(os, (params.pNext));
+
+    os << ", ";
+    os << ".location = ";
+
+    os << (params.location);
 
     os << "}";
     return os;
