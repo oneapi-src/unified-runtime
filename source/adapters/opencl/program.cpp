@@ -170,17 +170,36 @@ static cl_int mapURProgramInfoToCL(ur_program_info_t URPropName) {
 UR_APIEXPORT ur_result_t UR_APICALL
 urProgramGetInfo(ur_program_handle_t hProgram, ur_program_info_t propName,
                  size_t propSize, void *pPropValue, size_t *pPropSizeRet) {
-  size_t CheckPropSize = 0;
-  auto ClResult =
-      clGetProgramInfo(hProgram->get(), mapURProgramInfoToCL(propName),
-                       propSize, pPropValue, &CheckPropSize);
-  if (pPropValue && CheckPropSize != propSize) {
-    return UR_RESULT_ERROR_INVALID_SIZE;
+
+  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+
+  const cl_program_info CLPropName = mapURProgramInfoToCL(propName);
+
+  switch (static_cast<uint32_t>(propName)) {
+  case UR_PROGRAM_INFO_CONTEXT: {
+    return ReturnValue(hProgram->Context);
   }
-  CL_RETURN_ON_FAILURE(ClResult);
-  if (pPropSizeRet) {
-    *pPropSizeRet = CheckPropSize;
+  case UR_PROGRAM_INFO_NUM_DEVICES: {
+    if (!hProgram->Context || !hProgram->Context->DeviceCount) {
+      return UR_RESULT_ERROR_INVALID_PROGRAM;
+    }
+    cl_uint DeviceCount = hProgram->Context->DeviceCount;
+    return ReturnValue(DeviceCount);
   }
+  default: {
+    size_t CheckPropSize = 0;
+    auto ClResult = clGetProgramInfo(hProgram->get(), CLPropName, propSize,
+                                     pPropValue, &CheckPropSize);
+    if (pPropValue && CheckPropSize != propSize) {
+      return UR_RESULT_ERROR_INVALID_SIZE;
+    }
+    CL_RETURN_ON_FAILURE(ClResult);
+    if (pPropSizeRet) {
+      *pPropSizeRet = CheckPropSize;
+    }
+  }
+  }
+
   return UR_RESULT_SUCCESS;
 }
 

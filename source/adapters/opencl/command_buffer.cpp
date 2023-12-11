@@ -11,6 +11,7 @@
 #include "command_buffer.hpp"
 #include "common.hpp"
 #include "context.hpp"
+#include "memory.hpp"
 
 UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferCreateExp(
     ur_context_handle_t hContext, ur_device_handle_t hDevice,
@@ -166,8 +167,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
     return UR_RESULT_ERROR_INVALID_OPERATION;
 
   CL_RETURN_ON_FAILURE(clCommandCopyBufferKHR(
-      hCommandBuffer->CLCommandBuffer, nullptr,
-      cl_adapter::cast<cl_mem>(hSrcMem), cl_adapter::cast<cl_mem>(hDstMem),
+      hCommandBuffer->CLCommandBuffer, nullptr, hSrcMem->get(), hDstMem->get(),
       srcOffset, dstOffset, size, numSyncPointsInWaitList, pSyncPointWaitList,
       pSyncPoint, nullptr));
 
@@ -203,8 +203,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
     return UR_RESULT_ERROR_INVALID_OPERATION;
 
   CL_RETURN_ON_FAILURE(clCommandCopyBufferRectKHR(
-      hCommandBuffer->CLCommandBuffer, nullptr,
-      cl_adapter::cast<cl_mem>(hSrcMem), cl_adapter::cast<cl_mem>(hDstMem),
+      hCommandBuffer->CLCommandBuffer, nullptr, hSrcMem->get(), hDstMem->get(),
       OpenCLOriginRect, OpenCLDstRect, OpenCLRegion, srcRowPitch, srcSlicePitch,
       dstRowPitch, dstSlicePitch, numSyncPointsInWaitList, pSyncPointWaitList,
       pSyncPoint, nullptr));
@@ -292,9 +291,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
     return UR_RESULT_ERROR_INVALID_OPERATION;
 
   CL_RETURN_ON_FAILURE(clCommandFillBufferKHR(
-      hCommandBuffer->CLCommandBuffer, nullptr,
-      cl_adapter::cast<cl_mem>(hBuffer), pPattern, patternSize, offset, size,
-      numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint, nullptr));
+      hCommandBuffer->CLCommandBuffer, nullptr, hBuffer->get(), pPattern,
+      patternSize, offset, size, numSyncPointsInWaitList, pSyncPointWaitList,
+      pSyncPoint, nullptr));
 
   return UR_RESULT_SUCCESS;
 }
