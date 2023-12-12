@@ -95,7 +95,7 @@ urContextGetInfo(ur_context_handle_t hContext, ur_context_info_t propName,
     return ReturnValue(hContext->DeviceCount);
   }
   case UR_CONTEXT_INFO_DEVICES: {
-    return ReturnValue(hContext->Devices);
+    return ReturnValue(&hContext->Devices[0], hContext->DeviceCount);
   }
   case UR_CONTEXT_INFO_REFERENCE_COUNT: {
     size_t CheckPropSize = 0;
