@@ -8,6 +8,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include <limits>
 #include <cassert>
 
 #include "adapter.hpp"
@@ -133,7 +134,15 @@ ur_result_t USMHostAllocImpl(void **ResultPtr,
                              ur_usm_host_mem_flags_t *, size_t Size,
                              [[maybe_unused]] uint32_t Alignment) {
   try {
-    UR_CHECK_ERROR(hipHostMalloc(ResultPtr, Size));
+    unsigned flag = 0;
+
+    if (const char *e = getenv("UR_HIP_HOST_ALLOC_FLAGS")) {
+        unsigned long long u;
+        u = strtoull(e, nullptr, 0);
+        assert(flag < std::numeric_limits<unsigned>::max());
+        flag = u;
+    }
+    UR_CHECK_ERROR(hipHostMalloc(ResultPtr, Size, flag));
   } catch (ur_result_t Err) {
     return Err;
   }
