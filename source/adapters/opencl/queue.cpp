@@ -6,6 +6,7 @@
 //
 //===-----------------------------------------------------------------===//
 
+#include "queue.hpp"
 #include "common.hpp"
 #include "context.hpp"
 #include "device.hpp"
@@ -73,11 +74,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreate(
     ur_context_handle_t hContext, ur_device_handle_t hDevice,
     const ur_queue_properties_t *pProperties, ur_queue_handle_t *phQueue) {
 
-  cl_platform_id CurPlatform;
-  CL_RETURN_ON_FAILURE_AND_SET_NULL(
-      clGetDeviceInfo(hDevice->get(), CL_DEVICE_PLATFORM,
-                      sizeof(cl_platform_id), &CurPlatform, nullptr),
-      phQueue);
+  cl_platform_id CurPlatform = hDevice->Platform->get();
 
   cl_command_queue_properties CLProperties =
       pProperties ? convertURQueuePropertiesToCL(pProperties) : 0;
@@ -94,20 +91,21 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreate(
   cl_int RetErr = CL_INVALID_OPERATION;
 
   if (Version < oclv::V2_0) {
-    *phQueue = cl_adapter::cast<ur_queue_handle_t>(
+    cl_command_queue Queue =
         clCreateCommandQueue(hContext->get(), hDevice->get(),
-                             CLProperties & SupportByOpenCL, &RetErr));
+                             CLProperties & SupportByOpenCL, &RetErr);
     CL_RETURN_ON_FAILURE(RetErr);
+    *phQueue = new ur_queue_handle_t_(Queue, hContext, hDevice);
     return UR_RESULT_SUCCESS;
   }
 
   /* TODO: Add support for CL_QUEUE_PRIORITY_KHR */
   cl_queue_properties CreationFlagProperties[] = {
       CL_QUEUE_PROPERTIES, CLProperties & SupportByOpenCL, 0};
-  *phQueue =
-      cl_adapter::cast<ur_queue_handle_t>(clCreateCommandQueueWithProperties(
-          hContext->get(), hDevice->get(), CreationFlagProperties, &RetErr));
+  cl_command_queue Queue = clCreateCommandQueueWithProperties(
+      hContext->get(), hDevice->get(), CreationFlagProperties, &RetErr);
   CL_RETURN_ON_FAILURE(RetErr);
+  *phQueue = new ur_queue_handle_t_(Queue, hContext, hDevice);
   return UR_RESULT_SUCCESS;
 }
 
@@ -121,23 +119,27 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueGetInfo(ur_queue_handle_t hQueue,
     return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
   }
   cl_command_queue_info CLCommandQueueInfo = mapURQueueInfoToCL(propName);
+  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
 
+  if (propName == UR_QUEUE_INFO_CONTEXT) {
+    return ReturnValue(hQueue->Context);
+  }
+  if (propName == UR_QUEUE_INFO_DEVICE) {
+    return ReturnValue(hQueue->Device);
+  }
   // Unfortunately the size of cl_bitfield (unsigned long) doesn't line up with
   // our enums (forced to be sizeof(uint32_t)) so this needs special handling.
   if (propName == UR_QUEUE_INFO_FLAGS) {
-    UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
-
     cl_command_queue_properties QueueProperties = 0;
     CL_RETURN_ON_FAILURE(clGetCommandQueueInfo(
-        cl_adapter::cast<cl_command_queue>(hQueue), CLCommandQueueInfo,
-        sizeof(QueueProperties), &QueueProperties, nullptr));
+        hQueue->get(), CLCommandQueueInfo, sizeof(QueueProperties),
+        &QueueProperties, nullptr));
 
     return ReturnValue(mapCLQueuePropsToUR(QueueProperties));
   } else {
     size_t CheckPropSize = 0;
-    cl_int RetErr = clGetCommandQueueInfo(
-        cl_adapter::cast<cl_command_queue>(hQueue), CLCommandQueueInfo,
-        propSize, pPropValue, &CheckPropSize);
+    cl_int RetErr = clGetCommandQueueInfo(hQueue->get(), CLCommandQueueInfo,
+                                          propSize, pPropValue, &CheckPropSize);
     if (pPropValue && CheckPropSize != propSize) {
       return UR_RESULT_ERROR_INVALID_SIZE;
     }
@@ -153,7 +155,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueGetInfo(ur_queue_handle_t hQueue,
 UR_APIEXPORT ur_result_t UR_APICALL
 urQueueGetNativeHandle(ur_queue_handle_t hQueue, ur_queue_native_desc_t *,
                        ur_native_handle_t *phNativeQueue) {
-  return getNativeHandle(hQueue, phNativeQueue);
+  return getNativeHandle(hQueue->get(), phNativeQueue);
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
@@ -163,7 +165,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
     [[maybe_unused]] const ur_queue_native_properties_t *pProperties,
     ur_queue_handle_t *phQueue) {
 
-  *phQueue = reinterpret_cast<ur_queue_handle_t>(hNativeQueue);
+  cl_command_queue NativeHandle =
+      reinterpret_cast<cl_command_queue>(hNativeQueue);
+  *phQueue = new ur_queue_handle_t_(NativeHandle, hContext, hDevice);
+
   cl_int RetErr =
       clRetainCommandQueue(cl_adapter::cast<cl_command_queue>(hNativeQueue));
   CL_RETURN_ON_FAILURE(RetErr);
@@ -171,27 +176,25 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urQueueFinish(ur_queue_handle_t hQueue) {
-  cl_int RetErr = clFinish(cl_adapter::cast<cl_command_queue>(hQueue));
+  cl_int RetErr = clFinish(hQueue->get());
   CL_RETURN_ON_FAILURE(RetErr);
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urQueueFlush(ur_queue_handle_t hQueue) {
-  cl_int RetErr = clFinish(cl_adapter::cast<cl_command_queue>(hQueue));
+  cl_int RetErr = clFinish(hQueue->get());
   CL_RETURN_ON_FAILURE(RetErr);
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urQueueRetain(ur_queue_handle_t hQueue) {
-  cl_int RetErr =
-      clRetainCommandQueue(cl_adapter::cast<cl_command_queue>(hQueue));
+  cl_int RetErr = clRetainCommandQueue(hQueue->get());
   CL_RETURN_ON_FAILURE(RetErr);
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urQueueRelease(ur_queue_handle_t hQueue) {
-  cl_int RetErr =
-      clReleaseCommandQueue(cl_adapter::cast<cl_command_queue>(hQueue));
+  cl_int RetErr = clReleaseCommandQueue(hQueue->get());
   CL_RETURN_ON_FAILURE(RetErr);
   return UR_RESULT_SUCCESS;
 }

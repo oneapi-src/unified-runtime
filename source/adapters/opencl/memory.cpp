@@ -374,7 +374,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemGetInfo(ur_mem_handle_t hMemory,
   const cl_int CLPropName = mapURMemInfoToCL(propName);
 
   switch (static_cast<uint32_t>(propName)) {
-  case UR_PROGRAM_INFO_CONTEXT: {
+  case UR_MEM_INFO_CONTEXT: {
     return ReturnValue(hMemory->Context);
   }
   default: {

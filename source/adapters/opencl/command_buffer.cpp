@@ -11,7 +11,9 @@
 #include "command_buffer.hpp"
 #include "common.hpp"
 #include "context.hpp"
+#include "event.hpp"
 #include "memory.hpp"
+#include "queue.hpp"
 
 UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferCreateExp(
     ur_context_handle_t hContext, ur_device_handle_t hDevice,
@@ -30,9 +32,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferCreateExp(
 
   if (!clCreateCommandBufferKHR || Res != CL_SUCCESS)
     return UR_RESULT_ERROR_INVALID_OPERATION;
-
-  auto CLCommandBuffer = clCreateCommandBufferKHR(
-      1, cl_adapter::cast<cl_command_queue *>(&Queue), nullptr, &Res);
+  cl_command_queue CLQueue = Queue->get();
+  auto CLCommandBuffer = clCreateCommandBufferKHR(1, &CLQueue, nullptr, &Res);
   CL_RETURN_ON_FAILURE_AND_SET_NULL(Res, phCommandBuffer);
 
   try {
@@ -348,13 +349,18 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferEnqueueExp(
     return UR_RESULT_ERROR_INVALID_OPERATION;
 
   const uint32_t NumberOfQueues = 1;
-
+  cl_event Event;
+  std::vector<cl_event> CLWaitEvents(numEventsInWaitList);
+  for (uint32_t i = 0; i < numEventsInWaitList; i++) {
+    CLWaitEvents[i] = phEventWaitList[i]->get();
+  }
+  cl_command_queue CLQueue = hQueue->get();
   CL_RETURN_ON_FAILURE(clEnqueueCommandBufferKHR(
-      NumberOfQueues, cl_adapter::cast<cl_command_queue *>(&hQueue),
-      hCommandBuffer->CLCommandBuffer, numEventsInWaitList,
-      cl_adapter::cast<const cl_event *>(phEventWaitList),
-      cl_adapter::cast<cl_event *>(phEvent)));
-
+      NumberOfQueues, &CLQueue, hCommandBuffer->CLCommandBuffer,
+      numEventsInWaitList, CLWaitEvents.data(), &Event));
+  if (phEvent) {
+    *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+  }
   return UR_RESULT_SUCCESS;
 }
 

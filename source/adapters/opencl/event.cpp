@@ -8,6 +8,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "event.hpp"
 #include "common.hpp"
 
 #include <mutex>
@@ -109,12 +110,12 @@ ur_command_t convertCLCommandTypeToUR(const cl_command_type &CommandType) {
   }
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL
-urEventCreateWithNativeHandle(ur_native_handle_t hNativeEvent,
-                              [[maybe_unused]] ur_context_handle_t hContext,
-                              const ur_event_native_properties_t *pProperties,
-                              ur_event_handle_t *phEvent) {
-  *phEvent = reinterpret_cast<ur_event_handle_t>(hNativeEvent);
+UR_APIEXPORT ur_result_t UR_APICALL urEventCreateWithNativeHandle(
+    ur_native_handle_t hNativeEvent, ur_context_handle_t hContext,
+    const ur_event_native_properties_t *pProperties,
+    ur_event_handle_t *phEvent) {
+  cl_event NativeHandle = reinterpret_cast<cl_event>(hNativeEvent);
+  *phEvent = new ur_event_handle_t_(NativeHandle, hContext, nullptr);
   if (!pProperties || !pProperties->isNativeHandleOwned) {
     return urEventRetain(*phEvent);
   }
@@ -123,25 +124,28 @@ urEventCreateWithNativeHandle(ur_native_handle_t hNativeEvent,
 
 UR_APIEXPORT ur_result_t UR_APICALL urEventGetNativeHandle(
     ur_event_handle_t hEvent, ur_native_handle_t *phNativeEvent) {
-  return getNativeHandle(hEvent, phNativeEvent);
+  return getNativeHandle(hEvent->get(), phNativeEvent);
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEventRelease(ur_event_handle_t hEvent) {
-  cl_int RetErr = clReleaseEvent(cl_adapter::cast<cl_event>(hEvent));
+  cl_int RetErr = clReleaseEvent(hEvent->get());
   CL_RETURN_ON_FAILURE(RetErr);
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEventRetain(ur_event_handle_t hEvent) {
-  cl_int RetErr = clRetainEvent(cl_adapter::cast<cl_event>(hEvent));
+  cl_int RetErr = clRetainEvent(hEvent->get());
   CL_RETURN_ON_FAILURE(RetErr);
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urEventWait(uint32_t numEvents, const ur_event_handle_t *phEventWaitList) {
-  cl_int RetErr = clWaitForEvents(
-      numEvents, cl_adapter::cast<const cl_event *>(phEventWaitList));
+  std::vector<cl_event> CLEvents(numEvents);
+  for (uint32_t i = 0; i < numEvents; i++) {
+    CLEvents[i] = phEventWaitList[i]->get();
+  }
+  cl_int RetErr = clWaitForEvents(numEvents, CLEvents.data());
   CL_RETURN_ON_FAILURE(RetErr);
   return UR_RESULT_SUCCESS;
 }
@@ -152,11 +156,17 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetInfo(ur_event_handle_t hEvent,
                                                    void *pPropValue,
                                                    size_t *pPropSizeRet) {
   cl_event_info CLEventInfo = convertUREventInfoToCL(propName);
+  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
 
+  if (CLEventInfo == CL_EVENT_CONTEXT) {
+    return ReturnValue(hEvent->Context);
+  }
+  if (CLEventInfo == CL_EVENT_COMMAND_QUEUE) {
+    return ReturnValue(hEvent->Queue);
+  }
   size_t CheckPropSize = 0;
-  cl_int RetErr =
-      clGetEventInfo(cl_adapter::cast<cl_event>(hEvent), CLEventInfo, propSize,
-                     pPropValue, &CheckPropSize);
+  cl_int RetErr = clGetEventInfo(hEvent->get(), CLEventInfo, propSize,
+                                 pPropValue, &CheckPropSize);
   if (pPropValue && CheckPropSize != propSize) {
     return UR_RESULT_ERROR_INVALID_SIZE;
   }
@@ -192,9 +202,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetProfilingInfo(
     ur_event_handle_t hEvent, ur_profiling_info_t propName, size_t propSize,
     void *pPropValue, size_t *pPropSizeRet) {
   cl_profiling_info CLProfilingInfo = convertURProfilingInfoToCL(propName);
-  cl_int RetErr = clGetEventProfilingInfo(cl_adapter::cast<cl_event>(hEvent),
-                                          CLProfilingInfo, propSize, pPropValue,
-                                          pPropSizeRet);
+  cl_int RetErr = clGetEventProfilingInfo(hEvent->get(), CLProfilingInfo,
+                                          propSize, pPropValue, pPropSizeRet);
   CL_RETURN_ON_FAILURE(RetErr);
   return UR_RESULT_SUCCESS;
 }
@@ -259,7 +268,7 @@ urEventSetCallback(ur_event_handle_t hEvent, ur_execution_info_t execStatus,
     auto *C = static_cast<EventCallback *>(pUserData);
     C->execute();
   };
-  CL_RETURN_ON_FAILURE(clSetEventCallback(cl_adapter::cast<cl_event>(hEvent),
-                                          CallbackType, ClCallback, Callback));
+  CL_RETURN_ON_FAILURE(
+      clSetEventCallback(hEvent->get(), CallbackType, ClCallback, Callback));
   return UR_RESULT_SUCCESS;
 }
