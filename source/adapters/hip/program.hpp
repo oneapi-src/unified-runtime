@@ -12,6 +12,7 @@
 #include <ur_api.h>
 
 #include <atomic>
+#include <unordered_map>
 
 #include "context.hpp"
 
@@ -29,6 +30,10 @@ struct ur_program_handle_t_ {
   // Metadata
   bool IsRelocatable = false;
 
+  // Metadata
+  std::unordered_map<std::string, std::tuple<uint32_t, uint32_t, uint32_t>>
+      KernelReqdWorkGroupSizeMD;
+
   constexpr static size_t MAX_LOG_SIZE = 8192u;
 
   char ErrorLog[MAX_LOG_SIZE], InfoLog[MAX_LOG_SIZE];
@@ -36,8 +41,8 @@ struct ur_program_handle_t_ {
   ur_program_build_status_t BuildStatus = UR_PROGRAM_BUILD_STATUS_NONE;
 
   ur_program_handle_t_(ur_context_handle_t Ctxt, ur_device_handle_t Device)
-      : Module{nullptr}, Binary{},
-        BinarySizeInBytes{0}, RefCount{1}, Context{Ctxt}, Device{Device} {
+      : Module{nullptr}, Binary{}, BinarySizeInBytes{0}, RefCount{1},
+        Context{Ctxt}, Device{Device}, KernelReqdWorkGroupSizeMD{} {
     urContextRetain(Context);
     urDeviceRetain(Device);
   }

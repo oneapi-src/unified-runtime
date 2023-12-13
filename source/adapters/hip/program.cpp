@@ -9,6 +9,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "program.hpp"
+#include "ur_util.hpp"
 
 #ifdef SYCL_ENABLE_KERNEL_FUSION
 #include <amd_comgr/amd_comgr.h>
@@ -86,7 +87,32 @@ ur_program_handle_t_::setMetadata(const ur_program_metadata_t *Metadata,
       assert(MetadataElement.type == UR_PROGRAM_METADATA_TYPE_UINT32);
       IsRelocatable = MetadataElement.value.data32;
     }
+
+    auto [Prefix, Tag] = splitMetadataName(MetadataElementName);
+
+    if (Tag == __SYCL_UR_PROGRAM_METADATA_TAG_REQD_WORK_GROUP_SIZE) {
+      // If metadata is reqd_work_group_size, record it for the corresponding
+      // kernel name.
+      size_t MDElemsSize = MetadataElement.size - sizeof(std::uint64_t);
+
+      // Expect between 1 and 3 32-bit integer values.
+      UR_ASSERT(MDElemsSize >= sizeof(std::uint32_t) &&
+                    MDElemsSize <= sizeof(std::uint32_t) * 3,
+                UR_RESULT_ERROR_INVALID_WORK_GROUP_SIZE);
+
+      // Get pointer to data, skipping 64-bit size at the start of the data.
+      const char *ValuePtr =
+          reinterpret_cast<const char *>(MetadataElement.value.pData) +
+          sizeof(std::uint64_t);
+      // Read values and pad with 1's for values not present.
+      std::uint32_t ReqdWorkGroupElements[] = {1, 1, 1};
+      std::memcpy(ReqdWorkGroupElements, ValuePtr, MDElemsSize);
+      KernelReqdWorkGroupSizeMD[Prefix] =
+          std::make_tuple(ReqdWorkGroupElements[0], ReqdWorkGroupElements[1],
+                          ReqdWorkGroupElements[2]);
+    }
   }
+
   return UR_RESULT_SUCCESS;
 }
 
@@ -419,8 +445,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
   std::unique_ptr<ur_program_handle_t_> RetProgram{
       new ur_program_handle_t_{hContext, hDevice}};
 
-  // TODO: Set metadata here and use reqd_work_group_size information.
-  // See urProgramCreateWithBinary in CUDA adapter.
   if (pProperties) {
     if (pProperties->count > 0 && pProperties->pMetadatas == nullptr) {
       return UR_RESULT_ERROR_INVALID_NULL_POINTER;
@@ -429,8 +453,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
     }
     Result =
         RetProgram->setMetadata(pProperties->pMetadatas, pProperties->count);
+    UR_ASSERT(Result == UR_RESULT_SUCCESS, Result);
   }
-  UR_ASSERT(Result == UR_RESULT_SUCCESS, Result);
 
   auto pBinary_string = reinterpret_cast<const char *>(pBinary);
   if (size == 0) {
