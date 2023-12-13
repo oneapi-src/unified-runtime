@@ -9,7 +9,9 @@
 //===----------------------------------------------------------------------===//
 #include "common.hpp"
 #include "device.hpp"
+#include "memory.hpp"
 #include "program.hpp"
+#include "sampler.hpp"
 
 #include <algorithm>
 #include <memory>
@@ -391,9 +393,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelSetArgMemObj(
     ur_kernel_handle_t hKernel, uint32_t argIndex,
     const ur_kernel_arg_mem_obj_properties_t *, ur_mem_handle_t hArgValue) {
 
-  cl_int RetErr = clSetKernelArg(
-      cl_adapter::cast<cl_kernel>(hKernel), cl_adapter::cast<cl_uint>(argIndex),
-      sizeof(hArgValue), cl_adapter::cast<const cl_mem *>(&hArgValue));
+  cl_mem CLArgValue = hArgValue->get();
+  cl_int RetErr = clSetKernelArg(cl_adapter::cast<cl_kernel>(hKernel),
+                                 cl_adapter::cast<cl_uint>(argIndex),
+                                 sizeof(hArgValue), &CLArgValue);
   CL_RETURN_ON_FAILURE(RetErr);
   return UR_RESULT_SUCCESS;
 }
@@ -402,9 +405,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelSetArgSampler(
     ur_kernel_handle_t hKernel, uint32_t argIndex,
     const ur_kernel_arg_sampler_properties_t *, ur_sampler_handle_t hArgValue) {
 
-  cl_int RetErr = clSetKernelArg(
-      cl_adapter::cast<cl_kernel>(hKernel), cl_adapter::cast<cl_uint>(argIndex),
-      sizeof(hArgValue), cl_adapter::cast<const cl_sampler *>(&hArgValue));
+  cl_sampler CLArgSampler = hArgValue->get();
+  cl_int RetErr = clSetKernelArg(cl_adapter::cast<cl_kernel>(hKernel),
+                                 cl_adapter::cast<cl_uint>(argIndex),
+                                 sizeof(hArgValue), &CLArgSampler);
   CL_RETURN_ON_FAILURE(RetErr);
   return UR_RESULT_SUCCESS;
 }
