@@ -229,8 +229,8 @@ urProgramLink(ur_context_handle_t hContext, uint32_t count,
   cl_program Program = clLinkProgram(
       hContext->get(), 0, nullptr, pOptions, cl_adapter::cast<cl_uint>(count),
       CLPrograms.data(), nullptr, nullptr, &CLResult);
-  *phProgram = new ur_program_handle_t_(Program, hContext);
   CL_RETURN_ON_FAILURE(CLResult);
+  *phProgram = new ur_program_handle_t_(Program, hContext);
 
   return UR_RESULT_SUCCESS;
 }
