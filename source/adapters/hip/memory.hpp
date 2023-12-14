@@ -108,7 +108,7 @@ public:
   /// the data on the device associated with this allocation.
   /// The offset is used to index into the HIP allocation.
   ///
-  void *mapToPtr(size_t Size, size_t Offset, ur_map_flags_t Flags) noexcept {
+  void *mapToPtr(size_t Size, size_t Offset, ur_map_flags_t Flags) {
     assert(MapPtr == nullptr);
     MapSize = Size;
     MapOffset = Offset;
@@ -117,17 +117,17 @@ public:
       MapPtr = static_cast<char *>(HostPtr) + Offset;
     } else {
       // TODO: Allocate only what is needed based on the offset
-      MapPtr = static_cast<void *>(malloc(this->getSize()));
+      MapPtr = static_cast<void *>(new char[this->getSize()]);
     }
     return MapPtr;
   }
 
   /// Detach the allocation from the host memory.
-  void unmap(void *) noexcept {
+  void unmap(void *) {
     assert(MapPtr != nullptr);
 
     if (MapPtr != HostPtr) {
-      free(MapPtr);
+      delete[] static_cast<char *>(MapPtr);
     }
     MapPtr = nullptr;
     MapSize = 0;
