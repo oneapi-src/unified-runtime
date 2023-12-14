@@ -115,7 +115,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventCreateWithNativeHandle(
     const ur_event_native_properties_t *pProperties,
     ur_event_handle_t *phEvent) {
   cl_event NativeHandle = reinterpret_cast<cl_event>(hNativeEvent);
-  *phEvent = new ur_event_handle_t_(NativeHandle, hContext, nullptr);
+  auto UREvent =
+      std::make_unique<ur_event_handle_t_>(NativeHandle, hContext, nullptr);
+  *phEvent = UREvent.release();
   if (!pProperties || !pProperties->isNativeHandleOwned) {
     return urEventRetain(*phEvent);
   }

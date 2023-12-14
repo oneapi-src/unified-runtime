@@ -252,7 +252,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMFill(
                                         patternSize, size, numEventsInWaitList,
                                         CLWaitEvents.data(), &Event));
     if (phEvent) {
-      *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+      auto UREvent =
+          std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+      *phEvent = UREvent.release();
     }
     return UR_RESULT_SUCCESS;
   }
@@ -287,9 +289,13 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMFill(
   }
 
   cl_event CopyEvent = nullptr;
-  CL_RETURN_ON_FAILURE(USMMemcpy(
-      hQueue->get(), false, ptr, HostBuffer, size, numEventsInWaitList,
-      cl_adapter::cast<const cl_event *>(phEventWaitList), &CopyEvent));
+  std::vector<cl_event> CLWaitEvents(numEventsInWaitList);
+  for (uint32_t i = 0; i < numEventsInWaitList; i++) {
+    CLWaitEvents[i] = phEventWaitList[i]->get();
+  }
+  CL_RETURN_ON_FAILURE(USMMemcpy(hQueue->get(), false, ptr, HostBuffer, size,
+                                 numEventsInWaitList, CLWaitEvents.data(),
+                                 &CopyEvent));
 
   struct DeleteCallbackInfo {
     DeleteCallbackInfo(clMemBlockingFreeINTEL_fn USMFree, cl_context CLContext,
@@ -326,7 +332,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMFill(
     CL_RETURN_ON_FAILURE(ClErr);
   }
   if (phEvent) {
-    *phEvent = new ur_event_handle_t_(CopyEvent, hQueue->Context, hQueue);
+    auto UREvent = std::make_unique<ur_event_handle_t_>(
+        CopyEvent, hQueue->Context, hQueue);
+    *phEvent = UREvent.release();
   } else {
     CL_RETURN_ON_FAILURE(clReleaseEvent(CopyEvent));
   }
@@ -357,7 +365,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy(
                                     numEventsInWaitList, CLWaitEvents.data(),
                                     &Event));
     if (phEvent) {
-      *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+      auto UREvent =
+          std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+      *phEvent = UREvent.release();
     }
   }
 
@@ -378,7 +388,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
   CL_RETURN_ON_FAILURE(clEnqueueMarkerWithWaitList(
       hQueue->get(), numEventsInWaitList, CLWaitEvents.data(), &Event));
   if (phEvent) {
-    *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+    auto UREvent =
+        std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+    *phEvent = UREvent.release();
   }
   return UR_RESULT_SUCCESS;
   /*
@@ -411,7 +423,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMAdvise(
   CL_RETURN_ON_FAILURE(
       clEnqueueMarkerWithWaitList(hQueue->get(), 0, nullptr, &Event));
   if (phEvent) {
-    *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+    auto UREvent =
+        std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+    *phEvent = UREvent.release();
   }
   return UR_RESULT_SUCCESS;
   /*
@@ -491,7 +505,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
     ClResult = clEnqueueBarrierWithWaitList(hQueue->get(), Events.size(),
                                             Events.data(), &Event);
     if (phEvent) {
-      *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+      auto UREvent =
+          std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+      *phEvent = UREvent.release();
     }
   }
   for (const auto &E : Events) {

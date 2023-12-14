@@ -266,7 +266,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
       cl_mem Buffer = FuncPtr(
           CLContext, PropertiesIntel.data(), static_cast<cl_mem_flags>(flags),
           size, pProperties->pHost, cl_adapter::cast<cl_int *>(&RetErr));
-      *phBuffer = new ur_mem_handle_t_(Buffer, hContext);
+      auto URMem = std::make_unique<ur_mem_handle_t_>(Buffer, hContext);
+      *phBuffer = URMem.release();
       return mapCLErrorToUR(RetErr);
     }
   }
@@ -276,7 +277,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
       clCreateBuffer(hContext->get(), static_cast<cl_mem_flags>(flags), size,
                      HostPtr, cl_adapter::cast<cl_int *>(&RetErr));
   CL_RETURN_ON_FAILURE(RetErr);
-  *phBuffer = new ur_mem_handle_t_(Buffer, hContext);
+  auto URMem = std::make_unique<ur_mem_handle_t_>(Buffer, hContext);
+  *phBuffer = URMem.release();
 
   return UR_RESULT_SUCCESS;
 }
@@ -296,7 +298,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreate(
       clCreateImage(hContext->get(), MapFlags, &ImageFormat, &ImageDesc, pHost,
                     cl_adapter::cast<cl_int *>(&RetErr));
   CL_RETURN_ON_FAILURE(RetErr);
-  *phMem = new ur_mem_handle_t_(Mem, hContext);
+  auto URMem = std::make_unique<ur_mem_handle_t_>(Mem, hContext);
+  *phMem = URMem.release();
 
   return UR_RESULT_SUCCESS;
 }
@@ -321,10 +324,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferPartition(
   BufferRegion.origin = pRegion->origin;
   BufferRegion.size = pRegion->size;
 
-  *phMem = reinterpret_cast<ur_mem_handle_t>(clCreateSubBuffer(
+  cl_mem Buffer = clCreateSubBuffer(
       hBuffer->get(), static_cast<cl_mem_flags>(flags), BufferCreateType,
-      &BufferRegion, cl_adapter::cast<cl_int *>(&RetErr)));
-
+      &BufferRegion, cl_adapter::cast<cl_int *>(&RetErr));
+  auto URMem = std::make_unique<ur_mem_handle_t_>(Buffer, hBuffer->Context);
+  *phMem = URMem.release();
   if (RetErr == CL_INVALID_VALUE) {
     size_t BufferSize = 0;
     CL_RETURN_ON_FAILURE(clGetMemObjectInfo(
@@ -344,7 +348,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
     ur_native_handle_t hNativeMem, ur_context_handle_t hContext,
     const ur_mem_native_properties_t *pProperties, ur_mem_handle_t *phMem) {
   cl_mem NativeHandle = reinterpret_cast<cl_mem>(hNativeMem);
-  *phMem = new ur_mem_handle_t_(NativeHandle, hContext);
+  auto URMem = std::make_unique<ur_mem_handle_t_>(NativeHandle, hContext);
+  *phMem = URMem.release();
   if (!pProperties || !pProperties->isNativeHandleOwned) {
     return urMemRetain(*phMem);
   }
@@ -357,7 +362,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
     [[maybe_unused]] const ur_image_desc_t *pImageDesc,
     const ur_mem_native_properties_t *pProperties, ur_mem_handle_t *phMem) {
   cl_mem NativeHandle = reinterpret_cast<cl_mem>(hNativeMem);
-  *phMem = new ur_mem_handle_t_(NativeHandle, hContext);
+  auto URMem = std::make_unique<ur_mem_handle_t_>(NativeHandle, hContext);
+  *phMem = URMem.release();
   if (!pProperties || !pProperties->isNativeHandleOwned) {
     return urMemRetain(*phMem);
   }

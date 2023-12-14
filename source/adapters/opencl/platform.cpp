@@ -87,7 +87,7 @@ UR_APIEXPORT ur_result_t UR_APICALL
 urPlatformGet(ur_adapter_handle_t *, uint32_t, uint32_t NumEntries,
               ur_platform_handle_t *phPlatforms, uint32_t *pNumPlatforms) {
 
-  static std::vector<ur_platform_handle_t> URPlatforms;
+  static std::vector<std::unique_ptr<ur_platform_handle_t_>> URPlatforms;
   static std::once_flag InitFlag;
   static uint32_t NumPlatforms = 0;
   cl_int Result = CL_SUCCESS;
@@ -107,7 +107,8 @@ urPlatformGet(ur_adapter_handle_t *, uint32_t, uint32_t NumEntries,
         }
         URPlatforms.resize(NumPlatforms);
         for (uint32_t i = 0; i < NumPlatforms; i++) {
-          URPlatforms[i] = new ur_platform_handle_t_(CLPlatforms[i]);
+          URPlatforms[i] =
+              std::make_unique<ur_platform_handle_t_>(CLPlatforms[i]);
         }
         return Result;
       },
@@ -125,7 +126,7 @@ urPlatformGet(ur_adapter_handle_t *, uint32_t, uint32_t NumEntries,
   }
   if (NumEntries && phPlatforms) {
     for (uint32_t i = 0; i < NumEntries; i++) {
-      phPlatforms[i] = URPlatforms[i];
+      phPlatforms[i] = URPlatforms[i].get();
     }
   }
   return mapCLErrorToUR(Result);
@@ -142,7 +143,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
     ur_platform_handle_t *phPlatform) {
   cl_platform_id NativeHandle =
       reinterpret_cast<cl_platform_id>(hNativePlatform);
-  *phPlatform = new ur_platform_handle_t_(NativeHandle);
+  auto URPlatform = std::make_unique<ur_platform_handle_t_>(NativeHandle);
+  *phPlatform = URPlatform.release();
   return UR_RESULT_SUCCESS;
 }
 

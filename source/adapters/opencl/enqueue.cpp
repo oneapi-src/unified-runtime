@@ -45,7 +45,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
       pGlobalWorkOffset, pGlobalWorkSize, pLocalWorkSize, numEventsInWaitList,
       CLWaitEvents.data(), &Event));
   if (phEvent) {
-    *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+    auto UREvent =
+        std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+    *phEvent = UREvent.release();
   }
   return UR_RESULT_SUCCESS;
 }
@@ -71,7 +73,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWait(
   CL_RETURN_ON_FAILURE(clEnqueueMarkerWithWaitList(
       hQueue->get(), numEventsInWaitList, CLWaitEvents.data(), &Event));
   if (phEvent) {
-    *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+    auto UREvent =
+        std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+    *phEvent = UREvent.release();
   }
   return UR_RESULT_SUCCESS;
 }
@@ -87,7 +91,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
   CL_RETURN_ON_FAILURE(clEnqueueBarrierWithWaitList(
       hQueue->get(), numEventsInWaitList, CLWaitEvents.data(), &Event));
   if (phEvent) {
-    *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+    auto UREvent =
+        std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+    *phEvent = UREvent.release();
   }
   return UR_RESULT_SUCCESS;
 }
@@ -105,7 +111,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferRead(
       hQueue->get(), hBuffer->get(), blockingRead, offset, size, pDst,
       numEventsInWaitList, CLWaitEvents.data(), &Event));
   if (phEvent) {
-    *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+    auto UREvent =
+        std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+    *phEvent = UREvent.release();
   }
   return UR_RESULT_SUCCESS;
 }
@@ -123,7 +131,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferWrite(
       hQueue->get(), hBuffer->get(), blockingWrite, offset, size, pSrc,
       numEventsInWaitList, CLWaitEvents.data(), &Event));
   if (phEvent) {
-    *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+    auto UREvent =
+        std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+    *phEvent = UREvent.release();
   }
   return UR_RESULT_SUCCESS;
 }
@@ -149,7 +159,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
       Region, bufferRowPitch, bufferSlicePitch, hostRowPitch, hostSlicePitch,
       pDst, numEventsInWaitList, CLWaitEvents.data(), &Event));
   if (phEvent) {
-    *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+    auto UREvent =
+        std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+    *phEvent = UREvent.release();
   }
   return UR_RESULT_SUCCESS;
 }
@@ -175,7 +187,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
       Region, bufferRowPitch, bufferSlicePitch, hostRowPitch, hostSlicePitch,
       pSrc, numEventsInWaitList, CLWaitEvents.data(), &Event));
   if (phEvent) {
-    *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+    auto UREvent =
+        std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+    *phEvent = UREvent.release();
   }
   return UR_RESULT_SUCCESS;
 }
@@ -194,7 +208,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferCopy(
       hQueue->get(), hBufferSrc->get(), hBufferDst->get(), srcOffset, dstOffset,
       size, numEventsInWaitList, CLWaitEvents.data(), &Event));
   if (phEvent) {
-    *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+    auto UREvent =
+        std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+    *phEvent = UREvent.release();
   }
   return UR_RESULT_SUCCESS;
 }
@@ -219,7 +235,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
       Region, srcRowPitch, srcSlicePitch, dstRowPitch, dstSlicePitch,
       numEventsInWaitList, CLWaitEvents.data(), &Event));
   if (phEvent) {
-    *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+    auto UREvent =
+        std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+    *phEvent = UREvent.release();
   }
   return UR_RESULT_SUCCESS;
 }
@@ -241,7 +259,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferFill(
         hQueue->get(), hBuffer->get(), pPattern, patternSize, offset, size,
         numEventsInWaitList, CLWaitEvents.data(), &Event));
     if (phEvent) {
-      *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+      auto UREvent =
+          std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+      *phEvent = UREvent.release();
     }
     return UR_RESULT_SUCCESS;
   }
@@ -281,7 +301,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferFill(
   }
 
   if (phEvent) {
-    *phEvent = new ur_event_handle_t_(WriteEvent, hQueue->Context, hQueue);
+    auto UREvent = std::make_unique<ur_event_handle_t_>(
+        WriteEvent, hQueue->Context, hQueue);
+    *phEvent = UREvent.release();
   } else {
     CL_RETURN_ON_FAILURE(clReleaseEvent(WriteEvent));
   }
@@ -305,7 +327,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemImageRead(
       hQueue->get(), hImage->get(), blockingRead, Origin, Region, rowPitch,
       slicePitch, pDst, numEventsInWaitList, CLWaitEvents.data(), &Event));
   if (phEvent) {
-    *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+    auto UREvent =
+        std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+    *phEvent = UREvent.release();
   }
   return UR_RESULT_SUCCESS;
 }
@@ -326,7 +350,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemImageWrite(
       hQueue->get(), hImage->get(), blockingWrite, Origin, Region, rowPitch,
       slicePitch, pSrc, numEventsInWaitList, CLWaitEvents.data(), &Event));
   if (phEvent) {
-    *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+    auto UREvent =
+        std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+    *phEvent = UREvent.release();
   }
   return UR_RESULT_SUCCESS;
 }
@@ -349,7 +375,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemImageCopy(
       hQueue->get(), hImageSrc->get(), hImageDst->get(), SrcOrigin, DstOrigin,
       Region, numEventsInWaitList, CLWaitEvents.data(), &Event));
   if (phEvent) {
-    *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+    auto UREvent =
+        std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+    *phEvent = UREvent.release();
   }
   return UR_RESULT_SUCCESS;
 }
@@ -370,7 +398,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferMap(
                                  numEventsInWaitList, CLWaitEvents.data(),
                                  &Event, &Err);
   if (phEvent) {
-    *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+    auto UREvent =
+        std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+    *phEvent = UREvent.release();
   }
   return mapCLErrorToUR(Err);
 }
@@ -388,7 +418,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemUnmap(
                                                pMappedPtr, numEventsInWaitList,
                                                CLWaitEvents.data(), &Event));
   if (phEvent) {
-    *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+    auto UREvent =
+        std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+    *phEvent = UREvent.release();
   }
   return UR_RESULT_SUCCESS;
 }
@@ -416,7 +448,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
   Res = F(hQueue->get(), hProgram->get(), name, blockingWrite, count, offset,
           pSrc, numEventsInWaitList, CLWaitEvents.data(), &Event);
   if (phEvent) {
-    *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+    auto UREvent =
+        std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+    *phEvent = UREvent.release();
   }
   return mapCLErrorToUR(Res);
 }
@@ -444,7 +478,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
   Res = F(hQueue->get(), hProgram->get(), name, blockingRead, count, offset,
           pDst, numEventsInWaitList, CLWaitEvents.data(), &Event);
   if (phEvent) {
-    *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+    auto UREvent =
+        std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+    *phEvent = UREvent.release();
   }
   return mapCLErrorToUR(Res);
 }
@@ -473,7 +509,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueReadHostPipe(
                                     blocking, pDst, size, numEventsInWaitList,
                                     CLWaitEvents.data(), &Event));
     if (phEvent) {
-      *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+      auto UREvent =
+          std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+      *phEvent = UREvent.release();
     }
   }
 
@@ -504,7 +542,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueWriteHostPipe(
                                     blocking, pSrc, size, numEventsInWaitList,
                                     CLWaitEvents.data(), &Event));
     if (phEvent) {
-      *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+      auto UREvent =
+          std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+      *phEvent = UREvent.release();
     }
   }
 
