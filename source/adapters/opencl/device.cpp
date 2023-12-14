@@ -79,6 +79,7 @@ urDeviceGet(ur_platform_handle_t hPlatform, ur_device_type_t DeviceType,
   default:
     return UR_RESULT_ERROR_INVALID_ENUMERATION;
   }
+  UR_RETURN_ON_FAILURE(hPlatform->InitDevices());
   try {
     uint32_t AllDevicesNum = hPlatform->Devices.size();
     uint32_t DeviceNumIter = 0;
@@ -86,7 +87,7 @@ urDeviceGet(ur_platform_handle_t hPlatform, ur_device_type_t DeviceType,
       cl_device_type DeviceType = hPlatform->Devices[i]->Type;
       if (DeviceType == Type || Type == CL_DEVICE_TYPE_ALL) {
         if (phDevices) {
-          phDevices[DeviceNumIter] = hPlatform->Devices[i];
+          phDevices[DeviceNumIter] = hPlatform->Devices[i].get();
         }
         DeviceNumIter++;
       }
@@ -1021,8 +1022,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urDevicePartition(
                                             CLNumDevicesRet,
                                             CLSubDevices.data(), nullptr));
     for (uint32_t i = 0; i < NumDevices; i++) {
-      phSubDevices[i] =
-          new ur_device_handle_t_(CLSubDevices[i], hDevice->Platform, hDevice);
+      auto URSubDevice = std::make_unique<ur_device_handle_t_>(
+          CLSubDevices[i], hDevice->Platform, hDevice);
+      phSubDevices[i] = URSubDevice.release();
     }
   }
 
@@ -1055,7 +1057,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
     ur_native_handle_t hNativeDevice, ur_platform_handle_t hPlatform,
     const ur_device_native_properties_t *, ur_device_handle_t *phDevice) {
   cl_device_id NativeHandle = reinterpret_cast<cl_device_id>(hNativeDevice);
-  *phDevice = new ur_device_handle_t_(NativeHandle, hPlatform, nullptr);
+  auto URDevice =
+      std::make_unique<ur_device_handle_t_>(NativeHandle, hPlatform, nullptr);
+  *phDevice = URDevice.release();
   return UR_RESULT_SUCCESS;
 }
 

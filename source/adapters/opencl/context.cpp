@@ -45,8 +45,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextCreate(
   cl_context Ctx = clCreateContext(
       nullptr, cl_adapter::cast<cl_uint>(DeviceCount), CLDevices.data(),
       nullptr, nullptr, cl_adapter::cast<cl_int *>(&Ret));
-
-  *phContext = new ur_context_handle_t_(Ctx, DeviceCount, phDevices);
+  auto URContext =
+      std::make_unique<ur_context_handle_t_>(Ctx, DeviceCount, phDevices);
+  *phContext = URContext.release();
   return mapCLErrorToUR(Ret);
 }
 
@@ -141,7 +142,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextCreateWithNativeHandle(
     const ur_context_native_properties_t *pProperties, ur_context_handle_t *phContext) {
 
   cl_context NativeHandle = reinterpret_cast<cl_context>(hNativeContext);
-  *phContext = new ur_context_handle_t_(NativeHandle, numDevices, phDevices);
+  auto URContext = std::make_unique<ur_context_handle_t_>(
+      NativeHandle, numDevices, phDevices);
+  *phContext = URContext.release();
   if (!pProperties || !pProperties->isNativeHandleOwned) {
     return clRetainContext(NativeHandle);
   }

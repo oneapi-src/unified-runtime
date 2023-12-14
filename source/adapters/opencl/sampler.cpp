@@ -148,7 +148,8 @@ ur_result_t urSamplerCreate(ur_context_handle_t hContext,
   cl_sampler Sampler = clCreateSampler(
       hContext->get(), static_cast<cl_bool>(pDesc->normalizedCoords),
       AddressingMode, FilterMode, cl_adapter::cast<cl_int *>(&ErrorCode));
-  *phSampler = new ur_sampler_handle_t_(Sampler, hContext);
+  auto URSampler = std::make_unique<ur_sampler_handle_t_>(Sampler, hContext);
+  *phSampler = URSampler.release();
   return mapCLErrorToUR(ErrorCode);
 }
 
@@ -200,7 +201,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urSamplerCreateWithNativeHandle(
     ur_native_handle_t hNativeSampler, ur_context_handle_t hContext,
     const ur_sampler_native_properties_t *pProperties, ur_sampler_handle_t *phSampler) {
   cl_sampler NativeHandle = reinterpret_cast<cl_sampler>(hNativeSampler);
-  *phSampler = new ur_sampler_handle_t_(NativeHandle, hContext);
+  auto URSampler =
+      std::make_unique<ur_sampler_handle_t_>(NativeHandle, hContext);
+  *phSampler = URSampler.release();
   if (!pProperties || !pProperties->isNativeHandleOwned) {
     return clRetainSampler(NativeHandle);
   }

@@ -359,7 +359,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferEnqueueExp(
       NumberOfQueues, &CLQueue, hCommandBuffer->CLCommandBuffer,
       numEventsInWaitList, CLWaitEvents.data(), &Event));
   if (phEvent) {
-    *phEvent = new ur_event_handle_t_(Event, hQueue->Context, hQueue);
+    auto UREvent =
+        std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+    *phEvent = UREvent.release();
   }
   return UR_RESULT_SUCCESS;
 }

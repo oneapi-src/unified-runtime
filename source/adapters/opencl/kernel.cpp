@@ -393,11 +393,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelSetArgMemObj(
     ur_kernel_handle_t hKernel, uint32_t argIndex,
     const ur_kernel_arg_mem_obj_properties_t *, ur_mem_handle_t hArgValue) {
 
-  cl_mem CLArgValue = hArgValue->get();
-  cl_int RetErr = clSetKernelArg(cl_adapter::cast<cl_kernel>(hKernel),
-                                 cl_adapter::cast<cl_uint>(argIndex),
-                                 sizeof(hArgValue), &CLArgValue);
-  CL_RETURN_ON_FAILURE(RetErr);
+  cl_mem CLArgValue = hArgValue ? hArgValue->get() : nullptr;
+  CL_RETURN_ON_FAILURE(clSetKernelArg(cl_adapter::cast<cl_kernel>(hKernel),
+                                      cl_adapter::cast<cl_uint>(argIndex),
+                                      sizeof(CLArgValue), &CLArgValue));
   return UR_RESULT_SUCCESS;
 }
 
@@ -408,7 +407,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelSetArgSampler(
   cl_sampler CLArgSampler = hArgValue->get();
   cl_int RetErr = clSetKernelArg(cl_adapter::cast<cl_kernel>(hKernel),
                                  cl_adapter::cast<cl_uint>(argIndex),
-                                 sizeof(hArgValue), &CLArgSampler);
+                                 sizeof(CLArgSampler), &CLArgSampler);
   CL_RETURN_ON_FAILURE(RetErr);
   return UR_RESULT_SUCCESS;
 }

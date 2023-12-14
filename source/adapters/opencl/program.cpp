@@ -72,8 +72,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithIL(
     cl_program Program =
         clCreateProgramWithIL(hContext->get(), pIL, length, &Err);
     CL_RETURN_ON_FAILURE(Err);
-
-    *phProgram = new ur_program_handle_t_(Program, hContext);
+    auto URProgram = std::make_unique<ur_program_handle_t_>(Program, hContext);
+    *phProgram = URProgram.release();
   } else {
 
     /* If none of the devices conform with CL 2.1 or newer make sure they all
@@ -100,7 +100,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithIL(
 
     assert(FuncPtr != nullptr);
     cl_program Program = FuncPtr(hContext->get(), pIL, length, &Err);
-    *phProgram = new ur_program_handle_t_(Program, hContext);
+    auto URProgram = std::make_unique<ur_program_handle_t_>(Program, hContext);
+    *phProgram = URProgram.release();
 
     CL_RETURN_ON_FAILURE(Err);
   }
@@ -120,7 +121,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
   cl_program Program = clCreateProgramWithBinary(
       hContext->get(), cl_adapter::cast<cl_uint>(1u), Devices, Lengths,
       &pBinary, BinaryStatus, &CLResult);
-  *phProgram = new ur_program_handle_t_(Program, hContext);
+
+  auto URProgram = std::make_unique<ur_program_handle_t_>(Program, hContext);
+  *phProgram = URProgram.release();
   CL_RETURN_ON_FAILURE(BinaryStatus[0]);
   CL_RETURN_ON_FAILURE(CLResult);
 
@@ -186,6 +189,10 @@ urProgramGetInfo(ur_program_handle_t hProgram, ur_program_info_t propName,
     cl_uint DeviceCount = hProgram->Context->DeviceCount;
     return ReturnValue(DeviceCount);
   }
+  case UR_PROGRAM_INFO_DEVICES: {
+    return ReturnValue(&hProgram->Context->Devices[0],
+                       hProgram->Context->DeviceCount);
+  }
   default: {
     size_t CheckPropSize = 0;
     auto ClResult = clGetProgramInfo(hProgram->get(), CLPropName, propSize,
@@ -230,7 +237,8 @@ urProgramLink(ur_context_handle_t hContext, uint32_t count,
       hContext->get(), 0, nullptr, pOptions, cl_adapter::cast<cl_uint>(count),
       CLPrograms.data(), nullptr, nullptr, &CLResult);
   CL_RETURN_ON_FAILURE(CLResult);
-  *phProgram = new ur_program_handle_t_(Program, hContext);
+  auto URProgram = std::make_unique<ur_program_handle_t_>(Program, hContext);
+  *phProgram = URProgram.release();
 
   return UR_RESULT_SUCCESS;
 }
@@ -347,7 +355,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithNativeHandle(
     const ur_program_native_properties_t *pProperties,
     ur_program_handle_t *phProgram) {
   cl_program NativeHandle = reinterpret_cast<cl_program>(hNativeProgram);
-  *phProgram = new ur_program_handle_t_(NativeHandle, hContext);
+
+  auto URProgram =
+      std::make_unique<ur_program_handle_t_>(NativeHandle, hContext);
+  *phProgram = URProgram.release();
   if (!pProperties || !pProperties->isNativeHandleOwned) {
     return urProgramRetain(*phProgram);
   }

@@ -95,7 +95,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreate(
         clCreateCommandQueue(hContext->get(), hDevice->get(),
                              CLProperties & SupportByOpenCL, &RetErr);
     CL_RETURN_ON_FAILURE(RetErr);
-    *phQueue = new ur_queue_handle_t_(Queue, hContext, hDevice);
+    auto URQueue =
+        std::make_unique<ur_queue_handle_t_>(Queue, hContext, hDevice);
+    *phQueue = URQueue.release();
     return UR_RESULT_SUCCESS;
   }
 
@@ -105,7 +107,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreate(
   cl_command_queue Queue = clCreateCommandQueueWithProperties(
       hContext->get(), hDevice->get(), CreationFlagProperties, &RetErr);
   CL_RETURN_ON_FAILURE(RetErr);
-  *phQueue = new ur_queue_handle_t_(Queue, hContext, hDevice);
+  auto URQueue = std::make_unique<ur_queue_handle_t_>(Queue, hContext, hDevice);
+  *phQueue = URQueue.release();
   return UR_RESULT_SUCCESS;
 }
 
@@ -167,7 +170,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
 
   cl_command_queue NativeHandle =
       reinterpret_cast<cl_command_queue>(hNativeQueue);
-  *phQueue = new ur_queue_handle_t_(NativeHandle, hContext, hDevice);
+  auto URQueue =
+      std::make_unique<ur_queue_handle_t_>(NativeHandle, hContext, hDevice);
+  *phQueue = URQueue.release();
 
   cl_int RetErr =
       clRetainCommandQueue(cl_adapter::cast<cl_command_queue>(hNativeQueue));
