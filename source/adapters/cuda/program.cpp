@@ -372,8 +372,6 @@ urProgramGetInfo(ur_program_handle_t hProgram, ur_program_info_t propName,
     return ReturnValue(1u);
   case UR_PROGRAM_INFO_DEVICES:
     return ReturnValue(&hProgram->Context->DeviceID, 1);
-  case UR_PROGRAM_INFO_SOURCE:
-    return ReturnValue(hProgram->Binary);
   case UR_PROGRAM_INFO_BINARY_SIZES:
     return ReturnValue(&hProgram->BinarySizeInBytes, 1);
   case UR_PROGRAM_INFO_BINARIES:
@@ -383,6 +381,7 @@ urProgramGetInfo(ur_program_handle_t hProgram, ur_program_info_t propName,
     UR_ASSERT(getKernelNames(hProgram), UR_RESULT_ERROR_UNSUPPORTED_FEATURE);
     return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
   case UR_PROGRAM_INFO_NUM_KERNELS:
+  case UR_PROGRAM_INFO_IL:
     return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
   default:
     break;
