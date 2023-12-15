@@ -173,7 +173,7 @@ struct ur_mem_handle_t_ {
     urContextRetain(Context);
   }
 
-  ~ur_mem_handle_t_() {
+  ~ur_mem_handle_t_() noexcept(false) {
     if (isBuffer() && isSubBuffer()) {
       urMemRelease(std::get<BufferMem>(Mem).Parent);
       return;
@@ -183,7 +183,7 @@ struct ur_mem_handle_t_ {
 
   bool isBuffer() const noexcept { return MemType == Type::Buffer; }
 
-  bool isSubBuffer() const noexcept {
+  bool isSubBuffer() const {
     return (isBuffer() && (std::get<BufferMem>(Mem).Parent != nullptr));
   }
 
