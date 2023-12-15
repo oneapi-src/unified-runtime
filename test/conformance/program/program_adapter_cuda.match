@@ -17,7 +17,6 @@ urProgramBuildTest.BuildFailure/NVIDIA_CUDA_BACKEND___{{.*}}_
 {{OPT}}urProgramGetInfoTest.InvalidNullHandleProgram/NVIDIA_CUDA_BACKEND___{{.*}}___UR_PROGRAM_INFO_CONTEXT
 {{OPT}}urProgramGetInfoTest.InvalidNullHandleProgram/NVIDIA_CUDA_BACKEND___{{.*}}___UR_PROGRAM_INFO_NUM_DEVICES
 {{OPT}}urProgramGetInfoTest.InvalidNullHandleProgram/NVIDIA_CUDA_BACKEND___{{.*}}___UR_PROGRAM_INFO_DEVICES
-{{OPT}}urProgramGetInfoTest.InvalidNullHandleProgram/NVIDIA_CUDA_BACKEND___{{.*}}___UR_PROGRAM_INFO_SOURCE
 {{OPT}}urProgramGetInfoTest.InvalidNullHandleProgram/NVIDIA_CUDA_BACKEND___{{.*}}___UR_PROGRAM_INFO_BINARY_SIZES
 {{OPT}}urProgramGetInfoTest.InvalidNullHandleProgram/NVIDIA_CUDA_BACKEND___{{.*}}___UR_PROGRAM_INFO_BINARIES
 {{OPT}}urProgramGetInfoTest.InvalidNullHandleProgram/NVIDIA_CUDA_BACKEND___{{.*}}___UR_PROGRAM_INFO_NUM_KERNELS
