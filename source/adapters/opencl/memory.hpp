@@ -23,5 +23,18 @@ struct ur_mem_handle_t_ {
 
   ~ur_mem_handle_t_() {}
 
+  ur_result_t initWithNative() {
+    if (!Context) {
+      cl_context CLContext;
+      CL_RETURN_ON_FAILURE(clGetMemObjectInfo(
+          Memory, CL_MEM_CONTEXT, sizeof(CLContext), &CLContext, nullptr));
+      ur_native_handle_t NativeContext =
+          reinterpret_cast<ur_native_handle_t>(CLContext);
+      UR_RETURN_ON_FAILURE(urContextCreateWithNativeHandle(
+          NativeContext, 0, nullptr, nullptr, &Context));
+    }
+    return UR_RESULT_SUCCESS;
+  }
+
   native_type get() { return Memory; }
 };

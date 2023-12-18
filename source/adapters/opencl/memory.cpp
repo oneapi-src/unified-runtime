@@ -349,6 +349,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
     const ur_mem_native_properties_t *pProperties, ur_mem_handle_t *phMem) {
   cl_mem NativeHandle = reinterpret_cast<cl_mem>(hNativeMem);
   auto URMem = std::make_unique<ur_mem_handle_t_>(NativeHandle, hContext);
+  UR_RETURN_ON_FAILURE(URMem->initWithNative());
   *phMem = URMem.release();
   if (!pProperties || !pProperties->isNativeHandleOwned) {
     return urMemRetain(*phMem);
@@ -363,6 +364,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
     const ur_mem_native_properties_t *pProperties, ur_mem_handle_t *phMem) {
   cl_mem NativeHandle = reinterpret_cast<cl_mem>(hNativeMem);
   auto URMem = std::make_unique<ur_mem_handle_t_>(NativeHandle, hContext);
+  UR_RETURN_ON_FAILURE(URMem->initWithNative());
   *phMem = URMem.release();
   if (!pProperties || !pProperties->isNativeHandleOwned) {
     return urMemRetain(*phMem);

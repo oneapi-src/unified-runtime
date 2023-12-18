@@ -143,9 +143,20 @@ UR_APIEXPORT ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
     ur_platform_handle_t *phPlatform) {
   cl_platform_id NativeHandle =
       reinterpret_cast<cl_platform_id>(hNativePlatform);
-  auto URPlatform = std::make_unique<ur_platform_handle_t_>(NativeHandle);
-  *phPlatform = URPlatform.release();
-  return UR_RESULT_SUCCESS;
+
+  uint32_t NumPlatforms = 0;
+  UR_RETURN_ON_FAILURE(urPlatformGet(nullptr, 0, 0, nullptr, &NumPlatforms));
+  std::vector<ur_platform_handle_t> Platforms(NumPlatforms);
+  UR_RETURN_ON_FAILURE(
+      urPlatformGet(nullptr, 0, NumPlatforms, Platforms.data(), nullptr));
+
+  for (uint32_t i = 0; i < NumPlatforms; i++) {
+    if (Platforms[i]->get() == NativeHandle) {
+      *phPlatform = Platforms[i];
+      return UR_RESULT_SUCCESS;
+    }
+  }
+  return UR_RESULT_ERROR_INVALID_PLATFORM;
 }
 
 // Returns plugin specific backend option.
