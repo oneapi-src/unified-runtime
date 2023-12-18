@@ -879,6 +879,9 @@ inline std::ostream &operator<<(std::ostream &os, ur_function_t value) {
     case UR_FUNCTION_KERNEL_SUGGEST_MAX_COOPERATIVE_GROUP_COUNT_EXP:
         os << "UR_FUNCTION_KERNEL_SUGGEST_MAX_COOPERATIVE_GROUP_COUNT_EXP";
         break;
+    case UR_FUNCTION_MEM_GET_NATIVE_HANDLE_EXP:
+        os << "UR_FUNCTION_MEM_GET_NATIVE_HANDLE_EXP";
+        break;
     default:
         os << "unknown enumerator";
         break;
@@ -11184,6 +11187,32 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_mem_get_native_handle_exp_params_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_mem_get_native_handle_exp_params_t *params) {
+
+    os << ".hMem = ";
+
+    ur::details::printPtr(os,
+                          *(params->phMem));
+
+    os << ", ";
+    os << ".hDevice = ";
+
+    ur::details::printPtr(os,
+                          *(params->phDevice));
+
+    os << ", ";
+    os << ".phNativeMem = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphNativeMem));
+
+    return os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Print operator for the ur_mem_buffer_create_with_native_handle_params_t type
 /// @returns
 ///     std::ostream &
@@ -16090,6 +16119,9 @@ inline ur_result_t UR_APICALL printFunctionParams(std::ostream &os, ur_function_
     } break;
     case UR_FUNCTION_MEM_GET_NATIVE_HANDLE: {
         os << (const struct ur_mem_get_native_handle_params_t *)params;
+    } break;
+    case UR_FUNCTION_MEM_GET_NATIVE_HANDLE_EXP: {
+        os << (const struct ur_mem_get_native_handle_exp_params_t *)params;
     } break;
     case UR_FUNCTION_MEM_BUFFER_CREATE_WITH_NATIVE_HANDLE: {
         os << (const struct ur_mem_buffer_create_with_native_handle_params_t *)params;

@@ -294,6 +294,40 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemGetNativeHandle(ur_mem_handle_t,
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
+/// Gets the native HIP handle of a UR mem object, specific to a ur Device
+///
+/// \param[in] hMem The UR mem to get the native HIP object of.
+/// \param[in] hDevice The UR device that we want to get the native mem on
+/// \param[out] phNativeMem Set to the native handle of the UR mem object.
+///
+/// \return UR_RESULT_SUCCESS
+UR_APIEXPORT ur_result_t UR_APICALL
+urMemGetNativeHandleExp(ur_mem_handle_t hMem, ur_device_handle_t hDevice,
+                        ur_native_handle_t *phNativeMem) {
+#if defined(__HIP_PLATFORM_NVIDIA__)
+  if (sizeof(BufferMem::native_type) > sizeof(ur_native_handle_t)) {
+    // Check that all the upper bits that cannot be represented by
+    // ur_native_handle_t are empty.
+    // NOTE: The following shift might trigger a warning, but the check in the
+    // if above makes sure that this does not underflow.
+    BufferMem::native_type UpperBits = std::get<BufferMem>(hMem->Mem).get() >>
+                                       (sizeof(ur_native_handle_t) * CHAR_BIT);
+    if (UpperBits) {
+      // Return an error if any of the remaining bits is non-zero.
+      return UR_RESULT_ERROR_INVALID_MEM_OBJECT;
+    }
+  }
+  *phNativeMem = reinterpret_cast<ur_native_handle_t>(
+      std::get<BufferMem>(hMem->Mem).getPtr(hDevice));
+#elif defined(__HIP_PLATFORM_AMD__)
+  *phNativeMem = reinterpret_cast<ur_native_handle_t>(
+      std::get<BufferMem>(hMem->Mem).getPtr(hDevice));
+#else
+#error("Must define exactly one of __HIP_PLATFORM_AMD__ or __HIP_PLATFORM_NVIDIA__");
+#endif
+  return UR_RESULT_SUCCESS;
+}
+
 UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
     ur_native_handle_t, ur_context_handle_t, const ur_mem_native_properties_t *,
     ur_mem_handle_t *) {

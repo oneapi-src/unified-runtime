@@ -178,6 +178,16 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetMemProcAddrTable(
   return retVal;
 }
 
+UR_DLLEXPORT ur_result_t UR_APICALL urGetMemExpProcAddrTable(
+    ur_api_version_t version, ur_mem_exp_dditable_t *pDdiTable) {
+  auto result = validateProcInputs(version, pDdiTable);
+  if (UR_RESULT_SUCCESS != result) {
+    return result;
+  }
+  pDdiTable->pfnGetNativeHandleExp = urMemGetNativeHandleExp;
+  return UR_RESULT_SUCCESS;
+}
+
 UR_DLLEXPORT ur_result_t UR_APICALL urGetPlatformProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_platform_dditable_t

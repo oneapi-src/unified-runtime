@@ -215,6 +215,7 @@ typedef enum ur_function_t {
     UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_ADVISE_EXP = 213,                    ///< Enumerator for ::urCommandBufferAppendUSMAdviseExp
     UR_FUNCTION_ENQUEUE_COOPERATIVE_KERNEL_LAUNCH_EXP = 214,                   ///< Enumerator for ::urEnqueueCooperativeKernelLaunchExp
     UR_FUNCTION_KERNEL_SUGGEST_MAX_COOPERATIVE_GROUP_COUNT_EXP = 215,          ///< Enumerator for ::urKernelSuggestMaxCooperativeGroupCountExp
+    UR_FUNCTION_MEM_GET_NATIVE_HANDLE_EXP = 216,                               ///< Enumerator for ::urMemGetNativeHandleExp
     /// @cond
     UR_FUNCTION_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -2730,6 +2731,37 @@ urMemBufferPartition(
 UR_APIEXPORT ur_result_t UR_APICALL
 urMemGetNativeHandle(
     ur_mem_handle_t hMem,           ///< [in] handle of the mem.
+    ur_native_handle_t *phNativeMem ///< [out] a pointer to the native handle of the mem.
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Return platform native mem handle.
+///
+/// @details
+///     - Retrieved native handle can be used for direct interaction with the
+///       native platform driver.
+///     - Use interoperability platform extensions to convert native handle to
+///       native type.
+///     - The application may call this function from simultaneous threads for
+///       the same context.
+///     - The implementation of this function should be thread-safe.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hMem`
+///         + `NULL == hDevice`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == phNativeMem`
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
+///         + If the adapter has no underlying equivalent handle.
+UR_APIEXPORT ur_result_t UR_APICALL
+urMemGetNativeHandleExp(
+    ur_mem_handle_t hMem,           ///< [in] handle of the mem.
+    ur_device_handle_t hDevice,     ///< [in] handle of the device that native handle will be resident on.
     ur_native_handle_t *phNativeMem ///< [out] a pointer to the native handle of the mem.
 );
 
@@ -9487,6 +9519,16 @@ typedef struct ur_mem_get_native_handle_params_t {
     ur_mem_handle_t *phMem;
     ur_native_handle_t **pphNativeMem;
 } ur_mem_get_native_handle_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urMemGetNativeHandleExp
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_mem_get_native_handle_exp_params_t {
+    ur_mem_handle_t *phMem;
+    ur_device_handle_t *phDevice;
+    ur_native_handle_t **pphNativeMem;
+} ur_mem_get_native_handle_exp_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urMemBufferCreateWithNativeHandle

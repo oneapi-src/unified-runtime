@@ -161,6 +161,16 @@ urGetMemProcAddrTable(ur_api_version_t Version, ur_mem_dditable_t *pDdiTable) {
   return UR_RESULT_SUCCESS;
 }
 
+UR_DLLEXPORT ur_result_t UR_APICALL urGetMemExpProcAddrTable(
+    ur_api_version_t version, ur_mem_exp_dditable_t *pDdiTable) {
+  auto result = validateProcInputs(version, pDdiTable);
+  if (UR_RESULT_SUCCESS != result) {
+    return result;
+  }
+  pDdiTable->pfnGetNativeHandleExp = urMemGetNativeHandleExp;
+  return UR_RESULT_SUCCESS;
+}
+
 UR_DLLEXPORT ur_result_t UR_APICALL urGetEnqueueProcAddrTable(
     ur_api_version_t Version, ur_enqueue_dditable_t *pDdiTable) {
   auto Result = validateProcInputs(Version, pDdiTable);

@@ -1867,6 +1867,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemGetNativeHandle(
   return UR_RESULT_SUCCESS;
 }
 
+// Experimental entry point
+UR_APIEXPORT ur_result_t UR_APICALL urMemGetNativeHandleExp(
+    ur_mem_handle_t hMem, ur_device_handle_t, ur_native_handle_t *phNativeMem) {
+  return urMemGetNativeHandle(hMem, phNativeMem);
+}
+
 UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
     ur_native_handle_t NativeMem, ///< [in] the native handle to the memory.
     ur_context_handle_t Context,  ///< [in] handle of the context object.

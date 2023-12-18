@@ -1179,6 +1179,40 @@ __urdlllocal ur_result_t UR_APICALL urMemGetNativeHandle(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urMemGetNativeHandleExp
+__urdlllocal ur_result_t UR_APICALL urMemGetNativeHandleExp(
+    ur_mem_handle_t hMem, ///< [in] handle of the mem.
+    ur_device_handle_t
+        hDevice, ///< [in] handle of the device that native handle will be resident on.
+    ur_native_handle_t
+        *phNativeMem ///< [out] a pointer to the native handle of the mem.
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // extract platform's function pointer table
+    auto dditable = reinterpret_cast<ur_mem_object_t *>(hMem)->dditable;
+    auto pfnGetNativeHandleExp = dditable->ur.MemExp.pfnGetNativeHandleExp;
+    if (nullptr == pfnGetNativeHandleExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    hMem = reinterpret_cast<ur_mem_object_t *>(hMem)->handle;
+
+    // convert loader handle to platform handle
+    hDevice = reinterpret_cast<ur_device_object_t *>(hDevice)->handle;
+
+    // forward to device-platform
+    result = pfnGetNativeHandleExp(hMem, hDevice, phNativeMem);
+
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urMemBufferCreateWithNativeHandle
 __urdlllocal ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
     ur_native_handle_t
@@ -7908,6 +7942,60 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetMemProcAddrTable(
         } else {
             // return pointers directly to platform's DDIs
             *pDdiTable = ur_loader::context->platforms.front().dditable.ur.Mem;
+        }
+    }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Exported function for filling application's MemExp table
+///        with current process' addresses
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+UR_DLLEXPORT ur_result_t UR_APICALL urGetMemExpProcAddrTable(
+    ur_api_version_t version, ///< [in] API version requested
+    ur_mem_exp_dditable_t
+        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
+) {
+    if (nullptr == pDdiTable) {
+        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    if (ur_loader::context->version < version) {
+        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+    }
+
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // Load the device-platform DDI tables
+    for (auto &platform : ur_loader::context->platforms) {
+        if (platform.initStatus != UR_RESULT_SUCCESS) {
+            continue;
+        }
+        auto getTable = reinterpret_cast<ur_pfnGetMemExpProcAddrTable_t>(
+            ur_loader::LibLoader::getFunctionPtr(platform.handle.get(),
+                                                 "urGetMemExpProcAddrTable"));
+        if (!getTable) {
+            continue;
+        }
+        platform.initStatus = getTable(version, &platform.dditable.ur.MemExp);
+    }
+
+    if (UR_RESULT_SUCCESS == result) {
+        if (ur_loader::context->platforms.size() != 1 ||
+            ur_loader::context->forceIntercept) {
+            // return pointers to loader's DDIs
+            pDdiTable->pfnGetNativeHandleExp =
+                ur_loader::urMemGetNativeHandleExp;
+        } else {
+            // return pointers directly to platform's DDIs
+            *pDdiTable =
+                ur_loader::context->platforms.front().dditable.ur.MemExp;
         }
     }
 

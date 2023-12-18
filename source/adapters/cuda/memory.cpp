@@ -168,6 +168,20 @@ urMemGetNativeHandle(ur_mem_handle_t hMem, ur_native_handle_t *phNativeMem) {
   return UR_RESULT_SUCCESS;
 }
 
+/// Gets the native CUDA handle of a UR mem object
+/// This is the same as urMemGetNativeHandle but it will be changed when multi
+/// device context is supported
+///
+/// \param[in] hMem The UR mem to get the native CUDA object of.
+/// \param[in] hDevice The UR mem to get the native CUDA object of.
+/// \param[out] phNativeMem Set to the native handle of the UR mem object.
+///
+/// \return UR_RESULT_SUCCESS
+UR_APIEXPORT ur_result_t UR_APICALL urMemGetNativeHandleExp(
+    ur_mem_handle_t hMem, ur_device_handle_t, ur_native_handle_t *phNativeMem) {
+  return urMemGetNativeHandle(hMem, phNativeMem);
+}
+
 UR_APIEXPORT ur_result_t UR_APICALL urMemGetInfo(ur_mem_handle_t hMemory,
                                                  ur_mem_info_t MemInfoType,
                                                  size_t propSize,

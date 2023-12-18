@@ -1213,6 +1213,41 @@ __urdlllocal ur_result_t UR_APICALL urMemGetNativeHandle(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urMemGetNativeHandleExp
+__urdlllocal ur_result_t UR_APICALL urMemGetNativeHandleExp(
+    ur_mem_handle_t hMem, ///< [in] handle of the mem.
+    ur_device_handle_t
+        hDevice, ///< [in] handle of the device that native handle will be resident on.
+    ur_native_handle_t
+        *phNativeMem ///< [out] a pointer to the native handle of the mem.
+) {
+    auto pfnGetNativeHandleExp =
+        context.urDdiTable.MemExp.pfnGetNativeHandleExp;
+
+    if (nullptr == pfnGetNativeHandleExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    if (context.enableParameterValidation) {
+        if (NULL == hMem) {
+            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
+        }
+
+        if (NULL == hDevice) {
+            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
+        }
+
+        if (NULL == phNativeMem) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+    }
+
+    ur_result_t result = pfnGetNativeHandleExp(hMem, hDevice, phNativeMem);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urMemBufferCreateWithNativeHandle
 __urdlllocal ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
     ur_native_handle_t
@@ -8706,6 +8741,41 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetMemProcAddrTable(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Exported function for filling application's MemExp table
+///        with current process' addresses
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+UR_DLLEXPORT ur_result_t UR_APICALL urGetMemExpProcAddrTable(
+    ur_api_version_t version, ///< [in] API version requested
+    ur_mem_exp_dditable_t
+        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
+) {
+    auto &dditable = ur_validation_layer::context.urDdiTable.MemExp;
+
+    if (nullptr == pDdiTable) {
+        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    if (UR_MAJOR_VERSION(ur_validation_layer::context.version) !=
+            UR_MAJOR_VERSION(version) ||
+        UR_MINOR_VERSION(ur_validation_layer::context.version) >
+            UR_MINOR_VERSION(version)) {
+        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+    }
+
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    dditable.pfnGetNativeHandleExp = pDdiTable->pfnGetNativeHandleExp;
+    pDdiTable->pfnGetNativeHandleExp =
+        ur_validation_layer::urMemGetNativeHandleExp;
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's PhysicalMem table
 ///        with current process' addresses
 ///
@@ -9344,6 +9414,11 @@ ur_result_t context_t::init(ur_dditable_t *dditable,
     if (UR_RESULT_SUCCESS == result) {
         result = ur_validation_layer::urGetMemProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->Mem);
+    }
+
+    if (UR_RESULT_SUCCESS == result) {
+        result = ur_validation_layer::urGetMemExpProcAddrTable(
+            UR_API_VERSION_CURRENT, &dditable->MemExp);
     }
 
     if (UR_RESULT_SUCCESS == result) {

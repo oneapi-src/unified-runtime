@@ -773,6 +773,13 @@ typedef ur_result_t(UR_APICALL *ur_pfnMemGetNativeHandle_t)(
     ur_native_handle_t *);
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for urMemGetNativeHandleExp
+typedef ur_result_t(UR_APICALL *ur_pfnMemGetNativeHandleExp_t)(
+    ur_mem_handle_t,
+    ur_device_handle_t,
+    ur_native_handle_t *);
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Function-pointer for urMemBufferCreateWithNativeHandle
 typedef ur_result_t(UR_APICALL *ur_pfnMemBufferCreateWithNativeHandle_t)(
     ur_native_handle_t,
@@ -817,6 +824,7 @@ typedef struct ur_mem_dditable_t {
     ur_pfnMemRelease_t pfnRelease;
     ur_pfnMemBufferPartition_t pfnBufferPartition;
     ur_pfnMemGetNativeHandle_t pfnGetNativeHandle;
+    ur_pfnMemGetNativeHandleExp_t pfnGetNativeHandleExp;
     ur_pfnMemBufferCreateWithNativeHandle_t pfnBufferCreateWithNativeHandle;
     ur_pfnMemImageCreateWithNativeHandle_t pfnImageCreateWithNativeHandle;
     ur_pfnMemGetInfo_t pfnGetInfo;
@@ -843,6 +851,40 @@ urGetMemProcAddrTable(
 typedef ur_result_t(UR_APICALL *ur_pfnGetMemProcAddrTable_t)(
     ur_api_version_t,
     ur_mem_dditable_t *);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for urMemGetNativeHandleExp
+typedef ur_result_t(UR_APICALL *ur_pfnMemGetNativeHandleExp_t)(
+    ur_mem_handle_t,
+    ur_device_handle_t,
+    ur_native_handle_t *);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Table of MemExp functions pointers
+typedef struct ur_mem_exp_dditable_t {
+    ur_pfnMemGetNativeHandleExp_t pfnGetNativeHandleExp;
+} ur_mem_exp_dditable_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Exported function for filling application's MemExp table
+///        with current process' addresses
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+UR_DLLEXPORT ur_result_t UR_APICALL
+urGetMemExpProcAddrTable(
+    ur_api_version_t version,        ///< [in] API version requested
+    ur_mem_exp_dditable_t *pDdiTable ///< [in,out] pointer to table of DDI function pointers
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for urGetMemExpProcAddrTable
+typedef ur_result_t(UR_APICALL *ur_pfnGetMemExpProcAddrTable_t)(
+    ur_api_version_t,
+    ur_mem_exp_dditable_t *);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function-pointer for urPhysicalMemCreate
@@ -2311,6 +2353,7 @@ typedef struct ur_dditable_t {
     ur_kernel_exp_dditable_t KernelExp;
     ur_sampler_dditable_t Sampler;
     ur_mem_dditable_t Mem;
+    ur_mem_exp_dditable_t MemExp;
     ur_physical_mem_dditable_t PhysicalMem;
     ur_global_dditable_t Global;
     ur_enqueue_dditable_t Enqueue;

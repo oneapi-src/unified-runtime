@@ -559,6 +559,9 @@ etors:
 - name: KERNEL_SUGGEST_MAX_COOPERATIVE_GROUP_COUNT_EXP
   desc: Enumerator for $xKernelSuggestMaxCooperativeGroupCountExp
   value: '215'
+- name: MEM_GET_NATIVE_HANDLE_EXP
+  desc: Enumerator for $xMemGetNativeHandleExp
+  value: '216'
 ---
 type: enum
 desc: Defines structure types

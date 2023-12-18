@@ -897,6 +897,32 @@ __urdlllocal ur_result_t UR_APICALL urMemGetNativeHandle(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urMemGetNativeHandleExp
+__urdlllocal ur_result_t UR_APICALL urMemGetNativeHandleExp(
+    ur_mem_handle_t hMem, ///< [in] handle of the mem.
+    ur_device_handle_t
+        hDevice, ///< [in] handle of the device that native handle will be resident on.
+    ur_native_handle_t
+        *phNativeMem ///< [out] a pointer to the native handle of the mem.
+    ) try {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // if the driver has created a custom function, then call it instead of using the generic path
+    auto pfnGetNativeHandleExp =
+        d_context.urDdiTable.MemExp.pfnGetNativeHandleExp;
+    if (nullptr != pfnGetNativeHandleExp) {
+        result = pfnGetNativeHandleExp(hMem, hDevice, phNativeMem);
+    } else {
+        // generic implementation
+        *phNativeMem = reinterpret_cast<ur_native_handle_t>(d_context.get());
+    }
+
+    return result;
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urMemBufferCreateWithNativeHandle
 __urdlllocal ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
     ur_native_handle_t
@@ -5821,6 +5847,36 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetMemProcAddrTable(
     pDdiTable->pfnGetInfo = driver::urMemGetInfo;
 
     pDdiTable->pfnImageGetInfo = driver::urMemImageGetInfo;
+
+    return result;
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Exported function for filling application's MemExp table
+///        with current process' addresses
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+UR_DLLEXPORT ur_result_t UR_APICALL urGetMemExpProcAddrTable(
+    ur_api_version_t version, ///< [in] API version requested
+    ur_mem_exp_dditable_t
+        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
+    ) try {
+    if (nullptr == pDdiTable) {
+        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    if (driver::d_context.version < version) {
+        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+    }
+
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    pDdiTable->pfnGetNativeHandleExp = driver::urMemGetNativeHandleExp;
 
     return result;
 } catch (...) {

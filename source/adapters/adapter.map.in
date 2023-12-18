@@ -10,6 +10,7 @@
 		urGetKernelProcAddrTable;
 		urGetKernelExpProcAddrTable;
 		urGetMemProcAddrTable;
+		urGetMemExpProcAddrTable;
 		urGetPhysicalMemProcAddrTable;
 		urGetPlatformProcAddrTable;
 		urGetProgramProcAddrTable;

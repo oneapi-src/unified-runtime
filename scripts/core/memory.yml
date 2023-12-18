@@ -440,6 +440,34 @@ returns:
     - $X_RESULT_ERROR_UNSUPPORTED_FEATURE:
         - "If the adapter has no underlying equivalent handle."
 --- #--------------------------------------------------------------------------
+type: function
+desc: "Return platform native mem handle."
+class: $xMem
+name: GetNativeHandleExp
+decl: static
+ordinal: "0"
+details:
+    - "Retrieved native handle can be used for direct interaction with the native platform driver."
+    - "Use interoperability platform extensions to convert native handle to native type."
+    - "The application may call this function from simultaneous threads for the same context."
+    - "The implementation of this function should be thread-safe."
+params:
+    - type: $x_mem_handle_t
+      name: hMem
+      desc: |
+            [in] handle of the mem.
+    - type: $x_device_handle_t
+      name: hDevice
+      desc: |
+            [in] handle of the device that native handle will be resident on.
+    - type: $x_native_handle_t*
+      name: phNativeMem
+      desc: |
+            [out] a pointer to the native handle of the mem.
+returns:
+    - $X_RESULT_ERROR_UNSUPPORTED_FEATURE:
+        - "If the adapter has no underlying equivalent handle."
+--- #--------------------------------------------------------------------------
 type: struct
 desc: "Native memory object creation properties"
 class: $xMem
