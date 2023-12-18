@@ -10,6 +10,7 @@
 #pragma once
 
 #include "common.hpp"
+#include "platform.hpp"
 
 namespace cl_adapter {
 ur_result_t getDeviceVersion(cl_device_id Dev, oclv::OpenCLVersion &Version);

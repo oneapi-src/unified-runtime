@@ -162,9 +162,8 @@ urQueueGetNativeHandle(ur_queue_handle_t hQueue, ur_queue_native_desc_t *,
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
-    ur_native_handle_t hNativeQueue,
-    [[maybe_unused]] ur_context_handle_t hContext,
-    [[maybe_unused]] ur_device_handle_t hDevice,
+    ur_native_handle_t hNativeQueue, ur_context_handle_t hContext,
+    ur_device_handle_t hDevice,
     [[maybe_unused]] const ur_queue_native_properties_t *pProperties,
     ur_queue_handle_t *phQueue) {
 
@@ -172,11 +171,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
       reinterpret_cast<cl_command_queue>(hNativeQueue);
   auto URQueue =
       std::make_unique<ur_queue_handle_t_>(NativeHandle, hContext, hDevice);
+  UR_RETURN_ON_FAILURE(URQueue->initWithNative());
   *phQueue = URQueue.release();
 
-  cl_int RetErr =
-      clRetainCommandQueue(cl_adapter::cast<cl_command_queue>(hNativeQueue));
-  CL_RETURN_ON_FAILURE(RetErr);
+  CL_RETURN_ON_FAILURE(clRetainCommandQueue(NativeHandle));
+
   return UR_RESULT_SUCCESS;
 }
 

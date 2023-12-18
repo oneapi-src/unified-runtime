@@ -1054,13 +1054,32 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetNativeHandle(
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
-    ur_native_handle_t hNativeDevice, ur_platform_handle_t hPlatform,
+    ur_native_handle_t hNativeDevice, ur_platform_handle_t,
     const ur_device_native_properties_t *, ur_device_handle_t *phDevice) {
   cl_device_id NativeHandle = reinterpret_cast<cl_device_id>(hNativeDevice);
-  auto URDevice =
-      std::make_unique<ur_device_handle_t_>(NativeHandle, hPlatform, nullptr);
-  *phDevice = URDevice.release();
-  return UR_RESULT_SUCCESS;
+
+  uint32_t NumPlatforms = 0;
+  UR_RETURN_ON_FAILURE(urPlatformGet(nullptr, 0, 0, nullptr, &NumPlatforms));
+  std::vector<ur_platform_handle_t> Platforms(NumPlatforms);
+  UR_RETURN_ON_FAILURE(
+      urPlatformGet(nullptr, 0, NumPlatforms, Platforms.data(), nullptr));
+
+  for (uint32_t i = 0; i < NumPlatforms; i++) {
+    uint32_t NumDevices = 0;
+    UR_RETURN_ON_FAILURE(
+        urDeviceGet(Platforms[i], UR_DEVICE_TYPE_ALL, 0, nullptr, &NumDevices));
+    std::vector<ur_device_handle_t> Devices(NumDevices);
+    UR_RETURN_ON_FAILURE(urDeviceGet(Platforms[i], UR_DEVICE_TYPE_ALL,
+                                     NumDevices, Devices.data(), nullptr));
+
+    for (auto &Device : Devices) {
+      if (Device->get() == NativeHandle) {
+        *phDevice = Device;
+        return UR_RESULT_SUCCESS;
+      }
+    }
+  }
+  return UR_RESULT_ERROR_INVALID_DEVICE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetGlobalTimestamps(
