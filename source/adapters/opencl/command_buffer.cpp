@@ -12,6 +12,7 @@
 #include "common.hpp"
 #include "context.hpp"
 #include "event.hpp"
+#include "kernel.hpp"
 #include "memory.hpp"
 #include "queue.hpp"
 
@@ -121,10 +122,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
     return UR_RESULT_ERROR_INVALID_OPERATION;
 
   CL_RETURN_ON_FAILURE(clCommandNDRangeKernelKHR(
-      hCommandBuffer->CLCommandBuffer, nullptr, nullptr,
-      cl_adapter::cast<cl_kernel>(hKernel), workDim, pGlobalWorkOffset,
-      pGlobalWorkSize, pLocalWorkSize, numSyncPointsInWaitList,
-      pSyncPointWaitList, pSyncPoint, nullptr));
+      hCommandBuffer->CLCommandBuffer, nullptr, nullptr, hKernel->get(),
+      workDim, pGlobalWorkOffset, pGlobalWorkSize, pLocalWorkSize,
+      numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint, nullptr));
 
   return UR_RESULT_SUCCESS;
 }
