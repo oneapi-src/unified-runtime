@@ -358,6 +358,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithNativeHandle(
 
   auto URProgram =
       std::make_unique<ur_program_handle_t_>(NativeHandle, hContext);
+  UR_RETURN_ON_FAILURE(URProgram->initWithNative());
   *phProgram = URProgram.release();
   if (!pProperties || !pProperties->isNativeHandleOwned) {
     return urProgramRetain(*phProgram);

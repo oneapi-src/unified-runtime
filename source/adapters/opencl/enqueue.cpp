@@ -11,6 +11,7 @@
 #include "common.hpp"
 #include "context.hpp"
 #include "event.hpp"
+#include "kernel.hpp"
 #include "memory.hpp"
 #include "program.hpp"
 #include "queue.hpp"
@@ -40,10 +41,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
   for (uint32_t i = 0; i < numEventsInWaitList; i++) {
     CLWaitEvents[i] = phEventWaitList[i]->get();
   }
-  CL_RETURN_ON_FAILURE(clEnqueueNDRangeKernel(
-      hQueue->get(), cl_adapter::cast<cl_kernel>(hKernel), workDim,
-      pGlobalWorkOffset, pGlobalWorkSize, pLocalWorkSize, numEventsInWaitList,
-      CLWaitEvents.data(), &Event));
+  CL_RETURN_ON_FAILURE(
+      clEnqueueNDRangeKernel(hQueue->get(), hKernel->get(), workDim,
+                             pGlobalWorkOffset, pGlobalWorkSize, pLocalWorkSize,
+                             numEventsInWaitList, CLWaitEvents.data(), &Event));
   if (phEvent) {
     auto UREvent =
         std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);

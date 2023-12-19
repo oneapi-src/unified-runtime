@@ -559,7 +559,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMGetMemAllocInfo(
   default:
     return UR_RESULT_ERROR_INVALID_VALUE;
   }
-
+  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+  if (propName == UR_USM_ALLOC_INFO_DEVICE) {
+    return ReturnValue(Context->Devices[0]);
+  }
   size_t CheckPropSize = 0;
   cl_int ClErr = GetMemAllocInfo(Context->get(), pMem, PropNameCL, propSize,
                                  pPropValue, &CheckPropSize);
