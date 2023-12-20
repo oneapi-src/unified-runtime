@@ -173,7 +173,7 @@ context_t::context_t() {
                 return UR_RESULT_ERROR_UNSUPPORTED_SIZE;
             }
             *ppMem = malloc(size);
-            if (ppMem == nullptr) {
+            if (*ppMem == nullptr) {
                 return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
             }
             return UR_RESULT_SUCCESS;
@@ -189,7 +189,7 @@ context_t::context_t() {
                 return UR_RESULT_ERROR_UNSUPPORTED_SIZE;
             }
             *ppMem = malloc(size);
-            if (ppMem == nullptr) {
+            if (*ppMem == nullptr) {
                 return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
             }
             return UR_RESULT_SUCCESS;
