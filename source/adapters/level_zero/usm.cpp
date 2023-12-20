@@ -615,28 +615,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMGetMemAllocInfo(
 
     std::shared_lock<ur_shared_mutex> ContextLock(Context->Mutex);
 
-    auto SearchMatchingPool =
-        [](std::unordered_map<ur_device_handle_t, umf::pool_unique_handle_t>
-               &PoolMap,
-           umf_memory_pool_handle_t UMFPool) {
-          for (auto &PoolPair : PoolMap) {
-            if (PoolPair.second.get() == UMFPool) {
-              return true;
-            }
-          }
-          return false;
-        };
-
     for (auto &Pool : Context->UsmPoolHandles) {
-      if (SearchMatchingPool(Pool->DeviceMemPools, UMFPool)) {
+      if (Pool->PoolManager.hasPool(UMFPool))
         return ReturnValue(Pool);
-      }
-      if (SearchMatchingPool(Pool->SharedMemPools, UMFPool)) {
-        return ReturnValue(Pool);
-      }
-      if (Pool->HostMemPool.get() == UMFPool) {
-        return ReturnValue(Pool);
-      }
     }
 
     return UR_RESULT_ERROR_INVALID_VALUE;
