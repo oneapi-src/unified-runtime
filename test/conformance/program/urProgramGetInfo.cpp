@@ -25,13 +25,31 @@ UUR_TEST_SUITE_P(
 
 TEST_P(urProgramGetInfoTest, Success) {
     auto property_name = getParam();
-    size_t property_size = 0;
     std::vector<char> property_value;
-    ASSERT_SUCCESS(
-        urProgramGetInfo(program, property_name, 0, nullptr, &property_size));
-    property_value.resize(property_size);
-    ASSERT_SUCCESS(urProgramGetInfo(program, property_name, property_size,
-                                    property_value.data(), nullptr));
+    if (property_name == UR_PROGRAM_INFO_BINARIES) {
+        size_t binary_sizes_len = 0;
+        ASSERT_SUCCESS(urProgramGetInfo(program, UR_PROGRAM_INFO_BINARY_SIZES,
+                                        0, nullptr, &binary_sizes_len));
+        // Due to how the fixtures + env are set up we should only have one
+        // device associated with program, so one binary.
+        ASSERT_EQ(binary_sizes_len / sizeof(size_t), 1);
+        size_t binary_sizes[1] = {binary_sizes_len};
+        ASSERT_SUCCESS(urProgramGetInfo(program, UR_PROGRAM_INFO_BINARY_SIZES,
+                                        binary_sizes_len, binary_sizes,
+                                        nullptr));
+        std::vector<char> binary(binary_sizes[0]);
+        char *binaries[1] = {binary.data()};
+        ASSERT_SUCCESS(urProgramGetInfo(program, UR_PROGRAM_INFO_BINARIES,
+                                        sizeof(binaries[0]), binaries,
+                                        nullptr));
+    } else {
+        size_t property_size = 0;
+        ASSERT_SUCCESS(urProgramGetInfo(program, property_name, 0, nullptr,
+                                        &property_size));
+        property_value.resize(property_size);
+        ASSERT_SUCCESS(urProgramGetInfo(program, property_name, property_size,
+                                        property_value.data(), nullptr));
+    }
 }
 
 TEST_P(urProgramGetInfoTest, InvalidNullHandleProgram) {

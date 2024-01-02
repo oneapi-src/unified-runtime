@@ -1,4 +1,3 @@
-urKernelSetArgValueTest.InvalidKernelArgumentSize/Intel_R__OpenCL___{{.*}}
 urKernelSetSpecializationConstantsTest.Success/Intel_R__OpenCL___{{.*}}
 urKernelSetSpecializationConstantsTest.InvalidNullHandleKernel/Intel_R__OpenCL___{{.*}}
 urKernelSetSpecializationConstantsTest.InvalidNullPointerSpecConstants/Intel_R__OpenCL___{{.*}}
