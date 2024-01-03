@@ -279,7 +279,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelSetArgMemObj(
       auto array = std::get<SurfaceMem>(hArgValue->Mem).getArray();
       hipArray_Format Format;
       size_t NumChannels;
-      getArrayDesc(array, Format, NumChannels);
+      UR_CHECK_ERROR(getArrayDesc(array, Format, NumChannels));
       if (Format != HIP_AD_FORMAT_UNSIGNED_INT32 &&
           Format != HIP_AD_FORMAT_SIGNED_INT32 &&
           Format != HIP_AD_FORMAT_HALF && Format != HIP_AD_FORMAT_FLOAT) {
