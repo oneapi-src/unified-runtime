@@ -264,6 +264,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
       *phBuffer = reinterpret_cast<ur_mem_handle_t>(FuncPtr(
           CLContext, PropertiesIntel.data(), static_cast<cl_mem_flags>(flags),
           size, pProperties->pHost, cl_adapter::cast<cl_int *>(&RetErr)));
+      if (RetErr == CL_SUCCESS) {
+        CL_RETURN_ON_FAILURE(clRetainContext(CLContext));
+      }
       return mapCLErrorToUR(RetErr);
     }
   }
@@ -273,6 +276,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
       cl_adapter::cast<cl_context>(hContext), static_cast<cl_mem_flags>(flags),
       size, HostPtr, cl_adapter::cast<cl_int *>(&RetErr)));
   CL_RETURN_ON_FAILURE(RetErr);
+  CL_RETURN_ON_FAILURE(clRetainContext(cl_adapter::cast<cl_context>(hContext)));
 
   return UR_RESULT_SUCCESS;
 }
@@ -292,7 +296,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreate(
       cl_adapter::cast<cl_context>(hContext), MapFlags, &ImageFormat,
       &ImageDesc, pHost, cl_adapter::cast<cl_int *>(&RetErr)));
   CL_RETURN_ON_FAILURE(RetErr);
-
+  CL_RETURN_ON_FAILURE(clRetainContext(cl_adapter::cast<cl_context>(hContext)));
   return UR_RESULT_SUCCESS;
 }
 
@@ -319,7 +323,13 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferPartition(
   *phMem = reinterpret_cast<ur_mem_handle_t>(clCreateSubBuffer(
       cl_adapter::cast<cl_mem>(hBuffer), static_cast<cl_mem_flags>(flags),
       BufferCreateType, &BufferRegion, cl_adapter::cast<cl_int *>(&RetErr)));
-
+  cl_context CLContext;
+  CL_RETURN_ON_FAILURE(clGetMemObjectInfo(cl_adapter::cast<cl_mem>(hBuffer),
+                                          CL_MEM_CONTEXT, sizeof(CLContext),
+                                          &CLContext, nullptr));
+  if (RetErr == CL_SUCCESS) {
+    CL_RETURN_ON_FAILURE(clRetainContext(CLContext));
+  }
   if (RetErr == CL_INVALID_VALUE) {
     size_t BufferSize = 0;
     CL_RETURN_ON_FAILURE(clGetMemObjectInfo(cl_adapter::cast<cl_mem>(hBuffer),
@@ -337,19 +347,18 @@ urMemGetNativeHandle(ur_mem_handle_t hMem, ur_native_handle_t *phNativeMem) {
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
-    ur_native_handle_t hNativeMem,
-    [[maybe_unused]] ur_context_handle_t hContext,
+    ur_native_handle_t hNativeMem, ur_context_handle_t hContext,
     const ur_mem_native_properties_t *pProperties, ur_mem_handle_t *phMem) {
   *phMem = reinterpret_cast<ur_mem_handle_t>(hNativeMem);
   if (!pProperties || !pProperties->isNativeHandleOwned) {
     return urMemRetain(*phMem);
   }
+  CL_RETURN_ON_FAILURE(clRetainContext(cl_adapter::cast<cl_context>(hContext)));
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
-    ur_native_handle_t hNativeMem,
-    [[maybe_unused]] ur_context_handle_t hContext,
+    ur_native_handle_t hNativeMem, ur_context_handle_t hContext,
     [[maybe_unused]] const ur_image_format_t *pImageFormat,
     [[maybe_unused]] const ur_image_desc_t *pImageDesc,
     const ur_mem_native_properties_t *pProperties, ur_mem_handle_t *phMem) {
@@ -357,6 +366,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
   if (!pProperties || !pProperties->isNativeHandleOwned) {
     return urMemRetain(*phMem);
   }
+  CL_RETURN_ON_FAILURE(clRetainContext(cl_adapter::cast<cl_context>(hContext)));
   return UR_RESULT_SUCCESS;
 }
 
@@ -406,11 +416,22 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageGetInfo(ur_mem_handle_t hMemory,
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urMemRetain(ur_mem_handle_t hMem) {
+  cl_context CLContext;
+  CL_RETURN_ON_FAILURE(clGetMemObjectInfo(cl_adapter::cast<cl_mem>(hMem),
+                                          CL_MEM_CONTEXT, sizeof(CLContext),
+                                          &CLContext, nullptr));
   CL_RETURN_ON_FAILURE(clRetainMemObject(cl_adapter::cast<cl_mem>(hMem)));
+  CL_RETURN_ON_FAILURE(clRetainContext(CLContext));
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urMemRelease(ur_mem_handle_t hMem) {
+  cl_context CLContext;
+  CL_RETURN_ON_FAILURE(clGetMemObjectInfo(cl_adapter::cast<cl_mem>(hMem),
+                                          CL_MEM_CONTEXT, sizeof(CLContext),
+                                          &CLContext, nullptr));
   CL_RETURN_ON_FAILURE(clReleaseMemObject(cl_adapter::cast<cl_mem>(hMem)));
+  CL_RETURN_ON_FAILURE(clReleaseContext(CLContext));
+
   return UR_RESULT_SUCCESS;
 }
