@@ -23,16 +23,22 @@ struct ur_program_handle_t_ {
 
   ~ur_program_handle_t_() {}
 
-  ur_result_t initWithNative() {
+  static ur_result_t makeWithNative(native_type NativeProg,
+                                    ur_context_handle_t Context,
+                                    ur_program_handle_t &Program) {
+    auto URProgram =
+        std::make_unique<ur_program_handle_t_>(NativeProg, Context);
     if (!Context) {
       cl_context CLContext;
-      CL_RETURN_ON_FAILURE(clGetProgramInfo(
-          Program, CL_PROGRAM_CONTEXT, sizeof(CLContext), &CLContext, nullptr));
+      CL_RETURN_ON_FAILURE(clGetProgramInfo(NativeProg, CL_PROGRAM_CONTEXT,
+                                            sizeof(CLContext), &CLContext,
+                                            nullptr));
       ur_native_handle_t NativeContext =
           reinterpret_cast<ur_native_handle_t>(CLContext);
       UR_RETURN_ON_FAILURE(urContextCreateWithNativeHandle(
-          NativeContext, 0, nullptr, nullptr, &Context));
+          NativeContext, 0, nullptr, nullptr, &(URProgram->Context)));
     }
+    Program = URProgram.release();
     return UR_RESULT_SUCCESS;
   }
 

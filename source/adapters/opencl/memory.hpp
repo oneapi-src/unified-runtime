@@ -23,16 +23,20 @@ struct ur_mem_handle_t_ {
 
   ~ur_mem_handle_t_() {}
 
-  ur_result_t initWithNative() {
-    if (!Context) {
+  static ur_result_t makeWithNative(native_type NativeMem,
+                                    ur_context_handle_t Ctx,
+                                    ur_mem_handle_t &Mem) {
+    auto URMem = std::make_unique<ur_mem_handle_t_>(NativeMem, Ctx);
+    if (!Ctx) {
       cl_context CLContext;
       CL_RETURN_ON_FAILURE(clGetMemObjectInfo(
-          Memory, CL_MEM_CONTEXT, sizeof(CLContext), &CLContext, nullptr));
+          NativeMem, CL_MEM_CONTEXT, sizeof(CLContext), &CLContext, nullptr));
       ur_native_handle_t NativeContext =
           reinterpret_cast<ur_native_handle_t>(CLContext);
       UR_RETURN_ON_FAILURE(urContextCreateWithNativeHandle(
-          NativeContext, 0, nullptr, nullptr, &Context));
+          NativeContext, 0, nullptr, nullptr, &(URMem->Context)));
     }
+    Mem = URMem.release();
     return UR_RESULT_SUCCESS;
   }
 

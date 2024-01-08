@@ -169,10 +169,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
 
   cl_command_queue NativeHandle =
       reinterpret_cast<cl_command_queue>(hNativeQueue);
-  auto URQueue =
-      std::make_unique<ur_queue_handle_t_>(NativeHandle, hContext, hDevice);
-  UR_RETURN_ON_FAILURE(URQueue->initWithNative());
-  *phQueue = URQueue.release();
+
+  UR_RETURN_ON_FAILURE(ur_queue_handle_t_::makeWithNative(
+      NativeHandle, hContext, hDevice, *phQueue));
 
   CL_RETURN_ON_FAILURE(clRetainCommandQueue(NativeHandle));
 
