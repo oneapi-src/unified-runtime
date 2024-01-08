@@ -227,7 +227,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
     ur_context_handle_t hContext, ur_mem_flags_t flags, size_t size,
     const ur_buffer_properties_t *pProperties, ur_mem_handle_t *phBuffer) {
   cl_int RetErr = CL_INVALID_OPERATION;
-  UR_RETURN_ON_FAILURE(urContextRetain(hContext));
+  // UR_RETURN_ON_FAILURE(urContextRetain(hContext));
   if (pProperties) {
     // TODO: need to check if all properties are supported by OpenCL RT and
     // ignore unsupported
@@ -348,9 +348,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
     ur_native_handle_t hNativeMem, ur_context_handle_t hContext,
     const ur_mem_native_properties_t *pProperties, ur_mem_handle_t *phMem) {
   cl_mem NativeHandle = reinterpret_cast<cl_mem>(hNativeMem);
-  auto URMem = std::make_unique<ur_mem_handle_t_>(NativeHandle, hContext);
-  UR_RETURN_ON_FAILURE(URMem->initWithNative());
-  *phMem = URMem.release();
+  UR_RETURN_ON_FAILURE(
+      ur_mem_handle_t_::makeWithNative(NativeHandle, hContext, *phMem));
   if (!pProperties || !pProperties->isNativeHandleOwned) {
     return urMemRetain(*phMem);
   }
@@ -363,9 +362,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
     [[maybe_unused]] const ur_image_desc_t *pImageDesc,
     const ur_mem_native_properties_t *pProperties, ur_mem_handle_t *phMem) {
   cl_mem NativeHandle = reinterpret_cast<cl_mem>(hNativeMem);
-  auto URMem = std::make_unique<ur_mem_handle_t_>(NativeHandle, hContext);
-  UR_RETURN_ON_FAILURE(URMem->initWithNative());
-  *phMem = URMem.release();
+  UR_RETURN_ON_FAILURE(
+      ur_mem_handle_t_::makeWithNative(NativeHandle, hContext, *phMem));
   if (!pProperties || !pProperties->isNativeHandleOwned) {
     return urMemRetain(*phMem);
   }

@@ -385,10 +385,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
     const ur_kernel_native_properties_t *pProperties,
     ur_kernel_handle_t *phKernel) {
   cl_kernel NativeHandle = reinterpret_cast<cl_kernel>(hNativeKernel);
-  auto URKernel =
-      std::make_unique<ur_kernel_handle_t_>(NativeHandle, hProgram, hContext);
-  UR_RETURN_ON_FAILURE(URKernel->initWithNative());
-  *phKernel = URKernel.release();
+
+  UR_RETURN_ON_FAILURE(ur_kernel_handle_t_::makeWithNative(
+      NativeHandle, hProgram, hContext, *phKernel));
 
   if (!pProperties || !pProperties->isNativeHandleOwned) {
     return urKernelRetain(*phKernel);

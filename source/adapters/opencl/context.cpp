@@ -144,8 +144,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextCreateWithNativeHandle(
   cl_context NativeHandle = reinterpret_cast<cl_context>(hNativeContext);
   auto URContext = std::make_unique<ur_context_handle_t_>(
       NativeHandle, numDevices, phDevices);
-  UR_RETURN_ON_FAILURE(URContext->initWithNative());
-  *phContext = URContext.release();
+  UR_RETURN_ON_FAILURE(ur_context_handle_t_::makeWithNative(
+      NativeHandle, numDevices, phDevices, *phContext));
   if (!pProperties || !pProperties->isNativeHandleOwned) {
     return clRetainContext(NativeHandle);
   }
