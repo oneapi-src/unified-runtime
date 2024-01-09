@@ -72,7 +72,7 @@ UR_APIEXPORT ur_result_t UR_APICALL
 urContextGetInfo(ur_context_handle_t hContext, ur_context_info_t propName,
                  size_t propSize, void *pPropValue, size_t *pPropSizeRet) {
 
-  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
 
   switch (uint32_t{propName}) {
   case UR_CONTEXT_INFO_NUM_DEVICES:

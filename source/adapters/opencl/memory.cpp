@@ -366,7 +366,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemGetInfo(ur_mem_handle_t hMemory,
                                                  void *pPropValue,
                                                  size_t *pPropSizeRet) {
 
-  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
   const cl_int CLPropName = mapURMemInfoToCL(propName);
 
   size_t CheckPropSize = 0;
@@ -389,7 +389,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageGetInfo(ur_mem_handle_t hMemory,
                                                       void *pPropValue,
                                                       size_t *pPropSizeRet) {
 
-  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
   const cl_int CLPropName = mapURMemImageInfoToCL(propName);
 
   size_t CheckPropSize = 0;

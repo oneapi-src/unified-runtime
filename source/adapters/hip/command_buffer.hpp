@@ -8,7 +8,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include <ur/ur.hpp>
+#include <ur_api.h>
 
 /// Stub implementation of command-buffers for HIP
 

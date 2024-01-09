@@ -17,7 +17,8 @@
 #endif
 #endif
 #include <hip/hip_runtime.h>
-#include <ur/ur.hpp>
+#include <ur_api.h>
+#include <ur_util.hpp>
 
 // Before ROCm 6, hipify doesn't support cuArrayGetDescriptor, on AMD the
 // hipArray can just be indexed, but on NVidia it is an opaque type and needs to

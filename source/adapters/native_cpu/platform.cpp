@@ -11,7 +11,6 @@
 #include "platform.hpp"
 #include "common.hpp"
 
-#include "ur/ur.hpp"
 #include "ur_api.h"
 
 #include <iostream>
@@ -58,7 +57,7 @@ urPlatformGetInfo(ur_platform_handle_t hPlatform, ur_platform_info_t propName,
   if (hPlatform == nullptr) {
     return UR_RESULT_ERROR_INVALID_PLATFORM;
   }
-  UrReturnHelper ReturnValue(propSize, pParamValue, pSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pParamValue, pSizeRet);
 
   switch (propName) {
   case UR_PLATFORM_INFO_NAME:

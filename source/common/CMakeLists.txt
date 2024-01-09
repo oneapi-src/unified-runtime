@@ -9,9 +9,12 @@ add_subdirectory(umf_pools)
 add_ur_library(ur_common STATIC
     umf_helpers.hpp
     ur_pool_manager.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ur_util.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ur_util.hpp
     $<$<PLATFORM_ID:Windows>:windows/ur_lib_loader.cpp>
     $<$<PLATFORM_ID:Linux,Darwin>:linux/ur_lib_loader.cpp>
 )
+
 add_library(${PROJECT_NAME}::common ALIAS ur_common)
 
 target_include_directories(ur_common PUBLIC

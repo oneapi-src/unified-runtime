@@ -160,7 +160,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueGetInfo(ur_queue_handle_t hQueue,
                                                    size_t propValueSize,
                                                    void *pPropValue,
                                                    size_t *pPropSizeRet) {
-  UrReturnHelper ReturnValue(propValueSize, pPropValue, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propValueSize, pPropValue, pPropSizeRet);
   switch (propName) {
   case UR_QUEUE_INFO_CONTEXT:
     return ReturnValue(hQueue->Context);

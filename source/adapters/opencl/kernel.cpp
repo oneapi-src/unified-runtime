@@ -10,6 +10,7 @@
 #include "common.hpp"
 
 #include <algorithm>
+#include <cassert>
 #include <memory>
 
 UR_APIEXPORT ur_result_t UR_APICALL

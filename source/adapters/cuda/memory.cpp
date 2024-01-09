@@ -175,7 +175,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemGetInfo(ur_mem_handle_t hMemory,
                                                  size_t *pPropSizeRet) {
   UR_ASSERT(hMemory->isBuffer(), UR_RESULT_ERROR_INVALID_MEM_OBJECT);
 
-  UrReturnHelper ReturnValue(propSize, pMemInfo, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pMemInfo, pPropSizeRet);
 
   ScopedContext Active(hMemory->getContext());
 

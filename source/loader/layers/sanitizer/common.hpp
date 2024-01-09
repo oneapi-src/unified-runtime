@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "ur/ur.hpp"
+#include "ur_api.h"
 #include "ur_ddi.h"
 
 #include <cassert>

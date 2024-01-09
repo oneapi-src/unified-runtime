@@ -8,7 +8,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include <ur/ur.hpp>
+#include <ur_api.h>
+
+#include <atomic>
 
 /// Implementation of samplers for CUDA
 ///

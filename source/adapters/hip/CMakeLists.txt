@@ -83,8 +83,6 @@ add_ur_adapter(${TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/usm.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/usm_p2p.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/virtual_mem.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../ur/ur.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../ur/ur.hpp
 )
 
 if(NOT MSVC)
@@ -184,7 +182,3 @@ elseif("${UR_HIP_PLATFORM}" STREQUAL "NVIDIA")
 else()
     message(FATAL_ERROR "Unspecified UR HIP platform please set UR_HIP_PLATFORM to 'AMD' or 'NVIDIA'")
 endif()
-
-target_include_directories(${TARGET_NAME} PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/../../"
-)

@@ -9,6 +9,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "context.hpp"
+#include <ur_util.hpp>
 
 #include <mutex>
 #include <set>
@@ -73,7 +74,7 @@ UR_APIEXPORT ur_result_t UR_APICALL
 urContextGetInfo(ur_context_handle_t hContext, ur_context_info_t propName,
                  size_t propSize, void *pPropValue, size_t *pPropSizeRet) {
 
-  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
   const cl_int CLPropName = mapURContextInfoToCL(propName);
 
   switch (static_cast<uint32_t>(propName)) {

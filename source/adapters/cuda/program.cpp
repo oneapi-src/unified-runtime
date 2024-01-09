@@ -339,7 +339,7 @@ urProgramGetBuildInfo(ur_program_handle_t hProgram, ur_device_handle_t hDevice,
                       void *pPropValue, size_t *pPropSizeRet) {
   std::ignore = hDevice;
 
-  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
 
   switch (propName) {
   case UR_PROGRAM_BUILD_INFO_STATUS: {
@@ -361,7 +361,7 @@ urProgramGetBuildInfo(ur_program_handle_t hProgram, ur_device_handle_t hDevice,
 UR_APIEXPORT ur_result_t UR_APICALL
 urProgramGetInfo(ur_program_handle_t hProgram, ur_program_info_t propName,
                  size_t propSize, void *pProgramInfo, size_t *pPropSizeRet) {
-  UrReturnHelper ReturnValue(propSize, pProgramInfo, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pProgramInfo, pPropSizeRet);
 
   switch (propName) {
   case UR_PROGRAM_INFO_REFERENCE_COUNT:

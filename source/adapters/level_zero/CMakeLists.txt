@@ -119,7 +119,6 @@ add_ur_adapter(${TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/queue.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/sampler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/image.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../ur/ur.cpp
 )
 
 # TODO: fix level_zero adapter conversion warnings
@@ -141,6 +140,5 @@ target_link_libraries(${TARGET_NAME} PRIVATE
 )
 
 target_include_directories(${TARGET_NAME} PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/../../"
     LevelZeroLoader-Headers
 )

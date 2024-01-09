@@ -80,7 +80,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPlatformGet(
   // 2. performance; we can save time by immediately return from cache.
   //
 
-  const std::lock_guard<SpinLock> Lock{*URPlatformsCacheMutex};
+  const std::lock_guard<ur::SpinLock> Lock{*URPlatformsCacheMutex};
   if (!URPlatformCachePopulated) {
     try {
       // Level Zero does not have concept of Platforms, but Level Zero driver is
@@ -139,7 +139,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPlatformGetInfo(
     size_t *SizeRet   ///< [out][optional] pointer to the actual number of bytes
                       ///< being queried by pPlatformInfo.
 ) {
-  UrReturnHelper ReturnValue(Size, ParamValue, SizeRet);
+  ur::ReturnHelper ReturnValue(Size, ParamValue, SizeRet);
 
   switch (ParamName) {
   case UR_PLATFORM_INFO_NAME:
@@ -304,7 +304,7 @@ ur_platform_handle_t_::getDeviceFromNativeHandle(ze_device_handle_t ZeDevice) {
   // mapping from L0 device handle to PI device assumed in this function. Until
   // Level-Zero adds unique ze_device_handle_t for sub-sub-devices, here we
   // filter out PI sub-sub-devices.
-  std::shared_lock<ur_shared_mutex> Lock(URDevicesCacheMutex);
+  std::shared_lock<ur::SharedMutex> Lock(URDevicesCacheMutex);
   auto it = std::find_if(URDevicesCache.begin(), URDevicesCache.end(),
                          [&](std::unique_ptr<ur_device_handle_t_> &D) {
                            return D.get()->ZeDevice == ZeDevice &&
@@ -319,7 +319,7 @@ ur_platform_handle_t_::getDeviceFromNativeHandle(ze_device_handle_t ZeDevice) {
 
 // Check the device cache and load it if necessary.
 ur_result_t ur_platform_handle_t_::populateDeviceCacheIfNeeded() {
-  std::scoped_lock<ur_shared_mutex> Lock(URDevicesCacheMutex);
+  std::scoped_lock<ur::SharedMutex> Lock(URDevicesCacheMutex);
 
   if (DeviceCachePopulated) {
     return UR_RESULT_SUCCESS;

@@ -41,8 +41,6 @@ add_ur_adapter(${TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/usm.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/usm_p2p.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/virtual_mem.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../ur/ur.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../ur/ur.hpp
 )
 
 set_target_properties(${TARGET_NAME} PROPERTIES
@@ -82,8 +80,4 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     ${PROJECT_NAME}::unified_malloc_framework
     Threads::Threads
     cudadrv
-)
-
-target_include_directories(${TARGET_NAME} PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/../../"
 )

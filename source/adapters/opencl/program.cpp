@@ -277,7 +277,7 @@ urProgramGetBuildInfo(ur_program_handle_t hProgram, ur_device_handle_t hDevice,
                       ur_program_build_info_t propName, size_t propSize,
                       void *pPropValue, size_t *pPropSizeRet) {
   if (propName == UR_PROGRAM_BUILD_INFO_BINARY_TYPE) {
-    UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+    ur::ReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
     cl_program_binary_type BinaryType;
     CL_RETURN_ON_FAILURE(clGetProgramBuildInfo(
         cl_adapter::cast<cl_program>(hProgram),

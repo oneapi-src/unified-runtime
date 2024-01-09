@@ -90,7 +90,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferPartition(
                 !(static_cast<_ur_buffer *>(hBuffer))->isSubBuffer(),
             UR_RESULT_ERROR_INVALID_MEM_OBJECT);
 
-  std::shared_lock<ur_shared_mutex> Guard(hBuffer->Mutex);
+  std::shared_lock<ur::SharedMutex> Guard(hBuffer->Mutex);
 
   if (flags != UR_MEM_FLAG_READ_WRITE) {
     die("urMemBufferPartition: NativeCPU implements only read-write buffer,"

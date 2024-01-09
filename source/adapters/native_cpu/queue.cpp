@@ -11,7 +11,6 @@
 #include "queue.hpp"
 #include "common.hpp"
 
-#include "ur/ur.hpp"
 #include "ur_api.h"
 
 UR_APIEXPORT ur_result_t UR_APICALL urQueueGetInfo(ur_queue_handle_t hQueue,

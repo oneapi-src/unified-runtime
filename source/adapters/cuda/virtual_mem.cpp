@@ -20,7 +20,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urVirtualMemGranularityGetInfo(
     ur_context_handle_t hContext, ur_device_handle_t hDevice,
     ur_virtual_mem_granularity_info_t propName, size_t propSize,
     void *pPropValue, size_t *pPropSizeRet) {
-  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
 
   ScopedContext Active(hContext);
   switch (propName) {
@@ -108,7 +108,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urVirtualMemGetInfo(
     ur_context_handle_t hContext, const void *pStart,
     [[maybe_unused]] size_t size, ur_virtual_mem_info_t propName,
     size_t propSize, void *pPropValue, size_t *pPropSizeRet) {
-  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
 
   ScopedContext Active(hContext);
   switch (propName) {

@@ -173,7 +173,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urAdapterGetInfo(ur_adapter_handle_t,
                                                      size_t PropSize,
                                                      void *PropValue,
                                                      size_t *PropSizeRet) {
-  UrReturnHelper ReturnValue(PropSize, PropValue, PropSizeRet);
+  ur::ReturnHelper ReturnValue(PropSize, PropValue, PropSizeRet);
 
   switch (PropName) {
   case UR_ADAPTER_INFO_BACKEND:

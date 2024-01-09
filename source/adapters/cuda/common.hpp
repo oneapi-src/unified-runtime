@@ -10,7 +10,7 @@
 #pragma once
 
 #include <cuda.h>
-#include <ur/ur.hpp>
+#include <ur_util.hpp>
 
 ur_result_t mapErrorUR(CUresult Result);
 

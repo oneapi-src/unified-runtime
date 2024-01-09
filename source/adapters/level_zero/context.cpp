@@ -39,7 +39,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextCreate(
     Context->initialize();
     *RetContext = reinterpret_cast<ur_context_handle_t>(Context);
     if (IndirectAccessTrackingEnabled) {
-      std::scoped_lock<ur_shared_mutex> Lock(Platform->ContextsMutex);
+      std::scoped_lock<ur::SharedMutex> Lock(Platform->ContextsMutex);
       Platform->Contexts.push_back(*RetContext);
     }
   } catch (const std::bad_alloc &) {
@@ -63,7 +63,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextRelease(
     ur_context_handle_t Context ///< [in] handle of the context to release.
 ) {
   ur_platform_handle_t Plt = Context->getPlatform();
-  std::unique_lock<ur_shared_mutex> ContextsLock(Plt->ContextsMutex,
+  std::unique_lock<ur::SharedMutex> ContextsLock(Plt->ContextsMutex,
                                                  std::defer_lock);
   if (IndirectAccessTrackingEnabled)
     ContextsLock.lock();
@@ -96,8 +96,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextGetInfo(
     size_t *PropSizeRet ///< [out][optional] pointer to the actual size in
                         ///< bytes of data queried by ContextInfoType.
 ) {
-  std::shared_lock<ur_shared_mutex> Lock(Context->Mutex);
-  UrReturnHelper ReturnValue(PropSize, ContextInfo, PropSizeRet);
+  std::shared_lock<ur::SharedMutex> Lock(Context->Mutex);
+  ur::ReturnHelper ReturnValue(PropSize, ContextInfo, PropSizeRet);
   switch (
       (uint32_t)ContextInfoType) { // cast to avoid warnings on EXT enum values
   case UR_CONTEXT_INFO_DEVICES:
@@ -397,7 +397,7 @@ ur_result_t ur_context_handle_t_::finalize() {
   // deallocated. For example, event and event pool caches would be still alive.
 
   if (!DisableEventsCaching) {
-    std::scoped_lock<ur_mutex> Lock(EventCacheMutex);
+    std::scoped_lock<ur::Mutex> Lock(EventCacheMutex);
     for (auto &EventCache : EventCaches) {
       for (auto &Event : EventCache) {
         auto ZeResult = ZE_CALL_NOCHECK(zeEventDestroy, (Event->ZeEvent));
@@ -410,7 +410,7 @@ ur_result_t ur_context_handle_t_::finalize() {
     }
   }
   {
-    std::scoped_lock<ur_mutex> Lock(ZeEventPoolCacheMutex);
+    std::scoped_lock<ur::Mutex> Lock(ZeEventPoolCacheMutex);
     for (auto &ZePoolCache : ZeEventPoolCache) {
       for (auto &ZePool : ZePoolCache) {
         auto ZeResult = ZE_CALL_NOCHECK(zeEventPoolDestroy, (ZePool));
@@ -428,7 +428,7 @@ ur_result_t ur_context_handle_t_::finalize() {
   if (ZeResult && ZeResult != ZE_RESULT_ERROR_UNINITIALIZED)
     return ze2urResult(ZeResult);
 
-  std::scoped_lock<ur_mutex> Lock(ZeCommandListCacheMutex);
+  std::scoped_lock<ur::Mutex> Lock(ZeCommandListCacheMutex);
   for (auto &List : ZeComputeCommandListCache) {
     for (auto &Item : List.second) {
       ze_command_list_handle_t ZeCommandList = Item.first;
@@ -473,7 +473,7 @@ ur_result_t ur_context_handle_t_::getFreeSlotInExistingOrNewPool(
     ze_event_pool_handle_t &Pool, size_t &Index, bool HostVisible,
     bool ProfilingEnabled) {
   // Lock while updating event pool machinery.
-  std::scoped_lock<ur_mutex> Lock(ZeEventPoolCacheMutex);
+  std::scoped_lock<ur::Mutex> Lock(ZeEventPoolCacheMutex);
 
   std::list<ze_event_pool_handle_t> *ZePoolCache =
       getZeEventPoolCache(HostVisible, ProfilingEnabled);
@@ -531,7 +531,7 @@ ur_result_t ur_context_handle_t_::getFreeSlotInExistingOrNewPool(
 ur_event_handle_t
 ur_context_handle_t_::getEventFromContextCache(bool HostVisible,
                                                bool WithProfiling) {
-  std::scoped_lock<ur_mutex> Lock(EventCacheMutex);
+  std::scoped_lock<ur::Mutex> Lock(EventCacheMutex);
   auto Cache = getEventCache(HostVisible, WithProfiling);
   if (Cache->empty())
     return nullptr;
@@ -545,7 +545,7 @@ ur_context_handle_t_::getEventFromContextCache(bool HostVisible,
 }
 
 void ur_context_handle_t_::addEventToContextCache(ur_event_handle_t Event) {
-  std::scoped_lock<ur_mutex> Lock(EventCacheMutex);
+  std::scoped_lock<ur::Mutex> Lock(EventCacheMutex);
   auto Cache =
       getEventCache(Event->isHostVisible(), Event->isProfilingEnabled());
   Cache->emplace_back(Event);
@@ -553,8 +553,8 @@ void ur_context_handle_t_::addEventToContextCache(ur_event_handle_t Event) {
 
 ur_result_t
 ur_context_handle_t_::decrementUnreleasedEventsInPool(ur_event_handle_t Event) {
-  std::shared_lock<ur_shared_mutex> EventLock(Event->Mutex, std::defer_lock);
-  std::scoped_lock<ur_mutex, std::shared_lock<ur_shared_mutex>> LockAll(
+  std::shared_lock<ur::SharedMutex> EventLock(Event->Mutex, std::defer_lock);
+  std::scoped_lock<ur::Mutex, std::shared_lock<ur::SharedMutex>> LockAll(
       ZeEventPoolCacheMutex, EventLock);
   if (!Event->ZeEventPool) {
     // This must be an interop event created on a users's pool.
@@ -683,7 +683,7 @@ ur_result_t ur_context_handle_t_::getAvailableCommandList(
   {
     // Make sure to acquire the lock before checking the size, or there
     // will be a race condition.
-    std::scoped_lock<ur_mutex> Lock(Queue->Context->ZeCommandListCacheMutex);
+    std::scoped_lock<ur::Mutex> Lock(Queue->Context->ZeCommandListCacheMutex);
     // Under mutex since operator[] does insertion on the first usage for every
     // unique ZeDevice.
     auto &ZeCommandListCache =

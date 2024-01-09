@@ -16,7 +16,7 @@ hipEvent_t ur_platform_handle_t_::EvBase{nullptr};
 UR_APIEXPORT ur_result_t UR_APICALL
 urPlatformGetInfo(ur_platform_handle_t, ur_platform_info_t propName,
                   size_t propSize, void *pPropValue, size_t *pSizeRet) {
-  UrReturnHelper ReturnValue(propSize, pPropValue, pSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pPropValue, pSizeRet);
 
   switch (propName) {
   case UR_PLATFORM_INFO_NAME:

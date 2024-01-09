@@ -75,9 +75,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelGetInfo(ur_kernel_handle_t hKernel,
   std::ignore = propName;
   std::ignore = pPropValue;
 
-  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
   // todo: check if we need this
-  // std::shared_lock<ur_shared_mutex> Guard(hKernel->Mutex);
+  // std::shared_lock<ur::SharedMutex> Guard(hKernel->Mutex);
   switch (propName) {
     //  case UR_KERNEL_INFO_CONTEXT:
     //    return ReturnValue(ur_context_handle_t{ hKernel->Program->Context });
@@ -108,7 +108,7 @@ urKernelGetGroupInfo(ur_kernel_handle_t hKernel, ur_device_handle_t hDevice,
 
   UR_ASSERT(hKernel, UR_RESULT_ERROR_INVALID_NULL_HANDLE);
 
-  UrReturnHelper returnValue(propSize, pPropValue, pPropSizeRet);
+  ur::ReturnHelper returnValue(propSize, pPropValue, pPropSizeRet);
 
   switch (propName) {
   case UR_KERNEL_GROUP_INFO_GLOBAL_WORK_SIZE: {
@@ -152,7 +152,7 @@ urKernelGetSubGroupInfo(ur_kernel_handle_t hKernel, ur_device_handle_t hDevice,
   std::ignore = hKernel;
   std::ignore = hDevice;
 
-  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
   switch (propName) {
   case UR_KERNEL_SUB_GROUP_INFO_MAX_SUB_GROUP_SIZE: {
     // todo: set proper values

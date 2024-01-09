@@ -10,7 +10,10 @@
 
 #pragma once
 
-#include "ur/ur.hpp"
+#include <atomic>
+
+#include "ur_api.h"
+#include "ur_util.hpp"
 
 constexpr size_t MaxMessageSize = 256;
 
@@ -58,7 +61,7 @@ namespace ur {
 
 // Base class to store common data
 struct _ur_object {
-  ur_shared_mutex Mutex;
+  ur::SharedMutex Mutex;
 };
 
 // Todo: replace this with a common helper once it is available

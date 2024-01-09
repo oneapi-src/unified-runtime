@@ -10,9 +10,13 @@
 #include <CL/cl.h>
 #include <CL/cl_ext.h>
 #include <climits>
+#include <cstring>
 #include <map>
+#include <memory>
 #include <mutex>
-#include <ur/ur.hpp>
+#include <ur_api.h>
+#include <ur_util.hpp>
+#include <vector>
 
 /**
  * Call an OpenCL API and, if the result is not CL_SUCCESS, automatically map

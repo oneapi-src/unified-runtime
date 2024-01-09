@@ -9,6 +9,9 @@
 //===----------------------------------------------------------------------===//
 
 #include "common.hpp"
+#include <cassert>
+#include <cstring>
+#include <iostream>
 
 namespace cl_adapter {
 

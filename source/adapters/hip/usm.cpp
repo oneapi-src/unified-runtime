@@ -154,7 +154,7 @@ urUSMGetMemAllocInfo(ur_context_handle_t hContext, const void *pMem,
   ur_result_t Result = UR_RESULT_SUCCESS;
   hipPointerAttribute_t hipPointerAttributeType;
 
-  UrReturnHelper ReturnValue(propValueSize, pPropValue, pPropValueSizeRet);
+  ur::ReturnHelper ReturnValue(propValueSize, pPropValue, pPropValueSizeRet);
 
   try {
     switch (propName) {
@@ -430,7 +430,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMPoolGetInfo(
     size_t *pPropSizeRet ///< [out][optional] size in bytes returned in pool
                          ///< property value
 ) {
-  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
 
   switch (propName) {
   case UR_USM_POOL_INFO_REFERENCE_COUNT: {

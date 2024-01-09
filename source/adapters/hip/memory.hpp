@@ -397,8 +397,8 @@ struct ur_mem_handle_t_ {
   // Enumerates all possible types of accesses.
   enum access_mode_t { unknown, read_write, read_only, write_only };
 
-  ur_mutex MemoryAllocationMutex; // A mutex for allocations
-  ur_mutex MemoryMigrationMutex;  // A mutex for memory transfers
+  ur::Mutex MemoryAllocationMutex; // A mutex for allocations
+  ur::Mutex MemoryMigrationMutex;  // A mutex for memory transfers
 
   /// A UR Memory object represents either plain memory allocations ("Buffers"
   /// in OpenCL) or typed allocations ("Images" in OpenCL).

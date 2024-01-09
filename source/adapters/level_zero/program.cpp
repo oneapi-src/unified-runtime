@@ -140,7 +140,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramBuildExp(
     return UR_RESULT_ERROR_INVALID_OPERATION;
   }
 
-  std::scoped_lock<ur_shared_mutex> Guard(hProgram->Mutex);
+  std::scoped_lock<ur::SharedMutex> Guard(hProgram->Mutex);
 
   // Ask Level Zero to build and load the native code onto the device.
   ZeStruct<ze_module_desc_t> ZeModuleDesc;
@@ -234,7 +234,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCompile(
                         ///< null-terminated string.
 ) {
   std::ignore = Context;
-  std::scoped_lock<ur_shared_mutex> Guard(Program->Mutex);
+  std::scoped_lock<ur::SharedMutex> Guard(Program->Mutex);
 
   // It's only valid to compile a program created from IL (we don't support
   // programs created from source code).
@@ -322,9 +322,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramLinkExp(
     // potential if there was some other code that holds more than one of these
     // locks simultaneously with "exclusive" access.  However, there is no such
     // code like that, so this is also not a danger.
-    std::vector<std::shared_lock<ur_shared_mutex>> Guards(count);
+    std::vector<std::shared_lock<ur::SharedMutex>> Guards(count);
     for (uint32_t I = 0; I < count; I++) {
-      std::shared_lock<ur_shared_mutex> Guard(phPrograms[I]->Mutex);
+      std::shared_lock<ur::SharedMutex> Guard(phPrograms[I]->Mutex);
       Guards[I].swap(Guard);
       if (phPrograms[I]->State != ur_program_handle_t_::Object) {
         return UR_RESULT_ERROR_INVALID_OPERATION;
@@ -512,7 +512,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramGetFunctionPointer(
 ) {
   std::ignore = Device;
 
-  std::shared_lock<ur_shared_mutex> Guard(Program->Mutex);
+  std::shared_lock<ur::SharedMutex> Guard(Program->Mutex);
   if (Program->State != ur_program_handle_t_::Exe) {
     return UR_RESULT_ERROR_INVALID_PROGRAM_EXECUTABLE;
   }
@@ -571,7 +571,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramGetInfo(
     size_t *PropSizeRet ///< [out][optional] pointer to the actual size in
                         ///< bytes of data copied to propName.
 ) {
-  UrReturnHelper ReturnValue(PropSize, ProgramInfo, PropSizeRet);
+  ur::ReturnHelper ReturnValue(PropSize, ProgramInfo, PropSizeRet);
 
   switch (PropName) {
   case UR_PROGRAM_INFO_REFERENCE_COUNT:
@@ -585,7 +585,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramGetInfo(
     // TODO: return all devices this program exists for.
     return ReturnValue(Program->Context->Devices[0]);
   case UR_PROGRAM_INFO_BINARY_SIZES: {
-    std::shared_lock<ur_shared_mutex> Guard(Program->Mutex);
+    std::shared_lock<ur::SharedMutex> Guard(Program->Mutex);
     size_t SzBinary;
     if (Program->State == ur_program_handle_t_::IL ||
         Program->State == ur_program_handle_t_::Native ||
@@ -609,7 +609,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramGetInfo(
     if (!PBinary[0])
       break;
 
-    std::shared_lock<ur_shared_mutex> Guard(Program->Mutex);
+    std::shared_lock<ur::SharedMutex> Guard(Program->Mutex);
     if (Program->State == ur_program_handle_t_::IL ||
         Program->State == ur_program_handle_t_::Native ||
         Program->State == ur_program_handle_t_::Object) {
@@ -624,7 +624,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramGetInfo(
     break;
   }
   case UR_PROGRAM_INFO_NUM_KERNELS: {
-    std::shared_lock<ur_shared_mutex> Guard(Program->Mutex);
+    std::shared_lock<ur::SharedMutex> Guard(Program->Mutex);
     uint32_t NumKernels;
     if (Program->State == ur_program_handle_t_::IL ||
         Program->State == ur_program_handle_t_::Native ||
@@ -641,7 +641,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramGetInfo(
   }
   case UR_PROGRAM_INFO_KERNEL_NAMES:
     try {
-      std::shared_lock<ur_shared_mutex> Guard(Program->Mutex);
+      std::shared_lock<ur::SharedMutex> Guard(Program->Mutex);
       std::string PINames{""};
       if (Program->State == ur_program_handle_t_::IL ||
           Program->State == ur_program_handle_t_::Native ||
@@ -690,8 +690,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramGetBuildInfo(
 ) {
   std::ignore = Device;
 
-  std::shared_lock<ur_shared_mutex> Guard(Program->Mutex);
-  UrReturnHelper ReturnValue(PropSize, PropValue, PropSizeRet);
+  std::shared_lock<ur::SharedMutex> Guard(Program->Mutex);
+  ur::ReturnHelper ReturnValue(PropSize, PropValue, PropSizeRet);
   if (PropName == UR_PROGRAM_BUILD_INFO_BINARY_TYPE) {
     ur_program_binary_type_t Type = UR_PROGRAM_BINARY_TYPE_NONE;
     if (Program->State == ur_program_handle_t_::Object) {
@@ -769,7 +769,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramGetNativeHandle(
 ) {
   auto ZeModule = ur_cast<ze_module_handle_t *>(NativeProgram);
 
-  std::shared_lock<ur_shared_mutex> Guard(Program->Mutex);
+  std::shared_lock<ur::SharedMutex> Guard(Program->Mutex);
   switch (Program->State) {
   case ur_program_handle_t_::Exe: {
     *ZeModule = Program->ZeModule;
@@ -833,7 +833,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramSetSpecializationConstants(
         *SpecConstants ///< [in][range(0, count)] array of specialization
                        ///< constant value descriptions
 ) {
-  std::scoped_lock<ur_shared_mutex> Guard(Program->Mutex);
+  std::scoped_lock<ur::SharedMutex> Guard(Program->Mutex);
 
   // Remember the value of this specialization constant until the program is
   // built.  Note that we only save the pointer to the buffer that contains the

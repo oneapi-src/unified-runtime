@@ -39,7 +39,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urUsmP2PPeerAccessGetInfoExp(
   std::ignore = peerDevice;
   std::ignore = propName;
 
-  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
   // Zero return value indicates that all of the queries currently return false.
   return ReturnValue(uint32_t{0});
 }

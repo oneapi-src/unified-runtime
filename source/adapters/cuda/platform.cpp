@@ -22,7 +22,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPlatformGetInfo(
     size_t Size, void *pPlatformInfo, size_t *pSizeRet) {
 
   UR_ASSERT(hPlatform, UR_RESULT_ERROR_INVALID_NULL_HANDLE);
-  UrReturnHelper ReturnValue(Size, pPlatformInfo, pSizeRet);
+  ur::ReturnHelper ReturnValue(Size, pPlatformInfo, pSizeRet);
 
   switch (PlatformInfoType) {
   case UR_PLATFORM_INFO_NAME:

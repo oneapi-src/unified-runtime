@@ -34,7 +34,7 @@ ur_result_t urSamplerCreate(ur_context_handle_t hContext,
 ur_result_t urSamplerGetInfo(ur_sampler_handle_t hSampler,
                              ur_sampler_info_t propName, size_t propValueSize,
                              void *pPropValue, size_t *pPropSizeRet) {
-  UrReturnHelper ReturnValue(propValueSize, pPropValue, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propValueSize, pPropValue, pPropSizeRet);
 
   switch (propName) {
   case UR_SAMPLER_INFO_REFERENCE_COUNT:

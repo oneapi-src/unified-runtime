@@ -19,7 +19,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urSamplerCreate(
     ur_sampler_handle_t
         *Sampler ///< [out] pointer to handle of sampler object created
 ) {
-  std::shared_lock<ur_shared_mutex> Lock(Context->Mutex);
+  std::shared_lock<ur::SharedMutex> Lock(Context->Mutex);
 
   // Have the "0" device in context to own the sampler. Rely on Level-Zero
   // drivers to perform migration as necessary for sharing it across multiple

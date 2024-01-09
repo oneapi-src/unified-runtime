@@ -104,7 +104,6 @@ endif()
 if(UR_ENABLE_SANITIZER)
     target_sources(ur_loader
         PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/../ur/ur.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_interceptor.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_interceptor.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/common.hpp

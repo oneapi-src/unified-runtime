@@ -221,7 +221,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemGetInfo(ur_mem_handle_t hMemory,
   auto Device = hMemory->getContext()->getDevices()[0];
   ScopedContext Active(Device);
 
-  UrReturnHelper ReturnValue(propSize, pMemInfo, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pMemInfo, pPropSizeRet);
 
   switch (MemInfoType) {
   case UR_MEM_INFO_SIZE: {
@@ -366,7 +366,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageGetInfo(ur_mem_handle_t hMemory,
   // FIXME: only getting infor for first image in ctx
   auto Device = hMemory->getContext()->getDevices()[0];
   ScopedContext Active(Device);
-  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
 
   try {
     HIP_ARRAY3D_DESCRIPTOR ArrayInfo;
@@ -439,7 +439,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemRetain(ur_mem_handle_t hMem) {
 ur_result_t allocateMemObjOnDeviceIfNeeded(ur_mem_handle_t Mem,
                                            const ur_device_handle_t hDevice) {
   ScopedContext Active(hDevice);
-  ur_lock LockGuard(Mem->MemoryAllocationMutex);
+  ur::Lock LockGuard(Mem->MemoryAllocationMutex);
 
   if (Mem->isBuffer()) {
     auto &Buffer = std::get<BufferMem>(Mem->Mem);

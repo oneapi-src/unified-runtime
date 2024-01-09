@@ -216,7 +216,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetInfo(ur_event_handle_t hEvent,
                                                    size_t *pPropValueSizeRet) {
   UR_ASSERT(!(pPropValue && propValueSize == 0), UR_RESULT_ERROR_INVALID_SIZE);
 
-  UrReturnHelper ReturnValue(propValueSize, pPropValue, pPropValueSizeRet);
+  ur::ReturnHelper ReturnValue(propValueSize, pPropValue, pPropValueSizeRet);
   switch (propName) {
   case UR_EVENT_INFO_COMMAND_QUEUE:
     return ReturnValue(hEvent->getQueue());
@@ -253,7 +253,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetProfilingInfo(
     return UR_RESULT_ERROR_PROFILING_INFO_NOT_AVAILABLE;
   }
 
-  UrReturnHelper ReturnValue(propValueSize, pPropValue, pPropValueSizeRet);
+  ur::ReturnHelper ReturnValue(propValueSize, pPropValue, pPropValueSizeRet);
   switch (propName) {
   case UR_PROFILING_INFO_COMMAND_QUEUED:
   case UR_PROFILING_INFO_COMMAND_SUBMIT:

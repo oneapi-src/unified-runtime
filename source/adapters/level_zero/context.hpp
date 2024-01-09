@@ -17,8 +17,8 @@
 #include <unordered_set>
 #include <vector>
 
-#include <ur/ur.hpp>
 #include <ur_api.h>
+#include <ur_util.hpp>
 #include <ze_api.h>
 #include <zes_api.h>
 
@@ -64,11 +64,11 @@ struct ur_context_handle_t_ : _ur_object {
   // Mutex for the immediate command list. Per the Level Zero spec memory copy
   // operations submitted to an immediate command list are not allowed to be
   // called from simultaneous threads.
-  ur_mutex ImmediateCommandListMutex;
+  ur::Mutex ImmediateCommandListMutex;
 
   // Mutex Lock for the Command List Cache. This lock is used to control both
   // compute and copy command list caches.
-  ur_mutex ZeCommandListCacheMutex;
+  ur::Mutex ZeCommandListCacheMutex;
 
   // If context contains one device or sub-devices of the same device, we want
   // to save this device.
@@ -156,10 +156,10 @@ struct ur_context_handle_t_ : _ur_object {
 
   // Mutex to control operations on event pool caches and the helper maps
   // holding the current pool usage counts.
-  ur_mutex ZeEventPoolCacheMutex;
+  ur::Mutex ZeEventPoolCacheMutex;
 
   // Mutex to control operations on event caches.
-  ur_mutex EventCacheMutex;
+  ur::Mutex EventCacheMutex;
 
   // Caches for events.
   std::vector<std::list<ur_event_handle_t>> EventCaches{4};

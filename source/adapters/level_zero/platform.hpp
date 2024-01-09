@@ -14,7 +14,7 @@
 
 struct ur_device_handle_t_;
 
-struct ur_platform_handle_t_ : public _ur_platform {
+struct ur_platform_handle_t_ {
   ur_platform_handle_t_(ze_driver_handle_t Driver)
       : ZeDriver{Driver}, ZeApiVersion{ZE_API_VERSION_CURRENT} {}
   // Performs initialization of a newly constructed PI platform.
@@ -38,7 +38,7 @@ struct ur_platform_handle_t_ : public _ur_platform {
 
   // Cache UR devices for reuse
   std::vector<std::unique_ptr<ur_device_handle_t_>> URDevicesCache;
-  ur_shared_mutex URDevicesCacheMutex;
+  ur::SharedMutex URDevicesCacheMutex;
   bool DeviceCachePopulated = false;
 
   // Check the device cache and load it if necessary.
@@ -54,5 +54,5 @@ struct ur_platform_handle_t_ : public _ur_platform {
   // TODO: should be deleted when memory isolation in the context is implemented
   // in the driver.
   std::list<ur_context_handle_t> Contexts;
-  ur_shared_mutex ContextsMutex;
+  ur::SharedMutex ContextsMutex;
 };

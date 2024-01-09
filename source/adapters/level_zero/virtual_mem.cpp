@@ -18,7 +18,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urVirtualMemGranularityGetInfo(
     ur_context_handle_t hContext, ur_device_handle_t hDevice,
     ur_virtual_mem_granularity_info_t propName, size_t propSize,
     void *pPropValue, size_t *pPropSizeRet) {
-  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
   switch (propName) {
   case UR_VIRTUAL_MEM_GRANULARITY_INFO_MINIMUM:
   case UR_VIRTUAL_MEM_GRANULARITY_INFO_RECOMMENDED: {
@@ -96,7 +96,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urVirtualMemGetInfo(
     ur_context_handle_t hContext, const void *pStart,
     [[maybe_unused]] size_t size, ur_virtual_mem_info_t propName,
     size_t propSize, void *pPropValue, size_t *pPropSizeRet) {
-  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
   switch (propName) {
   case UR_VIRTUAL_MEM_INFO_ACCESS_MODE: {
     size_t QuerySize;

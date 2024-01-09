@@ -13,16 +13,27 @@
 
 #include <ur_api.h>
 
+#include <atomic>
+#include <cassert>
+#include <cstdlib>
+#include <cstring>
+#include <functional>
 #include <iostream>
 #include <map>
+#include <memory>
+#include <mutex>
 #include <optional>
+#include <shared_mutex>
 #include <sstream>
 #include <string.h>
 #include <string>
+#include <thread>
 #include <vector>
 
 #ifdef _WIN32
+#define NOMINMAX
 #include <windows.h>
+#undef NOMINMAX
 inline int ur_getpid(void) { return static_cast<int>(GetCurrentProcessId()); }
 #else
 
@@ -93,29 +104,7 @@ inline std::string create_library_path(const char *name, const char *path) {
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
-inline std::optional<std::string> ur_getenv(const char *name) {
-#if defined(_WIN32)
-    constexpr int buffer_size = 1024;
-    char buffer[buffer_size];
-    auto rc = GetEnvironmentVariableA(name, buffer, buffer_size);
-    if (0 != rc && rc < buffer_size) {
-        return std::string(buffer);
-    } else if (rc >= buffer_size) {
-        std::stringstream ex_ss;
-        ex_ss << "Environment variable " << name << " value too long!"
-              << " Maximum length is " << buffer_size - 1 << " characters.";
-        throw std::invalid_argument(ex_ss.str());
-    }
-    return std::nullopt;
-#else
-    const char *tmp_env = getenv(name);
-    if (tmp_env != nullptr) {
-        return std::string(tmp_env);
-    } else {
-        return std::nullopt;
-    }
-#endif
-}
+std::optional<std::string> ur_getenv(const char *name);
 
 inline bool getenv_tobool(const char *name) {
     auto env = ur_getenv(name);
@@ -296,7 +285,64 @@ inline ur_result_t exceptionToResult(std::exception_ptr eptr) {
 
 template <class> inline constexpr bool ur_always_false_t = false;
 
+// TODO: promote all of the below extensions to the Unified Runtime
+//       and get rid of these ZER_EXT constants.
+const ur_device_info_t UR_EXT_DEVICE_INFO_OPENCL_C_VERSION =
+    (ur_device_info_t)0x103D;
+
+const ur_command_t UR_EXT_COMMAND_TYPE_USER =
+    (ur_command_t)((uint32_t)UR_COMMAND_FORCE_UINT32 - 1);
+
+/// Program metadata tags recognized by the UR adapters. For kernels the tag
+/// must appear after the kernel name.
+#define __SYCL_UR_PROGRAM_METADATA_TAG_REQD_WORK_GROUP_SIZE                    \
+    "@reqd_work_group_size"
+#define __SYCL_UR_PROGRAM_METADATA_GLOBAL_ID_MAPPING "@global_id_mapping"
+#define __SYCL_UR_PROGRAM_METADATA_TAG_NEED_FINALIZATION "Requires finalization"
+
+// Terminates the process with a catastrophic error message.
+[[noreturn]] inline void die(const char *Message) {
+    std::cerr << "die: " << Message << std::endl;
+    std::terminate();
+}
+
+// A single-threaded app has an opportunity to enable this mode to avoid
+// overhead from mutex locking. Default value is 0 which means that single
+// thread mode is disabled.
+extern const bool SingleThreadMode;
+
+// The wrapper for immutable data.
+// The data is initialized only once at first access (via ->) with the
+// initialization function provided in Init. All subsequent access to
+// the data just returns the already stored data.
+//
+template <class T> struct ZeCache : private T {
+    // The initialization function takes a reference to the data
+    // it is going to initialize, since it is private here in
+    // order to disallow access other than through "->".
+    //
+    using InitFunctionType = std::function<void(T &)>;
+    InitFunctionType Compute{nullptr};
+    std::once_flag Computed;
+
+    ZeCache() : T{} {}
+
+    // Access to the fields of the original T data structure.
+    T *operator->() {
+        std::call_once(Computed, Compute, static_cast<T &>(*this));
+        return this;
+    }
+};
+
+// Helper for one-liner validation
+#define UR_ASSERT(Condition, Error)                                            \
+    if (!(Condition))                                                          \
+        return Error;
+
+// The getInfo*/ReturnHelper facilities provide shortcut way of
+// writing return bytes for the various getInfo APIs.
 namespace ur {
+
 [[noreturn]] inline void unreachable() {
 #ifdef _MSC_VER
     __assume(0);
@@ -304,6 +350,226 @@ namespace ur {
     __builtin_unreachable();
 #endif
 }
+
+// Class which acts like shared_mutex if SingleThreadMode variable is not set.
+// If SingleThreadMode variable is set then mutex operations are turned into
+// nop.
+class SharedMutex {
+    std::shared_mutex Mutex;
+
+  public:
+    void lock() {
+        if (!SingleThreadMode) {
+            Mutex.lock();
+        }
+    }
+    bool try_lock() { return SingleThreadMode ? true : Mutex.try_lock(); }
+    void unlock() {
+        if (!SingleThreadMode) {
+            Mutex.unlock();
+        }
+    }
+
+    void lock_shared() {
+        if (!SingleThreadMode) {
+            Mutex.lock_shared();
+        }
+    }
+    bool try_lock_shared() {
+        return SingleThreadMode ? true : Mutex.try_lock_shared();
+    }
+    void unlock_shared() {
+        if (!SingleThreadMode) {
+            Mutex.unlock_shared();
+        }
+    }
+};
+
+// Class which acts like std::mutex if SingleThreadMode variable is not set.
+// If SingleThreadMode variable is set then mutex operations are turned into
+// nop.
+class Mutex {
+    std::mutex Mutex;
+    friend class Lock;
+
+  public:
+    void lock() {
+        if (!SingleThreadMode) {
+            Mutex.lock();
+        }
+    }
+    bool try_lock() { return SingleThreadMode ? true : Mutex.try_lock(); }
+    void unlock() {
+        if (!SingleThreadMode) {
+            Mutex.unlock();
+        }
+    }
+};
+
+class Lock {
+    std::unique_lock<std::mutex> UniqueLock;
+
+  public:
+    explicit Lock(Mutex &Mutex) {
+        if (!SingleThreadMode) {
+            UniqueLock = std::unique_lock<std::mutex>(Mutex.Mutex);
+        }
+    }
+};
+
+/// SpinLock is a synchronization primitive, that uses atomic variable and
+/// causes thread trying acquire lock wait in loop while repeatedly check if
+/// the lock is available.
+///
+/// One important feature of this implementation is that std::atomic<bool> can
+/// be zero-initialized. This allows SpinLock to have trivial constructor and
+/// destructor, which makes it possible to use it in global context (unlike
+/// std::mutex, that doesn't provide such guarantees).
+class SpinLock {
+  public:
+    void lock() {
+        while (MLock.test_and_set(std::memory_order_acquire)) {
+            std::this_thread::yield();
+        }
+    }
+    void unlock() { MLock.clear(std::memory_order_release); }
+
+  private:
+    std::atomic_flag MLock = ATOMIC_FLAG_INIT;
+};
+
+template <typename T, typename Assign>
+ur_result_t getInfoImpl(size_t ParamValueSize, void *ParamValue,
+                        size_t *ParamValueSizeRet, T Value, size_t ValueSize,
+                        Assign &&AssignFunc) {
+    if (!ParamValue && !ParamValueSizeRet) {
+        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    if (ParamValue != nullptr) {
+
+        if (ParamValueSize < ValueSize) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        AssignFunc(ParamValue, Value, ValueSize);
+    }
+
+    if (ParamValueSizeRet != nullptr) {
+        *ParamValueSizeRet = ValueSize;
+    }
+
+    return UR_RESULT_SUCCESS;
+}
+
+template <typename T>
+ur_result_t getInfo(size_t ParamValueSize, void *ParamValue,
+                    size_t *ParamValueSizeRet, T Value) {
+
+    auto assignment = [](void *ParamValue, T Value, size_t ValueSize) {
+        std::ignore = ValueSize;
+        *static_cast<T *>(ParamValue) = Value;
+    };
+
+    return getInfoImpl(ParamValueSize, ParamValue, ParamValueSizeRet, Value,
+                       sizeof(T), assignment);
+}
+
+template <typename T>
+ur_result_t getInfoArray(size_t ArrayLength, size_t ParamValueSize,
+                         void *ParamValue, size_t *ParamValueSizeRet,
+                         const T *value) {
+    return getInfoImpl(ParamValueSize, ParamValue, ParamValueSizeRet, value,
+                       ArrayLength * sizeof(T), memcpy);
+}
+
+template <typename T, typename RetType>
+ur_result_t getInfoArray(size_t ArrayLength, size_t ParamValueSize,
+                         void *ParamValue, size_t *ParamValueSizeRet,
+                         const T *value) {
+    if (ParamValue) {
+        memset(ParamValue, 0, ParamValueSize);
+        for (uint32_t I = 0; I < ArrayLength; I++) {
+            ((RetType *)ParamValue)[I] = (RetType)value[I];
+        }
+    }
+    if (ParamValueSizeRet) {
+        *ParamValueSizeRet = ArrayLength * sizeof(RetType);
+    }
+    return UR_RESULT_SUCCESS;
+}
+
+template <>
+inline ur_result_t
+getInfo<const char *>(size_t ParamValueSize, void *ParamValue,
+                      size_t *ParamValueSizeRet, const char *Value) {
+    return getInfoArray(strlen(Value) + 1, ParamValueSize, ParamValue,
+                        ParamValueSizeRet, Value);
+}
+
+class ReturnHelper {
+  public:
+    ReturnHelper(size_t ParamValueSize, void *ParamValue,
+                 size_t *ParamValueSizeRet)
+        : ParamValueSize(ParamValueSize), ParamValue(ParamValue),
+          ParamValueSizeRet(ParamValueSizeRet) {}
+
+    // A version where in/out info size is represented by a single pointer
+    // to a value which is updated on return
+    ReturnHelper(size_t *ParamValueSize, void *ParamValue)
+        : ParamValueSize(*ParamValueSize), ParamValue(ParamValue),
+          ParamValueSizeRet(ParamValueSize) {}
+
+    // Scalar return value
+    template <class T> ur_result_t operator()(const T &t) {
+        return ur::getInfo(ParamValueSize, ParamValue, ParamValueSizeRet, t);
+    }
+
+    // Array return value
+    template <class T> ur_result_t operator()(const T *t, size_t s) {
+        return ur::getInfoArray(s, ParamValueSize, ParamValue,
+                                ParamValueSizeRet, t);
+    }
+
+    // Array return value where element type is differrent from T
+    template <class RetType, class T>
+    ur_result_t operator()(const T *t, size_t s) {
+        return ur::getInfoArray<T, RetType>(s, ParamValueSize, ParamValue,
+                                            ParamValueSizeRet, t);
+    }
+
+  protected:
+    size_t ParamValueSize;
+    void *ParamValue;
+    size_t *ParamValueSizeRet;
+};
+
 } // namespace ur
+
+template <class To, class From> To ur_cast(From Value) {
+    // TODO: see if more sanity checks are possible.
+    assert(sizeof(From) == sizeof(To));
+    return (To)(Value);
+}
+
+template <> uint32_t inline ur_cast(uint64_t Value) {
+    // Cast value and check that we don't lose any information.
+    uint32_t CastedValue = (uint32_t)(Value);
+    assert((uint64_t)CastedValue == Value);
+    return CastedValue;
+}
+
+// Controls tracing UR calls from within the UR itself.
+extern bool PrintTrace;
+
+// Apparatus for maintaining immutable cache of platforms.
+//
+// Note we only create a simple pointer variables such that C++ RT won't
+// deallocate them automatically at the end of the main program.
+// The heap memory allocated for these global variables reclaimed only at
+// explicit tear-down.
+extern std::vector<ur_platform_handle_t> *URPlatformsCache;
+extern ur::SpinLock *URPlatformsCacheMutex;
+extern bool URPlatformCachePopulated;
 
 #endif /* UR_UTIL_H */

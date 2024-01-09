@@ -11,7 +11,7 @@
 
 #include "common.hpp"
 
-#include <ur/ur.hpp>
+#include <ur_api.h>
 
 /// UR device mapping to a hipDevice_t.
 /// Includes an observer pointer to the platform,

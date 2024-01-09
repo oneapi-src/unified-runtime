@@ -42,7 +42,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urUsmP2PPeerAccessGetInfoExp(
     ur_exp_peer_info_t propName, size_t propSize, void *pPropValue,
     size_t *pPropSizeRet) {
 
-  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
 
   int value;
   CUdevice_P2PAttribute cu_attr;

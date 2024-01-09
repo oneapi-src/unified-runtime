@@ -136,19 +136,19 @@ ur_result_t SanitizerInterceptor::allocateMemory(
 
     // For updating shadow memory
     if (DeviceInfo) { // device/shared USM
-        std::scoped_lock<ur_shared_mutex> Guard(DeviceInfo->Mutex);
+        std::scoped_lock<ur::SharedMutex> Guard(DeviceInfo->Mutex);
         DeviceInfo->AllocInfos.emplace_back(AllocInfo);
     } else { // host USM's AllocInfo needs to insert into all devices
         for (auto &pair : ContextInfo->DeviceMap) {
             auto DeviceInfo = pair.second;
-            std::scoped_lock<ur_shared_mutex> Guard(DeviceInfo->Mutex);
+            std::scoped_lock<ur::SharedMutex> Guard(DeviceInfo->Mutex);
             DeviceInfo->AllocInfos.emplace_back(AllocInfo);
         }
     }
 
     // For memory release
     {
-        std::scoped_lock<ur_shared_mutex> Guard(ContextInfo->Mutex);
+        std::scoped_lock<ur::SharedMutex> Guard(ContextInfo->Mutex);
         ContextInfo->AllocatedUSMMap[AllocBegin] = AllocInfo;
     }
 
@@ -164,7 +164,7 @@ ur_result_t SanitizerInterceptor::releaseMemory(ur_context_handle_t Context,
                                                 void *Ptr) {
     auto ContextInfo = getContextInfo(Context);
 
-    std::shared_lock<ur_shared_mutex> Guard(ContextInfo->Mutex);
+    std::shared_lock<ur::SharedMutex> Guard(ContextInfo->Mutex);
 
     auto Addr = reinterpret_cast<uptr>(Ptr);
     // Find the last element is not greater than key
@@ -203,7 +203,7 @@ bool SanitizerInterceptor::preLaunchKernel(ur_kernel_handle_t Kernel,
     auto ContextInfo = getContextInfo(Context);
     auto QueueInfo = ContextInfo->getQueueInfo(Queue);
 
-    std::scoped_lock<ur_mutex> Guard(QueueInfo->Mutex);
+    std::scoped_lock<ur::Mutex> Guard(QueueInfo->Mutex);
     Event = QueueInfo->LastEvent;
     QueueInfo->LastEvent = nullptr;
 
@@ -467,12 +467,12 @@ ur_result_t SanitizerInterceptor::updateShadowMemory(ur_queue_handle_t Queue) {
     auto DeviceInfo = ContextInfo->getDeviceInfo(Device);
     auto QueueInfo = ContextInfo->getQueueInfo(Queue);
 
-    std::shared_lock<ur_shared_mutex> HostGuard(HostInfo->Mutex,
+    std::shared_lock<ur::SharedMutex> HostGuard(HostInfo->Mutex,
                                                 std::defer_lock);
-    std::unique_lock<ur_shared_mutex> DeviceGuard(DeviceInfo->Mutex,
+    std::unique_lock<ur::SharedMutex> DeviceGuard(DeviceInfo->Mutex,
                                                   std::defer_lock);
-    std::scoped_lock<std::shared_lock<ur_shared_mutex>,
-                     std::unique_lock<ur_shared_mutex>, ur_mutex>
+    std::scoped_lock<std::shared_lock<ur::SharedMutex>,
+                     std::unique_lock<ur::SharedMutex>, ur::Mutex>
         Guard(HostGuard, DeviceGuard, QueueInfo->Mutex);
 
     ur_event_handle_t LastEvent = QueueInfo->LastEvent;
@@ -490,7 +490,7 @@ ur_result_t SanitizerInterceptor::updateShadowMemory(ur_queue_handle_t Queue) {
 ur_result_t SanitizerInterceptor::insertContext(ur_context_handle_t Context) {
     auto ContextInfo = std::make_shared<ur_sanitizer_layer::ContextInfo>();
 
-    std::scoped_lock<ur_shared_mutex> Guard(m_ContextMapMutex);
+    std::scoped_lock<ur::SharedMutex> Guard(m_ContextMapMutex);
     assert(m_ContextMap.find(Context) == m_ContextMap.end());
     m_ContextMap.emplace(Context, std::move(ContextInfo));
 
@@ -498,7 +498,7 @@ ur_result_t SanitizerInterceptor::insertContext(ur_context_handle_t Context) {
 }
 
 ur_result_t SanitizerInterceptor::eraseContext(ur_context_handle_t Context) {
-    std::scoped_lock<ur_shared_mutex> Guard(m_ContextMapMutex);
+    std::scoped_lock<ur::SharedMutex> Guard(m_ContextMapMutex);
     assert(m_ContextMap.find(Context) != m_ContextMap.end());
     m_ContextMap.erase(Context);
     return UR_RESULT_SUCCESS;
@@ -532,7 +532,7 @@ ur_result_t SanitizerInterceptor::insertDevice(ur_context_handle_t Context,
     UR_CALL(allocShadowMemory(Context, DeviceInfo));
 
     auto ContextInfo = getContextInfo(Context);
-    std::scoped_lock<ur_shared_mutex> Guard(ContextInfo->Mutex);
+    std::scoped_lock<ur::SharedMutex> Guard(ContextInfo->Mutex);
     ContextInfo->DeviceMap.emplace(Device, std::move(DeviceInfo));
 
     return UR_RESULT_SUCCESS;
@@ -544,7 +544,7 @@ ur_result_t SanitizerInterceptor::insertQueue(ur_context_handle_t Context,
     QueueInfo->LastEvent = nullptr;
 
     auto ContextInfo = getContextInfo(Context);
-    std::scoped_lock<ur_shared_mutex> Guard(ContextInfo->Mutex);
+    std::scoped_lock<ur::SharedMutex> Guard(ContextInfo->Mutex);
     ContextInfo->QueueMap.emplace(Queue, std::move(QueueInfo));
 
     return UR_RESULT_SUCCESS;
@@ -553,7 +553,7 @@ ur_result_t SanitizerInterceptor::insertQueue(ur_context_handle_t Context,
 ur_result_t SanitizerInterceptor::eraseQueue(ur_context_handle_t Context,
                                              ur_queue_handle_t Queue) {
     auto ContextInfo = getContextInfo(Context);
-    std::scoped_lock<ur_shared_mutex> Guard(ContextInfo->Mutex);
+    std::scoped_lock<ur::SharedMutex> Guard(ContextInfo->Mutex);
     assert(ContextInfo->QueueMap.find(Queue) != ContextInfo->QueueMap.end());
     ContextInfo->QueueMap.erase(Queue);
     return UR_RESULT_SUCCESS;
@@ -569,7 +569,7 @@ void SanitizerInterceptor::prepareLaunch(ur_queue_handle_t Queue,
     auto DeviceInfo = ContextInfo->getDeviceInfo(Device);
     auto QueueInfo = ContextInfo->getQueueInfo(Queue);
 
-    std::scoped_lock<ur_mutex> Guard(QueueInfo->Mutex);
+    std::scoped_lock<ur::Mutex> Guard(QueueInfo->Mutex);
     ur_event_handle_t LastEvent = QueueInfo->LastEvent;
 
     {

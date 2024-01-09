@@ -318,9 +318,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMHostAlloc(
   // indirect access. This lock also protects access to the context's data
   // structures. If indirect access tracking is not enabled then lock context
   // mutex to protect access to context's data structures.
-  std::shared_lock<ur_shared_mutex> ContextLock(Context->Mutex,
+  std::shared_lock<ur::SharedMutex> ContextLock(Context->Mutex,
                                                 std::defer_lock);
-  std::unique_lock<ur_shared_mutex> IndirectAccessTrackingLock(
+  std::unique_lock<ur::SharedMutex> IndirectAccessTrackingLock(
       Plt->ContextsMutex, std::defer_lock);
   if (IndirectAccessTrackingEnabled) {
     IndirectAccessTrackingLock.lock();
@@ -392,9 +392,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMDeviceAlloc(
   // indirect access. This lock also protects access to the context's data
   // structures. If indirect access tracking is not enabled then lock context
   // mutex to protect access to context's data structures.
-  std::shared_lock<ur_shared_mutex> ContextLock(Context->Mutex,
+  std::shared_lock<ur::SharedMutex> ContextLock(Context->Mutex,
                                                 std::defer_lock);
-  std::unique_lock<ur_shared_mutex> IndirectAccessTrackingLock(
+  std::unique_lock<ur::SharedMutex> IndirectAccessTrackingLock(
       Plt->ContextsMutex, std::defer_lock);
   if (IndirectAccessTrackingEnabled) {
     IndirectAccessTrackingLock.lock();
@@ -496,7 +496,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMSharedAlloc(
   // indirect access. This lock also protects access to the context's data
   // structures. If indirect access tracking is not enabled then lock context
   // mutex to protect access to context's data structures.
-  std::scoped_lock<ur_shared_mutex> Lock(
+  std::scoped_lock<ur::SharedMutex> Lock(
       IndirectAccessTrackingEnabled ? Plt->ContextsMutex : Context->Mutex);
 
   if (IndirectAccessTrackingEnabled) {
@@ -555,7 +555,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMFree(
 ) {
   ur_platform_handle_t Plt = Context->getPlatform();
 
-  std::scoped_lock<ur_shared_mutex> Lock(
+  std::scoped_lock<ur::SharedMutex> Lock(
       IndirectAccessTrackingEnabled ? Plt->ContextsMutex : Context->Mutex);
 
   return USMFreeHelper(Context, Mem);
@@ -579,7 +579,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMGetMemAllocInfo(
              (Context->ZeContext, Ptr, &ZeMemoryAllocationProperties,
               &ZeDeviceHandle));
 
-  UrReturnHelper ReturnValue(PropValueSize, PropValue, PropValueSizeRet);
+  ur::ReturnHelper ReturnValue(PropValueSize, PropValue, PropValueSizeRet);
   switch (PropName) {
   case UR_USM_ALLOC_INFO_TYPE: {
     ur_usm_type_t MemAllocaType;
@@ -626,7 +626,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMGetMemAllocInfo(
       return UR_RESULT_ERROR_INVALID_VALUE;
     }
 
-    std::shared_lock<ur_shared_mutex> ContextLock(Context->Mutex);
+    std::shared_lock<ur::SharedMutex> ContextLock(Context->Mutex);
 
     auto SearchMatchingPool =
         [](std::unordered_map<ur_device_handle_t, umf::pool_unique_handle_t>
@@ -888,7 +888,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMPoolCreate(
     *Pool = reinterpret_cast<ur_usm_pool_handle_t>(
         new ur_usm_pool_handle_t_(Context, PoolDesc));
 
-    std::shared_lock<ur_shared_mutex> ContextLock(Context->Mutex);
+    std::shared_lock<ur::SharedMutex> ContextLock(Context->Mutex);
     Context->UsmPoolHandles.insert(Context->UsmPoolHandles.cend(), *Pool);
 
   } catch (const UsmAllocationException &Ex) {
@@ -908,7 +908,7 @@ ur_result_t
 urUSMPoolRelease(ur_usm_pool_handle_t Pool ///< [in] pointer to USM memory pool
 ) {
   if (Pool->RefCount.decrementAndTest()) {
-    std::shared_lock<ur_shared_mutex> ContextLock(Pool->Context->Mutex);
+    std::shared_lock<ur::SharedMutex> ContextLock(Pool->Context->Mutex);
     Pool->Context->UsmPoolHandles.remove(Pool);
     delete Pool;
   }
@@ -923,7 +923,7 @@ ur_result_t urUSMPoolGetInfo(
                      ///< property
     size_t *PropSizeRet ///< [out] size in bytes returned in pool property value
 ) {
-  UrReturnHelper ReturnValue(PropSize, PropValue, PropSizeRet);
+  ur::ReturnHelper ReturnValue(PropSize, PropValue, PropSizeRet);
 
   switch (PropName) {
   case UR_USM_POOL_INFO_REFERENCE_COUNT: {
@@ -943,7 +943,7 @@ ur_result_t urUSMPoolGetInfo(
 // performed.
 ur_result_t ZeMemFreeHelper(ur_context_handle_t Context, void *Ptr) {
   ur_platform_handle_t Plt = Context->getPlatform();
-  std::unique_lock<ur_shared_mutex> ContextsLock(Plt->ContextsMutex,
+  std::unique_lock<ur::SharedMutex> ContextsLock(Plt->ContextsMutex,
                                                  std::defer_lock);
   if (IndirectAccessTrackingEnabled) {
     ContextsLock.lock();

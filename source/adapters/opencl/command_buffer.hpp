@@ -9,7 +9,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <CL/cl_ext.h>
-#include <ur/ur.hpp>
+#include <ur_api.h>
 
 struct ur_exp_command_buffer_handle_t_ {
   ur_queue_handle_t hInternalQueue;

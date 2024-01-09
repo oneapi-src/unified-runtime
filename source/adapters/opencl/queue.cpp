@@ -127,7 +127,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueGetInfo(ur_queue_handle_t hQueue,
   // Unfortunately the size of cl_bitfield (unsigned long) doesn't line up with
   // our enums (forced to be sizeof(uint32_t)) so this needs special handling.
   if (propName == UR_QUEUE_INFO_FLAGS) {
-    UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+    ur::ReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
 
     cl_command_queue_properties QueueProperties = 0;
     CL_RETURN_ON_FAILURE(clGetCommandQueueInfo(

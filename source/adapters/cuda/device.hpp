@@ -9,7 +9,7 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include <ur/ur.hpp>
+#include <ur_api.h>
 
 #include "common.hpp"
 

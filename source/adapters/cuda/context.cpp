@@ -68,7 +68,7 @@ urContextCreate(uint32_t DeviceCount, const ur_device_handle_t *phDevices,
 UR_APIEXPORT ur_result_t UR_APICALL urContextGetInfo(
     ur_context_handle_t hContext, ur_context_info_t ContextInfoType,
     size_t propSize, void *pContextInfo, size_t *pPropSizeRet) {
-  UrReturnHelper ReturnValue(propSize, pContextInfo, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pContextInfo, pPropSizeRet);
 
   switch (static_cast<uint32_t>(ContextInfoType)) {
   case UR_CONTEXT_INFO_NUM_DEVICES:

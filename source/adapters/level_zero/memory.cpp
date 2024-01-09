@@ -257,7 +257,7 @@ static ur_result_t ZeHostMemAllocHelper(void **ResultPtr,
                                         ur_context_handle_t UrContext,
                                         size_t Size) {
   ur_platform_handle_t Plt = UrContext->getPlatform();
-  std::unique_lock<ur_shared_mutex> ContextsLock(Plt->ContextsMutex,
+  std::unique_lock<ur::SharedMutex> ContextsLock(Plt->ContextsMutex,
                                                  std::defer_lock);
   if (IndirectAccessTrackingEnabled) {
     // Lock the mutex which is guarding contexts container in the platform.
@@ -485,8 +485,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferRead(
 ) {
   ur_mem_handle_t_ *Src = ur_cast<ur_mem_handle_t_ *>(hBuffer);
 
-  std::shared_lock<ur_shared_mutex> SrcLock(Src->Mutex, std::defer_lock);
-  std::scoped_lock<std::shared_lock<ur_shared_mutex>, ur_shared_mutex> LockAll(
+  std::shared_lock<ur::SharedMutex> SrcLock(Src->Mutex, std::defer_lock);
+  std::scoped_lock<std::shared_lock<ur::SharedMutex>, ur::SharedMutex> LockAll(
       SrcLock, Queue->Mutex);
 
   char *ZeHandleSrc = nullptr;
@@ -521,7 +521,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferWrite(
 ) {
   ur_mem_handle_t_ *Buffer = ur_cast<ur_mem_handle_t_ *>(hBuffer);
 
-  std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Lock(Queue->Mutex,
+  std::scoped_lock<ur::SharedMutex, ur::SharedMutex> Lock(Queue->Mutex,
                                                           Buffer->Mutex);
 
   char *ZeHandleDst = nullptr;
@@ -566,8 +566,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
 ) {
   ur_mem_handle_t_ *Buffer = ur_cast<ur_mem_handle_t_ *>(hBuffer);
 
-  std::shared_lock<ur_shared_mutex> SrcLock(Buffer->Mutex, std::defer_lock);
-  std::scoped_lock<std::shared_lock<ur_shared_mutex>, ur_shared_mutex> LockAll(
+  std::shared_lock<ur::SharedMutex> SrcLock(Buffer->Mutex, std::defer_lock);
+  std::scoped_lock<std::shared_lock<ur::SharedMutex>, ur::SharedMutex> LockAll(
       SrcLock, Queue->Mutex);
 
   char *ZeHandleSrc;
@@ -613,7 +613,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
 ) {
   ur_mem_handle_t_ *Buffer = ur_cast<ur_mem_handle_t_ *>(hBuffer);
 
-  std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Lock(Queue->Mutex,
+  std::scoped_lock<ur::SharedMutex, ur::SharedMutex> Lock(Queue->Mutex,
                                                           Buffer->Mutex);
 
   char *ZeHandleDst = nullptr;
@@ -652,9 +652,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferCopy(
   UR_ASSERT(!SrcBuffer->isImage(), UR_RESULT_ERROR_INVALID_MEM_OBJECT);
   UR_ASSERT(!DstBuffer->isImage(), UR_RESULT_ERROR_INVALID_MEM_OBJECT);
 
-  std::shared_lock<ur_shared_mutex> SrcLock(SrcBuffer->Mutex, std::defer_lock);
-  std::scoped_lock<std::shared_lock<ur_shared_mutex>, ur_shared_mutex,
-                   ur_shared_mutex>
+  std::shared_lock<ur::SharedMutex> SrcLock(SrcBuffer->Mutex, std::defer_lock);
+  std::scoped_lock<std::shared_lock<ur::SharedMutex>, ur::SharedMutex,
+                   ur::SharedMutex>
       LockAll(SrcLock, DstBuffer->Mutex, Queue->Mutex);
 
   // Copy engine is preferred only for host to device transfer.
@@ -712,9 +712,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
   UR_ASSERT(!SrcBuffer->isImage(), UR_RESULT_ERROR_INVALID_MEM_OBJECT);
   UR_ASSERT(!DstBuffer->isImage(), UR_RESULT_ERROR_INVALID_MEM_OBJECT);
 
-  std::shared_lock<ur_shared_mutex> SrcLock(SrcBuffer->Mutex, std::defer_lock);
-  std::scoped_lock<std::shared_lock<ur_shared_mutex>, ur_shared_mutex,
-                   ur_shared_mutex>
+  std::shared_lock<ur::SharedMutex> SrcLock(SrcBuffer->Mutex, std::defer_lock);
+  std::scoped_lock<std::shared_lock<ur::SharedMutex>, ur::SharedMutex,
+                   ur::SharedMutex>
       LockAll(SrcLock, DstBuffer->Mutex, Queue->Mutex);
 
   // Copy engine is preferred only for host to device transfer.
@@ -755,7 +755,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferFill(
         *OutEvent ///< [in,out][optional] return an event object that identifies
                   ///< this particular command instance.
 ) {
-  std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Lock(Queue->Mutex,
+  std::scoped_lock<ur::SharedMutex, ur::SharedMutex> Lock(Queue->Mutex,
                                                           Buffer->Mutex);
 
   char *ZeHandleDst = nullptr;
@@ -792,7 +792,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemImageRead(
         *OutEvent ///< [in,out][optional] return an event object that identifies
                   ///< this particular command instance.
 ) {
-  std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Lock(Queue->Mutex,
+  std::scoped_lock<ur::SharedMutex, ur::SharedMutex> Lock(Queue->Mutex,
                                                           Image->Mutex);
   return enqueueMemImageCommandHelper(
       UR_COMMAND_MEM_IMAGE_READ, Queue, Image, Dst, BlockingRead, &Origin,
@@ -824,7 +824,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemImageWrite(
         *OutEvent ///< [in,out][optional] return an event object that identifies
                   ///< this particular command instance.
 ) {
-  std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Lock(Queue->Mutex,
+  std::scoped_lock<ur::SharedMutex, ur::SharedMutex> Lock(Queue->Mutex,
                                                           Image->Mutex);
   return enqueueMemImageCommandHelper(
       UR_COMMAND_MEM_IMAGE_WRITE, Queue, Src, Image, BlockingWrite, nullptr,
@@ -854,9 +854,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemImageCopy(
         *OutEvent ///< [in,out][optional] return an event object that identifies
                   ///< this particular command instance.
 ) {
-  std::shared_lock<ur_shared_mutex> SrcLock(ImageSrc->Mutex, std::defer_lock);
-  std::scoped_lock<std::shared_lock<ur_shared_mutex>, ur_shared_mutex,
-                   ur_shared_mutex>
+  std::shared_lock<ur::SharedMutex> SrcLock(ImageSrc->Mutex, std::defer_lock);
+  std::scoped_lock<std::shared_lock<ur::SharedMutex>, ur::SharedMutex,
+                   ur::SharedMutex>
       LockAll(SrcLock, ImageDst->Mutex, Queue->Mutex);
   // Copy engine is preferred only for host to device transfer.
   // Device to device transfers run faster on compute engines.
@@ -905,7 +905,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferMap(
   bool UseCopyEngine = false;
   {
     // Lock automatically releases when this goes out of scope.
-    std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
+    std::scoped_lock<ur::SharedMutex> lock(Queue->Mutex);
 
     _ur_ze_event_list_t TmpWaitList;
     UR_CALL(TmpWaitList.createAndRetainUrZeEventList(
@@ -957,7 +957,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferMap(
       UR_CALL(urQueueFinish(Queue));
 
     // Lock automatically releases when this goes out of scope.
-    std::scoped_lock<ur_shared_mutex> Guard(Buffer->Mutex);
+    std::scoped_lock<ur::SharedMutex> Guard(Buffer->Mutex);
 
     char *ZeHandleSrc;
     UR_CALL(Buffer->getZeHandle(ZeHandleSrc, AccessMode, Queue->Device));
@@ -987,7 +987,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferMap(
   }
 
   // Lock automatically releases when this goes out of scope.
-  std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Lock(Queue->Mutex,
+  std::scoped_lock<ur::SharedMutex, ur::SharedMutex> Lock(Queue->Mutex,
                                                           Buffer->Mutex);
 
   if (Buffer->MapHostPtr) {
@@ -1063,7 +1063,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemUnmap(
   ur_event_handle_t *Event = OutEvent ? OutEvent : &InternalEvent;
   {
     // Lock automatically releases when this goes out of scope.
-    std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
+    std::scoped_lock<ur::SharedMutex> lock(Queue->Mutex);
 
     _ur_ze_event_list_t TmpWaitList;
     UR_CALL(TmpWaitList.createAndRetainUrZeEventList(
@@ -1079,7 +1079,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemUnmap(
   _ur_buffer::Mapping MapInfo = {};
   {
     // Lock automatically releases when this goes out of scope.
-    std::scoped_lock<ur_shared_mutex> Guard(Buffer->Mutex);
+    std::scoped_lock<ur::SharedMutex> Guard(Buffer->Mutex);
     auto It = Buffer->Mappings.find(MappedPtr);
     if (It == Buffer->Mappings.end()) {
       urPrint("urEnqueueMemUnmap: unknown memory mapping\n");
@@ -1111,7 +1111,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemUnmap(
     UR_CALL(Buffer->getZeHandle(ZeHandleDst, ur_mem_handle_t_::write_only,
                                 Queue->Device));
 
-    std::scoped_lock<ur_shared_mutex> Guard(Buffer->Mutex);
+    std::scoped_lock<ur::SharedMutex> Guard(Buffer->Mutex);
     if (Buffer->MapHostPtr)
       memcpy(ZeHandleDst + MapInfo.Offset, MappedPtr, MapInfo.Size);
 
@@ -1122,7 +1122,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemUnmap(
   }
 
   // Lock automatically releases when this goes out of scope.
-  std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Lock(Queue->Mutex,
+  std::scoped_lock<ur::SharedMutex, ur::SharedMutex> Lock(Queue->Mutex,
                                                           Buffer->Mutex);
 
   ur_command_list_ptr_t CommandList{};
@@ -1201,7 +1201,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy(
         *OutEvent ///< [in,out][optional] return an event object that identifies
                   ///< this particular command instance.
 ) {
-  std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
+  std::scoped_lock<ur::SharedMutex> lock(Queue->Mutex);
 
   // Device to Device copies are found to execute slower on copy engine
   // (versus compute engine).
@@ -1235,7 +1235,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
 ) {
   std::ignore = Flags;
   // Lock automatically releases when this goes out of scope.
-  std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
+  std::scoped_lock<ur::SharedMutex> lock(Queue->Mutex);
 
   bool UseCopyEngine = false;
 
@@ -1294,7 +1294,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMAdvise(
                   ///< this particular command instance.
 ) {
   // Lock automatically releases when this goes out of scope.
-  std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
+  std::scoped_lock<ur::SharedMutex> lock(Queue->Mutex);
 
   auto ZeAdvice = ur_cast<ze_memory_advice_t>(Advice);
 
@@ -1434,7 +1434,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
   ur_rect_offset_t ZeroOffset{0, 0, 0};
   ur_rect_region_t Region{Width, Height, 0};
 
-  std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
+  std::scoped_lock<ur::SharedMutex> lock(Queue->Mutex);
 
   // Device to Device copies are found to execute slower on copy engine
   // (versus compute engine).
@@ -1606,7 +1606,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreate(
         "no read-only or write-only yet.");
   }
 
-  std::shared_lock<ur_shared_mutex> Lock(Context->Mutex);
+  std::shared_lock<ur::SharedMutex> Lock(Context->Mutex);
 
   ZeStruct<ze_image_desc_t> ZeImageDesc;
   UR_CALL(ur2zeImageDesc(ImageFormat, ImageDesc, ZeImageDesc));
@@ -1636,7 +1636,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreate(
       // zeCommandListAppendImageCopyFromMemory must not be called from
       // simultaneous threads with the same command list handle, so we need
       // exclusive lock.
-      std::scoped_lock<ur_mutex> Lock(Context->ImmediateCommandListMutex);
+      std::scoped_lock<ur::Mutex> Lock(Context->ImmediateCommandListMutex);
       ZE2UR_CALL(zeCommandListAppendImageCopyFromMemory,
                  (Context->ZeCommandListInit, ZeImage, Host, nullptr, nullptr,
                   0, nullptr));
@@ -1660,7 +1660,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
         *Properties, ///< [in][optional] pointer to native memory creation
                      ///< properties.
     ur_mem_handle_t *Mem) {
-  std::shared_lock<ur_shared_mutex> Lock(Context->Mutex);
+  std::shared_lock<ur::SharedMutex> Lock(Context->Mutex);
 
   ze_image_handle_t ZeHImage = ur_cast<ze_image_handle_t>(NativeMem);
 
@@ -1770,7 +1770,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
         // Initialize the buffer synchronously with immediate offload
         // zeCommandListAppendMemoryCopy must not be called from simultaneous
         // threads with the same command list handle, so we need exclusive lock.
-        std::scoped_lock<ur_mutex> Lock(Context->ImmediateCommandListMutex);
+        std::scoped_lock<ur::Mutex> Lock(Context->ImmediateCommandListMutex);
         ZE2UR_CALL(zeCommandListAppendMemoryCopy,
                    (Context->ZeCommandListInit, ZeHandleDst, Host, Size,
                     nullptr, 0, nullptr));
@@ -1833,7 +1833,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferPartition(
                 !(static_cast<_ur_buffer *>(Buffer))->isSubBuffer(),
             UR_RESULT_ERROR_INVALID_MEM_OBJECT);
 
-  std::shared_lock<ur_shared_mutex> Guard(Buffer->Mutex);
+  std::shared_lock<ur::SharedMutex> Guard(Buffer->Mutex);
 
   if (Flags != UR_MEM_FLAG_READ_WRITE) {
     die("urMemBufferPartition: Level-Zero implements only read-write buffer,"
@@ -1859,7 +1859,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemGetNativeHandle(
     ur_native_handle_t
         *NativeMem ///< [out] a pointer to the native handle of the mem.
 ) {
-  std::shared_lock<ur_shared_mutex> Guard(Mem->Mutex);
+  std::shared_lock<ur::SharedMutex> Guard(Mem->Mutex);
   char *ZeHandle = nullptr;
   UR_CALL(Mem->getZeHandle(ZeHandle, ur_mem_handle_t_::read_write));
   *NativeMem = ur_cast<ur_native_handle_t>(ZeHandle);
@@ -1878,7 +1878,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
 ) {
   bool OwnNativeHandle = Properties->isNativeHandleOwned;
 
-  std::shared_lock<ur_shared_mutex> Lock(Context->Mutex);
+  std::shared_lock<ur::SharedMutex> Lock(Context->Mutex);
 
   // Get base of the allocation
   void *Base = nullptr;
@@ -1923,7 +1923,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
   }
 
   ur_platform_handle_t Plt = Context->getPlatform();
-  std::unique_lock<ur_shared_mutex> ContextsLock(Plt->ContextsMutex,
+  std::unique_lock<ur::SharedMutex> ContextsLock(Plt->ContextsMutex,
                                                  std::defer_lock);
   // If we don't own the native handle then we can't control deallocation of
   // that memory so there is no point of keeping track of the memory
@@ -1957,7 +1957,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
 
     // zeCommandListAppendMemoryCopy must not be called from simultaneous
     // threads with the same command list handle, so we need exclusive lock.
-    std::scoped_lock<ur_mutex> Lock(Context->ImmediateCommandListMutex);
+    std::scoped_lock<ur::Mutex> Lock(Context->ImmediateCommandListMutex);
     ZE2UR_CALL(zeCommandListAppendMemoryCopy,
                (Context->ZeCommandListInit, ZeHandleDst, Ptr, Size, nullptr, 0,
                 nullptr));
@@ -1983,8 +1983,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemGetInfo(
             UR_RESULT_ERROR_INVALID_VALUE);
 
   auto Buffer = reinterpret_cast<_ur_buffer *>(Memory);
-  std::shared_lock<ur_shared_mutex> Lock(Buffer->Mutex);
-  UrReturnHelper ReturnValue(PropSize, MemInfo, PropSizeRet);
+  std::shared_lock<ur::SharedMutex> Lock(Buffer->Mutex);
+  ur::ReturnHelper ReturnValue(PropSize, MemInfo, PropSizeRet);
 
   switch (MemInfoType) {
   case UR_MEM_INFO_CONTEXT: {
@@ -2031,7 +2031,7 @@ static ur_result_t ZeDeviceMemAllocHelper(void **ResultPtr,
                                           ur_device_handle_t Device,
                                           size_t Size) {
   ur_platform_handle_t Plt = Device->Platform;
-  std::unique_lock<ur_shared_mutex> ContextsLock(Plt->ContextsMutex,
+  std::unique_lock<ur::SharedMutex> ContextsLock(Plt->ContextsMutex,
                                                  std::defer_lock);
   if (IndirectAccessTrackingEnabled) {
     // Lock the mutex which is guarding contexts container in the platform.
@@ -2235,7 +2235,7 @@ ur_result_t _ur_buffer::getZeHandle(char *&ZeHandle, access_mode_t AccessMode,
           HostAllocation.ZeHandle = reinterpret_cast<char *>(ZeHandleHost);
           HostAllocation.Valid = false;
         }
-        std::scoped_lock<ur_mutex> Lock(UrContext->ImmediateCommandListMutex);
+        std::scoped_lock<ur::Mutex> Lock(UrContext->ImmediateCommandListMutex);
         if (!HostAllocation.Valid) {
           ZE2UR_CALL(zeCommandListAppendMemoryCopy,
                      (UrContext->ZeCommandListInit, HostAllocation.ZeHandle,
@@ -2250,7 +2250,7 @@ ur_result_t _ur_buffer::getZeHandle(char *&ZeHandle, access_mode_t AccessMode,
                     HostAllocation.ZeHandle, Size, nullptr, 0, nullptr));
       } else {
         // Perform P2P copy.
-        std::scoped_lock<ur_mutex> Lock(UrContext->ImmediateCommandListMutex);
+        std::scoped_lock<ur::Mutex> Lock(UrContext->ImmediateCommandListMutex);
         ZE2UR_CALL(zeCommandListAppendMemoryCopy,
                    (UrContext->ZeCommandListInit, ZeHandle, ZeHandleSrc, Size,
                     nullptr, 0, nullptr));
@@ -2287,7 +2287,7 @@ ur_result_t _ur_buffer::free() {
       break;
     case allocation_t::free: {
       ur_platform_handle_t Plt = UrContext->getPlatform();
-      std::scoped_lock<ur_shared_mutex> Lock(IndirectAccessTrackingEnabled
+      std::scoped_lock<ur::SharedMutex> Lock(IndirectAccessTrackingEnabled
                                                  ? Plt->ContextsMutex
                                                  : UrContext->Mutex);
 
@@ -2416,7 +2416,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMFill(
     ur_event_handle_t *Event ///< [out][optional] return an event object that
                              ///< identifies this particular command instance.
 ) {
-  std::scoped_lock<ur_shared_mutex> Lock(Queue->Mutex);
+  std::scoped_lock<ur::SharedMutex> Lock(Queue->Mutex);
 
   return enqueueMemFillHelper(
       // TODO: do we need a new command type for USM memset?

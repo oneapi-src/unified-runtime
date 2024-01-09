@@ -185,7 +185,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferRead(
 
   std::unique_ptr<ur_event_handle_t_> RetImplEvent{nullptr};
 
-  ur_lock MemoryMigrationLock{hBuffer->MemoryMigrationMutex};
+  ur::Lock MemoryMigrationLock{hBuffer->MemoryMigrationMutex};
   auto Device = hQueue->getDevice();
   hipStream_t HIPStream = hQueue->getNextTransferStream();
 
@@ -254,7 +254,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
 
   std::vector<ur_event_handle_t> DepEvents(
       phEventWaitList, phEventWaitList + numEventsInWaitList);
-  std::vector<std::pair<ur_mem_handle_t, ur_lock>> MemMigrationLocks;
+  std::vector<std::pair<ur_mem_handle_t, ur::Lock>> MemMigrationLocks;
 
   // phEventWaitList only contains events that are handed to UR by the SYCL
   // runtime. However since UR handles memory dependencies within a context
@@ -277,8 +277,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
                          [MemArg](auto &Lock) {
                            return Lock.first == MemArg.Mem;
                          }) == MemMigrationLocks.end())
-          MemMigrationLocks.emplace_back(
-              std::pair{MemArg.Mem, ur_lock{MemArg.Mem->MemoryMigrationMutex}});
+          MemMigrationLocks.emplace_back(std::pair{
+              MemArg.Mem, ur::Lock{MemArg.Mem->MemoryMigrationMutex}});
       }
     }
   }
@@ -632,7 +632,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
   std::unique_ptr<ur_event_handle_t_> RetImplEvent{nullptr};
 
   ur_result_t Result = UR_RESULT_SUCCESS;
-  ur_lock MemoryMigrationLock(hBuffer->MemoryMigrationMutex);
+  ur::Lock MemoryMigrationLock(hBuffer->MemoryMigrationMutex);
   auto Device = hQueue->getDevice();
   hipStream_t HIPStream = hQueue->getNextTransferStream();
 
@@ -1026,7 +1026,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemImageRead(
     const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent) {
   UR_ASSERT(hImage->isImage(), UR_RESULT_ERROR_INVALID_MEM_OBJECT);
 
-  ur_lock MemoryMigrationLock{hImage->MemoryMigrationMutex};
+  ur::Lock MemoryMigrationLock{hImage->MemoryMigrationMutex};
   auto Device = hQueue->getDevice();
   hipStream_t HIPStream = hQueue->getNextTransferStream();
 

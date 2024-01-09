@@ -20,7 +20,6 @@
 #include "memory.hpp"
 #include "queue.hpp"
 #include "sampler.hpp"
-#include "ur/ur.hpp"
 #include "ur_api.h"
 
 ur_result_t urCalculateNumChannels(ur_image_channel_order_t order,

@@ -13,6 +13,7 @@
 #pragma once
 
 #include "common.hpp"
+#include "ur_util.hpp"
 
 #include <map>
 #include <memory>
@@ -40,36 +41,36 @@ struct DeviceInfo {
     uptr ShadowOffsetEnd;
 
     // Lock InitPool & AllocInfos
-    ur_shared_mutex Mutex;
+    ur::SharedMutex Mutex;
     std::vector<std::shared_ptr<USMAllocInfo>> AllocInfos;
 };
 
 struct QueueInfo {
-    ur_mutex Mutex;
+    ur::Mutex Mutex;
     ur_event_handle_t LastEvent;
 };
 
 struct ContextInfo {
 
     std::shared_ptr<DeviceInfo> getDeviceInfo(ur_device_handle_t Device) {
-        std::shared_lock<ur_shared_mutex> Guard(Mutex);
+        std::shared_lock<ur::SharedMutex> Guard(Mutex);
         assert(DeviceMap.find(Device) != DeviceMap.end());
         return DeviceMap[Device];
     }
 
     std::shared_ptr<QueueInfo> getQueueInfo(ur_queue_handle_t Queue) {
-        std::shared_lock<ur_shared_mutex> Guard(Mutex);
+        std::shared_lock<ur::SharedMutex> Guard(Mutex);
         assert(QueueMap.find(Queue) != QueueMap.end());
         return QueueMap[Queue];
     }
 
     std::shared_ptr<USMAllocInfo> getUSMAllocInfo(uptr Address) {
-        std::shared_lock<ur_shared_mutex> Guard(Mutex);
+        std::shared_lock<ur::SharedMutex> Guard(Mutex);
         assert(AllocatedUSMMap.find(Address) != AllocatedUSMMap.end());
         return AllocatedUSMMap[Address];
     }
 
-    ur_shared_mutex Mutex;
+    ur::SharedMutex Mutex;
     std::unordered_map<ur_device_handle_t, std::shared_ptr<DeviceInfo>>
         DeviceMap;
     std::unordered_map<ur_queue_handle_t, std::shared_ptr<QueueInfo>> QueueMap;
@@ -127,7 +128,7 @@ class SanitizerInterceptor {
                                     ur_event_handle_t *OutEvent);
 
     std::shared_ptr<ContextInfo> getContextInfo(ur_context_handle_t Context) {
-        std::shared_lock<ur_shared_mutex> Guard(m_ContextMapMutex);
+        std::shared_lock<ur::SharedMutex> Guard(m_ContextMapMutex);
         assert(m_ContextMap.find(Context) != m_ContextMap.end());
         return m_ContextMap[Context];
     }
@@ -135,7 +136,7 @@ class SanitizerInterceptor {
   private:
     std::unordered_map<ur_context_handle_t, std::shared_ptr<ContextInfo>>
         m_ContextMap;
-    ur_shared_mutex m_ContextMapMutex;
+    ur::SharedMutex m_ContextMapMutex;
 };
 
 } // namespace ur_sanitizer_layer

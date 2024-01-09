@@ -135,7 +135,7 @@ urProgramGetInfo(ur_program_handle_t hProgram, ur_program_info_t propName,
                  size_t propSize, void *pPropValue, size_t *pPropSizeRet) {
   UR_ASSERT(hProgram, UR_RESULT_ERROR_INVALID_NULL_HANDLE);
 
-  UrReturnHelper returnValue(propSize, pPropValue, pPropSizeRet);
+  ur::ReturnHelper returnValue(propSize, pPropValue, pPropSizeRet);
 
   switch (propName) {
   case UR_PROGRAM_INFO_REFERENCE_COUNT:

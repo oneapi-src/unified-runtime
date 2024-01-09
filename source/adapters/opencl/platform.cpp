@@ -51,7 +51,7 @@ UR_DLLEXPORT ur_result_t UR_APICALL
 urPlatformGetInfo(ur_platform_handle_t hPlatform, ur_platform_info_t propName,
                   size_t propSize, void *pPropValue, size_t *pSizeRet) {
 
-  UrReturnHelper ReturnValue(propSize, pPropValue, pSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pPropValue, pSizeRet);
   const cl_int CLPropName = mapURPlatformInfoToCL(propName);
 
   switch (static_cast<uint32_t>(propName)) {

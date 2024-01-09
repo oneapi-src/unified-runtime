@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <ur/ur.hpp>
+#include <ur_api.h>
 
 struct ur_device_handle_t_ {
   ur_device_handle_t_(ur_platform_handle_t ArgPlt) : Platform(ArgPlt) {}

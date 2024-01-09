@@ -11,7 +11,6 @@
 #include <memory>
 #include <tuple>
 
-#include "ur/ur.hpp"
 #include "ur_api.h"
 
 #include "common.hpp"
@@ -45,7 +44,7 @@ urContextRelease(ur_context_handle_t hContext) {
 UR_APIEXPORT ur_result_t UR_APICALL
 urContextGetInfo(ur_context_handle_t hContext, ur_context_info_t propName,
                  size_t propSize, void *pPropValue, size_t *pPropSizeRet) {
-  UrReturnHelper returnValue(propSize, pPropValue, pPropSizeRet);
+  ur::ReturnHelper returnValue(propSize, pPropValue, pPropSizeRet);
 
   switch (propName) {
   case UR_CONTEXT_INFO_NUM_DEVICES:

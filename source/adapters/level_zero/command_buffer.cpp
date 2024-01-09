@@ -511,7 +511,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
     const ur_exp_command_buffer_sync_point_t *SyncPointWaitList,
     ur_exp_command_buffer_sync_point_t *SyncPoint) {
   // Lock automatically releases when this goes out of scope.
-  std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Lock(
+  std::scoped_lock<ur::SharedMutex, ur::SharedMutex> Lock(
       Kernel->Mutex, Kernel->Program->Mutex);
 
   if (GlobalWorkOffset != NULL) {
@@ -598,8 +598,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
   auto SrcBuffer = ur_cast<ur_mem_handle_t>(SrcMem);
   auto DstBuffer = ur_cast<ur_mem_handle_t>(DstMem);
 
-  std::shared_lock<ur_shared_mutex> SrcLock(SrcBuffer->Mutex, std::defer_lock);
-  std::scoped_lock<std::shared_lock<ur_shared_mutex>, ur_shared_mutex> LockAll(
+  std::shared_lock<ur::SharedMutex> SrcLock(SrcBuffer->Mutex, std::defer_lock);
+  std::scoped_lock<std::shared_lock<ur::SharedMutex>, ur::SharedMutex> LockAll(
       SrcLock, DstBuffer->Mutex);
 
   char *ZeHandleSrc;
@@ -626,8 +626,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
   auto SrcBuffer = ur_cast<ur_mem_handle_t>(SrcMem);
   auto DstBuffer = ur_cast<ur_mem_handle_t>(DstMem);
 
-  std::shared_lock<ur_shared_mutex> SrcLock(SrcBuffer->Mutex, std::defer_lock);
-  std::scoped_lock<std::shared_lock<ur_shared_mutex>, ur_shared_mutex> LockAll(
+  std::shared_lock<ur::SharedMutex> SrcLock(SrcBuffer->Mutex, std::defer_lock);
+  std::scoped_lock<std::shared_lock<ur::SharedMutex>, ur::SharedMutex> LockAll(
       SrcLock, DstBuffer->Mutex);
 
   char *ZeHandleSrc;
@@ -649,7 +649,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
     uint32_t NumSyncPointsInWaitList,
     const ur_exp_command_buffer_sync_point_t *SyncPointWaitList,
     ur_exp_command_buffer_sync_point_t *SyncPoint) {
-  std::scoped_lock<ur_shared_mutex> Lock(Buffer->Mutex);
+  std::scoped_lock<ur::SharedMutex> Lock(Buffer->Mutex);
 
   char *ZeHandleDst = nullptr;
   UR_CALL(Buffer->getZeHandle(ZeHandleDst, ur_mem_handle_t_::write_only,
@@ -670,7 +670,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
     uint32_t NumSyncPointsInWaitList,
     const ur_exp_command_buffer_sync_point_t *SyncPointWaitList,
     ur_exp_command_buffer_sync_point_t *SyncPoint) {
-  std::scoped_lock<ur_shared_mutex> Lock(Buffer->Mutex);
+  std::scoped_lock<ur::SharedMutex> Lock(Buffer->Mutex);
 
   char *ZeHandleDst = nullptr;
   UR_CALL(Buffer->getZeHandle(ZeHandleDst, ur_mem_handle_t_::write_only,
@@ -687,7 +687,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
     size_t Offset, size_t Size, void *Dst, uint32_t NumSyncPointsInWaitList,
     const ur_exp_command_buffer_sync_point_t *SyncPointWaitList,
     ur_exp_command_buffer_sync_point_t *SyncPoint) {
-  std::scoped_lock<ur_shared_mutex> SrcLock(Buffer->Mutex);
+  std::scoped_lock<ur::SharedMutex> SrcLock(Buffer->Mutex);
 
   char *ZeHandleSrc = nullptr;
   UR_CALL(Buffer->getZeHandle(ZeHandleSrc, ur_mem_handle_t_::read_only,
@@ -705,7 +705,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
     uint32_t NumSyncPointsInWaitList,
     const ur_exp_command_buffer_sync_point_t *SyncPointWaitList,
     ur_exp_command_buffer_sync_point_t *SyncPoint) {
-  std::scoped_lock<ur_shared_mutex> SrcLock(Buffer->Mutex);
+  std::scoped_lock<ur::SharedMutex> SrcLock(Buffer->Mutex);
 
   char *ZeHandleSrc;
   UR_CALL(Buffer->getZeHandle(ZeHandleSrc, ur_mem_handle_t_::read_only,
@@ -824,7 +824,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
     const ur_exp_command_buffer_sync_point_t *SyncPointWaitList,
     ur_exp_command_buffer_sync_point_t *SyncPoint) {
 
-  std::scoped_lock<ur_shared_mutex> Lock(Buffer->Mutex);
+  std::scoped_lock<ur::SharedMutex> Lock(Buffer->Mutex);
 
   char *ZeHandleDst = nullptr;
   _ur_buffer *UrBuffer = reinterpret_cast<_ur_buffer *>(Buffer);
@@ -862,7 +862,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferEnqueueExp(
     return UR_RESULT_ERROR_INVALID_QUEUE_PROPERTIES;
   }
 
-  std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
+  std::scoped_lock<ur::SharedMutex> lock(Queue->Mutex);
   // Use compute engine rather than copy engine
   const auto UseCopyEngine = false;
   auto &QGroup = Queue->getQueueGroup(UseCopyEngine);

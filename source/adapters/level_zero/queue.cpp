@@ -40,7 +40,7 @@ ur_result_t CleanupEventsInImmCmdLists(ur_queue_handle_t UrQueue,
 
   std::vector<ur_event_handle_t> EventListToCleanup;
   {
-    std::unique_lock<ur_shared_mutex> QueueLock(UrQueue->Mutex,
+    std::unique_lock<ur::SharedMutex> QueueLock(UrQueue->Mutex,
                                                 std::defer_lock);
     if (!QueueLocked)
       QueueLock.lock();
@@ -151,8 +151,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueGetInfo(
                               ///< property value
 ) {
 
-  std::shared_lock<ur_shared_mutex> Lock(Queue->Mutex);
-  UrReturnHelper ReturnValue(ParamValueSize, ParamValue, ParamValueSizeRet);
+  std::shared_lock<ur::SharedMutex> Lock(Queue->Mutex);
+  ur::ReturnHelper ReturnValue(ParamValueSize, ParamValue, ParamValueSizeRet);
   // TODO: consider support for queue properties and size
   switch ((uint32_t)ParamName) { // cast to avoid warnings on EXT enum values
   case UR_QUEUE_INFO_CONTEXT:
@@ -292,7 +292,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreate(
   // for building to all the devices in the context.
   //
   { // Lock context for thread-safe update
-    std::scoped_lock<ur_shared_mutex> Lock(Context->Mutex);
+    std::scoped_lock<ur::SharedMutex> Lock(Context->Mutex);
     UR_ASSERT(Context->isValidDevice(Device), UR_RESULT_ERROR_INVALID_DEVICE);
 
     auto MakeFirst = Context->Devices.begin();
@@ -409,7 +409,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueRetain(
     ur_queue_handle_t Queue ///< [in] handle of the queue object to get access
 ) {
   {
-    std::scoped_lock<ur_shared_mutex> Lock(Queue->Mutex);
+    std::scoped_lock<ur::SharedMutex> Lock(Queue->Mutex);
     Queue->RefCountExternal++;
   }
   Queue->RefCount.increment();
@@ -422,7 +422,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueRelease(
 
   std::vector<ur_event_handle_t> EventListToCleanup;
   {
-    std::scoped_lock<ur_shared_mutex> Lock(Queue->Mutex);
+    std::scoped_lock<ur::SharedMutex> Lock(Queue->Mutex);
 
     if ((--Queue->RefCountExternal) != 0)
       return UR_RESULT_SUCCESS;
@@ -464,7 +464,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueRelease(
           return ze2urResult(ZeResult);
       }
       if (Queue->UsingImmCmdLists && Queue->OwnZeCommandQueue) {
-        std::scoped_lock<ur_mutex> Lock(
+        std::scoped_lock<ur::Mutex> Lock(
             Queue->Context->ZeCommandListCacheMutex);
         const ur_command_list_info_t &MapEntry = it->second;
         if (MapEntry.CanReuse) {
@@ -494,7 +494,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueRelease(
     // We don't need to synchronize the events since the queue
     // synchronized above already does that.
     {
-      std::scoped_lock<ur_shared_mutex> EventLock(Event->Mutex);
+      std::scoped_lock<ur::SharedMutex> EventLock(Event->Mutex);
       Event->Completed = true;
     }
     UR_CALL(CleanupCompletedEvent(Event));
@@ -513,7 +513,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueGetNativeHandle(
         *NativeQueue ///< [out] a pointer to the native handle of the queue.
 ) {
   // Lock automatically releases when this goes out of scope.
-  std::shared_lock<ur_shared_mutex> lock(Queue->Mutex);
+  std::shared_lock<ur::SharedMutex> lock(Queue->Mutex);
 
   int32_t NativeHandleDesc{};
 
@@ -652,11 +652,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueFinish(
 ) {
   if (UrQueue->UsingImmCmdLists) {
     // Lock automatically releases when this goes out of scope.
-    std::scoped_lock<ur_shared_mutex> Lock(UrQueue->Mutex);
+    std::scoped_lock<ur::SharedMutex> Lock(UrQueue->Mutex);
 
     UrQueue->synchronize();
   } else {
-    std::unique_lock<ur_shared_mutex> Lock(UrQueue->Mutex);
+    std::unique_lock<ur::SharedMutex> Lock(UrQueue->Mutex);
     std::vector<ze_command_queue_handle_t> ZeQueues;
 
     // execute any command list that may still be open.
@@ -696,7 +696,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueFinish(
     // We can only do so if nothing else was submitted to the queue
     // while we were synchronizing it.
     if (!HoldLock) {
-      std::scoped_lock<ur_shared_mutex> Lock(UrQueue->Mutex);
+      std::scoped_lock<ur::SharedMutex> Lock(UrQueue->Mutex);
       if (LastCommandEvent == UrQueue->LastCommandEvent) {
         UrQueue->LastCommandEvent = nullptr;
       }
@@ -708,7 +708,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueFinish(
   // available command lists. Events in the immediate command lists are cleaned
   // up in synchronize().
   if (!UrQueue->UsingImmCmdLists) {
-    std::unique_lock<ur_shared_mutex> Lock(UrQueue->Mutex);
+    std::unique_lock<ur::SharedMutex> Lock(UrQueue->Mutex);
     resetCommandLists(UrQueue);
   }
   return UR_RESULT_SUCCESS;
@@ -1115,7 +1115,7 @@ ur_queue_handle_t_::executeCommandList(ur_command_list_ptr_t CommandList,
   // unique_lock destructor at the end of the function will unlock the mutex
   // if it was locked (which happens only if IndirectAccessTrackingEnabled is
   // true).
-  std::unique_lock<ur_shared_mutex> ContextsLock(
+  std::unique_lock<ur::SharedMutex> ContextsLock(
       Device->Platform->ContextsMutex, std::defer_lock);
 
   if (IndirectAccessTrackingEnabled) {
@@ -1160,7 +1160,7 @@ ur_queue_handle_t_::executeCommandList(ur_command_list_ptr_t CommandList,
         // Update each command's event in the command-list to "see" this
         // proxy event as a host-visible counterpart.
         for (auto &Event : CommandList->second.EventList) {
-          std::scoped_lock<ur_shared_mutex> EventLock(Event->Mutex);
+          std::scoped_lock<ur::SharedMutex> EventLock(Event->Mutex);
           // Internal event doesn't need host-visible proxy.
           if (!Event->hasExternalRefs())
             continue;
@@ -1644,7 +1644,7 @@ ur_result_t ur_queue_handle_t_::resetCommandList(
     // If events in the queue are discarded then we can't check their status.
     // Helper for checking of event completion
     auto EventCompleted = [](ur_event_handle_t Event) -> bool {
-      std::scoped_lock<ur_shared_mutex> EventLock(Event->Mutex);
+      std::scoped_lock<ur::SharedMutex> EventLock(Event->Mutex);
       ze_result_t ZeResult =
           Event->Completed
               ? ZE_RESULT_SUCCESS
@@ -1692,7 +1692,7 @@ ur_result_t ur_queue_handle_t_::resetCommandList(
   // Standard commandlists move in and out of the cache as they are recycled.
   // Immediate commandlists are always available.
   if (CommandList->second.ZeFence != nullptr && MakeAvailable) {
-    std::scoped_lock<ur_mutex> Lock(this->Context->ZeCommandListCacheMutex);
+    std::scoped_lock<ur::Mutex> Lock(this->Context->ZeCommandListCacheMutex);
     auto &ZeCommandListCache =
         UseCopyEngine
             ? this->Context->ZeCopyCommandListCache[this->Device->ZeDevice]
@@ -1982,7 +1982,7 @@ ur_command_list_ptr_t &ur_queue_handle_t_::ur_queue_group_t::getImmCmdList() {
   ze_command_list_handle_t ZeCommandList = nullptr;
   {
     // Acquire lock to avoid race conditions.
-    std::scoped_lock<ur_mutex> Lock(Queue->Context->ZeCommandListCacheMutex);
+    std::scoped_lock<ur::Mutex> Lock(Queue->Context->ZeCommandListCacheMutex);
     // Under mutex since operator[] does insertion on the first usage for every
     // unique ZeDevice.
     auto &ZeCommandListCache =

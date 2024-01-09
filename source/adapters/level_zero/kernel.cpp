@@ -42,7 +42,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
                   ///< this particular kernel execution instance.
 ) {
   // Lock automatically releases when this goes out of scope.
-  std::scoped_lock<ur_shared_mutex, ur_shared_mutex, ur_shared_mutex> Lock(
+  std::scoped_lock<ur::SharedMutex, ur::SharedMutex, ur::SharedMutex> Lock(
       Queue->Mutex, Kernel->Mutex, Kernel->Program->Mutex);
   if (GlobalWorkOffset != NULL) {
     if (!Queue->Device->Platform->ZeDriverGlobalOffsetExtensionFound) {
@@ -215,7 +215,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
     // If using immediate commandlists then gathering of indirect
     // references and appending to the queue (which means submission)
     // must be done together.
-    std::unique_lock<ur_shared_mutex> ContextsLock(
+    std::unique_lock<ur::SharedMutex> ContextsLock(
         Queue->Device->Platform->ContextsMutex, std::defer_lock);
     // We are going to submit kernels for execution. If indirect access flag is
     // set for a kernel then we need to make a snapshot of existing memory
@@ -275,7 +275,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
         *Event ///< [in,out][optional] return an event object that identifies
                ///< this particular kernel execution instance.
 ) {
-  std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
+  std::scoped_lock<ur::SharedMutex> lock(Queue->Mutex);
 
   // Find global variable pointer
   size_t GlobalVarSize = 0;
@@ -325,7 +325,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
                ///< this particular kernel execution instance.
 ) {
 
-  std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
+  std::scoped_lock<ur::SharedMutex> lock(Queue->Mutex);
 
   // Find global variable pointer
   size_t GlobalVarSize = 0;
@@ -358,7 +358,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelCreate(
     ur_kernel_handle_t
         *RetKernel ///< [out] pointer to handle of kernel object created.
 ) {
-  std::shared_lock<ur_shared_mutex> Guard(Program->Mutex);
+  std::shared_lock<ur::SharedMutex> Guard(Program->Mutex);
   if (Program->State != ur_program_handle_t_::state::Exe) {
     return UR_RESULT_ERROR_INVALID_PROGRAM_EXECUTABLE;
   }
@@ -408,7 +408,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelSetArgValue(
     PArgValue = nullptr;
   }
 
-  std::scoped_lock<ur_shared_mutex> Guard(Kernel->Mutex);
+  std::scoped_lock<ur::SharedMutex> Guard(Kernel->Mutex);
   ZE2UR_CALL(zeKernelSetArgumentValue,
              (Kernel->ZeKernel, ArgIndex, ArgSize, PArgValue));
 
@@ -444,9 +444,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelGetInfo(
                         ///< bytes of data being queried by propName.
 ) {
 
-  UrReturnHelper ReturnValue(PropSize, KernelInfo, PropSizeRet);
+  ur::ReturnHelper ReturnValue(PropSize, KernelInfo, PropSizeRet);
 
-  std::shared_lock<ur_shared_mutex> Guard(Kernel->Mutex);
+  std::shared_lock<ur::SharedMutex> Guard(Kernel->Mutex);
   switch (ParamName) {
   case UR_KERNEL_INFO_CONTEXT:
     return ReturnValue(ur_context_handle_t{Kernel->Program->Context});
@@ -502,9 +502,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelGetGroupInfo(
     size_t *ParamValueSizeRet ///< [out][optional] pointer to the actual size in
                               ///< bytes of data being queried by propName.
 ) {
-  UrReturnHelper ReturnValue(ParamValueSize, ParamValue, ParamValueSizeRet);
+  ur::ReturnHelper ReturnValue(ParamValueSize, ParamValue, ParamValueSizeRet);
 
-  std::shared_lock<ur_shared_mutex> Guard(Kernel->Mutex);
+  std::shared_lock<ur::SharedMutex> Guard(Kernel->Mutex);
   switch (ParamName) {
   case UR_KERNEL_GROUP_INFO_GLOBAL_WORK_SIZE: {
     // TODO: To revisit after level_zero/issues/262 is resolved
@@ -562,9 +562,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelGetSubGroupInfo(
 ) {
   std::ignore = Device;
 
-  UrReturnHelper ReturnValue(PropSize, PropValue, PropSizeRet);
+  ur::ReturnHelper ReturnValue(PropSize, PropValue, PropSizeRet);
 
-  std::shared_lock<ur_shared_mutex> Guard(Kernel->Mutex);
+  std::shared_lock<ur::SharedMutex> Guard(Kernel->Mutex);
   if (PropName == UR_KERNEL_SUB_GROUP_INFO_MAX_SUB_GROUP_SIZE) {
     ReturnValue(uint32_t{Kernel->ZeKernelProperties->maxSubgroupSize});
   } else if (PropName == UR_KERNEL_SUB_GROUP_INFO_MAX_NUM_SUB_GROUPS) {
@@ -639,7 +639,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelSetExecInfo(
   std::ignore = PropSize;
   std::ignore = Properties;
 
-  std::scoped_lock<ur_shared_mutex> Guard(Kernel->Mutex);
+  std::scoped_lock<ur::SharedMutex> Guard(Kernel->Mutex);
   if (PropName == UR_KERNEL_EXEC_INFO_USM_INDIRECT_ACCESS &&
       *(static_cast<const ur_bool_t *>(PropValue)) == true) {
     // The whole point for users really was to not need to know anything
@@ -680,7 +680,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelSetArgSampler(
     ur_sampler_handle_t ArgValue ///< [in] handle of Sampler object.
 ) {
   std::ignore = Properties;
-  std::scoped_lock<ur_shared_mutex> Guard(Kernel->Mutex);
+  std::scoped_lock<ur::SharedMutex> Guard(Kernel->Mutex);
   ZE2UR_CALL(zeKernelSetArgumentValue, (Kernel->ZeKernel, ArgIndex,
                                         sizeof(void *), &ArgValue->ZeSampler));
 
@@ -696,7 +696,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelSetArgMemObj(
 ) {
   std::ignore = Properties;
 
-  std::scoped_lock<ur_shared_mutex> Guard(Kernel->Mutex);
+  std::scoped_lock<ur::SharedMutex> Guard(Kernel->Mutex);
   // The ArgValue may be a NULL pointer in which case a NULL value is used for
   // the kernel argument declared as a pointer to global or constant memory.
 
@@ -730,7 +730,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelGetNativeHandle(
     ur_native_handle_t
         *NativeKernel ///< [out] a pointer to the native handle of the kernel.
 ) {
-  std::shared_lock<ur_shared_mutex> Guard(Kernel->Mutex);
+  std::shared_lock<ur::SharedMutex> Guard(Kernel->Mutex);
 
   *NativeKernel = reinterpret_cast<ur_native_handle_t>(Kernel->ZeKernel);
   return UR_RESULT_SUCCESS;

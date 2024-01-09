@@ -60,7 +60,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWait(
     bool UseCopyEngine = false;
 
     // Lock automatically releases when this goes out of scope.
-    std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
+    std::scoped_lock<ur::SharedMutex> lock(Queue->Mutex);
 
     _ur_ze_event_list_t TmpWaitList = {};
     UR_CALL(TmpWaitList.createAndRetainUrZeEventList(
@@ -100,7 +100,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWait(
     // TODO: find a way to do that without blocking the host.
 
     // Lock automatically releases when this goes out of scope.
-    std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
+    std::scoped_lock<ur::SharedMutex> lock(Queue->Mutex);
 
     if (OutEvent) {
       UR_CALL(createEventAndAssociateQueue(
@@ -119,7 +119,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWait(
   }
 
   if (!Queue->UsingImmCmdLists) {
-    std::unique_lock<ur_shared_mutex> Lock(Queue->Mutex);
+    std::unique_lock<ur::SharedMutex> Lock(Queue->Mutex);
     resetCommandLists(Queue);
   }
 
@@ -148,7 +148,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
 ) {
 
   // Lock automatically releases when this goes out of scope.
-  std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
+  std::scoped_lock<ur::SharedMutex> lock(Queue->Mutex);
 
   // Helper function for appending a barrier to a command list.
   auto insertBarrierIntoCmdList =
@@ -374,19 +374,19 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetInfo(
     size_t
         *PropValueSizeRet ///< [out][optional] bytes returned in event property
 ) {
-  UrReturnHelper ReturnValue(PropValueSize, PropValue, PropValueSizeRet);
+  ur::ReturnHelper ReturnValue(PropValueSize, PropValue, PropValueSizeRet);
 
   switch (PropName) {
   case UR_EVENT_INFO_COMMAND_QUEUE: {
-    std::shared_lock<ur_shared_mutex> EventLock(Event->Mutex);
+    std::shared_lock<ur::SharedMutex> EventLock(Event->Mutex);
     return ReturnValue(ur_queue_handle_t{Event->UrQueue});
   }
   case UR_EVENT_INFO_CONTEXT: {
-    std::shared_lock<ur_shared_mutex> EventLock(Event->Mutex);
+    std::shared_lock<ur::SharedMutex> EventLock(Event->Mutex);
     return ReturnValue(ur_context_handle_t{Event->Context});
   }
   case UR_EVENT_INFO_COMMAND_TYPE: {
-    std::shared_lock<ur_shared_mutex> EventLock(Event->Mutex);
+    std::shared_lock<ur::SharedMutex> EventLock(Event->Mutex);
     return ReturnValue(ur_cast<uint64_t>(Event->CommandType));
   }
   case UR_EVENT_INFO_COMMAND_EXECUTION_STATUS: {
@@ -398,7 +398,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetInfo(
     auto UrQueue = Event->UrQueue;
     if (UrQueue) {
       // Lock automatically releases when this goes out of scope.
-      std::scoped_lock<ur_shared_mutex> lock(UrQueue->Mutex);
+      std::scoped_lock<ur::SharedMutex> lock(UrQueue->Mutex);
       const auto &OpenCommandList = UrQueue->eventOpenCommandList(Event);
       if (OpenCommandList != UrQueue->CommandListMap.end()) {
         UR_CALL(UrQueue->executeOpenCommandList(
@@ -418,7 +418,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetInfo(
     // Make sure that we query a host-visible event only.
     // If one wasn't yet created then don't create it here as well, and
     // just conservatively return that event is not yet completed.
-    std::shared_lock<ur_shared_mutex> EventLock(Event->Mutex);
+    std::shared_lock<ur::SharedMutex> EventLock(Event->Mutex);
     auto HostVisibleEvent = Event->HostVisibleEvent;
     if (Event->Completed) {
       Result = UR_EVENT_STATUS_COMPLETE;
@@ -454,7 +454,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetProfilingInfo(
     size_t *PropValueSizeRet ///< [out][optional] pointer to the actual size in
                              ///< bytes returned in propValue
 ) {
-  std::shared_lock<ur_shared_mutex> EventLock(Event->Mutex);
+  std::shared_lock<ur::SharedMutex> EventLock(Event->Mutex);
 
   if (Event->UrQueue &&
       (Event->UrQueue->Properties & UR_QUEUE_FLAG_PROFILING_ENABLE) == 0) {
@@ -468,7 +468,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetProfilingInfo(
   const uint64_t TimestampMaxValue =
       ((1ULL << Device->ZeDeviceProperties->kernelTimestampValidBits) - 1ULL);
 
-  UrReturnHelper ReturnValue(PropValueSize, PropValue, PropValueSizeRet);
+  ur::ReturnHelper ReturnValue(PropValueSize, PropValue, PropValueSizeRet);
 
   ze_kernel_timestamp_result_t tsResult;
 
@@ -581,7 +581,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetProfilingInfo(
 ur_result_t ur_event_handle_t_::getOrCreateHostVisibleEvent(
     ze_event_handle_t &ZeHostVisibleEvent) {
 
-  std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Lock(UrQueue->Mutex,
+  std::scoped_lock<ur::SharedMutex, ur::SharedMutex> Lock(UrQueue->Mutex,
                                                           this->Mutex);
 
   if (!HostVisibleEvent) {
@@ -646,7 +646,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventWait(
     auto UrQueue = Event->UrQueue;
     if (UrQueue) {
       // Lock automatically releases when this goes out of scope.
-      std::scoped_lock<ur_shared_mutex> lock(UrQueue->Mutex);
+      std::scoped_lock<ur::SharedMutex> lock(UrQueue->Mutex);
 
       UR_CALL(UrQueue->executeAllOpenCommandLists());
     }
@@ -657,7 +657,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventWait(
       ur_event_handle_t_ *Event =
           ur_cast<ur_event_handle_t_ *>(EventWaitList[I]);
       {
-        std::shared_lock<ur_shared_mutex> EventLock(Event->Mutex);
+        std::shared_lock<ur::SharedMutex> EventLock(Event->Mutex);
         if (!Event->hasExternalRefs())
           die("urEventWait must not be called for an internal event");
 
@@ -695,7 +695,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventWait(
   // We waited some events above, check queue for signaled command lists and
   // reset them.
   for (auto &Q : Queues) {
-    std::unique_lock<ur_shared_mutex> Lock(Q->Mutex);
+    std::unique_lock<ur::SharedMutex> Lock(Q->Mutex);
     resetCommandLists(Q);
   }
 
@@ -726,7 +726,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetNativeHandle(
         *NativeEvent ///< [out] a pointer to the native handle of the event.
 ) {
   {
-    std::shared_lock<ur_shared_mutex> Lock(Event->Mutex);
+    std::shared_lock<ur::SharedMutex> Lock(Event->Mutex);
     auto *ZeEvent = ur_cast<ze_event_handle_t *>(NativeEvent);
     *ZeEvent = Event->ZeEvent;
   }
@@ -735,7 +735,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetNativeHandle(
   // interop app is going to wait for it.
   auto Queue = Event->UrQueue;
   if (Queue) {
-    std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
+    std::scoped_lock<ur::SharedMutex> lock(Queue->Mutex);
     const auto &OpenCommandList = Queue->eventOpenCommandList(Event);
     if (OpenCommandList != Queue->CommandListMap.end()) {
       UR_CALL(
@@ -919,7 +919,7 @@ ur_result_t CleanupCompletedEvent(ur_event_handle_t Event, bool QueueLocked,
   std::list<ur_event_handle_t> EventsToBeReleased;
   ur_queue_handle_t AssociatedQueue = nullptr;
   {
-    std::scoped_lock<ur_shared_mutex> EventLock(Event->Mutex);
+    std::scoped_lock<ur::SharedMutex> EventLock(Event->Mutex);
     if (SetEventCompleted)
       Event->Completed = true;
     // Exit early of event was already cleanedup.
@@ -953,7 +953,7 @@ ur_result_t CleanupCompletedEvent(ur_event_handle_t Event, bool QueueLocked,
       // result, memory can be deallocated and context can be removed from
       // container in the platform. That's why we need to lock a mutex here.
       ur_platform_handle_t Plt = Kernel->Program->Context->getPlatform();
-      std::scoped_lock<ur_shared_mutex> ContextsLock(Plt->ContextsMutex);
+      std::scoped_lock<ur::SharedMutex> ContextsLock(Plt->ContextsMutex);
 
       if (--Kernel->SubmissionsCount == 0) {
         // Kernel is not submitted for execution, release referenced memory
@@ -977,7 +977,7 @@ ur_result_t CleanupCompletedEvent(ur_event_handle_t Event, bool QueueLocked,
   if (AssociatedQueue) {
     {
       // Lock automatically releases when this goes out of scope.
-      std::unique_lock<ur_shared_mutex> QueueLock(AssociatedQueue->Mutex,
+      std::unique_lock<ur::SharedMutex> QueueLock(AssociatedQueue->Mutex,
                                                   std::defer_lock);
       if (!QueueLocked)
         QueueLock.lock();
@@ -1011,7 +1011,7 @@ ur_result_t CleanupCompletedEvent(ur_event_handle_t Event, bool QueueLocked,
 
     ur_kernel_handle_t DepEventKernel = nullptr;
     {
-      std::scoped_lock<ur_shared_mutex> DepEventLock(DepEvent->Mutex);
+      std::scoped_lock<ur::SharedMutex> DepEventLock(DepEvent->Mutex);
       DepEvent->WaitList.collectEventsForReleaseAndDestroyUrZeEventList(
           EventsToBeReleased);
       if (IndirectAccessTrackingEnabled) {
@@ -1180,7 +1180,7 @@ ur_result_t _ur_ze_event_list_t::createAndRetainUrZeEventList(
     if (IncludeLastCommandEvent) {
       this->ZeEventList = new ze_event_handle_t[EventListLength + 1];
       this->UrEventList = new ur_event_handle_t[EventListLength + 1];
-      std::shared_lock<ur_shared_mutex> Lock(CurQueue->LastCommandEvent->Mutex);
+      std::shared_lock<ur::SharedMutex> Lock(CurQueue->LastCommandEvent->Mutex);
       this->ZeEventList[0] = CurQueue->LastCommandEvent->ZeEvent;
       this->UrEventList[0] = CurQueue->LastCommandEvent;
       this->UrEventList[0]->RefCount.increment();
@@ -1193,7 +1193,7 @@ ur_result_t _ur_ze_event_list_t::createAndRetainUrZeEventList(
     if (EventListLength > 0) {
       for (uint32_t I = 0; I < EventListLength; I++) {
         {
-          std::shared_lock<ur_shared_mutex> Lock(EventList[I]->Mutex);
+          std::shared_lock<ur::SharedMutex> Lock(EventList[I]->Mutex);
           if (EventList[I]->Completed)
             continue;
 
@@ -1217,8 +1217,8 @@ ur_result_t _ur_ze_event_list_t::createAndRetainUrZeEventList(
           // TODO: rework this to avoid deadlock when another thread is
           //       locking the same queues but in a different order.
           auto Lock = ((Queue == CurQueue)
-                           ? std::unique_lock<ur_shared_mutex>()
-                           : std::unique_lock<ur_shared_mutex>(Queue->Mutex));
+                           ? std::unique_lock<ur::SharedMutex>()
+                           : std::unique_lock<ur::SharedMutex>(Queue->Mutex));
 
           // If the event that is going to be waited is in an open batch
           // different from where this next command is going to be added,
@@ -1261,7 +1261,7 @@ ur_result_t _ur_ze_event_list_t::createAndRetainUrZeEventList(
           }
         }
 
-        std::shared_lock<ur_shared_mutex> Lock(EventList[I]->Mutex);
+        std::shared_lock<ur::SharedMutex> Lock(EventList[I]->Mutex);
         this->ZeEventList[TmpListLength] = EventList[I]->ZeEvent;
         this->UrEventList[TmpListLength] = EventList[I];
         this->UrEventList[TmpListLength]->RefCount.increment();

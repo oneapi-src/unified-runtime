@@ -315,7 +315,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
                                                     void *pPropValue,
                                                     size_t *pPropSizeRet) {
 
-  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
 
   const cl_device_info CLPropName = mapURDeviceInfoToCL(propName);
 

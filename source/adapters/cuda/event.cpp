@@ -162,7 +162,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetInfo(ur_event_handle_t hEvent,
                                                    size_t propValueSize,
                                                    void *pPropValue,
                                                    size_t *pPropValueSizeRet) {
-  UrReturnHelper ReturnValue(propValueSize, pPropValue, pPropValueSizeRet);
+  ur::ReturnHelper ReturnValue(propValueSize, pPropValue, pPropValueSizeRet);
 
   switch (propName) {
   case UR_EVENT_INFO_COMMAND_QUEUE:
@@ -187,7 +187,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetInfo(ur_event_handle_t hEvent,
 UR_APIEXPORT ur_result_t UR_APICALL urEventGetProfilingInfo(
     ur_event_handle_t hEvent, ur_profiling_info_t propName,
     size_t propValueSize, void *pPropValue, size_t *pPropValueSizeRet) {
-  UrReturnHelper ReturnValue(propValueSize, pPropValue, pPropValueSizeRet);
+  ur::ReturnHelper ReturnValue(propValueSize, pPropValue, pPropValueSizeRet);
 
   ur_queue_handle_t Queue = hEvent->getQueue();
   if (Queue == nullptr || !(Queue->URFlags & UR_QUEUE_FLAG_PROFILING_ENABLE)) {

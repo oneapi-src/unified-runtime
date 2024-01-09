@@ -62,7 +62,7 @@ UR_APIEXPORT ur_result_t UR_APICALL
 urKernelGetGroupInfo(ur_kernel_handle_t hKernel, ur_device_handle_t hDevice,
                      ur_kernel_group_info_t propName, size_t propSize,
                      void *pPropValue, size_t *pPropSizeRet) {
-  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
 
   switch (propName) {
   case UR_KERNEL_GROUP_INFO_GLOBAL_WORK_SIZE: {
@@ -205,7 +205,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelGetInfo(ur_kernel_handle_t hKernel,
                                                     size_t propSize,
                                                     void *pKernelInfo,
                                                     size_t *pPropSizeRet) {
-  UrReturnHelper ReturnValue(propSize, pKernelInfo, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pKernelInfo, pPropSizeRet);
 
   switch (propName) {
   case UR_KERNEL_INFO_FUNCTION_NAME:
@@ -237,7 +237,7 @@ UR_APIEXPORT ur_result_t UR_APICALL
 urKernelGetSubGroupInfo(ur_kernel_handle_t hKernel, ur_device_handle_t hDevice,
                         ur_kernel_sub_group_info_t propName, size_t propSize,
                         void *pPropValue, size_t *pPropSizeRet) {
-  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+  ur::ReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
   switch (propName) {
   case UR_KERNEL_SUB_GROUP_INFO_MAX_SUB_GROUP_SIZE: {
     // Sub-group size is equivalent to warp size

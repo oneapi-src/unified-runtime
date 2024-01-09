@@ -8,7 +8,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "ur/ur.hpp"
+#include "ur_api.h"
 
 UR_APIEXPORT ur_result_t UR_APICALL urUSMPitchedAllocExp(
     [[maybe_unused]] ur_context_handle_t hContext,

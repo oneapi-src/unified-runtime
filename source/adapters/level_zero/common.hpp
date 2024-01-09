@@ -18,8 +18,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include <ur/ur.hpp>
 #include <ur_api.h>
+#include <ur_util.hpp>
 #include <ze_api.h>
 #include <zes_api.h>
 
@@ -261,11 +261,6 @@ bool setEnvVar(const char *name, const char *value);
 // Prints to stderr if UR_L0_DEBUG allows it
 void urPrint(const char *Format, ...);
 
-// Helper for one-liner validation
-#define UR_ASSERT(condition, error)                                            \
-  if (!(condition))                                                            \
-    return error;
-
 // Returns the ze_structure_type_t to use in .stype of a structured descriptor.
 // Intentionally not defined; will give an error if no proper specialization
 template <class T> ze_structure_type_t getZeStructureType();
@@ -305,11 +300,6 @@ bool setEnvVar(const char *name, const char *value);
 
 // Prints to stderr if UR_L0_DEBUG allows it
 void urPrint(const char *Format, ...);
-
-// Helper for one-liner validation
-#define UR_ASSERT(condition, error)                                            \
-  if (!(condition))                                                            \
-    return error;
 
 // Map Level Zero runtime error code to UR error code.
 ur_result_t ze2urResult(ze_result_t ZeResult);
@@ -389,7 +379,7 @@ struct _ur_object {
   // access to Obj3 in a scope use the following approach:
   //   std::shared_lock Obj3Lock(Obj3->Mutex, std::defer_lock);
   //   std::scoped_lock LockAll(Obj1->Mutex, Obj2->Mutex, Obj3Lock);
-  ur_shared_mutex Mutex;
+  ur::SharedMutex Mutex;
 
   // Indicates if we own the native handle or it came from interop that
   // asked to not transfer the ownership to SYCL RT.

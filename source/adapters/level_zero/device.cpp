@@ -39,7 +39,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGet(
 
   // Filter available devices based on input DeviceType.
   std::vector<ur_device_handle_t> MatchedDevices;
-  std::shared_lock<ur_shared_mutex> Lock(Platform->URDevicesCacheMutex);
+  std::shared_lock<ur::SharedMutex> Lock(Platform->URDevicesCacheMutex);
   for (auto &D : Platform->URDevicesCache) {
     // Only ever return root-devices from urDeviceGet, but the
     // devices cache also keeps sub-devices.
@@ -119,7 +119,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
     size_t *pSize ///< [out][optional] pointer to the actual size in bytes of
                   ///< the queried infoType.
 ) {
-  UrReturnHelper ReturnValue(propSize, ParamValue, pSize);
+  ur::ReturnHelper ReturnValue(propSize, ParamValue, pSize);
 
   ze_device_handle_t ZeDevice = Device->ZeDevice;
 
@@ -1329,7 +1329,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
   // TODO: maybe we should populate cache of platforms if it wasn't already.
   // For now assert that is was populated.
   UR_ASSERT(URPlatformCachePopulated, UR_RESULT_ERROR_INVALID_VALUE);
-  const std::lock_guard<SpinLock> Lock{*URPlatformsCacheMutex};
+  const std::lock_guard<ur::SpinLock> Lock{*URPlatformsCacheMutex};
 
   ur_device_handle_t Dev = nullptr;
   for (ur_platform_handle_t ThePlatform : *URPlatformsCache) {

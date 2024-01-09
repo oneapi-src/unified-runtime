@@ -9,7 +9,9 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include <ur/ur.hpp>
+
+#include "ur_api.h"
+#include <memory>
 #include <vector>
 
 struct ur_platform_handle_t_ {

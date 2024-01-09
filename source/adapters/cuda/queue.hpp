@@ -9,10 +9,12 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include <ur/ur.hpp>
+#include <ur_api.h>
 
 #include <algorithm>
+#include <atomic>
 #include <cuda.h>
+#include <mutex>
 #include <vector>
 
 using ur_stream_guard_ = std::unique_lock<std::mutex>;
