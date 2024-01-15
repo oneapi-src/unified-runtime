@@ -8,7 +8,9 @@ add_subdirectory(umf_pools)
 
 add_ur_library(ur_common STATIC
     umf_helpers.hpp
+    umf_helpers.cpp
     ur_pool_manager.hpp
+    ur_pool_handle.hpp
     $<$<PLATFORM_ID:Windows>:windows/ur_lib_loader.cpp>
     $<$<PLATFORM_ID:Linux,Darwin>:linux/ur_lib_loader.cpp>
 )

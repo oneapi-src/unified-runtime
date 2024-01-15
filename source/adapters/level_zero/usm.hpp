@@ -9,125 +9,102 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "common.hpp"
-
 #include <umf_helpers.hpp>
+#include <ur_pool_handle.hpp>
 #include <ur_pool_manager.hpp>
 
 usm::DisjointPoolAllConfigs InitializeDisjointPoolConfig();
 
-struct ur_usm_pool_handle_t_ : _ur_object {
-  bool zeroInit;
+ur_result_t USMFreeImpl(ur_context_handle_t Context, void *Ptr);
 
-  usm::DisjointPoolAllConfigs DisjointPoolConfigs =
-      InitializeDisjointPoolConfig();
-
-  usm::pool_manager<usm::pool_descriptor> PoolManager;
-
-  ur_context_handle_t Context{};
-
-  ur_usm_pool_handle_t_(ur_context_handle_t Context,
-                        ur_usm_pool_desc_t *PoolDesc);
-};
-
-// Exception type to pass allocation errors
-class UsmAllocationException {
-  const ur_result_t Error;
-
-public:
-  UsmAllocationException(ur_result_t Err) : Error{Err} {}
-  ur_result_t getError() const { return Error; }
-};
-
-// UMF memory provider interface for USM.
-class USMMemoryProviderBase {
-protected:
-  ur_context_handle_t Context;
-  ur_device_handle_t Device;
-
-  ur_result_t &getLastStatusRef() {
-    static thread_local ur_result_t LastStatus = UR_RESULT_SUCCESS;
-    return LastStatus;
-  }
-
-  // Internal allocation routine which must be implemented for each allocation
-  // type
-  virtual ur_result_t allocateImpl(void **, size_t, uint32_t) = 0;
-
-public:
-  virtual void get_last_native_error(const char **ErrMsg, int32_t *ErrCode) {
-    std::ignore = ErrMsg;
-    *ErrCode = static_cast<int32_t>(getLastStatusRef());
-  };
-  virtual umf_result_t initialize(ur_context_handle_t, ur_device_handle_t) {
-    return UMF_RESULT_ERROR_NOT_SUPPORTED;
-  };
-  virtual umf_result_t alloc(size_t, size_t, void **) {
-    return UMF_RESULT_ERROR_NOT_SUPPORTED;
-  };
-  virtual umf_result_t free(void *, size_t) {
-    return UMF_RESULT_ERROR_NOT_SUPPORTED;
-  };
-  virtual umf_result_t get_min_page_size(void *, size_t *) {
-    return UMF_RESULT_ERROR_NOT_SUPPORTED;
-  };
-  virtual umf_result_t get_recommended_page_size(size_t, size_t *) {
-    return UMF_RESULT_ERROR_NOT_SUPPORTED;
-  };
-  virtual umf_result_t purge_lazy(void *, size_t) {
-    return UMF_RESULT_ERROR_NOT_SUPPORTED;
-  };
-  virtual umf_result_t purge_force(void *, size_t) {
-    return UMF_RESULT_ERROR_NOT_SUPPORTED;
-  };
-  virtual const char *get_name() { return ""; };
-  virtual ~USMMemoryProviderBase() = default;
-};
-
-// Implements USM memory provider interface for L0 RT USM memory allocations.
-class L0MemoryProvider : public USMMemoryProviderBase {
-private:
-  // Min page size query function for L0MemoryProvider.
-  umf_result_t GetL0MinPageSize(void *Mem, size_t *PageSize);
-  size_t MinPageSize = 0;
-  bool MinPageSizeCached = false;
-
-public:
-  umf_result_t initialize(ur_context_handle_t Ctx,
-                          ur_device_handle_t Dev) override;
-  umf_result_t alloc(size_t Size, size_t Align, void **Ptr) override;
-  umf_result_t free(void *Ptr, size_t Size) override;
-  umf_result_t get_min_page_size(void *, size_t *) override;
-  // TODO: Different name for each provider (Host/Shared/SharedRO/Device)
-  const char *get_name() override { return "L0"; };
-};
+// Helper that queries the min page size from the given pointer. If no pointer
+// is provided (i.e. Ptr == nullptr), Provider is used to create a small
+// allocation for the purpose of running the query.
+ur_result_t GetL0MinPageSize(ur_context_handle_t Context, void *Ptr,
+                             size_t *PageSize,
+                             umf::USMMemoryProvider *Provider);
 
 // Allocation routines for shared memory type
-class L0SharedMemoryProvider final : public L0MemoryProvider {
-protected:
-  ur_result_t allocateImpl(void **ResultPtr, size_t Size,
-                           uint32_t Alignment) override;
-};
+class L0SharedMemoryProvider final : public umf::USMSharedMemoryProvider {
+public:
+  umf_result_t initialize(usm::pool_descriptor Desc) override;
 
-// Allocation routines for shared memory type that is only modified from host.
-class L0SharedReadOnlyMemoryProvider final : public L0MemoryProvider {
+  umf_result_t get_min_page_size(void *Ptr, size_t *PageSize) override {
+    if (!Ptr) {
+      *PageSize = MinPageSize;
+      return UMF_RESULT_SUCCESS;
+    }
+    UMF_PROVIDER_CHECK_UR_RESULT(
+        GetL0MinPageSize(Context, Ptr, PageSize, this));
+    return UMF_RESULT_SUCCESS;
+  }
+
 protected:
   ur_result_t allocateImpl(void **ResultPtr, size_t Size,
-                           uint32_t Alignment) override;
+                           size_t Alignment) override;
+
+  ur_result_t freeImpl(void *Ptr, size_t) override {
+    return USMFreeImpl(Context, Ptr);
+  }
 };
 
 // Allocation routines for device memory type
-class L0DeviceMemoryProvider final : public L0MemoryProvider {
+class L0DeviceMemoryProvider final : public umf::USMDeviceMemoryProvider {
+public:
+  umf_result_t initialize(usm::pool_descriptor Desc) override;
+
+  umf_result_t get_min_page_size(void *Ptr, size_t *PageSize) override {
+    if (!Ptr) {
+      *PageSize = MinPageSize;
+      return UMF_RESULT_SUCCESS;
+    }
+    UMF_PROVIDER_CHECK_UR_RESULT(
+        GetL0MinPageSize(Context, Ptr, PageSize, this));
+    return UMF_RESULT_SUCCESS;
+  }
+
 protected:
   ur_result_t allocateImpl(void **ResultPtr, size_t Size,
-                           uint32_t Alignment) override;
+                           size_t Alignment) override;
+
+  ur_result_t freeImpl(void *Ptr, size_t) override {
+    return USMFreeImpl(Context, Ptr);
+  }
 };
 
 // Allocation routines for host memory type
-class L0HostMemoryProvider final : public L0MemoryProvider {
+class L0HostMemoryProvider final : public umf::USMHostMemoryProvider {
+public:
+  umf_result_t initialize(usm::pool_descriptor Desc) override;
+
+  umf_result_t get_min_page_size(void *Ptr, size_t *PageSize) override {
+    if (!Ptr) {
+      *PageSize = MinPageSize;
+      return UMF_RESULT_SUCCESS;
+    }
+    UMF_PROVIDER_CHECK_UR_RESULT(
+        GetL0MinPageSize(Context, Ptr, PageSize, this));
+    return UMF_RESULT_SUCCESS;
+  }
+
 protected:
   ur_result_t allocateImpl(void **ResultPtr, size_t Size,
-                           uint32_t Alignment) override;
+                           size_t Alignment) override;
+
+  ur_result_t freeImpl(void *Ptr, size_t) override {
+    return USMFreeImpl(Context, Ptr);
+  }
+};
+
+#undef PROVIDER_CHECK_UR_RESULT
+
+struct ur_usm_pool_handle_t_
+    : public usm::pool_handle_base<L0HostMemoryProvider, L0DeviceMemoryProvider,
+                                   L0SharedMemoryProvider> {
+  ur_usm_pool_handle_t_(ur_context_handle_t Context,
+                        ur_usm_pool_desc_t *PoolDesc)
+      : usm::pool_handle_base<L0HostMemoryProvider, L0DeviceMemoryProvider,
+                              L0SharedMemoryProvider>(Context, PoolDesc){};
 };
 
 // Simple proxy for memory allocations. It is used for the UMF tracking

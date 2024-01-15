@@ -8,16 +8,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include <algorithm>
-#include <climits>
 #include <string.h>
 
 #include "common.hpp"
 #include "context.hpp"
-#include "event.hpp"
+#include "platform.hpp"
 #include "usm.hpp"
-
-#include "ur_level_zero.hpp"
 
 #include <umf_helpers.hpp>
 
@@ -144,7 +140,7 @@ static ur_result_t USMDeviceAllocImpl(void **ResultPtr,
                                       ur_context_handle_t Context,
                                       ur_device_handle_t Device,
                                       ur_usm_device_mem_flags_t *Flags,
-                                      size_t Size, uint32_t Alignment) {
+                                      size_t Size, size_t Alignment) {
   std::ignore = Flags;
   // TODO: translate PI properties to Level Zero flags
   ZeStruct<ze_device_mem_alloc_desc_t> ZeDesc;
@@ -185,12 +181,10 @@ static ur_result_t USMDeviceAllocImpl(void **ResultPtr,
   return UR_RESULT_SUCCESS;
 }
 
-static ur_result_t USMSharedAllocImpl(void **ResultPtr,
-                                      ur_context_handle_t Context,
-                                      ur_device_handle_t Device,
-                                      ur_usm_host_mem_flags_t *,
-                                      ur_usm_device_mem_flags_t *, size_t Size,
-                                      uint32_t Alignment) {
+static ur_result_t
+USMSharedAllocImpl(void **ResultPtr, ur_context_handle_t Context,
+                   ur_device_handle_t Device, ur_usm_host_mem_flags_t *,
+                   ur_usm_device_mem_flags_t *, size_t Size, size_t Alignment) {
 
   // TODO: translate PI properties to Level Zero flags
   ZeStruct<ze_host_mem_alloc_desc_t> ZeHostDesc;
@@ -236,7 +230,7 @@ static ur_result_t USMSharedAllocImpl(void **ResultPtr,
 static ur_result_t USMHostAllocImpl(void **ResultPtr,
                                     ur_context_handle_t Context,
                                     ur_usm_host_mem_flags_t *Flags, size_t Size,
-                                    uint32_t Alignment) {
+                                    size_t Alignment) {
   std::ignore = Flags;
   // TODO: translate PI properties to Level Zero flags
   ZeStruct<ze_host_mem_alloc_desc_t> ZeHostDesc;
@@ -309,8 +303,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMHostAlloc(
   // find the allocator depending on context as we do for Shared and Device
   // allocations.
   std::optional<umf_memory_pool_handle_t> hPoolInternalOpt = std::nullopt;
-  usm::pool_descriptor Desc = {nullptr, Context, nullptr, UR_USM_TYPE_HOST,
-                               false};
+  usm::pool_descriptor Desc(nullptr, Context, nullptr, UR_USM_TYPE_HOST,
+                            USMDesc);
   if (!UseUSMAllocator ||
       // L0 spec says that allocation fails if Alignment != 2^n, in order to
       // keep the same behavior for the allocator, just call L0 API directly and
@@ -320,9 +314,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMHostAlloc(
   } else if (Pool) {
     // Getting user-created pool requires 'poolHandle' field.
     Desc.poolHandle = Pool;
-    hPoolInternalOpt = Pool->PoolManager.getPool(Desc);
+    hPoolInternalOpt = Pool->getOrCreatePool(Desc);
   } else {
-    hPoolInternalOpt = Context->PoolManager.getPool(Desc);
+    hPoolInternalOpt = Context->Pool->getOrCreatePool(Desc);
   }
 
   if (!hPoolInternalOpt.has_value()) {
@@ -392,8 +386,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMDeviceAlloc(
   }
 
   std::optional<umf_memory_pool_handle_t> hPoolInternalOpt = std::nullopt;
-  usm::pool_descriptor Desc = {nullptr, Context, Device, UR_USM_TYPE_DEVICE,
-                               false};
+  usm::pool_descriptor Desc(nullptr, Context, Device, UR_USM_TYPE_DEVICE,
+                            USMDesc);
   if (!UseUSMAllocator ||
       // L0 spec says that allocation fails if Alignment != 2^n, in order to
       // keep the same behavior for the allocator, just call L0 API directly and
@@ -403,9 +397,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMDeviceAlloc(
   } else if (Pool) {
     // Getting user-created pool requires 'poolHandle' field.
     Desc.poolHandle = Pool;
-    hPoolInternalOpt = Pool->PoolManager.getPool(Desc);
+    hPoolInternalOpt = Pool->getOrCreatePool(Desc);
   } else {
-    hPoolInternalOpt = Context->PoolManager.getPool(Desc);
+    hPoolInternalOpt = Context->Pool->getOrCreatePool(Desc);
   }
 
   if (!hPoolInternalOpt.has_value()) {
@@ -446,31 +440,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMSharedAlloc(
 
   uint32_t Alignment = USMDesc ? USMDesc->align : 0;
 
-  ur_usm_host_mem_flags_t UsmHostFlags{};
-
-  // See if the memory is going to be read-only on the device.
-  bool DeviceReadOnly = false;
-  ur_usm_device_mem_flags_t UsmDeviceFlags{};
-
-  void *pNext = USMDesc ? const_cast<void *>(USMDesc->pNext) : nullptr;
-  while (pNext != nullptr) {
-    const ur_base_desc_t *BaseDesc =
-        reinterpret_cast<const ur_base_desc_t *>(pNext);
-    if (BaseDesc->stype == UR_STRUCTURE_TYPE_USM_DEVICE_DESC) {
-      const ur_usm_device_desc_t *UsmDeviceDesc =
-          reinterpret_cast<const ur_usm_device_desc_t *>(pNext);
-      UsmDeviceFlags = UsmDeviceDesc->flags;
-    }
-    if (BaseDesc->stype == UR_STRUCTURE_TYPE_USM_HOST_DESC) {
-      const ur_usm_host_desc_t *UsmHostDesc =
-          reinterpret_cast<const ur_usm_host_desc_t *>(pNext);
-      UsmHostFlags = UsmHostDesc->flags;
-      std::ignore = UsmHostFlags;
-    }
-    pNext = const_cast<void *>(BaseDesc->pNext);
-  }
-  DeviceReadOnly = UsmDeviceFlags & UR_USM_DEVICE_MEM_FLAG_DEVICE_READ_ONLY;
-
   // L0 supports alignment up to 64KB and silently ignores higher values.
   // We flag alignment > 64KB as an invalid value.
   if (Alignment > 65536)
@@ -496,8 +465,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMSharedAlloc(
   }
 
   std::optional<umf_memory_pool_handle_t> hPoolInternalOpt = std::nullopt;
-  usm::pool_descriptor Desc = {nullptr, Context, Device, UR_USM_TYPE_SHARED,
-                               DeviceReadOnly};
+  usm::pool_descriptor Desc(nullptr, Context, Device, UR_USM_TYPE_SHARED,
+                            USMDesc);
   if (!UseUSMAllocator ||
       // L0 spec says that allocation fails if Alignment != 2^n, in order to
       // keep the same behavior for the allocator, just call L0 API directly and
@@ -507,9 +476,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMSharedAlloc(
   } else if (Pool) {
     // Getting user-created pool requires 'poolHandle' field.
     Desc.poolHandle = Pool;
-    hPoolInternalOpt = Pool->PoolManager.getPool(Desc);
+    hPoolInternalOpt = Pool->getOrCreatePool(Desc);
   } else {
-    hPoolInternalOpt = Context->PoolManager.getPool(Desc);
+    hPoolInternalOpt = Context->Pool->getOrCreatePool(Desc);
   }
 
   if (!hPoolInternalOpt.has_value()) {
@@ -629,7 +598,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMGetMemAllocInfo(
   return UR_RESULT_SUCCESS;
 }
 
-static ur_result_t USMFreeImpl(ur_context_handle_t Context, void *Ptr) {
+ur_result_t USMFreeImpl(ur_context_handle_t Context, void *Ptr) {
   auto ZeResult = ZE_CALL_NOCHECK(zeMemFree, (Context->ZeContext, Ptr));
   // Handle When the driver is already released
   if (ZeResult == ZE_RESULT_ERROR_UNINITIALIZED) {
@@ -639,212 +608,82 @@ static ur_result_t USMFreeImpl(ur_context_handle_t Context, void *Ptr) {
   }
 }
 
-static ur_result_t USMQueryPageSize(ur_context_handle_t Context, void *Ptr,
-                                    size_t *PageSize) {
+ur_result_t GetL0MinPageSize(ur_context_handle_t Context, void *Ptr,
+                             size_t *PageSize,
+                             umf::USMMemoryProvider *Provider) {
+  // If we didn't get a pointer to check we need to use the memory provider to
+  // make a small allocation so we can run the query
+  void *CheckAlloc = Ptr;
+  if (!Ptr) {
+    if (auto AllocRes = Provider->alloc(1, 0, &CheckAlloc);
+        AllocRes != UMF_RESULT_SUCCESS) {
+      return umf::umf2urResult(AllocRes);
+    }
+  }
+
   ZeStruct<ze_memory_allocation_properties_t> AllocProperties = {};
-  ZE2UR_CALL(zeMemGetAllocProperties,
-             (Context->ZeContext, Ptr, &AllocProperties, nullptr));
-  *PageSize = AllocProperties.pageSize;
-
-  return UR_RESULT_SUCCESS;
-}
-
-umf_result_t L0MemoryProvider::initialize(ur_context_handle_t Ctx,
-                                          ur_device_handle_t Dev) {
-  Context = Ctx;
-  Device = Dev;
-
-  return UMF_RESULT_SUCCESS;
-}
-
-enum umf_result_t L0MemoryProvider::alloc(size_t Size, size_t Align,
-                                          void **Ptr) {
-  auto Res = allocateImpl(Ptr, Size, Align);
-  if (Res != UR_RESULT_SUCCESS) {
-    getLastStatusRef() = Res;
-    return UMF_RESULT_ERROR_MEMORY_PROVIDER_SPECIFIC;
+  auto Res = ze2urResult(
+      ZE_CALL_NOCHECK(zeMemGetAllocProperties, (Context->ZeContext, CheckAlloc,
+                                                &AllocProperties, nullptr)));
+  if (Res == UR_RESULT_SUCCESS) {
+    *PageSize = AllocProperties.pageSize;
   }
 
-  return UMF_RESULT_SUCCESS;
-}
-
-enum umf_result_t L0MemoryProvider::free(void *Ptr, size_t Size) {
-  (void)Size;
-
-  auto Res = USMFreeImpl(Context, Ptr);
-  if (Res != UR_RESULT_SUCCESS) {
-    getLastStatusRef() = Res;
-    return UMF_RESULT_ERROR_MEMORY_PROVIDER_SPECIFIC;
-  }
-
-  return UMF_RESULT_SUCCESS;
-}
-
-umf_result_t L0MemoryProvider::GetL0MinPageSize(void *Mem, size_t *PageSize) {
-  ur_result_t Res = UR_RESULT_SUCCESS;
-  void *Ptr = Mem;
-
-  if (!Mem) {
-    Res = allocateImpl(&Ptr, 1, 0);
-    if (Res != UR_RESULT_SUCCESS) {
-      goto err_set_status;
+  if (!Ptr) {
+    if (auto FreeRes = Provider->free(CheckAlloc, 1);
+        FreeRes != UMF_RESULT_SUCCESS) {
+      return umf::umf2urResult(FreeRes);
     }
   }
 
-  // Query L0 for the minimal page size.
-  Res = USMQueryPageSize(Context, Ptr, PageSize);
-  if (Res != UR_RESULT_SUCCESS) {
-    goto err_dealloc;
-  }
-
-  if (!Mem) {
-    Res = USMFreeImpl(Context, Ptr);
-    if (Res != UR_RESULT_SUCCESS) {
-      goto err_set_status;
-    }
-  }
-
-  return UMF_RESULT_SUCCESS;
-
-err_dealloc:
-  if (!Mem) {
-    USMFreeImpl(Context, Ptr);
-  }
-err_set_status:
-  getLastStatusRef() = Res;
-  return UMF_RESULT_ERROR_MEMORY_PROVIDER_SPECIFIC;
+  return Res;
 }
 
-umf_result_t L0MemoryProvider::get_min_page_size(void *Ptr, size_t *PageSize) {
-  std::ignore = Ptr;
-
-  // Query L0 for min page size. Use provided 'Ptr'.
-  if (Ptr) {
-    return GetL0MinPageSize(Ptr, PageSize);
+umf_result_t L0SharedMemoryProvider::initialize(usm::pool_descriptor Desc) {
+  if (auto Res = USMSharedMemoryProvider::initialize(Desc);
+      Res != UMF_RESULT_SUCCESS) {
+    return Res;
   }
-
-  // Return cached min page size.
-  if (MinPageSizeCached) {
-    *PageSize = MinPageSize;
-    return UMF_RESULT_SUCCESS;
-  }
-
-  // Query L0 for min page size and cache it in 'MinPageSize'.
-  auto Ret = GetL0MinPageSize(nullptr, &MinPageSize);
-  if (Ret) {
-    return Ret;
-  }
-
-  *PageSize = MinPageSize;
-  MinPageSizeCached = true;
-
+  UMF_PROVIDER_CHECK_UR_RESULT(
+      GetL0MinPageSize(Context, nullptr, &MinPageSize, this))
   return UMF_RESULT_SUCCESS;
 }
 
 ur_result_t L0SharedMemoryProvider::allocateImpl(void **ResultPtr, size_t Size,
-                                                 uint32_t Alignment) {
+                                                 size_t Alignment) {
   return USMSharedAllocImpl(ResultPtr, Context, Device, nullptr, nullptr, Size,
                             Alignment);
 }
 
-ur_result_t L0SharedReadOnlyMemoryProvider::allocateImpl(void **ResultPtr,
-                                                         size_t Size,
-                                                         uint32_t Alignment) {
-  ur_usm_device_desc_t UsmDeviceDesc{};
-  UsmDeviceDesc.flags = UR_USM_DEVICE_MEM_FLAG_DEVICE_READ_ONLY;
-  ur_usm_host_desc_t UsmHostDesc{};
-  return USMSharedAllocImpl(ResultPtr, Context, Device, &UsmDeviceDesc.flags,
-                            &UsmHostDesc.flags, Size, Alignment);
+umf_result_t L0DeviceMemoryProvider::initialize(usm::pool_descriptor Desc) {
+  if (auto Res = USMDeviceMemoryProvider::initialize(Desc);
+      Res != UMF_RESULT_SUCCESS) {
+    return Res;
+  }
+  UMF_PROVIDER_CHECK_UR_RESULT(
+      GetL0MinPageSize(Context, nullptr, &MinPageSize, this))
+  return UMF_RESULT_SUCCESS;
 }
 
 ur_result_t L0DeviceMemoryProvider::allocateImpl(void **ResultPtr, size_t Size,
-                                                 uint32_t Alignment) {
+                                                 size_t Alignment) {
   return USMDeviceAllocImpl(ResultPtr, Context, Device, nullptr, Size,
                             Alignment);
 }
 
-ur_result_t L0HostMemoryProvider::allocateImpl(void **ResultPtr, size_t Size,
-                                               uint32_t Alignment) {
-  return USMHostAllocImpl(ResultPtr, Context, nullptr, Size, Alignment);
+umf_result_t L0HostMemoryProvider::initialize(usm::pool_descriptor Desc) {
+  if (auto Res = USMHostMemoryProvider::initialize(Desc);
+      Res != UMF_RESULT_SUCCESS) {
+    return Res;
+  }
+  UMF_PROVIDER_CHECK_UR_RESULT(
+      GetL0MinPageSize(Context, nullptr, &MinPageSize, this))
+  return UMF_RESULT_SUCCESS;
 }
 
-ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t Context,
-                                             ur_usm_pool_desc_t *PoolDesc) {
-
-  this->Context = Context;
-  zeroInit = static_cast<uint32_t>(PoolDesc->flags &
-                                   UR_USM_POOL_FLAG_ZERO_INITIALIZE_BLOCK);
-
-  void *pNext = const_cast<void *>(PoolDesc->pNext);
-  while (pNext != nullptr) {
-    const ur_base_desc_t *BaseDesc =
-        reinterpret_cast<const ur_base_desc_t *>(pNext);
-    switch (BaseDesc->stype) {
-    case UR_STRUCTURE_TYPE_USM_POOL_LIMITS_DESC: {
-      const ur_usm_pool_limits_desc_t *Limits =
-          reinterpret_cast<const ur_usm_pool_limits_desc_t *>(BaseDesc);
-      for (auto &config : DisjointPoolConfigs.Configs) {
-        config.MaxPoolableSize = Limits->maxPoolableSize;
-        config.SlabMinSize = Limits->minDriverAllocSize;
-      }
-      break;
-    }
-    default: {
-      urPrint("urUSMPoolCreate: unexpected chained stype\n");
-      throw UsmAllocationException(UR_RESULT_ERROR_INVALID_ARGUMENT);
-    }
-    }
-    pNext = const_cast<void *>(BaseDesc->pNext);
-  }
-
-  ur_result_t Ret;
-  std::tie(Ret, PoolManager) =
-      usm::pool_manager<usm::pool_descriptor>::create();
-  if (Ret) {
-    urPrint("urUSMPoolCreate: unexpected internal error\n");
-    throw UsmAllocationException(Ret);
-  }
-
-  std::vector<usm::pool_descriptor> Descs;
-  // Create pool descriptor for every device and subdevice.
-  std::tie(Ret, Descs) = usm::pool_descriptor::create(
-      reinterpret_cast<ur_usm_pool_handle_t>(this), Context);
-  if (Ret) {
-    urPrint("urUSMPoolCreate: unexpected internal error\n");
-    throw UsmAllocationException(Ret);
-  }
-
-  auto descTypeToDisjointPoolType =
-      [](usm::pool_descriptor &Desc) -> usm::DisjointPoolMemType {
-    switch (Desc.type) {
-    case UR_USM_TYPE_HOST:
-      return usm::DisjointPoolMemType::Host;
-    case UR_USM_TYPE_DEVICE:
-      return usm::DisjointPoolMemType::Device;
-    case UR_USM_TYPE_SHARED:
-      return (Desc.deviceReadOnly) ? usm::DisjointPoolMemType::SharedReadOnly
-                                   : usm::DisjointPoolMemType::Shared;
-    default:
-      assert(0 && "Invalid pool descriptor type!");
-      // Added to suppress 'not all control paths return a value' warning.
-      return usm::DisjointPoolMemType::All;
-    }
-  };
-
-  // Create USM pool for each pool descriptor and add it to pool manager.
-  for (auto &Desc : Descs) {
-    umf::pool_unique_handle_t Pool = nullptr;
-    auto PoolType = descTypeToDisjointPoolType(Desc);
-
-    std::tie(Ret, Pool) = createUMFPoolForDesc<usm::DisjointPool>(
-        Desc, DisjointPoolConfigInstance.Configs[PoolType]);
-    if (Ret) {
-      urPrint("urUSMPoolCreate: unexpected internal error\n");
-      throw UsmAllocationException(Ret);
-    }
-
-    PoolManager.addPool(Desc, Pool);
-  }
+ur_result_t L0HostMemoryProvider::allocateImpl(void **ResultPtr, size_t Size,
+                                               size_t Alignment) {
+  return USMHostAllocImpl(ResultPtr, Context, nullptr, Size, Alignment);
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urUSMPoolCreate(
@@ -862,7 +701,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMPoolCreate(
     std::shared_lock<ur_shared_mutex> ContextLock(Context->Mutex);
     Context->UsmPoolHandles.insert(Context->UsmPoolHandles.cend(), *Pool);
 
-  } catch (const UsmAllocationException &Ex) {
+  } catch (const umf::UsmAllocationException &Ex) {
     return Ex.getError();
   }
   return UR_RESULT_SUCCESS;
@@ -871,18 +710,19 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMPoolCreate(
 ur_result_t
 urUSMPoolRetain(ur_usm_pool_handle_t Pool ///< [in] pointer to USM memory pool
 ) {
-  Pool->RefCount.increment();
+  Pool->incrementReferenceCount();
   return UR_RESULT_SUCCESS;
 }
 
 ur_result_t
 urUSMPoolRelease(ur_usm_pool_handle_t Pool ///< [in] pointer to USM memory pool
 ) {
-  if (Pool->RefCount.decrementAndTest()) {
-    std::shared_lock<ur_shared_mutex> ContextLock(Pool->Context->Mutex);
-    Pool->Context->UsmPoolHandles.remove(Pool);
-    delete Pool;
+  if (Pool->decrementReferenceCount() > 0) {
+    return UR_RESULT_SUCCESS;
   }
+  std::shared_lock<ur_shared_mutex> ContextLock(Pool->Context->Mutex);
+  Pool->Context->UsmPoolHandles.remove(Pool);
+  delete Pool;
   return UR_RESULT_SUCCESS;
 }
 

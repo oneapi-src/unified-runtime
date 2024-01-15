@@ -13,14 +13,13 @@
 #include "adapter.hpp"
 #include "common.hpp"
 #include "context.hpp"
-#include "device.hpp"
-#include "event.hpp"
 #include "platform.hpp"
 #include "queue.hpp"
 #include "ur_util.hpp"
 #include "usm.hpp"
 
 #include <cuda.h>
+#include <optional>
 
 /// USM: Implements USM Host allocations using CUDA Pinned Memory
 /// https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#page-locked-host-memory
@@ -36,12 +35,10 @@ urUSMHostAlloc(ur_context_handle_t hContext, const ur_usm_desc_t *pUSMDesc,
     return USMHostAllocImpl(ppMem, hContext, nullptr, size, alignment);
   }
 
-  usm::pool_descriptor Desc = {hPool, hContext, nullptr, UR_USM_TYPE_HOST,
-                               false};
-  auto hPoolInternalOpt = hPool->PoolManager.getPool(Desc);
+  usm::pool_descriptor Desc(hPool, hContext, nullptr, UR_USM_TYPE_HOST,
+                            pUSMDesc);
+  auto hPoolInternalOpt = hPool->getOrCreatePool(Desc);
   if (!hPoolInternalOpt.has_value()) {
-    // Internal error, every L0 context and usm pool should have Host, Device,
-    // Shared and SharedReadOnly UMF pools.
     return UR_RESULT_ERROR_UNKNOWN;
   }
 
@@ -70,12 +67,10 @@ urUSMDeviceAlloc(ur_context_handle_t hContext, ur_device_handle_t hDevice,
                               alignment);
   }
 
-  usm::pool_descriptor Desc = {hPool, hContext, hDevice, UR_USM_TYPE_DEVICE,
-                               false};
-  auto hPoolInternalOpt = hPool->PoolManager.getPool(Desc);
+  usm::pool_descriptor Desc(hPool, hContext, hDevice, UR_USM_TYPE_DEVICE,
+                            pUSMDesc);
+  auto hPoolInternalOpt = hPool->getOrCreatePool(Desc);
   if (!hPoolInternalOpt.has_value()) {
-    // Internal error, every L0 context and usm pool should have Host, Device,
-    // Shared and SharedReadOnly UMF pools.
     return UR_RESULT_ERROR_UNKNOWN;
   }
 
@@ -104,12 +99,10 @@ urUSMSharedAlloc(ur_context_handle_t hContext, ur_device_handle_t hDevice,
                               alignment);
   }
 
-  usm::pool_descriptor Desc = {hPool, hContext, hDevice, UR_USM_TYPE_SHARED,
-                               false};
-  auto hPoolInternalOpt = hPool->PoolManager.getPool(Desc);
+  usm::pool_descriptor Desc(hPool, hContext, hDevice, UR_USM_TYPE_SHARED,
+                            pUSMDesc);
+  auto hPoolInternalOpt = hPool->getOrCreatePool(Desc);
   if (!hPoolInternalOpt.has_value()) {
-    // Internal error, every L0 context and usm pool should have Host, Device,
-    // Shared and SharedReadOnly UMF pools.
     return UR_RESULT_ERROR_UNKNOWN;
   }
 
@@ -333,190 +326,37 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMReleaseExp(ur_context_handle_t Context,
   return UR_RESULT_SUCCESS;
 }
 
-umf_result_t USMMemoryProvider::initialize(ur_context_handle_t Ctx,
-                                           ur_device_handle_t Dev) {
-  Context = Ctx;
-  Device = Dev;
-  // There isn't a way to query this in cuda, and there isn't much info on
-  // cuda's approach to alignment or transfer granularity between host and
-  // device. Within UMF this is only used to influence alignment, and since we
-  // discard that in our alloc implementations it seems we can safely ignore
-  // this as well, for now.
-  MinPageSize = 0;
-
-  return UMF_RESULT_SUCCESS;
-}
-
-enum umf_result_t USMMemoryProvider::alloc(size_t Size, size_t Align,
-                                           void **Ptr) {
-  auto Res = allocateImpl(Ptr, Size, Align);
-  if (Res != UR_RESULT_SUCCESS) {
-    getLastStatusRef() = Res;
-    return UMF_RESULT_ERROR_MEMORY_PROVIDER_SPECIFIC;
-  }
-
-  return UMF_RESULT_SUCCESS;
-}
-
-enum umf_result_t USMMemoryProvider::free(void *Ptr, size_t Size) {
-  (void)Size;
-
-  auto Res = USMFreeImpl(Context, Ptr);
-  if (Res != UR_RESULT_SUCCESS) {
-    getLastStatusRef() = Res;
-    return UMF_RESULT_ERROR_MEMORY_PROVIDER_SPECIFIC;
-  }
-
-  return UMF_RESULT_SUCCESS;
-}
-
-void USMMemoryProvider::get_last_native_error(const char **ErrMsg,
-                                              int32_t *ErrCode) {
-  (void)ErrMsg;
-  *ErrCode = static_cast<int32_t>(getLastStatusRef());
-}
-
-umf_result_t USMMemoryProvider::get_min_page_size(void *Ptr, size_t *PageSize) {
-  (void)Ptr;
-  *PageSize = MinPageSize;
-
-  return UMF_RESULT_SUCCESS;
-}
-
-ur_result_t USMSharedMemoryProvider::allocateImpl(void **ResultPtr, size_t Size,
-                                                  uint32_t Alignment) {
+ur_result_t CudaUSMSharedMemoryProvider::allocateImpl(void **ResultPtr,
+                                                      size_t Size,
+                                                      size_t Alignment) {
   return USMSharedAllocImpl(ResultPtr, Context, Device, nullptr, nullptr, Size,
-                            Alignment);
+                            static_cast<uint32_t>(Alignment));
 }
 
-ur_result_t USMDeviceMemoryProvider::allocateImpl(void **ResultPtr, size_t Size,
-                                                  uint32_t Alignment) {
+ur_result_t CudaUSMSharedMemoryProvider::freeImpl(void *Ptr, size_t) {
+  return USMFreeImpl(Context, Ptr);
+}
+
+ur_result_t CudaUSMDeviceMemoryProvider::allocateImpl(void **ResultPtr,
+                                                      size_t Size,
+                                                      size_t Alignment) {
   return USMDeviceAllocImpl(ResultPtr, Context, Device, nullptr, Size,
-                            Alignment);
+                            static_cast<uint32_t>(Alignment));
 }
 
-ur_result_t USMHostMemoryProvider::allocateImpl(void **ResultPtr, size_t Size,
-                                                uint32_t Alignment) {
-  return USMHostAllocImpl(ResultPtr, Context, nullptr, Size, Alignment);
+ur_result_t CudaUSMDeviceMemoryProvider::freeImpl(void *Ptr, size_t) {
+  return USMFreeImpl(Context, Ptr);
 }
 
-// Template helper function for creating USM pools for given pool descriptor.
-template <typename P, typename... Args>
-std::pair<ur_result_t, umf::pool_unique_handle_t>
-createUMFPoolForDesc(usm::pool_descriptor &Desc, Args &&...args) {
-  umf_result_t UmfRet = UMF_RESULT_SUCCESS;
-  umf::provider_unique_handle_t MemProvider = nullptr;
-
-  switch (Desc.type) {
-  case UR_USM_TYPE_HOST: {
-    std::tie(UmfRet, MemProvider) =
-        umf::memoryProviderMakeUnique<USMHostMemoryProvider>(Desc.hContext,
-                                                             Desc.hDevice);
-    break;
-  }
-  case UR_USM_TYPE_DEVICE: {
-    std::tie(UmfRet, MemProvider) =
-        umf::memoryProviderMakeUnique<USMDeviceMemoryProvider>(Desc.hContext,
-                                                               Desc.hDevice);
-    break;
-  }
-  case UR_USM_TYPE_SHARED: {
-    std::tie(UmfRet, MemProvider) =
-        umf::memoryProviderMakeUnique<USMSharedMemoryProvider>(Desc.hContext,
-                                                               Desc.hDevice);
-    break;
-  }
-  default:
-    UmfRet = UMF_RESULT_ERROR_INVALID_ARGUMENT;
-  }
-
-  if (UmfRet)
-    return std::pair<ur_result_t, umf::pool_unique_handle_t>{
-        umf::umf2urResult(UmfRet), nullptr};
-
-  umf::pool_unique_handle_t Pool = nullptr;
-  std::tie(UmfRet, Pool) =
-      umf::poolMakeUnique<P, 1>({std::move(MemProvider)}, args...);
-
-  return std::pair<ur_result_t, umf::pool_unique_handle_t>{
-      umf::umf2urResult(UmfRet), std::move(Pool)};
-};
-
-ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t Context,
-                                             ur_usm_pool_desc_t *PoolDesc)
-    : Context(Context) {
-  const void *pNext = PoolDesc->pNext;
-  while (pNext != nullptr) {
-    const ur_base_desc_t *BaseDesc = static_cast<const ur_base_desc_t *>(pNext);
-    switch (BaseDesc->stype) {
-    case UR_STRUCTURE_TYPE_USM_POOL_LIMITS_DESC: {
-      const ur_usm_pool_limits_desc_t *Limits =
-          reinterpret_cast<const ur_usm_pool_limits_desc_t *>(BaseDesc);
-      for (auto &config : DisjointPoolConfigs.Configs) {
-        config.MaxPoolableSize = Limits->maxPoolableSize;
-        config.SlabMinSize = Limits->minDriverAllocSize;
-      }
-      break;
-    }
-    default: {
-      throw UsmAllocationException(UR_RESULT_ERROR_INVALID_ARGUMENT);
-    }
-    }
-    pNext = BaseDesc->pNext;
-  }
-
-  ur_result_t Ret;
-  std::tie(Ret, PoolManager) =
-      usm::pool_manager<usm::pool_descriptor>::create();
-  if (Ret) {
-    throw UsmAllocationException(Ret);
-  }
-
-  auto Device = Context->DeviceID;
-  auto UrUSMPool = reinterpret_cast<ur_usm_pool_handle_t>(this);
-
-  // TODO: Replace this with appropriate usm::pool_descriptor 'create' static
-  // function.
-  usm::pool_descriptor Descs[] = {
-      {UrUSMPool, Context, nullptr, UR_USM_TYPE_HOST, false},
-      {UrUSMPool, Context, Device, UR_USM_TYPE_DEVICE, false},
-      {UrUSMPool, Context, Device, UR_USM_TYPE_SHARED, false}};
-
-  // Helper lambda function matching USM type to DisjointPoolMemType
-  auto descTypeToDisjointPoolType =
-      [](usm::pool_descriptor &Desc) -> usm::DisjointPoolMemType {
-    switch (Desc.type) {
-    case UR_USM_TYPE_HOST:
-      return usm::DisjointPoolMemType::Host;
-    case UR_USM_TYPE_DEVICE:
-      return usm::DisjointPoolMemType::Device;
-    case UR_USM_TYPE_SHARED:
-      return (Desc.deviceReadOnly) ? usm::DisjointPoolMemType::SharedReadOnly
-                                   : usm::DisjointPoolMemType::Shared;
-    default:
-      // Added to suppress 'not all control paths return a value' warning.
-      return usm::DisjointPoolMemType::All;
-    }
-  };
-
-  for (auto &Desc : Descs) {
-    umf::pool_unique_handle_t Pool = nullptr;
-    auto PoolType = descTypeToDisjointPoolType(Desc);
-
-    std::tie(Ret, Pool) = createUMFPoolForDesc<usm::DisjointPool>(
-        Desc, this->DisjointPoolConfigs.Configs[PoolType]);
-    if (Ret) {
-      throw UsmAllocationException(Ret);
-    }
-
-    PoolManager.addPool(Desc, Pool);
-  }
-
-  Context->addPool(this);
+ur_result_t CudaUSMHostMemoryProvider::allocateImpl(void **ResultPtr,
+                                                    size_t Size,
+                                                    size_t Alignment) {
+  return USMHostAllocImpl(ResultPtr, Context, nullptr, Size,
+                          static_cast<uint32_t>(Alignment));
 }
 
-bool ur_usm_pool_handle_t_::hasUMFPool(umf_memory_pool_t *umf_pool) {
-  return PoolManager.hasPool(umf_pool);
+ur_result_t CudaUSMHostMemoryProvider::freeImpl(void *Ptr, size_t) {
+  return USMFreeImpl(Context, Ptr);
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urUSMPoolCreate(
@@ -534,9 +374,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMPoolCreate(
   try {
     *Pool = reinterpret_cast<ur_usm_pool_handle_t>(
         new ur_usm_pool_handle_t_(Context, PoolDesc));
-  } catch (const UsmAllocationException &Ex) {
+  } catch (const umf::UsmAllocationException &Ex) {
     return Ex.getError();
   }
+  Context->addPool(*Pool);
   return UR_RESULT_SUCCESS;
 #else
   std::ignore = Context;

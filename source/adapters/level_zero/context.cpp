@@ -14,7 +14,9 @@
 #include <string.h>
 
 #include "context.hpp"
-#include "ur_level_zero.hpp"
+#include "event.hpp"
+#include "platform.hpp"
+#include "usm.hpp"
 
 UR_APIEXPORT ur_result_t UR_APICALL urContextCreate(
     uint32_t DeviceCount, ///< [in] the number of devices given in phDevices
@@ -183,122 +185,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextSetExtendedDeleter(
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
-// Template helper function for creating USM pools for given pool descriptor.
-template <typename P, typename... Args>
-std::pair<ur_result_t, umf::pool_unique_handle_t>
-createUMFPoolForDesc(usm::pool_descriptor &Desc, Args &&...args) {
-  umf_result_t UmfRet = UMF_RESULT_SUCCESS;
-  umf::provider_unique_handle_t MemProvider = nullptr;
-
-  switch (Desc.type) {
-  case UR_USM_TYPE_HOST: {
-    std::tie(UmfRet, MemProvider) =
-        umf::memoryProviderMakeUnique<L0HostMemoryProvider>(Desc.hContext,
-                                                            Desc.hDevice);
-    break;
-  }
-  case UR_USM_TYPE_DEVICE: {
-    std::tie(UmfRet, MemProvider) =
-        umf::memoryProviderMakeUnique<L0DeviceMemoryProvider>(Desc.hContext,
-                                                              Desc.hDevice);
-    break;
-  }
-  case UR_USM_TYPE_SHARED: {
-    if (Desc.deviceReadOnly) {
-      std::tie(UmfRet, MemProvider) =
-          umf::memoryProviderMakeUnique<L0SharedReadOnlyMemoryProvider>(
-              Desc.hContext, Desc.hDevice);
-    } else {
-      std::tie(UmfRet, MemProvider) =
-          umf::memoryProviderMakeUnique<L0SharedMemoryProvider>(Desc.hContext,
-                                                                Desc.hDevice);
-    }
-    break;
-  }
-  default:
-    UmfRet = UMF_RESULT_ERROR_INVALID_ARGUMENT;
-  }
-
-  if (UmfRet)
-    return std::pair<ur_result_t, umf::pool_unique_handle_t>{
-        umf::umf2urResult(UmfRet), nullptr};
-
-  umf::pool_unique_handle_t Pool = nullptr;
-  std::tie(UmfRet, Pool) =
-      umf::poolMakeUnique<P, 1>({std::move(MemProvider)}, args...);
-
-  return std::pair<ur_result_t, umf::pool_unique_handle_t>{
-      umf::umf2urResult(UmfRet), std::move(Pool)};
-};
-
 ur_result_t ur_context_handle_t_::initialize() {
-
-  auto Context = reinterpret_cast<ur_context_handle_t>(this);
-  ur_result_t Ret;
-
-  // Initialize pool managers.
-  std::tie(Ret, PoolManager) =
-      usm::pool_manager<usm::pool_descriptor>::create();
-  if (Ret) {
-    urPrint("urContextCreate: unexpected internal error\n");
-    return Ret;
-  }
-
-  std::tie(Ret, ProxyPoolManager) =
-      usm::pool_manager<usm::pool_descriptor>::create();
-  if (Ret) {
-    urPrint("urContextCreate: unexpected internal error\n");
-    return Ret;
-  }
-
-  std::vector<usm::pool_descriptor> Descs;
-  // Create pool descriptor for every device and subdevice.
-  std::tie(Ret, Descs) = usm::pool_descriptor::create(nullptr, Context);
-  if (Ret) {
-    urPrint("urContextCreate: unexpected internal error\n");
-    return Ret;
-  }
-
-  auto descTypeToDisjointPoolType =
-      [](usm::pool_descriptor &Desc) -> usm::DisjointPoolMemType {
-    switch (Desc.type) {
-    case UR_USM_TYPE_HOST:
-      return usm::DisjointPoolMemType::Host;
-    case UR_USM_TYPE_DEVICE:
-      return usm::DisjointPoolMemType::Device;
-    case UR_USM_TYPE_SHARED:
-      return (Desc.deviceReadOnly) ? usm::DisjointPoolMemType::SharedReadOnly
-                                   : usm::DisjointPoolMemType::Shared;
-    default:
-      // Added to suppress 'not all control paths return a value' warning.
-      return usm::DisjointPoolMemType::All;
-    }
-  };
-
-  // Create USM pool for each pool descriptor and add it to pool manager.
-  for (auto &Desc : Descs) {
-    umf::pool_unique_handle_t Pool = nullptr;
-    auto PoolType = descTypeToDisjointPoolType(Desc);
-
-    std::tie(Ret, Pool) = createUMFPoolForDesc<usm::DisjointPool>(
-        Desc, DisjointPoolConfigInstance.Configs[PoolType]);
-    if (Ret) {
-      urPrint("urContextCreate: unexpected internal error\n");
-      return Ret;
-    }
-
-    PoolManager.addPool(Desc, Pool);
-
-    umf::pool_unique_handle_t ProxyPool = nullptr;
-    std::tie(Ret, ProxyPool) = createUMFPoolForDesc<USMProxyPool>(Desc);
-    if (Ret) {
-      urPrint("urContextCreate: unexpected internal error\n");
-      return Ret;
-    }
-
-    ProxyPoolManager.addPool(Desc, ProxyPool);
-  }
-
   // Create the immediate command list to be used for initializations.
   // Created as synchronous so level-zero performs implicit synchronization and
   // there is no need to query for completion in the plugin
@@ -310,6 +197,45 @@ ur_result_t ur_context_handle_t_::initialize() {
   // immediate command-list for the specfic devices, and this single one.
   //
   ur_device_handle_t Device = SingleRootDevice ? SingleRootDevice : Devices[0];
+
+  // We can initialize our default pool with a regular pool create
+  ur_usm_pool_desc_t PoolDesc = {UR_STRUCTURE_TYPE_USM_POOL_DESC, nullptr, 0};
+  if (auto err = urUSMPoolCreate(this, &PoolDesc, &Pool);
+      err != UR_RESULT_SUCCESS) {
+    return err;
+  }
+
+  // Initializing the proxy pool manager is a little more involved
+  ur_result_t Ret;
+  std::tie(Ret, ProxyPoolManager) =
+      usm::pool_manager<usm::pool_descriptor>::create();
+  if (Ret) {
+    urPrint("urContextCreate: unexpected internal error\n");
+    return Ret;
+  }
+
+  std::vector<usm::pool_descriptor> Descs;
+  // Create pool descriptor for every device and subdevice.
+  std::tie(Ret, Descs) = usm::pool_descriptor::createDefaults(nullptr, this);
+  if (Ret) {
+    urPrint("urContextCreate: unexpected internal error\n");
+    return Ret;
+  }
+
+  // Create USM pool for each pool descriptor and add it to pool manager.
+  for (auto &Desc : Descs) {
+    umf::pool_unique_handle_t ProxyPool = nullptr;
+    std::tie(Ret, ProxyPool) =
+        usm::createUMFPoolForDesc<USMProxyPool, L0HostMemoryProvider,
+                                  L0DeviceMemoryProvider,
+                                  L0SharedMemoryProvider>(Desc);
+    if (Ret) {
+      urPrint("urContextCreate: unexpected internal error\n");
+      return Ret;
+    }
+
+    ProxyPoolManager.addPool(Desc, ProxyPool);
+  }
 
   // Prefer to use copy engine for initialization copies,
   // if available and allowed (main copy engine with index 0).
@@ -409,6 +335,10 @@ ur_result_t ur_context_handle_t_::finalize() {
   // This function is called when ur_context_handle_t is deallocated,
   // urContextRelease. There could be some memory that may have not been
   // deallocated. For example, event and event pool caches would be still alive.
+
+  if (auto Err = urUSMPoolRelease(Pool); Err != UR_RESULT_SUCCESS) {
+    return Err;
+  }
 
   if (!DisableEventsCaching) {
     std::scoped_lock<ur_mutex> Lock(EventCacheMutex);

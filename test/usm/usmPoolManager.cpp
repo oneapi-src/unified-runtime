@@ -19,7 +19,7 @@ TEST_P(urUsmPoolDescriptorTest, poolIsPerContextTypeAndDevice) {
     auto poolHandle = this->GetParam();
 
     auto [ret, pool_descriptors] =
-        usm::pool_descriptor::create(poolHandle, this->context);
+        usm::pool_descriptor::createDefaults(poolHandle, this->context);
     ASSERT_EQ(ret, UR_RESULT_SUCCESS);
 
     size_t hostPools = 0;
@@ -56,7 +56,8 @@ INSTANTIATE_TEST_SUITE_P(urUsmPoolDescriptorTest, urUsmPoolDescriptorTest,
 struct urUsmPoolManagerTest : public uur::urContextTest {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(urContextTest::SetUp());
-        auto [ret, descs] = usm::pool_descriptor::create(nullptr, context);
+        auto [ret, descs] =
+            usm::pool_descriptor::createDefaults(nullptr, context);
         ASSERT_EQ(ret, UR_RESULT_SUCCESS);
         poolDescriptors = std::move(descs);
     }
