@@ -10,25 +10,6 @@
 
 #include "platform.hpp"
 
-ur_result_t cl_adapter::getPlatformVersion(cl_platform_id Plat,
-                                           oclv::OpenCLVersion &Version) {
-
-  size_t PlatVerSize = 0;
-  CL_RETURN_ON_FAILURE(
-      clGetPlatformInfo(Plat, CL_PLATFORM_VERSION, 0, nullptr, &PlatVerSize));
-
-  std::string PlatVer(PlatVerSize, '\0');
-  CL_RETURN_ON_FAILURE(clGetPlatformInfo(Plat, CL_PLATFORM_VERSION, PlatVerSize,
-                                         PlatVer.data(), nullptr));
-
-  Version = oclv::OpenCLVersion(PlatVer);
-  if (!Version.isValid()) {
-    return UR_RESULT_ERROR_INVALID_PLATFORM;
-  }
-
-  return UR_RESULT_SUCCESS;
-}
-
 static cl_int mapURPlatformInfoToCL(ur_platform_info_t URPropName) {
 
   switch (URPropName) {

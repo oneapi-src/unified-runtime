@@ -14,11 +14,6 @@
 
 #include <vector>
 
-namespace cl_adapter {
-ur_result_t getPlatformVersion(cl_platform_id Plat,
-                               oclv::OpenCLVersion &Version);
-} // namespace cl_adapter
-
 struct ur_platform_handle_t_ {
   using native_type = cl_platform_id;
   native_type Platform = nullptr;
@@ -59,6 +54,24 @@ struct ur_platform_handle_t_ {
         Devices[i] =
             std::make_unique<ur_device_handle_t_>(CLDevices[i], this, nullptr);
       }
+    }
+
+    return UR_RESULT_SUCCESS;
+  }
+
+  ur_result_t getPlatformVersion(oclv::OpenCLVersion &Version) {
+
+    size_t PlatVerSize = 0;
+    CL_RETURN_ON_FAILURE(clGetPlatformInfo(Platform, CL_PLATFORM_VERSION, 0,
+                                           nullptr, &PlatVerSize));
+
+    std::string PlatVer(PlatVerSize, '\0');
+    CL_RETURN_ON_FAILURE(clGetPlatformInfo(
+        Platform, CL_PLATFORM_VERSION, PlatVerSize, PlatVer.data(), nullptr));
+
+    Version = oclv::OpenCLVersion(PlatVer);
+    if (!Version.isValid()) {
+      return UR_RESULT_ERROR_INVALID_PLATFORM;
     }
 
     return UR_RESULT_SUCCESS;
