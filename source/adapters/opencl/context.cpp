@@ -14,24 +14,6 @@
 #include <set>
 #include <unordered_map>
 
-ur_result_t cl_adapter::getDevicesFromContext(
-    ur_context_handle_t hContext,
-    std::unique_ptr<std::vector<cl_device_id>> &DevicesInCtx) {
-
-  cl_uint DeviceCount = hContext->DeviceCount;
-
-  if (DeviceCount < 1) {
-    return UR_RESULT_ERROR_INVALID_CONTEXT;
-  }
-
-  DevicesInCtx = std::make_unique<std::vector<cl_device_id>>(DeviceCount);
-  for (size_t i = 0; i < DeviceCount; i++) {
-    (*DevicesInCtx)[i] = hContext->Devices[i]->get();
-  }
-
-  return UR_RESULT_SUCCESS;
-}
-
 UR_APIEXPORT ur_result_t UR_APICALL urContextCreate(
     uint32_t DeviceCount, const ur_device_handle_t *phDevices,
     const ur_context_properties_t *, ur_context_handle_t *phContext) {

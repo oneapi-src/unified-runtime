@@ -14,6 +14,8 @@
 #include "device.hpp"
 #include "platform.hpp"
 
+#include <vector>
+
 static ur_result_t getDevicesFromProgram(
     ur_program_handle_t hProgram,
     std::unique_ptr<std::vector<cl_device_id>> &DevicesInProgram) {
@@ -36,22 +38,21 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithIL(
   if (!hContext->DeviceCount || !hContext->Devices[0]->Platform) {
     return UR_RESULT_ERROR_INVALID_CONTEXT;
   }
-  cl_platform_id CurPlatform = hContext->Devices[0]->Platform->get();
+  ur_platform_handle_t CurPlatform = hContext->Devices[0]->Platform;
 
   oclv::OpenCLVersion PlatVer;
-  CL_RETURN_ON_FAILURE_AND_SET_NULL(
-      cl_adapter::getPlatformVersion(CurPlatform, PlatVer), phProgram);
+  CL_RETURN_ON_FAILURE_AND_SET_NULL(CurPlatform->getPlatformVersion(PlatVer),
+                                    phProgram);
 
   cl_int Err = CL_SUCCESS;
   if (PlatVer >= oclv::V2_1) {
 
     /* Make sure all devices support CL 2.1 or newer as well. */
     for (ur_device_handle_t URDev : hContext->Devices) {
-      cl_device_id Dev = URDev->get();
       oclv::OpenCLVersion DevVer;
 
-      CL_RETURN_ON_FAILURE_AND_SET_NULL(
-          cl_adapter::getDeviceVersion(Dev, DevVer), phProgram);
+      CL_RETURN_ON_FAILURE_AND_SET_NULL(URDev->getDeviceVersion(DevVer),
+                                        phProgram);
 
       /* If the device does not support CL 2.1 or greater, we need to make sure
        * it supports the cl_khr_il_program extension.
@@ -59,8 +60,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithIL(
       if (DevVer < oclv::V2_1) {
         bool Supported = false;
         CL_RETURN_ON_FAILURE_AND_SET_NULL(
-            cl_adapter::checkDeviceExtensions(Dev, {"cl_khr_il_program"},
-                                              Supported),
+            URDev->checkDeviceExtensions({"cl_khr_il_program"}, Supported),
             phProgram);
 
         if (!Supported) {
@@ -80,11 +80,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithIL(
      * support the cl_khr_il_program extension.
      */
     for (ur_device_handle_t URDev : hContext->Devices) {
-      cl_device_id Dev = URDev->get();
       bool Supported = false;
       CL_RETURN_ON_FAILURE_AND_SET_NULL(
-          cl_adapter::checkDeviceExtensions(Dev, {"cl_khr_il_program"},
-                                            Supported),
+          URDev->checkDeviceExtensions({"cl_khr_il_program"}, Supported),
           phProgram);
 
       if (!Supported) {
@@ -96,7 +94,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithIL(
         cl_program(CL_API_CALL *)(cl_context, const void *, size_t, cl_int *);
     ApiFuncT FuncPtr =
         reinterpret_cast<ApiFuncT>(clGetExtensionFunctionAddressForPlatform(
-            CurPlatform, "clCreateProgramWithILKHR"));
+            CurPlatform->get(), "clCreateProgramWithILKHR"));
 
     assert(FuncPtr != nullptr);
     cl_program Program = FuncPtr(hContext->get(), pIL, length, &Err);
@@ -377,22 +375,21 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramSetSpecializationConstants(
     return UR_RESULT_ERROR_INVALID_CONTEXT;
   }
 
-  std::unique_ptr<std::vector<cl_device_id>> DevicesInCtx;
-  UR_RETURN_ON_FAILURE(cl_adapter::getDevicesFromContext(Ctx, DevicesInCtx));
+  std::vector<ur_device_handle_t> &DevicesInCtx = Ctx->Devices;
 
-  cl_platform_id CurPlatform = Ctx->Devices[0]->Platform->get();
+  ur_platform_handle_t CurPlatform = Ctx->Devices[0]->Platform;
 
   oclv::OpenCLVersion PlatVer;
-  cl_adapter::getPlatformVersion(CurPlatform, PlatVer);
+  CurPlatform->getPlatformVersion(PlatVer);
 
   bool UseExtensionLookup = false;
   if (PlatVer < oclv::V2_2) {
     UseExtensionLookup = true;
   } else {
-    for (cl_device_id Dev : *DevicesInCtx) {
+    for (ur_device_handle_t Dev : DevicesInCtx) {
       oclv::OpenCLVersion DevVer;
 
-      UR_RETURN_ON_FAILURE(cl_adapter::getDeviceVersion(Dev, DevVer));
+      UR_RETURN_ON_FAILURE(Dev->getDeviceVersion(DevVer));
 
       if (DevVer < oclv::V2_2) {
         UseExtensionLookup = true;

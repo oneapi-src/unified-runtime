@@ -74,7 +74,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreate(
     ur_context_handle_t hContext, ur_device_handle_t hDevice,
     const ur_queue_properties_t *pProperties, ur_queue_handle_t *phQueue) {
 
-  cl_platform_id CurPlatform = hDevice->Platform->get();
+  ur_platform_handle_t CurPlatform = hDevice->Platform;
 
   cl_command_queue_properties CLProperties =
       pProperties ? convertURQueuePropertiesToCL(pProperties) : 0;
@@ -85,8 +85,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreate(
       CL_QUEUE_ON_DEVICE | CL_QUEUE_ON_DEVICE_DEFAULT;
 
   oclv::OpenCLVersion Version;
-  CL_RETURN_ON_FAILURE_AND_SET_NULL(
-      cl_adapter::getPlatformVersion(CurPlatform, Version), phQueue);
+  CL_RETURN_ON_FAILURE_AND_SET_NULL(CurPlatform->getPlatformVersion(Version),
+                                    phQueue);
 
   cl_int RetErr = CL_INVALID_OPERATION;
 
