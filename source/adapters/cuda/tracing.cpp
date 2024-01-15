@@ -22,14 +22,11 @@
 #include <iostream>
 
 #ifdef XPTI_ENABLE_INSTRUMENTATION
-constexpr auto CUDA_CALL_STREAM_NAME = "sycl.experimental.cuda.call";
-constexpr auto CUDA_DEBUG_STREAM_NAME = "sycl.experimental.cuda.debug";
+constexpr auto CUDA_CALL_STREAM_NAME = "ur.adapter.cuda.call";
 
 thread_local uint64_t CallCorrelationID = 0;
-thread_local uint64_t DebugCorrelationID = 0;
 
 static xpti_td *GCallEvent = nullptr;
-static xpti_td *GDebugEvent = nullptr;
 
 constexpr auto GVerStr = "0.1";
 constexpr int GMajVer = 0;
@@ -40,31 +37,22 @@ static void cuptiCallback(void *, CUpti_CallbackDomain, CUpti_CallbackId CBID,
   if (xptiTraceEnabled()) {
     const auto *CBInfo = static_cast<const CUpti_CallbackData *>(CBData);
 
-    if (CBInfo->callbackSite == CUPTI_API_ENTER) {
+    if (CBInfo->callbackSite == CUPTI_API_ENTER)
       CallCorrelationID = xptiGetUniqueId();
-      DebugCorrelationID = xptiGetUniqueId();
-    }
 
     const char *FuncName = CBInfo->functionName;
     uint32_t FuncID = static_cast<uint32_t>(CBID);
     uint16_t TraceTypeArgs = CBInfo->callbackSite == CUPTI_API_ENTER
                                  ? xpti::trace_function_with_args_begin
                                  : xpti::trace_function_with_args_end;
-    uint16_t TraceType = CBInfo->callbackSite == CUPTI_API_ENTER
-                             ? xpti::trace_function_begin
-                             : xpti::trace_function_end;
 
     uint8_t CallStreamID = xptiRegisterStream(CUDA_CALL_STREAM_NAME);
-    uint8_t DebugStreamID = xptiRegisterStream(CUDA_DEBUG_STREAM_NAME);
-
-    xptiNotifySubscribers(CallStreamID, TraceType, GCallEvent, nullptr,
-                          CallCorrelationID, FuncName);
 
     xpti::function_with_args_t Payload{
         FuncID, FuncName, const_cast<void *>(CBInfo->functionParams),
         CBInfo->functionReturnValue, CBInfo->context};
-    xptiNotifySubscribers(DebugStreamID, TraceTypeArgs, GDebugEvent, nullptr,
-                          DebugCorrelationID, &Payload);
+    xptiNotifySubscribers(CallStreamID, TraceTypeArgs, GCallEvent, nullptr,
+                          CallCorrelationID, &Payload);
   }
 }
 #endif
@@ -76,18 +64,11 @@ void enableCUDATracing() {
 
   xptiRegisterStream(CUDA_CALL_STREAM_NAME);
   xptiInitialize(CUDA_CALL_STREAM_NAME, GMajVer, GMinVer, GVerStr);
-  xptiRegisterStream(CUDA_DEBUG_STREAM_NAME);
-  xptiInitialize(CUDA_DEBUG_STREAM_NAME, GMajVer, GMinVer, GVerStr);
 
   uint64_t Dummy;
-  xpti::payload_t CUDAPayload("CUDA Plugin Layer");
+  xpti::payload_t CUDAPayload("Unified Runtime CUDA Adapter Layer");
   GCallEvent =
-      xptiMakeEvent("CUDA Plugin Layer", &CUDAPayload,
-                    xpti::trace_algorithm_event, xpti_at::active, &Dummy);
-
-  xpti::payload_t CUDADebugPayload("CUDA Plugin Debug Layer");
-  GDebugEvent =
-      xptiMakeEvent("CUDA Plugin Debug Layer", &CUDADebugPayload,
+      xptiMakeEvent("Unified Runtime CUDA Adapter Layer", &CUDAPayload,
                     xpti::trace_algorithm_event, xpti_at::active, &Dummy);
 
   CUpti_SubscriberHandle Subscriber;
@@ -106,6 +87,5 @@ void disableCUDATracing() {
     return;
 
   xptiFinalize(CUDA_CALL_STREAM_NAME);
-  xptiFinalize(CUDA_DEBUG_STREAM_NAME);
 #endif // XPTI_ENABLE_INSTRUMENTATION
 }
