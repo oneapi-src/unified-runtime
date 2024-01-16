@@ -379,7 +379,7 @@ etors:
     - name: UUID
       desc: "[uint8_t[]] return device UUID"
     - name: PCI_ADDRESS
-      desc: "[char[]] return device PCI address"
+      desc: "[$x_device_pci_address_t] return device PCI address"
     - name: GPU_EU_COUNT
       desc: "[uint32_t] return Intel GPU EU count"
     - name: GPU_EU_SIMD_WIDTH
@@ -916,3 +916,22 @@ etors:
     - name: ATOMIC_CONCURRENT_ACCESS
       desc: "Memory can be accessed atomically and concurrently"
       value: "$X_BIT(3)"
+
+--- #--------------------------------------------------------------------------
+type: struct
+desc: Device PCI address.
+class: $xDevice
+name: $x_device_pci_address_t
+members:
+    - name: domain
+      type: uint32_t
+      desc: '[out] PCI domain number.'
+    - name: bus
+      type: uint32_t
+      desc: '[out] PCI BDF bus number.'
+    - name: device
+      type: uint32_t
+      desc: '[out] PCI BDF device number.'
+    - name: function
+      type: uint32_t
+      desc: '[out] PCI BDF device number.'

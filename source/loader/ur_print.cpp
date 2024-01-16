@@ -282,6 +282,14 @@ ur_result_t urPrintDeviceUsmAccessCapabilityFlags(
     return str_copy(&ss, buffer, buff_size, out_size);
 }
 
+ur_result_t urPrintDevicePciAddress(const struct ur_device_pci_address_t params,
+                                    char *buffer, const size_t buff_size,
+                                    size_t *out_size) {
+    std::stringstream ss;
+    ss << params;
+    return str_copy(&ss, buffer, buff_size, out_size);
+}
+
 ur_result_t urPrintContextFlags(enum ur_context_flag_t value, char *buffer,
                                 const size_t buff_size, size_t *out_size) {
     std::stringstream ss;

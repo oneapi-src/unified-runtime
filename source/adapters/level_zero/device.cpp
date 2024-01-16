@@ -685,18 +685,16 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
   case UR_DEVICE_INFO_DEVICE_ID:
     return ReturnValue(uint32_t{Device->ZeDeviceProperties->deviceId});
   case UR_DEVICE_INFO_PCI_ADDRESS: {
-    ze_pci_address_ext_t PciAddr{};
     ZeStruct<ze_pci_ext_properties_t> ZeDevicePciProperties;
-    ZeDevicePciProperties.address = PciAddr;
+    ZeDevicePciProperties.address = {};
     ZE2UR_CALL(zeDevicePciGetPropertiesExt, (ZeDevice, &ZeDevicePciProperties));
-    constexpr size_t AddressBufferSize = 13;
-    char AddressBuffer[AddressBufferSize];
-    std::snprintf(AddressBuffer, AddressBufferSize, "%04x:%02x:%02x.%01x",
-                  ZeDevicePciProperties.address.domain,
-                  ZeDevicePciProperties.address.bus,
-                  ZeDevicePciProperties.address.device,
-                  ZeDevicePciProperties.address.function);
-    return ReturnValue(AddressBuffer);
+    ur_device_pci_address_t UrPciAddr{
+        /*.domain = */ ZeDevicePciProperties.address.domain,
+        /*.bus = */ ZeDevicePciProperties.address.bus,
+        /*.device = */ ZeDevicePciProperties.address.device,
+        /*.function = */ ZeDevicePciProperties.address.function,
+    };
+    return ReturnValue(UrPciAddr);
   }
 
   case UR_DEVICE_INFO_GLOBAL_MEM_FREE: {

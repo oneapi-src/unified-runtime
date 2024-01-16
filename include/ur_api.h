@@ -1552,7 +1552,7 @@ typedef enum ur_device_info_t {
     UR_DEVICE_INFO_USM_SYSTEM_SHARED_SUPPORT = 87,                   ///< [::ur_device_usm_access_capability_flags_t] support USM system wide
                                                                      ///< shared memory access
     UR_DEVICE_INFO_UUID = 88,                                        ///< [uint8_t[]] return device UUID
-    UR_DEVICE_INFO_PCI_ADDRESS = 89,                                 ///< [char[]] return device PCI address
+    UR_DEVICE_INFO_PCI_ADDRESS = 89,                                 ///< [::ur_device_pci_address_t] return device PCI address
     UR_DEVICE_INFO_GPU_EU_COUNT = 90,                                ///< [uint32_t] return Intel GPU EU count
     UR_DEVICE_INFO_GPU_EU_SIMD_WIDTH = 91,                           ///< [uint32_t] return Intel GPU EU SIMD width
     UR_DEVICE_INFO_GPU_EU_SLICES = 92,                               ///< [uint32_t] return Intel GPU number of slices
@@ -2115,6 +2115,16 @@ typedef enum ur_device_usm_access_capability_flag_t {
 } ur_device_usm_access_capability_flag_t;
 /// @brief Bit Mask for validating ur_device_usm_access_capability_flags_t
 #define UR_DEVICE_USM_ACCESS_CAPABILITY_FLAGS_MASK 0xfffffff0
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Device PCI address.
+typedef struct ur_device_pci_address_t {
+    uint32_t domain;   ///< [out] PCI domain number.
+    uint32_t bus;      ///< [out] PCI BDF bus number.
+    uint32_t device;   ///< [out] PCI BDF device number.
+    uint32_t function; ///< [out] PCI BDF device number.
+
+} ur_device_pci_address_t;
 
 #if !defined(__GNUC__)
 #pragma endregion

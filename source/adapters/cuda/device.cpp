@@ -1053,14 +1053,22 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_IMAGE_SRGB:
     return ReturnValue(false);
   case UR_DEVICE_INFO_PCI_ADDRESS: {
-    constexpr size_t AddressBufferSize = 13;
-    char AddressBuffer[AddressBufferSize];
-    UR_CHECK_ERROR(
-        cuDeviceGetPCIBusId(AddressBuffer, AddressBufferSize, hDevice->get()));
-    // CUDA API (8.x - 12.1) guarantees 12 bytes + \0 are written
-    detail::ur::assertion(strnlen(AddressBuffer, AddressBufferSize) == 12);
-    return ReturnValue(AddressBuffer,
-                       strnlen(AddressBuffer, AddressBufferSize - 1) + 1);
+    int PciDomainId;
+    UR_CHECK_ERROR(cuDeviceGetAttribute(
+        &PciDomainId, CU_DEVICE_ATTRIBUTE_PCI_DOMAIN_ID, hDevice->get()));
+    int PciBusId;
+    UR_CHECK_ERROR(cuDeviceGetAttribute(
+        &PciBusId, CU_DEVICE_ATTRIBUTE_PCI_BUS_ID, hDevice->get()));
+    int PciDeviceId;
+    UR_CHECK_ERROR(cuDeviceGetAttribute(
+        &PciDeviceId, CU_DEVICE_ATTRIBUTE_PCI_DEVICE_ID, hDevice->get()));
+    ur_device_pci_address_t PciAddr{
+        /*.domain = */ static_cast<uint32_t>(PciDomainId),
+        /*.bus = */ static_cast<uint32_t>(PciBusId),
+        /*.device = */ static_cast<uint32_t>(PciDeviceId),
+        /*.function = */ 0u,
+    };
+    return ReturnValue(PciAddr);
   }
   case UR_DEVICE_INFO_KERNEL_SET_SPECIALIZATION_CONSTANTS:
     return ReturnValue(false);

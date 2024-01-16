@@ -248,6 +248,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
 inline std::ostream &operator<<(std::ostream &os, enum ur_memory_order_capability_flag_t value);
 inline std::ostream &operator<<(std::ostream &os, enum ur_memory_scope_capability_flag_t value);
 inline std::ostream &operator<<(std::ostream &os, enum ur_device_usm_access_capability_flag_t value);
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_device_pci_address_t params);
 inline std::ostream &operator<<(std::ostream &os, enum ur_context_flag_t value);
 inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_context_properties_t params);
 inline std::ostream &operator<<(std::ostream &os, enum ur_context_info_t value);
@@ -3636,9 +3637,16 @@ inline ur_result_t printTagged(std::ostream &os, const void *ptr, ur_device_info
         os << "}";
     } break;
     case UR_DEVICE_INFO_PCI_ADDRESS: {
+        const ur_device_pci_address_t *tptr = (const ur_device_pci_address_t *)ptr;
+        if (sizeof(ur_device_pci_address_t) > size) {
+            os << "invalid size (is: " << size << ", expected: >=" << sizeof(ur_device_pci_address_t) << ")";
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+        os << (const void *)(tptr) << " (";
 
-        const char *tptr = (const char *)ptr;
-        printPtr(os, tptr);
+        os << *tptr;
+
+        os << ")";
     } break;
     case UR_DEVICE_INFO_GPU_EU_COUNT: {
         const uint32_t *tptr = (const uint32_t *)ptr;
@@ -5081,6 +5089,35 @@ inline ur_result_t printFlag<ur_device_usm_access_capability_flag_t>(std::ostrea
     return UR_RESULT_SUCCESS;
 }
 } // namespace ur::details
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_device_pci_address_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, const struct ur_device_pci_address_t params) {
+    os << "(struct ur_device_pci_address_t){";
+
+    os << ".domain = ";
+
+    os << (params.domain);
+
+    os << ", ";
+    os << ".bus = ";
+
+    os << (params.bus);
+
+    os << ", ";
+    os << ".device = ";
+
+    os << (params.device);
+
+    os << ", ";
+    os << ".function = ";
+
+    os << (params.function);
+
+    os << "}";
+    return os;
+}
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print operator for the ur_context_flag_t type
 /// @returns

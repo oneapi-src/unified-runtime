@@ -860,18 +860,24 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_IMAGE_SRGB:
     return ReturnValue(false);
   case UR_DEVICE_INFO_PCI_ADDRESS: {
-    constexpr size_t AddressBufferSize = 13;
-    char AddressBuffer[AddressBufferSize];
-    UR_CHECK_ERROR(
-        hipDeviceGetPCIBusId(AddressBuffer, AddressBufferSize, hDevice->get()));
-    // A typical PCI address is 12 bytes + \0: "1234:67:90.2", but the HIP API
-    // is not guaranteed to use this format. In practice, it uses this format,
-    // at least in 5.3-5.5. To be on the safe side, we make sure the terminating
-    // \0 is set.
-    AddressBuffer[AddressBufferSize - 1] = '\0';
-    detail::ur::assertion(strnlen(AddressBuffer, AddressBufferSize) > 0);
-    return ReturnValue(AddressBuffer,
-                       strnlen(AddressBuffer, AddressBufferSize - 1) + 1);
+    // A typical PCI address is 12 bytes + \0: "1234:67:90.2"
+    //                            PCI Domain ID ^^^^ || || |
+    //                            PCI Bus ID         ^^ || |
+    //                            PCI Device ID         ^^ |
+    //                            PCI Function ID          ^
+    std::string PciAddrStr(16, '\0');
+    UR_CHECK_ERROR(hipDeviceGetPCIBusId(PciAddrStr.data(), PciAddrStr.size(),
+                                        hDevice->get()));
+    auto PciDomainId = std::stoul(PciAddrStr.substr(0, 4), nullptr, 16);
+    auto PciBusId = std::stoul(PciAddrStr.substr(5, 2), nullptr, 16);
+    auto PciDeviceId = std::stoul(PciAddrStr.substr(8, 2), nullptr, 16);
+    auto PciFunctionId = std::stoul(PciAddrStr.substr(11, 1), nullptr, 16);
+    return ReturnValue(ur_device_pci_address_t{
+        /*.domain = */ static_cast<uint32_t>(PciDomainId),
+        /*.bus = */ static_cast<uint32_t>(PciBusId),
+        /*.device = */ static_cast<uint32_t>(PciDeviceId),
+        /*.function = */ static_cast<uint32_t>(PciFunctionId),
+    });
   }
   case UR_DEVICE_INFO_HOST_PIPE_READ_WRITE_SUPPORTED:
     return ReturnValue(false);

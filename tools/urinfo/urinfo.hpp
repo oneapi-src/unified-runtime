@@ -260,7 +260,8 @@ inline void printDeviceInfos(ur_device_handle_t hDevice,
     std::cout << prefix;
     printDeviceUUID(hDevice, UR_DEVICE_INFO_UUID);
     std::cout << prefix;
-    printDeviceInfo<char[]>(hDevice, UR_DEVICE_INFO_PCI_ADDRESS);
+    printDeviceInfo<ur_device_pci_address_t>(hDevice,
+                                             UR_DEVICE_INFO_PCI_ADDRESS);
     std::cout << prefix;
     printDeviceInfo<uint32_t>(hDevice, UR_DEVICE_INFO_GPU_EU_COUNT);
     std::cout << prefix;
