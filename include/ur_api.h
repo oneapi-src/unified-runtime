@@ -215,6 +215,7 @@ typedef enum ur_function_t {
     UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_ADVISE_EXP = 213,                    ///< Enumerator for ::urCommandBufferAppendUSMAdviseExp
     UR_FUNCTION_ENQUEUE_COOPERATIVE_KERNEL_LAUNCH_EXP = 214,                   ///< Enumerator for ::urEnqueueCooperativeKernelLaunchExp
     UR_FUNCTION_KERNEL_SUGGEST_MAX_COOPERATIVE_GROUP_COUNT_EXP = 215,          ///< Enumerator for ::urKernelSuggestMaxCooperativeGroupCountExp
+    UR_FUNCTION_PROGRAM_GET_GLOBAL_VARIABLE_POINTER = 216,                     ///< Enumerator for ::urProgramGetGlobalVariablePointer
     /// @cond
     UR_FUNCTION_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -4260,6 +4261,42 @@ urProgramGetFunctionPointer(
                                   ///< otherwise ::UR_RESULT_ERROR_INVALID_PROGRAM_EXECUTABLE is returned.
     const char *pFunctionName,    ///< [in] A null-terminates string denoting the mangled function name.
     void **ppFunctionPointer      ///< [out] Returns the pointer to the function if it is found in the program.
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Retrieves a pointer to a device global variable.
+///
+/// @details
+///     - Retrieves a pointer to a device global variable.
+///     - The application may call this function from simultaneous threads for
+///       the same device.
+///     - The implementation of this function should be thread-safe.
+///
+/// @remarks
+///   _Analogues_
+///     - **clGetDeviceGlobalVariablePointerINTEL**
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hDevice`
+///         + `NULL == hProgram`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pGlobalVariableName`
+///         + `NULL == ppGlobalVariablePointerRet`
+///     - ::UR_RESULT_ERROR_INVALID_SIZE
+///         + `name` is not a valid variable in the program.
+UR_APIEXPORT ur_result_t UR_APICALL
+urProgramGetGlobalVariablePointer(
+    ur_device_handle_t hDevice,       ///< [in] handle of the device to retrieve the pointer for.
+    ur_program_handle_t hProgram,     ///< [in] handle of the program where the global variable is.
+    const char *pGlobalVariableName,  ///< [in] mangled name of the global variable to retrieve the pointer for.
+    size_t *pGlobalVariableSizeRet,   ///< [out][optional] Returns the size of the global variable if it is found
+                                      ///< in the program.
+    void **ppGlobalVariablePointerRet ///< [out] Returns the pointer to the global variable if it is found in the program.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -9143,6 +9180,18 @@ typedef struct ur_program_get_function_pointer_params_t {
     const char **ppFunctionName;
     void ***pppFunctionPointer;
 } ur_program_get_function_pointer_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urProgramGetGlobalVariablePointer
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_program_get_global_variable_pointer_params_t {
+    ur_device_handle_t *phDevice;
+    ur_program_handle_t *phProgram;
+    const char **ppGlobalVariableName;
+    size_t **ppGlobalVariableSizeRet;
+    void ***pppGlobalVariablePointerRet;
+} ur_program_get_global_variable_pointer_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urProgramGetInfo

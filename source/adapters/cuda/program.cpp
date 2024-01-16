@@ -489,3 +489,34 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramGetFunctionPointer(
 
   return Result;
 }
+
+UR_APIEXPORT ur_result_t UR_APICALL urProgramGetGlobalVariablePointer(
+    ur_device_handle_t, ur_program_handle_t hProgram,
+    const char *pGlobalVariableName, size_t *pGlobalVariableSizeRet,
+    void **ppGlobalVariablePointerRet) {
+
+  /* Since CUDA requires a global variable to be referenced by name, we use
+   * metadata to find the correct name to access it by. */
+  auto DeviceGlobalNameIt = hProgram->GlobalIDMD.find(pGlobalVariableName);
+  if (DeviceGlobalNameIt == hProgram->GlobalIDMD.end())
+    return UR_RESULT_ERROR_INVALID_VALUE;
+  std::string DeviceGlobalName = DeviceGlobalNameIt->second;
+
+  ur_result_t Result = UR_RESULT_SUCCESS;
+  try {
+    CUdeviceptr DeviceGlobal = 0;
+    size_t DeviceGlobalSize = 0;
+    UR_CHECK_ERROR(cuModuleGetGlobal(&DeviceGlobal, &DeviceGlobalSize,
+                                     hProgram->get(),
+                                     DeviceGlobalName.c_str()));
+
+    if (pGlobalVariableSizeRet) {
+      *pGlobalVariableSizeRet = DeviceGlobalSize;
+    }
+    *ppGlobalVariablePointerRet = reinterpret_cast<void *>(DeviceGlobal);
+
+  } catch (ur_result_t Err) {
+    Result = Err;
+  }
+  return Result;
+}

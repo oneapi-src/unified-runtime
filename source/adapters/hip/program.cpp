@@ -495,3 +495,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramGetFunctionPointer(
 
   return Result;
 }
+
+UR_APIEXPORT ur_result_t UR_APICALL urProgramGetGlobalVariablePointer(
+    ur_device_handle_t, ur_program_handle_t, const char *, size_t *, void **) {
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+}

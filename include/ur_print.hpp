@@ -879,6 +879,9 @@ inline std::ostream &operator<<(std::ostream &os, ur_function_t value) {
     case UR_FUNCTION_KERNEL_SUGGEST_MAX_COOPERATIVE_GROUP_COUNT_EXP:
         os << "UR_FUNCTION_KERNEL_SUGGEST_MAX_COOPERATIVE_GROUP_COUNT_EXP";
         break;
+    case UR_FUNCTION_PROGRAM_GET_GLOBAL_VARIABLE_POINTER:
+        os << "UR_FUNCTION_PROGRAM_GET_GLOBAL_VARIABLE_POINTER";
+        break;
     default:
         os << "unknown enumerator";
         break;
@@ -10258,6 +10261,44 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_program_get_global_variable_pointer_params_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_program_get_global_variable_pointer_params_t *params) {
+
+    os << ".hDevice = ";
+
+    ur::details::printPtr(os,
+                          *(params->phDevice));
+
+    os << ", ";
+    os << ".hProgram = ";
+
+    ur::details::printPtr(os,
+                          *(params->phProgram));
+
+    os << ", ";
+    os << ".pGlobalVariableName = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppGlobalVariableName));
+
+    os << ", ";
+    os << ".pGlobalVariableSizeRet = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppGlobalVariableSizeRet));
+
+    os << ", ";
+    os << ".ppGlobalVariablePointerRet = ";
+
+    ur::details::printPtr(os,
+                          *(params->pppGlobalVariablePointerRet));
+
+    return os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Print operator for the ur_program_get_info_params_t type
 /// @returns
 ///     std::ostream &
@@ -15991,6 +16032,9 @@ inline ur_result_t UR_APICALL printFunctionParams(std::ostream &os, ur_function_
     } break;
     case UR_FUNCTION_PROGRAM_GET_FUNCTION_POINTER: {
         os << (const struct ur_program_get_function_pointer_params_t *)params;
+    } break;
+    case UR_FUNCTION_PROGRAM_GET_GLOBAL_VARIABLE_POINTER: {
+        os << (const struct ur_program_get_global_variable_pointer_params_t *)params;
     } break;
     case UR_FUNCTION_PROGRAM_GET_INFO: {
         os << (const struct ur_program_get_info_params_t *)params;

@@ -581,6 +581,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramGetFunctionPointer(
   return ze2urResult(ZeResult);
 }
 
+UR_APIEXPORT ur_result_t UR_APICALL urProgramGetGlobalVariablePointer(
+    ur_device_handle_t, ur_program_handle_t, const char *, size_t *, void **) {
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+}
+
 UR_APIEXPORT ur_result_t UR_APICALL urProgramGetInfo(
     ur_program_handle_t Program, ///< [in] handle of the Program object
     ur_program_info_t PropName,  ///< [in] name of the Program property to query
