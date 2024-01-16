@@ -843,22 +843,26 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferFill(
   }
 }
 
-static size_t imageElementByteSize(CUDA_ARRAY_DESCRIPTOR ArrayDesc) {
+static ur_result_t imageElementByteSize(CUDA_ARRAY_DESCRIPTOR ArrayDesc,
+                                        unsigned int *Size) {
   switch (ArrayDesc.Format) {
   case CU_AD_FORMAT_UNSIGNED_INT8:
   case CU_AD_FORMAT_SIGNED_INT8:
-    return 1;
+    *Size = 1;
+    break;
   case CU_AD_FORMAT_UNSIGNED_INT16:
   case CU_AD_FORMAT_SIGNED_INT16:
   case CU_AD_FORMAT_HALF:
-    return 2;
+    *Size = 2;
+    break;
   case CU_AD_FORMAT_UNSIGNED_INT32:
   case CU_AD_FORMAT_SIGNED_INT32:
   case CU_AD_FORMAT_FLOAT:
-    return 4;
+    *Size = 4;
+    break;
   default:
-    detail::ur::die("Invalid image format.");
-    return 0;
+    return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
+    *Size = 0;
   }
 }
 
@@ -955,7 +959,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemImageRead(
     CUDA_ARRAY_DESCRIPTOR ArrayDesc;
     UR_CHECK_ERROR(cuArrayGetDescriptor(&ArrayDesc, Array));
 
-    int ElementByteSize = imageElementByteSize(ArrayDesc);
+    unsigned int ElementByteSize = 0;
+    UR_RETURN_ON_FAILURE(imageElementByteSize(ArrayDesc, &ElementByteSize));
 
     size_t ByteOffsetX = origin.x * ElementByteSize * ArrayDesc.NumChannels;
     size_t BytesToCopy = ElementByteSize * ArrayDesc.NumChannels * region.width;
@@ -1027,7 +1032,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemImageWrite(
     CUDA_ARRAY_DESCRIPTOR ArrayDesc;
     UR_CHECK_ERROR(cuArrayGetDescriptor(&ArrayDesc, Array));
 
-    int ElementByteSize = imageElementByteSize(ArrayDesc);
+    unsigned int ElementByteSize = 0;
+    UR_RETURN_ON_FAILURE(imageElementByteSize(ArrayDesc, &ElementByteSize));
 
     size_t ByteOffsetX = origin.x * ElementByteSize * ArrayDesc.NumChannels;
     size_t BytesToCopy = ElementByteSize * ArrayDesc.NumChannels * region.width;
@@ -1106,7 +1112,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemImageCopy(
     UR_ASSERT(SrcArrayDesc.NumChannels == DstArrayDesc.NumChannels,
               UR_RESULT_ERROR_INVALID_MEM_OBJECT);
 
-    int ElementByteSize = imageElementByteSize(SrcArrayDesc);
+    unsigned int ElementByteSize = 0;
+    UR_RETURN_ON_FAILURE(imageElementByteSize(SrcArrayDesc, &ElementByteSize));
 
     size_t DstByteOffsetX =
         dstOrigin.x * ElementByteSize * SrcArrayDesc.NumChannels;

@@ -12,15 +12,11 @@
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urUsmP2PEnablePeerAccessExp(ur_device_handle_t, ur_device_handle_t) {
-  detail::ur::die(
-      "urUsmP2PEnablePeerAccessExp is not implemented for HIP adapter.");
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urUsmP2PDisablePeerAccessExp(ur_device_handle_t, ur_device_handle_t) {
-  detail::ur::die(
-      "urUsmP2PDisablePeerAccessExp is not implemented for HIP adapter.");
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 

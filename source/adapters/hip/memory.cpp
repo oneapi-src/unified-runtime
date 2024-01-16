@@ -13,27 +13,30 @@
 #include <cassert>
 #include <ur_util.hpp>
 
-namespace {
-
-size_t GetHipFormatPixelSize(hipArray_Format Format) {
+ur_result_t hip2urFormat(hipArray_Format Format,
+                         ur_image_channel_type_t *ChannelType) {
   switch (Format) {
   case HIP_AD_FORMAT_UNSIGNED_INT8:
-  case HIP_AD_FORMAT_SIGNED_INT8:
-    return 1;
+    *ChannelType = UR_IMAGE_CHANNEL_TYPE_UNSIGNED_INT8;
   case HIP_AD_FORMAT_UNSIGNED_INT16:
-  case HIP_AD_FORMAT_SIGNED_INT16:
-  case HIP_AD_FORMAT_HALF:
-    return 2;
+    *ChannelType = UR_IMAGE_CHANNEL_TYPE_UNSIGNED_INT16;
   case HIP_AD_FORMAT_UNSIGNED_INT32:
+    *ChannelType = UR_IMAGE_CHANNEL_TYPE_UNSIGNED_INT32;
+  case HIP_AD_FORMAT_SIGNED_INT8:
+    *ChannelType = UR_IMAGE_CHANNEL_TYPE_SIGNED_INT8;
+  case HIP_AD_FORMAT_SIGNED_INT16:
+    *ChannelType = UR_IMAGE_CHANNEL_TYPE_SIGNED_INT16;
   case HIP_AD_FORMAT_SIGNED_INT32:
+    *ChannelType = UR_IMAGE_CHANNEL_TYPE_SIGNED_INT32;
+  case HIP_AD_FORMAT_HALF:
+    *ChannelType = UR_IMAGE_CHANNEL_TYPE_HALF_FLOAT;
   case HIP_AD_FORMAT_FLOAT:
-    return 4;
+    *ChannelType = UR_IMAGE_CHANNEL_TYPE_FLOAT;
+
   default:
-    detail::ur::die("Invalid HIP format specifier");
+    return UR_RESULT_ERROR_UNSUPPORTED_IMAGE_FORMAT;
   }
 }
-
-} // namespace
 
 /// Decreases the reference count of the Mem object.
 /// If this is zero, calls the relevant HIP Free function
@@ -68,7 +71,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemRelease(ur_mem_handle_t hMem) {
     // error for which it is unclear if the function that reported it succeeded
     // or not. Either way, the state of the program is compromised and likely
     // unrecoverable.
-    detail::ur::die("Unrecoverable program state reached in urMemRelease");
+    assert(!"Unrecoverable program state reached in urMemRelease");
   }
 
   return UR_RESULT_SUCCESS;
@@ -244,9 +247,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemGetInfo(ur_mem_handle_t hMemory,
           HIP_ARRAY3D_DESCRIPTOR ArrayDescriptor;
           UR_CHECK_ERROR(
               hipArray3DGetDescriptor(&ArrayDescriptor, Mem.getArray(Device)));
-          const auto PixelSizeBytes =
-              GetHipFormatPixelSize(ArrayDescriptor.Format) *
-              ArrayDescriptor.NumChannels;
+          int PixelSize = 0;
+          UR_RETURN_ON_FAILURE(
+              imageElementByteSize(ArrayDescriptor.Format, &PixelSize));
+          const auto PixelSizeBytes = PixelSize * ArrayDescriptor.NumChannels;
           const auto ImageSizeBytes =
               PixelSizeBytes *
               (ArrayDescriptor.Width ? ArrayDescriptor.Width : 1) *
@@ -380,62 +384,23 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageGetInfo(ur_mem_handle_t hMemory,
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 #endif
 
-    const auto hip2urFormat =
-        [](hipArray_Format HipFormat) -> ur_image_channel_type_t {
-      switch (HipFormat) {
-      case HIP_AD_FORMAT_UNSIGNED_INT8:
-        return UR_IMAGE_CHANNEL_TYPE_UNSIGNED_INT8;
-      case HIP_AD_FORMAT_UNSIGNED_INT16:
-        return UR_IMAGE_CHANNEL_TYPE_UNSIGNED_INT16;
-      case HIP_AD_FORMAT_UNSIGNED_INT32:
-        return UR_IMAGE_CHANNEL_TYPE_UNSIGNED_INT32;
-      case HIP_AD_FORMAT_SIGNED_INT8:
-        return UR_IMAGE_CHANNEL_TYPE_SIGNED_INT8;
-      case HIP_AD_FORMAT_SIGNED_INT16:
-        return UR_IMAGE_CHANNEL_TYPE_SIGNED_INT16;
-      case HIP_AD_FORMAT_SIGNED_INT32:
-        return UR_IMAGE_CHANNEL_TYPE_SIGNED_INT32;
-      case HIP_AD_FORMAT_HALF:
-        return UR_IMAGE_CHANNEL_TYPE_HALF_FLOAT;
-      case HIP_AD_FORMAT_FLOAT:
-        return UR_IMAGE_CHANNEL_TYPE_FLOAT;
-
-      default:
-        detail::ur::die("Invalid Hip format specified.");
-      }
-    };
-
-    const auto hipFormatToElementSize =
-        [](hipArray_Format HipFormat) -> size_t {
-      switch (HipFormat) {
-      case HIP_AD_FORMAT_UNSIGNED_INT8:
-      case HIP_AD_FORMAT_SIGNED_INT8:
-        return 1;
-      case HIP_AD_FORMAT_UNSIGNED_INT16:
-      case HIP_AD_FORMAT_SIGNED_INT16:
-      case HIP_AD_FORMAT_HALF:
-        return 2;
-      case HIP_AD_FORMAT_UNSIGNED_INT32:
-      case HIP_AD_FORMAT_SIGNED_INT32:
-      case HIP_AD_FORMAT_FLOAT:
-        return 4;
-      default:
-        detail::ur::die("Invalid Hip format specified.");
-      }
-    };
-
     switch (propName) {
     case UR_IMAGE_INFO_FORMAT:
-      return ReturnValue(ur_image_format_t{UR_IMAGE_CHANNEL_ORDER_RGBA,
-                                           hip2urFormat(ArrayInfo.Format)});
+      ur_image_channel_type_t ChannelType;
+      UR_RETURN_ON_FAILURE(hip2urFormat(ArrayInfo.Format, &ChannelType));
+      return ReturnValue(
+          ur_image_format_t{UR_IMAGE_CHANNEL_ORDER_RGBA, ChannelType});
     case UR_IMAGE_INFO_WIDTH:
       return ReturnValue(ArrayInfo.Width);
     case UR_IMAGE_INFO_HEIGHT:
       return ReturnValue(ArrayInfo.Height);
     case UR_IMAGE_INFO_DEPTH:
       return ReturnValue(ArrayInfo.Depth);
-    case UR_IMAGE_INFO_ELEMENT_SIZE:
-      return ReturnValue(hipFormatToElementSize(ArrayInfo.Format));
+    case UR_IMAGE_INFO_ELEMENT_SIZE: {
+      int Size = 0;
+      UR_RETURN_ON_FAILURE(imageElementByteSize(ArrayInfo.Format, &Size));
+      return ReturnValue(Size);
+    }
     case UR_IMAGE_INFO_ROW_PITCH:
     case UR_IMAGE_INFO_SLICE_PITCH:
       return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;

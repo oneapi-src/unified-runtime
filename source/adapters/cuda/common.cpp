@@ -100,16 +100,6 @@ std::string getCudaVersionString() {
   return stream.str();
 }
 
-void detail::ur::die(const char *Message) {
-  std::cerr << "ur_die: " << Message << std::endl;
-  std::terminate();
-}
-
-void detail::ur::assertion(bool Condition, const char *Message) {
-  if (!Condition)
-    die(Message);
-}
-
 void detail::ur::cuPrint(const char *Message) {
   std::cerr << "ur_print: " << Message << std::endl;
 }

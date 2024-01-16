@@ -113,10 +113,8 @@ ur_result_t ur_event_handle_t_::record() {
 
   try {
     EventID = Queue->getNextEventID();
-    if (EventID == 0) {
-      detail::ur::die(
-          "Unrecoverable program state reached in event identifier overflow");
-    }
+    assert(EventID == 0 &&
+           "Unrecoverable program state reached in event identifier overflow.");
     UR_CHECK_ERROR(cuEventRecord(EvEnd, Stream));
   } catch (ur_result_t error) {
     Result = error;
@@ -176,10 +174,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetInfo(ur_event_handle_t hEvent,
   case UR_EVENT_INFO_CONTEXT:
     return ReturnValue(hEvent->getContext());
   default:
-    detail::ur::die("Event info request not implemented");
+    return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
   }
-
-  return UR_RESULT_ERROR_INVALID_ENUMERATION;
 }
 
 /// Obtain profiling information from PI CUDA events
@@ -206,8 +202,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetProfilingInfo(
   default:
     break;
   }
-  detail::ur::die("Event Profiling info request not implemented");
-  return {};
+
+  return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEventSetCallback(ur_event_handle_t,
@@ -241,8 +237,8 @@ urEventWait(uint32_t numEvents, const ur_event_handle_t *phEventWaitList) {
 UR_APIEXPORT ur_result_t UR_APICALL urEventRetain(ur_event_handle_t hEvent) {
   const auto RefCount = hEvent->incrementReferenceCount();
 
-  detail::ur::assertion(RefCount != 0,
-                        "Reference count overflow detected in urEventRetain.");
+  assert(RefCount == 0 &&
+         "Reference count overflow detected in urEventRetain.");
 
   return UR_RESULT_SUCCESS;
 }
@@ -250,8 +246,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventRetain(ur_event_handle_t hEvent) {
 UR_APIEXPORT ur_result_t UR_APICALL urEventRelease(ur_event_handle_t hEvent) {
   // double delete or someone is messing with the ref count.
   // either way, cannot safely proceed.
-  detail::ur::assertion(hEvent->getReferenceCount() != 0,
-                        "Reference count overflow detected in urEventRelease.");
+  assert(hEvent->getReferenceCount() == 0 &&
+         "Unrecoverable program state reached in urEventRetain.");
 
   // decrement ref count. If it is 0, delete the event.
   if (hEvent->decrementReferenceCount() == 0) {

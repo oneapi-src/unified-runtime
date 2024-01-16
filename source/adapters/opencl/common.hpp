@@ -24,7 +24,7 @@
   }
 
 /**
- * Call an UR API and, if the result is not UR_RESULT_SUCCESS, automatically
+ * Call a UR API and, if the result is not UR_RESULT_SUCCESS, automatically
  * return from the current function.
  */
 #define UR_RETURN_ON_FAILURE(urCall)                                           \
@@ -156,8 +156,6 @@ extern thread_local char ErrorMessage[MaxMessageSize];
 // Utility function for setting a message and warning
 [[maybe_unused]] void setErrorMessage(const char *Message,
                                       ur_result_t ErrorCode);
-
-[[noreturn]] void die(const char *Message);
 
 template <class To, class From> To cast(From Value) {
 

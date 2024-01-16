@@ -149,8 +149,10 @@ ur_result_t ur_program_handle_t_::finalizeRelocatable() {
 
   std::string ISA = "amdgcn-amd-amdhsa--";
   hipDeviceProp_t Props;
-  detail::ur::assertion(hipGetDeviceProperties(&Props, getDevice()->get()) ==
-                        hipSuccess);
+  if (hipGetDeviceProperties(&Props, Context->getDevice()->get()) !=
+      hipSuccess) {
+    return UR_RESULT_ERROR_INVALID_OPERATION;
+  }
   ISA += Props.gcnArchName;
   UR_CHECK_ERROR(amd_comgr_action_info_set_isa_name(Action, ISA.data()));
 
@@ -240,8 +242,8 @@ ur_result_t getKernelNames(ur_program_handle_t) {
 UR_APIEXPORT ur_result_t UR_APICALL
 urProgramCreateWithIL(ur_context_handle_t, const void *, size_t,
                       const ur_program_properties_t *, ur_program_handle_t *) {
-  detail::ur::die("urProgramCreateWithIL not implemented for HIP adapter"
-                  " please use urProgramCreateWithBinary instead");
+  assert(!"urProgramCreateWithIL not implemented for HIP adapter"
+          " please use urProgramCreateWithBinary instead");
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
