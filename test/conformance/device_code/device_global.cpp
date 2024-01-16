@@ -5,7 +5,10 @@
 
 #include <sycl/sycl.hpp>
 
-sycl::ext::oneapi::experimental::device_global<int> dev_var;
+sycl::ext::oneapi::experimental::device_global<
+    int, decltype(sycl::ext::oneapi::experimental::properties(
+             sycl::ext::oneapi::experimental::device_image_scope))>
+    dev_var;
 
 int main() {
 
