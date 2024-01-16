@@ -148,6 +148,9 @@ static ur_result_t enqueueCommandBufferFillHelper(
 
       size_t NumberOfSteps = PatternSize / sizeof(uint32_t);
 
+      // List shared pointer that will point to the last node created
+      std::shared_ptr<CUgraphNode> GraphNodePtr;
+
       // we walk up the pattern in 4-byte steps, and call cuMemset for each
       // 4-byte chunk of the pattern.
       for (auto Step = 0u; Step < NumberOfSteps; ++Step) {
@@ -173,9 +176,12 @@ static ur_result_t enqueueCommandBufferFillHelper(
             DepsList.size(), &NodeParamsStep,
             CommandBuffer->Device->getContext()));
 
+        GraphNodePtr = std::make_shared<CUgraphNode>(GraphNode);
         // Get sync point and register the cuNode with it.
-        *SyncPoint = CommandBuffer->AddSyncPoint(
-            std::make_shared<CUgraphNode>(GraphNode));
+        *SyncPoint = CommandBuffer->AddSyncPoint(GraphNodePtr);
+
+        DepsList.clear();
+        DepsList.push_back(*GraphNodePtr.get());
       }
     }
   } catch (ur_result_t Err) {
