@@ -4676,6 +4676,49 @@ ur_result_t UR_APICALL urEventSetCallback(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Enqueues a timestamp recording to be stored in the resulting event.
+///
+/// @details
+///     - TODO
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hQueue`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == phEvent`
+ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
+    ur_queue_handle_t hQueue,     ///< [in] handle of the queue object
+    bool blocking,                ///< [in] blocking or non-blocking enqueue
+    uint32_t numEventsInWaitList, ///< [in] size of the event wait list
+    const ur_event_handle_t
+        *phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                          ///< pointer to a list of events that must be complete
+                          ///< before this command can be executed. If nullptr,
+                          ///< the numEventsInWaitList must be 0, indicating
+                          ///< that this command does not wait on any event to
+                          ///< complete.
+    ur_event_handle_t
+        *phEvent ///< [in,out] return an event object that identifies
+                 ///< this particular command instance. This event has
+                 ///< profiling info, even if it is not enabled on hQueue.
+    ) try {
+    auto pfnEnqueueTimestampRecordingExp =
+        ur_lib::context->urDdiTable.Event.pfnEnqueueTimestampRecordingExp;
+    if (nullptr == pfnEnqueueTimestampRecordingExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    return pfnEnqueueTimestampRecordingExp(
+        hQueue, blocking, numEventsInWaitList, phEventWaitList, phEvent);
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Enqueue a command to execute a kernel
 ///
 /// @remarks

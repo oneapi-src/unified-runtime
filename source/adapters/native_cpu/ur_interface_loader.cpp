@@ -75,6 +75,7 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetEventProcAddrTable(
   pDdiTable->pfnRetain = urEventRetain;
   pDdiTable->pfnSetCallback = urEventSetCallback;
   pDdiTable->pfnWait = urEventWait;
+  pDdiTable->pfnEnqueueTimestampRecordingExp = urEnqueueTimestampRecordingExp;
   return UR_RESULT_SUCCESS;
 }
 

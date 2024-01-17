@@ -236,6 +236,15 @@ typedef ur_result_t(UR_APICALL *ur_pfnEventSetCallback_t)(
     void *);
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for urEnqueueTimestampRecordingExp
+typedef ur_result_t(UR_APICALL *ur_pfnEnqueueTimestampRecordingExp_t)(
+    ur_queue_handle_t,
+    bool,
+    uint32_t,
+    const ur_event_handle_t *,
+    ur_event_handle_t *);
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Table of Event functions pointers
 typedef struct ur_event_dditable_t {
     ur_pfnEventGetInfo_t pfnGetInfo;
@@ -246,6 +255,7 @@ typedef struct ur_event_dditable_t {
     ur_pfnEventGetNativeHandle_t pfnGetNativeHandle;
     ur_pfnEventCreateWithNativeHandle_t pfnCreateWithNativeHandle;
     ur_pfnEventSetCallback_t pfnSetCallback;
+    ur_pfnEnqueueTimestampRecordingExp_t pfnEnqueueTimestampRecordingExp;
 } ur_event_dditable_t;
 
 ///////////////////////////////////////////////////////////////////////////////

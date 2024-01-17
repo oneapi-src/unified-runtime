@@ -221,6 +221,7 @@ typedef enum ur_function_t {
     UR_FUNCTION_COMMAND_BUFFER_GET_INFO_EXP = 218,                             ///< Enumerator for ::urCommandBufferGetInfoExp
     UR_FUNCTION_COMMAND_BUFFER_COMMAND_GET_INFO_EXP = 219,                     ///< Enumerator for ::urCommandBufferCommandGetInfoExp
     UR_FUNCTION_DEVICE_GET_SELECTED = 220,                                     ///< Enumerator for ::urDeviceGetSelected
+    UR_FUNCTION_ENQUEUE_TIMESTAMP_RECORDING_EXP = 221,                         ///< Enumerator for ::urEnqueueTimestampRecordingExp
     /// @cond
     UR_FUNCTION_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -1622,6 +1623,7 @@ typedef enum ur_device_info_t {
                                                                     ///< semaphore resources
     UR_DEVICE_INFO_INTEROP_SEMAPHORE_EXPORT_SUPPORT_EXP = 0x200F,   ///< [::ur_bool_t] returns true if the device supports exporting internal
                                                                     ///< event resources
+    UR_DEVICE_INFO_TIMESTAMP_RECORDING_SUPPORT_EXP = 0x2010,        ///< [::ur_bool_t] returns true if the device supports timestamp recording
     /// @cond
     UR_DEVICE_INFO_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -5879,6 +5881,34 @@ urEventSetCallback(
     void *pUserData                 ///< [in][out][optional] pointer to data to be passed to callback.
 );
 
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Enqueues a timestamp recording to be stored in the resulting event.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hQueue`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == phEvent`
+UR_APIEXPORT ur_result_t UR_APICALL
+urEnqueueTimestampRecordingExp(
+    ur_queue_handle_t hQueue,                 ///< [in] handle of the queue object
+    bool blocking,                            ///< [in] blocking or non-blocking enqueue
+    uint32_t numEventsInWaitList,             ///< [in] size of the event wait list
+    const ur_event_handle_t *phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                                              ///< pointer to a list of events that must be complete
+                                              ///< before this command can be executed. If nullptr,
+                                              ///< the numEventsInWaitList must be 0, indicating
+                                              ///< that this command does not wait on any event to
+                                              ///< complete.
+    ur_event_handle_t *phEvent                ///< [in,out] return an event object that identifies
+                                              ///< this particular command instance. This event has
+                                              ///< profiling info, even if it is not enabled on hQueue.
+);
+
 #if !defined(__GNUC__)
 #pragma endregion
 #endif
@@ -9341,6 +9371,18 @@ typedef struct ur_event_set_callback_params_t {
     ur_event_callback_t *ppfnNotify;
     void **ppUserData;
 } ur_event_set_callback_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urEnqueueTimestampRecordingExp
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_enqueue_timestamp_recording_exp_t {
+    ur_queue_handle_t hQueue;
+    bool blocking;
+    uint32_t numEventsInWaitList;
+    const ur_event_handle_t *phEventWaitList;
+    ur_event_handle_t *phEvent;
+} ur_enqueue_timestamp_recording_exp_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urProgramCreateWithIL
