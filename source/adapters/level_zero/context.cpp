@@ -14,7 +14,9 @@
 #include <string.h>
 
 #include "context.hpp"
-#include "ur_level_zero.hpp"
+#include "event.hpp"
+#include "platform.hpp"
+#include "usm.hpp"
 
 UR_APIEXPORT ur_result_t UR_APICALL urContextCreate(
     uint32_t DeviceCount, ///< [in] the number of devices given in phDevices
@@ -36,7 +38,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextCreate(
     ur_context_handle_t_ *Context =
         new ur_context_handle_t_(ZeContext, DeviceCount, Devices, true);
 
-    Context->initialize();
+    auto Ret = Context->initialize();
+    if (Ret) {
+      delete Context;
+      return Ret;
+    }
+
     *RetContext = reinterpret_cast<ur_context_handle_t>(Context);
     if (IndirectAccessTrackingEnabled) {
       std::scoped_lock<ur_shared_mutex> Lock(Platform->ContextsMutex);
@@ -179,112 +186,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextSetExtendedDeleter(
 }
 
 ur_result_t ur_context_handle_t_::initialize() {
-
-  // Helper lambda to create various USM allocators for a device.
-  // Note that the CCS devices and their respective subdevices share a
-  // common ze_device_handle and therefore, also share USM allocators.
-  auto createUSMAllocators = [this](ur_device_handle_t Device) {
-    auto MemProvider = umf::memoryProviderMakeUnique<L0DeviceMemoryProvider>(
-                           reinterpret_cast<ur_context_handle_t>(this), Device)
-                           .second;
-    DeviceMemPools.emplace(
-        std::piecewise_construct, std::make_tuple(Device->ZeDevice),
-        std::make_tuple(umf::poolMakeUnique<usm::DisjointPool, 1>(
-                            {std::move(MemProvider)},
-                            DisjointPoolConfigInstance
-                                .Configs[usm::DisjointPoolMemType::Device])
-                            .second));
-
-    MemProvider = umf::memoryProviderMakeUnique<L0SharedMemoryProvider>(
-                      reinterpret_cast<ur_context_handle_t>(this), Device)
-                      .second;
-    SharedMemPools.emplace(
-        std::piecewise_construct, std::make_tuple(Device->ZeDevice),
-        std::make_tuple(umf::poolMakeUnique<usm::DisjointPool, 1>(
-                            {std::move(MemProvider)},
-                            DisjointPoolConfigInstance
-                                .Configs[usm::DisjointPoolMemType::Shared])
-                            .second));
-
-    MemProvider = umf::memoryProviderMakeUnique<L0SharedReadOnlyMemoryProvider>(
-                      reinterpret_cast<ur_context_handle_t>(this), Device)
-                      .second;
-    SharedReadOnlyMemPools.emplace(
-        std::piecewise_construct, std::make_tuple(Device->ZeDevice),
-        std::make_tuple(
-            umf::poolMakeUnique<usm::DisjointPool, 1>(
-                {std::move(MemProvider)},
-                DisjointPoolConfigInstance
-                    .Configs[usm::DisjointPoolMemType::SharedReadOnly])
-                .second));
-
-    MemProvider = umf::memoryProviderMakeUnique<L0DeviceMemoryProvider>(
-                      reinterpret_cast<ur_context_handle_t>(this), Device)
-                      .second;
-    DeviceMemProxyPools.emplace(
-        std::piecewise_construct, std::make_tuple(Device->ZeDevice),
-        std::make_tuple(
-            umf::poolMakeUnique<USMProxyPool, 1>({std::move(MemProvider)})
-                .second));
-
-    MemProvider = umf::memoryProviderMakeUnique<L0SharedMemoryProvider>(
-                      reinterpret_cast<ur_context_handle_t>(this), Device)
-                      .second;
-    SharedMemProxyPools.emplace(
-        std::piecewise_construct, std::make_tuple(Device->ZeDevice),
-        std::make_tuple(
-            umf::poolMakeUnique<USMProxyPool, 1>({std::move(MemProvider)})
-                .second));
-
-    MemProvider = umf::memoryProviderMakeUnique<L0SharedReadOnlyMemoryProvider>(
-                      reinterpret_cast<ur_context_handle_t>(this), Device)
-                      .second;
-    SharedReadOnlyMemProxyPools.emplace(
-        std::piecewise_construct, std::make_tuple(Device->ZeDevice),
-        std::make_tuple(
-            umf::poolMakeUnique<USMProxyPool, 1>({std::move(MemProvider)})
-                .second));
-  };
-
-  // Recursive helper to call createUSMAllocators for all sub-devices
-  std::function<void(ur_device_handle_t)> createUSMAllocatorsRecursive;
-  createUSMAllocatorsRecursive =
-      [createUSMAllocators,
-       &createUSMAllocatorsRecursive](ur_device_handle_t Device) -> void {
-    createUSMAllocators(Device);
-    for (auto &SubDevice : Device->SubDevices)
-      createUSMAllocatorsRecursive(SubDevice);
-  };
-
-  // Create USM pool for each pair (device, context).
-  //
-  for (auto &Device : Devices) {
-    createUSMAllocatorsRecursive(Device);
-  }
-  // Create USM pool for host. Device and Shared USM allocations
-  // are device-specific. Host allocations are not device-dependent therefore
-  // we don't need a map with device as key.
-  auto MemProvider = umf::memoryProviderMakeUnique<L0HostMemoryProvider>(
-                         reinterpret_cast<ur_context_handle_t>(this), nullptr)
-                         .second;
-  HostMemPool =
-      umf::poolMakeUnique<usm::DisjointPool, 1>(
-          {std::move(MemProvider)},
-          DisjointPoolConfigInstance.Configs[usm::DisjointPoolMemType::Host])
-          .second;
-
-  MemProvider = umf::memoryProviderMakeUnique<L0HostMemoryProvider>(
-                    reinterpret_cast<ur_context_handle_t>(this), nullptr)
-                    .second;
-  HostMemProxyPool =
-      umf::poolMakeUnique<USMProxyPool, 1>({std::move(MemProvider)}).second;
-
-  // We may allocate memory to this root device so create allocators.
-  if (SingleRootDevice &&
-      DeviceMemPools.find(SingleRootDevice->ZeDevice) == DeviceMemPools.end()) {
-    createUSMAllocators(SingleRootDevice);
-  }
-
   // Create the immediate command list to be used for initializations.
   // Created as synchronous so level-zero performs implicit synchronization and
   // there is no need to query for completion in the plugin
@@ -296,6 +197,45 @@ ur_result_t ur_context_handle_t_::initialize() {
   // immediate command-list for the specfic devices, and this single one.
   //
   ur_device_handle_t Device = SingleRootDevice ? SingleRootDevice : Devices[0];
+
+  // We can initialize our default pool with a regular pool create
+  ur_usm_pool_desc_t PoolDesc = {UR_STRUCTURE_TYPE_USM_POOL_DESC, nullptr, 0};
+  if (auto err = urUSMPoolCreate(this, &PoolDesc, &Pool);
+      err != UR_RESULT_SUCCESS) {
+    return err;
+  }
+
+  // Initializing the proxy pool manager is a little more involved
+  ur_result_t Ret;
+  std::tie(Ret, ProxyPoolManager) =
+      usm::pool_manager<usm::pool_descriptor>::create();
+  if (Ret) {
+    urPrint("urContextCreate: unexpected internal error\n");
+    return Ret;
+  }
+
+  std::vector<usm::pool_descriptor> Descs;
+  // Create pool descriptor for every device and subdevice.
+  std::tie(Ret, Descs) = usm::pool_descriptor::createDefaults(nullptr, this);
+  if (Ret) {
+    urPrint("urContextCreate: unexpected internal error\n");
+    return Ret;
+  }
+
+  // Create USM pool for each pool descriptor and add it to pool manager.
+  for (auto &Desc : Descs) {
+    umf::pool_unique_handle_t ProxyPool = nullptr;
+    std::tie(Ret, ProxyPool) =
+        usm::createUMFPoolForDesc<USMProxyPool, L0HostMemoryProvider,
+                                  L0DeviceMemoryProvider,
+                                  L0SharedMemoryProvider>(Desc);
+    if (Ret) {
+      urPrint("urContextCreate: unexpected internal error\n");
+      return Ret;
+    }
+
+    ProxyPoolManager.addPool(Desc, ProxyPool);
+  }
 
   // Prefer to use copy engine for initialization copies,
   // if available and allowed (main copy engine with index 0).
@@ -395,6 +335,10 @@ ur_result_t ur_context_handle_t_::finalize() {
   // This function is called when ur_context_handle_t is deallocated,
   // urContextRelease. There could be some memory that may have not been
   // deallocated. For example, event and event pool caches would be still alive.
+
+  if (auto Err = urUSMPoolRelease(Pool); Err != UR_RESULT_SUCCESS) {
+    return Err;
+  }
 
   if (!DisableEventsCaching) {
     std::scoped_lock<ur_mutex> Lock(EventCacheMutex);

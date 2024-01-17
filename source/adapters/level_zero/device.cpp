@@ -683,7 +683,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
         }
       }
     }
-    return ReturnValue(std::min(GlobalMemSize, FreeMemory));
+    return ReturnValue((std::min)(GlobalMemSize, FreeMemory));
   }
   case UR_DEVICE_INFO_MEMORY_CLOCK_RATE: {
     // If there are not any memory modules then return 0.

@@ -26,6 +26,7 @@
 #include "queue.hpp"
 
 #include <umf_helpers.hpp>
+#include <ur_pool_manager.hpp>
 
 struct ur_context_handle_t_ : _ur_object {
   ur_context_handle_t_(ze_context_handle_t ZeContext, uint32_t NumDevices,
@@ -94,26 +95,9 @@ struct ur_context_handle_t_ : _ur_object {
                                          ZeStruct<ze_command_queue_desc_t>>>>
       ZeCopyCommandListCache;
 
-  // Store USM pool for USM shared and device allocations. There is 1 memory
-  // pool per each pair of (context, device) per each memory type.
-  std::unordered_map<ze_device_handle_t, umf::pool_unique_handle_t>
-      DeviceMemPools;
-  std::unordered_map<ze_device_handle_t, umf::pool_unique_handle_t>
-      SharedMemPools;
-  std::unordered_map<ze_device_handle_t, umf::pool_unique_handle_t>
-      SharedReadOnlyMemPools;
-
-  // Store the host memory pool. It does not depend on any device.
-  umf::pool_unique_handle_t HostMemPool;
-
-  // Allocation-tracking proxy pools for direct allocations. No pooling used.
-  std::unordered_map<ze_device_handle_t, umf::pool_unique_handle_t>
-      DeviceMemProxyPools;
-  std::unordered_map<ze_device_handle_t, umf::pool_unique_handle_t>
-      SharedMemProxyPools;
-  std::unordered_map<ze_device_handle_t, umf::pool_unique_handle_t>
-      SharedReadOnlyMemProxyPools;
-  umf::pool_unique_handle_t HostMemProxyPool;
+  // This default pool is used when a pool isn't provided by the application.
+  ur_usm_pool_handle_t Pool;
+  usm::pool_manager<usm::pool_descriptor> ProxyPoolManager;
 
   // Map associating pools created with urUsmPoolCreate and internal pools
   std::list<ur_usm_pool_handle_t> UsmPoolHandles{};
