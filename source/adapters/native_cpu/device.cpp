@@ -267,6 +267,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     return ReturnValue(bool{0});
   case UR_DEVICE_INFO_SUB_GROUP_SIZES_INTEL:
     return ReturnValue(uint32_t{1});
+  case UR_DEVICE_INFO_KERNEL_SET_SPECIALIZATION_CONSTANTS:
+    return ReturnValue(bool{0});
   case UR_DEVICE_INFO_GPU_EU_COUNT:
   case UR_DEVICE_INFO_PCI_ADDRESS:
   case UR_DEVICE_INFO_GPU_EU_SLICES:
