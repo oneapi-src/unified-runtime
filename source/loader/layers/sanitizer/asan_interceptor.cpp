@@ -420,7 +420,8 @@ ur_result_t SanitizerInterceptor::enqueueAllocInfo(
         auto Value = AllocInfo->UserEnd -
                      RoundDownTo(AllocInfo->UserEnd, ASAN_SHADOW_GRANULARITY);
         UR_CALL(enqueueMemSetShadow(Context, Device, Queue, AllocInfo->UserEnd,
-                                    1, Value, LastEvent, &LastEvent));
+                                    1, static_cast<u8>(Value), LastEvent,
+                                    &LastEvent));
     }
 
     int ShadowByte;
