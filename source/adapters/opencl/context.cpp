@@ -24,12 +24,20 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextCreate(
     CLDevices[i] = phDevices[i]->get();
   }
 
-  cl_context Ctx = clCreateContext(
-      nullptr, cl_adapter::cast<cl_uint>(DeviceCount), CLDevices.data(),
-      nullptr, nullptr, cl_adapter::cast<cl_int *>(&Ret));
-  auto URContext =
-      std::make_unique<ur_context_handle_t_>(Ctx, DeviceCount, phDevices);
-  *phContext = URContext.release();
+  try {
+    cl_context Ctx = clCreateContext(
+        nullptr, cl_adapter::cast<cl_uint>(DeviceCount), CLDevices.data(),
+        nullptr, nullptr, cl_adapter::cast<cl_int *>(&Ret));
+    CL_RETURN_ON_FAILURE(Ret);
+    auto URContext =
+        std::make_unique<ur_context_handle_t_>(Ctx, DeviceCount, phDevices);
+    *phContext = URContext.release();
+  } catch (std::bad_alloc &) {
+    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+  } catch (...) {
+    return UR_RESULT_ERROR_UNKNOWN;
+  }
+
   return mapCLErrorToUR(Ret);
 }
 

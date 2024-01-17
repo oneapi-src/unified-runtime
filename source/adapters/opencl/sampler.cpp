@@ -139,17 +139,24 @@ ur_result_t urSamplerCreate(ur_context_handle_t hContext,
                             ur_sampler_handle_t *phSampler) {
 
   // Initialize properties according to OpenCL 2.1 spec.
-  ur_result_t ErrorCode;
+  cl_int ErrorCode;
   cl_addressing_mode AddressingMode =
       ur2CLAddressingMode(pDesc->addressingMode);
   cl_filter_mode FilterMode = ur2CLFilterMode(pDesc->filterMode);
+  try {
+    // Always call OpenCL 1.0 API
+    cl_sampler Sampler = clCreateSampler(
+        hContext->get(), static_cast<cl_bool>(pDesc->normalizedCoords),
+        AddressingMode, FilterMode, &ErrorCode);
+    CL_RETURN_ON_FAILURE(ErrorCode);
+    auto URSampler = std::make_unique<ur_sampler_handle_t_>(Sampler, hContext);
+    *phSampler = URSampler.release();
+  } catch (std::bad_alloc &) {
+    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+  } catch (...) {
+    return UR_RESULT_ERROR_UNKNOWN;
+  }
 
-  // Always call OpenCL 1.0 API
-  cl_sampler Sampler = clCreateSampler(
-      hContext->get(), static_cast<cl_bool>(pDesc->normalizedCoords),
-      AddressingMode, FilterMode, cl_adapter::cast<cl_int *>(&ErrorCode));
-  auto URSampler = std::make_unique<ur_sampler_handle_t_>(Sampler, hContext);
-  *phSampler = URSampler.release();
   return mapCLErrorToUR(ErrorCode);
 }
 
@@ -201,9 +208,15 @@ UR_APIEXPORT ur_result_t UR_APICALL urSamplerCreateWithNativeHandle(
     ur_native_handle_t hNativeSampler, ur_context_handle_t hContext,
     const ur_sampler_native_properties_t *pProperties, ur_sampler_handle_t *phSampler) {
   cl_sampler NativeHandle = reinterpret_cast<cl_sampler>(hNativeSampler);
-  auto URSampler =
-      std::make_unique<ur_sampler_handle_t_>(NativeHandle, hContext);
-  *phSampler = URSampler.release();
+  try {
+    auto URSampler =
+        std::make_unique<ur_sampler_handle_t_>(NativeHandle, hContext);
+    *phSampler = URSampler.release();
+  } catch (std::bad_alloc &) {
+    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+  } catch (...) {
+    return UR_RESULT_ERROR_UNKNOWN;
+  }
   if (!pProperties || !pProperties->isNativeHandleOwned) {
     return clRetainSampler(NativeHandle);
   }

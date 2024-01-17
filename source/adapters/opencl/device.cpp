@@ -981,9 +981,15 @@ UR_APIEXPORT ur_result_t UR_APICALL urDevicePartition(
                                             CLNumDevicesRet,
                                             CLSubDevices.data(), nullptr));
     for (uint32_t i = 0; i < NumDevices; i++) {
-      auto URSubDevice = std::make_unique<ur_device_handle_t_>(
-          CLSubDevices[i], hDevice->Platform, hDevice);
-      phSubDevices[i] = URSubDevice.release();
+      try {
+        auto URSubDevice = std::make_unique<ur_device_handle_t_>(
+            CLSubDevices[i], hDevice->Platform, hDevice);
+        phSubDevices[i] = URSubDevice.release();
+      } catch (std::bad_alloc &) {
+        return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+      } catch (...) {
+        return UR_RESULT_ERROR_UNKNOWN;
+      }
     }
   }
 

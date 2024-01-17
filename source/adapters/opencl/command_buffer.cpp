@@ -41,8 +41,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferCreateExp(
     auto URCommandBuffer = std::make_unique<ur_exp_command_buffer_handle_t_>(
         Queue, hContext, CLCommandBuffer);
     *phCommandBuffer = URCommandBuffer.release();
-  } catch (...) {
+  } catch (std::bad_alloc &) {
     return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+  } catch (...) {
+    return UR_RESULT_ERROR_UNKNOWN;
   }
 
   CL_RETURN_ON_FAILURE(Res);
@@ -359,9 +361,15 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferEnqueueExp(
       NumberOfQueues, &CLQueue, hCommandBuffer->CLCommandBuffer,
       numEventsInWaitList, CLWaitEvents.data(), &Event));
   if (phEvent) {
-    auto UREvent =
-        std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
-    *phEvent = UREvent.release();
+    try {
+      auto UREvent =
+          std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+      *phEvent = UREvent.release();
+    } catch (std::bad_alloc &) {
+      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+    } catch (...) {
+      return UR_RESULT_ERROR_UNKNOWN;
+    }
   }
   return UR_RESULT_SUCCESS;
 }

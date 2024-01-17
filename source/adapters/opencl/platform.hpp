@@ -49,10 +49,16 @@ struct ur_platform_handle_t_ {
       CL_RETURN_ON_FAILURE(clGetDeviceIDs(
           Platform, CL_DEVICE_TYPE_ALL, DeviceNum, CLDevices.data(), nullptr));
 
-      Devices.resize(DeviceNum);
-      for (size_t i = 0; i < DeviceNum; i++) {
-        Devices[i] =
-            std::make_unique<ur_device_handle_t_>(CLDevices[i], this, nullptr);
+      try {
+        Devices.resize(DeviceNum);
+        for (size_t i = 0; i < DeviceNum; i++) {
+          Devices[i] = std::make_unique<ur_device_handle_t_>(CLDevices[i], this,
+                                                             nullptr);
+        }
+      } catch (std::bad_alloc &) {
+        return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+      } catch (...) {
+        return UR_RESULT_ERROR_UNKNOWN;
       }
     }
 

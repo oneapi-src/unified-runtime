@@ -27,28 +27,35 @@ struct ur_queue_handle_t_ {
                                     ur_context_handle_t Context,
                                     ur_device_handle_t Device,
                                     ur_queue_handle_t &Queue) {
-    auto URQueue =
-        std::make_unique<ur_queue_handle_t_>(NativeQueue, Context, Device);
-    if (!Context) {
-      cl_context CLContext;
-      CL_RETURN_ON_FAILURE(clGetCommandQueueInfo(NativeQueue, CL_QUEUE_CONTEXT,
-                                                 sizeof(CLContext), &CLContext,
-                                                 nullptr));
-      ur_native_handle_t NativeContext =
-          reinterpret_cast<ur_native_handle_t>(CLContext);
-      UR_RETURN_ON_FAILURE(urContextCreateWithNativeHandle(
-          NativeContext, 0, nullptr, nullptr, &(URQueue->Context)));
+    try {
+      auto URQueue =
+          std::make_unique<ur_queue_handle_t_>(NativeQueue, Context, Device);
+      if (!Context) {
+        cl_context CLContext;
+        CL_RETURN_ON_FAILURE(
+            clGetCommandQueueInfo(NativeQueue, CL_QUEUE_CONTEXT,
+                                  sizeof(CLContext), &CLContext, nullptr));
+        ur_native_handle_t NativeContext =
+            reinterpret_cast<ur_native_handle_t>(CLContext);
+        UR_RETURN_ON_FAILURE(urContextCreateWithNativeHandle(
+            NativeContext, 0, nullptr, nullptr, &(URQueue->Context)));
+      }
+      if (!Device) {
+        cl_device_id CLDevice;
+        CL_RETURN_ON_FAILURE(clGetCommandQueueInfo(NativeQueue, CL_QUEUE_DEVICE,
+                                                   sizeof(CLDevice), &CLDevice,
+                                                   nullptr));
+        ur_native_handle_t NativeDevice =
+            reinterpret_cast<ur_native_handle_t>(CLDevice);
+        UR_RETURN_ON_FAILURE(urDeviceCreateWithNativeHandle(
+            NativeDevice, nullptr, nullptr, &(URQueue->Device)));
+      }
+      Queue = URQueue.release();
+    } catch (std::bad_alloc &) {
+      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+    } catch (...) {
+      return UR_RESULT_ERROR_UNKNOWN;
     }
-    if (!Device) {
-      cl_device_id CLDevice;
-      CL_RETURN_ON_FAILURE(clGetCommandQueueInfo(
-          NativeQueue, CL_QUEUE_DEVICE, sizeof(CLDevice), &CLDevice, nullptr));
-      ur_native_handle_t NativeDevice =
-          reinterpret_cast<ur_native_handle_t>(CLDevice);
-      UR_RETURN_ON_FAILURE(urDeviceCreateWithNativeHandle(
-          NativeDevice, nullptr, nullptr, &(URQueue->Device)));
-    }
-    Queue = URQueue.release();
     return UR_RESULT_SUCCESS;
   }
 

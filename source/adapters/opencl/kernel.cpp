@@ -20,13 +20,19 @@
 UR_APIEXPORT ur_result_t UR_APICALL
 urKernelCreate(ur_program_handle_t hProgram, const char *pKernelName,
                ur_kernel_handle_t *phKernel) {
+  try {
+    cl_int CLResult;
+    cl_kernel Kernel = clCreateKernel(hProgram->get(), pKernelName, &CLResult);
+    CL_RETURN_ON_FAILURE(CLResult);
+    auto URKernel = std::make_unique<ur_kernel_handle_t_>(Kernel, hProgram,
+                                                          hProgram->Context);
+    *phKernel = URKernel.release();
+  } catch (std::bad_alloc &) {
+    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+  } catch (...) {
+    return UR_RESULT_ERROR_UNKNOWN;
+  }
 
-  cl_int CLResult;
-  cl_kernel Kernel = clCreateKernel(hProgram->get(), pKernelName, &CLResult);
-  CL_RETURN_ON_FAILURE(CLResult);
-  auto URKernel = std::make_unique<ur_kernel_handle_t_>(Kernel, hProgram,
-                                                        hProgram->Context);
-  *phKernel = URKernel.release();
   return UR_RESULT_SUCCESS;
 }
 
