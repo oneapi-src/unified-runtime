@@ -263,22 +263,35 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
       }
       PropertiesIntel.push_back(0);
 
-      cl_mem Buffer = FuncPtr(
-          CLContext, PropertiesIntel.data(), static_cast<cl_mem_flags>(flags),
-          size, pProperties->pHost, cl_adapter::cast<cl_int *>(&RetErr));
-      auto URMem = std::make_unique<ur_mem_handle_t_>(Buffer, hContext);
-      *phBuffer = URMem.release();
+      try {
+        cl_mem Buffer = FuncPtr(
+            CLContext, PropertiesIntel.data(), static_cast<cl_mem_flags>(flags),
+            size, pProperties->pHost, cl_adapter::cast<cl_int *>(&RetErr));
+        CL_RETURN_ON_FAILURE(RetErr);
+        auto URMem = std::make_unique<ur_mem_handle_t_>(Buffer, hContext);
+        *phBuffer = URMem.release();
+      } catch (std::bad_alloc &) {
+        return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+      } catch (...) {
+        return UR_RESULT_ERROR_UNKNOWN;
+      }
       return mapCLErrorToUR(RetErr);
     }
   }
 
   void *HostPtr = pProperties ? pProperties->pHost : nullptr;
-  cl_mem Buffer =
-      clCreateBuffer(hContext->get(), static_cast<cl_mem_flags>(flags), size,
-                     HostPtr, cl_adapter::cast<cl_int *>(&RetErr));
-  CL_RETURN_ON_FAILURE(RetErr);
-  auto URMem = std::make_unique<ur_mem_handle_t_>(Buffer, hContext);
-  *phBuffer = URMem.release();
+  try {
+    cl_mem Buffer =
+        clCreateBuffer(hContext->get(), static_cast<cl_mem_flags>(flags), size,
+                       HostPtr, cl_adapter::cast<cl_int *>(&RetErr));
+    CL_RETURN_ON_FAILURE(RetErr);
+    auto URMem = std::make_unique<ur_mem_handle_t_>(Buffer, hContext);
+    *phBuffer = URMem.release();
+  } catch (std::bad_alloc &) {
+    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+  } catch (...) {
+    return UR_RESULT_ERROR_UNKNOWN;
+  }
 
   return UR_RESULT_SUCCESS;
 }
@@ -294,12 +307,18 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreate(
   cl_image_desc ImageDesc = mapURImageDescToCL(pImageDesc);
   cl_map_flags MapFlags = convertURMemFlagsToCL(flags);
 
-  cl_mem Mem =
-      clCreateImage(hContext->get(), MapFlags, &ImageFormat, &ImageDesc, pHost,
-                    cl_adapter::cast<cl_int *>(&RetErr));
-  CL_RETURN_ON_FAILURE(RetErr);
-  auto URMem = std::make_unique<ur_mem_handle_t_>(Mem, hContext);
-  *phMem = URMem.release();
+  try {
+    cl_mem Mem =
+        clCreateImage(hContext->get(), MapFlags, &ImageFormat, &ImageDesc,
+                      pHost, cl_adapter::cast<cl_int *>(&RetErr));
+    CL_RETURN_ON_FAILURE(RetErr);
+    auto URMem = std::make_unique<ur_mem_handle_t_>(Mem, hContext);
+    *phMem = URMem.release();
+  } catch (std::bad_alloc &) {
+    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+  } catch (...) {
+    return UR_RESULT_ERROR_UNKNOWN;
+  }
 
   return UR_RESULT_SUCCESS;
 }
@@ -323,12 +342,19 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferPartition(
   _cl_buffer_region BufferRegion;
   BufferRegion.origin = pRegion->origin;
   BufferRegion.size = pRegion->size;
+  try {
+    cl_mem Buffer = clCreateSubBuffer(
+        hBuffer->get(), static_cast<cl_mem_flags>(flags), BufferCreateType,
+        &BufferRegion, cl_adapter::cast<cl_int *>(&RetErr));
+    CL_RETURN_ON_FAILURE(RetErr);
+    auto URMem = std::make_unique<ur_mem_handle_t_>(Buffer, hBuffer->Context);
+    *phMem = URMem.release();
+  } catch (std::bad_alloc &) {
+    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+  } catch (...) {
+    return UR_RESULT_ERROR_UNKNOWN;
+  }
 
-  cl_mem Buffer = clCreateSubBuffer(
-      hBuffer->get(), static_cast<cl_mem_flags>(flags), BufferCreateType,
-      &BufferRegion, cl_adapter::cast<cl_int *>(&RetErr));
-  auto URMem = std::make_unique<ur_mem_handle_t_>(Buffer, hBuffer->Context);
-  *phMem = URMem.release();
   if (RetErr == CL_INVALID_VALUE) {
     size_t BufferSize = 0;
     CL_RETURN_ON_FAILURE(clGetMemObjectInfo(

@@ -24,9 +24,15 @@ static ur_result_t getDevicesFromProgram(
     return UR_RESULT_ERROR_INVALID_PROGRAM;
   }
   cl_uint DeviceCount = hProgram->Context->DeviceCount;
-  DevicesInProgram = std::make_unique<std::vector<cl_device_id>>(DeviceCount);
-  for (uint32_t i = 0; i < DeviceCount; i++) {
-    (*DevicesInProgram)[i] = hProgram->Context->Devices[i]->get();
+  try {
+    DevicesInProgram = std::make_unique<std::vector<cl_device_id>>(DeviceCount);
+    for (uint32_t i = 0; i < DeviceCount; i++) {
+      (*DevicesInProgram)[i] = hProgram->Context->Devices[i]->get();
+    }
+  } catch (std::bad_alloc &) {
+    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+  } catch (...) {
+    return UR_RESULT_ERROR_UNKNOWN;
   }
   return UR_RESULT_SUCCESS;
 }
@@ -72,10 +78,16 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithIL(
     cl_program Program =
         clCreateProgramWithIL(hContext->get(), pIL, length, &Err);
     CL_RETURN_ON_FAILURE(Err);
-    auto URProgram = std::make_unique<ur_program_handle_t_>(Program, hContext);
-    *phProgram = URProgram.release();
+    try {
+      auto URProgram =
+          std::make_unique<ur_program_handle_t_>(Program, hContext);
+      *phProgram = URProgram.release();
+    } catch (std::bad_alloc &) {
+      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+    } catch (...) {
+      return UR_RESULT_ERROR_UNKNOWN;
+    }
   } else {
-
     /* If none of the devices conform with CL 2.1 or newer make sure they all
      * support the cl_khr_il_program extension.
      */
@@ -97,10 +109,17 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithIL(
             CurPlatform->get(), "clCreateProgramWithILKHR"));
 
     assert(FuncPtr != nullptr);
-    cl_program Program = FuncPtr(hContext->get(), pIL, length, &Err);
-    auto URProgram = std::make_unique<ur_program_handle_t_>(Program, hContext);
-    *phProgram = URProgram.release();
-
+    try {
+      cl_program Program = FuncPtr(hContext->get(), pIL, length, &Err);
+      CL_RETURN_ON_FAILURE(Err);
+      auto URProgram =
+          std::make_unique<ur_program_handle_t_>(Program, hContext);
+      *phProgram = URProgram.release();
+    } catch (std::bad_alloc &) {
+      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+    } catch (...) {
+      return UR_RESULT_ERROR_UNKNOWN;
+    }
     CL_RETURN_ON_FAILURE(Err);
   }
 
@@ -116,12 +135,18 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
   const size_t Lengths[1] = {size};
   cl_int BinaryStatus[1];
   cl_int CLResult;
-  cl_program Program = clCreateProgramWithBinary(
-      hContext->get(), cl_adapter::cast<cl_uint>(1u), Devices, Lengths,
-      &pBinary, BinaryStatus, &CLResult);
-
-  auto URProgram = std::make_unique<ur_program_handle_t_>(Program, hContext);
-  *phProgram = URProgram.release();
+  try {
+    cl_program Program = clCreateProgramWithBinary(
+        hContext->get(), cl_adapter::cast<cl_uint>(1u), Devices, Lengths,
+        &pBinary, BinaryStatus, &CLResult);
+    CL_RETURN_ON_FAILURE(CLResult);
+    auto URProgram = std::make_unique<ur_program_handle_t_>(Program, hContext);
+    *phProgram = URProgram.release();
+  } catch (std::bad_alloc &) {
+    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+  } catch (...) {
+    return UR_RESULT_ERROR_UNKNOWN;
+  }
   CL_RETURN_ON_FAILURE(BinaryStatus[0]);
   CL_RETURN_ON_FAILURE(CLResult);
 
@@ -235,8 +260,14 @@ urProgramLink(ur_context_handle_t hContext, uint32_t count,
       hContext->get(), 0, nullptr, pOptions, cl_adapter::cast<cl_uint>(count),
       CLPrograms.data(), nullptr, nullptr, &CLResult);
   CL_RETURN_ON_FAILURE(CLResult);
-  auto URProgram = std::make_unique<ur_program_handle_t_>(Program, hContext);
-  *phProgram = URProgram.release();
+  try {
+    auto URProgram = std::make_unique<ur_program_handle_t_>(Program, hContext);
+    *phProgram = URProgram.release();
+  } catch (std::bad_alloc &) {
+    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+  } catch (...) {
+    return UR_RESULT_ERROR_UNKNOWN;
+  }
 
   return UR_RESULT_SUCCESS;
 }

@@ -26,17 +26,24 @@ struct ur_mem_handle_t_ {
   static ur_result_t makeWithNative(native_type NativeMem,
                                     ur_context_handle_t Ctx,
                                     ur_mem_handle_t &Mem) {
-    auto URMem = std::make_unique<ur_mem_handle_t_>(NativeMem, Ctx);
-    if (!Ctx) {
-      cl_context CLContext;
-      CL_RETURN_ON_FAILURE(clGetMemObjectInfo(
-          NativeMem, CL_MEM_CONTEXT, sizeof(CLContext), &CLContext, nullptr));
-      ur_native_handle_t NativeContext =
-          reinterpret_cast<ur_native_handle_t>(CLContext);
-      UR_RETURN_ON_FAILURE(urContextCreateWithNativeHandle(
-          NativeContext, 0, nullptr, nullptr, &(URMem->Context)));
+    try {
+      auto URMem = std::make_unique<ur_mem_handle_t_>(NativeMem, Ctx);
+      if (!Ctx) {
+        cl_context CLContext;
+        CL_RETURN_ON_FAILURE(clGetMemObjectInfo(
+            NativeMem, CL_MEM_CONTEXT, sizeof(CLContext), &CLContext, nullptr));
+        ur_native_handle_t NativeContext =
+            reinterpret_cast<ur_native_handle_t>(CLContext);
+        UR_RETURN_ON_FAILURE(urContextCreateWithNativeHandle(
+            NativeContext, 0, nullptr, nullptr, &(URMem->Context)));
+      }
+      Mem = URMem.release();
+    } catch (std::bad_alloc &) {
+      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+    } catch (...) {
+      return UR_RESULT_ERROR_UNKNOWN;
     }
-    Mem = URMem.release();
+
     return UR_RESULT_SUCCESS;
   }
 

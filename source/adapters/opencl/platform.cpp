@@ -86,10 +86,16 @@ urPlatformGet(ur_adapter_handle_t *, uint32_t, uint32_t NumEntries,
         if (Result != CL_SUCCESS) {
           return Result;
         }
-        for (uint32_t i = 0; i < NumPlatforms; i++) {
-          auto URPlatform =
-              std::make_unique<ur_platform_handle_t_>(CLPlatforms[i]);
-          URPlatforms.emplace_back(URPlatform.release());
+        try {
+          for (uint32_t i = 0; i < NumPlatforms; i++) {
+            auto URPlatform =
+                std::make_unique<ur_platform_handle_t_>(CLPlatforms[i]);
+            URPlatforms.emplace_back(URPlatform.release());
+          }
+        } catch (std::bad_alloc &) {
+          return CL_OUT_OF_RESOURCES;
+        } catch (...) {
+          return CL_INVALID_PLATFORM;
         }
         return Result;
       },

@@ -95,9 +95,16 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreate(
         clCreateCommandQueue(hContext->get(), hDevice->get(),
                              CLProperties & SupportByOpenCL, &RetErr);
     CL_RETURN_ON_FAILURE(RetErr);
-    auto URQueue =
-        std::make_unique<ur_queue_handle_t_>(Queue, hContext, hDevice);
-    *phQueue = URQueue.release();
+    try {
+      auto URQueue =
+          std::make_unique<ur_queue_handle_t_>(Queue, hContext, hDevice);
+      *phQueue = URQueue.release();
+    } catch (std::bad_alloc &) {
+      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+    } catch (...) {
+      return UR_RESULT_ERROR_UNKNOWN;
+    }
+
     return UR_RESULT_SUCCESS;
   }
 
@@ -107,8 +114,15 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreate(
   cl_command_queue Queue = clCreateCommandQueueWithProperties(
       hContext->get(), hDevice->get(), CreationFlagProperties, &RetErr);
   CL_RETURN_ON_FAILURE(RetErr);
-  auto URQueue = std::make_unique<ur_queue_handle_t_>(Queue, hContext, hDevice);
-  *phQueue = URQueue.release();
+  try {
+    auto URQueue =
+        std::make_unique<ur_queue_handle_t_>(Queue, hContext, hDevice);
+    *phQueue = URQueue.release();
+  } catch (std::bad_alloc &) {
+    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+  } catch (...) {
+    return UR_RESULT_ERROR_UNKNOWN;
+  }
   return UR_RESULT_SUCCESS;
 }
 

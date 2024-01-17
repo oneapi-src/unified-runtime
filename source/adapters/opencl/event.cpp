@@ -115,9 +115,16 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventCreateWithNativeHandle(
     const ur_event_native_properties_t *pProperties,
     ur_event_handle_t *phEvent) {
   cl_event NativeHandle = reinterpret_cast<cl_event>(hNativeEvent);
-  auto UREvent =
-      std::make_unique<ur_event_handle_t_>(NativeHandle, hContext, nullptr);
-  *phEvent = UREvent.release();
+  try {
+    auto UREvent =
+        std::make_unique<ur_event_handle_t_>(NativeHandle, hContext, nullptr);
+    *phEvent = UREvent.release();
+  } catch (std::bad_alloc &) {
+    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+  } catch (...) {
+    return UR_RESULT_ERROR_UNKNOWN;
+  }
+
   if (!pProperties || !pProperties->isNativeHandleOwned) {
     return urEventRetain(*phEvent);
   }
