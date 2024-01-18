@@ -345,7 +345,7 @@ params:
       desc: |
             [out] Returns the pointer to the global variable if it is found in the program.
 returns:
-  - $X_RESULT_ERROR_INVALID_SIZE:
+  - $X_RESULT_ERROR_INVALID_VALUE:
       - "`name` is not a valid variable in the program."
 --- #--------------------------------------------------------------------------
 type: enum

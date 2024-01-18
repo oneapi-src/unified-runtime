@@ -4287,7 +4287,7 @@ urProgramGetFunctionPointer(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `NULL == pGlobalVariableName`
 ///         + `NULL == ppGlobalVariablePointerRet`
-///     - ::UR_RESULT_ERROR_INVALID_SIZE
+///     - ::UR_RESULT_ERROR_INVALID_VALUE
 ///         + `name` is not a valid variable in the program.
 UR_APIEXPORT ur_result_t UR_APICALL
 urProgramGetGlobalVariablePointer(
