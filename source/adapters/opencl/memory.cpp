@@ -227,7 +227,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
     ur_context_handle_t hContext, ur_mem_flags_t flags, size_t size,
     const ur_buffer_properties_t *pProperties, ur_mem_handle_t *phBuffer) {
   cl_int RetErr = CL_INVALID_OPERATION;
-  UR_RETURN_ON_FAILURE(urContextRetain(hContext));
   if (pProperties) {
     // TODO: need to check if all properties are supported by OpenCL RT and
     // ignore unsupported
@@ -346,6 +345,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferPartition(
     cl_mem Buffer = clCreateSubBuffer(
         hBuffer->get(), static_cast<cl_mem_flags>(flags), BufferCreateType,
         &BufferRegion, cl_adapter::cast<cl_int *>(&RetErr));
+    if (RetErr == CL_INVALID_VALUE) {
+      size_t BufferSize = 0;
+      CL_RETURN_ON_FAILURE(clGetMemObjectInfo(hBuffer->get(), CL_MEM_SIZE,
+                                              sizeof(BufferSize), &BufferSize,
+                                              nullptr));
+      if (BufferRegion.size + BufferRegion.origin > BufferSize)
+        return UR_RESULT_ERROR_INVALID_BUFFER_SIZE;
+    }
     CL_RETURN_ON_FAILURE(RetErr);
     auto URMem = std::make_unique<ur_mem_handle_t_>(Buffer, hBuffer->Context);
     *phMem = URMem.release();
@@ -353,14 +360,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferPartition(
     return UR_RESULT_ERROR_OUT_OF_RESOURCES;
   } catch (...) {
     return UR_RESULT_ERROR_UNKNOWN;
-  }
-
-  if (RetErr == CL_INVALID_VALUE) {
-    size_t BufferSize = 0;
-    CL_RETURN_ON_FAILURE(clGetMemObjectInfo(
-        hBuffer->get(), CL_MEM_SIZE, sizeof(BufferSize), &BufferSize, nullptr));
-    if (BufferRegion.size + BufferRegion.origin > BufferSize)
-      return UR_RESULT_ERROR_INVALID_BUFFER_SIZE;
   }
   return mapCLErrorToUR(RetErr);
 }
@@ -377,7 +376,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
   UR_RETURN_ON_FAILURE(
       ur_mem_handle_t_::makeWithNative(NativeHandle, hContext, *phMem));
   if (!pProperties || !pProperties->isNativeHandleOwned) {
-    return urMemRetain(*phMem);
+    CL_RETURN_ON_FAILURE(clRetainMemObject((*phMem)->get()));
   }
   return UR_RESULT_SUCCESS;
 }
@@ -391,7 +390,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
   UR_RETURN_ON_FAILURE(
       ur_mem_handle_t_::makeWithNative(NativeHandle, hContext, *phMem));
   if (!pProperties || !pProperties->isNativeHandleOwned) {
-    return urMemRetain(*phMem);
+    CL_RETURN_ON_FAILURE(clRetainMemObject((*phMem)->get()));
   }
   return UR_RESULT_SUCCESS;
 }
@@ -449,11 +448,13 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageGetInfo(ur_mem_handle_t hMemory,
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urMemRetain(ur_mem_handle_t hMem) {
-  CL_RETURN_ON_FAILURE(clRetainMemObject(hMem->get()));
+  hMem->incrementReferenceCount();
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urMemRelease(ur_mem_handle_t hMem) {
-  CL_RETURN_ON_FAILURE(clReleaseMemObject(hMem->get()));
+  if (hMem->decrementReferenceCount() == 0) {
+    delete hMem;
+  }
   return UR_RESULT_SUCCESS;
 }

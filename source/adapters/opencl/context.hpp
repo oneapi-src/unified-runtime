@@ -19,14 +19,23 @@ struct ur_context_handle_t_ {
   native_type Context;
   std::vector<ur_device_handle_t> Devices;
   uint32_t DeviceCount;
+  std::atomic<uint32_t> RefCount = 0;
 
   ur_context_handle_t_(native_type Ctx, uint32_t DevCount,
                        const ur_device_handle_t *phDevices)
       : Context(Ctx), DeviceCount(DevCount) {
     for (uint32_t i = 0; i < DeviceCount; i++) {
       Devices.emplace_back(phDevices[i]);
+      urDeviceRetain(phDevices[i]);
     }
+    RefCount = 1;
   }
+
+  uint32_t incrementReferenceCount() noexcept { return ++RefCount; }
+
+  uint32_t decrementReferenceCount() noexcept { return --RefCount; }
+
+  uint32_t getReferenceCount() const noexcept { return RefCount; }
 
   static ur_result_t makeWithNative(native_type Ctx, uint32_t DevCount,
                                     const ur_device_handle_t *phDevices,
@@ -34,6 +43,7 @@ struct ur_context_handle_t_ {
     try {
       auto URContext =
           std::make_unique<ur_context_handle_t_>(Ctx, DevCount, phDevices);
+      CL_RETURN_ON_FAILURE(clRetainContext(Ctx));
       native_type &NativeContext = URContext->Context;
       uint32_t &DeviceCount = URContext->DeviceCount;
       if (!DeviceCount) {
@@ -50,6 +60,7 @@ struct ur_context_handle_t_ {
               reinterpret_cast<ur_native_handle_t>(CLDevices[i]);
           UR_RETURN_ON_FAILURE(urDeviceCreateWithNativeHandle(
               NativeDevice, nullptr, nullptr, &(URContext->Devices[i])));
+          UR_RETURN_ON_FAILURE(urDeviceRetain(URContext->Devices[i]));
         }
       }
       Context = URContext.release();
@@ -62,7 +73,12 @@ struct ur_context_handle_t_ {
     return UR_RESULT_SUCCESS;
   }
 
-  ~ur_context_handle_t_() {}
+  ~ur_context_handle_t_() {
+    for (uint32_t i = 0; i < DeviceCount; i++) {
+      urDeviceRelease(Devices[i]);
+    }
+    clReleaseContext(Context);
+  }
 
   native_type get() { return Context; }
 };

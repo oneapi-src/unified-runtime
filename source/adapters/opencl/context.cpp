@@ -41,32 +41,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextCreate(
   return mapCLErrorToUR(Ret);
 }
 
-static cl_int mapURContextInfoToCL(ur_context_info_t URPropName) {
-
-  cl_int CLPropName;
-  switch (URPropName) {
-  case UR_CONTEXT_INFO_NUM_DEVICES:
-    CLPropName = CL_CONTEXT_NUM_DEVICES;
-    break;
-  case UR_CONTEXT_INFO_DEVICES:
-    CLPropName = CL_CONTEXT_DEVICES;
-    break;
-  case UR_CONTEXT_INFO_REFERENCE_COUNT:
-    CLPropName = CL_CONTEXT_REFERENCE_COUNT;
-    break;
-  default:
-    CLPropName = -1;
-  }
-
-  return CLPropName;
-}
-
 UR_APIEXPORT ur_result_t UR_APICALL
 urContextGetInfo(ur_context_handle_t hContext, ur_context_info_t propName,
                  size_t propSize, void *pPropValue, size_t *pPropSizeRet) {
 
   UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
-  const cl_int CLPropName = mapURContextInfoToCL(propName);
 
   switch (static_cast<uint32_t>(propName)) {
   /* 2D USM memops are not supported. */
@@ -89,17 +68,7 @@ urContextGetInfo(ur_context_handle_t hContext, ur_context_info_t propName,
     return ReturnValue(&hContext->Devices[0], hContext->DeviceCount);
   }
   case UR_CONTEXT_INFO_REFERENCE_COUNT: {
-    size_t CheckPropSize = 0;
-    auto ClResult = clGetContextInfo(hContext->get(), CLPropName, propSize,
-                                     pPropValue, &CheckPropSize);
-    if (pPropValue && CheckPropSize != propSize) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
-    CL_RETURN_ON_FAILURE(ClResult);
-    if (pPropSizeRet) {
-      *pPropSizeRet = CheckPropSize;
-    }
-    return UR_RESULT_SUCCESS;
+    return ReturnValue(hContext->getReferenceCount());
   }
   default:
     return UR_RESULT_ERROR_INVALID_ENUMERATION;
@@ -108,16 +77,16 @@ urContextGetInfo(ur_context_handle_t hContext, ur_context_info_t propName,
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urContextRelease(ur_context_handle_t hContext) {
-
-  cl_int Ret = clReleaseContext(hContext->get());
-  return mapCLErrorToUR(Ret);
+  if (hContext->decrementReferenceCount() == 0) {
+    delete hContext;
+  }
+  return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urContextRetain(ur_context_handle_t hContext) {
-
-  cl_int Ret = clRetainContext(hContext->get());
-  return mapCLErrorToUR(Ret);
+  hContext->incrementReferenceCount();
+  return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urContextGetNativeHandle(

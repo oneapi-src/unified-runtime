@@ -87,7 +87,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelGetInfo(ur_kernel_handle_t hKernel,
   // We need this little bit of ugliness because the UR NUM_ARGS property is
   // size_t whereas the CL one is cl_uint. We should consider changing that see
   // #1038
-  if (propName == UR_KERNEL_INFO_NUM_ARGS) {
+  switch (propName) {
+  case UR_KERNEL_INFO_NUM_ARGS: {
     if (pPropSizeRet)
       *pPropSizeRet = sizeof(size_t);
     cl_uint NumArgs = 0;
@@ -99,11 +100,18 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelGetInfo(ur_kernel_handle_t hKernel,
         return UR_RESULT_ERROR_INVALID_SIZE;
       *static_cast<size_t *>(pPropValue) = static_cast<size_t>(NumArgs);
     }
-  } else if (propName == UR_KERNEL_INFO_PROGRAM) {
+    return UR_RESULT_SUCCESS;
+  }
+  case UR_KERNEL_INFO_PROGRAM: {
     return ReturnValue(hKernel->Program);
-  } else if (propName == UR_KERNEL_INFO_CONTEXT) {
+  }
+  case UR_KERNEL_INFO_CONTEXT: {
     return ReturnValue(hKernel->Context);
-  } else {
+  }
+  case UR_KERNEL_INFO_REFERENCE_COUNT: {
+    return ReturnValue(hKernel->getReferenceCount());
+  }
+  default: {
     size_t CheckPropSize = 0;
     cl_int ClResult =
         clGetKernelInfo(hKernel->get(), mapURKernelInfoToCL(propName), propSize,
@@ -115,6 +123,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelGetInfo(ur_kernel_handle_t hKernel,
     if (pPropSizeRet) {
       *pPropSizeRet = CheckPropSize;
     }
+  }
   }
 
   return UR_RESULT_SUCCESS;
@@ -263,13 +272,15 @@ urKernelGetSubGroupInfo(ur_kernel_handle_t hKernel, ur_device_handle_t hDevice,
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urKernelRetain(ur_kernel_handle_t hKernel) {
-  CL_RETURN_ON_FAILURE(clRetainKernel(hKernel->get()));
+  hKernel->incrementReferenceCount();
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urKernelRelease(ur_kernel_handle_t hKernel) {
-  CL_RETURN_ON_FAILURE(clReleaseKernel(hKernel->get()));
+  if (hKernel->decrementReferenceCount() == 0) {
+    delete hKernel;
+  }
   return UR_RESULT_SUCCESS;
 }
 
@@ -388,7 +399,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelGetNativeHandle(
 UR_APIEXPORT ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
     ur_native_handle_t hNativeKernel, ur_context_handle_t hContext,
     ur_program_handle_t hProgram,
-    const ur_kernel_native_properties_t *pProperties,
+    [[maybe_unused]] const ur_kernel_native_properties_t *pProperties,
     ur_kernel_handle_t *phKernel) {
   cl_kernel NativeHandle = reinterpret_cast<cl_kernel>(hNativeKernel);
 
@@ -396,7 +407,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
       NativeHandle, hProgram, hContext, *phKernel));
 
   if (!pProperties || !pProperties->isNativeHandleOwned) {
-    return urKernelRetain(*phKernel);
+    CL_RETURN_ON_FAILURE(clRetainKernel((*phKernel)->get()));
   }
   return UR_RESULT_SUCCESS;
 }

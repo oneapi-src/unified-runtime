@@ -16,27 +16,6 @@
 
 #include <vector>
 
-static ur_result_t getDevicesFromProgram(
-    ur_program_handle_t hProgram,
-    std::unique_ptr<std::vector<cl_device_id>> &DevicesInProgram) {
-
-  if (!hProgram->Context || !hProgram->Context->DeviceCount) {
-    return UR_RESULT_ERROR_INVALID_PROGRAM;
-  }
-  cl_uint DeviceCount = hProgram->Context->DeviceCount;
-  try {
-    DevicesInProgram = std::make_unique<std::vector<cl_device_id>>(DeviceCount);
-    for (uint32_t i = 0; i < DeviceCount; i++) {
-      (*DevicesInProgram)[i] = hProgram->Context->Devices[i]->get();
-    }
-  } catch (std::bad_alloc &) {
-    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-  } catch (...) {
-    return UR_RESULT_ERROR_UNKNOWN;
-  }
-  return UR_RESULT_SUCCESS;
-}
-
 UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithIL(
     ur_context_handle_t hContext, const void *pIL, size_t length,
     const ur_program_properties_t *, ur_program_handle_t *phProgram) {
@@ -157,12 +136,15 @@ UR_APIEXPORT ur_result_t UR_APICALL
 urProgramCompile([[maybe_unused]] ur_context_handle_t hContext,
                  ur_program_handle_t hProgram, const char *pOptions) {
 
-  std::unique_ptr<std::vector<cl_device_id>> DevicesInProgram;
-  CL_RETURN_ON_FAILURE(getDevicesFromProgram(hProgram, DevicesInProgram));
+  uint32_t DeviceCount = hProgram->Context->DeviceCount;
+  std::vector<cl_device_id> CLDevicesInProgram(DeviceCount);
+  for (uint32_t i = 0; i < DeviceCount; i++) {
+    CLDevicesInProgram[i] = hProgram->Context->Devices[i]->get();
+  }
 
-  CL_RETURN_ON_FAILURE(clCompileProgram(
-      hProgram->get(), DevicesInProgram->size(), DevicesInProgram->data(),
-      pOptions, 0, nullptr, nullptr, nullptr, nullptr));
+  CL_RETURN_ON_FAILURE(clCompileProgram(hProgram->get(), DeviceCount,
+                                        CLDevicesInProgram.data(), pOptions, 0,
+                                        nullptr, nullptr, nullptr, nullptr));
 
   return UR_RESULT_SUCCESS;
 }
@@ -216,6 +198,9 @@ urProgramGetInfo(ur_program_handle_t hProgram, ur_program_info_t propName,
     return ReturnValue(&hProgram->Context->Devices[0],
                        hProgram->Context->DeviceCount);
   }
+  case UR_PROGRAM_INFO_REFERENCE_COUNT: {
+    return ReturnValue(hProgram->getReferenceCount());
+  }
   default: {
     size_t CheckPropSize = 0;
     auto ClResult = clGetProgramInfo(hProgram->get(), CLPropName, propSize,
@@ -237,12 +222,14 @@ UR_APIEXPORT ur_result_t UR_APICALL
 urProgramBuild([[maybe_unused]] ur_context_handle_t hContext,
                ur_program_handle_t hProgram, const char *pOptions) {
 
-  std::unique_ptr<std::vector<cl_device_id>> DevicesInProgram;
-  CL_RETURN_ON_FAILURE(getDevicesFromProgram(hProgram, DevicesInProgram));
-
-  CL_RETURN_ON_FAILURE(clBuildProgram(hProgram->get(), DevicesInProgram->size(),
-                                      DevicesInProgram->data(), pOptions,
-                                      nullptr, nullptr));
+  uint32_t DeviceCount = hProgram->Context->DeviceCount;
+  std::vector<cl_device_id> CLDevicesInProgram(DeviceCount);
+  for (uint32_t i = 0; i < DeviceCount; i++) {
+    CLDevicesInProgram[i] = hProgram->Context->Devices[i]->get();
+  }
+  CL_RETURN_ON_FAILURE(
+      clBuildProgram(hProgram->get(), cl_adapter::cast<cl_uint>(DeviceCount),
+                     CLDevicesInProgram.data(), pOptions, nullptr, nullptr));
   return UR_RESULT_SUCCESS;
 }
 
@@ -360,15 +347,15 @@ urProgramGetBuildInfo(ur_program_handle_t hProgram, ur_device_handle_t hDevice,
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urProgramRetain(ur_program_handle_t hProgram) {
-
-  CL_RETURN_ON_FAILURE(clRetainProgram(hProgram->get()));
+  hProgram->incrementReferenceCount();
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urProgramRelease(ur_program_handle_t hProgram) {
-
-  CL_RETURN_ON_FAILURE(clReleaseProgram(hProgram->get()));
+  if (hProgram->decrementReferenceCount() == 0) {
+    delete hProgram;
+  }
   return UR_RESULT_SUCCESS;
 }
 
@@ -388,7 +375,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithNativeHandle(
   UR_RETURN_ON_FAILURE(
       ur_program_handle_t_::makeWithNative(NativeHandle, hContext, *phProgram));
   if (!pProperties || !pProperties->isNativeHandleOwned) {
-    return urProgramRetain(*phProgram);
+    CL_RETURN_ON_FAILURE(clRetainProgram((*phProgram)->get()));
   }
   return UR_RESULT_SUCCESS;
 }

@@ -126,7 +126,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventCreateWithNativeHandle(
   }
 
   if (!pProperties || !pProperties->isNativeHandleOwned) {
-    return urEventRetain(*phEvent);
+    CL_RETURN_ON_FAILURE(clRetainEvent(NativeHandle));
   }
   return UR_RESULT_SUCCESS;
 }
@@ -137,14 +137,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetNativeHandle(
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEventRelease(ur_event_handle_t hEvent) {
-  cl_int RetErr = clReleaseEvent(hEvent->get());
-  CL_RETURN_ON_FAILURE(RetErr);
+  if (hEvent->decrementReferenceCount() == 0) {
+    delete hEvent;
+  }
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEventRetain(ur_event_handle_t hEvent) {
-  cl_int RetErr = clRetainEvent(hEvent->get());
-  CL_RETURN_ON_FAILURE(RetErr);
+  hEvent->incrementReferenceCount();
   return UR_RESULT_SUCCESS;
 }
 
@@ -167,41 +167,50 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetInfo(ur_event_handle_t hEvent,
   cl_event_info CLEventInfo = convertUREventInfoToCL(propName);
   UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
 
-  if (CLEventInfo == CL_EVENT_CONTEXT) {
+  switch (propName) {
+  case UR_EVENT_INFO_CONTEXT: {
     return ReturnValue(hEvent->Context);
   }
-  if (CLEventInfo == CL_EVENT_COMMAND_QUEUE) {
+  case UR_EVENT_INFO_COMMAND_QUEUE: {
     return ReturnValue(hEvent->Queue);
   }
-  size_t CheckPropSize = 0;
-  cl_int RetErr = clGetEventInfo(hEvent->get(), CLEventInfo, propSize,
-                                 pPropValue, &CheckPropSize);
-  if (pPropValue && CheckPropSize != propSize) {
-    return UR_RESULT_ERROR_INVALID_SIZE;
+  case UR_EVENT_INFO_REFERENCE_COUNT: {
+    return ReturnValue(hEvent->getReferenceCount());
   }
-  CL_RETURN_ON_FAILURE(RetErr);
-  if (pPropSizeRet) {
-    *pPropSizeRet = CheckPropSize;
-  }
+  default: {
+    size_t CheckPropSize = 0;
+    cl_int RetErr = clGetEventInfo(hEvent->get(), CLEventInfo, propSize,
+                                   pPropValue, &CheckPropSize);
+    if (pPropValue && CheckPropSize != propSize) {
+      return UR_RESULT_ERROR_INVALID_SIZE;
+    }
+    CL_RETURN_ON_FAILURE(RetErr);
+    if (pPropSizeRet) {
+      *pPropSizeRet = CheckPropSize;
+    }
 
-  if (pPropValue) {
-    if (propName == UR_EVENT_INFO_COMMAND_TYPE) {
-      *reinterpret_cast<ur_command_t *>(pPropValue) = convertCLCommandTypeToUR(
-          *reinterpret_cast<cl_command_type *>(pPropValue));
-    } else if (propName == UR_EVENT_INFO_COMMAND_EXECUTION_STATUS) {
-      /* If the CL_EVENT_COMMAND_EXECUTION_STATUS info value is CL_QUEUED,
-       * change it to CL_SUBMITTED. sycl::info::event::event_command_status has
-       * no equivalent to CL_QUEUED.
-       *
-       * FIXME UR Port: This should not be part of the UR adapter. Since
-       * PI_QUEUED exists, SYCL RT should be changed to handle this situation.
-       * In addition, SYCL RT is relying on PI_QUEUED status to make sure that
-       * the queues are flushed. */
-      const auto param_value_int = static_cast<ur_event_status_t *>(pPropValue);
-      if (*param_value_int == UR_EVENT_STATUS_QUEUED) {
-        *param_value_int = UR_EVENT_STATUS_SUBMITTED;
+    if (pPropValue) {
+      if (propName == UR_EVENT_INFO_COMMAND_TYPE) {
+        *reinterpret_cast<ur_command_t *>(pPropValue) =
+            convertCLCommandTypeToUR(
+                *reinterpret_cast<cl_command_type *>(pPropValue));
+      } else if (propName == UR_EVENT_INFO_COMMAND_EXECUTION_STATUS) {
+        /* If the CL_EVENT_COMMAND_EXECUTION_STATUS info value is CL_QUEUED,
+         * change it to CL_SUBMITTED. sycl::info::event::event_command_status
+         * has no equivalent to CL_QUEUED.
+         *
+         * FIXME UR Port: This should not be part of the UR adapter. Since
+         * PI_QUEUED exists, SYCL RT should be changed to handle this situation.
+         * In addition, SYCL RT is relying on PI_QUEUED status to make sure that
+         * the queues are flushed. */
+        const auto param_value_int =
+            static_cast<ur_event_status_t *>(pPropValue);
+        if (*param_value_int == UR_EVENT_STATUS_QUEUED) {
+          *param_value_int = UR_EVENT_STATUS_SUBMITTED;
+        }
       }
     }
+  }
   }
 
   return UR_RESULT_SUCCESS;

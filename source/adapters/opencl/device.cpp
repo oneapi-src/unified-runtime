@@ -732,6 +732,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
         {"cl_intel_program_scope_host_pipe"}, Supported));
     return ReturnValue(Supported);
   }
+  case UR_DEVICE_INFO_REFERENCE_COUNT: {
+    return ReturnValue(hDevice->getReferenceCount());
+  }
   case UR_DEVICE_INFO_QUEUE_PROPERTIES:
   case UR_DEVICE_INFO_QUEUE_ON_DEVICE_PROPERTIES:
   case UR_DEVICE_INFO_QUEUE_ON_HOST_PROPERTIES:
@@ -802,7 +805,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_MAX_SAMPLERS:
   case UR_DEVICE_INFO_GLOBAL_MEM_CACHELINE_SIZE:
   case UR_DEVICE_INFO_MAX_CONSTANT_ARGS:
-  case UR_DEVICE_INFO_REFERENCE_COUNT:
   case UR_DEVICE_INFO_PARTITION_MAX_SUB_DEVICES:
   case UR_DEVICE_INFO_MAX_MEM_ALLOC_SIZE:
   case UR_DEVICE_INFO_GLOBAL_MEM_CACHE_SIZE:
@@ -980,7 +982,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDevicePartition(
     CL_RETURN_ON_FAILURE(clCreateSubDevices(hDevice->get(), CLProperties.data(),
                                             CLNumDevicesRet,
                                             CLSubDevices.data(), nullptr));
-    for (uint32_t i = 0; i < NumDevices; i++) {
+    for (uint32_t i = 0; i < std::min(CLNumDevicesRet, NumDevices); i++) {
       try {
         auto URSubDevice = std::make_unique<ur_device_handle_t_>(
             CLSubDevices[i], hDevice->Platform, hDevice);
@@ -996,19 +998,23 @@ UR_APIEXPORT ur_result_t UR_APICALL urDevicePartition(
   return UR_RESULT_SUCCESS;
 }
 
+// Root devices ref count are unchanged through out the program lifetime.
 UR_APIEXPORT ur_result_t UR_APICALL urDeviceRetain(ur_device_handle_t hDevice) {
+  if (hDevice->ParentDevice) {
+    hDevice->incrementReferenceCount();
+  }
 
-  cl_int Result = clRetainDevice(hDevice->get());
-
-  return mapCLErrorToUR(Result);
+  return UR_RESULT_SUCCESS;
 }
 
+// Root devices ref count are unchanged through out the program lifetime.
 UR_APIEXPORT ur_result_t UR_APICALL
 urDeviceRelease(ur_device_handle_t hDevice) {
+  if (hDevice->ParentDevice && hDevice->decrementReferenceCount() == 0) {
+    delete hDevice;
+  }
 
-  cl_int Result = clReleaseDevice(hDevice->get());
-
-  return mapCLErrorToUR(Result);
+  return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetNativeHandle(
@@ -1054,7 +1060,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetGlobalTimestamps(
   cl_device_id DeviceId = hDevice->get();
 
   // TODO: Cache OpenCL version for each device and platform
-
   auto RetErr = hDevice->getDeviceVersion(DevVer);
   CL_RETURN_ON_FAILURE(RetErr);
 
