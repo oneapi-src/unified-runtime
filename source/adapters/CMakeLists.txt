@@ -50,3 +50,7 @@ endif()
 if(UR_BUILD_ADAPTER_NATIVE_CPU OR UR_BUILD_ADAPTER_ALL)
     add_subdirectory(native_cpu)
 endif()
+
+if(UR_BUILD_ADAPTER_LIBOMPTARGET OR UR_BUILD_ADAPTER_ALL)
+    add_subdirectory(libomptarget)
+endif()
