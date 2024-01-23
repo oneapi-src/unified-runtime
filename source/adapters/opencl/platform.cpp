@@ -68,7 +68,7 @@ UR_APIEXPORT ur_result_t UR_APICALL
 urPlatformGet(ur_adapter_handle_t *, uint32_t, uint32_t NumEntries,
               ur_platform_handle_t *phPlatforms, uint32_t *pNumPlatforms) {
 
-  static std::vector<ur_platform_handle_t> URPlatforms;
+  static std::vector<std::unique_ptr<ur_platform_handle_t_>> URPlatforms;
   static std::once_flag InitFlag;
   static uint32_t NumPlatforms = 0;
   cl_int Result = CL_SUCCESS;
@@ -113,7 +113,7 @@ urPlatformGet(ur_adapter_handle_t *, uint32_t, uint32_t NumEntries,
   }
   if (NumEntries && phPlatforms) {
     for (uint32_t i = 0; i < NumEntries; i++) {
-      phPlatforms[i] = URPlatforms[i];
+      phPlatforms[i] = &(*URPlatforms[i]);
     }
   }
   return mapCLErrorToUR(Result);

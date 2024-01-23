@@ -168,34 +168,45 @@ urSamplerGetInfo(ur_sampler_handle_t hSampler, ur_sampler_info_t propName,
                 sizeof(ur_sampler_addressing_mode_t));
 
   UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
-  if (SamplerInfo == CL_SAMPLER_CONTEXT) {
+  switch (propName) {
+  case UR_SAMPLER_INFO_CONTEXT: {
     return ReturnValue(hSampler->Context);
   }
-  size_t CheckPropSize = 0;
-  ur_result_t Err = mapCLErrorToUR(clGetSamplerInfo(
-      hSampler->get(), SamplerInfo, propSize, pPropValue, &CheckPropSize));
-  if (pPropValue && CheckPropSize != propSize) {
-    return UR_RESULT_ERROR_INVALID_SIZE;
+  case UR_SAMPLER_INFO_REFERENCE_COUNT: {
+    return ReturnValue(hSampler->getReferenceCount());
   }
-  CL_RETURN_ON_FAILURE(Err);
-  if (pPropSizeRet) {
-    *pPropSizeRet = CheckPropSize;
-  }
+  default: {
+    size_t CheckPropSize = 0;
+    ur_result_t Err = mapCLErrorToUR(clGetSamplerInfo(
+        hSampler->get(), SamplerInfo, propSize, pPropValue, &CheckPropSize));
+    if (pPropValue && CheckPropSize != propSize) {
+      return UR_RESULT_ERROR_INVALID_SIZE;
+    }
+    CL_RETURN_ON_FAILURE(Err);
+    if (pPropSizeRet) {
+      *pPropSizeRet = CheckPropSize;
+    }
 
-  // Convert OpenCL returns to UR
-  cl2URSamplerInfoValue(SamplerInfo, pPropValue);
+    // Convert OpenCL returns to UR
+    cl2URSamplerInfoValue(SamplerInfo, pPropValue);
+  }
+  }
 
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urSamplerRetain(ur_sampler_handle_t hSampler) {
-  return mapCLErrorToUR(clRetainSampler(hSampler->get()));
+  hSampler->incrementReferenceCount();
+  return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urSamplerRelease(ur_sampler_handle_t hSampler) {
-  return mapCLErrorToUR(clReleaseSampler(hSampler->get()));
+  if (hSampler->decrementReferenceCount() == 0) {
+    delete hSampler;
+  }
+  return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urSamplerGetNativeHandle(
@@ -206,7 +217,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urSamplerGetNativeHandle(
 
 UR_APIEXPORT ur_result_t UR_APICALL urSamplerCreateWithNativeHandle(
     ur_native_handle_t hNativeSampler, ur_context_handle_t hContext,
-    const ur_sampler_native_properties_t *pProperties, ur_sampler_handle_t *phSampler) {
+    const ur_sampler_native_properties_t *pProperties,
+    ur_sampler_handle_t *phSampler) {
   cl_sampler NativeHandle = reinterpret_cast<cl_sampler>(hNativeSampler);
   try {
     auto URSampler =
@@ -217,8 +229,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urSamplerCreateWithNativeHandle(
   } catch (...) {
     return UR_RESULT_ERROR_UNKNOWN;
   }
+
   if (!pProperties || !pProperties->isNativeHandleOwned) {
-    return clRetainSampler(NativeHandle);
+    CL_RETURN_ON_FAILURE(clRetainSampler(NativeHandle));
   }
+
   return UR_RESULT_SUCCESS;
 }

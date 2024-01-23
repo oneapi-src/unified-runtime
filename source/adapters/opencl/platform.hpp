@@ -21,7 +21,12 @@ struct ur_platform_handle_t_ {
 
   ur_platform_handle_t_(native_type Plat) : Platform(Plat) {}
 
-  ~ur_platform_handle_t_() {}
+  ~ur_platform_handle_t_() {
+    for (auto &Dev : Devices) {
+      Dev.reset();
+    }
+    Devices.clear();
+  }
 
   template <typename T>
   ur_result_t getExtFunc(T CachedExtFunc, const char *FuncName, T *Fptr) {

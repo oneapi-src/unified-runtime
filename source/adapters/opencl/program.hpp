@@ -17,11 +17,28 @@ struct ur_program_handle_t_ {
   using native_type = cl_program;
   native_type Program;
   ur_context_handle_t Context;
+  std::atomic<uint32_t> RefCount = 0;
 
   ur_program_handle_t_(native_type Prog, ur_context_handle_t Ctx)
-      : Program(Prog), Context(Ctx) {}
+      : Program(Prog), Context(Ctx) {
+    RefCount = 1;
+    if (Context) {
+      urContextRetain(Context);
+    }
+  }
 
-  ~ur_program_handle_t_() {}
+  ~ur_program_handle_t_() {
+    clReleaseProgram(Program);
+    if (Context) {
+      urContextRelease(Context);
+    }
+  }
+
+  uint32_t incrementReferenceCount() noexcept { return ++RefCount; }
+
+  uint32_t decrementReferenceCount() noexcept { return --RefCount; }
+
+  uint32_t getReferenceCount() const noexcept { return RefCount; }
 
   static ur_result_t makeWithNative(native_type NativeProg,
                                     ur_context_handle_t Context,
@@ -38,6 +55,7 @@ struct ur_program_handle_t_ {
             reinterpret_cast<ur_native_handle_t>(CLContext);
         UR_RETURN_ON_FAILURE(urContextCreateWithNativeHandle(
             NativeContext, 0, nullptr, nullptr, &(URProgram->Context)));
+        UR_RETURN_ON_FAILURE(urContextRetain(URProgram->Context));
       }
       Program = URProgram.release();
     } catch (std::bad_alloc &) {

@@ -137,23 +137,27 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueGetInfo(ur_queue_handle_t hQueue,
   }
   cl_command_queue_info CLCommandQueueInfo = mapURQueueInfoToCL(propName);
   UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
-
-  if (propName == UR_QUEUE_INFO_CONTEXT) {
+  switch (propName) {
+  case UR_QUEUE_INFO_CONTEXT: {
     return ReturnValue(hQueue->Context);
   }
-  if (propName == UR_QUEUE_INFO_DEVICE) {
+  case UR_QUEUE_INFO_DEVICE: {
     return ReturnValue(hQueue->Device);
   }
   // Unfortunately the size of cl_bitfield (unsigned long) doesn't line up with
   // our enums (forced to be sizeof(uint32_t)) so this needs special handling.
-  if (propName == UR_QUEUE_INFO_FLAGS) {
+  case UR_QUEUE_INFO_FLAGS: {
     cl_command_queue_properties QueueProperties = 0;
     CL_RETURN_ON_FAILURE(clGetCommandQueueInfo(
         hQueue->get(), CLCommandQueueInfo, sizeof(QueueProperties),
         &QueueProperties, nullptr));
 
     return ReturnValue(mapCLQueuePropsToUR(QueueProperties));
-  } else {
+  }
+  case UR_QUEUE_INFO_REFERENCE_COUNT: {
+    return ReturnValue(hQueue->getReferenceCount());
+  }
+  default: {
     size_t CheckPropSize = 0;
     cl_int RetErr = clGetCommandQueueInfo(hQueue->get(), CLCommandQueueInfo,
                                           propSize, pPropValue, &CheckPropSize);
@@ -164,6 +168,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueGetInfo(ur_queue_handle_t hQueue,
     if (pPropSizeRet) {
       *pPropSizeRet = CheckPropSize;
     }
+  }
   }
 
   return UR_RESULT_SUCCESS;
@@ -205,13 +210,13 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueFlush(ur_queue_handle_t hQueue) {
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urQueueRetain(ur_queue_handle_t hQueue) {
-  cl_int RetErr = clRetainCommandQueue(hQueue->get());
-  CL_RETURN_ON_FAILURE(RetErr);
+  hQueue->incrementReferenceCount();
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urQueueRelease(ur_queue_handle_t hQueue) {
-  cl_int RetErr = clReleaseCommandQueue(hQueue->get());
-  CL_RETURN_ON_FAILURE(RetErr);
+  if (hQueue->decrementReferenceCount() == 0) {
+    delete hQueue;
+  }
   return UR_RESULT_SUCCESS;
 }

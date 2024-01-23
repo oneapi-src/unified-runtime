@@ -18,12 +18,35 @@ struct ur_event_handle_t_ {
   native_type Event;
   ur_context_handle_t Context;
   ur_queue_handle_t Queue;
+  std::atomic<uint32_t> RefCount = 0;
 
   ur_event_handle_t_(native_type Event, ur_context_handle_t Ctx,
                      ur_queue_handle_t Queue)
-      : Event(Event), Context(Ctx), Queue(Queue) {}
+      : Event(Event), Context(Ctx), Queue(Queue) {
+    RefCount = 1;
+    if (Context) {
+      urContextRetain(Context);
+    }
+    if (Queue) {
+      urQueueRetain(Queue);
+    }
+  }
 
-  ~ur_event_handle_t_() {}
+  ~ur_event_handle_t_() {
+    if (Context) {
+      urContextRelease(Context);
+    }
+    if (Queue) {
+      urQueueRelease(Queue);
+    }
+    clReleaseEvent(Event);
+  }
+
+  uint32_t incrementReferenceCount() noexcept { return ++RefCount; }
+
+  uint32_t decrementReferenceCount() noexcept { return --RefCount; }
+
+  uint32_t getReferenceCount() const noexcept { return RefCount; }
 
   native_type get() { return Event; }
 };

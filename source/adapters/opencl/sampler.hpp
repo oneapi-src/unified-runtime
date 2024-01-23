@@ -17,11 +17,28 @@ struct ur_sampler_handle_t_ {
   using native_type = cl_sampler;
   native_type Sampler;
   ur_context_handle_t Context;
+  std::atomic<uint32_t> RefCount = 0;
 
   ur_sampler_handle_t_(native_type Sampler, ur_context_handle_t Ctx)
-      : Sampler(Sampler), Context(Ctx) {}
+      : Sampler(Sampler), Context(Ctx) {
+    RefCount = 1;
+    if (Context) {
+      urContextRetain(Context);
+    }
+  }
 
-  ~ur_sampler_handle_t_() {}
+  ~ur_sampler_handle_t_() {
+    clReleaseSampler(Sampler);
+    if (Context) {
+      urContextRelease(Context);
+    }
+  }
+
+  uint32_t incrementReferenceCount() noexcept { return ++RefCount; }
+
+  uint32_t decrementReferenceCount() noexcept { return --RefCount; }
+
+  uint32_t getReferenceCount() const noexcept { return RefCount; }
 
   native_type get() { return Sampler; }
 };

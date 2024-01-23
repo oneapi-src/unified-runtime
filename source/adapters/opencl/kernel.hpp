@@ -19,12 +19,35 @@ struct ur_kernel_handle_t_ {
   native_type Kernel;
   ur_program_handle_t Program;
   ur_context_handle_t Context;
+  std::atomic<uint32_t> RefCount = 0;
 
   ur_kernel_handle_t_(native_type Kernel, ur_program_handle_t Program,
                       ur_context_handle_t Context)
-      : Kernel(Kernel), Program(Program), Context(Context) {}
+      : Kernel(Kernel), Program(Program), Context(Context) {
+    RefCount = 1;
+    if (Program) {
+      urProgramRetain(Program);
+    }
+    if (Context) {
+      urContextRetain(Context);
+    }
+  }
 
-  ~ur_kernel_handle_t_() {}
+  ~ur_kernel_handle_t_() {
+    clReleaseKernel(Kernel);
+    if (Program) {
+      urProgramRelease(Program);
+    }
+    if (Context) {
+      urContextRelease(Context);
+    }
+  }
+
+  uint32_t incrementReferenceCount() noexcept { return ++RefCount; }
+
+  uint32_t decrementReferenceCount() noexcept { return --RefCount; }
+
+  uint32_t getReferenceCount() const noexcept { return RefCount; }
 
   static ur_result_t makeWithNative(native_type NativeKernel,
                                     ur_program_handle_t Program,
@@ -42,6 +65,7 @@ struct ur_kernel_handle_t_ {
             reinterpret_cast<ur_native_handle_t>(CLProgram);
         UR_RETURN_ON_FAILURE(urProgramCreateWithNativeHandle(
             NativeProgram, nullptr, nullptr, &(URKernel->Program)));
+        UR_RETURN_ON_FAILURE(urProgramRetain(URKernel->Program));
       }
       cl_context CLContext;
       CL_RETURN_ON_FAILURE(clGetKernelInfo(NativeKernel, CL_KERNEL_CONTEXT,
@@ -52,6 +76,7 @@ struct ur_kernel_handle_t_ {
             reinterpret_cast<ur_native_handle_t>(CLContext);
         UR_RETURN_ON_FAILURE(urContextCreateWithNativeHandle(
             NativeContext, 0, nullptr, nullptr, &(URKernel->Context)));
+        UR_RETURN_ON_FAILURE(urContextRetain(URKernel->Context));
       } else if (Context->get() != CLContext) {
         return UR_RESULT_ERROR_INVALID_CONTEXT;
       }
