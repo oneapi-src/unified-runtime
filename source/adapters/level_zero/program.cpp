@@ -113,7 +113,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramBuild(
     const char *Options          ///< [in][optional] pointer to build options
                                  ///< null-terminated string.
 ) {
-  return urProgramBuildExp(Program, 1, Context->Devices.data(), Options);
+  return urProgramBuildExp(Program,
+                           static_cast<uint32_t>(Context->Devices.size()),
+                           Context->Devices.data(), Options);
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urProgramBuildExp(
@@ -282,8 +284,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramLink(
     ur_program_handle_t
         *Program ///< [out] pointer to handle of program object created.
 ) {
-  return urProgramLinkExp(Context, Count, Context->Devices.data(), 1, Programs,
-                          Options, Program);
+  return urProgramLinkExp(Context, Count, Context->Devices.data(),
+                          static_cast<uint32_t>(Context->Devices.size()),
+                          Programs, Options, Program);
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urProgramLinkExp(
