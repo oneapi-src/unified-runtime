@@ -188,8 +188,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
   }
   case UR_DEVICE_INFO_ATOMIC_64:
     return ReturnValue(
-        static_cast<uint32_t>(Device->ZeDeviceModuleProperties->flags &
-                              ZE_DEVICE_MODULE_FLAG_INT64_ATOMICS));
+        static_cast<ur_bool_t>(Device->ZeDeviceModuleProperties->flags &
+                               ZE_DEVICE_MODULE_FLAG_INT64_ATOMICS));
   case UR_DEVICE_INFO_EXTENSIONS: {
     // Convention adopted from OpenCL:
     //     "Returns a space separated list of extension names (the extension
@@ -256,11 +256,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
   // > The application must only use the module for the device, or its
   // > sub-devices, which was provided during creation.
   case UR_DEVICE_INFO_BUILD_ON_SUBDEVICE:
-    return ReturnValue(uint32_t{0});
+    return ReturnValue(false);
   case UR_DEVICE_INFO_COMPILER_AVAILABLE:
-    return ReturnValue(static_cast<uint32_t>(true));
+    return ReturnValue(true);
   case UR_DEVICE_INFO_LINKER_AVAILABLE:
-    return ReturnValue(static_cast<uint32_t>(true));
+    return ReturnValue(true);
   case UR_DEVICE_INFO_MAX_COMPUTE_UNITS: {
     uint32_t MaxComputeUnits =
         Device->ZeDeviceProperties->numEUsPerSubslice *
@@ -323,14 +323,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
     return ReturnValue(
         uint64_t{Device->ZeDeviceComputeProperties->maxSharedLocalMemory});
   case UR_DEVICE_INFO_IMAGE_SUPPORTED:
-    return ReturnValue(static_cast<uint32_t>(
+    return ReturnValue(static_cast<ur_bool_t>(
         Device->ZeDeviceImageProperties->maxImageDims1D > 0));
   case UR_DEVICE_INFO_HOST_UNIFIED_MEMORY:
     return ReturnValue(
-        static_cast<uint32_t>((Device->ZeDeviceProperties->flags &
-                               ZE_DEVICE_PROPERTY_FLAG_INTEGRATED) != 0));
+        static_cast<ur_bool_t>((Device->ZeDeviceProperties->flags &
+                                ZE_DEVICE_PROPERTY_FLAG_INTEGRATED) != 0));
   case UR_DEVICE_INFO_AVAILABLE:
-    return ReturnValue(static_cast<uint32_t>(ZeDevice ? true : false));
+    return ReturnValue(ZeDevice ? true : false);
   case UR_DEVICE_INFO_VENDOR:
     // TODO: Level-Zero does not return vendor's name at the moment
     // only the ID.
@@ -411,7 +411,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
   case UR_EXT_DEVICE_INFO_OPENCL_C_VERSION:
     return ReturnValue("");
   case UR_DEVICE_INFO_PREFERRED_INTEROP_USER_SYNC:
-    return ReturnValue(static_cast<uint32_t>(true));
+    return ReturnValue(true);
   case UR_DEVICE_INFO_PRINTF_BUFFER_SIZE:
     return ReturnValue(
         size_t{Device->ZeDeviceModuleProperties->printfBufferSize});
@@ -428,10 +428,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
     return ReturnValue(ur_device_exec_capability_flag_t{
         UR_DEVICE_EXEC_CAPABILITY_FLAG_NATIVE_KERNEL});
   case UR_DEVICE_INFO_ENDIAN_LITTLE:
-    return ReturnValue(static_cast<uint32_t>(true));
+    return ReturnValue(true);
   case UR_DEVICE_INFO_ERROR_CORRECTION_SUPPORT:
-    return ReturnValue(static_cast<uint32_t>(Device->ZeDeviceProperties->flags &
-                                             ZE_DEVICE_PROPERTY_FLAG_ECC));
+    return ReturnValue(static_cast<ur_bool_t>(
+        Device->ZeDeviceProperties->flags & ZE_DEVICE_PROPERTY_FLAG_ECC));
   case UR_DEVICE_INFO_PROFILING_TIMER_RESOLUTION:
     return ReturnValue(
         static_cast<size_t>(Device->ZeDeviceProperties->timerResolution));
@@ -605,7 +605,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
   }
   case UR_DEVICE_INFO_SUB_GROUP_INDEPENDENT_FORWARD_PROGRESS: {
     // TODO: Not supported yet. Needs to be updated after support is added.
-    return ReturnValue(static_cast<uint32_t>(false));
+    return ReturnValue(false);
   }
   case UR_DEVICE_INFO_SUB_GROUP_SIZES_INTEL: {
     return ReturnValue(Device->ZeDeviceComputeProperties->subGroupSizes,
@@ -833,9 +833,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
     return ReturnValue(capabilities);
   }
   case UR_DEVICE_INFO_MEM_CHANNEL_SUPPORT:
-    return ReturnValue(uint32_t{false});
+    return ReturnValue(false);
   case UR_DEVICE_INFO_IMAGE_SRGB:
-    return ReturnValue(uint32_t{false});
+    return ReturnValue(false);
 
   case UR_DEVICE_INFO_QUEUE_ON_DEVICE_PROPERTIES:
   case UR_DEVICE_INFO_QUEUE_ON_HOST_PROPERTIES: {
@@ -847,13 +847,13 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
         0)); //__read_write attribute currently undefinde in opencl
   }
   case UR_DEVICE_INFO_VIRTUAL_MEMORY_SUPPORT: {
-    return ReturnValue(static_cast<uint32_t>(true));
+    return ReturnValue(true);
   }
 
   case UR_DEVICE_INFO_ESIMD_SUPPORT: {
     // ESIMD is only supported by Intel GPUs.
-    uint32_t result = Device->ZeDeviceProperties->type == ZE_DEVICE_TYPE_GPU &&
-                      Device->ZeDeviceProperties->vendorId == 0x8086;
+    bool result = Device->ZeDeviceProperties->type == ZE_DEVICE_TYPE_GPU &&
+                  Device->ZeDeviceProperties->vendorId == 0x8086;
     return ReturnValue(result);
   }
 
