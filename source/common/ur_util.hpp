@@ -52,7 +52,6 @@ int ur_getpid(void);
 #endif
 ///////////////////////////////////////////////////////////////////////////////
 #if defined(_WIN32)
-#include <Windows.h>
 #define MAKE_LIBRARY_NAME(NAME, VERSION) NAME ".dll"
 #else
 #if defined(__APPLE__)
