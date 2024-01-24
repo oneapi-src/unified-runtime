@@ -19,7 +19,7 @@ UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urProgramSetSpecializationConstantsTest);
 
 TEST_P(urProgramSetSpecializationConstantsTest, Success) {
     ASSERT_SUCCESS(urProgramSetSpecializationConstants(program, 1, &info));
-    ASSERT_SUCCESS(urProgramBuild(context, program, nullptr));
+    ASSERT_SUCCESS(urProgramBuild(program, 1, &device, nullptr));
     auto entry_points =
         uur::KernelsEnvironment::instance->GetEntryPointNames(program_name);
     kernel_name = entry_points[0];

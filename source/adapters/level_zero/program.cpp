@@ -108,15 +108,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urProgramBuild(
-    ur_context_handle_t Context, ///< [in] handle of the context instance.
-    ur_program_handle_t Program, ///< [in] Handle of the program to build.
-    const char *Options          ///< [in][optional] pointer to build options
-                                 ///< null-terminated string.
-) {
-  return urProgramBuildExp(Program, 1, Context->Devices.data(), Options);
-}
-
-UR_APIEXPORT ur_result_t UR_APICALL urProgramBuildExp(
     ur_program_handle_t hProgram,  ///< [in] Handle of the program to build.
     uint32_t numDevices,           ///< [in] number of devices
     ur_device_handle_t *phDevices, ///< [in][range(0, numDevices)] pointer to
@@ -219,7 +210,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramBuildExp(
   return Result;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urProgramCompileExp(
+UR_APIEXPORT ur_result_t UR_APICALL urProgramCompile(
     ur_program_handle_t
         hProgram,        ///< [in][out] handle of the program to compile.
     uint32_t numDevices, ///< [in] number of devices
@@ -230,25 +221,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCompileExp(
 ) {
   std::ignore = numDevices;
   std::ignore = phDevices;
-  return urProgramCompile(hProgram->Context, hProgram, pOptions);
-}
-
-UR_APIEXPORT ur_result_t UR_APICALL urProgramCompile(
-    ur_context_handle_t Context, ///< [in] handle of the context instance.
-    ur_program_handle_t
-        Program,        ///< [in][out] handle of the program to compile.
-    const char *Options ///< [in][optional] pointer to build options
-                        ///< null-terminated string.
-) {
-  std::ignore = Context;
-  std::scoped_lock<ur_shared_mutex> Guard(Program->Mutex);
+  std::scoped_lock<ur_shared_mutex> Guard(hProgram->Mutex);
 
   // It's only valid to compile a program created from IL (we don't support
   // programs created from source code).
   //
   // The OpenCL spec says that the header parameters are ignored when compiling
   // IL programs, so we don't validate them.
-  if (Program->State != ur_program_handle_t_::IL)
+  if (hProgram->State != ur_program_handle_t_::IL)
     return UR_RESULT_ERROR_INVALID_OPERATION;
 
   // We don't compile anything now.  Instead, we delay compilation until
@@ -256,37 +236,22 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCompile(
   // This produces better code because the driver can do cross-module
   // optimizations.  Therefore, we just remember the compilation flags, so we
   // can use them later.
-  if (Options) {
-    Program->BuildFlags = Options;
+  if (pOptions) {
+    hProgram->BuildFlags = pOptions;
 
     // if large allocations are selected, then pass
     // ze-opt-greater-than-4GB-buffer-required to disable
     // stateful optimizations and be able to use larger than
     // 4GB allocations on these kernels.
-    if (Context->Devices[0]->useRelaxedAllocationLimits()) {
-      Program->BuildFlags += " -ze-opt-greater-than-4GB-buffer-required";
+    if (phDevices[0]->useRelaxedAllocationLimits()) {
+      hProgram->BuildFlags += " -ze-opt-greater-than-4GB-buffer-required";
     }
   }
-  Program->State = ur_program_handle_t_::Object;
-
+  hProgram->State = ur_program_handle_t_::Object;
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urProgramLink(
-    ur_context_handle_t Context, ///< [in] handle of the context instance.
-    uint32_t Count, ///< [in] number of program handles in `phPrograms`.
-    const ur_program_handle_t *Programs, ///< [in][range(0, count)] pointer to
-                                         ///< array of program handles.
-    const char *Options, ///< [in][optional] pointer to linker options
-                         ///< null-terminated string.
-    ur_program_handle_t
-        *Program ///< [out] pointer to handle of program object created.
-) {
-  return urProgramLinkExp(Context, Count, Context->Devices.data(), 1, Programs,
-                          Options, Program);
-}
-
-UR_APIEXPORT ur_result_t UR_APICALL urProgramLinkExp(
     ur_context_handle_t hContext,  ///< [in] handle of the context instance.
     uint32_t numDevices,           ///< [in] number of devices
     ur_device_handle_t *phDevices, ///< [in][range(0, numDevices)] pointer to

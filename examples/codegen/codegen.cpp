@@ -118,7 +118,7 @@ int main() {
     ur_program_handle_t hProgram;
     ur_check(urProgramCreateWithIL(hContext, spv.data(), spv.size(), nullptr,
                                    &hProgram));
-    ur_check(urProgramBuild(hContext, hProgram, nullptr));
+    ur_check(urProgramBuild(hProgram, 1, &current_device, nullptr));
 
     ur_mem_handle_t dA, dB;
     ur_check(urMemBufferCreate(hContext, UR_MEM_FLAG_READ_WRITE,

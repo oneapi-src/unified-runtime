@@ -365,7 +365,7 @@ int ur_program_create_with_il(TestState &state) {
 
     urProgramCreateWithIL(context, il_bin.data(), il_bin.size(), nullptr,
                           &program);
-    urProgramBuild(context, program, nullptr);
+    urProgramBuild(program, 1, &device, nullptr);
     urKernelCreate(program, kernel_name.data(), &kernel);
     urQueueCreate(context, device, nullptr, &queue);
 

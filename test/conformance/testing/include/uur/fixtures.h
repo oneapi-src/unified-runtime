@@ -1098,7 +1098,7 @@ struct urBaseKernelTest : urProgramTest {
     }
 
     void Build() {
-        ASSERT_SUCCESS(urProgramBuild(context, program, nullptr));
+        ASSERT_SUCCESS(urProgramBuild(program, 1, &device, nullptr));
         ASSERT_SUCCESS(urKernelCreate(program, kernel_name.data(), &kernel));
     }
 
@@ -1132,7 +1132,8 @@ struct urBaseKernelTestWithParam : urProgramTestWithParam<T> {
     }
 
     void Build() {
-        ASSERT_SUCCESS(urProgramBuild(this->context, this->program, nullptr));
+        ASSERT_SUCCESS(
+            urProgramBuild(this->program, 1, &this->device, nullptr));
         ASSERT_SUCCESS(
             urKernelCreate(this->program, kernel_name.data(), &kernel));
     }
