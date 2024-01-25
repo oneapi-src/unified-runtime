@@ -506,10 +506,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramGetGlobalVariablePointer(
       CLContext, cl_ext::ExtFuncPtrCache->clGetDeviceGlobalVariablePointerCache,
       cl_ext::GetDeviceGlobalVariablePointerName, &FuncT));
 
-  if (!FuncT) {
-    return UR_RESULT_ERROR_INVALID_FUNCTION_NAME;
-  }
-
   const cl_int CLResult =
       FuncT(cl_adapter::cast<cl_device_id>(hDevice),
             cl_adapter::cast<cl_program>(hProgram), pGlobalVariableName,
