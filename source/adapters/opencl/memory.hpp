@@ -10,6 +10,7 @@
 #pragma once
 
 #include "common.hpp"
+#include "context.hpp"
 
 #include <vector>
 
@@ -22,16 +23,12 @@ struct ur_mem_handle_t_ {
   ur_mem_handle_t_(native_type Mem, ur_context_handle_t Ctx)
       : Memory(Mem), Context(Ctx) {
     RefCount = 1;
-    if (Context) {
-      urContextRetain(Context);
-    }
+    urContextRetain(Context);
   }
 
   ~ur_mem_handle_t_() {
     clReleaseMemObject(Memory);
-    if (Context) {
-      urContextRelease(Context);
-    }
+    urContextRelease(Context);
   }
 
   uint32_t incrementReferenceCount() noexcept { return ++RefCount; }
@@ -43,18 +40,18 @@ struct ur_mem_handle_t_ {
   static ur_result_t makeWithNative(native_type NativeMem,
                                     ur_context_handle_t Ctx,
                                     ur_mem_handle_t &Mem) {
+    if (!Ctx) {
+      return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
+    }
     try {
-      auto URMem = std::make_unique<ur_mem_handle_t_>(NativeMem, Ctx);
-      if (!Ctx) {
-        cl_context CLContext;
-        CL_RETURN_ON_FAILURE(clGetMemObjectInfo(
-            NativeMem, CL_MEM_CONTEXT, sizeof(CLContext), &CLContext, nullptr));
-        ur_native_handle_t NativeContext =
-            reinterpret_cast<ur_native_handle_t>(CLContext);
-        UR_RETURN_ON_FAILURE(urContextCreateWithNativeHandle(
-            NativeContext, 0, nullptr, nullptr, &(URMem->Context)));
-        UR_RETURN_ON_FAILURE(urContextRetain(URMem->Context));
+      cl_context CLContext;
+      CL_RETURN_ON_FAILURE(clGetMemObjectInfo(
+          NativeMem, CL_MEM_CONTEXT, sizeof(CLContext), &CLContext, nullptr));
+
+      if (Ctx->get() != CLContext) {
+        return UR_RESULT_ERROR_INVALID_CONTEXT;
       }
+      auto URMem = std::make_unique<ur_mem_handle_t_>(NativeMem, Ctx);
       Mem = URMem.release();
     } catch (std::bad_alloc &) {
       return UR_RESULT_ERROR_OUT_OF_RESOURCES;

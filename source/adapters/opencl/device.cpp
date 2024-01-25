@@ -988,8 +988,16 @@ UR_APIEXPORT ur_result_t UR_APICALL urDevicePartition(
             CLSubDevices[i], hDevice->Platform, hDevice);
         phSubDevices[i] = URSubDevice.release();
       } catch (std::bad_alloc &) {
+        // Delete all the successfully created subdevices before the failed one.
+        for (uint32_t j = 0; j < i; j++) {
+          delete phSubDevices[j];
+        }
         return UR_RESULT_ERROR_OUT_OF_RESOURCES;
       } catch (...) {
+        // Delete all the successfully created subdevices before the failed one.
+        for (uint32_t j = 0; j < i; j++) {
+          delete phSubDevices[j];
+        }
         return UR_RESULT_ERROR_UNKNOWN;
       }
     }

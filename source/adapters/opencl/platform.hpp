@@ -71,7 +71,6 @@ struct ur_platform_handle_t_ {
   }
 
   ur_result_t getPlatformVersion(oclv::OpenCLVersion &Version) {
-
     size_t PlatVerSize = 0;
     CL_RETURN_ON_FAILURE(clGetPlatformInfo(Platform, CL_PLATFORM_VERSION, 0,
                                            nullptr, &PlatVerSize));

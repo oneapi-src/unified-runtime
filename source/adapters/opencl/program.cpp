@@ -33,7 +33,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithIL(
   if (PlatVer >= oclv::V2_1) {
 
     /* Make sure all devices support CL 2.1 or newer as well. */
-    for (ur_device_handle_t URDev : hContext->Devices) {
+    for (ur_device_handle_t URDev : hContext->getDevices()) {
       oclv::OpenCLVersion DevVer;
 
       CL_RETURN_ON_FAILURE_AND_SET_NULL(URDev->getDeviceVersion(DevVer),
@@ -70,7 +70,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithIL(
     /* If none of the devices conform with CL 2.1 or newer make sure they all
      * support the cl_khr_il_program extension.
      */
-    for (ur_device_handle_t URDev : hContext->Devices) {
+    for (ur_device_handle_t URDev : hContext->getDevices()) {
       bool Supported = false;
       CL_RETURN_ON_FAILURE_AND_SET_NULL(
           URDev->checkDeviceExtensions({"cl_khr_il_program"}, Supported),
@@ -178,7 +178,6 @@ static cl_int mapURProgramInfoToCL(ur_program_info_t URPropName) {
 UR_APIEXPORT ur_result_t UR_APICALL
 urProgramGetInfo(ur_program_handle_t hProgram, ur_program_info_t propName,
                  size_t propSize, void *pPropValue, size_t *pPropSizeRet) {
-
   UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
 
   const cl_program_info CLPropName = mapURProgramInfoToCL(propName);
@@ -375,7 +374,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithNativeHandle(
   UR_RETURN_ON_FAILURE(
       ur_program_handle_t_::makeWithNative(NativeHandle, hContext, *phProgram));
   if (!pProperties || !pProperties->isNativeHandleOwned) {
-    CL_RETURN_ON_FAILURE(clRetainProgram((*phProgram)->get()));
+    CL_RETURN_ON_FAILURE(clRetainProgram(NativeHandle));
   }
   return UR_RESULT_SUCCESS;
 }
@@ -393,8 +392,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramSetSpecializationConstants(
     return UR_RESULT_ERROR_INVALID_CONTEXT;
   }
 
-  std::vector<ur_device_handle_t> &DevicesInCtx = Ctx->Devices;
-
   ur_platform_handle_t CurPlatform = Ctx->Devices[0]->Platform;
 
   oclv::OpenCLVersion PlatVer;
@@ -404,7 +401,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramSetSpecializationConstants(
   if (PlatVer < oclv::V2_2) {
     UseExtensionLookup = true;
   } else {
-    for (ur_device_handle_t Dev : DevicesInCtx) {
+    for (ur_device_handle_t Dev : Ctx->getDevices()) {
       oclv::OpenCLVersion DevVer;
 
       UR_RETURN_ON_FAILURE(Dev->getDeviceVersion(DevVer));

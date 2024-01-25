@@ -407,7 +407,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
       NativeHandle, hProgram, hContext, *phKernel));
 
   if (!pProperties || !pProperties->isNativeHandleOwned) {
-    CL_RETURN_ON_FAILURE(clRetainKernel((*phKernel)->get()));
+    CL_RETURN_ON_FAILURE(clRetainKernel(NativeHandle));
   }
   return UR_RESULT_SUCCESS;
 }
