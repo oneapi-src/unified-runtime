@@ -49,14 +49,6 @@ ur_result_t umf2urResult(umf_result_t umfResult) {
 }
 
 usm::DisjointPoolAllConfigs InitializeDisjointPoolConfig() {
-  const char *PoolUrConfigVal = std::getenv("SYCL_PI_LEVEL_ZERO_USM_ALLOCATOR");
-  const char *PoolPiConfigVal = std::getenv("UR_L0_USM_ALLOCATOR");
-  const char *PoolConfigVal =
-      PoolUrConfigVal ? PoolUrConfigVal : PoolPiConfigVal;
-  if (PoolConfigVal == nullptr) {
-    return usm::DisjointPoolAllConfigs();
-  }
-
   const char *PoolUrTraceVal = std::getenv("UR_L0_USM_ALLOCATOR_TRACE");
   const char *PoolPiTraceVal =
       std::getenv("SYCL_PI_LEVEL_ZERO_USM_ALLOCATOR_TRACE");
@@ -64,9 +56,17 @@ usm::DisjointPoolAllConfigs InitializeDisjointPoolConfig() {
                                  ? PoolUrTraceVal
                                  : (PoolPiTraceVal ? PoolPiTraceVal : nullptr);
 
-  bool PoolTrace = false;
+  int PoolTrace = 0;
   if (PoolTraceVal != nullptr) {
     PoolTrace = std::atoi(PoolTraceVal);
+  }
+
+  const char *PoolUrConfigVal = std::getenv("SYCL_PI_LEVEL_ZERO_USM_ALLOCATOR");
+  const char *PoolPiConfigVal = std::getenv("UR_L0_USM_ALLOCATOR");
+  const char *PoolConfigVal =
+      PoolUrConfigVal ? PoolUrConfigVal : PoolPiConfigVal;
+  if (PoolConfigVal == nullptr) {
+    return usm::DisjointPoolAllConfigs(PoolTrace);
   }
 
   return usm::parseDisjointPoolConfig(PoolConfigVal, PoolTrace);
@@ -178,11 +178,11 @@ static ur_result_t USMDeviceAllocImpl(void **ResultPtr,
   ZeDesc.flags = 0;
   ZeDesc.ordinal = 0;
 
-  if (Device->useOptimized32bitAccess() == 0 &&
+  ZeStruct<ze_relaxed_allocation_limits_exp_desc_t> RelaxedDesc;
+  if (Device->useRelaxedAllocationLimits() &&
       (Size > Device->ZeDeviceProperties->maxMemAllocSize)) {
     // Tell Level-Zero to accept Size > maxMemAllocSize if
     // large allocations are used.
-    ZeStruct<ze_relaxed_allocation_limits_exp_desc_t> RelaxedDesc;
     RelaxedDesc.flags = ZE_RELAXED_ALLOCATION_LIMITS_EXP_FLAG_MAX_SIZE;
     ZeDesc.pNext = &RelaxedDesc;
   }
