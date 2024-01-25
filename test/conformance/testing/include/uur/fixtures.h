@@ -325,7 +325,7 @@ struct urHostPipeTest : urQueueTest {
         UUR_RETURN_ON_FATAL_FAILURE(urQueueTest::SetUp());
         uur::KernelsEnvironment::instance->LoadSource("foo", 0, il_binary);
         ASSERT_SUCCESS(uur::KernelsEnvironment::instance->CreateProgram(
-            platform, context, device, *il_binary, &program));
+            platform, context, device, *il_binary, nullptr, &program));
 
         size_t size = 0;
         ASSERT_SUCCESS(urDeviceGetInfo(
@@ -1079,7 +1079,8 @@ template <class T> struct urProgramTestWithParam : urContextTestWithParam<T> {
         UUR_RETURN_ON_FATAL_FAILURE(urContextTestWithParam<T>::SetUp());
         uur::KernelsEnvironment::instance->LoadSource("foo", 0, il_binary);
         ASSERT_SUCCESS(uur::KernelsEnvironment::instance->CreateProgram(
-            this->platform, this->context, this->device, *il_binary, &program));
+            this->platform, this->context, this->device, *il_binary, nullptr,
+            &program));
     }
 
     void TearDown() override {
