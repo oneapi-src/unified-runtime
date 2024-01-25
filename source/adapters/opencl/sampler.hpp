@@ -22,16 +22,12 @@ struct ur_sampler_handle_t_ {
   ur_sampler_handle_t_(native_type Sampler, ur_context_handle_t Ctx)
       : Sampler(Sampler), Context(Ctx) {
     RefCount = 1;
-    if (Context) {
-      urContextRetain(Context);
-    }
+    urContextRetain(Context);
   }
 
   ~ur_sampler_handle_t_() {
     clReleaseSampler(Sampler);
-    if (Context) {
-      urContextRelease(Context);
-    }
+    urContextRelease(Context);
   }
 
   uint32_t incrementReferenceCount() noexcept { return ++RefCount; }

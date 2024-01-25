@@ -24,18 +24,14 @@ struct ur_event_handle_t_ {
                      ur_queue_handle_t Queue)
       : Event(Event), Context(Ctx), Queue(Queue) {
     RefCount = 1;
-    if (Context) {
-      urContextRetain(Context);
-    }
+    urContextRetain(Context);
     if (Queue) {
       urQueueRetain(Queue);
     }
   }
 
   ~ur_event_handle_t_() {
-    if (Context) {
-      urContextRelease(Context);
-    }
+    urContextRelease(Context);
     if (Queue) {
       urQueueRelease(Queue);
     }

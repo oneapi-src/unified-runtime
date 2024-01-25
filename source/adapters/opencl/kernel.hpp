@@ -11,6 +11,7 @@
 
 #include "common.hpp"
 #include "context.hpp"
+#include "program.hpp"
 
 #include <vector>
 
@@ -25,22 +26,14 @@ struct ur_kernel_handle_t_ {
                       ur_context_handle_t Context)
       : Kernel(Kernel), Program(Program), Context(Context) {
     RefCount = 1;
-    if (Program) {
-      urProgramRetain(Program);
-    }
-    if (Context) {
-      urContextRetain(Context);
-    }
+    urProgramRetain(Program);
+    urContextRetain(Context);
   }
 
   ~ur_kernel_handle_t_() {
     clReleaseKernel(Kernel);
-    if (Program) {
-      urProgramRelease(Program);
-    }
-    if (Context) {
-      urContextRelease(Context);
-    }
+    urProgramRelease(Program);
+    urContextRelease(Context);
   }
 
   uint32_t incrementReferenceCount() noexcept { return ++RefCount; }
@@ -53,33 +46,27 @@ struct ur_kernel_handle_t_ {
                                     ur_program_handle_t Program,
                                     ur_context_handle_t Context,
                                     ur_kernel_handle_t &Kernel) {
+    if (!Program || !Context) {
+      return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
+    }
     try {
-      auto URKernel =
-          std::make_unique<ur_kernel_handle_t_>(NativeKernel, Program, Context);
-      if (!Program) {
-        cl_program CLProgram;
-        CL_RETURN_ON_FAILURE(clGetKernelInfo(NativeKernel, CL_KERNEL_PROGRAM,
-                                             sizeof(CLProgram), &CLProgram,
-                                             nullptr));
-        ur_native_handle_t NativeProgram =
-            reinterpret_cast<ur_native_handle_t>(CLProgram);
-        UR_RETURN_ON_FAILURE(urProgramCreateWithNativeHandle(
-            NativeProgram, nullptr, nullptr, &(URKernel->Program)));
-        UR_RETURN_ON_FAILURE(urProgramRetain(URKernel->Program));
-      }
       cl_context CLContext;
       CL_RETURN_ON_FAILURE(clGetKernelInfo(NativeKernel, CL_KERNEL_CONTEXT,
                                            sizeof(CLContext), &CLContext,
                                            nullptr));
-      if (!Context) {
-        ur_native_handle_t NativeContext =
-            reinterpret_cast<ur_native_handle_t>(CLContext);
-        UR_RETURN_ON_FAILURE(urContextCreateWithNativeHandle(
-            NativeContext, 0, nullptr, nullptr, &(URKernel->Context)));
-        UR_RETURN_ON_FAILURE(urContextRetain(URKernel->Context));
-      } else if (Context->get() != CLContext) {
+      cl_program CLProgram;
+      CL_RETURN_ON_FAILURE(clGetKernelInfo(NativeKernel, CL_KERNEL_PROGRAM,
+                                           sizeof(CLProgram), &CLProgram,
+                                           nullptr));
+
+      if (Context->get() != CLContext) {
         return UR_RESULT_ERROR_INVALID_CONTEXT;
       }
+      if (Program->get() != CLProgram) {
+        return UR_RESULT_ERROR_INVALID_PROGRAM;
+      }
+      auto URKernel =
+          std::make_unique<ur_kernel_handle_t_>(NativeKernel, Program, Context);
       Kernel = URKernel.release();
     } catch (std::bad_alloc &) {
       return UR_RESULT_ERROR_OUT_OF_RESOURCES;

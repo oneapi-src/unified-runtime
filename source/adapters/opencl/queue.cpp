@@ -182,8 +182,7 @@ urQueueGetNativeHandle(ur_queue_handle_t hQueue, ur_queue_native_desc_t *,
 
 UR_APIEXPORT ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
     ur_native_handle_t hNativeQueue, ur_context_handle_t hContext,
-    ur_device_handle_t hDevice,
-    [[maybe_unused]] const ur_queue_native_properties_t *pProperties,
+    ur_device_handle_t hDevice, const ur_queue_native_properties_t *pProperties,
     ur_queue_handle_t *phQueue) {
 
   cl_command_queue NativeHandle =
@@ -192,7 +191,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
   UR_RETURN_ON_FAILURE(ur_queue_handle_t_::makeWithNative(
       NativeHandle, hContext, hDevice, *phQueue));
 
-  CL_RETURN_ON_FAILURE(clRetainCommandQueue(NativeHandle));
+  if (!pProperties || !pProperties->isNativeHandleOwned) {
+    CL_RETURN_ON_FAILURE(clRetainCommandQueue(NativeHandle));
+  }
 
   return UR_RESULT_SUCCESS;
 }

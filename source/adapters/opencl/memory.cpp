@@ -364,8 +364,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferPartition(
   return mapCLErrorToUR(RetErr);
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL
-urMemGetNativeHandle(ur_mem_handle_t hMem, ur_native_handle_t *phNativeMem) {
+UR_APIEXPORT ur_result_t UR_APICALL urMemGetNativeHandle(
+    ur_mem_handle_t hMem, ur_device_handle_t, ur_native_handle_t *phNativeMem) {
   return getNativeHandle(hMem->get(), phNativeMem);
 }
 
@@ -390,7 +390,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
   UR_RETURN_ON_FAILURE(
       ur_mem_handle_t_::makeWithNative(NativeHandle, hContext, *phMem));
   if (!pProperties || !pProperties->isNativeHandleOwned) {
-    CL_RETURN_ON_FAILURE(clRetainMemObject((*phMem)->get()));
+    CL_RETURN_ON_FAILURE(clRetainMemObject(NativeHandle));
   }
   return UR_RESULT_SUCCESS;
 }
