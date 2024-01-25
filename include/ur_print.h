@@ -1559,6 +1559,16 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramReleaseParams(const struct ur_
 UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramGetFunctionPointerParams(const struct ur_program_get_function_pointer_params_t *params, char *buffer, const size_t buff_size, size_t *out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Print ur_program_get_global_variable_pointer_params_t params struct
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         - `NULL == buffer`
+///     - ::UR_RESULT_ERROR_INVALID_SIZE
+///         - `buff_size < out_size`
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramGetGlobalVariablePointerParams(const struct ur_program_get_global_variable_pointer_params_t *params, char *buffer, const size_t buff_size, size_t *out_size);
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_get_info_params_t params struct
 /// @returns
 ///     - ::UR_RESULT_SUCCESS
