@@ -237,6 +237,7 @@ ur_result_t ur_program_handle_t_::getGlobalVariablePointer(
   std::string DeviceGlobalName = DeviceGlobalNameIt->second;
 
   try {
+    std::cerr << DeviceGlobalName.c_str() << std::endl;
     UR_CHECK_ERROR(hipModuleGetGlobal(DeviceGlobal, DeviceGlobalSize,
                                       this->get(), DeviceGlobalName.c_str()));
   } catch (ur_result_t Err) {
