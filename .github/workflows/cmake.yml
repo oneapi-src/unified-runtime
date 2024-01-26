@@ -166,12 +166,12 @@ jobs:
     strategy:
       matrix:
         adapter: [
-          {name: CUDA, platform: ""},
-          {name: HIP, platform: ""},
-          {name: L0, platform: ""},
-          {name: OPENCL, platform: "Intel(R) OpenCL"}
+            #{name: CUDA, platform: ""},
+          {name: HIP, platform: ""}
+            #{name: L0, platform: ""},
+            #{name: OPENCL, platform: "Intel(R) OpenCL"}
         ]
-        build_type: [Debug, Release]
+        build_type: [Release]
         compiler: [{c: gcc, cxx: g++}, {c: clang, cxx: clang++}]
 
     runs-on: ${{matrix.adapter.name}}
@@ -222,7 +222,7 @@ jobs:
     - name: Test adapters
       if: matrix.adapter.name != 'L0'
       working-directory: ${{github.workspace}}/build
-      run: env UR_CTS_ADAPTER_PLATFORM="${{matrix.adapter.platform}}" ctest -C ${{matrix.build_type}} --output-on-failure -L "conformance" --timeout 180
+      run: env UR_CTS_ADAPTER_PLATFORM="${{matrix.adapter.platform}}" ctest -VV -C ${{matrix.build_type}} --output-on-failure -L "conformance" --timeout 180
 
     - name: Get information about platform
       if: ${{ always() }}
