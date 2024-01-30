@@ -16,6 +16,7 @@ jobs:
         adapter: [
           {name: CUDA, str_name: cuda, prefix: "ext_oneapi_", config: "--cuda --hip", unit: "gpu"},
           {name: OPENCL, str_name: opencl, prefix: "", config: "", unit: "cpu"}
+          {name: NATIVE_CPU, str_name: nativecpu, prefix: "", config: "", unit: "cpu"}
         ]
         build_type: [Release]
         compiler: [{c: clang, cxx: clang++}]
