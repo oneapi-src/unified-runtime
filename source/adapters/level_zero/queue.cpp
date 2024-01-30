@@ -1493,7 +1493,7 @@ ur_result_t createEventAndAssociateQueue(ur_queue_handle_t Queue,
   // ur_event_handle_t objects. We destroy corresponding ze_event by releasing
   // events from the events cache at queue destruction. Event in the cache owns
   // the Level Zero event.
-  if (IsInternal)
+  if (Queue->isDiscardEvents() && IsInternal)
     (*Event)->OwnNativeHandle = false;
 
   // Append this Event to the CommandList, if any
