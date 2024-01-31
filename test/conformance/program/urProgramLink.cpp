@@ -17,7 +17,7 @@ struct urProgramLinkTest : uur::urProgramTest {
         if (backend == UR_PLATFORM_BACKEND_HIP) {
             GTEST_SKIP();
         }
-        ASSERT_SUCCESS(urProgramCompile(context, program, nullptr));
+        ASSERT_SUCCESS(urProgramCompile(program, 1, &device, nullptr));
     }
 
     void TearDown() override {
@@ -32,8 +32,8 @@ struct urProgramLinkTest : uur::urProgramTest {
 UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urProgramLinkTest);
 
 TEST_P(urProgramLinkTest, Success) {
-    ASSERT_SUCCESS(
-        urProgramLink(context, 1, &program, nullptr, &linked_program));
+    ASSERT_SUCCESS(urProgramLink(context, 1, &device, 1, &program, nullptr,
+                                 &linked_program));
     ur_program_binary_type_t binary_type = UR_PROGRAM_BINARY_TYPE_NONE;
     ASSERT_SUCCESS(urProgramGetBuildInfo(
         linked_program, device, UR_PROGRAM_BUILD_INFO_BINARY_TYPE,
@@ -42,24 +42,37 @@ TEST_P(urProgramLinkTest, Success) {
 }
 
 TEST_P(urProgramLinkTest, InvalidNullHandleContext) {
-    ASSERT_EQ_RESULT(
-        UR_RESULT_ERROR_INVALID_NULL_HANDLE,
-        urProgramLink(nullptr, 1, &program, nullptr, &linked_program));
+    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_HANDLE,
+                     urProgramLink(nullptr, 1, &device, 1, &program, nullptr,
+                                   &linked_program));
 }
 
 TEST_P(urProgramLinkTest, InvalidNullPointerProgram) {
-    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_POINTER,
-                     urProgramLink(context, 1, &program, nullptr, nullptr));
+    ASSERT_EQ_RESULT(
+        UR_RESULT_ERROR_INVALID_NULL_POINTER,
+        urProgramLink(context, 1, &device, 1, &program, nullptr, nullptr));
 }
 
 TEST_P(urProgramLinkTest, InvalidNullPointerInputPrograms) {
-    ASSERT_EQ_RESULT(
-        UR_RESULT_ERROR_INVALID_NULL_POINTER,
-        urProgramLink(context, 1, nullptr, nullptr, &linked_program));
+    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_POINTER,
+                     urProgramLink(context, 1, &device, 1, nullptr, nullptr,
+                                   &linked_program));
 }
 
 TEST_P(urProgramLinkTest, InvalidSizeCount) {
-    ASSERT_EQ_RESULT(
-        UR_RESULT_ERROR_INVALID_SIZE,
-        urProgramLink(context, 0, &program, nullptr, &linked_program));
+    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
+                     urProgramLink(context, 1, &device, 0, &program, nullptr,
+                                   &linked_program));
+}
+
+TEST_P(urProgramLinkTest, InvalidSizeNumDevices) {
+    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
+                     urProgramLink(context, 0, &device, 1, &program, nullptr,
+                                   &linked_program));
+}
+
+TEST_P(urProgramLinkTest, InvalidNullPointerDevices) {
+    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_POINTER,
+                     urProgramLink(context, 1, nullptr, 1, &program, nullptr,
+                                   &linked_program));
 }

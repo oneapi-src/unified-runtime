@@ -10,7 +10,7 @@ struct urProgramGetInfoTest : uur::urProgramTestWithParam<ur_program_info_t> {
         UUR_RETURN_ON_FATAL_FAILURE(
             urProgramTestWithParam<ur_program_info_t>::SetUp());
         // Some queries need the program to be built.
-        ASSERT_SUCCESS(urProgramBuild(this->context, program, nullptr));
+        ASSERT_SUCCESS(urProgramBuild(program, 1, &device, nullptr));
     }
 };
 
