@@ -32,6 +32,9 @@ TEST_P(urProgramGetInfoTest, Success) {
     property_value.resize(property_size);
     ASSERT_SUCCESS(urProgramGetInfo(program, property_name, property_size,
                                     property_value.data(), nullptr));
+    if (property_name == UR_PROGRAM_INFO_IL) {
+        ASSERT_EQ(property_value, *il_binary.get());
+    }
 }
 
 TEST_P(urProgramGetInfoTest, InvalidNullHandleProgram) {
