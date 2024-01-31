@@ -240,7 +240,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCompile(
     const char *Options ///< [in][optional] pointer to build options
                         ///< null-terminated string.
 ) {
-  std::ignore = Context;
   std::scoped_lock<ur_shared_mutex> Guard(Program->Mutex);
 
   // It's only valid to compile a program created from IL (we don't support
@@ -711,7 +710,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramGetBuildInfo(
     size_t *PropSizeRet ///< [out][optional] pointer to the actual size in
                         ///< bytes of data being queried by propName.
 ) {
-  std::ignore = Device;
 
   std::shared_lock<ur_shared_mutex> Guard(Program->Mutex);
   UrReturnHelper ReturnValue(PropSize, PropValue, PropSizeRet);
@@ -820,7 +818,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithNativeHandle(
     ur_program_handle_t *Program ///< [out] pointer to the handle of the
                                  ///< program object created.
 ) {
-  std::ignore = Properties;
   auto ZeModule = ur_cast<ze_module_handle_t>(NativeProgram);
 
   // We assume here that programs created from a native handle always
