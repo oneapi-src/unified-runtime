@@ -346,6 +346,7 @@ urProgramGetBuildInfo(ur_program_handle_t hProgram, ur_device_handle_t hDevice,
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urProgramRetain(ur_program_handle_t hProgram) {
+  CL_RETURN_ON_FAILURE(clRetainProgram(hProgram->get()));
   hProgram->incrementReferenceCount();
   return UR_RESULT_SUCCESS;
 }
@@ -354,6 +355,8 @@ UR_APIEXPORT ur_result_t UR_APICALL
 urProgramRelease(ur_program_handle_t hProgram) {
   if (hProgram->decrementReferenceCount() == 0) {
     delete hProgram;
+  } else {
+    CL_RETURN_ON_FAILURE(clReleaseProgram(hProgram->get()));
   }
   return UR_RESULT_SUCCESS;
 }

@@ -1009,6 +1009,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDevicePartition(
 // Root devices ref count are unchanged through out the program lifetime.
 UR_APIEXPORT ur_result_t UR_APICALL urDeviceRetain(ur_device_handle_t hDevice) {
   if (hDevice->ParentDevice) {
+    CL_RETURN_ON_FAILURE(clRetainDevice(hDevice->get()));
     hDevice->incrementReferenceCount();
   }
 
@@ -1018,10 +1019,13 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceRetain(ur_device_handle_t hDevice) {
 // Root devices ref count are unchanged through out the program lifetime.
 UR_APIEXPORT ur_result_t UR_APICALL
 urDeviceRelease(ur_device_handle_t hDevice) {
-  if (hDevice->ParentDevice && hDevice->decrementReferenceCount() == 0) {
-    delete hDevice;
+  if (hDevice->ParentDevice) {
+    if (hDevice->decrementReferenceCount() == 0) {
+      delete hDevice;
+    } else {
+      CL_RETURN_ON_FAILURE(clReleaseDevice(hDevice->get()));
+    }
   }
-
   return UR_RESULT_SUCCESS;
 }
 

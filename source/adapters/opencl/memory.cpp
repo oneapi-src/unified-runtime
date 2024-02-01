@@ -448,6 +448,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageGetInfo(ur_mem_handle_t hMemory,
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urMemRetain(ur_mem_handle_t hMem) {
+  CL_RETURN_ON_FAILURE(clRetainMemObject(hMem->get()));
   hMem->incrementReferenceCount();
   return UR_RESULT_SUCCESS;
 }
@@ -455,6 +456,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemRetain(ur_mem_handle_t hMem) {
 UR_APIEXPORT ur_result_t UR_APICALL urMemRelease(ur_mem_handle_t hMem) {
   if (hMem->decrementReferenceCount() == 0) {
     delete hMem;
+  } else {
+    CL_RETURN_ON_FAILURE(clReleaseMemObject(hMem->get()));
   }
   return UR_RESULT_SUCCESS;
 }

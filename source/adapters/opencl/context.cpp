@@ -79,12 +79,15 @@ UR_APIEXPORT ur_result_t UR_APICALL
 urContextRelease(ur_context_handle_t hContext) {
   if (hContext->decrementReferenceCount() == 0) {
     delete hContext;
+  } else {
+    CL_RETURN_ON_FAILURE(clReleaseContext(hContext->get()));
   }
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urContextRetain(ur_context_handle_t hContext) {
+  CL_RETURN_ON_FAILURE(clRetainContext(hContext->get()));
   hContext->incrementReferenceCount();
   return UR_RESULT_SUCCESS;
 }

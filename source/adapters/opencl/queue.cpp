@@ -211,6 +211,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueFlush(ur_queue_handle_t hQueue) {
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urQueueRetain(ur_queue_handle_t hQueue) {
+  CL_RETURN_ON_FAILURE(clRetainCommandQueue(hQueue->get()));
   hQueue->incrementReferenceCount();
   return UR_RESULT_SUCCESS;
 }
@@ -218,6 +219,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueRetain(ur_queue_handle_t hQueue) {
 UR_APIEXPORT ur_result_t UR_APICALL urQueueRelease(ur_queue_handle_t hQueue) {
   if (hQueue->decrementReferenceCount() == 0) {
     delete hQueue;
+  } else {
+    CL_RETURN_ON_FAILURE(clReleaseCommandQueue(hQueue->get()));
   }
   return UR_RESULT_SUCCESS;
 }

@@ -139,11 +139,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetNativeHandle(
 UR_APIEXPORT ur_result_t UR_APICALL urEventRelease(ur_event_handle_t hEvent) {
   if (hEvent->decrementReferenceCount() == 0) {
     delete hEvent;
+  } else {
+    CL_RETURN_ON_FAILURE(clReleaseEvent(hEvent->get()));
   }
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEventRetain(ur_event_handle_t hEvent) {
+  CL_RETURN_ON_FAILURE(clRetainEvent(hEvent->get()));
   hEvent->incrementReferenceCount();
   return UR_RESULT_SUCCESS;
 }
