@@ -7260,6 +7260,43 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urEventGetSyncPointProfilingInfoExp
+__urdlllocal ur_result_t UR_APICALL urEventGetSyncPointProfilingInfoExp(
+    ur_event_handle_t hEvent, ///< [in] handle of the event object
+    ur_exp_command_buffer_sync_point_t
+        syncPoint, ///< [in] Sync point referencing the node (i.e. command) from which we want
+                   ///< to get profile information
+    ur_profiling_info_t
+        propName,    ///< [in] the name of the profiling property to query
+    size_t propSize, ///< [in] size in bytes of the profiling property value
+    void *
+        pPropValue, ///< [out][optional][typename(propName, propSize)] value of the profiling
+                    ///< property
+    size_t *
+        pPropSizeRet ///< [out][optional] pointer to the actual size in bytes returned in
+                     ///< propValue
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // extract platform's function pointer table
+    auto dditable = reinterpret_cast<ur_event_object_t *>(hEvent)->dditable;
+    auto pfnGetSyncPointProfilingInfoExp =
+        dditable->ur.EventExp.pfnGetSyncPointProfilingInfoExp;
+    if (nullptr == pfnGetSyncPointProfilingInfoExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    hEvent = reinterpret_cast<ur_event_object_t *>(hEvent)->handle;
+
+    // forward to device-platform
+    result = pfnGetSyncPointProfilingInfoExp(
+        hEvent, syncPoint, propName, propSize, pPropValue, pPropSizeRet);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueCooperativeKernelLaunchExp
 __urdlllocal ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
     ur_queue_handle_t hQueue,   ///< [in] handle of the queue object
@@ -8138,6 +8175,60 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetEventProcAddrTable(
             // return pointers directly to platform's DDIs
             *pDdiTable =
                 ur_loader::context->platforms.front().dditable.ur.Event;
+        }
+    }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Exported function for filling application's EventExp table
+///        with current process' addresses
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+UR_DLLEXPORT ur_result_t UR_APICALL urGetEventExpProcAddrTable(
+    ur_api_version_t version, ///< [in] API version requested
+    ur_event_exp_dditable_t
+        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
+) {
+    if (nullptr == pDdiTable) {
+        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    if (ur_loader::context->version < version) {
+        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+    }
+
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // Load the device-platform DDI tables
+    for (auto &platform : ur_loader::context->platforms) {
+        if (platform.initStatus != UR_RESULT_SUCCESS) {
+            continue;
+        }
+        auto getTable = reinterpret_cast<ur_pfnGetEventExpProcAddrTable_t>(
+            ur_loader::LibLoader::getFunctionPtr(platform.handle.get(),
+                                                 "urGetEventExpProcAddrTable"));
+        if (!getTable) {
+            continue;
+        }
+        platform.initStatus = getTable(version, &platform.dditable.ur.EventExp);
+    }
+
+    if (UR_RESULT_SUCCESS == result) {
+        if (ur_loader::context->platforms.size() != 1 ||
+            ur_loader::context->forceIntercept) {
+            // return pointers to loader's DDIs
+            pDdiTable->pfnGetSyncPointProfilingInfoExp =
+                ur_loader::urEventGetSyncPointProfilingInfoExp;
+        } else {
+            // return pointers directly to platform's DDIs
+            *pDdiTable =
+                ur_loader::context->platforms.front().dditable.ur.EventExp;
         }
     }
 

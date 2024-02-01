@@ -132,6 +132,23 @@ were obtained from.
                                            pLocalWorkSize, 1, &syncPoint, 
                                            nullptr);
 
+    // Finalize the CommandBuffer to launch it
+    ${x}CommandBufferFinalizeExp(hCommandBuffer);
+
+    // Execute the CommandBuffer and obtain the event associated to this
+    // execution
+    ${x}_event_handle_t event;
+    ${x}CommandBufferEnqueueExp(hCommandBuffer, hQueue, 0, nullptr,
+                                &event);
+
+    // Get SyncPoint profiling information
+    ${x}_profiling_info_t propName;
+    size_t propSize;
+    void* pPropValue;
+    size_t pPropSizeRet;
+    ${x}EventGetSyncPointProfilingInfoExp(event, syncPoint, propName, propSize,
+                                          pPropValue, &pPropSizeRet);
+
 Enqueueing Command-Buffers
 --------------------------------------------------------------------------------
 
@@ -211,6 +228,7 @@ Functions
 * ${x}CommandBufferAppendUSMPrefetchExp
 * ${x}CommandBufferAppendUSMAdviseExp
 * ${x}CommandBufferEnqueueExp
+* ${x}EventGetSyncPointProfilingInfoExp
 
 Changelog
 --------------------------------------------------------------------------------
@@ -226,6 +244,9 @@ Changelog
 +-----------+-------------------------------------------------------+
 | 1.3       | Add function definitions for Prefetch and Advise      |
 |           | commands                                              |
++-----------+-------------------------------------------------------+
+| 1.4       | Add function definitions for getting sync point       |
+|           | profiling information                                 |
 +-----------+-------------------------------------------------------+
 
 Contributors

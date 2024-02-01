@@ -1616,6 +1616,14 @@ ur_result_t urPrintEventSetCallbackParams(
     return str_copy(&ss, buffer, buff_size, out_size);
 }
 
+ur_result_t urPrintEventGetSyncPointProfilingInfoExpParams(
+    const struct ur_event_get_sync_point_profiling_info_exp_params_t *params,
+    char *buffer, const size_t buff_size, size_t *out_size) {
+    std::stringstream ss;
+    ss << params;
+    return str_copy(&ss, buffer, buff_size, out_size);
+}
+
 ur_result_t
 urPrintKernelCreateParams(const struct ur_kernel_create_params_t *params,
                           char *buffer, const size_t buff_size,

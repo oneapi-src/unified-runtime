@@ -345,6 +345,20 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
   return retVal;
 }
 
+UR_DLLEXPORT ur_result_t UR_APICALL urGetEventExpProcAddrTable(
+    ur_api_version_t version, ///< [in] API version requested
+    ur_event_exp_dditable_t
+        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
+) {
+  auto retVal = validateProcInputs(version, pDdiTable);
+  if (UR_RESULT_SUCCESS != retVal) {
+    return retVal;
+  }
+  pDdiTable->pfnGetSyncPointProfilingInfoExp =
+      urEventGetSyncProfilingProfilingInfoExp;
+  return retVal;
+}
+
 UR_DLLEXPORT ur_result_t UR_APICALL urGetUsmP2PExpProcAddrTable(
     ur_api_version_t version, ur_usm_p2p_exp_dditable_t *pDdiTable) {
   auto retVal = validateProcInputs(version, pDdiTable);

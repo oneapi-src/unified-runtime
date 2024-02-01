@@ -7623,6 +7623,50 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urEventGetSyncPointProfilingInfoExp
+__urdlllocal ur_result_t UR_APICALL urEventGetSyncPointProfilingInfoExp(
+    ur_event_handle_t hEvent, ///< [in] handle of the event object
+    ur_exp_command_buffer_sync_point_t
+        syncPoint, ///< [in] Sync point referencing the node (i.e. command) from which we want
+                   ///< to get profile information
+    ur_profiling_info_t
+        propName,    ///< [in] the name of the profiling property to query
+    size_t propSize, ///< [in] size in bytes of the profiling property value
+    void *
+        pPropValue, ///< [out][optional][typename(propName, propSize)] value of the profiling
+                    ///< property
+    size_t *
+        pPropSizeRet ///< [out][optional] pointer to the actual size in bytes returned in
+                     ///< propValue
+) {
+    auto pfnGetSyncPointProfilingInfoExp =
+        context.urDdiTable.EventExp.pfnGetSyncPointProfilingInfoExp;
+
+    if (nullptr == pfnGetSyncPointProfilingInfoExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    if (context.enableParameterValidation) {
+        if (NULL == hEvent) {
+            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
+        }
+
+        if (UR_PROFILING_INFO_COMMAND_COMPLETE < propName) {
+            return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        }
+
+        if (pPropValue && propSize == 0) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
+    }
+
+    ur_result_t result = pfnGetSyncPointProfilingInfoExp(
+        hEvent, syncPoint, propName, propSize, pPropValue, pPropSizeRet);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueCooperativeKernelLaunchExp
 __urdlllocal ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
     ur_queue_handle_t hQueue,   ///< [in] handle of the queue object
@@ -8530,6 +8574,42 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetEventProcAddrTable(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Exported function for filling application's EventExp table
+///        with current process' addresses
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+UR_DLLEXPORT ur_result_t UR_APICALL urGetEventExpProcAddrTable(
+    ur_api_version_t version, ///< [in] API version requested
+    ur_event_exp_dditable_t
+        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
+) {
+    auto &dditable = ur_validation_layer::context.urDdiTable.EventExp;
+
+    if (nullptr == pDdiTable) {
+        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    if (UR_MAJOR_VERSION(ur_validation_layer::context.version) !=
+            UR_MAJOR_VERSION(version) ||
+        UR_MINOR_VERSION(ur_validation_layer::context.version) >
+            UR_MINOR_VERSION(version)) {
+        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+    }
+
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    dditable.pfnGetSyncPointProfilingInfoExp =
+        pDdiTable->pfnGetSyncPointProfilingInfoExp;
+    pDdiTable->pfnGetSyncPointProfilingInfoExp =
+        ur_validation_layer::urEventGetSyncPointProfilingInfoExp;
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's Kernel table
 ///        with current process' addresses
 ///
@@ -9335,6 +9415,11 @@ ur_result_t context_t::init(ur_dditable_t *dditable,
     if (UR_RESULT_SUCCESS == result) {
         result = ur_validation_layer::urGetEventProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->Event);
+    }
+
+    if (UR_RESULT_SUCCESS == result) {
+        result = ur_validation_layer::urGetEventExpProcAddrTable(
+            UR_API_VERSION_CURRENT, &dditable->EventExp);
     }
 
     if (UR_RESULT_SUCCESS == result) {

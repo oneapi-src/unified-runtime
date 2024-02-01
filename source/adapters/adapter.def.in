@@ -7,6 +7,7 @@ EXPORTS
 	urGetEnqueueProcAddrTable
 	urGetEnqueueExpProcAddrTable
 	urGetEventProcAddrTable
+	urGetEventExpProcAddrTable
 	urGetKernelProcAddrTable
 	urGetKernelExpProcAddrTable
 	urGetMemProcAddrTable
