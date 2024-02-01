@@ -32,7 +32,7 @@ struct ur_device_handle_t_ {
     }
   }
 
-  ~ur_device_handle_t_() { clReleaseDevice(Device); }
+  ~ur_device_handle_t_() {}
 
   uint32_t incrementReferenceCount() noexcept { return ++RefCount; }
 

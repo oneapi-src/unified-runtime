@@ -272,6 +272,7 @@ urKernelGetSubGroupInfo(ur_kernel_handle_t hKernel, ur_device_handle_t hDevice,
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urKernelRetain(ur_kernel_handle_t hKernel) {
+  CL_RETURN_ON_FAILURE(clRetainKernel(hKernel->get()));
   hKernel->incrementReferenceCount();
   return UR_RESULT_SUCCESS;
 }
@@ -280,6 +281,8 @@ UR_APIEXPORT ur_result_t UR_APICALL
 urKernelRelease(ur_kernel_handle_t hKernel) {
   if (hKernel->decrementReferenceCount() == 0) {
     delete hKernel;
+  } else {
+    CL_RETURN_ON_FAILURE(clReleaseKernel(hKernel->get()));
   }
   return UR_RESULT_SUCCESS;
 }
