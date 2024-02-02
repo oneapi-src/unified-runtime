@@ -1007,8 +1007,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetSyncPointProfilingInfoExp(
 
   UrReturnHelper ReturnValue(PropValueSize, PropValue, PropValueSizeRet);
 
-  ze_kernel_timestamp_result_t tsResult;
-
   // Node profiling info is stored in the CommandData field of the event
   // returned from graph submission.
   // The timing info of each command corresponding to a node is stored using
@@ -1024,7 +1022,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetSyncPointProfilingInfoExp(
       case UR_PROFILING_INFO_COMMAND_START: {
         ProfilingsPtr =
             static_cast<command_buffer_profiling_t *>(Event->CommandData);
-        uint64_t Index = static_cast<const uint64_t>(SyncPoint);
+        const uint64_t Index = static_cast<const uint64_t>(SyncPoint);
 
         if (Index > ProfilingsPtr->NumEvents) {
           return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_EXP;
@@ -1039,7 +1037,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetSyncPointProfilingInfoExp(
       case UR_PROFILING_INFO_COMMAND_END: {
         ProfilingsPtr =
             static_cast<command_buffer_profiling_t *>(Event->CommandData);
-        uint64_t Index = static_cast<const uint64_t>(SyncPoint);
+        const uint64_t Index = static_cast<const uint64_t>(SyncPoint);
 
         if (Index > ProfilingsPtr->NumEvents) {
           return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_EXP;
