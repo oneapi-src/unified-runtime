@@ -13,24 +13,28 @@
 
 UR_APIEXPORT ur_result_t UR_APICALL urUsmP2PEnablePeerAccessExp(
     ur_device_handle_t commandDevice, ur_device_handle_t peerDevice) {
+
+  ur_result_t result = UR_RESULT_SUCCESS;
   try {
     ScopedContext active(commandDevice->getContext());
     UR_CHECK_ERROR(cuCtxEnablePeerAccess(peerDevice->getContext(), 0));
   } catch (ur_result_t err) {
-    return err;
+    result = err;
   }
-  return UR_RESULT_SUCCESS;
+  return result;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urUsmP2PDisablePeerAccessExp(
     ur_device_handle_t commandDevice, ur_device_handle_t peerDevice) {
+
+  ur_result_t result = UR_RESULT_SUCCESS;
   try {
     ScopedContext active(commandDevice->getContext());
     UR_CHECK_ERROR(cuCtxDisablePeerAccess(peerDevice->getContext()));
   } catch (ur_result_t err) {
-    return err;
+    result = err;
   }
-  return UR_RESULT_SUCCESS;
+  return result;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urUsmP2PPeerAccessGetInfoExp(
