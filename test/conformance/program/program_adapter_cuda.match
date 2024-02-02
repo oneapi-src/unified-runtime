@@ -9,6 +9,7 @@
 {{OPT}}urProgramGetBuildInfoTest.InvalidNullHandleDevice/NVIDIA_CUDA_BACKEND___{{.*}}___UR_PROGRAM_BUILD_INFO_OPTIONS
 {{OPT}}urProgramGetBuildInfoTest.InvalidNullHandleDevice/NVIDIA_CUDA_BACKEND___{{.*}}___UR_PROGRAM_BUILD_INFO_LOG
 {{OPT}}urProgramGetBuildInfoTest.InvalidNullHandleDevice/NVIDIA_CUDA_BACKEND___{{.*}}___UR_PROGRAM_BUILD_INFO_BINARY_TYPE
+{{OPT}}urProgramGetInfoTest.Success/NVIDIA_CUDA_BACKEND___{{.*}}___UR_PROGRAM_INFO_IL
 {{OPT}}urProgramGetInfoTest.Success/NVIDIA_CUDA_BACKEND___{{.*}}___UR_PROGRAM_INFO_NUM_KERNELS
 {{OPT}}urProgramGetInfoTest.Success/NVIDIA_CUDA_BACKEND___{{.*}}___UR_PROGRAM_INFO_KERNEL_NAMES
 {{OPT}}urProgramGetInfoTest.InvalidNullHandleProgram/NVIDIA_CUDA_BACKEND___{{.*}}___UR_PROGRAM_INFO_REFERENCE_COUNT
