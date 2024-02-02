@@ -11,6 +11,7 @@ urProgramBuildTest.BuildFailure/AMD_HIP_BACKEND___{{.*}}_
 {{OPT}}urProgramGetBuildInfoTest.InvalidNullHandleDevice/AMD_HIP_BACKEND___{{.*}}___UR_PROGRAM_BUILD_INFO_LOG
 {{OPT}}urProgramGetBuildInfoTest.InvalidNullHandleDevice/AMD_HIP_BACKEND___{{.*}}___UR_PROGRAM_BUILD_INFO_BINARY_TYPE
 {{OPT}}urProgramGetBuildInfoSingleTest.LogIsNullTerminated/AMD_HIP_BACKEND___{{.*}}_
+{{OPT}}urProgramGetInfoTest.Success/AMD_HIP_BACKEND___{{.*}}___UR_PROGRAM_INFO_IL
 {{OPT}}urProgramGetInfoTest.Success/AMD_HIP_BACKEND___{{.*}}___UR_PROGRAM_INFO_NUM_KERNELS
 {{OPT}}urProgramGetInfoTest.Success/AMD_HIP_BACKEND___{{.*}}___UR_PROGRAM_INFO_KERNEL_NAMES
 {{OPT}}urProgramGetInfoTest.InvalidNullHandleProgram/AMD_HIP_BACKEND___{{.*}}___UR_PROGRAM_INFO_REFERENCE_COUNT
