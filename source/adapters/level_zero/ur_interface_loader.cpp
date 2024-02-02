@@ -355,7 +355,7 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetEventExpProcAddrTable(
     return retVal;
   }
   pDdiTable->pfnGetSyncPointProfilingInfoExp =
-      urEventGetSyncProfilingProfilingInfoExp;
+      urEventGetSyncPointProfilingInfoExp;
   return retVal;
 }
 
