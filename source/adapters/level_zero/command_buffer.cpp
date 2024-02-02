@@ -1022,7 +1022,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetSyncPointProfilingInfoExp(
       case UR_PROFILING_INFO_COMMAND_START: {
         ProfilingsPtr =
             static_cast<command_buffer_profiling_t *>(Event->CommandData);
-        const uint64_t Index = static_cast<const uint64_t>(SyncPoint);
+        const uint64_t Index = static_cast<uint64_t>(SyncPoint);
 
         if (Index > ProfilingsPtr->NumEvents) {
           return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_EXP;
@@ -1037,7 +1037,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetSyncPointProfilingInfoExp(
       case UR_PROFILING_INFO_COMMAND_END: {
         ProfilingsPtr =
             static_cast<command_buffer_profiling_t *>(Event->CommandData);
-        const uint64_t Index = static_cast<const uint64_t>(SyncPoint);
+        const uint64_t Index = static_cast<uint64_t>(SyncPoint);
 
         if (Index > ProfilingsPtr->NumEvents) {
           return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_EXP;
