@@ -80,6 +80,8 @@ struct ur_command_list_info_t {
   void append(ur_event_handle_t Event) { EventList.push_back(Event); }
 };
 
+// The map type that would track all internal events in a queue.
+using ur_event_map_t = std::unordered_map<ze_event_handle_t, uint32_t>;
 // The map type that would track all command-lists in a queue.
 using ur_command_list_map_t =
     std::unordered_map<ze_command_list_handle_t, ur_command_list_info_t>;
@@ -186,6 +188,9 @@ struct ur_queue_handle_t_ : _ur_object {
       return It->second;
     }
   };
+  uint32_t CmdListEnqueued = 0;
+  // for the last cmdlist to wait for all other events so it has host scope.
+  ur_event_map_t AppendedEventsMap;
 
   // A map of compute groups containing compute queue handles, one per thread.
   // When a queue is accessed from multiple host threads, a separate queue group

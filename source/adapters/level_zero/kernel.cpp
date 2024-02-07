@@ -209,9 +209,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
   ur_event_handle_t InternalEvent{};
   bool IsInternal = OutEvent == nullptr;
   ur_event_handle_t *Event = OutEvent ? OutEvent : &InternalEvent;
+  bool IsLastCmdList = !Queue->UsingImmCmdLists && OutEvent != nullptr;
 
   UR_CALL(createEventAndAssociateQueue(Queue, Event, UR_COMMAND_KERNEL_LAUNCH,
                                        CommandList, IsInternal));
+
   ZeEvent = (*Event)->ZeEvent;
   (*Event)->WaitList = TmpWaitList;
 
@@ -228,6 +230,15 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
   // Add to list of kernels to be submitted
   if (IndirectAccessTrackingEnabled)
     Queue->KernelsToBeSubmitted.push_back(Kernel);
+
+  // given that there is no outevent and regular cmdlist, we'll assume that this
+  // is not the last cmdlist appended and thus we will treat this with internal
+  // event with device scope. (If OutEvent == nullptr then IsInternal = true
+  // then Device Scope)
+  if (!IsLastCmdList) {
+    Queue->AppendedEventsMap.insert(std::pair<ze_event_handle_t, uint32_t>(
+        ZeEvent, Queue->CmdListEnqueued++));
+  }
 
   if (Queue->UsingImmCmdLists && IndirectAccessTrackingEnabled) {
     // If using immediate commandlists then gathering of indirect
@@ -252,16 +263,54 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
     // No lock is needed here, unlike the immediate commandlist case above,
     // because the kernels are not actually submitted yet. Kernels will be
     // submitted only when the comamndlist is closed. Then, a lock is held.
-    ZE2UR_CALL(zeCommandListAppendLaunchKernel,
-               (CommandList->first, ZeKernel, &ZeThreadGroupDimensions, ZeEvent,
-                (*Event)->WaitList.Length, (*Event)->WaitList.ZeEventList));
+
+    // If this is the lastCmdList, we want to wait on all previous enqueued
+    // events, in addition to all events in waitlist.
+    // No need for the overhead if internal eventmap is empty.
+    if (IsLastCmdList && Queue->AppendedEventsMap.size() > 0) {
+      ze_event_handle_t *FinalEventWaitList =
+          new ze_event_handle_t[Queue->AppendedEventsMap.size() +
+                                NumEventsInWaitList];
+      auto EventPair = Queue->AppendedEventsMap.begin();
+      int FinalEventWaitListCounter = 0;
+      int InEventWaitListCounter = 0;
+      while (EventPair != Queue->AppendedEventsMap.end() ||
+             InEventWaitListCounter < (int)NumEventsInWaitList) {
+        // If we haven't exhausted our EventWaitList and events on waitlist is
+        // not in our internal event map, add to FinalEventWaitList
+        if (InEventWaitListCounter < (int)NumEventsInWaitList) {
+          if (Queue->AppendedEventsMap.find(
+                  (*Event)->WaitList.ZeEventList[InEventWaitListCounter]) ==
+              Queue->AppendedEventsMap.end()) {
+            FinalEventWaitList[FinalEventWaitListCounter++] =
+                static_cast<ze_event_handle_t>(
+                    (*Event)->WaitList.ZeEventList[InEventWaitListCounter]);
+          }
+          InEventWaitListCounter++;
+        }
+        if (EventPair != Queue->AppendedEventsMap.end()) {
+          FinalEventWaitList[FinalEventWaitListCounter++] =
+              static_cast<ze_event_handle_t>(EventPair->first);
+          EventPair++;
+        }
+      }
+
+      ZE2UR_CALL(zeCommandListAppendLaunchKernel,
+                 (CommandList->first, ZeKernel, &ZeThreadGroupDimensions,
+                  ZeEvent, FinalEventWaitListCounter + InEventWaitListCounter,
+                  FinalEventWaitList));
+    } else {
+      ZE2UR_CALL(zeCommandListAppendLaunchKernel,
+                 (CommandList->first, ZeKernel, &ZeThreadGroupDimensions,
+                  ZeEvent, (*Event)->WaitList.Length,
+                  (*Event)->WaitList.ZeEventList));
+    }
   }
 
   urPrint("calling zeCommandListAppendLaunchKernel() with"
           "  ZeEvent %#" PRIxPTR "\n",
           ur_cast<std::uintptr_t>(ZeEvent));
   printZeEventList((*Event)->WaitList);
-
   // Execute command list asynchronously, as the event will be used
   // to track down its completion.
   UR_CALL(Queue->executeCommandList(CommandList, false, true));
