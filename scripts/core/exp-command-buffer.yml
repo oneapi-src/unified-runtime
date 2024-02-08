@@ -738,4 +738,4 @@ returns:
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_EXP
-      - "If `syncPoint` is not referencing a command enqueued in this CommandBuffer. Typically, `syncPoint` > number of commands"
+      - "If `syncPoint` does not reference a command in the command-buffer submission associated with `hEvent.`"
