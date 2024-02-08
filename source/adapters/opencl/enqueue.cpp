@@ -13,6 +13,7 @@
 #include "event.hpp"
 #include "kernel.hpp"
 #include "memory.hpp"
+#include "platform.hpp"
 #include "program.hpp"
 #include "queue.hpp"
 
@@ -518,22 +519,22 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
     uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
     ur_event_handle_t *phEvent) {
 
-  cl_context Ctx = hQueue->Context->get();
+  ur_platform_handle_t Platform = hQueue->getPlatform();
 
-  cl_ext::clEnqueueWriteGlobalVariable_fn F = nullptr;
-  cl_int Res = cl_ext::getExtFuncFromContext<decltype(F)>(
-      Ctx, cl_ext::ExtFuncPtrCache->clEnqueueWriteGlobalVariableCache,
-      cl_ext::EnqueueWriteGlobalVariableName, &F);
+  cl_ext::clEnqueueWriteGlobalVariable_fn clEnqueueWriteGlobalVariable =
+      Platform->ExtFuncPtr->clEnqueueWriteGlobalVariableCache;
+  UR_RETURN_ON_FAILURE(
+      Platform->getExtFunc(&clEnqueueWriteGlobalVariable,
+                           cl_ext::EnqueueWriteGlobalVariableName, ""));
 
-  if (!F || Res != CL_SUCCESS)
-    return UR_RESULT_ERROR_INVALID_OPERATION;
   cl_event Event;
   std::vector<cl_event> CLWaitEvents(numEventsInWaitList);
   for (uint32_t i = 0; i < numEventsInWaitList; i++) {
     CLWaitEvents[i] = phEventWaitList[i]->get();
   }
-  Res = F(hQueue->get(), hProgram->get(), name, blockingWrite, count, offset,
-          pSrc, numEventsInWaitList, CLWaitEvents.data(), &Event);
+  cl_int Res = clEnqueueWriteGlobalVariable(
+      hQueue->get(), hProgram->get(), name, blockingWrite, count, offset, pSrc,
+      numEventsInWaitList, CLWaitEvents.data(), &Event);
   if (phEvent) {
     try {
       auto UREvent =
@@ -554,22 +555,21 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
     uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
     ur_event_handle_t *phEvent) {
 
-  cl_context Ctx = hQueue->Context->get();
+  ur_platform_handle_t Platform = hQueue->getPlatform();
 
-  cl_ext::clEnqueueReadGlobalVariable_fn F = nullptr;
-  cl_int Res = cl_ext::getExtFuncFromContext<decltype(F)>(
-      Ctx, cl_ext::ExtFuncPtrCache->clEnqueueReadGlobalVariableCache,
-      cl_ext::EnqueueReadGlobalVariableName, &F);
+  cl_ext::clEnqueueReadGlobalVariable_fn clEnqueueReadGlobalVariable =
+      Platform->ExtFuncPtr->clEnqueueReadGlobalVariableCache;
+  UR_RETURN_ON_FAILURE(Platform->getExtFunc(
+      &clEnqueueReadGlobalVariable, cl_ext::EnqueueReadGlobalVariableName, ""));
 
-  if (!F || Res != CL_SUCCESS)
-    return UR_RESULT_ERROR_INVALID_OPERATION;
   cl_event Event;
   std::vector<cl_event> CLWaitEvents(numEventsInWaitList);
   for (uint32_t i = 0; i < numEventsInWaitList; i++) {
     CLWaitEvents[i] = phEventWaitList[i]->get();
   }
-  Res = F(hQueue->get(), hProgram->get(), name, blockingRead, count, offset,
-          pDst, numEventsInWaitList, CLWaitEvents.data(), &Event);
+  cl_int Res = clEnqueueReadGlobalVariable(
+      hQueue->get(), hProgram->get(), name, blockingRead, count, offset, pDst,
+      numEventsInWaitList, CLWaitEvents.data(), &Event);
   if (phEvent) {
     try {
       auto UREvent =
@@ -590,33 +590,31 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueReadHostPipe(
     uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
     ur_event_handle_t *phEvent) {
 
-  cl_context CLContext = hQueue->Context->get();
+  ur_platform_handle_t Platform = hQueue->getPlatform();
 
-  cl_ext::clEnqueueReadHostPipeINTEL_fn FuncPtr = nullptr;
-  ur_result_t RetVal =
-      cl_ext::getExtFuncFromContext<cl_ext::clEnqueueReadHostPipeINTEL_fn>(
-          CLContext, cl_ext::ExtFuncPtrCache->clEnqueueReadHostPipeINTELCache,
-          cl_ext::EnqueueReadHostPipeName, &FuncPtr);
+  cl_ext::clEnqueueReadHostPipeINTEL_fn clEnqueueReadHostPipe =
+      Platform->ExtFuncPtr->clEnqueueReadHostPipeINTELCache;
+  UR_RETURN_ON_FAILURE(Platform->getExtFunc(
+      &clEnqueueReadHostPipe, cl_ext::EnqueueReadHostPipeName,
+      "cl_intel_program_scope_host_pipe"));
 
-  if (FuncPtr) {
-    cl_event Event;
-    std::vector<cl_event> CLWaitEvents(numEventsInWaitList);
-    for (uint32_t i = 0; i < numEventsInWaitList; i++) {
-      CLWaitEvents[i] = phEventWaitList[i]->get();
-    }
-    RetVal = mapCLErrorToUR(FuncPtr(hQueue->get(), hProgram->get(), pipe_symbol,
-                                    blocking, pDst, size, numEventsInWaitList,
-                                    CLWaitEvents.data(), &Event));
-    if (phEvent) {
-      try {
-        auto UREvent = std::make_unique<ur_event_handle_t_>(
-            Event, hQueue->Context, hQueue);
-        *phEvent = UREvent.release();
-      } catch (std::bad_alloc &) {
-        return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-      } catch (...) {
-        return UR_RESULT_ERROR_UNKNOWN;
-      }
+  cl_event Event;
+  std::vector<cl_event> CLWaitEvents(numEventsInWaitList);
+  for (uint32_t i = 0; i < numEventsInWaitList; i++) {
+    CLWaitEvents[i] = phEventWaitList[i]->get();
+  }
+  ur_result_t RetVal = mapCLErrorToUR(clEnqueueReadHostPipe(
+      hQueue->get(), hProgram->get(), pipe_symbol, blocking, pDst, size,
+      numEventsInWaitList, CLWaitEvents.data(), &Event));
+  if (phEvent) {
+    try {
+      auto UREvent =
+          std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+      *phEvent = UREvent.release();
+    } catch (std::bad_alloc &) {
+      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+    } catch (...) {
+      return UR_RESULT_ERROR_UNKNOWN;
     }
   }
 
@@ -629,33 +627,31 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueWriteHostPipe(
     uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
     ur_event_handle_t *phEvent) {
 
-  cl_context CLContext = hQueue->Context->get();
+  ur_platform_handle_t Platform = hQueue->getPlatform();
 
-  cl_ext::clEnqueueWriteHostPipeINTEL_fn FuncPtr = nullptr;
-  ur_result_t RetVal =
-      cl_ext::getExtFuncFromContext<cl_ext::clEnqueueWriteHostPipeINTEL_fn>(
-          CLContext, cl_ext::ExtFuncPtrCache->clEnqueueWriteHostPipeINTELCache,
-          cl_ext::EnqueueWriteHostPipeName, &FuncPtr);
+  cl_ext::clEnqueueWriteHostPipeINTEL_fn clEnqueueWriteHostPipe =
+      Platform->ExtFuncPtr->clEnqueueWriteHostPipeINTELCache;
+  UR_RETURN_ON_FAILURE(Platform->getExtFunc(
+      &clEnqueueWriteHostPipe, cl_ext::EnqueueWriteHostPipeName,
+      "cl_intel_program_scope_host_pipe"));
 
-  if (FuncPtr) {
-    cl_event Event;
-    std::vector<cl_event> CLWaitEvents(numEventsInWaitList);
-    for (uint32_t i = 0; i < numEventsInWaitList; i++) {
-      CLWaitEvents[i] = phEventWaitList[i]->get();
-    }
-    RetVal = mapCLErrorToUR(FuncPtr(hQueue->get(), hProgram->get(), pipe_symbol,
-                                    blocking, pSrc, size, numEventsInWaitList,
-                                    CLWaitEvents.data(), &Event));
-    if (phEvent) {
-      try {
-        auto UREvent = std::make_unique<ur_event_handle_t_>(
-            Event, hQueue->Context, hQueue);
-        *phEvent = UREvent.release();
-      } catch (std::bad_alloc &) {
-        return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-      } catch (...) {
-        return UR_RESULT_ERROR_UNKNOWN;
-      }
+  cl_event Event;
+  std::vector<cl_event> CLWaitEvents(numEventsInWaitList);
+  for (uint32_t i = 0; i < numEventsInWaitList; i++) {
+    CLWaitEvents[i] = phEventWaitList[i]->get();
+  }
+  ur_result_t RetVal = mapCLErrorToUR(clEnqueueWriteHostPipe(
+      hQueue->get(), hProgram->get(), pipe_symbol, blocking, pSrc, size,
+      numEventsInWaitList, CLWaitEvents.data(), &Event));
+  if (phEvent) {
+    try {
+      auto UREvent =
+          std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+      *phEvent = UREvent.release();
+    } catch (std::bad_alloc &) {
+      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+    } catch (...) {
+      return UR_RESULT_ERROR_UNKNOWN;
     }
   }
 

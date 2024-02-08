@@ -10,7 +10,6 @@
 #pragma once
 
 #include "common.hpp"
-#include "platform.hpp"
 
 struct ur_device_handle_t_ {
   using native_type = cl_device_id;

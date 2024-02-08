@@ -12,6 +12,7 @@
 #include "context.hpp"
 #include "device.hpp"
 #include "event.hpp"
+#include "platform.hpp"
 #include "queue.hpp"
 
 inline cl_mem_alloc_flags_intel
@@ -97,24 +98,22 @@ urUSMHostAlloc(ur_context_handle_t Context, const ur_usm_desc_t *pUSMDesc,
   }
 
   // First we need to look up the function pointer
-  clHostMemAllocINTEL_fn FuncPtr = nullptr;
   cl_context CLContext = Context->get();
-  if (auto UrResult = cl_ext::getExtFuncFromContext<clHostMemAllocINTEL_fn>(
-          CLContext, cl_ext::ExtFuncPtrCache->clHostMemAllocINTELCache,
-          cl_ext::HostMemAllocName, &FuncPtr)) {
-    return UrResult;
-  }
+  ur_platform_handle_t Platform = Context->getPlatform();
+  clHostMemAllocINTEL_fn clHostMemAlloc =
+      Platform->ExtFuncPtr->clHostMemAllocINTELCache;
+  UR_RETURN_ON_FAILURE(Platform->getExtFunc(&clHostMemAlloc,
+                                            cl_ext::HostMemAllocName,
+                                            "cl_intel_unified_shared_memory"));
 
-  if (FuncPtr) {
-    cl_int ClResult = CL_SUCCESS;
-    Ptr = FuncPtr(CLContext,
-                  AllocProperties.empty() ? nullptr : AllocProperties.data(),
-                  size, Alignment, &ClResult);
-    if (ClResult == CL_INVALID_BUFFER_SIZE) {
-      return UR_RESULT_ERROR_INVALID_USM_SIZE;
-    }
-    CL_RETURN_ON_FAILURE(ClResult);
+  cl_int ClResult = CL_SUCCESS;
+  Ptr = clHostMemAlloc(
+      CLContext, AllocProperties.empty() ? nullptr : AllocProperties.data(),
+      size, Alignment, &ClResult);
+  if (ClResult == CL_INVALID_BUFFER_SIZE) {
+    return UR_RESULT_ERROR_INVALID_USM_SIZE;
   }
+  CL_RETURN_ON_FAILURE(ClResult);
 
   *ppMem = Ptr;
 
@@ -140,24 +139,23 @@ urUSMDeviceAlloc(ur_context_handle_t Context, ur_device_handle_t hDevice,
   }
 
   // First we need to look up the function pointer
-  clDeviceMemAllocINTEL_fn FuncPtr = nullptr;
   cl_context CLContext = Context->get();
-  if (auto UrResult = cl_ext::getExtFuncFromContext<clDeviceMemAllocINTEL_fn>(
-          CLContext, cl_ext::ExtFuncPtrCache->clDeviceMemAllocINTELCache,
-          cl_ext::DeviceMemAllocName, &FuncPtr)) {
-    return UrResult;
-  }
+  ur_platform_handle_t Platform = hDevice->Platform;
+  clDeviceMemAllocINTEL_fn clDeviceMemAlloc =
+      Platform->ExtFuncPtr->clDeviceMemAllocINTELCache;
+  UR_RETURN_ON_FAILURE(Platform->getExtFunc(&clDeviceMemAlloc,
+                                            cl_ext::DeviceMemAllocName,
+                                            "cl_intel_unified_shared_memory"));
 
-  if (FuncPtr) {
-    cl_int ClResult = CL_SUCCESS;
-    Ptr = FuncPtr(CLContext, hDevice->get(),
-                  AllocProperties.empty() ? nullptr : AllocProperties.data(),
-                  size, Alignment, &ClResult);
-    if (ClResult == CL_INVALID_BUFFER_SIZE) {
-      return UR_RESULT_ERROR_INVALID_USM_SIZE;
-    }
-    CL_RETURN_ON_FAILURE(ClResult);
+  cl_int ClResult = CL_SUCCESS;
+  Ptr = clDeviceMemAlloc(CLContext, hDevice->get(),
+                         AllocProperties.empty() ? nullptr
+                                                 : AllocProperties.data(),
+                         size, Alignment, &ClResult);
+  if (ClResult == CL_INVALID_BUFFER_SIZE) {
+    return UR_RESULT_ERROR_INVALID_USM_SIZE;
   }
+  CL_RETURN_ON_FAILURE(ClResult);
 
   *ppMem = Ptr;
 
@@ -183,24 +181,23 @@ urUSMSharedAlloc(ur_context_handle_t Context, ur_device_handle_t hDevice,
   }
 
   // First we need to look up the function pointer
-  clSharedMemAllocINTEL_fn FuncPtr = nullptr;
   cl_context CLContext = Context->get();
-  if (auto UrResult = cl_ext::getExtFuncFromContext<clSharedMemAllocINTEL_fn>(
-          CLContext, cl_ext::ExtFuncPtrCache->clSharedMemAllocINTELCache,
-          cl_ext::SharedMemAllocName, &FuncPtr)) {
-    return UrResult;
-  }
+  ur_platform_handle_t Platform = hDevice->Platform;
+  clSharedMemAllocINTEL_fn clSharedMemAlloc =
+      Platform->ExtFuncPtr->clSharedMemAllocINTELCache;
+  UR_RETURN_ON_FAILURE(Platform->getExtFunc(&clSharedMemAlloc,
+                                            cl_ext::SharedMemAllocName,
+                                            "cl_intel_unified_shared_memory"));
 
-  if (FuncPtr) {
-    cl_int ClResult = CL_SUCCESS;
-    Ptr = FuncPtr(CLContext, hDevice->get(),
-                  AllocProperties.empty() ? nullptr : AllocProperties.data(),
-                  size, Alignment, cl_adapter::cast<cl_int *>(&ClResult));
-    if (ClResult == CL_INVALID_BUFFER_SIZE) {
-      return UR_RESULT_ERROR_INVALID_USM_SIZE;
-    }
-    CL_RETURN_ON_FAILURE(ClResult);
+  cl_int ClResult = CL_SUCCESS;
+  Ptr = clSharedMemAlloc(
+      CLContext, hDevice->get(),
+      AllocProperties.empty() ? nullptr : AllocProperties.data(), size,
+      Alignment, cl_adapter::cast<cl_int *>(&ClResult));
+  if (ClResult == CL_INVALID_BUFFER_SIZE) {
+    return UR_RESULT_ERROR_INVALID_USM_SIZE;
   }
+  CL_RETURN_ON_FAILURE(ClResult);
 
   *ppMem = Ptr;
 
@@ -215,19 +212,15 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMFree(ur_context_handle_t Context,
 
   // Use a blocking free to avoid issues with indirect access from kernels that
   // might be still running.
-  clMemBlockingFreeINTEL_fn FuncPtr = nullptr;
-
   cl_context CLContext = Context->get();
-  ur_result_t RetVal = UR_RESULT_ERROR_INVALID_OPERATION;
-  RetVal = cl_ext::getExtFuncFromContext<clMemBlockingFreeINTEL_fn>(
-      CLContext, cl_ext::ExtFuncPtrCache->clMemBlockingFreeINTELCache,
-      cl_ext::MemBlockingFreeName, &FuncPtr);
+  ur_platform_handle_t Platform = Context->getPlatform();
+  clMemBlockingFreeINTEL_fn clMemBlockingFree =
+      Platform->ExtFuncPtr->clMemBlockingFreeINTELCache;
+  UR_RETURN_ON_FAILURE(Platform->getExtFunc(&clMemBlockingFree,
+                                            cl_ext::MemBlockingFreeName,
+                                            "cl_intel_unified_shared_memory"));
 
-  if (FuncPtr) {
-    RetVal = mapCLErrorToUR(FuncPtr(CLContext, pMem));
-  }
-
-  return RetVal;
+  return mapCLErrorToUR(clMemBlockingFree(CLContext, pMem));
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMFill(
@@ -236,13 +229,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMFill(
     const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent) {
   // Have to look up the context from the kernel
   cl_context CLContext = hQueue->Context->get();
-
+  ur_platform_handle_t Platform = hQueue->Context->getPlatform();
   if (patternSize <= 128) {
-    clEnqueueMemFillINTEL_fn EnqueueMemFill = nullptr;
+    clEnqueueMemFillINTEL_fn EnqueueMemFill =
+        Platform->ExtFuncPtr->clEnqueueMemFillINTELCache;
     UR_RETURN_ON_FAILURE(
-        cl_ext::getExtFuncFromContext<clEnqueueMemFillINTEL_fn>(
-            CLContext, cl_ext::ExtFuncPtrCache->clEnqueueMemFillINTELCache,
-            cl_ext::EnqueueMemFillName, &EnqueueMemFill));
+        Platform->getExtFunc(&EnqueueMemFill, cl_ext::EnqueueMemFillName,
+                             "cl_intel_unified_shared_memory"));
+
     cl_event Event;
     std::vector<cl_event> CLWaitEvents(numEventsInWaitList);
     for (uint32_t i = 0; i < numEventsInWaitList; i++) {
@@ -268,20 +262,21 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMFill(
   // OpenCL only supports pattern sizes as large as the largest CL type
   // (double16/long16 - 128 bytes), anything larger we need to do on the host
   // side and copy it into the target allocation.
-  clHostMemAllocINTEL_fn HostMemAlloc = nullptr;
-  UR_RETURN_ON_FAILURE(cl_ext::getExtFuncFromContext<clHostMemAllocINTEL_fn>(
-      CLContext, cl_ext::ExtFuncPtrCache->clHostMemAllocINTELCache,
-      cl_ext::HostMemAllocName, &HostMemAlloc));
+  clHostMemAllocINTEL_fn HostMemAlloc =
+      Platform->ExtFuncPtr->clHostMemAllocINTELCache;
+  UR_RETURN_ON_FAILURE(Platform->getExtFunc(&HostMemAlloc,
+                                            cl_ext::HostMemAllocName,
+                                            "cl_intel_unified_shared_memory"));
 
-  clEnqueueMemcpyINTEL_fn USMMemcpy = nullptr;
-  UR_RETURN_ON_FAILURE(cl_ext::getExtFuncFromContext<clEnqueueMemcpyINTEL_fn>(
-      CLContext, cl_ext::ExtFuncPtrCache->clEnqueueMemcpyINTELCache,
-      cl_ext::EnqueueMemcpyName, &USMMemcpy));
+  clEnqueueMemcpyINTEL_fn USMMemcpy =
+      Platform->ExtFuncPtr->clEnqueueMemcpyINTELCache;
+  UR_RETURN_ON_FAILURE(Platform->getExtFunc(
+      &USMMemcpy, cl_ext::EnqueueMemcpyName, "cl_intel_unified_shared_memory"));
 
-  clMemBlockingFreeINTEL_fn USMFree = nullptr;
-  UR_RETURN_ON_FAILURE(cl_ext::getExtFuncFromContext<clMemBlockingFreeINTEL_fn>(
-      CLContext, cl_ext::ExtFuncPtrCache->clMemBlockingFreeINTELCache,
-      cl_ext::MemBlockingFreeName, &USMFree));
+  clMemBlockingFreeINTEL_fn USMFree =
+      Platform->ExtFuncPtr->clMemBlockingFreeINTELCache;
+  UR_RETURN_ON_FAILURE(Platform->getExtFunc(
+      &USMFree, cl_ext::MemBlockingFreeName, "cl_intel_unified_shared_memory"));
 
   cl_int ClErr = CL_SUCCESS;
   auto HostBuffer = static_cast<uint64_t *>(
@@ -360,32 +355,30 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy(
     const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent) {
 
   // Have to look up the context from the kernel
-  cl_context CLContext = hQueue->Context->get();
+  ur_platform_handle_t Platform = hQueue->Context->getPlatform();
+  clEnqueueMemcpyINTEL_fn clEnqueueMemcpy =
+      Platform->ExtFuncPtr->clEnqueueMemcpyINTELCache;
+  UR_RETURN_ON_FAILURE(Platform->getExtFunc(&clEnqueueMemcpy,
+                                            cl_ext::EnqueueMemcpyName,
+                                            "cl_intel_unified_shared_memory"));
 
-  clEnqueueMemcpyINTEL_fn FuncPtr = nullptr;
-  ur_result_t RetVal = cl_ext::getExtFuncFromContext<clEnqueueMemcpyINTEL_fn>(
-      CLContext, cl_ext::ExtFuncPtrCache->clEnqueueMemcpyINTELCache,
-      cl_ext::EnqueueMemcpyName, &FuncPtr);
-
-  if (FuncPtr) {
-    cl_event Event;
-    std::vector<cl_event> CLWaitEvents(numEventsInWaitList);
-    for (uint32_t i = 0; i < numEventsInWaitList; i++) {
-      CLWaitEvents[i] = phEventWaitList[i]->get();
-    }
-    RetVal = mapCLErrorToUR(FuncPtr(hQueue->get(), blocking, pDst, pSrc, size,
-                                    numEventsInWaitList, CLWaitEvents.data(),
-                                    &Event));
-    if (phEvent) {
-      try {
-        auto UREvent = std::make_unique<ur_event_handle_t_>(
-            Event, hQueue->Context, hQueue);
-        *phEvent = UREvent.release();
-      } catch (std::bad_alloc &) {
-        return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-      } catch (...) {
-        return UR_RESULT_ERROR_UNKNOWN;
-      }
+  cl_event Event;
+  std::vector<cl_event> CLWaitEvents(numEventsInWaitList);
+  for (uint32_t i = 0; i < numEventsInWaitList; i++) {
+    CLWaitEvents[i] = phEventWaitList[i]->get();
+  }
+  ur_result_t RetVal = mapCLErrorToUR(
+      clEnqueueMemcpy(hQueue->get(), blocking, pDst, pSrc, size,
+                      numEventsInWaitList, CLWaitEvents.data(), &Event));
+  if (phEvent) {
+    try {
+      auto UREvent =
+          std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+      *phEvent = UREvent.release();
+    } catch (std::bad_alloc &) {
+      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+    } catch (...) {
+      return UR_RESULT_ERROR_UNKNOWN;
     }
   }
 
@@ -495,16 +488,13 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
     const void *pSrc, size_t srcPitch, size_t width, size_t height,
     uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
     ur_event_handle_t *phEvent) {
-  cl_context CLContext = hQueue->Context->get();
 
-  clEnqueueMemcpyINTEL_fn FuncPtr = nullptr;
-  ur_result_t RetVal = cl_ext::getExtFuncFromContext<clEnqueueMemcpyINTEL_fn>(
-      CLContext, cl_ext::ExtFuncPtrCache->clEnqueueMemcpyINTELCache,
-      cl_ext::EnqueueMemcpyName, &FuncPtr);
-
-  if (!FuncPtr) {
-    return RetVal;
-  }
+  ur_platform_handle_t Platform = hQueue->Context->getPlatform();
+  clEnqueueMemcpyINTEL_fn clEnqueueMemcpy =
+      Platform->ExtFuncPtr->clEnqueueMemcpyINTELCache;
+  UR_RETURN_ON_FAILURE(Platform->getExtFunc(&clEnqueueMemcpy,
+                                            cl_ext::EnqueueMemcpyName,
+                                            "cl_intel_unified_shared_memory"));
 
   std::vector<cl_event> Events(height);
   for (size_t HeightIndex = 0; HeightIndex < height; HeightIndex++) {
@@ -513,11 +503,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
     for (uint32_t i = 0; i < numEventsInWaitList; i++) {
       CLWaitEvents[i] = phEventWaitList[i]->get();
     }
-    auto ClResult =
-        FuncPtr(hQueue->get(), false,
-                static_cast<uint8_t *>(pDst) + dstPitch * HeightIndex,
-                static_cast<const uint8_t *>(pSrc) + srcPitch * HeightIndex,
-                width, numEventsInWaitList, CLWaitEvents.data(), &Event);
+    auto ClResult = clEnqueueMemcpy(
+        hQueue->get(), false,
+        static_cast<uint8_t *>(pDst) + dstPitch * HeightIndex,
+        static_cast<const uint8_t *>(pSrc) + srcPitch * HeightIndex, width,
+        numEventsInWaitList, CLWaitEvents.data(), &Event);
     Events[HeightIndex] = Event;
     if (ClResult != CL_SUCCESS) {
       for (const auto &E : Events) {
@@ -572,11 +562,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMGetMemAllocInfo(
     ur_context_handle_t Context, const void *pMem, ur_usm_alloc_info_t propName,
     size_t propSize, void *pPropValue, size_t *pPropSizeRet) {
 
-  clGetMemAllocInfoINTEL_fn GetMemAllocInfo = nullptr;
-  cl_context CLContext = Context->get();
-  UR_RETURN_ON_FAILURE(cl_ext::getExtFuncFromContext<clGetMemAllocInfoINTEL_fn>(
-      CLContext, cl_ext::ExtFuncPtrCache->clGetMemAllocInfoINTELCache,
-      cl_ext::GetMemAllocInfoName, &GetMemAllocInfo));
+  ur_platform_handle_t Platform = Context->getPlatform();
+  clGetMemAllocInfoINTEL_fn GetMemAllocInfo =
+      Platform->ExtFuncPtr->clGetMemAllocInfoINTELCache;
+  UR_RETURN_ON_FAILURE(Platform->getExtFunc(&GetMemAllocInfo,
+                                            cl_ext::GetMemAllocInfoName,
+                                            "cl_intel_unified_shared_memory"));
 
   cl_mem_info_intel PropNameCL;
   switch (propName) {

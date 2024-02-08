@@ -11,6 +11,7 @@
 #include "memory.hpp"
 #include "common.hpp"
 #include "context.hpp"
+#include "platform.hpp"
 
 cl_image_format mapURImageFormatToCL(const ur_image_format_t *PImageFormat) {
   cl_image_format CLImageFormat;
@@ -230,15 +231,17 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
   if (pProperties) {
     // TODO: need to check if all properties are supported by OpenCL RT and
     // ignore unsupported
-    clCreateBufferWithPropertiesINTEL_fn FuncPtr = nullptr;
-    cl_context CLContext = hContext->get();
+
     // First we need to look up the function pointer
-    RetErr =
-        cl_ext::getExtFuncFromContext<clCreateBufferWithPropertiesINTEL_fn>(
-            CLContext,
-            cl_ext::ExtFuncPtrCache->clCreateBufferWithPropertiesINTELCache,
-            cl_ext::CreateBufferWithPropertiesName, &FuncPtr);
-    if (FuncPtr) {
+    cl_context CLContext = hContext->get();
+    ur_platform_handle_t Platform = hContext->getPlatform();
+    clCreateBufferWithPropertiesINTEL_fn clCreateBufferWithProperties =
+        Platform->ExtFuncPtr->clCreateBufferWithPropertiesINTELCache;
+    ur_result_t Res = Platform->getExtFunc(
+        &clCreateBufferWithProperties, cl_ext::CreateBufferWithPropertiesName,
+        "cl_intel_create_buffer_with_properties");
+
+    if (Res == UR_RESULT_SUCCESS) {
       std::vector<cl_mem_properties_intel> PropertiesIntel;
       auto Prop = static_cast<ur_base_properties_t *>(pProperties->pNext);
       while (Prop) {
@@ -263,7 +266,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
       PropertiesIntel.push_back(0);
 
       try {
-        cl_mem Buffer = FuncPtr(
+        cl_mem Buffer = clCreateBufferWithProperties(
             CLContext, PropertiesIntel.data(), static_cast<cl_mem_flags>(flags),
             size, pProperties->pHost, cl_adapter::cast<cl_int *>(&RetErr));
         CL_RETURN_ON_FAILURE(RetErr);

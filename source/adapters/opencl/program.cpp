@@ -424,17 +424,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramSetSpecializationConstants(
     }
   } else {
     cl_ext::clSetProgramSpecializationConstant_fn
-        SetProgramSpecializationConstant = nullptr;
-    const ur_result_t URResult = cl_ext::getExtFuncFromContext<
-        decltype(SetProgramSpecializationConstant)>(
-        Ctx->get(),
-        cl_ext::ExtFuncPtrCache->clSetProgramSpecializationConstantCache,
-        cl_ext::SetProgramSpecializationConstantName,
-        &SetProgramSpecializationConstant);
-
-    if (URResult != UR_RESULT_SUCCESS) {
-      return URResult;
-    }
+        SetProgramSpecializationConstant =
+            CurPlatform->ExtFuncPtr->clSetProgramSpecializationConstantCache;
+    UR_RETURN_ON_FAILURE(CurPlatform->getExtFunc(
+        &SetProgramSpecializationConstant,
+        cl_ext::SetProgramSpecializationConstantName, ""));
 
     for (uint32_t i = 0; i < count; ++i) {
       CL_RETURN_ON_FAILURE(SetProgramSpecializationConstant(
@@ -475,16 +469,13 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramGetFunctionPointer(
     ur_device_handle_t hDevice, ur_program_handle_t hProgram,
     const char *pFunctionName, void **ppFunctionPointer) {
 
-  cl_context CLContext = hProgram->Context->get();
+  ur_platform_handle_t Platform = hDevice->Platform;
+  cl_ext::clGetDeviceFunctionPointer_fn clGetDeviceFunctionPointer =
+      Platform->ExtFuncPtr->clGetDeviceFunctionPointerCache;
+  ur_result_t Res = Platform->getExtFunc(
+      &clGetDeviceFunctionPointer, cl_ext::GetDeviceFunctionPointerName, "");
 
-  cl_ext::clGetDeviceFunctionPointer_fn FuncT = nullptr;
-
-  UR_RETURN_ON_FAILURE(
-      cl_ext::getExtFuncFromContext<cl_ext::clGetDeviceFunctionPointer_fn>(
-          CLContext, cl_ext::ExtFuncPtrCache->clGetDeviceFunctionPointerCache,
-          cl_ext::GetDeviceFunctionPointerName, &FuncT));
-
-  if (!FuncT) {
+  if (Res != UR_RESULT_SUCCESS) {
     return UR_RESULT_ERROR_INVALID_FUNCTION_NAME;
   }
 
@@ -511,9 +502,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramGetFunctionPointer(
     return UR_RESULT_ERROR_INVALID_KERNEL_NAME;
   }
 
-  const cl_int CLResult =
-      FuncT(hDevice->get(), hProgram->get(), pFunctionName,
-            reinterpret_cast<cl_ulong *>(ppFunctionPointer));
+  const cl_int CLResult = clGetDeviceFunctionPointer(
+      hDevice->get(), hProgram->get(), pFunctionName,
+      reinterpret_cast<cl_ulong *>(ppFunctionPointer));
   // GPU runtime sometimes returns CL_INVALID_ARG_VALUE if the function address
   // cannot be found but the kernel exists. As the kernel does exist, return
   // that the function name is invalid.

@@ -11,6 +11,8 @@
 #include <CL/cl_ext.h>
 #include <ur/ur.hpp>
 
+#include "context.hpp"
+
 struct ur_exp_command_buffer_handle_t_ {
   ur_queue_handle_t hInternalQueue;
   ur_context_handle_t hContext;
@@ -21,4 +23,6 @@ struct ur_exp_command_buffer_handle_t_ {
                                   cl_command_buffer_khr CLCommandBuffer)
       : hInternalQueue(hQueue), hContext(hContext),
         CLCommandBuffer(CLCommandBuffer) {}
+
+  ur_platform_handle_t getPlatform() { return hContext->Devices[0]->Platform; }
 };

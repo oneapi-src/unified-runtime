@@ -75,4 +75,6 @@ struct ur_queue_handle_t_ {
   uint32_t getReferenceCount() const noexcept { return RefCount; }
 
   native_type get() { return Queue; }
+
+  ur_platform_handle_t getPlatform() { return Device->Platform; }
 };

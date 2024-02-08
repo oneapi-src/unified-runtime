@@ -14,32 +14,23 @@
 
 #include <vector>
 
+using namespace cl_ext;
+
 struct ur_platform_handle_t_ {
   using native_type = cl_platform_id;
   native_type Platform = nullptr;
   std::vector<std::unique_ptr<ur_device_handle_t_>> Devices;
 
-  ur_platform_handle_t_(native_type Plat) : Platform(Plat) {}
+  ur_platform_handle_t_(native_type Plat) : Platform(Plat) {
+    ExtFuncPtr = std::make_unique<ExtFuncPtrT>();
+  }
 
   ~ur_platform_handle_t_() {
     for (auto &Dev : Devices) {
       Dev.reset();
     }
     Devices.clear();
-  }
-
-  template <typename T>
-  ur_result_t getExtFunc(T CachedExtFunc, const char *FuncName, T *Fptr) {
-    if (!CachedExtFunc) {
-      // TODO: check that the function is available
-      CachedExtFunc = reinterpret_cast<T>(
-          clGetExtensionFunctionAddressForPlatform(Platform, FuncName));
-      if (!CachedExtFunc) {
-        return UR_RESULT_ERROR_INVALID_VALUE;
-      }
-    }
-    *Fptr = CachedExtFunc;
-    return UR_RESULT_SUCCESS;
+    ExtFuncPtr.reset();
   }
 
   native_type get() { return Platform; }
@@ -84,6 +75,79 @@ struct ur_platform_handle_t_ {
       return UR_RESULT_ERROR_INVALID_PLATFORM;
     }
 
+    return UR_RESULT_SUCCESS;
+  }
+
+  ur_result_t checkPlatformExtensions(const std::vector<std::string> &Exts,
+                                      bool &Supported) {
+    size_t ExtSize = 0;
+    CL_RETURN_ON_FAILURE(clGetPlatformInfo(Platform, CL_PLATFORM_EXTENSIONS, 0,
+                                           nullptr, &ExtSize));
+
+    std::string ExtStr(ExtSize, '\0');
+
+    CL_RETURN_ON_FAILURE(clGetPlatformInfo(Platform, CL_PLATFORM_EXTENSIONS,
+                                           ExtSize, ExtStr.data(), nullptr));
+
+    Supported = true;
+    for (const std::string &Ext : Exts) {
+      if (!(Supported = (ExtStr.find(Ext) != std::string::npos))) {
+        break;
+      }
+    }
+
+    return UR_RESULT_SUCCESS;
+  }
+
+  struct ExtFuncPtrT {
+    clHostMemAllocINTEL_fn clHostMemAllocINTELCache = nullptr;
+    clDeviceMemAllocINTEL_fn clDeviceMemAllocINTELCache = nullptr;
+    clSharedMemAllocINTEL_fn clSharedMemAllocINTELCache = nullptr;
+    clGetDeviceFunctionPointer_fn clGetDeviceFunctionPointerCache = nullptr;
+    clCreateBufferWithPropertiesINTEL_fn
+        clCreateBufferWithPropertiesINTELCache = nullptr;
+    clMemBlockingFreeINTEL_fn clMemBlockingFreeINTELCache = nullptr;
+    clSetKernelArgMemPointerINTEL_fn clSetKernelArgMemPointerINTELCache =
+        nullptr;
+    clEnqueueMemFillINTEL_fn clEnqueueMemFillINTELCache = nullptr;
+    clEnqueueMemcpyINTEL_fn clEnqueueMemcpyINTELCache = nullptr;
+    clGetMemAllocInfoINTEL_fn clGetMemAllocInfoINTELCache = nullptr;
+    clEnqueueWriteGlobalVariable_fn clEnqueueWriteGlobalVariableCache = nullptr;
+    clEnqueueReadGlobalVariable_fn clEnqueueReadGlobalVariableCache = nullptr;
+    clEnqueueReadHostPipeINTEL_fn clEnqueueReadHostPipeINTELCache = nullptr;
+    clEnqueueWriteHostPipeINTEL_fn clEnqueueWriteHostPipeINTELCache = nullptr;
+    clSetProgramSpecializationConstant_fn
+        clSetProgramSpecializationConstantCache = nullptr;
+    clCreateCommandBufferKHR_fn clCreateCommandBufferKHRCache = nullptr;
+    clRetainCommandBufferKHR_fn clRetainCommandBufferKHRCache = nullptr;
+    clReleaseCommandBufferKHR_fn clReleaseCommandBufferKHRCache = nullptr;
+    clFinalizeCommandBufferKHR_fn clFinalizeCommandBufferKHRCache = nullptr;
+    clCommandNDRangeKernelKHR_fn clCommandNDRangeKernelKHRCache = nullptr;
+    clCommandCopyBufferKHR_fn clCommandCopyBufferKHRCache = nullptr;
+    clCommandCopyBufferRectKHR_fn clCommandCopyBufferRectKHRCache = nullptr;
+    clCommandFillBufferKHR_fn clCommandFillBufferKHRCache = nullptr;
+    clEnqueueCommandBufferKHR_fn clEnqueueCommandBufferKHRCache = nullptr;
+    clGetCommandBufferInfoKHR_fn clGetCommandBufferInfoKHRCache = nullptr;
+  };
+
+  std::unique_ptr<ExtFuncPtrT> ExtFuncPtr;
+  template <typename T>
+  ur_result_t getExtFunc(T *CachedExtFunc, const char *FuncName,
+                         const char *Extension) {
+    if (!(*CachedExtFunc)) {
+      // Check that the function ext is supported by the platform.
+      bool Supported = false;
+      UR_RETURN_ON_FAILURE(checkPlatformExtensions({Extension}, Supported));
+      if (!Supported) {
+        return UR_RESULT_ERROR_INVALID_OPERATION;
+      }
+
+      *CachedExtFunc = reinterpret_cast<T>(
+          clGetExtensionFunctionAddressForPlatform(Platform, FuncName));
+      if (!(*CachedExtFunc)) {
+        return UR_RESULT_ERROR_INVALID_OPERATION;
+      }
+    }
     return UR_RESULT_SUCCESS;
   }
 };

@@ -78,4 +78,6 @@ struct ur_kernel_handle_t_ {
   }
 
   native_type get() { return Kernel; }
+
+  ur_platform_handle_t getPlatform() { return Context->Devices[0]->Platform; }
 };

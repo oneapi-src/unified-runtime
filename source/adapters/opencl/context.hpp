@@ -81,5 +81,7 @@ struct ur_context_handle_t_ {
 
   native_type get() { return Context; }
 
+  ur_platform_handle_t getPlatform() { return Devices[0]->Platform; }
+
   const std::vector<ur_device_handle_t> &getDevices() { return Devices; }
 };

@@ -11,6 +11,7 @@
 #include "common.hpp"
 #include "device.hpp"
 #include "memory.hpp"
+#include "platform.hpp"
 #include "program.hpp"
 #include "sampler.hpp"
 
@@ -294,42 +295,38 @@ urKernelRelease(ur_kernel_handle_t hKernel) {
 static ur_result_t usmSetIndirectAccess(ur_kernel_handle_t hKernel) {
 
   cl_bool TrueVal = CL_TRUE;
-  clHostMemAllocINTEL_fn HFunc = nullptr;
-  clSharedMemAllocINTEL_fn SFunc = nullptr;
-  clDeviceMemAllocINTEL_fn DFunc = nullptr;
-  cl_context CLContext;
-
+  ur_platform_handle_t Platform = hKernel->getPlatform();
   /* We test that each alloc type is supported before we actually try to set
    * KernelExecInfo. */
-  CL_RETURN_ON_FAILURE(clGetKernelInfo(hKernel->get(), CL_KERNEL_CONTEXT,
-                                       sizeof(cl_context), &CLContext,
-                                       nullptr));
+  clHostMemAllocINTEL_fn clHostMemAlloc =
+      Platform->ExtFuncPtr->clHostMemAllocINTELCache;
+  ur_result_t Res =
+      Platform->getExtFunc(&clHostMemAlloc, cl_ext::HostMemAllocName,
+                           "cl_intel_unified_shared_memory");
 
-  UR_RETURN_ON_FAILURE(cl_ext::getExtFuncFromContext<clHostMemAllocINTEL_fn>(
-      CLContext, cl_ext::ExtFuncPtrCache->clHostMemAllocINTELCache,
-      cl_ext::HostMemAllocName, &HFunc));
-
-  if (HFunc) {
+  if (Res == UR_RESULT_SUCCESS) {
     CL_RETURN_ON_FAILURE(clSetKernelExecInfo(
         hKernel->get(), CL_KERNEL_EXEC_INFO_INDIRECT_HOST_ACCESS_INTEL,
         sizeof(cl_bool), &TrueVal));
   }
 
-  UR_RETURN_ON_FAILURE(cl_ext::getExtFuncFromContext<clDeviceMemAllocINTEL_fn>(
-      CLContext, cl_ext::ExtFuncPtrCache->clDeviceMemAllocINTELCache,
-      cl_ext::DeviceMemAllocName, &DFunc));
+  clDeviceMemAllocINTEL_fn clDeviceMemAlloc =
+      Platform->ExtFuncPtr->clDeviceMemAllocINTELCache;
+  Res = Platform->getExtFunc(&clDeviceMemAlloc, cl_ext::DeviceMemAllocName,
+                             "cl_intel_unified_shared_memory");
 
-  if (DFunc) {
+  if (Res == UR_RESULT_SUCCESS) {
     CL_RETURN_ON_FAILURE(clSetKernelExecInfo(
         hKernel->get(), CL_KERNEL_EXEC_INFO_INDIRECT_DEVICE_ACCESS_INTEL,
         sizeof(cl_bool), &TrueVal));
   }
 
-  UR_RETURN_ON_FAILURE(cl_ext::getExtFuncFromContext<clSharedMemAllocINTEL_fn>(
-      CLContext, cl_ext::ExtFuncPtrCache->clSharedMemAllocINTELCache,
-      cl_ext::SharedMemAllocName, &SFunc));
+  clSharedMemAllocINTEL_fn clSharedMemAlloc =
+      Platform->ExtFuncPtr->clSharedMemAllocINTELCache;
+  Res = Platform->getExtFunc(&clSharedMemAlloc, cl_ext::SharedMemAllocName,
+                             "cl_intel_unified_shared_memory");
 
-  if (SFunc) {
+  if (Res == UR_RESULT_SUCCESS) {
     CL_RETURN_ON_FAILURE(clSetKernelExecInfo(
         hKernel->get(), CL_KERNEL_EXEC_INFO_INDIRECT_SHARED_ACCESS_INTEL,
         sizeof(cl_bool), &TrueVal));
@@ -374,24 +371,26 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelSetArgPointer(
                                        sizeof(cl_context), &CLContext,
                                        nullptr));
 
-  clSetKernelArgMemPointerINTEL_fn FuncPtr = nullptr;
-  UR_RETURN_ON_FAILURE(
-      cl_ext::getExtFuncFromContext<clSetKernelArgMemPointerINTEL_fn>(
-          CLContext,
-          cl_ext::ExtFuncPtrCache->clSetKernelArgMemPointerINTELCache,
-          cl_ext::SetKernelArgMemPointerName, &FuncPtr));
+  ur_platform_handle_t Platform = hKernel->getPlatform();
 
-  if (FuncPtr) {
+  clSetKernelArgMemPointerINTEL_fn clSetKernelArgMemPointer =
+      Platform->ExtFuncPtr->clSetKernelArgMemPointerINTELCache;
+  ur_result_t Res = Platform->getExtFunc(&clSetKernelArgMemPointer,
+                                         cl_ext::SetKernelArgMemPointerName,
+                                         "cl_intel_unified_shared_memory");
+
+  if (Res == UR_RESULT_SUCCESS) {
     /* OpenCL passes pointers by value not by reference. This means we need to
      * deref the arg to get the pointer value */
     auto PtrToPtr = reinterpret_cast<const intptr_t *>(pArgValue);
     auto DerefPtr = reinterpret_cast<void *>(*PtrToPtr);
-    CL_RETURN_ON_FAILURE(
-        FuncPtr(hKernel->get(), cl_adapter::cast<cl_uint>(argIndex), DerefPtr));
+    CL_RETURN_ON_FAILURE(clSetKernelArgMemPointer(
+        hKernel->get(), cl_adapter::cast<cl_uint>(argIndex), DerefPtr));
   }
 
   return UR_RESULT_SUCCESS;
 }
+
 UR_APIEXPORT ur_result_t UR_APICALL urKernelGetNativeHandle(
     ur_kernel_handle_t hKernel, ur_native_handle_t *phNativeKernel) {
 
