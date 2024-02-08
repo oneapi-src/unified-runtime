@@ -169,18 +169,10 @@ void guessLocalWorkSize(ur_device_handle_t Device, size_t *ThreadsPerBlock,
   ThreadsPerBlock[0] = std::min(
       MaxThreadsPerBlock[0], std::min(GlobalSizeNormalized[0], MaxBlockDim[0]));
 
-  static auto IsPowerOf2 = [](size_t Value) -> bool {
-    return Value && !(Value & (Value - 1));
-  };
-
   // Find a local work group size that is a divisor of the global
   // work group size to produce uniform work groups.
-  // Additionally, for best compute utilisation, the local size has
-  // to be a power of two.
-  while (0u != (GlobalSizeNormalized[0] % ThreadsPerBlock[0]) ||
-         !IsPowerOf2(ThreadsPerBlock[0])) {
+  while (GlobalSizeNormalized[0] % ThreadsPerBlock[0])
     --ThreadsPerBlock[0];
-  }
 }
 
 // Helper to verify out-of-registers case (exceeded block max registers).

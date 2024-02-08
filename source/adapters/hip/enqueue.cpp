@@ -51,13 +51,9 @@ ur_result_t enqueueEventsWait(ur_queue_handle_t, hipStream_t Stream,
 
 void simpleGuessLocalWorkSize(size_t *ThreadsPerBlock,
                               const size_t *GlobalWorkSize,
-                              const size_t MaxThreadsPerBlock[3],
-                              ur_kernel_handle_t Kernel) {
+                              const size_t MaxThreadsPerBlock[3]) {
   assert(ThreadsPerBlock != nullptr);
   assert(GlobalWorkSize != nullptr);
-  assert(Kernel != nullptr);
-
-  std::ignore = Kernel;
 
   ThreadsPerBlock[0] = std::min(MaxThreadsPerBlock[0], GlobalWorkSize[0]);
 
@@ -345,7 +341,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
       }
     } else {
       simpleGuessLocalWorkSize(ThreadsPerBlock, pGlobalWorkSize,
-                               MaxThreadsPerBlock, hKernel);
+                               MaxThreadsPerBlock);
     }
   }
 
