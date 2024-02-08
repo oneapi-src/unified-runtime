@@ -7853,13 +7853,13 @@ ur_result_t UR_APICALL urCommandBufferEnqueueExp(
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
 ///         + `::UR_PROFILING_INFO_COMMAND_COMPLETE < propName`
 ///     - ::UR_RESULT_ERROR_PROFILING_INFO_NOT_AVAILABLE
-///         + If `hEvent`s associated queue was not created with `UR_QUEUE_FLAG_PROFILING_ENABLE`.
+///         + If `hEvent`s associated queue was not created with `::UR_QUEUE_FLAG_PROFILING_ENABLE`.
 ///     - ::UR_RESULT_ERROR_INVALID_VALUE
 ///         + `pPropValue && propSize == 0`
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
-///     - ::UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_EXP - "If `syncPoint` is not referencing a command enqueued in this CommandBuffer. Typically, `syncPoint` > number of commands"
+///     - ::UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_EXP - "If `syncPoint` does not reference a command in the command-buffer submission associated with `hEvent.`"
 ur_result_t UR_APICALL urEventGetSyncPointProfilingInfoExp(
     ur_event_handle_t hEvent, ///< [in] handle of the event object
     ur_exp_command_buffer_sync_point_t

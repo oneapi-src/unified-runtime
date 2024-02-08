@@ -164,10 +164,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferEnqueueExp(
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEventGetSyncPointProfilingInfoExp(
-    ur_event_handle_t Event, ur_exp_command_buffer_sync_point_t SyncPoint,
+    ur_event_handle_t hEvent, ur_exp_command_buffer_sync_point_t SyncPoint,
     ur_profiling_info_t PropName, size_t PropValueSize, void *PropValue,
     size_t *PropValueSizeRet) {
-  (void)Event;
+  (void)hEvent;
   (void)SyncPoint;
   (void)PropName;
   (void)PropValueSize;
