@@ -3,7 +3,6 @@
 // See LICENSE.TXT
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-#include <map>
 #include <uur/fixtures.h>
 
 static std::unordered_map<ur_device_info_t, size_t> device_info_size_map = {
@@ -114,7 +113,13 @@ static std::unordered_map<ur_device_info_t, size_t> device_info_size_map = {
     {UR_DEVICE_INFO_MAX_REGISTERS_PER_WORK_GROUP, sizeof(uint32_t)},
     {UR_DEVICE_INFO_COMPONENT_DEVICES, sizeof(uint32_t)},
     {UR_DEVICE_INFO_COMPOSITE_DEVICE, sizeof(ur_device_handle_t)},
-};
+    {UR_DEVICE_INFO_ATOMIC_FENCE_ORDER_CAPABILITIES,
+     sizeof(ur_memory_order_capability_flags_t)},
+    {UR_DEVICE_INFO_ATOMIC_FENCE_SCOPE_CAPABILITIES,
+     sizeof(ur_memory_scope_capability_flags_t)},
+    {UR_DEVICE_INFO_ESIMD_SUPPORT, sizeof(ur_bool_t)},
+    {UR_DEVICE_INFO_IP_VERSION, sizeof(uint32_t)},
+    {UR_DEVICE_INFO_VIRTUAL_MEMORY_SUPPORT, sizeof(ur_bool_t)}};
 
 struct urDeviceGetInfoTest : uur::urAllDevicesTest,
                              ::testing::WithParamInterface<ur_device_info_t> {
@@ -234,7 +239,15 @@ INSTANTIATE_TEST_SUITE_P(
         UR_DEVICE_INFO_MEM_CHANNEL_SUPPORT,                    //
         UR_DEVICE_INFO_HOST_PIPE_READ_WRITE_SUPPORTED,         //
         UR_DEVICE_INFO_MAX_REGISTERS_PER_WORK_GROUP,           //
-        UR_DEVICE_INFO_VIRTUAL_MEMORY_SUPPORT                  //
+        UR_DEVICE_INFO_VIRTUAL_MEMORY_SUPPORT,                 //
+        UR_DEVICE_INFO_ATOMIC_FENCE_ORDER_CAPABILITIES,        //
+        UR_DEVICE_INFO_ATOMIC_FENCE_SCOPE_CAPABILITIES,        //
+        UR_DEVICE_INFO_ATOMIC_MEMORY_SCOPE_CAPABILITIES,       //
+        UR_DEVICE_INFO_IP_VERSION,                             //
+        UR_DEVICE_INFO_KERNEL_SET_SPECIALIZATION_CONSTANTS,    //
+        UR_DEVICE_INFO_PREFERRED_VECTOR_WIDTH_DOUBLE,          //
+        UR_DEVICE_INFO_PREFERRED_VECTOR_WIDTH_HALF,            //
+        UR_DEVICE_INFO_PREFERRED_VECTOR_WIDTH_INT              //
         ),
     [](const ::testing::TestParamInfo<ur_device_info_t> &info) {
         std::stringstream ss;
@@ -250,30 +263,47 @@ bool doesReturnArray(ur_device_info_t info_type) {
     return false;
 }
 
+const std::set optionalQueries{UR_DEVICE_INFO_MEMORY_CLOCK_RATE,
+                               UR_DEVICE_INFO_GLOBAL_MEM_FREE,
+                               UR_DEVICE_INFO_PCI_ADDRESS,
+                               UR_DEVICE_INFO_UUID,
+                               UR_DEVICE_INFO_GPU_EU_COUNT,
+                               UR_DEVICE_INFO_GPU_EU_SIMD_WIDTH,
+                               UR_DEVICE_INFO_GPU_EU_SLICES,
+                               UR_DEVICE_INFO_GPU_EU_COUNT_PER_SUBSLICE,
+                               UR_DEVICE_INFO_GPU_SUBSLICES_PER_SLICE,
+                               UR_DEVICE_INFO_GPU_HW_THREADS_PER_EU,
+                               UR_DEVICE_INFO_MAX_MEMORY_BANDWIDTH,
+                               UR_DEVICE_INFO_MEMORY_BUS_WIDTH,
+                               UR_DEVICE_INFO_IP_VERSION,
+                               UR_DEVICE_INFO_MAX_REGISTERS_PER_WORK_GROUP};
+
 TEST_P(urDeviceGetInfoTest, Success) {
     ur_device_info_t info_type = GetParam();
     for (auto device : devices) {
         size_t size = 0;
-        ur_result_t result =
-            urDeviceGetInfo(device, info_type, 0, nullptr, &size);
+        auto result = urDeviceGetInfo(device, info_type, 0, nullptr, &size);
 
-        if (result == UR_RESULT_SUCCESS) {
-            if (doesReturnArray(info_type) && size == 0) {
-                return;
-            }
-            ASSERT_NE(size, 0);
-
-            if (const auto expected_size = device_info_size_map.find(info_type);
-                expected_size != device_info_size_map.end()) {
-                ASSERT_EQ(expected_size->second, size);
-            }
-
-            std::vector<char> info_data(size);
-            ASSERT_SUCCESS(urDeviceGetInfo(device, info_type, size,
-                                           info_data.data(), nullptr));
+        if (result == UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION) {
+            ASSERT_TRUE(optionalQueries.count(info_type));
+            return;
         } else {
-            ASSERT_EQ_RESULT(result, UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION);
+            ASSERT_SUCCESS(result);
         }
+
+        if (doesReturnArray(info_type) && size == 0) {
+            return;
+        }
+        ASSERT_NE(size, 0);
+
+        if (const auto expected_size = device_info_size_map.find(info_type);
+            expected_size != device_info_size_map.end()) {
+            ASSERT_EQ(expected_size->second, size);
+        }
+
+        std::vector<char> info_data(size);
+        ASSERT_SUCCESS(urDeviceGetInfo(device, info_type, size,
+                                       info_data.data(), nullptr));
     }
 }
 

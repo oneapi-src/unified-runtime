@@ -209,7 +209,7 @@ etors:
     - name: MAX_CLOCK_FREQUENCY
       desc: "[uint32_t] max clock frequency in MHz"
     - name: MEMORY_CLOCK_RATE
-      desc: "[uint32_t] memory clock frequency in MHz"
+      desc: "[uint32_t] memory clock frequency in MHz (optional)"
     - name: ADDRESS_BITS
       desc: "[uint32_t] address bits"
     - name: MAX_MEM_ALLOC_SIZE
@@ -251,7 +251,7 @@ etors:
     - name: GLOBAL_MEM_SIZE
       desc: "[uint64_t] size of global memory in bytes"
     - name: GLOBAL_MEM_FREE
-      desc: "[uint64_t] size of global memory which is free in bytes"
+      desc: "[uint64_t] size of global memory which is free in bytes (optional)"
     - name: MAX_CONSTANT_BUFFER_SIZE
       desc: "[uint64_t] max constant buffer size in bytes"
     - name: MAX_CONSTANT_ARGS
@@ -338,23 +338,23 @@ etors:
     - name: USM_SYSTEM_SHARED_SUPPORT
       desc: "[$x_device_usm_access_capability_flags_t] support USM system wide shared memory access"
     - name: UUID
-      desc: "[char[]] return device UUID"
+      desc: "[char[]] return device UUID (optional)"
     - name: PCI_ADDRESS
-      desc: "[char[]] return device PCI address"
+      desc: "[char[]] return device PCI address (optional)"
     - name: GPU_EU_COUNT
-      desc: "[uint32_t] return Intel GPU EU count"
+      desc: "[uint32_t] return Intel GPU EU count (optional)"
     - name: GPU_EU_SIMD_WIDTH
-      desc: "[uint32_t] return Intel GPU EU SIMD width"
+      desc: "[uint32_t] return Intel GPU EU SIMD width (optional)"
     - name: GPU_EU_SLICES
-      desc: "[uint32_t] return Intel GPU number of slices"
+      desc: "[uint32_t] return Intel GPU number of slices (optional)"
     - name: GPU_EU_COUNT_PER_SUBSLICE
-      desc: "[uint32_t] return Intel GPU EU count per subslice"
+      desc: "[uint32_t] return Intel GPU EU count per subslice (optional)"
     - name: GPU_SUBSLICES_PER_SLICE
-      desc: "[uint32_t] return Intel GPU number of subslices per slice"
+      desc: "[uint32_t] return Intel GPU number of subslices per slice (optional)"
     - name: GPU_HW_THREADS_PER_EU
-      desc: "[uint32_t] return Intel GPU number of threads per EU"
+      desc: "[uint32_t] return Intel GPU number of threads per EU (optional)"
     - name: MAX_MEMORY_BANDWIDTH
-      desc: "[uint32_t] return max memory bandwidth in Mb/s"
+      desc: "[uint32_t] return max memory bandwidth in Mb/s (optional)"
     - name: IMAGE_SRGB
       desc: "[$x_bool_t] device supports sRGB images"
     - name: BUILD_ON_SUBDEVICE
@@ -379,7 +379,7 @@ etors:
     - name: KERNEL_SET_SPECIALIZATION_CONSTANTS
       desc: "[$x_bool_t] support the $xKernelSetSpecializationConstants entry point"
     - name: MEMORY_BUS_WIDTH
-      desc: "[uint32_t] return the width in bits of the memory bus interface of the device."
+      desc: "[uint32_t] return the width in bits of the memory bus interface of the device (optional)."
     - name: MAX_WORK_GROUPS_3D
       desc: "[size_t[3]] return max 3D work groups"
     - name: ASYNC_BARRIER
@@ -389,9 +389,9 @@ etors:
     - name: HOST_PIPE_READ_WRITE_SUPPORTED
       desc: "[$x_bool_t] Return true if the device supports enqueueing commands to read and write pipes from the host."
     - name: MAX_REGISTERS_PER_WORK_GROUP
-      desc: "[uint32_t] The maximum number of registers available per block."
+      desc: "[uint32_t] The maximum number of registers available per block. (optional)"
     - name: IP_VERSION
-      desc: "[uint32_t] The device IP version. The meaning of the device IP version is implementation-defined, but newer devices should have a higher version than older devices."
+      desc: "[uint32_t] The device IP version. The meaning of the device IP version is implementation-defined, but newer devices should have a higher version than older devices. (optional)"
     - name: VIRTUAL_MEMORY_SUPPORT
       desc: "[$x_bool_t] return true if the device supports virtual memory."
     - name: ESIMD_SUPPORT
