@@ -124,7 +124,7 @@ etors:
     - name: ATTRIBUTES
       desc: "[char[]] Return null-terminated kernel attributes string."
     - name: NUM_REGS
-      desc: "[uint32_t] Return the number of registers used by the compiled kernel (device specific)."
+      desc: "[uint32_t] Return the number of registers used by the compiled kernel (optional)."
 --- #--------------------------------------------------------------------------
 type: enum
 desc: "Get Kernel Work Group information"
@@ -133,7 +133,7 @@ name: $x_kernel_group_info_t
 typed_etors: True
 etors:
     - name: GLOBAL_WORK_SIZE
-      desc: "[size_t[3]] Return Work Group maximum global size"
+      desc: "[size_t[3]] Return Work Group maximum global size (optional)"
     - name: WORK_GROUP_SIZE
       desc: "[size_t] Return maximum Work Group size"
     - name: COMPILE_WORK_GROUP_SIZE
