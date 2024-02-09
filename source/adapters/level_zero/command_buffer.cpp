@@ -988,9 +988,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferEnqueueExp(
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEventGetSyncPointProfilingInfoExp(
-    ur_event_handle_t hEvent, ur_exp_command_buffer_sync_point_t SyncPoint,
-    ur_profiling_info_t PropName, size_t PropValueSize, void *PropValue,
-    size_t *PropValueSizeRet) {
+    ur_event_handle_t hEvent, ur_exp_command_buffer_sync_point_t syncPoint,
+    ur_profiling_info_t propName, size_t propSize, void *pPropValue,
+    size_t *pPropSizeRet) {
   std::shared_lock<ur_shared_mutex> EventLock(hEvent->Mutex);
 
   if (hEvent->UrQueue &&
@@ -1005,14 +1005,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetSyncPointProfilingInfoExp(
   const uint64_t TimestampMaxValue =
       ((1ULL << Device->ZeDeviceProperties->kernelTimestampValidBits) - 1ULL);
 
-  UrReturnHelper ReturnValue(PropValueSize, PropValue, PropValueSizeRet);
+  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
 
   // Node profiling info is stored in the CommandData field of the event
   // returned from graph submission.
   // The timing info of each command corresponding to a node is stored using
   // `zeCommandListAppendQueryKernelTimestamps`. This command stores the timing
   // info of each command/node in the same order as the sync-points that were
-  // assigned to this node when it was enqueued. Consequently, `SyncPoint`
+  // assigned to this node when it was enqueued. Consequently, `syncPoint`
   // corresponds to the index of the memory slot containing the timestamps
   // corresponding to this specific node.
   if (hEvent->CommandType != UR_COMMAND_COMMAND_BUFFER_ENQUEUE_EXP) {
@@ -1024,11 +1024,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetSyncPointProfilingInfoExp(
   }
 
   command_buffer_profiling_t *ProfilingsPtr;
-  switch (PropName) {
+  switch (propName) {
   case UR_PROFILING_INFO_COMMAND_START: {
     ProfilingsPtr =
         static_cast<command_buffer_profiling_t *>(hEvent->CommandData);
-    const uint64_t Index = static_cast<uint64_t>(SyncPoint);
+    const uint64_t Index = static_cast<uint64_t>(syncPoint);
 
     if (Index > ProfilingsPtr->NumEvents) {
       return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_EXP;
@@ -1042,7 +1042,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetSyncPointProfilingInfoExp(
   case UR_PROFILING_INFO_COMMAND_END: {
     ProfilingsPtr =
         static_cast<command_buffer_profiling_t *>(hEvent->CommandData);
-    const uint64_t Index = static_cast<uint64_t>(SyncPoint);
+    const uint64_t Index = static_cast<uint64_t>(syncPoint);
 
     if (Index > ProfilingsPtr->NumEvents) {
       return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_EXP;
