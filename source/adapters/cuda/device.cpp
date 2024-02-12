@@ -207,7 +207,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     int Major = 0;
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &Major, CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MAJOR, hDevice->get()));
-    uint64_t Capabilities =
+    ur_memory_scope_capability_flags_t Capabilities =
         (Major >= 7) ? UR_MEMORY_SCOPE_CAPABILITY_FLAG_WORK_ITEM |
                            UR_MEMORY_SCOPE_CAPABILITY_FLAG_SUB_GROUP |
                            UR_MEMORY_SCOPE_CAPABILITY_FLAG_WORK_GROUP |
@@ -288,12 +288,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
 
     return ReturnValue(Enabled);
   }
-  case UR_DEVICE_INFO_MAX_READ_IMAGE_ARGS: {
-    // This call doesn't match to CUDA as it doesn't have images, but instead
-    // surfaces and textures. No clear call in the CUDA API to determine this,
-    // but some searching found as of SM 2.x 128 are supported.
-    return ReturnValue(128u);
-  }
+  //
+  case UR_DEVICE_INFO_MAX_READ_WRITE_IMAGE_ARGS:
+  case UR_DEVICE_INFO_MAX_READ_IMAGE_ARGS:
   case UR_DEVICE_INFO_MAX_WRITE_IMAGE_ARGS: {
     // This call doesn't match to CUDA as it doesn't have images, but instead
     // surfaces and textures. No clear call in the CUDA API to determine this,
@@ -1026,13 +1023,13 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_COMPOSITE_DEVICE:
     // These two are exclusive of L0.
     return ReturnValue(0);
-  case UR_DEVICE_INFO_MAX_READ_WRITE_IMAGE_ARGS:
   case UR_DEVICE_INFO_GPU_EU_COUNT:
   case UR_DEVICE_INFO_GPU_EU_SIMD_WIDTH:
   case UR_DEVICE_INFO_GPU_EU_SLICES:
   case UR_DEVICE_INFO_GPU_SUBSLICES_PER_SLICE:
   case UR_DEVICE_INFO_GPU_EU_COUNT_PER_SUBSLICE:
   case UR_DEVICE_INFO_GPU_HW_THREADS_PER_EU:
+  case UR_DEVICE_INFO_IP_VERSION:
     return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
 
   default:

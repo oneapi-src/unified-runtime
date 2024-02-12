@@ -3,9 +3,10 @@
 // See LICENSE.TXT
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
+#include <map>
 #include <uur/fixtures.h>
 
-struct urUSMGetMemAllocInfoTest
+struct urUSMAllocInfoTest
     : uur::urUSMDeviceAllocTestWithParam<ur_usm_alloc_info_t> {
     void SetUp() override {
         use_pool = getParam() == UR_USM_ALLOC_INFO_POOL;
@@ -14,7 +15,7 @@ struct urUSMGetMemAllocInfoTest
     }
 };
 
-UUR_TEST_SUITE_P(urUSMGetMemAllocInfoTest,
+UUR_TEST_SUITE_P(urUSMAllocInfoTest,
                  ::testing::Values(UR_USM_ALLOC_INFO_TYPE,
                                    UR_USM_ALLOC_INFO_BASE_PTR,
                                    UR_USM_ALLOC_INFO_SIZE,
@@ -30,7 +31,7 @@ static std::unordered_map<ur_usm_alloc_info_t, size_t> usm_info_size_map = {
     {UR_USM_ALLOC_INFO_POOL, sizeof(ur_usm_pool_handle_t)},
 };
 
-TEST_P(urUSMGetMemAllocInfoTest, Success) {
+TEST_P(urUSMAllocInfoTest, Success) {
     size_t size = 0;
     auto alloc_info = getParam();
     ASSERT_SUCCESS(
@@ -47,10 +48,10 @@ TEST_P(urUSMGetMemAllocInfoTest, Success) {
                                         info_data.data(), nullptr));
 }
 
-using urUSMGetMemAllocInfoNegativeTest = uur::urUSMDeviceAllocTest;
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urUSMGetMemAllocInfoNegativeTest);
+using urUSMGetMemAllocInfoTest = uur::urUSMDeviceAllocTest;
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urUSMGetMemAllocInfoTest);
 
-TEST_P(urUSMGetMemAllocInfoNegativeTest, InvalidNullHandleContext) {
+TEST_P(urUSMGetMemAllocInfoTest, InvalidNullHandleContext) {
     ur_usm_type_t USMType;
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_HANDLE,
                      urUSMGetMemAllocInfo(nullptr, ptr, UR_USM_ALLOC_INFO_TYPE,
@@ -58,7 +59,7 @@ TEST_P(urUSMGetMemAllocInfoNegativeTest, InvalidNullHandleContext) {
                                           nullptr));
 }
 
-TEST_P(urUSMGetMemAllocInfoNegativeTest, InvalidNullPointerMem) {
+TEST_P(urUSMGetMemAllocInfoTest, InvalidNullPointerMem) {
     ur_usm_type_t USMType;
     ASSERT_EQ_RESULT(
         UR_RESULT_ERROR_INVALID_NULL_POINTER,
@@ -66,7 +67,7 @@ TEST_P(urUSMGetMemAllocInfoNegativeTest, InvalidNullPointerMem) {
                              sizeof(ur_usm_type_t), &USMType, nullptr));
 }
 
-TEST_P(urUSMGetMemAllocInfoNegativeTest, InvalidEnumeration) {
+TEST_P(urUSMGetMemAllocInfoTest, InvalidEnumeration) {
     ur_usm_type_t USMType;
     ASSERT_EQ_RESULT(
         UR_RESULT_ERROR_INVALID_ENUMERATION,
@@ -74,7 +75,7 @@ TEST_P(urUSMGetMemAllocInfoNegativeTest, InvalidEnumeration) {
                              sizeof(ur_usm_type_t), &USMType, nullptr));
 }
 
-TEST_P(urUSMGetMemAllocInfoNegativeTest, InvalidValuePropSize) {
+TEST_P(urUSMGetMemAllocInfoTest, InvalidValuePropSize) {
     ur_usm_type_t USMType;
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
                      urUSMGetMemAllocInfo(context, ptr, UR_USM_ALLOC_INFO_TYPE,
