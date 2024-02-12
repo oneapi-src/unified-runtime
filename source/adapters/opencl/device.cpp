@@ -506,7 +506,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
           cl_adapter::cast<cl_device_id>(hDevice), {"cl_khr_fp16"}, Supported));
 
       if (!Supported) {
-        return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
       }
     }
 
@@ -787,6 +787,13 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
         {"cl_intel_program_scope_host_pipe"}, Supported));
     return ReturnValue(Supported);
   }
+  case UR_DEVICE_INFO_GLOBAL_VARIABLE_SUPPORT: {
+    bool Supported = false;
+    CL_RETURN_ON_FAILURE(cl_adapter::checkDeviceExtensions(
+        cl_adapter::cast<cl_device_id>(hDevice),
+        {"cl_intel_global_variable_access"}, Supported));
+    return ReturnValue(Supported);
+  }
   case UR_DEVICE_INFO_QUEUE_PROPERTIES:
   case UR_DEVICE_INFO_QUEUE_ON_DEVICE_PROPERTIES:
   case UR_DEVICE_INFO_QUEUE_ON_HOST_PROPERTIES:
@@ -820,7 +827,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_COMPILER_AVAILABLE:
   case UR_DEVICE_INFO_LINKER_AVAILABLE:
   case UR_DEVICE_INFO_PREFERRED_INTEROP_USER_SYNC:
-  case UR_DEVICE_INFO_KERNEL_SET_SPECIALIZATION_CONSTANTS:
   case UR_DEVICE_INFO_SUB_GROUP_INDEPENDENT_FORWARD_PROGRESS: {
     /* CL type: cl_bool
      * UR type: ur_bool_t */
@@ -931,6 +937,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
    * EU device-specific information extensions. Some of the queries are
    * enabled by cl_intel_device_attribute_query extension, but it's not yet in
    * the Registry. */
+  case UR_DEVICE_INFO_KERNEL_SET_SPECIALIZATION_CONSTANTS: {
+    return ReturnValue(false);
+  }
   case UR_DEVICE_INFO_PCI_ADDRESS:
   case UR_DEVICE_INFO_GPU_EU_COUNT:
   case UR_DEVICE_INFO_GPU_EU_SIMD_WIDTH:

@@ -915,6 +915,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
       return ze2urResult(errc);
     return ReturnValue(UrRootDev);
   }
+  case UR_DEVICE_INFO_KERNEL_SET_SPECIALIZATION_CONSTANTS:
+    return ReturnValue(false);
+  case UR_DEVICE_INFO_GLOBAL_VARIABLE_SUPPORT:
+    return ReturnValue(true);
 
   default:
     urPrint("Unsupported ParamName in urGetDeviceInfo\n");
