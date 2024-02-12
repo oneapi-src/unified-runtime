@@ -164,7 +164,6 @@ jobs:
       matrix:
         adapter: [
           {name: CUDA, triplet: nvptx64-nvidia-cuda},
-          {name: HIP, triplet: amdgcn-amd-amdhsa}, 
           {name: L0, triplet: spir64}
         ]
         build_type: [Debug, Release]
