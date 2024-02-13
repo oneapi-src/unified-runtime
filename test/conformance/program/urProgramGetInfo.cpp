@@ -23,12 +23,21 @@ UUR_TEST_SUITE_P(
                       UR_PROGRAM_INFO_KERNEL_NAMES),
     uur::deviceTestWithParamPrinter<ur_program_info_t>);
 
+const std::set optionalQueries{UR_PROGRAM_INFO_NUM_KERNELS,
+                               UR_PROGRAM_INFO_KERNEL_NAMES};
+
 TEST_P(urProgramGetInfoTest, Success) {
     auto property_name = getParam();
     size_t property_size = 0;
     std::vector<char> property_value;
-    ASSERT_SUCCESS(
-        urProgramGetInfo(program, property_name, 0, nullptr, &property_size));
+    auto result =
+        urProgramGetInfo(program, property_name, 0, nullptr, &property_size);
+    if (result == UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION) {
+        ASSERT_TRUE(optionalQueries.count(property_name));
+        return;
+    } else {
+        ASSERT_SUCCESS(result);
+    }
     property_value.resize(property_size);
     ASSERT_SUCCESS(urProgramGetInfo(program, property_name, property_size,
                                     property_value.data(), nullptr));

@@ -161,15 +161,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueGetInfo(
     return ReturnValue(Queue->Device);
   case UR_QUEUE_INFO_REFERENCE_COUNT:
     return ReturnValue(uint32_t{Queue->RefCount.load()});
-  case UR_QUEUE_INFO_FLAGS:
-    die("UR_QUEUE_INFO_FLAGS in urQueueGetInfo not implemented\n");
-    break;
-  case UR_QUEUE_INFO_SIZE:
-    die("UR_QUEUE_INFO_SIZE in urQueueGetInfo not implemented\n");
-    break;
-  case UR_QUEUE_INFO_DEVICE_DEFAULT:
-    die("UR_QUEUE_INFO_DEVICE_DEFAULT in urQueueGetInfo not implemented\n");
-    break;
   case UR_QUEUE_INFO_EMPTY: {
     // We can exit early if we have in-order queue.
     if (Queue->isInOrderQueue()) {
@@ -249,10 +240,16 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueGetInfo(
     }
     return ReturnValue(true);
   }
-  default:
+  case UR_QUEUE_INFO_FLAGS:
+  case UR_QUEUE_INFO_SIZE:
+  case UR_QUEUE_INFO_DEVICE_DEFAULT:
     urPrint("Unsupported ParamName in urQueueGetInfo: ParamName=%d(0x%x)\n",
             ParamName, ParamName);
-    return UR_RESULT_ERROR_INVALID_VALUE;
+    return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
+  default:
+    urPrint("Unrecognized ParamName in urQueueGetInfo: ParamName=%d(0x%x)\n",
+            ParamName, ParamName);
+    return UR_RESULT_ERROR_INVALID_ENUMERATION;
   }
 
   return UR_RESULT_SUCCESS;

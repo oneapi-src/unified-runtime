@@ -60,8 +60,6 @@ static cl_int mapURKernelInfoToCL(ur_kernel_info_t URPropName) {
     return CL_KERNEL_PROGRAM;
   case UR_KERNEL_INFO_ATTRIBUTES:
     return CL_KERNEL_ATTRIBUTES;
-  case UR_KERNEL_INFO_NUM_REGS:
-    return CL_KERNEL_NUM_ARGS;
   default:
     return -1;
   }
@@ -72,6 +70,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelGetInfo(ur_kernel_handle_t hKernel,
                                                     size_t propSize,
                                                     void *pPropValue,
                                                     size_t *pPropSizeRet) {
+  // This is not supported in OpenCL
+  if (propName == UR_KERNEL_INFO_NUM_REGS) {
+    return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
+  }
   // We need this little bit of ugliness because the UR NUM_ARGS property is
   // size_t whereas the CL one is cl_uint. We should consider changing that see
   // #1038

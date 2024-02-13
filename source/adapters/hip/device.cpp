@@ -752,9 +752,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     // Because scopes are hierarchical, wider scopes support all narrower
     // scopes. At a minimum, each device must support WORK_ITEM, SUB_GROUP and
     // WORK_GROUP. (https://github.com/KhronosGroup/SYCL-Docs/pull/382)
-    uint64_t Capabilities = UR_MEMORY_SCOPE_CAPABILITY_FLAG_WORK_ITEM |
-                            UR_MEMORY_SCOPE_CAPABILITY_FLAG_SUB_GROUP |
-                            UR_MEMORY_SCOPE_CAPABILITY_FLAG_WORK_GROUP;
+    ur_memory_scope_capability_flags_t Capabilities =
+        UR_MEMORY_SCOPE_CAPABILITY_FLAG_WORK_ITEM |
+        UR_MEMORY_SCOPE_CAPABILITY_FLAG_SUB_GROUP |
+        UR_MEMORY_SCOPE_CAPABILITY_FLAG_WORK_GROUP;
     return ReturnValue(Capabilities);
   }
   case UR_DEVICE_INFO_ATOMIC_FENCE_ORDER_CAPABILITIES: {
@@ -827,6 +828,15 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_COMPOSITE_DEVICE:
     // These two are exclusive of L0.
     return ReturnValue(0);
+  case UR_DEVICE_INFO_KERNEL_SET_SPECIALIZATION_CONSTANTS:
+    return ReturnValue(false);
+  case UR_DEVICE_INFO_BFLOAT16:
+    return ReturnValue(true);
+  /* This functionality only works with the cuda backend, see */
+  case UR_DEVICE_INFO_ASYNC_BARRIER:
+    return ReturnValue(false);
+  case UR_DEVICE_INFO_IL_VERSION:
+    return ReturnValue("");
 
   // TODO: Investigate if this information is available on HIP.
   case UR_DEVICE_INFO_GPU_EU_COUNT:
@@ -836,9 +846,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_GPU_EU_COUNT_PER_SUBSLICE:
   case UR_DEVICE_INFO_GPU_HW_THREADS_PER_EU:
   case UR_DEVICE_INFO_MAX_MEMORY_BANDWIDTH:
-  case UR_DEVICE_INFO_BFLOAT16:
-  case UR_DEVICE_INFO_IL_VERSION:
-  case UR_DEVICE_INFO_ASYNC_BARRIER:
+  case UR_DEVICE_INFO_IP_VERSION:
     return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
 
   default:
