@@ -759,6 +759,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferEnqueueExp(
   // Create a command-list to signal RetEvent on completion
   ur_command_list_ptr_t SignalCommandList{};
   if (Event) {
+    UR_CALL(Queue->Context->getAvailableCommandList(Queue, SignalCommandList,
+                                                    false, false));
+
     UR_CALL(createEventAndAssociateQueue(
         Queue, &RetEvent, UR_COMMAND_COMMAND_BUFFER_ENQUEUE_EXP,
         SignalCommandList, false, false, true));
