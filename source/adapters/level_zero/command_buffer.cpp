@@ -761,7 +761,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferEnqueueExp(
   if (Event) {
     UR_CALL(Queue->Context->getAvailableCommandList(Queue, SignalCommandList,
                                                     false, false));
-
     UR_CALL(createEventAndAssociateQueue(
         Queue, &RetEvent, UR_COMMAND_COMMAND_BUFFER_ENQUEUE_EXP,
         SignalCommandList, false, false, true));
