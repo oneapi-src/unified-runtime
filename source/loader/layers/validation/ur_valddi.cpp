@@ -8593,6 +8593,11 @@ __urdlllocal ur_result_t UR_APICALL urEventGetSyncPointProfilingInfoExp(
         }
     }
 
+    if (context.enableLifetimeValidation &&
+        !refCountContext.isReferenceValid(hEvent)) {
+        refCountContext.logInvalidReference(hEvent);
+    }
+
     ur_result_t result = pfnGetSyncPointProfilingInfoExp(
         hEvent, syncPoint, propName, propSize, pPropValue, pPropSizeRet);
 
