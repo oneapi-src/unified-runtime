@@ -46,7 +46,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
     ur_exp_command_buffer_handle_t, ur_kernel_handle_t, uint32_t,
     const size_t *, const size_t *, const size_t *, uint32_t,
     const ur_exp_command_buffer_sync_point_t *,
-    ur_exp_command_buffer_sync_point_t *) {
+    ur_exp_command_buffer_sync_point_t *,
+    ur_exp_command_buffer_command_handle_t *) {
   detail::ur::die("Experimental Command-buffer feature is not "
                   "implemented for HIP adapter.");
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
@@ -163,6 +164,34 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferEnqueueExp(
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
+UR_APIEXPORT ur_result_t UR_APICALL
+urCommandBufferRetainCommandExp(ur_exp_command_buffer_command_handle_t) {
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+}
+
+UR_APIEXPORT ur_result_t UR_APICALL
+urCommandBufferReleaseCommandExp(ur_exp_command_buffer_command_handle_t) {
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+}
+
+UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
+    ur_exp_command_buffer_command_handle_t,
+    const ur_exp_command_buffer_update_kernel_launch_desc_t *) {
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+}
+
+UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferGetInfoExp(
+    ur_exp_command_buffer_handle_t, ur_exp_command_buffer_info_t, size_t,
+    void *, size_t *) {
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+}
+
+UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferCommandGetInfoExp(
+    ur_exp_command_buffer_command_handle_t,
+    ur_exp_command_buffer_command_info_t, size_t, void *, size_t *) {
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+}
+
 UR_APIEXPORT ur_result_t UR_APICALL urEventGetSyncPointProfilingInfoExp(
     ur_event_handle_t hEvent, ur_exp_command_buffer_sync_point_t syncPoint,
     ur_profiling_info_t propName, size_t propSize, void *pPropValue,
@@ -175,3 +204,4 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetSyncPointProfilingInfoExp(
   (void)pPropSizeRet;
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
+
