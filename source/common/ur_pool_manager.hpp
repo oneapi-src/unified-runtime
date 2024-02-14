@@ -249,12 +249,18 @@ template <typename D> struct pool_manager {
     std::optional<umf_memory_pool_handle_t> getPool(const D &desc) noexcept {
         auto it = descToPoolMap.find(desc);
         if (it == descToPoolMap.end()) {
-            logger::error("Pool descriptor doesn't match any existing pool: {}",
-                          desc);
+            logger::error(
+                "Pool descriptor: {}, doesn't match any existing pool", desc);
             return std::nullopt;
         }
 
         return it->second.get();
+    }
+
+    bool hasPool(umf_memory_pool_handle_t hPool) noexcept {
+        return std::any_of(
+            descToPoolMap.begin(), descToPoolMap.end(),
+            [&hPool](const auto &pair) { return hPool == pair.second.get(); });
     }
 };
 
