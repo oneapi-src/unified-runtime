@@ -3,11 +3,35 @@
 // See LICENSE.TXT
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #include <uur/fixtures.h>
+#include "helpers.h"
 
-using urEnqueueMemBufferMapTest = uur::urMemBufferQueueTest;
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueMemBufferMapTest);
+// Choose parameters so that we get good coverage and catch some edge cases.
+static std::vector<uur::mem_buffer_test_parameters_t> generateParameterizations() {
+    std::vector<uur::mem_buffer_test_parameters_t> parameterizations;
 
-TEST_P(urEnqueueMemBufferMapTest, SuccessRead) {
+// Choose parameters so that we get good coverage and catch some edge cases.
+#define PARAMETERIZATION(name, count, mem_flag)   \
+    uur::mem_buffer_test_parameters_t name{                                               \
+        #name,         count, mem_flag};                                       \
+    parameterizations.push_back(name);                                         \
+    (void)0
+    PARAMETERIZATION(ReadWrite_8, 8, UR_MEM_FLAG_READ_WRITE);
+    PARAMETERIZATION(ReadWrite_16, 16, UR_MEM_FLAG_READ_WRITE);
+    PARAMETERIZATION(WriteOnly_8, 8, UR_MEM_FLAG_WRITE_ONLY);
+    PARAMETERIZATION(WriteOnly_16, 16, UR_MEM_FLAG_WRITE_ONLY);
+#undef PARAMETERIZATION
+    return parameterizations;
+}
+
+struct urEnqueueMemBufferMapTestWithParam
+    : public uur::urMemBufferQueueTestWithParam<uur::mem_buffer_test_parameters_t> {};
+
+UUR_TEST_SUITE_P(
+    urEnqueueMemBufferMapTestWithParam,
+    testing::ValuesIn(generateParameterizations()),
+    uur::printRectTestString<urEnqueueMemBufferMapTestWithParam>);
+
+TEST_P(urEnqueueMemBufferMapTestWithParam, SuccessRead) {
     const std::vector<uint32_t> input(count, 42);
     ASSERT_SUCCESS(urEnqueueMemBufferWrite(queue, buffer, true, 0, size,
                                            input.data(), 0, nullptr, nullptr));
@@ -21,7 +45,7 @@ TEST_P(urEnqueueMemBufferMapTest, SuccessRead) {
     }
 }
 
-TEST_P(urEnqueueMemBufferMapTest, SuccessWrite) {
+TEST_P(urEnqueueMemBufferMapTestWithParam, SuccessWrite) {
     const std::vector<uint32_t> input(count, 0);
     ASSERT_SUCCESS(urEnqueueMemBufferWrite(queue, buffer, true, 0, size,
                                            input.data(), 0, nullptr, nullptr));
@@ -42,7 +66,7 @@ TEST_P(urEnqueueMemBufferMapTest, SuccessWrite) {
     }
 }
 
-TEST_P(urEnqueueMemBufferMapTest, SuccessOffset) {
+TEST_P(urEnqueueMemBufferMapTestWithParam, SuccessOffset) {
     const std::vector<uint32_t> input(count, 0);
     ASSERT_SUCCESS(urEnqueueMemBufferWrite(queue, buffer, true, 0, size,
                                            input.data(), 0, nullptr, nullptr));
@@ -71,7 +95,7 @@ TEST_P(urEnqueueMemBufferMapTest, SuccessOffset) {
     }
 }
 
-TEST_P(urEnqueueMemBufferMapTest, SuccessPartialMap) {
+TEST_P(urEnqueueMemBufferMapTestWithParam, SuccessPartialMap) {
     const std::vector<uint32_t> input(count, 0);
     ASSERT_SUCCESS(urEnqueueMemBufferWrite(queue, buffer, true, 0, size,
                                            input.data(), 0, nullptr, nullptr));
@@ -99,7 +123,7 @@ TEST_P(urEnqueueMemBufferMapTest, SuccessPartialMap) {
     }
 }
 
-TEST_P(urEnqueueMemBufferMapTest, SuccesPinnedRead) {
+TEST_P(urEnqueueMemBufferMapTestWithParam, SuccesPinnedRead) {
     const size_t memSize = sizeof(int);
     const int value = 20;
 
@@ -123,7 +147,7 @@ TEST_P(urEnqueueMemBufferMapTest, SuccesPinnedRead) {
     ASSERT_SUCCESS(urMemRelease(memObj));
 }
 
-TEST_P(urEnqueueMemBufferMapTest, SuccesPinnedWrite) {
+TEST_P(urEnqueueMemBufferMapTestWithParam, SuccessPinnedWrite) {
     const size_t memSize = sizeof(int);
     const int value = 30;
 
@@ -150,7 +174,7 @@ TEST_P(urEnqueueMemBufferMapTest, SuccesPinnedWrite) {
     ASSERT_SUCCESS(urMemRelease(memObj));
 }
 
-TEST_P(urEnqueueMemBufferMapTest, SuccessMultiMaps) {
+TEST_P(urEnqueueMemBufferMapTestWithParam, SuccessMultiMaps) {
     const std::vector<uint32_t> input(count, 0);
     ASSERT_SUCCESS(urEnqueueMemBufferWrite(queue, buffer, true, 0, size,
                                            input.data(), 0, nullptr, nullptr));
@@ -191,7 +215,7 @@ TEST_P(urEnqueueMemBufferMapTest, SuccessMultiMaps) {
     }
 }
 
-TEST_P(urEnqueueMemBufferMapTest, InvalidNullHandleQueue) {
+TEST_P(urEnqueueMemBufferMapTestWithParam, InvalidNullHandleQueue) {
     void *map = nullptr;
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_HANDLE,
                      urEnqueueMemBufferMap(nullptr, buffer, true,
@@ -199,7 +223,7 @@ TEST_P(urEnqueueMemBufferMapTest, InvalidNullHandleQueue) {
                                            0, size, 0, nullptr, nullptr, &map));
 }
 
-TEST_P(urEnqueueMemBufferMapTest, InvalidNullHandleBuffer) {
+TEST_P(urEnqueueMemBufferMapTestWithParam, InvalidNullHandleBuffer) {
     void *map = nullptr;
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_HANDLE,
                      urEnqueueMemBufferMap(queue, nullptr, true,
@@ -207,7 +231,7 @@ TEST_P(urEnqueueMemBufferMapTest, InvalidNullHandleBuffer) {
                                            0, size, 0, nullptr, nullptr, &map));
 }
 
-TEST_P(urEnqueueMemBufferMapTest, InvalidEnumerationMapFlags) {
+TEST_P(urEnqueueMemBufferMapTestWithParam, InvalidEnumerationMapFlags) {
     void *map = nullptr;
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_ENUMERATION,
                      urEnqueueMemBufferMap(queue, buffer, true,
@@ -215,7 +239,7 @@ TEST_P(urEnqueueMemBufferMapTest, InvalidEnumerationMapFlags) {
                                            nullptr, nullptr, &map));
 }
 
-TEST_P(urEnqueueMemBufferMapTest, InvalidNullPointerRetMap) {
+TEST_P(urEnqueueMemBufferMapTestWithParam, InvalidNullPointerRetMap) {
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_POINTER,
                      urEnqueueMemBufferMap(queue, buffer, true,
                                            UR_MAP_FLAG_READ | UR_MAP_FLAG_WRITE,
@@ -223,7 +247,7 @@ TEST_P(urEnqueueMemBufferMapTest, InvalidNullPointerRetMap) {
                                            nullptr));
 }
 
-TEST_P(urEnqueueMemBufferMapTest, InvalidNullPtrEventWaitList) {
+TEST_P(urEnqueueMemBufferMapTestWithParam, InvalidNullPtrEventWaitList) {
     void *map;
     ASSERT_EQ_RESULT(urEnqueueMemBufferMap(queue, buffer, true,
                                            UR_MAP_FLAG_READ | UR_MAP_FLAG_WRITE,
@@ -248,7 +272,7 @@ TEST_P(urEnqueueMemBufferMapTest, InvalidNullPtrEventWaitList) {
     ASSERT_SUCCESS(urEventRelease(validEvent));
 }
 
-TEST_P(urEnqueueMemBufferMapTest, InvalidSize) {
+TEST_P(urEnqueueMemBufferMapTestWithParam, InvalidSize) {
     void *map = nullptr;
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
                      urEnqueueMemBufferMap(queue, buffer, true, 0, 1, size, 0,

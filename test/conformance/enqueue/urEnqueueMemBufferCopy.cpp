@@ -3,11 +3,32 @@
 // See LICENSE.TXT
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
+#include "helpers.h"
 #include <uur/fixtures.h>
 
-struct urEnqueueMemBufferCopyTest : uur::urQueueTest {
+// Choose parameters so that we get good coverage and catch some edge cases.
+static std::vector<uur::mem_buffer_test_parameters_t>
+generateParameterizations() {
+    std::vector<uur::mem_buffer_test_parameters_t> parameterizations;
+
+// Choose parameters so that we get good coverage and catch some edge cases.
+#define PARAMETERIZATION(name, count, mem_flag)                                \
+    uur::mem_buffer_test_parameters_t name{#name, count, mem_flag};            \
+    parameterizations.push_back(name);                                         \
+    (void)0
+    PARAMETERIZATION(ReadWrite_8, 8, UR_MEM_FLAG_READ_WRITE);
+    PARAMETERIZATION(ReadWrite_16, 16, UR_MEM_FLAG_READ_WRITE);
+    PARAMETERIZATION(WriteOnly_8, 8, UR_MEM_FLAG_WRITE_ONLY);
+    PARAMETERIZATION(WriteOnly_16, 16, UR_MEM_FLAG_WRITE_ONLY);
+#undef PARAMETERIZATION
+    return parameterizations;
+}
+
+struct urEnqueueMemBufferCopyTestWithParam
+    : public uur::urQueueTestWithParam<
+          uur::mem_buffer_test_parameters_t> {
     void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(urQueueTest::SetUp());
+        UUR_RETURN_ON_FATAL_FAILURE(urQueueTestWithParam::SetUp());
         ASSERT_SUCCESS(urMemBufferCreate(context, UR_MEM_FLAG_WRITE_ONLY, size,
                                          nullptr, &src_buffer));
         ASSERT_SUCCESS(urMemBufferCreate(context, UR_MEM_FLAG_READ_ONLY, size,
@@ -22,21 +43,24 @@ struct urEnqueueMemBufferCopyTest : uur::urQueueTest {
         if (src_buffer) {
             EXPECT_SUCCESS(urMemRelease(src_buffer));
         }
-        if (src_buffer) {
+        if (dst_buffer) {
             EXPECT_SUCCESS(urMemRelease(dst_buffer));
         }
-        urQueueTest::TearDown();
+        urQueueTestWithParam::TearDown();
     }
 
-    const size_t count = 1024;
+    const size_t count = std::get<1>(this->GetParam()).count;
     const size_t size = sizeof(uint32_t) * count;
     ur_mem_handle_t src_buffer = nullptr;
     ur_mem_handle_t dst_buffer = nullptr;
     std::vector<uint32_t> input;
 };
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueMemBufferCopyTest);
 
-TEST_P(urEnqueueMemBufferCopyTest, Success) {
+UUR_TEST_SUITE_P(urEnqueueMemBufferCopyTestWithParam,
+                 testing::ValuesIn(generateParameterizations()),
+                 uur::printRectTestString<urEnqueueMemBufferCopyTestWithParam>);
+
+TEST_P(urEnqueueMemBufferCopyTestWithParam, Success) {
     ASSERT_SUCCESS(urEnqueueMemBufferCopy(queue, src_buffer, dst_buffer, 0, 0,
                                           size, 0, nullptr, nullptr));
     std::vector<uint32_t> output(count, 1);
@@ -45,25 +69,25 @@ TEST_P(urEnqueueMemBufferCopyTest, Success) {
     ASSERT_EQ(input, output);
 }
 
-TEST_P(urEnqueueMemBufferCopyTest, InvalidNullHandleQueue) {
+TEST_P(urEnqueueMemBufferCopyTestWithParam, InvalidNullHandleQueue) {
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_HANDLE,
                      urEnqueueMemBufferCopy(nullptr, src_buffer, dst_buffer, 0,
                                             0, size, 0, nullptr, nullptr));
 }
 
-TEST_P(urEnqueueMemBufferCopyTest, InvalidNullHandleBufferSrc) {
+TEST_P(urEnqueueMemBufferCopyTestWithParam, InvalidNullHandleBufferSrc) {
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_HANDLE,
                      urEnqueueMemBufferCopy(queue, nullptr, dst_buffer, 0, 0,
                                             size, 0, nullptr, nullptr));
 }
 
-TEST_P(urEnqueueMemBufferCopyTest, InvalidNullHandleBufferDst) {
+TEST_P(urEnqueueMemBufferCopyTestWithParam, InvalidNullHandleBufferDst) {
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_HANDLE,
                      urEnqueueMemBufferCopy(queue, src_buffer, nullptr, 0, 0,
                                             size, 0, nullptr, nullptr));
 }
 
-TEST_P(urEnqueueMemBufferCopyTest, InvalidNullPtrEventWaitList) {
+TEST_P(urEnqueueMemBufferCopyTestWithParam, InvalidNullPtrEventWaitList) {
     ASSERT_EQ_RESULT(urEnqueueMemBufferCopy(queue, src_buffer, dst_buffer, 0, 0,
                                             size, 1, nullptr, nullptr),
                      UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST);
@@ -83,7 +107,7 @@ TEST_P(urEnqueueMemBufferCopyTest, InvalidNullPtrEventWaitList) {
     ASSERT_SUCCESS(urEventRelease(validEvent));
 }
 
-TEST_P(urEnqueueMemBufferCopyTest, InvalidSize) {
+TEST_P(urEnqueueMemBufferCopyTestWithParam, InvalidSize) {
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
                      urEnqueueMemBufferCopy(queue, src_buffer, dst_buffer, 1, 0,
                                             size, 0, nullptr, nullptr));

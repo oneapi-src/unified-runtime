@@ -379,6 +379,26 @@ template <class T> struct urQueueTestWithParam : urContextTestWithParam<T> {
     ur_queue_handle_t queue;
 };
 
+template <class T> struct urMemBufferQueueTestWithParam : urQueueTestWithParam<T> {
+    void SetUp() override {
+        UUR_RETURN_ON_FATAL_FAILURE(urQueueTestWithParam<T>::SetUp());
+        ASSERT_SUCCESS(urMemBufferCreate(this->context, mem_flag, size,
+                                         nullptr, &buffer));
+    }
+
+    void TearDown() override {
+        if (buffer) {
+            EXPECT_SUCCESS(urMemRelease(buffer));
+        }
+        UUR_RETURN_ON_FATAL_FAILURE(urQueueTestWithParam<T>::TearDown());
+    }
+
+    const size_t count = std::get<1>(this->GetParam()).count;
+    const size_t size = sizeof(uint32_t) * count;
+    ur_mem_handle_t buffer = nullptr;
+    ur_mem_flag_t mem_flag = std::get<1>(this->GetParam()).mem_flag;
+};
+
 struct urProfilingQueueTest : urContextTest {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(urContextTest::SetUp());
@@ -444,6 +464,28 @@ struct urMultiQueueTest : urContextTest {
     ur_queue_handle_t queue1 = nullptr;
     ur_queue_handle_t queue2 = nullptr;
 };
+
+template <class T> struct urMemBufferQueueTestWithParam : urQueueTestWithParam<T> {
+    void SetUp() override {
+        UUR_RETURN_ON_FATAL_FAILURE(urQueueTestWithParam<T>::SetUp());
+        ASSERT_SUCCESS(urMemBufferCreate(this->context, mem_flag, size,
+                                         nullptr, &buffer));
+    }
+
+    void TearDown() override {
+        if (buffer) {
+            EXPECT_SUCCESS(urMemRelease(buffer));
+        }
+        UUR_RETURN_ON_FATAL_FAILURE(urQueueTestWithParam<T>::TearDown());
+    }
+
+    const size_t count = std::get<1>(this->GetParam()).count;
+    const size_t size = sizeof(uint32_t) * count;
+    ur_mem_handle_t buffer = nullptr;
+    ur_mem_flag_t mem_flag = std::get<1>(this->GetParam()).mem_flag;
+};
+
+
 
 struct urMultiDeviceContextTest : urPlatformTest {
     void SetUp() override {

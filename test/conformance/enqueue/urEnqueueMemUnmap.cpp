@@ -3,44 +3,72 @@
 // See LICENSE.TXT
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #include <uur/fixtures.h>
+#include "helpers.h"
 
-struct urEnqueueMemUnmapTest : public uur::urMemBufferQueueTest {
+// Choose parameters so that we get good coverage and catch some edge cases.
+static std::vector<uur::mem_buffer_test_parameters_t>
+generateParameterizations() {
+    std::vector<uur::mem_buffer_test_parameters_t> parameterizations;
+
+// Choose parameters so that we get good coverage and catch some edge cases.
+#define PARAMETERIZATION(name, count, mem_flag)                                \
+    uur::mem_buffer_test_parameters_t name{#name, count, mem_flag};            \
+    parameterizations.push_back(name);                                         \
+    (void)0
+    PARAMETERIZATION(ReadWrite_8, 8, UR_MEM_FLAG_READ_WRITE);
+    PARAMETERIZATION(ReadWrite_16, 16, UR_MEM_FLAG_READ_WRITE);
+    PARAMETERIZATION(WriteOnly_8, 8, UR_MEM_FLAG_WRITE_ONLY);
+    PARAMETERIZATION(WriteOnly_16, 16, UR_MEM_FLAG_WRITE_ONLY);
+#undef PARAMETERIZATION
+    return parameterizations;
+}
+
+struct urEnqueueMemUnmapTestWithParam
+    : public uur::urMemBufferQueueTestWithParam<
+          uur::mem_buffer_test_parameters_t> {
     void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(uur::urMemBufferQueueTest::SetUp());
+        UUR_RETURN_ON_FATAL_FAILURE(uur::urMemBufferQueueTestWithParam<
+          uur::mem_buffer_test_parameters_t>::SetUp());
         ASSERT_SUCCESS(urEnqueueMemBufferMap(
             queue, buffer, true, UR_MAP_FLAG_READ | UR_MAP_FLAG_WRITE, 0, size,
             0, nullptr, nullptr, (void **)&map));
     };
 
-    void TearDown() override { uur::urMemBufferQueueTest::TearDown(); }
+    void TearDown() override { uur::urMemBufferQueueTestWithParam<
+          uur::mem_buffer_test_parameters_t>::TearDown(); }
 
     uint32_t *map = nullptr;
 };
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueMemUnmapTest);
 
-TEST_P(urEnqueueMemUnmapTest, Success) {
+UUR_TEST_SUITE_P(urEnqueueMemUnmapTestWithParam,
+                 testing::ValuesIn(generateParameterizations()),
+                 uur::printRectTestString<urEnqueueMemUnmapTestWithParam>);
+
+
+
+TEST_P(urEnqueueMemUnmapTestWithParam, Success) {
     ASSERT_SUCCESS(urEnqueueMemUnmap(queue, buffer, map, 0, nullptr, nullptr));
 }
 
-TEST_P(urEnqueueMemUnmapTest, InvalidNullHandleQueue) {
+TEST_P(urEnqueueMemUnmapTestWithParam, InvalidNullHandleQueue) {
     ASSERT_EQ_RESULT(
         UR_RESULT_ERROR_INVALID_NULL_HANDLE,
         urEnqueueMemUnmap(nullptr, buffer, map, 0, nullptr, nullptr));
 }
 
-TEST_P(urEnqueueMemUnmapTest, InvalidNullHandleMem) {
+TEST_P(urEnqueueMemUnmapTestWithParam, InvalidNullHandleMem) {
     ASSERT_EQ_RESULT(
         UR_RESULT_ERROR_INVALID_NULL_HANDLE,
         urEnqueueMemUnmap(queue, nullptr, map, 0, nullptr, nullptr));
 }
 
-TEST_P(urEnqueueMemUnmapTest, InvalidNullPtrMap) {
+TEST_P(urEnqueueMemUnmapTestWithParam, InvalidNullPtrMap) {
     ASSERT_EQ_RESULT(
         UR_RESULT_ERROR_INVALID_NULL_POINTER,
         urEnqueueMemUnmap(queue, buffer, nullptr, 0, nullptr, nullptr));
 }
 
-TEST_P(urEnqueueMemUnmapTest, InvalidNullPtrEventWaitList) {
+TEST_P(urEnqueueMemUnmapTestWithParam, InvalidNullPtrEventWaitList) {
     ASSERT_EQ_RESULT(urEnqueueMemUnmap(queue, buffer, map, 1, nullptr, nullptr),
                      UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST);
 

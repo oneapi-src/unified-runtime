@@ -96,6 +96,24 @@ print2DTestString(const testing::TestParamInfo<typename T::ParamType> &info) {
     return test_name.str();
 }
 
+struct mem_buffer_test_parameters_t {
+    std::string name;
+    size_t count;
+    ur_mem_flag_t mem_flag;
+};
+
+/*
+template <typename T>
+inline std::string
+printMemBufferTestString(const testing::TestParamInfo<typename T::ParamType> &info) {
+    // ParamType will be std::tuple<ur_device_handle_t, mem_buffer_test_parameters_t>
+    const auto device_handle = std::get<0>(info.param);
+    const auto platform_device_name = uur::GetPlatformAndDeviceName(device_handle);
+    const auto &test_name = std::get<1>(info.param).name;
+    return platform_device_name + "__" + test_name;
+}
+*/
+
 } // namespace uur
 
 #endif // UUR_ENQUEUE_RECT_HELPERS_H_INCLUDED
