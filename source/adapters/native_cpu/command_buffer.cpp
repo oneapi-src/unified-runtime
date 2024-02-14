@@ -197,4 +197,3 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetSyncPointProfilingInfoExp(
     size_t, void *, size_t *) {
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
-

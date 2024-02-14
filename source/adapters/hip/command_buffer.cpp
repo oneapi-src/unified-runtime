@@ -204,4 +204,3 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetSyncPointProfilingInfoExp(
   (void)pPropSizeRet;
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
-
