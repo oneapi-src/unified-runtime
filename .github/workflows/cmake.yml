@@ -155,6 +155,7 @@ jobs:
         -DUR_BUILD_ADAPTER_L0=ON
         -DUR_DPCXX=${{github.workspace}}/dpcpp_compiler/bin/clang++
         -DUR_SYCL_LIBRARY_DIR=${{github.workspace}}/dpcpp_compiler/lib
+        -DUR_CONFORMANCE_TARGET_TRIPLES=spir64
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build -j $(nproc)

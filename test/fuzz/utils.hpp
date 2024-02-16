@@ -105,7 +105,11 @@ struct TestState {
     uint8_t context_num;
 
     TestState(std::unique_ptr<FuzzedDataProvider> data_provider)
-        : data_provider(std::move(data_provider)) {}
+        : data_provider(std::move(data_provider)) {
+        num_adapters = 0;
+        num_platforms = 0;
+        num_devices = 0;
+    }
 
     template <typename IntType> int get_next_input_data(IntType *data) {
         if (data_provider->remaining_bytes() < sizeof(IntType)) {
