@@ -9401,6 +9401,16 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_exp_command_bu
 
     os << (params.isUpdatable);
 
+    os << ", ";
+    os << ".isInOrder = ";
+
+    os << (params.isInOrder);
+
+    os << ", ";
+    os << ".enableProfiling = ";
+
+    os << (params.enableProfiling);
+
     os << "}";
     return os;
 }

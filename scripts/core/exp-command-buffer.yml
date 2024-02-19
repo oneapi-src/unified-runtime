@@ -113,6 +113,12 @@ members:
     - type: $x_bool_t
       name: isUpdatable
       desc: "[in] Commands in a finalized command-buffer can be updated."
+    - type: $x_bool_t
+      name: isInOrder
+      desc: "[in] Commands in a command-buffer may be executed in-order without explicit dependencies."
+    - type: $x_bool_t
+      name: enableProfiling
+      desc: "[in] Command-buffer profiling is enabled."
 --- #--------------------------------------------------------------------------
 type: struct
 desc: "Descriptor type for updating a kernel command memobj argument."
