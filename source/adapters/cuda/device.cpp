@@ -12,6 +12,7 @@
 #include <cassert>
 #include <sstream>
 
+
 #include "adapter.hpp"
 #include "context.hpp"
 #include "device.hpp"
