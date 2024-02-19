@@ -5,7 +5,7 @@
 
 #include <uur/fixtures.h>
 
-struct urKernelSetArgMemObjTest : uur::urKernelTest {
+struct urKernelSetArgMemObjTest : uur::urKernelTest<> {
     void SetUp() {
         program_name = "fill";
         UUR_RETURN_ON_FATAL_FAILURE(urKernelTest::SetUp());

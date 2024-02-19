@@ -6,7 +6,7 @@
 #include <uur/fixtures.h>
 
 using urKernelGetSubGroupInfoTest =
-    uur::urKernelTestWithParam<ur_kernel_sub_group_info_t>;
+    uur::urKernelTest<ur_kernel_sub_group_info_t>;
 
 UUR_TEST_SUITE_P(
     urKernelGetSubGroupInfoTest,
@@ -14,7 +14,7 @@ UUR_TEST_SUITE_P(
                       UR_KERNEL_SUB_GROUP_INFO_MAX_NUM_SUB_GROUPS,
                       UR_KERNEL_SUB_GROUP_INFO_COMPILE_NUM_SUB_GROUPS,
                       UR_KERNEL_SUB_GROUP_INFO_SUB_GROUP_SIZE_INTEL),
-    uur::deviceTestWithParamPrinter<ur_kernel_sub_group_info_t>);
+    uur::deviceTestPrinter<ur_kernel_sub_group_info_t>);
 
 TEST_P(urKernelGetSubGroupInfoTest, Success) {
     auto property_name = getParam();

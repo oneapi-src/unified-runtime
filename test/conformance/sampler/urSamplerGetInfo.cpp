@@ -5,17 +5,16 @@
 
 #include <uur/fixtures.h>
 
-using urSamplerGetInfoTestWithParam =
-    uur::urSamplerTestWithParam<ur_sampler_info_t>;
-UUR_TEST_SUITE_P(urSamplerGetInfoTestWithParam,
+using urSamplerGetInfoTest = uur::urSamplerTest<ur_sampler_info_t>;
+UUR_TEST_SUITE_P(urSamplerGetInfoTest,
                  ::testing::Values(UR_SAMPLER_INFO_REFERENCE_COUNT,
                                    UR_SAMPLER_INFO_CONTEXT,
                                    UR_SAMPLER_INFO_NORMALIZED_COORDS,
                                    UR_SAMPLER_INFO_ADDRESSING_MODE,
                                    UR_SAMPLER_INFO_FILTER_MODE),
-                 uur::deviceTestWithParamPrinter<ur_sampler_info_t>);
+                 uur::deviceTestPrinter<ur_sampler_info_t>);
 
-TEST_P(urSamplerGetInfoTestWithParam, Success) {
+TEST_P(urSamplerGetInfoTest, Success) {
     size_t size = 0;
     ur_sampler_info_t info = getParam();
     ASSERT_SUCCESS(urSamplerGetInfo(sampler, info, 0, nullptr, &size));
@@ -56,44 +55,44 @@ TEST_P(urSamplerGetInfoTestWithParam, Success) {
     }
 }
 
-using urSamplerGetInfoTest = uur::urSamplerTest;
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urSamplerGetInfoTest);
+using urSamplerGetInfoNegativeTest = uur::urSamplerTest<>;
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urSamplerGetInfoNegativeTest);
 
-TEST_P(urSamplerGetInfoTest, InvalidNullHandleSampler) {
+TEST_P(urSamplerGetInfoNegativeTest, InvalidNullHandleSampler) {
     uint32_t refcount = 0;
     ASSERT_EQ_RESULT(urSamplerGetInfo(nullptr, UR_SAMPLER_INFO_REFERENCE_COUNT,
                                       sizeof(refcount), &refcount, nullptr),
                      UR_RESULT_ERROR_INVALID_NULL_HANDLE);
 }
 
-TEST_P(urSamplerGetInfoTest, InvalidEnumerationInfo) {
+TEST_P(urSamplerGetInfoNegativeTest, InvalidEnumerationInfo) {
     size_t size = 0;
     ASSERT_EQ_RESULT(urSamplerGetInfo(sampler, UR_SAMPLER_INFO_FORCE_UINT32, 0,
                                       nullptr, &size),
                      UR_RESULT_ERROR_INVALID_ENUMERATION);
 }
 
-TEST_P(urSamplerGetInfoTest, InvalidNullPointerPropSizeRet) {
+TEST_P(urSamplerGetInfoNegativeTest, InvalidNullPointerPropSizeRet) {
     ASSERT_EQ_RESULT(urSamplerGetInfo(sampler, UR_SAMPLER_INFO_ADDRESSING_MODE,
                                       0, nullptr, nullptr),
                      UR_RESULT_ERROR_INVALID_NULL_POINTER);
 }
 
-TEST_P(urSamplerGetInfoTest, InvalidNullPointerPropValue) {
+TEST_P(urSamplerGetInfoNegativeTest, InvalidNullPointerPropValue) {
     ASSERT_EQ_RESULT(urSamplerGetInfo(sampler, UR_SAMPLER_INFO_ADDRESSING_MODE,
                                       sizeof(ur_sampler_addressing_mode_t),
                                       nullptr, nullptr),
                      UR_RESULT_ERROR_INVALID_NULL_POINTER);
 }
 
-TEST_P(urSamplerGetInfoTest, InvalidSizePropSizeZero) {
+TEST_P(urSamplerGetInfoNegativeTest, InvalidSizePropSizeZero) {
     ur_sampler_addressing_mode_t mode;
     ASSERT_EQ_RESULT(urSamplerGetInfo(sampler, UR_SAMPLER_INFO_ADDRESSING_MODE,
                                       0, &mode, nullptr),
                      UR_RESULT_ERROR_INVALID_SIZE);
 }
 
-TEST_P(urSamplerGetInfoTest, InvalidSizePropSizeSmall) {
+TEST_P(urSamplerGetInfoNegativeTest, InvalidSizePropSizeSmall) {
     ur_sampler_addressing_mode_t mode;
     ASSERT_EQ_RESULT(urSamplerGetInfo(sampler, UR_SAMPLER_INFO_ADDRESSING_MODE,
                                       sizeof(mode) - 1, &mode, nullptr),

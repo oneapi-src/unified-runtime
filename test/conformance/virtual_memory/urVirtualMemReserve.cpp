@@ -4,14 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #include <uur/fixtures.h>
 
-using urVirtualMemReserveTestWithParam =
-    uur::urVirtualMemGranularityTestWithParam<size_t>;
-UUR_TEST_SUITE_P(urVirtualMemReserveTestWithParam,
+using urVirtualMemReserveTest = uur::urVirtualMemGranularityTest<size_t>;
+UUR_TEST_SUITE_P(urVirtualMemReserveTest,
                  ::testing::Values(2, 4, 8, 16, 32, 64, 128, 256, 512, 1024,
                                    2048, 5000, 100000),
-                 uur::deviceTestWithParamPrinter<size_t>);
+                 uur::deviceTestPrinter<size_t>);
 
-TEST_P(urVirtualMemReserveTestWithParam, SuccessNoStartPointer) {
+TEST_P(urVirtualMemReserveTest, SuccessNoStartPointer) {
     // round up to nearest granularity
     size_t virtual_mem_size =
         uur::RoundUpToNearestFactor(getParam(), granularity);
@@ -24,7 +23,7 @@ TEST_P(urVirtualMemReserveTestWithParam, SuccessNoStartPointer) {
         urVirtualMemFree(context, virtual_mem_start, virtual_mem_size));
 }
 
-TEST_P(urVirtualMemReserveTestWithParam, SuccessWithStartPointer) {
+TEST_P(urVirtualMemReserveTest, SuccessWithStartPointer) {
     // roundup to nearest granularity
     size_t page_size = uur::RoundUpToNearestFactor(getParam(), granularity);
     void *origin_ptr = nullptr;
@@ -44,10 +43,10 @@ TEST_P(urVirtualMemReserveTestWithParam, SuccessWithStartPointer) {
     EXPECT_SUCCESS(urVirtualMemFree(context, virtual_mem_ptr, page_size));
 }
 
-using urVirtualMemReserveTest = uur::urVirtualMemGranularityTest;
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urVirtualMemReserveTest);
+using urVirtualMemReserveNegativeTest = uur::urVirtualMemGranularityTest<>;
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urVirtualMemReserveNegativeTest);
 
-TEST_P(urVirtualMemReserveTest, InvalidNullHandleContext) {
+TEST_P(urVirtualMemReserveNegativeTest, InvalidNullHandleContext) {
     size_t page_size = uur::RoundUpToNearestFactor(1024, granularity);
     void *virtual_ptr = nullptr;
     ASSERT_EQ_RESULT(
@@ -55,7 +54,7 @@ TEST_P(urVirtualMemReserveTest, InvalidNullHandleContext) {
         UR_RESULT_ERROR_INVALID_NULL_HANDLE);
 }
 
-TEST_P(urVirtualMemReserveTest, InvalidNullPointer) {
+TEST_P(urVirtualMemReserveNegativeTest, InvalidNullPointer) {
     size_t page_size = uur::RoundUpToNearestFactor(1024, granularity);
     ASSERT_EQ_RESULT(urVirtualMemReserve(context, nullptr, page_size, nullptr),
                      UR_RESULT_ERROR_INVALID_NULL_POINTER);

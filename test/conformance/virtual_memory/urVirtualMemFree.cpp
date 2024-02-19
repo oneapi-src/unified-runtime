@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #include <uur/fixtures.h>
 
-using urVirtualMemFreeTest = uur::urVirtualMemTest;
+using urVirtualMemFreeTest = uur::urVirtualMemTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urVirtualMemFreeTest);
 
 TEST_P(urVirtualMemFreeTest, Success) {

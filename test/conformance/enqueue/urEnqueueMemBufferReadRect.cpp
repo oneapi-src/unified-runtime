@@ -68,15 +68,14 @@ static std::vector<uur::test_parameters_t> generateParameterizations() {
     return parameterizations;
 }
 
-struct urEnqueueMemBufferReadRectTestWithParam
-    : public uur::urQueueTestWithParam<uur::test_parameters_t> {};
+struct urEnqueueMemBufferReadRectTest
+    : public uur::urQueueTest<uur::test_parameters_t> {};
 
-UUR_TEST_SUITE_P(
-    urEnqueueMemBufferReadRectTestWithParam,
-    testing::ValuesIn(generateParameterizations()),
-    uur::printRectTestString<urEnqueueMemBufferReadRectTestWithParam>);
+UUR_TEST_SUITE_P(urEnqueueMemBufferReadRectTest,
+                 testing::ValuesIn(generateParameterizations()),
+                 uur::printRectTestString<urEnqueueMemBufferReadRectTest>);
 
-TEST_P(urEnqueueMemBufferReadRectTestWithParam, Success) {
+TEST_P(urEnqueueMemBufferReadRectTest, Success) {
     // Unpack the parameters.
     const auto buffer_size = getParam().src_size;
     const auto host_size = getParam().dst_size;
@@ -119,9 +118,9 @@ TEST_P(urEnqueueMemBufferReadRectTestWithParam, Success) {
     EXPECT_SUCCESS(urMemRelease(buffer));
 }
 
-using urEnqueueMemBufferReadRectTest = uur::urMemBufferQueueTest;
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueMemBufferReadRectTest);
-TEST_P(urEnqueueMemBufferReadRectTest, InvalidNullHandleQueue) {
+using urEnqueueMemBufferReadRectNegativeTest = uur::urMemBufferQueueTest<>;
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueMemBufferReadRectNegativeTest);
+TEST_P(urEnqueueMemBufferReadRectNegativeTest, InvalidNullHandleQueue) {
     std::vector<uint32_t> dst(count);
     ur_rect_region_t region{size, 1, 1};
     ur_rect_offset_t buffer_offset{0, 0, 0};
@@ -133,7 +132,7 @@ TEST_P(urEnqueueMemBufferReadRectTest, InvalidNullHandleQueue) {
                                    dst.data(), 0, nullptr, nullptr));
 }
 
-TEST_P(urEnqueueMemBufferReadRectTest, InvalidNullHandleBuffer) {
+TEST_P(urEnqueueMemBufferReadRectNegativeTest, InvalidNullHandleBuffer) {
     std::vector<uint32_t> dst(count);
     ur_rect_region_t region{size, 1, 1};
     ur_rect_offset_t buffer_offset{0, 0, 0};
@@ -145,7 +144,7 @@ TEST_P(urEnqueueMemBufferReadRectTest, InvalidNullHandleBuffer) {
                                    dst.data(), 0, nullptr, nullptr));
 }
 
-TEST_P(urEnqueueMemBufferReadRectTest, InvalidNullPointerDst) {
+TEST_P(urEnqueueMemBufferReadRectNegativeTest, InvalidNullPointerDst) {
     std::vector<uint32_t> dst(count);
     ur_rect_region_t region{size, 1, 1};
     ur_rect_offset_t buffer_offset{0, 0, 0};
@@ -157,7 +156,7 @@ TEST_P(urEnqueueMemBufferReadRectTest, InvalidNullPointerDst) {
                                                 nullptr, 0, nullptr, nullptr));
 }
 
-TEST_P(urEnqueueMemBufferReadRectTest, InvalidNullPtrEventWaitList) {
+TEST_P(urEnqueueMemBufferReadRectNegativeTest, InvalidNullPtrEventWaitList) {
     std::vector<uint32_t> dst(count);
     ur_rect_region_t region{size, 1, 1};
     ur_rect_offset_t buffer_offset{0, 0, 0};
@@ -214,7 +213,7 @@ TEST_F(urEnqueueMemBufferReadRectMultiDeviceTest,
     }
 }
 
-TEST_P(urEnqueueMemBufferReadRectTest, InvalidSize) {
+TEST_P(urEnqueueMemBufferReadRectNegativeTest, InvalidSize) {
     std::vector<uint32_t> dst(count);
     // out-of-bounds access with potential overflow
     ur_rect_region_t region{size, 1, 1};

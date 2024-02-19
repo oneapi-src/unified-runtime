@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #include <uur/fixtures.h>
 
-using urMemImageGetInfoTest = uur::urMemImageTestWithParam<ur_image_info_t>;
+using urMemImageGetInfoTest = uur::urMemImageTest<ur_image_info_t>;
 
 static std::unordered_map<ur_image_info_t, size_t> image_info_size_map = {
     {UR_IMAGE_INFO_FORMAT, sizeof(ur_image_format_t)},
@@ -23,7 +23,7 @@ UUR_TEST_SUITE_P(urMemImageGetInfoTest,
                                    UR_IMAGE_INFO_SLICE_PITCH,
                                    UR_IMAGE_INFO_WIDTH, UR_IMAGE_INFO_HEIGHT,
                                    UR_IMAGE_INFO_DEPTH),
-                 uur::deviceTestWithParamPrinter<ur_image_info_t>);
+                 uur::deviceTestPrinter<ur_image_info_t>);
 
 TEST_P(urMemImageGetInfoTest, Success) {
     ur_image_info_t info = getParam();

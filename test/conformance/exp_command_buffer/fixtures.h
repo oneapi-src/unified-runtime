@@ -11,9 +11,9 @@
 namespace uur {
 namespace command_buffer {
 
-struct urCommandBufferExpTest : uur::urContextTest {
+struct urCommandBufferExpTest : uur::urContextTest<> {
     void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(uur::urContextTest::SetUp());
+        UUR_RETURN_ON_FATAL_FAILURE(uur::urContextTest<>::SetUp());
 
         size_t returned_size;
         ASSERT_SUCCESS(urDeviceGetInfo(device, UR_DEVICE_INFO_EXTENSIONS, 0,
@@ -48,16 +48,16 @@ struct urCommandBufferExpTest : uur::urContextTest {
         if (cmd_buf_handle) {
             EXPECT_SUCCESS(urCommandBufferReleaseExp(cmd_buf_handle));
         }
-        UUR_RETURN_ON_FATAL_FAILURE(uur::urContextTest::TearDown());
+        UUR_RETURN_ON_FATAL_FAILURE(uur::urContextTest<>::TearDown());
     }
 
     ur_exp_command_buffer_handle_t cmd_buf_handle = nullptr;
     ur_bool_t updatable_command_buffer_support = false;
 };
 
-struct urCommandBufferExpExecutionTest : uur::urKernelExecutionTest {
+struct urCommandBufferExpExecutionTest : uur::urKernelExecutionTest<> {
     void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(uur::urKernelExecutionTest::SetUp());
+        UUR_RETURN_ON_FATAL_FAILURE(uur::urKernelExecutionTest<>::SetUp());
 
         size_t returned_size;
         ASSERT_SUCCESS(urDeviceGetInfo(device, UR_DEVICE_INFO_EXTENSIONS, 0,
@@ -92,7 +92,7 @@ struct urCommandBufferExpExecutionTest : uur::urKernelExecutionTest {
         if (cmd_buf_handle) {
             EXPECT_SUCCESS(urCommandBufferReleaseExp(cmd_buf_handle));
         }
-        UUR_RETURN_ON_FATAL_FAILURE(uur::urKernelExecutionTest::TearDown());
+        UUR_RETURN_ON_FATAL_FAILURE(uur::urKernelExecutionTest<>::TearDown());
     }
 
     ur_exp_command_buffer_handle_t cmd_buf_handle = nullptr;

@@ -5,7 +5,7 @@
 
 #include <uur/fixtures.h>
 
-struct urKernelCreateWithNativeHandleTest : uur::urKernelTest {
+struct urKernelCreateWithNativeHandleTest : uur::urKernelTest<> {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(urKernelTest::SetUp());
         if (urKernelGetNativeHandle(kernel, &native_kernel_handle)) {

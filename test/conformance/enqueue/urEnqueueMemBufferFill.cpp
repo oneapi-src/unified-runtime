@@ -22,11 +22,9 @@ printFillTestString(const testing::TestParamInfo<typename T::ParamType> &info) {
     return test_name.str();
 }
 
-struct urEnqueueMemBufferFillTest
-    : uur::urQueueTestWithParam<testParametersFill> {
+struct urEnqueueMemBufferFillTest : uur::urQueueTest<testParametersFill> {
     void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(
-            urQueueTestWithParam<testParametersFill>::SetUp());
+        UUR_RETURN_ON_FATAL_FAILURE(urQueueTest<testParametersFill>::SetUp());
         size = std::get<1>(GetParam()).size;
         pattern_size = std::get<1>(GetParam()).pattern_size;
         pattern = std::vector<uint8_t>(pattern_size);
@@ -40,7 +38,7 @@ struct urEnqueueMemBufferFillTest
             EXPECT_SUCCESS(urMemRelease(buffer));
         }
         UUR_RETURN_ON_FATAL_FAILURE(
-            urQueueTestWithParam<testParametersFill>::TearDown());
+            urQueueTest<testParametersFill>::TearDown());
     }
 
     void verifyData(std::vector<uint8_t> &output, size_t verify_size) {
@@ -142,7 +140,7 @@ TEST_P(urEnqueueMemBufferFillTest, SuccessOffset) {
     }
 }
 
-using urEnqueueMemBufferFillNegativeTest = uur::urMemBufferQueueTest;
+using urEnqueueMemBufferFillNegativeTest = uur::urMemBufferQueueTest<>;
 
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueMemBufferFillNegativeTest);
 

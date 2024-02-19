@@ -5,7 +5,7 @@
 
 #include <uur/fixtures.h>
 
-struct urEnqueueMemBufferCopyTest : uur::urQueueTest {
+struct urEnqueueMemBufferCopyTest : uur::urQueueTest<> {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(urQueueTest::SetUp());
         ASSERT_SUCCESS(urMemBufferCreate(context, UR_MEM_FLAG_WRITE_ONLY, size,

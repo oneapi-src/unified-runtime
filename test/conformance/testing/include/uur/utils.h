@@ -8,6 +8,7 @@
 
 #include "ur_api.h"
 #include <optional>
+#include <random>
 #include <string>
 #include <uur/environment.h>
 #include <vector>
@@ -414,6 +415,12 @@ ur_result_t MakeUSMAllocationByType(USMKind kind, ur_context_handle_t hContext,
                                     const ur_usm_desc_t *pUSMDesc,
                                     ur_usm_pool_handle_t hPool, size_t size,
                                     void **ppMem);
+
+bool hasDevicePartitionSupport(ur_device_handle_t device,
+                               const ur_device_partition_t property);
+
+// Generates a random byte pattern for MemFill type entry-points.
+void generateMemFillPattern(std::vector<uint8_t> &pattern);
 
 } // namespace uur
 

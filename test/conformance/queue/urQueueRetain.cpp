@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #include <uur/fixtures.h>
 
-using urQueueRetainTest = uur::urQueueTest;
+using urQueueRetainTest = uur::urQueueTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urQueueRetainTest);
 
 TEST_P(urQueueRetainTest, Success) {

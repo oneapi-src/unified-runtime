@@ -3,9 +3,9 @@
 // See LICENSE.TXT
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-#include "fixtures.h"
+#include "uur/fixtures.h"
 
-using urEventRetainTest = uur::event::urEventTest;
+using urEventRetainTest = uur::urEventTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEventRetainTest);
 
 TEST_P(urEventRetainTest, Success) {

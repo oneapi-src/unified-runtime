@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #include <uur/fixtures.h>
 
-using urPhysicalMemRetainTest = uur::urPhysicalMemTest;
+using urPhysicalMemRetainTest = uur::urPhysicalMemTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urPhysicalMemRetainTest);
 
 TEST_P(urPhysicalMemRetainTest, Success) {

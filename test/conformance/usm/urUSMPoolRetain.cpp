@@ -6,7 +6,7 @@
 #include "ur_api.h"
 #include <uur/fixtures.h>
 
-using urUSMPoolRetainTest = uur::urUSMPoolTest;
+using urUSMPoolRetainTest = uur::urUSMPoolTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urUSMPoolRetainTest);
 
 TEST_P(urUSMPoolRetainTest, Success) {

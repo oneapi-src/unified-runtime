@@ -3,9 +3,9 @@
 // See LICENSE.TXT
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-#include "fixtures.h"
+#include "uur/fixtures.h"
 
-using urEventGetInfoTest = uur::event::urEventTestWithParam<ur_event_info_t>;
+using urEventGetInfoTest = uur::urEventTest<ur_event_info_t>;
 
 TEST_P(urEventGetInfoTest, Success) {
 
@@ -63,9 +63,9 @@ UUR_TEST_SUITE_P(urEventGetInfoTest,
                                    UR_EVENT_INFO_COMMAND_TYPE,
                                    UR_EVENT_INFO_COMMAND_EXECUTION_STATUS,
                                    UR_EVENT_INFO_REFERENCE_COUNT),
-                 uur::deviceTestWithParamPrinter<ur_event_info_t>);
+                 uur::deviceTestPrinter<ur_event_info_t>);
 
-using urEventGetInfoNegativeTest = uur::event::urEventTest;
+using urEventGetInfoNegativeTest = uur::urEventTest<>;
 
 TEST_P(urEventGetInfoNegativeTest, InvalidNullHandle) {
     ur_event_info_t info_type = UR_EVENT_INFO_COMMAND_QUEUE;

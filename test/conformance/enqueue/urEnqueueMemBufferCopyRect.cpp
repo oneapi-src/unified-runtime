@@ -67,15 +67,14 @@ static std::vector<uur::test_parameters_t> generateParameterizations() {
     return parameterizations;
 }
 
-struct urEnqueueMemBufferCopyRectTestWithParam
-    : public uur::urQueueTestWithParam<uur::test_parameters_t> {};
+struct urEnqueueMemBufferCopyRectTest
+    : public uur::urQueueTest<uur::test_parameters_t> {};
 
-UUR_TEST_SUITE_P(
-    urEnqueueMemBufferCopyRectTestWithParam,
-    testing::ValuesIn(generateParameterizations()),
-    uur::printRectTestString<urEnqueueMemBufferCopyRectTestWithParam>);
+UUR_TEST_SUITE_P(urEnqueueMemBufferCopyRectTest,
+                 testing::ValuesIn(generateParameterizations()),
+                 uur::printRectTestString<urEnqueueMemBufferCopyRectTest>);
 
-TEST_P(urEnqueueMemBufferCopyRectTestWithParam, Success) {
+TEST_P(urEnqueueMemBufferCopyRectTest, Success) {
     // Unpack the parameters.
     const auto src_buffer_size = getParam().src_size;
     const auto dst_buffer_size = getParam().dst_size;
@@ -137,7 +136,7 @@ TEST_P(urEnqueueMemBufferCopyRectTestWithParam, Success) {
     EXPECT_SUCCESS(urMemRelease(dst_buffer));
 }
 
-struct urEnqueueMemBufferCopyRectTest : uur::urQueueTest {
+struct urEnqueueMemBufferCopyRectNegativeTest : uur::urQueueTest<> {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(urQueueTest::SetUp());
         ASSERT_SUCCESS(urMemBufferCreate(context, UR_MEM_FLAG_WRITE_ONLY, size,
@@ -166,9 +165,9 @@ struct urEnqueueMemBufferCopyRectTest : uur::urQueueTest {
     ur_mem_handle_t dst_buffer = nullptr;
     std::vector<uint32_t> input;
 };
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueMemBufferCopyRectTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueMemBufferCopyRectNegativeTest);
 
-TEST_P(urEnqueueMemBufferCopyRectTest, InvalidNullHandleQueue) {
+TEST_P(urEnqueueMemBufferCopyRectNegativeTest, InvalidNullHandleQueue) {
     ur_rect_region_t src_region{size, 1, 1};
     ur_rect_offset_t src_origin{0, 0, 0};
     ur_rect_offset_t dst_origin{0, 0, 0};
@@ -179,7 +178,7 @@ TEST_P(urEnqueueMemBufferCopyRectTest, InvalidNullHandleQueue) {
                                                 size, 0, nullptr, nullptr));
 }
 
-TEST_P(urEnqueueMemBufferCopyRectTest, InvalidNullHandleBufferSrc) {
+TEST_P(urEnqueueMemBufferCopyRectNegativeTest, InvalidNullHandleBufferSrc) {
     ur_rect_region_t src_region{size, 1, 1};
     ur_rect_offset_t src_origin{0, 0, 0};
     ur_rect_offset_t dst_origin{0, 0, 0};
@@ -190,7 +189,7 @@ TEST_P(urEnqueueMemBufferCopyRectTest, InvalidNullHandleBufferSrc) {
                                                 size, 0, nullptr, nullptr));
 }
 
-TEST_P(urEnqueueMemBufferCopyRectTest, InvalidNullHandleBufferDst) {
+TEST_P(urEnqueueMemBufferCopyRectNegativeTest, InvalidNullHandleBufferDst) {
     ur_rect_region_t src_region{size, 1, 1};
     ur_rect_offset_t src_origin{0, 0, 0};
     ur_rect_offset_t dst_origin{0, 0, 0};
@@ -201,7 +200,7 @@ TEST_P(urEnqueueMemBufferCopyRectTest, InvalidNullHandleBufferDst) {
                                                 size, 0, nullptr, nullptr));
 }
 
-TEST_P(urEnqueueMemBufferCopyRectTest, InvalidNullPtrEventWaitList) {
+TEST_P(urEnqueueMemBufferCopyRectNegativeTest, InvalidNullPtrEventWaitList) {
     ur_rect_region_t src_region{size, 1, 1};
     ur_rect_offset_t src_origin{0, 0, 0};
     ur_rect_offset_t dst_origin{0, 0, 0};
@@ -271,7 +270,7 @@ TEST_F(urEnqueueMemBufferCopyRectMultiDeviceTest, CopyRectReadDifferentQueues) {
     EXPECT_SUCCESS(urMemRelease(dst_buffer));
 }
 
-TEST_P(urEnqueueMemBufferCopyRectTest, InvalidSize) {
+TEST_P(urEnqueueMemBufferCopyRectNegativeTest, InvalidSize) {
     // out-of-bounds access with potential overflow
     ur_rect_region_t src_region{size, 1, 1};
     ur_rect_offset_t src_origin{std::numeric_limits<uint64_t>::max(), 1, 1};

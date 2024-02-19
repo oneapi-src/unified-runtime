@@ -12,12 +12,12 @@ std::unordered_map<ur_usm_pool_info_t, size_t> pool_info_size_map = {
 };
 
 using urUSMPoolGetInfoTestWithInfoParam =
-    uur::urUSMPoolTestWithParam<ur_usm_pool_info_t>;
+    uur::urUSMPoolTest<ur_usm_pool_info_t>;
 
 UUR_TEST_SUITE_P(urUSMPoolGetInfoTestWithInfoParam,
                  ::testing::Values(UR_USM_POOL_INFO_CONTEXT,
                                    UR_USM_POOL_INFO_REFERENCE_COUNT),
-                 uur::deviceTestWithParamPrinter<ur_usm_pool_info_t>);
+                 uur::deviceTestPrinter<ur_usm_pool_info_t>);
 
 TEST_P(urUSMPoolGetInfoTestWithInfoParam, Success) {
     ur_usm_pool_info_t info_type = getParam();
@@ -35,7 +35,7 @@ TEST_P(urUSMPoolGetInfoTestWithInfoParam, Success) {
         urUSMPoolGetInfo(pool, info_type, size, data.data(), nullptr));
 }
 
-using urUSMPoolGetInfoTest = uur::urUSMPoolTest;
+using urUSMPoolGetInfoTest = uur::urUSMPoolTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urUSMPoolGetInfoTest);
 
 TEST_P(urUSMPoolGetInfoTest, InvalidNullHandlePool) {

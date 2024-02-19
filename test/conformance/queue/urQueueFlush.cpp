@@ -6,7 +6,7 @@
 #include "uur/fixtures.h"
 #include "uur/raii.h"
 
-using urQueueFlushTest = uur::urQueueTest;
+using urQueueFlushTest = uur::urQueueTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urQueueFlushTest);
 
 TEST_P(urQueueFlushTest, Success) {

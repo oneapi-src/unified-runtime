@@ -5,7 +5,7 @@
 
 #include <uur/fixtures.h>
 
-struct urKernelCreateTest : uur::urProgramTest {
+struct urKernelCreateTest : uur::urProgramTest<> {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(urProgramTest::SetUp());
         ASSERT_SUCCESS(urProgramBuild(context, program, nullptr));

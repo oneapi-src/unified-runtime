@@ -6,7 +6,7 @@
 #include "uur/fixtures.h"
 #include "uur/raii.h"
 
-using urContextCreateTest = uur::urDeviceTest;
+using urContextCreateTest = uur::urDeviceTest<>;
 
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urContextCreateTest);
 
@@ -30,7 +30,6 @@ TEST_P(urContextCreateTest, InvalidNullPointerDevices) {
 }
 
 TEST_P(urContextCreateTest, InvalidNullPointerContext) {
-    auto device = GetParam();
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_POINTER,
                      urContextCreate(1, &device, nullptr, nullptr));
 }

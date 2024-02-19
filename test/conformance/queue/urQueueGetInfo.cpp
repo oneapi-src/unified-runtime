@@ -15,8 +15,7 @@ std::unordered_map<ur_queue_info_t, size_t> queue_info_size_map = {
     {UR_QUEUE_INFO_EMPTY, sizeof(ur_bool_t)},
 };
 
-using urQueueGetInfoTestWithInfoParam =
-    uur::urQueueTestWithParam<ur_queue_info_t>;
+using urQueueGetInfoTestWithInfoParam = uur::urQueueTest<ur_queue_info_t>;
 
 UUR_TEST_SUITE_P(urQueueGetInfoTestWithInfoParam,
                  ::testing::Values(UR_QUEUE_INFO_CONTEXT, UR_QUEUE_INFO_DEVICE,
@@ -24,7 +23,7 @@ UUR_TEST_SUITE_P(urQueueGetInfoTestWithInfoParam,
                                    UR_QUEUE_INFO_FLAGS,
                                    UR_QUEUE_INFO_REFERENCE_COUNT,
                                    UR_QUEUE_INFO_SIZE, UR_QUEUE_INFO_EMPTY),
-                 uur::deviceTestWithParamPrinter<ur_queue_info_t>);
+                 uur::deviceTestPrinter<ur_queue_info_t>);
 
 TEST_P(urQueueGetInfoTestWithInfoParam, Success) {
     ur_queue_info_t info_type = getParam();
@@ -47,7 +46,7 @@ TEST_P(urQueueGetInfoTestWithInfoParam, Success) {
     }
 }
 
-using urQueueGetInfoTest = uur::urQueueTest;
+using urQueueGetInfoTest = uur::urQueueTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urQueueGetInfoTest);
 
 TEST_P(urQueueGetInfoTest, InvalidNullHandleQueue) {

@@ -5,7 +5,7 @@
 
 #include <uur/fixtures.h>
 
-struct urProgramCreateWithILTest : uur::urContextTest {
+struct urProgramCreateWithILTest : uur::urContextTest<> {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(urContextTest::SetUp());
         // TODO: This should use a query for urProgramCreateWithIL support or

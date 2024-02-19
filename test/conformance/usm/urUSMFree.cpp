@@ -5,7 +5,7 @@
 
 #include <uur/fixtures.h>
 
-using urUSMFreeTest = uur::urQueueTest;
+using urUSMFreeTest = uur::urQueueTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urUSMFreeTest);
 
 TEST_P(urUSMFreeTest, SuccessDeviceAlloc) {

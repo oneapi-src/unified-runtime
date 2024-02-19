@@ -5,7 +5,7 @@
 
 #include <uur/fixtures.h>
 
-struct urEventWaitTest : uur::urQueueTest {
+struct urEventWaitTest : uur::urQueueTest<> {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(urQueueTest::SetUp());
         ASSERT_SUCCESS(urMemBufferCreate(context, UR_MEM_FLAG_WRITE_ONLY, size,
@@ -59,7 +59,7 @@ TEST_P(urEventWaitTest, Success) {
     EXPECT_SUCCESS(urEventRelease(event2));
 }
 
-using urEventWaitNegativeTest = uur::urQueueTest;
+using urEventWaitNegativeTest = uur::urQueueTest<>;
 
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEventWaitNegativeTest);
 

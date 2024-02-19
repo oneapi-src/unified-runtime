@@ -5,7 +5,8 @@
 
 #include <uur/fixtures.h>
 
-using urSamplerCreateWithNativeHandleTest = uur::urSamplerTest;
+using urSamplerCreateWithNativeHandleTest = uur::urSamplerTest<>;
+;
 
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urSamplerCreateWithNativeHandleTest);
 

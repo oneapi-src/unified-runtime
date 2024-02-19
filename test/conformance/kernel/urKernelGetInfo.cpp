@@ -5,7 +5,7 @@
 
 #include <uur/fixtures.h>
 
-using urKernelGetInfoTest = uur::urKernelTestWithParam<ur_kernel_info_t>;
+using urKernelGetInfoTest = uur::urKernelTest<ur_kernel_info_t>;
 
 UUR_TEST_SUITE_P(
     urKernelGetInfoTest,
@@ -13,7 +13,7 @@ UUR_TEST_SUITE_P(
                       UR_KERNEL_INFO_REFERENCE_COUNT, UR_KERNEL_INFO_CONTEXT,
                       UR_KERNEL_INFO_PROGRAM, UR_KERNEL_INFO_ATTRIBUTES,
                       UR_KERNEL_INFO_NUM_REGS),
-    uur::deviceTestWithParamPrinter<ur_kernel_info_t>);
+    uur::deviceTestPrinter<ur_kernel_info_t>);
 
 TEST_P(urKernelGetInfoTest, Success) {
     auto property_name = getParam();

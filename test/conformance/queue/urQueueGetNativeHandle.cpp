@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #include <uur/fixtures.h>
 
-using urQueueGetNativeHandleTest = uur::urQueueTest;
+using urQueueGetNativeHandleTest = uur::urQueueTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urQueueGetNativeHandleTest);
 
 TEST_P(urQueueGetNativeHandleTest, Success) {

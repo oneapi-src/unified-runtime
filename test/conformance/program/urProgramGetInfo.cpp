@@ -5,10 +5,9 @@
 
 #include <uur/fixtures.h>
 
-struct urProgramGetInfoTest : uur::urProgramTestWithParam<ur_program_info_t> {
+struct urProgramGetInfoTest : uur::urProgramTest<ur_program_info_t> {
     void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(
-            urProgramTestWithParam<ur_program_info_t>::SetUp());
+        UUR_RETURN_ON_FATAL_FAILURE(urProgramTest<ur_program_info_t>::SetUp());
         // Some queries need the program to be built.
         ASSERT_SUCCESS(urProgramBuild(this->context, program, nullptr));
     }
@@ -21,7 +20,7 @@ UUR_TEST_SUITE_P(
                       UR_PROGRAM_INFO_SOURCE, UR_PROGRAM_INFO_BINARY_SIZES,
                       UR_PROGRAM_INFO_BINARIES, UR_PROGRAM_INFO_NUM_KERNELS,
                       UR_PROGRAM_INFO_KERNEL_NAMES),
-    uur::deviceTestWithParamPrinter<ur_program_info_t>);
+    uur::deviceTestPrinter<ur_program_info_t>);
 
 TEST_P(urProgramGetInfoTest, Success) {
     auto property_name = getParam();

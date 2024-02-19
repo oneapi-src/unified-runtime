@@ -5,12 +5,11 @@
 
 #include "uur/fixtures.h"
 
-struct urPhysicalMemCreateTest
-    : uur::urVirtualMemGranularityTestWithParam<size_t> {
+struct urPhysicalMemCreateTest : uur::urVirtualMemGranularityTest<size_t> {
 
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(
-            uur::urVirtualMemGranularityTestWithParam<size_t>::SetUp());
+            uur::urVirtualMemGranularityTest<size_t>::SetUp());
         size = getParam() * granularity;
     }
 
@@ -18,7 +17,7 @@ struct urPhysicalMemCreateTest
         if (physical_mem) {
             ASSERT_SUCCESS(urPhysicalMemRelease(physical_mem));
         }
-        uur::urVirtualMemGranularityTestWithParam<size_t>::TearDown();
+        uur::urVirtualMemGranularityTest<size_t>::TearDown();
     }
 
     size_t size;
@@ -26,7 +25,7 @@ struct urPhysicalMemCreateTest
 };
 
 UUR_TEST_SUITE_P(urPhysicalMemCreateTest, ::testing::Values(1, 2, 3, 7, 12, 44),
-                 uur::deviceTestWithParamPrinter<size_t>);
+                 uur::deviceTestPrinter<size_t>);
 
 TEST_P(urPhysicalMemCreateTest, Success) {
     ASSERT_SUCCESS(

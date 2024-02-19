@@ -5,10 +5,10 @@
 
 #include <uur/fixtures.h>
 
-struct urUSMSharedAllocTest : uur::urQueueTestWithParam<uur::BoolTestParam> {
+struct urUSMSharedAllocTest : uur::urQueueTest<uur::BoolTestParam> {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(
-            uur::urQueueTestWithParam<uur::BoolTestParam>::SetUp());
+            uur::urQueueTest<uur::BoolTestParam>::SetUp());
         ur_device_usm_access_capability_flags_t shared_usm_cross = 0;
         ur_device_usm_access_capability_flags_t shared_usm_single = 0;
 
@@ -32,7 +32,7 @@ struct urUSMSharedAllocTest : uur::urQueueTestWithParam<uur::BoolTestParam> {
             ASSERT_SUCCESS(urUSMPoolRelease(pool));
         }
         UUR_RETURN_ON_FATAL_FAILURE(
-            uur::urQueueTestWithParam<uur::BoolTestParam>::TearDown());
+            uur::urQueueTest<uur::BoolTestParam>::TearDown());
     }
 
     ur_usm_pool_handle_t pool = nullptr;
@@ -41,7 +41,7 @@ struct urUSMSharedAllocTest : uur::urQueueTestWithParam<uur::BoolTestParam> {
 UUR_TEST_SUITE_P(
     urUSMSharedAllocTest,
     testing::ValuesIn(uur::BoolTestParam::makeBoolParam("UsePool")),
-    uur::deviceTestWithParamPrinter<uur::BoolTestParam>);
+    uur::deviceTestPrinter<uur::BoolTestParam>);
 
 TEST_P(urUSMSharedAllocTest, Success) {
     void *ptr = nullptr;

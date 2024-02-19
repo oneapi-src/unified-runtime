@@ -5,7 +5,7 @@
 
 #include <uur/fixtures.h>
 
-using urKernelRetainTest = uur::urKernelTest;
+using urKernelRetainTest = uur::urKernelTest<>;
 UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urKernelRetainTest);
 
 TEST_P(urKernelRetainTest, Success) {

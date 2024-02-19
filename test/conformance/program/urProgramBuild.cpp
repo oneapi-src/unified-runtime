@@ -5,7 +5,7 @@
 
 #include <uur/fixtures.h>
 
-using urProgramBuildTest = uur::urProgramTest;
+using urProgramBuildTest = uur::urProgramTest<>;
 UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urProgramBuildTest);
 
 TEST_P(urProgramBuildTest, Success) {

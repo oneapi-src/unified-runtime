@@ -5,7 +5,8 @@
 
 #include <uur/fixtures.h>
 
-struct urKernelSetSpecializationConstantsTest : uur::urBaseKernelExecutionTest {
+struct urKernelSetSpecializationConstantsTest
+    : uur::urBaseKernelExecutionTest<> {
     void SetUp() override {
         program_name = "spec_constant";
         UUR_RETURN_ON_FATAL_FAILURE(urBaseKernelExecutionTest::SetUp());

@@ -5,8 +5,7 @@
 
 #include <uur/fixtures.h>
 
-using urKernelGetGroupInfoTest =
-    uur::urKernelTestWithParam<ur_kernel_group_info_t>;
+using urKernelGetGroupInfoTest = uur::urKernelTest<ur_kernel_group_info_t>;
 
 UUR_TEST_SUITE_P(
     urKernelGetGroupInfoTest,
@@ -16,7 +15,7 @@ UUR_TEST_SUITE_P(
                       UR_KERNEL_GROUP_INFO_LOCAL_MEM_SIZE,
                       UR_KERNEL_GROUP_INFO_PREFERRED_WORK_GROUP_SIZE_MULTIPLE,
                       UR_KERNEL_GROUP_INFO_PRIVATE_MEM_SIZE),
-    uur::deviceTestWithParamPrinter<ur_kernel_group_info_t>);
+    uur::deviceTestPrinter<ur_kernel_group_info_t>);
 
 TEST_P(urKernelGetGroupInfoTest, Success) {
     auto property_name = getParam();

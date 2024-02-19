@@ -5,7 +5,7 @@
 
 #include "fixtures.h"
 
-using urCudaGetDeviceNativeHandle = uur::urDeviceTest;
+using urCudaGetDeviceNativeHandle = uur::urDeviceTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urCudaGetDeviceNativeHandle);
 
 TEST_P(urCudaGetDeviceNativeHandle, Success) {

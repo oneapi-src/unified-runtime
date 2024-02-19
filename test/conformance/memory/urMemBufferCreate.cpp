@@ -6,8 +6,7 @@
 #include "uur/fixtures.h"
 #include "uur/raii.h"
 
-using urMemBufferCreateTestWithFlagsParam =
-    uur::urContextTestWithParam<ur_mem_flag_t>;
+using urMemBufferCreateTestWithFlagsParam = uur::urContextTest<ur_mem_flag_t>;
 
 using urMemBufferCreateWithFlagsTest = urMemBufferCreateTestWithFlagsParam;
 UUR_TEST_SUITE_P(urMemBufferCreateWithFlagsTest,
@@ -15,7 +14,7 @@ UUR_TEST_SUITE_P(urMemBufferCreateWithFlagsTest,
                                    UR_MEM_FLAG_WRITE_ONLY,
                                    UR_MEM_FLAG_READ_ONLY,
                                    UR_MEM_FLAG_ALLOC_HOST_POINTER),
-                 uur::deviceTestWithParamPrinter<ur_mem_flag_t>);
+                 uur::deviceTestPrinter<ur_mem_flag_t>);
 
 TEST_P(urMemBufferCreateWithFlagsTest, Success) {
     uur::raii::Mem buffer = nullptr;
@@ -31,7 +30,7 @@ TEST_P(urMemBufferCreateWithFlagsTest, InvalidNullHandleContext) {
         urMemBufferCreate(nullptr, getParam(), 4096, nullptr, buffer.ptr()));
 }
 
-using urMemBufferCreateTest = uur::urContextTest;
+using urMemBufferCreateTest = uur::urContextTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urMemBufferCreateTest);
 
 TEST_P(urMemBufferCreateTest, InvalidEnumerationFlags) {
@@ -46,7 +45,7 @@ using urMemBufferCreateWithHostPtrFlagsTest =
 UUR_TEST_SUITE_P(urMemBufferCreateWithHostPtrFlagsTest,
                  ::testing::Values(UR_MEM_FLAG_ALLOC_COPY_HOST_POINTER,
                                    UR_MEM_FLAG_USE_HOST_POINTER),
-                 uur::deviceTestWithParamPrinter<ur_mem_flag_t>);
+                 uur::deviceTestPrinter<ur_mem_flag_t>);
 
 TEST_P(urMemBufferCreateWithHostPtrFlagsTest, InvalidHostPtr) {
     uur::raii::Mem buffer = nullptr;

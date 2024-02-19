@@ -5,7 +5,7 @@
 
 #include <uur/fixtures.h>
 
-using urSamplerRetainTest = uur::urSamplerTest;
+using urSamplerRetainTest = uur::urSamplerTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urSamplerRetainTest);
 
 TEST_P(urSamplerRetainTest, Success) {

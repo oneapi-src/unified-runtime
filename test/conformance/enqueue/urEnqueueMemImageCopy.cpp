@@ -4,14 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #include <uur/fixtures.h>
 
-struct urEnqueueMemImageCopyTest
-    : public uur::urQueueTestWithParam<ur_mem_type_t> {
+struct urEnqueueMemImageCopyTest : public uur::urQueueTest<ur_mem_type_t> {
     // Helper type so element offset calculations work the same as pixel offsets
     struct rgba_pixel {
         uint32_t data[4];
     };
     void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(urQueueTestWithParam::SetUp());
+        UUR_RETURN_ON_FATAL_FAILURE(urQueueTest::SetUp());
         type = getParam();
         size = (type == UR_MEM_TYPE_IMAGE1D) ? ur_rect_region_t{width, 1, 1}
                : (type == UR_MEM_TYPE_IMAGE2D)
@@ -67,7 +66,7 @@ struct urEnqueueMemImageCopyTest
         if (dstImage) {
             EXPECT_SUCCESS(urMemRelease(dstImage));
         }
-        UUR_RETURN_ON_FATAL_FAILURE(urQueueTestWithParam::TearDown());
+        UUR_RETURN_ON_FATAL_FAILURE(urQueueTest::TearDown());
     }
 
     const size_t width = 32;

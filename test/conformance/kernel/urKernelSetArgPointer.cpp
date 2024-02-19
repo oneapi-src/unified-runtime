@@ -5,7 +5,7 @@
 
 #include <uur/fixtures.h>
 
-struct urKernelSetArgPointerTest : uur::urKernelExecutionTest {
+struct urKernelSetArgPointerTest : uur::urKernelExecutionTest<> {
     void SetUp() {
         program_name = "fill_usm";
         UUR_RETURN_ON_FATAL_FAILURE(urKernelExecutionTest::SetUp());

@@ -57,7 +57,7 @@ INSTANTIATE_TEST_SUITE_P(urUsmPoolDescriptorTest, urUsmPoolDescriptorTest,
 
 // TODO: add test with sub-devices
 
-struct urUsmPoolManagerTest : public uur::urContextTest {
+struct urUsmPoolManagerTest : public uur::urContextTest<> {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(urContextTest::SetUp());
         auto [ret, descs] = usm::pool_descriptor::create(nullptr, context);

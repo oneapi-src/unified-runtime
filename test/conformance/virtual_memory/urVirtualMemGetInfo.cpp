@@ -4,13 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #include <uur/fixtures.h>
 
-using urVirtualMemGetInfoTestWithParam =
-    uur::urVirtualMemMappedTestWithParam<ur_virtual_mem_info_t>;
-UUR_TEST_SUITE_P(urVirtualMemGetInfoTestWithParam,
+using urVirtualMemGetInfoTest =
+    uur::urVirtualMemMappedTest<ur_virtual_mem_info_t>;
+UUR_TEST_SUITE_P(urVirtualMemGetInfoTest,
                  ::testing::Values(UR_VIRTUAL_MEM_INFO_ACCESS_MODE),
-                 uur::deviceTestWithParamPrinter<ur_virtual_mem_info_t>);
+                 uur::deviceTestPrinter<ur_virtual_mem_info_t>);
 
-TEST_P(urVirtualMemGetInfoTestWithParam, Success) {
+TEST_P(urVirtualMemGetInfoTest, Success) {
     size_t info_size = 0;
     ur_virtual_mem_info_t info = getParam();
     ASSERT_SUCCESS(urVirtualMemGetInfo(context, virtual_ptr, size, info, 0,
@@ -35,10 +35,10 @@ TEST_P(urVirtualMemGetInfoTestWithParam, Success) {
     }
 }
 
-using urVirtualMemGetInfoTest = uur::urVirtualMemMappedTest;
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urVirtualMemGetInfoTest);
+using urVirtualMemGetInfoNegativeTest = uur::urVirtualMemMappedTest<>;
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urVirtualMemGetInfoNegativeTest);
 
-TEST_P(urVirtualMemGetInfoTest, InvalidNullHandleContext) {
+TEST_P(urVirtualMemGetInfoNegativeTest, InvalidNullHandleContext) {
     ur_virtual_mem_access_flags_t flags = 0;
     ASSERT_EQ_RESULT(urVirtualMemGetInfo(nullptr, virtual_ptr, size,
                                          UR_VIRTUAL_MEM_INFO_ACCESS_MODE,
@@ -46,7 +46,7 @@ TEST_P(urVirtualMemGetInfoTest, InvalidNullHandleContext) {
                      UR_RESULT_ERROR_INVALID_NULL_HANDLE);
 }
 
-TEST_P(urVirtualMemGetInfoTest, InvalidNullPointerStart) {
+TEST_P(urVirtualMemGetInfoNegativeTest, InvalidNullPointerStart) {
     ur_virtual_mem_access_flags_t flags = 0;
     ASSERT_EQ_RESULT(urVirtualMemGetInfo(context, nullptr, size,
                                          UR_VIRTUAL_MEM_INFO_ACCESS_MODE,
@@ -54,7 +54,7 @@ TEST_P(urVirtualMemGetInfoTest, InvalidNullPointerStart) {
                      UR_RESULT_ERROR_INVALID_NULL_POINTER);
 }
 
-TEST_P(urVirtualMemGetInfoTest, InvalidEnumerationInfo) {
+TEST_P(urVirtualMemGetInfoNegativeTest, InvalidEnumerationInfo) {
     size_t info_size = 0;
     ASSERT_EQ_RESULT(urVirtualMemGetInfo(context, virtual_ptr, size,
                                          UR_VIRTUAL_MEM_INFO_FORCE_UINT32, 0,

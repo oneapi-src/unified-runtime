@@ -6,7 +6,7 @@
 #include "fixtures.h"
 #include "uur/raii.h"
 
-using urCudaEventGetNativeHandleTest = uur::urQueueTest;
+using urCudaEventGetNativeHandleTest = uur::urQueueTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urCudaEventGetNativeHandleTest);
 
 TEST_P(urCudaEventGetNativeHandleTest, Success) {

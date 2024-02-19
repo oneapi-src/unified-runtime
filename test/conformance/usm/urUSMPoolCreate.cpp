@@ -5,7 +5,7 @@
 
 #include <uur/fixtures.h>
 
-using urUSMPoolCreateTest = uur::urContextTest;
+using urUSMPoolCreateTest = uur::urContextTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urUSMPoolCreateTest);
 
 TEST_P(urUSMPoolCreateTest, Success) {

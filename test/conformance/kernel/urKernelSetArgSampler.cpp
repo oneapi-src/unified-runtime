@@ -5,7 +5,7 @@
 
 #include <uur/fixtures.h>
 
-struct urKernelSetArgSamplerTest : uur::urBaseKernelTest {
+struct urKernelSetArgSamplerTest : uur::urBaseKernelTest<> {
     void SetUp() {
         program_name = "image_copy";
         UUR_RETURN_ON_FATAL_FAILURE(urBaseKernelTest::SetUp());

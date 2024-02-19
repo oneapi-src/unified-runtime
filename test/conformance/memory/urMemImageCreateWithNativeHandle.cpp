@@ -5,10 +5,30 @@
 
 #include <uur/fixtures.h>
 
-using urMemImageCreateWithNativeHandleTest = uur::urMemImageTest;
+using urMemImageCreateWithNativeHandleTest = uur::urContextTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urMemImageCreateWithNativeHandleTest);
 
 TEST_P(urMemImageCreateWithNativeHandleTest, Success) {
+
+    ur_image_format_t image_format = {
+        /*.channelOrder =*/UR_IMAGE_CHANNEL_ORDER_ARGB,
+        /*.channelType =*/UR_IMAGE_CHANNEL_TYPE_UNORM_INT8,
+    };
+    ur_image_desc_t image_desc = {
+        /*.stype =*/UR_STRUCTURE_TYPE_IMAGE_DESC,
+        /*.pNext =*/nullptr,
+        /*.type =*/UR_MEM_TYPE_IMAGE2D,
+        /*.width =*/16,
+        /*.height =*/16,
+        /*.depth =*/1,
+        /*.arraySize =*/1,
+        /*.rowPitch =*/16 * sizeof(char[4]),
+        /*.slicePitch =*/16 * 16 * sizeof(char[4]),
+        /*.numMipLevel =*/0,
+        /*.numSamples =*/0,
+    };
+    ur_mem_handle_t image = nullptr;
+
     ur_native_handle_t native_handle = nullptr;
     if (urMemGetNativeHandle(image, device, &native_handle)) {
         GTEST_SKIP();

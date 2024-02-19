@@ -6,7 +6,7 @@
 #include "fixtures.h"
 #include "uur/raii.h"
 
-using urHipEventGetNativeHandleTest = uur::urQueueTest;
+using urHipEventGetNativeHandleTest = uur::urQueueTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urHipEventGetNativeHandleTest);
 
 TEST_P(urHipEventGetNativeHandleTest, Success) {

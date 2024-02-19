@@ -9,11 +9,10 @@
 using TestParametersMemcpy2D =
     std::tuple<uur::TestParameters2D, uur::USMKind, uur::USMKind>;
 
-struct urEnqueueUSMMemcpy2DTestWithParam
-    : uur::urQueueTestWithParam<TestParametersMemcpy2D> {
+struct urEnqueueUSMMemcpy2DTest : uur::urQueueTest<TestParametersMemcpy2D> {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(
-            uur::urQueueTestWithParam<TestParametersMemcpy2D>::SetUp());
+            uur::urQueueTest<TestParametersMemcpy2D>::SetUp());
 
         const auto [in2DParams, inSrcKind, inDstKind] = getParam();
         std::tie(pitch, width, height, src_kind, dst_kind) =
@@ -60,7 +59,7 @@ struct urEnqueueUSMMemcpy2DTestWithParam
         if (pDst) {
             ASSERT_SUCCESS(urUSMFree(context, pDst));
         }
-        uur::urQueueTestWithParam<TestParametersMemcpy2D>::TearDown();
+        uur::urQueueTest<TestParametersMemcpy2D>::TearDown();
     }
 
     void verifyMemcpySucceeded() {
@@ -106,7 +105,7 @@ static std::vector<uur::TestParameters2D> test_sizes{
     /* Height == 1 && Pitch == width + 1 */
     {234, 233, 1}};
 
-UUR_TEST_SUITE_P(urEnqueueUSMMemcpy2DTestWithParam,
+UUR_TEST_SUITE_P(urEnqueueUSMMemcpy2DTest,
                  ::testing::Combine(::testing::ValuesIn(test_sizes),
                                     ::testing::Values(uur::USMKind::Device,
                                                       uur::USMKind::Host,
@@ -114,15 +113,15 @@ UUR_TEST_SUITE_P(urEnqueueUSMMemcpy2DTestWithParam,
                                     ::testing::Values(uur::USMKind::Device,
                                                       uur::USMKind::Host,
                                                       uur::USMKind::Shared)),
-                 uur::print2DTestString<urEnqueueUSMMemcpy2DTestWithParam>);
+                 uur::print2DTestString<urEnqueueUSMMemcpy2DTest>);
 
-TEST_P(urEnqueueUSMMemcpy2DTestWithParam, SuccessBlocking) {
+TEST_P(urEnqueueUSMMemcpy2DTest, SuccessBlocking) {
     ASSERT_SUCCESS(urEnqueueUSMMemcpy2D(queue, true, pDst, pitch, pSrc, pitch,
                                         width, height, 0, nullptr, nullptr));
     ASSERT_NO_FATAL_FAILURE(verifyMemcpySucceeded());
 }
 
-TEST_P(urEnqueueUSMMemcpy2DTestWithParam, SuccessNonBlocking) {
+TEST_P(urEnqueueUSMMemcpy2DTest, SuccessNonBlocking) {
     ur_event_handle_t memcpy_event = nullptr;
     ASSERT_SUCCESS(urEnqueueUSMMemcpy2D(queue, false, pDst, pitch, pSrc, pitch,
                                         width, height, 0, nullptr,
@@ -138,11 +137,11 @@ TEST_P(urEnqueueUSMMemcpy2DTestWithParam, SuccessNonBlocking) {
     ASSERT_NO_FATAL_FAILURE(verifyMemcpySucceeded());
 }
 
-using urEnqueueUSMMemcpy2DNegativeTest = urEnqueueUSMMemcpy2DTestWithParam;
+using urEnqueueUSMMemcpy2DNegativeTest = urEnqueueUSMMemcpy2DTest;
 UUR_TEST_SUITE_P(urEnqueueUSMMemcpy2DNegativeTest,
                  ::testing::Values(TestParametersMemcpy2D{
                      {1, 1, 1}, uur::USMKind::Device, uur::USMKind::Device}),
-                 uur::print2DTestString<urEnqueueUSMMemcpy2DTestWithParam>);
+                 uur::print2DTestString<urEnqueueUSMMemcpy2DTest>);
 
 TEST_P(urEnqueueUSMMemcpy2DNegativeTest, InvalidNullHandleQueue) {
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_HANDLE,

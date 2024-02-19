@@ -5,7 +5,7 @@
 
 #include <uur/fixtures.h>
 
-using urKernelSetExecInfoTest = uur::urKernelTest;
+using urKernelSetExecInfoTest = uur::urKernelTest<>;
 UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urKernelSetExecInfoTest);
 
 TEST_P(urKernelSetExecInfoTest, SuccessIndirectAccess) {
@@ -39,7 +39,7 @@ TEST_P(urKernelSetExecInfoTest, InvalidNullPointerPropValue) {
                             sizeof(property_value), nullptr, nullptr));
 }
 
-struct urKernelSetExecInfoUSMPointersTest : uur::urKernelTest {
+struct urKernelSetExecInfoUSMPointersTest : uur::urKernelTest<> {
     void SetUp() {
         program_name = "fill";
         UUR_RETURN_ON_FATAL_FAILURE(urKernelTest::SetUp());
@@ -107,13 +107,13 @@ TEST_P(urKernelSetExecInfoUSMPointersTest, SuccessShared) {
 }
 
 using urKernelSetExecInfoCacheConfigTest =
-    uur::urKernelTestWithParam<ur_kernel_cache_config_t>;
+    uur::urKernelTest<ur_kernel_cache_config_t>;
 
 UUR_TEST_SUITE_P(urKernelSetExecInfoCacheConfigTest,
                  ::testing::Values(UR_KERNEL_CACHE_CONFIG_DEFAULT,
                                    UR_KERNEL_CACHE_CONFIG_LARGE_SLM,
                                    UR_KERNEL_CACHE_CONFIG_LARGE_DATA),
-                 uur::deviceTestWithParamPrinter<ur_kernel_cache_config_t>);
+                 uur::deviceTestPrinter<ur_kernel_cache_config_t>);
 
 TEST_P(urKernelSetExecInfoCacheConfigTest, Success) {
     auto property_value = getParam();

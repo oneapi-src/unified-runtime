@@ -6,7 +6,7 @@
 #include <map>
 #include <uur/fixtures.h>
 
-using urMemGetInfoTest = uur::urMemBufferTestWithParam<ur_mem_info_t>;
+using urMemGetInfoTest = uur::urMemBufferTest<ur_mem_info_t>;
 
 static constexpr std::array<ur_mem_info_t, 2> mem_info_values{
     UR_MEM_INFO_SIZE, UR_MEM_INFO_CONTEXT};
@@ -16,7 +16,7 @@ static std::unordered_map<ur_mem_info_t, size_t> mem_info_size_map = {
 };
 
 UUR_TEST_SUITE_P(urMemGetInfoTest, ::testing::ValuesIn(mem_info_values),
-                 uur::deviceTestWithParamPrinter<ur_mem_info_t>);
+                 uur::deviceTestPrinter<ur_mem_info_t>);
 
 TEST_P(urMemGetInfoTest, Success) {
     ur_mem_info_t info = getParam();
@@ -74,9 +74,9 @@ TEST_P(urMemGetInfoTest, InvalidNullPointerPropSizeRet) {
         UR_RESULT_ERROR_INVALID_NULL_POINTER);
 }
 
-using urMemGetInfoImageTest = uur::urMemImageTestWithParam<ur_mem_info_t>;
+using urMemGetInfoImageTest = uur::urMemImageTest<ur_mem_info_t>;
 UUR_TEST_SUITE_P(urMemGetInfoImageTest, ::testing::ValuesIn(mem_info_values),
-                 uur::deviceTestWithParamPrinter<ur_mem_info_t>);
+                 uur::deviceTestPrinter<ur_mem_info_t>);
 
 TEST_P(urMemGetInfoImageTest, Success) {
     ur_mem_info_t info = getParam();

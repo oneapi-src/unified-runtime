@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #include <uur/fixtures.h>
 
-using urQueueCreateTest = uur::urContextTest;
+using urQueueCreateTest = uur::urContextTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urQueueCreateTest);
 
 TEST_P(urQueueCreateTest, Success) {
@@ -14,13 +14,13 @@ TEST_P(urQueueCreateTest, Success) {
     ASSERT_SUCCESS(urQueueRelease(queue));
 }
 
-using urQueueCreateWithParamTest = uur::urContextTestWithParam<ur_queue_flag_t>;
-UUR_TEST_SUITE_P(urQueueCreateWithParamTest,
+using urQueueCreateWithInfoParamTest = uur::urContextTest<ur_queue_flag_t>;
+UUR_TEST_SUITE_P(urQueueCreateWithInfoParamTest,
                  testing::Values(UR_QUEUE_FLAG_OUT_OF_ORDER_EXEC_MODE_ENABLE,
                                  UR_QUEUE_FLAG_PROFILING_ENABLE),
-                 uur::deviceTestWithParamPrinter<ur_queue_flag_t>);
+                 uur::deviceTestPrinter<ur_queue_flag_t>);
 
-TEST_P(urQueueCreateWithParamTest, SuccessWithProperties) {
+TEST_P(urQueueCreateWithInfoParamTest, SuccessWithProperties) {
     ur_queue_flags_t supportedFlags{};
     ASSERT_SUCCESS(uur::GetDeviceQueueOnHostProperties(device, supportedFlags));
 

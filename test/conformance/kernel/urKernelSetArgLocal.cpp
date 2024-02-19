@@ -5,7 +5,7 @@
 
 #include <uur/fixtures.h>
 
-struct urKernelSetArgLocalTest : uur::urKernelTest {
+struct urKernelSetArgLocalTest : uur::urKernelTest<> {
     void SetUp() {
         program_name = "mean";
         UUR_RETURN_ON_FATAL_FAILURE(urKernelTest::SetUp());

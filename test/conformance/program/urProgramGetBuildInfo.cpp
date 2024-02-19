@@ -5,11 +5,10 @@
 
 #include <uur/fixtures.h>
 
-struct urProgramGetBuildInfoTest
-    : uur::urProgramTestWithParam<ur_program_build_info_t> {
+struct urProgramGetBuildInfoTest : uur::urProgramTest<ur_program_build_info_t> {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(
-            urProgramTestWithParam<ur_program_build_info_t>::SetUp());
+            urProgramTest<ur_program_build_info_t>::SetUp());
         ASSERT_SUCCESS(urProgramBuild(this->context, program, nullptr));
     }
 };
@@ -19,7 +18,7 @@ UUR_TEST_SUITE_P(urProgramGetBuildInfoTest,
                                    UR_PROGRAM_BUILD_INFO_OPTIONS,
                                    UR_PROGRAM_BUILD_INFO_LOG,
                                    UR_PROGRAM_BUILD_INFO_BINARY_TYPE),
-                 uur::deviceTestWithParamPrinter<ur_program_build_info_t>);
+                 uur::deviceTestPrinter<ur_program_build_info_t>);
 
 TEST_P(urProgramGetBuildInfoTest, Success) {
     auto property_name = getParam();

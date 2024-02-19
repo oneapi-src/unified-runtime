@@ -6,11 +6,11 @@
 #include <uur/fixtures.h>
 
 struct urContextGetInfoTestWithInfoParam
-    : uur::urContextTestWithParam<ur_context_info_t> {
+    : uur::urContextTest<ur_context_info_t> {
 
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(
-            uur::urContextTestWithParam<ur_context_info_t>::SetUp());
+            uur::urContextTest<ur_context_info_t>::SetUp());
 
         ctx_info_size_map = {
             {UR_CONTEXT_INFO_NUM_DEVICES, sizeof(uint32_t)},
@@ -25,7 +25,7 @@ struct urContextGetInfoTestWithInfoParam
 
     void TearDown() override {
         UUR_RETURN_ON_FATAL_FAILURE(
-            uur::urContextTestWithParam<ur_context_info_t>::TearDown());
+            uur::urContextTest<ur_context_info_t>::TearDown());
     }
 
     std::unordered_map<ur_context_info_t, size_t> ctx_info_size_map;
@@ -40,7 +40,7 @@ UUR_TEST_SUITE_P(urContextGetInfoTestWithInfoParam,
                      UR_CONTEXT_INFO_USM_FILL2D_SUPPORT    //
 
                      ),
-                 uur::deviceTestWithParamPrinter<ur_context_info_t>);
+                 uur::deviceTestPrinter<ur_context_info_t>);
 
 TEST_P(urContextGetInfoTestWithInfoParam, Success) {
     ur_context_info_t info = getParam();
@@ -58,7 +58,7 @@ TEST_P(urContextGetInfoTestWithInfoParam, Success) {
         urContextGetInfo(context, info, info_size, info_data.data(), nullptr));
 }
 
-using urContextGetInfoTest = uur::urContextTest;
+using urContextGetInfoTest = uur::urContextTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urContextGetInfoTest);
 TEST_P(urContextGetInfoTest, InvalidNullHandleContext) {
     uint32_t nDevices = 0;

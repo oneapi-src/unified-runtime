@@ -9,7 +9,7 @@
 #include "uur/raii.h"
 #include <thread>
 
-using cudaUrContextCreateTest = uur::urDeviceTest;
+using cudaUrContextCreateTest = uur::urDeviceTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(cudaUrContextCreateTest);
 
 constexpr unsigned int known_cuda_api_version = 3020;

@@ -6,7 +6,7 @@
 #include "uur/fixtures.h"
 #include "uur/raii.h"
 
-using urContextSetExtendedDeleterTest = uur::urDeviceTest;
+using urContextSetExtendedDeleterTest = uur::urDeviceTest<>;
 
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urContextSetExtendedDeleterTest);
 

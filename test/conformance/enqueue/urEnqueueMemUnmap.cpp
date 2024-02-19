@@ -4,15 +4,15 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #include <uur/fixtures.h>
 
-struct urEnqueueMemUnmapTest : public uur::urMemBufferQueueTest {
+struct urEnqueueMemUnmapTest : public uur::urMemBufferQueueTest<> {
     void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(uur::urMemBufferQueueTest::SetUp());
+        UUR_RETURN_ON_FATAL_FAILURE(uur::urMemBufferQueueTest<>::SetUp());
         ASSERT_SUCCESS(urEnqueueMemBufferMap(
             queue, buffer, true, UR_MAP_FLAG_READ | UR_MAP_FLAG_WRITE, 0, size,
             0, nullptr, nullptr, (void **)&map));
     };
 
-    void TearDown() override { uur::urMemBufferQueueTest::TearDown(); }
+    void TearDown() override { uur::urMemBufferQueueTest<>::TearDown(); }
 
     uint32_t *map = nullptr;
 };

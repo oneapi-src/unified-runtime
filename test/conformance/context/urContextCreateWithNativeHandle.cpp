@@ -5,7 +5,7 @@
 
 #include <uur/fixtures.h>
 
-using urContextCreateWithNativeHandleTest = uur::urContextTest;
+using urContextCreateWithNativeHandleTest = uur::urContextTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urContextCreateWithNativeHandleTest);
 
 TEST_P(urContextCreateWithNativeHandleTest, Success) {

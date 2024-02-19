@@ -5,14 +5,14 @@
 
 #include <uur/fixtures.h>
 
-using urEnqueueUSMPrefetchWithParamTest =
-    uur::urUSMDeviceAllocTestWithParam<ur_usm_migration_flag_t>;
+using urEnqueueUSMPrefetchTest =
+    uur::urUSMDeviceAllocTest<ur_usm_migration_flag_t>;
 
-UUR_TEST_SUITE_P(urEnqueueUSMPrefetchWithParamTest,
+UUR_TEST_SUITE_P(urEnqueueUSMPrefetchTest,
                  ::testing::Values(UR_USM_MIGRATION_FLAG_DEFAULT),
-                 uur::deviceTestWithParamPrinter<ur_usm_migration_flag_t>);
+                 uur::deviceTestPrinter<ur_usm_migration_flag_t>);
 
-TEST_P(urEnqueueUSMPrefetchWithParamTest, Success) {
+TEST_P(urEnqueueUSMPrefetchTest, Success) {
     ur_event_handle_t prefetch_event = nullptr;
     ASSERT_SUCCESS(urEnqueueUSMPrefetch(queue, ptr, allocation_size, getParam(),
                                         0, nullptr, &prefetch_event));
@@ -31,7 +31,7 @@ TEST_P(urEnqueueUSMPrefetchWithParamTest, Success) {
  * Tests that urEnqueueUSMPrefetch() waits for its dependencies to finish before
  * executing.
  */
-TEST_P(urEnqueueUSMPrefetchWithParamTest, CheckWaitEvent) {
+TEST_P(urEnqueueUSMPrefetchTest, CheckWaitEvent) {
 
     ur_queue_handle_t fill_queue;
     ASSERT_SUCCESS(urQueueCreate(context, device, nullptr, &fill_queue));
@@ -71,45 +71,45 @@ TEST_P(urEnqueueUSMPrefetchWithParamTest, CheckWaitEvent) {
     ASSERT_SUCCESS(urUSMFree(context, fill_ptr));
 }
 
-using urEnqueueUSMPrefetchTest = uur::urUSMDeviceAllocTest;
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueUSMPrefetchTest);
+using urEnqueueUSMPrefetchNegativeTest = uur::urUSMDeviceAllocTest<>;
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueUSMPrefetchNegativeTest);
 
-TEST_P(urEnqueueUSMPrefetchTest, InvalidNullHandleQueue) {
+TEST_P(urEnqueueUSMPrefetchNegativeTest, InvalidNullHandleQueue) {
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_HANDLE,
                      urEnqueueUSMPrefetch(nullptr, ptr, allocation_size,
                                           UR_USM_MIGRATION_FLAG_DEFAULT, 0,
                                           nullptr, nullptr));
 }
 
-TEST_P(urEnqueueUSMPrefetchTest, InvalidNullPointerMem) {
+TEST_P(urEnqueueUSMPrefetchNegativeTest, InvalidNullPointerMem) {
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_POINTER,
                      urEnqueueUSMPrefetch(queue, nullptr, allocation_size,
                                           UR_USM_MIGRATION_FLAG_DEFAULT, 0,
                                           nullptr, nullptr));
 }
 
-TEST_P(urEnqueueUSMPrefetchTest, InvalidEnumeration) {
+TEST_P(urEnqueueUSMPrefetchNegativeTest, InvalidEnumeration) {
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_ENUMERATION,
                      urEnqueueUSMPrefetch(queue, ptr, allocation_size,
                                           UR_USM_MIGRATION_FLAG_FORCE_UINT32, 0,
                                           nullptr, nullptr));
 }
 
-TEST_P(urEnqueueUSMPrefetchTest, InvalidSizeZero) {
+TEST_P(urEnqueueUSMPrefetchNegativeTest, InvalidSizeZero) {
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
                      urEnqueueUSMPrefetch(queue, ptr, 0,
                                           UR_USM_MIGRATION_FLAG_DEFAULT, 0,
                                           nullptr, nullptr));
 }
 
-TEST_P(urEnqueueUSMPrefetchTest, InvalidSizeTooLarge) {
+TEST_P(urEnqueueUSMPrefetchNegativeTest, InvalidSizeTooLarge) {
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
                      urEnqueueUSMPrefetch(queue, ptr, allocation_size * 2,
                                           UR_USM_MIGRATION_FLAG_DEFAULT, 0,
                                           nullptr, nullptr));
 }
 
-TEST_P(urEnqueueUSMPrefetchTest, InvalidEventWaitList) {
+TEST_P(urEnqueueUSMPrefetchNegativeTest, InvalidEventWaitList) {
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST,
                      urEnqueueUSMPrefetch(queue, ptr, allocation_size,
                                           UR_USM_MIGRATION_FLAG_DEFAULT, 1,

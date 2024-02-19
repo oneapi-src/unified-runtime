@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #include <uur/fixtures.h>
 
-using urMemImageCreateTest = uur::urContextTest;
+using urMemImageCreateTest = uur::urContextTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urMemImageCreateTest);
 
 static ur_image_format_t image_format{UR_IMAGE_CHANNEL_ORDER_RGBA,
@@ -163,13 +163,12 @@ TEST_P(urMemImageCreateTest, InvalidImageDescSlicePitch) {
                                       nullptr, &image_handle));
 }
 
-using urMemImageCreateWithHostPtrFlagsTest =
-    uur::urContextTestWithParam<ur_mem_flag_t>;
+using urMemImageCreateWithHostPtrFlagsTest = uur::urContextTest<ur_mem_flag_t>;
 
 UUR_TEST_SUITE_P(urMemImageCreateWithHostPtrFlagsTest,
                  ::testing::Values(UR_MEM_FLAG_ALLOC_COPY_HOST_POINTER,
                                    UR_MEM_FLAG_USE_HOST_POINTER),
-                 uur::deviceTestWithParamPrinter<ur_mem_flag_t>);
+                 uur::deviceTestPrinter<ur_mem_flag_t>);
 
 TEST_P(urMemImageCreateWithHostPtrFlagsTest, InvalidHostPtr) {
     ur_mem_handle_t image_handle = nullptr;

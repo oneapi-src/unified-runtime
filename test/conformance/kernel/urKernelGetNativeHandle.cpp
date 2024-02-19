@@ -5,7 +5,7 @@
 
 #include <uur/fixtures.h>
 
-using urKernelGetNativeHandleTest = uur::urKernelTest;
+using urKernelGetNativeHandleTest = uur::urKernelTest<>;
 UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urKernelGetNativeHandleTest);
 
 TEST_P(urKernelGetNativeHandleTest, Success) {

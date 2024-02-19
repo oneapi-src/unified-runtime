@@ -10,7 +10,7 @@
 #include "queue.hpp"
 #include "uur/raii.h"
 
-using urHipContextTest = uur::urDeviceTest;
+using urHipContextTest = uur::urDeviceTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urHipContextTest);
 
 TEST_P(urHipContextTest, ActiveContexts) {

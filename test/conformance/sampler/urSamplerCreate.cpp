@@ -9,14 +9,13 @@
 using SamplerCreateParamTy =
     std::tuple<bool, ur_sampler_addressing_mode_t, ur_sampler_filter_mode_t>;
 
-struct urSamplerCreateTestWithParam
-    : uur::urContextTestWithParam<SamplerCreateParamTy> {};
+struct urSamplerCreateTest : uur::urContextTest<SamplerCreateParamTy> {};
 
 namespace uur {
 template <>
-std::string deviceTestWithParamPrinter(
-    const ::testing::TestParamInfo<
-        std::tuple<ur_device_handle_t, SamplerCreateParamTy>> &info) {
+std::string
+deviceTestPrinter(const ::testing::TestParamInfo<
+                  std::tuple<ur_device_handle_t, SamplerCreateParamTy>> &info) {
     auto device = std::get<0>(info.param);
     auto param = std::get<1>(info.param);
 
@@ -30,7 +29,7 @@ std::string deviceTestWithParamPrinter(
 }
 } // namespace uur
 UUR_TEST_SUITE_P(
-    urSamplerCreateTestWithParam,
+    urSamplerCreateTest,
     ::testing::Combine(
         ::testing::Values(true, false),
         ::testing::Values(UR_SAMPLER_ADDRESSING_MODE_NONE,
@@ -40,9 +39,9 @@ UUR_TEST_SUITE_P(
                           UR_SAMPLER_ADDRESSING_MODE_MIRRORED_REPEAT),
         ::testing::Values(UR_SAMPLER_FILTER_MODE_NEAREST,
                           UR_SAMPLER_FILTER_MODE_LINEAR)),
-    uur::deviceTestWithParamPrinter<SamplerCreateParamTy>);
+    uur::deviceTestPrinter<SamplerCreateParamTy>);
 
-TEST_P(urSamplerCreateTestWithParam, Success) {
+TEST_P(urSamplerCreateTest, Success) {
 
     const auto param = getParam();
     const auto normalized = std::get<0>(param);
@@ -62,10 +61,10 @@ TEST_P(urSamplerCreateTestWithParam, Success) {
     ASSERT_NE(hSampler, nullptr);
 }
 
-using urSamplerCreateTest = uur::urContextTest;
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urSamplerCreateTest);
+using urSamplerCreateNegativeTest = uur::urContextTest<>;
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urSamplerCreateNegativeTest);
 
-TEST_P(urSamplerCreateTest, InvalidNullHandleContext) {
+TEST_P(urSamplerCreateNegativeTest, InvalidNullHandleContext) {
     ur_sampler_desc_t sampler_desc{
         UR_STRUCTURE_TYPE_SAMPLER_DESC,   /* stype */
         nullptr,                          /* pNext */
@@ -78,7 +77,7 @@ TEST_P(urSamplerCreateTest, InvalidNullHandleContext) {
                      UR_RESULT_ERROR_INVALID_NULL_HANDLE);
 }
 
-TEST_P(urSamplerCreateTest, InvalidEnumerationAddrMode) {
+TEST_P(urSamplerCreateNegativeTest, InvalidEnumerationAddrMode) {
     ur_sampler_desc_t sampler_desc{
         UR_STRUCTURE_TYPE_SAMPLER_DESC,          /* stype */
         nullptr,                                 /* pNext */
@@ -90,7 +89,7 @@ TEST_P(urSamplerCreateTest, InvalidEnumerationAddrMode) {
     ASSERT_EQ_RESULT(urSamplerCreate(context, &sampler_desc, hSampler.ptr()),
                      UR_RESULT_ERROR_INVALID_ENUMERATION);
 }
-TEST_P(urSamplerCreateTest, InvalidEnumerationFilterMode) {
+TEST_P(urSamplerCreateNegativeTest, InvalidEnumerationFilterMode) {
     ur_sampler_desc_t sampler_desc{
         UR_STRUCTURE_TYPE_SAMPLER_DESC,      /* stype */
         nullptr,                             /* pNext */

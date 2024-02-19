@@ -3,10 +3,10 @@
 // See LICENSE.TXT
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-#include "fixtures.h"
+#include "uur/fixtures.h"
 
 /* Using urEventReferenceTest to be able to release the event during the test */
-using urEventSetCallbackTest = uur::event::urEventReferenceTest;
+using urEventSetCallbackTest = uur::urEventReferenceTest<>;
 
 /**
  * Checks that the callback function is called.
@@ -153,7 +153,7 @@ TEST_P(urEventSetCallbackTest, EventAlreadyCompleted) {
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEventSetCallbackTest);
 
 /* Negative tests */
-using urEventSetCallbackNegativeTest = uur::event::urEventTest;
+using urEventSetCallbackNegativeTest = uur::urEventTest<>;
 
 void emptyCallback(ur_event_handle_t, ur_execution_info_t, void *) {}
 

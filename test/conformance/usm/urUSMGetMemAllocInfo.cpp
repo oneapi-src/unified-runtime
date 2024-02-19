@@ -6,11 +6,11 @@
 #include <uur/fixtures.h>
 
 struct urUSMGetMemAllocInfoTest
-    : uur::urUSMDeviceAllocTestWithParam<ur_usm_alloc_info_t> {
+    : uur::urUSMDeviceAllocTest<ur_usm_alloc_info_t> {
     void SetUp() override {
         use_pool = getParam() == UR_USM_ALLOC_INFO_POOL;
         UUR_RETURN_ON_FATAL_FAILURE(
-            uur::urUSMDeviceAllocTestWithParam<ur_usm_alloc_info_t>::SetUp());
+            uur::urUSMDeviceAllocTest<ur_usm_alloc_info_t>::SetUp());
     }
 };
 
@@ -20,7 +20,7 @@ UUR_TEST_SUITE_P(urUSMGetMemAllocInfoTest,
                                    UR_USM_ALLOC_INFO_SIZE,
                                    UR_USM_ALLOC_INFO_DEVICE,
                                    UR_USM_ALLOC_INFO_POOL),
-                 uur::deviceTestWithParamPrinter<ur_usm_alloc_info_t>);
+                 uur::deviceTestPrinter<ur_usm_alloc_info_t>);
 
 static std::unordered_map<ur_usm_alloc_info_t, size_t> usm_info_size_map = {
     {UR_USM_ALLOC_INFO_TYPE, sizeof(ur_usm_type_t)},
@@ -47,7 +47,7 @@ TEST_P(urUSMGetMemAllocInfoTest, Success) {
                                         info_data.data(), nullptr));
 }
 
-using urUSMGetMemAllocInfoNegativeTest = uur::urUSMDeviceAllocTest;
+using urUSMGetMemAllocInfoNegativeTest = uur::urUSMDeviceAllocTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urUSMGetMemAllocInfoNegativeTest);
 
 TEST_P(urUSMGetMemAllocInfoNegativeTest, InvalidNullHandleContext) {

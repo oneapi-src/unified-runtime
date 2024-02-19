@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #include <uur/fixtures.h>
 
-struct urEnqueueEventsWaitTest : uur::urMultiQueueTest {
+struct urEnqueueEventsWaitTest : uur::urMultiQueueTest<> {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(urMultiQueueTest::SetUp());
         ASSERT_SUCCESS(urMemBufferCreate(context, UR_MEM_FLAG_WRITE_ONLY, size,

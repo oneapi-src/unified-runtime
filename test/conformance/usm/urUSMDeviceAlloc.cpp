@@ -5,10 +5,10 @@
 
 #include <uur/fixtures.h>
 
-struct urUSMDeviceAllocTest : uur::urQueueTestWithParam<uur::BoolTestParam> {
+struct urUSMDeviceAllocTest : uur::urQueueTest<uur::BoolTestParam> {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(
-            uur::urQueueTestWithParam<uur::BoolTestParam>::SetUp());
+            uur::urQueueTest<uur::BoolTestParam>::SetUp());
         ur_device_usm_access_capability_flags_t deviceUSMSupport = 0;
         ASSERT_SUCCESS(
             uur::GetDeviceUSMDeviceSupport(device, deviceUSMSupport));
@@ -16,7 +16,7 @@ struct urUSMDeviceAllocTest : uur::urQueueTestWithParam<uur::BoolTestParam> {
             GTEST_SKIP() << "Device USM is not supported.";
         }
 
-        if (getParam().value) {
+        if (std::get<1>(this->GetParam()).value) {
             ur_usm_pool_desc_t pool_desc = {};
             ASSERT_SUCCESS(urUSMPoolCreate(context, &pool_desc, &pool));
         }
@@ -27,7 +27,7 @@ struct urUSMDeviceAllocTest : uur::urQueueTestWithParam<uur::BoolTestParam> {
             ASSERT_SUCCESS(urUSMPoolRelease(pool));
         }
         UUR_RETURN_ON_FATAL_FAILURE(
-            uur::urQueueTestWithParam<uur::BoolTestParam>::TearDown());
+            uur::urQueueTest<uur::BoolTestParam>::TearDown());
     }
 
     ur_usm_pool_handle_t pool = nullptr;
@@ -36,7 +36,7 @@ struct urUSMDeviceAllocTest : uur::urQueueTestWithParam<uur::BoolTestParam> {
 UUR_TEST_SUITE_P(
     urUSMDeviceAllocTest,
     testing::ValuesIn(uur::BoolTestParam::makeBoolParam("UsePool")),
-    uur::deviceTestWithParamPrinter<uur::BoolTestParam>);
+    uur::deviceTestPrinter<uur::BoolTestParam>);
 
 TEST_P(urUSMDeviceAllocTest, Success) {
     void *ptr = nullptr;

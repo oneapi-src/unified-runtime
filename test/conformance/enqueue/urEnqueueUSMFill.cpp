@@ -23,11 +23,10 @@ printFillTestString(const testing::TestParamInfo<typename T::ParamType> &info) {
     return test_name.str();
 }
 
-struct urEnqueueUSMFillTestWithParam
-    : uur::urQueueTestWithParam<testParametersFill> {
+struct urEnqueueUSMFillTest : uur::urQueueTest<testParametersFill> {
 
     void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(urQueueTestWithParam::SetUp());
+        UUR_RETURN_ON_FATAL_FAILURE(urQueueTest::SetUp());
 
         size = std::get<1>(GetParam()).size;
         host_mem = std::vector<uint8_t>(size);
@@ -50,7 +49,7 @@ struct urEnqueueUSMFillTestWithParam
             EXPECT_SUCCESS(urUSMFree(context, ptr));
         }
 
-        UUR_RETURN_ON_FATAL_FAILURE(urQueueTestWithParam::TearDown());
+        UUR_RETURN_ON_FATAL_FAILURE(urQueueTest::TearDown());
     }
 
     void verifyData() {
@@ -90,10 +89,10 @@ static std::vector<testParametersFill> test_cases{
     {256, 16},
     {256, 32}};
 
-UUR_TEST_SUITE_P(urEnqueueUSMFillTestWithParam, testing::ValuesIn(test_cases),
-                 printFillTestString<urEnqueueUSMFillTestWithParam>);
+UUR_TEST_SUITE_P(urEnqueueUSMFillTest, testing::ValuesIn(test_cases),
+                 printFillTestString<urEnqueueUSMFillTest>);
 
-TEST_P(urEnqueueUSMFillTestWithParam, Success) {
+TEST_P(urEnqueueUSMFillTest, Success) {
 
     ur_event_handle_t event = nullptr;
 
@@ -111,9 +110,9 @@ TEST_P(urEnqueueUSMFillTestWithParam, Success) {
     ASSERT_NO_FATAL_FAILURE(verifyData());
 }
 
-struct urEnqueueUSMFillNegativeTest : uur::urQueueTest {
+struct urEnqueueUSMFillNegativeTest : uur::urQueueTest<> {
     void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(uur::urQueueTest::SetUp());
+        UUR_RETURN_ON_FATAL_FAILURE(uur::urQueueTest<>::SetUp());
 
         ur_device_usm_access_capability_flags_t device_usm = 0;
         ASSERT_SUCCESS(uur::GetDeviceUSMDeviceSupport(device, device_usm));
@@ -130,7 +129,7 @@ struct urEnqueueUSMFillNegativeTest : uur::urQueueTest {
             EXPECT_SUCCESS(urUSMFree(context, ptr));
         }
 
-        UUR_RETURN_ON_FATAL_FAILURE(uur::urQueueTest::TearDown());
+        UUR_RETURN_ON_FATAL_FAILURE(uur::urQueueTest<>::TearDown());
     }
 
     static constexpr size_t size = 16;

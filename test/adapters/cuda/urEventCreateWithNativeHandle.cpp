@@ -6,7 +6,7 @@
 #include "fixtures.h"
 #include "uur/raii.h"
 
-using urCudaEventCreateWithNativeHandleTest = uur::urQueueTest;
+using urCudaEventCreateWithNativeHandleTest = uur::urQueueTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urCudaEventCreateWithNativeHandleTest);
 
 struct RAIICUevent {

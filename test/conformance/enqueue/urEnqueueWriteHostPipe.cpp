@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #include <uur/fixtures.h>
 
-using urEnqueueWriteHostPipeTest = uur::urHostPipeTest;
+using urEnqueueWriteHostPipeTest = uur::urHostPipeTest<>;
 
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueWriteHostPipeTest);
 

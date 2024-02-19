@@ -6,10 +6,10 @@
 #include <cstring>
 #include <uur/fixtures.h>
 
-struct urUSMHostAllocTest : uur::urQueueTestWithParam<uur::BoolTestParam> {
+struct urUSMHostAllocTest : uur::urQueueTest<uur::BoolTestParam> {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(
-            uur::urQueueTestWithParam<uur::BoolTestParam>::SetUp());
+            uur::urQueueTest<uur::BoolTestParam>::SetUp());
         ur_device_usm_access_capability_flags_t hostUSMSupport = 0;
         ASSERT_SUCCESS(uur::GetDeviceUSMHostSupport(device, hostUSMSupport));
         if (!hostUSMSupport) {
@@ -26,7 +26,7 @@ struct urUSMHostAllocTest : uur::urQueueTestWithParam<uur::BoolTestParam> {
             ASSERT_SUCCESS(urUSMPoolRelease(pool));
         }
         UUR_RETURN_ON_FATAL_FAILURE(
-            uur::urQueueTestWithParam<uur::BoolTestParam>::TearDown());
+            uur::urQueueTest<uur::BoolTestParam>::TearDown());
     }
 
     ur_usm_pool_handle_t pool = nullptr;
@@ -35,7 +35,7 @@ struct urUSMHostAllocTest : uur::urQueueTestWithParam<uur::BoolTestParam> {
 UUR_TEST_SUITE_P(
     urUSMHostAllocTest,
     testing::ValuesIn(uur::BoolTestParam::makeBoolParam("UsePool")),
-    uur::deviceTestWithParamPrinter<uur::BoolTestParam>);
+    uur::deviceTestPrinter<uur::BoolTestParam>);
 
 TEST_P(urUSMHostAllocTest, Success) {
     ur_device_usm_access_capability_flags_t hostUSMSupport = 0;

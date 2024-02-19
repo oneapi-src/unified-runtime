@@ -5,7 +5,7 @@
 
 #include <uur/fixtures.h>
 
-using urKernelReleaseTest = uur::urKernelTest;
+using urKernelReleaseTest = uur::urKernelTest<>;
 UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urKernelReleaseTest);
 
 TEST_P(urKernelReleaseTest, Success) {

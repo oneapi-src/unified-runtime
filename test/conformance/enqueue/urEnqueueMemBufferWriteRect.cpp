@@ -67,15 +67,14 @@ static std::vector<uur::test_parameters_t> generateParameterizations() {
     return parameterizations;
 }
 
-struct urEnqueueMemBufferWriteRectTestWithParam
-    : public uur::urQueueTestWithParam<uur::test_parameters_t> {};
+struct urEnqueueMemBufferWriteRectTest
+    : public uur::urQueueTest<uur::test_parameters_t> {};
 
-UUR_TEST_SUITE_P(
-    urEnqueueMemBufferWriteRectTestWithParam,
-    testing::ValuesIn(generateParameterizations()),
-    uur::printRectTestString<urEnqueueMemBufferWriteRectTestWithParam>);
+UUR_TEST_SUITE_P(urEnqueueMemBufferWriteRectTest,
+                 testing::ValuesIn(generateParameterizations()),
+                 uur::printRectTestString<urEnqueueMemBufferWriteRectTest>);
 
-TEST_P(urEnqueueMemBufferWriteRectTestWithParam, Success) {
+TEST_P(urEnqueueMemBufferWriteRectTest, Success) {
     // Unpack the parameters.
     const auto host_size = getParam().src_size;
     const auto buffer_size = getParam().dst_size;
@@ -125,10 +124,10 @@ TEST_P(urEnqueueMemBufferWriteRectTestWithParam, Success) {
     EXPECT_SUCCESS(urMemRelease(buffer));
 }
 
-using urEnqueueMemBufferWriteRectTest = uur::urMemBufferQueueTest;
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueMemBufferWriteRectTest);
+using urEnqueueMemBufferWriteRectNegativeTest = uur::urMemBufferQueueTest<>;
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueMemBufferWriteRectNegativeTest);
 
-TEST_P(urEnqueueMemBufferWriteRectTest, InvalidNullHandleQueue) {
+TEST_P(urEnqueueMemBufferWriteRectNegativeTest, InvalidNullHandleQueue) {
     std::vector<uint32_t> src(count);
     ur_rect_region_t region{size, 1, 1};
     ur_rect_offset_t buffer_offset{0, 0, 0};
@@ -140,7 +139,7 @@ TEST_P(urEnqueueMemBufferWriteRectTest, InvalidNullHandleQueue) {
                                     src.data(), 0, nullptr, nullptr));
 }
 
-TEST_P(urEnqueueMemBufferWriteRectTest, InvalidNullHandleBuffer) {
+TEST_P(urEnqueueMemBufferWriteRectNegativeTest, InvalidNullHandleBuffer) {
     std::vector<uint32_t> src(count);
     ur_rect_region_t region{size, 1, 1};
     ur_rect_offset_t buffer_offset{0, 0, 0};
@@ -152,7 +151,7 @@ TEST_P(urEnqueueMemBufferWriteRectTest, InvalidNullHandleBuffer) {
                                     src.data(), 0, nullptr, nullptr));
 }
 
-TEST_P(urEnqueueMemBufferWriteRectTest, InvalidNullPointerSrc) {
+TEST_P(urEnqueueMemBufferWriteRectNegativeTest, InvalidNullPointerSrc) {
     std::vector<uint32_t> src(count);
     ur_rect_region_t region{size, 1, 1};
     ur_rect_offset_t buffer_offset{0, 0, 0};
@@ -164,7 +163,7 @@ TEST_P(urEnqueueMemBufferWriteRectTest, InvalidNullPointerSrc) {
                                                  nullptr, 0, nullptr, nullptr));
 }
 
-TEST_P(urEnqueueMemBufferWriteRectTest, InvalidNullPtrEventWaitList) {
+TEST_P(urEnqueueMemBufferWriteRectNegativeTest, InvalidNullPtrEventWaitList) {
     std::vector<uint32_t> src(count);
     ur_rect_region_t region{size, 1, 1};
     ur_rect_offset_t buffer_offset{0, 0, 0};
@@ -194,7 +193,7 @@ TEST_P(urEnqueueMemBufferWriteRectTest, InvalidNullPtrEventWaitList) {
     ASSERT_SUCCESS(urEventRelease(validEvent));
 }
 
-TEST_P(urEnqueueMemBufferWriteRectTest, InvalidSize) {
+TEST_P(urEnqueueMemBufferWriteRectNegativeTest, InvalidSize) {
     std::vector<uint32_t> src(count);
     std::fill(src.begin(), src.end(), 1);
 

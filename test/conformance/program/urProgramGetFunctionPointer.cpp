@@ -5,7 +5,7 @@
 
 #include <uur/fixtures.h>
 
-struct urProgramGetFunctionPointerTest : uur::urProgramTest {
+struct urProgramGetFunctionPointerTest : uur::urProgramTest<> {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(urProgramTest::SetUp());
         ASSERT_SUCCESS(urProgramBuild(context, program, nullptr));

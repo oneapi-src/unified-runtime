@@ -6,7 +6,7 @@
 #include "uur/fixtures.h"
 #include "uur/raii.h"
 
-using urMemBufferPartitionTest = uur::urMemBufferTest;
+using urMemBufferPartitionTest = uur::urMemBufferTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urMemBufferPartitionTest);
 
 TEST_P(urMemBufferPartitionTest, Success) {

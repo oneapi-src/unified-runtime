@@ -6,7 +6,7 @@
 #include "fixtures.h"
 #include "uur/raii.h"
 
-using cudaMemoryTest = uur::urContextTest;
+using cudaMemoryTest = uur::urContextTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(cudaMemoryTest);
 
 TEST_P(cudaMemoryTest, urMemBufferNoActiveContext) {

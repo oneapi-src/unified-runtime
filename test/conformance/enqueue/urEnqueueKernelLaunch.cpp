@@ -5,7 +5,7 @@
 
 #include <uur/fixtures.h>
 
-struct urEnqueueKernelLaunchTest : uur::urKernelExecutionTest {
+struct urEnqueueKernelLaunchTest : uur::urKernelExecutionTest<> {
     void SetUp() override {
         program_name = "fill";
         UUR_RETURN_ON_FATAL_FAILURE(urKernelExecutionTest::SetUp());
@@ -77,7 +77,7 @@ TEST_P(urEnqueueKernelLaunchTest, InvalidWorkDimension) {
                      UR_RESULT_ERROR_INVALID_WORK_DIMENSION);
 }
 
-struct urEnqueueKernelLaunch2DTest : uur::urKernelExecutionTest {
+struct urEnqueueKernelLaunch2DTest : uur::urKernelExecutionTest<> {
     void SetUp() override {
         program_name = "fill_2d";
         UUR_RETURN_ON_FATAL_FAILURE(urKernelExecutionTest::SetUp());
@@ -102,7 +102,7 @@ TEST_P(urEnqueueKernelLaunch2DTest, Success) {
     ValidateBuffer(buffer, buffer_size, val);
 }
 
-struct urEnqueueKernelLaunch3DTest : uur::urKernelExecutionTest {
+struct urEnqueueKernelLaunch3DTest : uur::urKernelExecutionTest<> {
     void SetUp() override {
         program_name = "fill_3d";
         UUR_RETURN_ON_FATAL_FAILURE(urKernelExecutionTest::SetUp());
@@ -128,11 +128,11 @@ TEST_P(urEnqueueKernelLaunch3DTest, Success) {
     ValidateBuffer(buffer, buffer_size, val);
 }
 
-struct urEnqueueKernelLaunchWithVirtualMemory : uur::urKernelExecutionTest {
+struct urEnqueueKernelLaunchWithVirtualMemory : uur::urKernelExecutionTest<> {
 
     void SetUp() override {
         program_name = "fill_usm";
-        UUR_RETURN_ON_FATAL_FAILURE(uur::urKernelExecutionTest::SetUp());
+        UUR_RETURN_ON_FATAL_FAILURE(uur::urKernelExecutionTest<>::SetUp());
 
         ur_bool_t virtual_memory_support = false;
         ASSERT_SUCCESS(urDeviceGetInfo(
@@ -180,7 +180,7 @@ struct urEnqueueKernelLaunchWithVirtualMemory : uur::urKernelExecutionTest {
             EXPECT_SUCCESS(urPhysicalMemRelease(physical_mem));
         }
 
-        UUR_RETURN_ON_FATAL_FAILURE(uur::urKernelExecutionTest::TearDown());
+        UUR_RETURN_ON_FATAL_FAILURE(uur::urKernelExecutionTest<>::TearDown());
     }
 
     size_t granularity = 0;
@@ -265,7 +265,7 @@ TEST_P(urEnqueueKernelLaunchMultiDeviceTest, KernelLaunchReadDifferentQueues) {
 }
 
 struct urEnqueueKernelLaunchUSMLinkedList
-    : uur::urKernelTestWithParam<uur::BoolTestParam> {
+    : uur::urKernelTest<uur::BoolTestParam> {
     struct Node {
         Node() : next(nullptr), num(0xDEADBEEF) {}
 
@@ -276,7 +276,7 @@ struct urEnqueueKernelLaunchUSMLinkedList
     void SetUp() override {
         program_name = "usm_ll";
         UUR_RETURN_ON_FATAL_FAILURE(
-            uur::urKernelTestWithParam<uur::BoolTestParam>::SetUp());
+            uur::urKernelTest<uur::BoolTestParam>::SetUp());
 
         use_pool = getParam().value;
         ASSERT_SUCCESS(urQueueCreate(context, device, 0, &queue));
@@ -304,7 +304,7 @@ struct urEnqueueKernelLaunchUSMLinkedList
         }
 
         UUR_RETURN_ON_FATAL_FAILURE(
-            uur::urKernelTestWithParam<uur::BoolTestParam>::TearDown());
+            uur::urKernelTest<uur::BoolTestParam>::TearDown());
     }
 
     size_t global_size = 1;
@@ -319,7 +319,7 @@ struct urEnqueueKernelLaunchUSMLinkedList
 UUR_TEST_SUITE_P(
     urEnqueueKernelLaunchUSMLinkedList,
     testing::ValuesIn(uur::BoolTestParam::makeBoolParam("UsePool")),
-    uur::deviceTestWithParamPrinter<uur::BoolTestParam>);
+    uur::deviceTestPrinter<uur::BoolTestParam>);
 
 TEST_P(urEnqueueKernelLaunchUSMLinkedList, Success) {
     ur_device_usm_access_capability_flags_t shared_usm_flags = 0;

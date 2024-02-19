@@ -6,9 +6,9 @@
 #include <uur/fixtures.h>
 #include <vector>
 
-struct urEnqueueUSMMemcpyTest : uur::urQueueTest {
+struct urEnqueueUSMMemcpyTest : uur::urQueueTest<> {
     void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(urQueueTest::SetUp());
+        UUR_RETURN_ON_FATAL_FAILURE(urQueueTest<>::SetUp());
 
         ur_device_usm_access_capability_flags_t device_usm = 0;
         ASSERT_SUCCESS(uur::GetDeviceUSMDeviceSupport(device, device_usm));
@@ -40,7 +40,7 @@ struct urEnqueueUSMMemcpyTest : uur::urQueueTest {
             EXPECT_SUCCESS(urUSMFree(context, device_dst));
         }
 
-        UUR_RETURN_ON_FATAL_FAILURE(urQueueTest::TearDown());
+        UUR_RETURN_ON_FATAL_FAILURE(urQueueTest<>::TearDown());
     }
 
     bool memsetHasFinished() {

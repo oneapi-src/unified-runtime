@@ -5,7 +5,7 @@
 
 #include <uur/fixtures.h>
 
-using urMemBufferCreateWithNativeHandleTest = uur::urMemBufferTest;
+using urMemBufferCreateWithNativeHandleTest = uur::urMemBufferTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urMemBufferCreateWithNativeHandleTest);
 
 TEST_P(urMemBufferCreateWithNativeHandleTest, Success) {

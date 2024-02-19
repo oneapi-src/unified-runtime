@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #include <uur/fixtures.h>
 
-using urEnqueueMemImageWriteTest = uur::urMemImageQueueTest;
+using urEnqueueMemImageWriteTest = uur::urMemImageQueueTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueMemImageWriteTest);
 
 TEST_P(urEnqueueMemImageWriteTest, Success1D) {

@@ -15,8 +15,8 @@
 {{OPT}}urKernelSetArgSamplerTest.InvalidNullHandleKernel/AMD_HIP_BACKEND___{{.*}}_
 {{OPT}}urKernelSetArgSamplerTest.InvalidNullHandleArgValue/AMD_HIP_BACKEND___{{.*}}_
 {{OPT}}urKernelSetArgSamplerTest.InvalidKernelArgumentIndex/AMD_HIP_BACKEND___{{.*}}_
-{{OPT}}urKernelSetArgValueTest.InvalidKernelArgumentIndex/AMD_HIP_BACKEND___{{.*}}_
-{{OPT}}urKernelSetArgValueTest.InvalidKernelArgumentSize/AMD_HIP_BACKEND___{{.*}}_
+{{OPT}}urKernelSetArgValueNegativeTest.InvalidKernelArgumentIndex/AMD_HIP_BACKEND___{{.*}}_
+{{OPT}}urKernelSetArgValueNegativeTest.InvalidKernelArgumentSize/AMD_HIP_BACKEND___{{.*}}_
 {{OPT}}urKernelSetExecInfoUSMPointersTest.SuccessShared/AMD_HIP_BACKEND___{{.*}}_
 {{OPT}}urKernelSetSpecializationConstantsTest.Success/AMD_HIP_BACKEND___{{.*}}_
 {{OPT}}urKernelSetSpecializationConstantsTest.InvalidNullHandleKernel/AMD_HIP_BACKEND___{{.*}}_

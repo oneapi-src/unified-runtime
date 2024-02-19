@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #include <uur/fixtures.h>
 
-using urEnqueueDeviceGetGlobalVariableReadTest = uur::urGlobalVariableTest;
+using urEnqueueDeviceGetGlobalVariableReadTest = uur::urGlobalVariableTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueDeviceGetGlobalVariableReadTest);
 
 TEST_P(urEnqueueDeviceGetGlobalVariableReadTest, Success) {

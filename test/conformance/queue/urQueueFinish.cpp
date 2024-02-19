@@ -6,7 +6,7 @@
 #include "uur/fixtures.h"
 #include "uur/raii.h"
 
-using urQueueFinishTest = uur::urQueueTest;
+using urQueueFinishTest = uur::urQueueTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urQueueFinishTest);
 
 TEST_P(urQueueFinishTest, Success) {

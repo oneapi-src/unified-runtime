@@ -7,7 +7,7 @@
 
 namespace uur {
 template <>
-std::string deviceTestWithParamPrinter<BoolTestParam>(
+std::string deviceTestPrinter<BoolTestParam>(
     const ::testing::TestParamInfo<
         std::tuple<ur_device_handle_t, BoolTestParam>> &info) {
     auto device = std::get<0>(info.param);

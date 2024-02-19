@@ -5,10 +5,10 @@
 #include <uur/fixtures.h>
 
 struct urVirtualMemGranularityGetInfoTest
-    : uur::urContextTestWithParam<ur_virtual_mem_granularity_info_t> {
+    : uur::urContextTest<ur_virtual_mem_granularity_info_t> {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(
-            urContextTestWithParam<ur_virtual_mem_granularity_info_t>::SetUp());
+            urContextTest<ur_virtual_mem_granularity_info_t>::SetUp());
         ur_bool_t virtual_memory_support = false;
         ASSERT_SUCCESS(urDeviceGetInfo(
             this->device, UR_DEVICE_INFO_VIRTUAL_MEMORY_SUPPORT,
@@ -19,11 +19,10 @@ struct urVirtualMemGranularityGetInfoTest
     }
 };
 
-UUR_TEST_SUITE_P(
-    urVirtualMemGranularityGetInfoTest,
-    ::testing::Values(UR_VIRTUAL_MEM_GRANULARITY_INFO_MINIMUM,
-                      UR_VIRTUAL_MEM_GRANULARITY_INFO_RECOMMENDED),
-    uur::deviceTestWithParamPrinter<ur_virtual_mem_granularity_info_t>);
+UUR_TEST_SUITE_P(urVirtualMemGranularityGetInfoTest,
+                 ::testing::Values(UR_VIRTUAL_MEM_GRANULARITY_INFO_MINIMUM,
+                                   UR_VIRTUAL_MEM_GRANULARITY_INFO_RECOMMENDED),
+                 uur::deviceTestPrinter<ur_virtual_mem_granularity_info_t>);
 
 TEST_P(urVirtualMemGranularityGetInfoTest, Success) {
     size_t size = 0;
@@ -54,7 +53,7 @@ TEST_P(urVirtualMemGranularityGetInfoTest, Success) {
     }
 }
 
-struct urVirtualMemGranularityGetInfoNegativeTest : uur::urContextTest {
+struct urVirtualMemGranularityGetInfoNegativeTest : uur::urContextTest<> {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(urContextTest::SetUp());
 

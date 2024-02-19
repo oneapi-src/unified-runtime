@@ -7,7 +7,7 @@
 #include "uur/fixtures.h"
 #include "uur/raii.h"
 
-using cudaKernelTest = uur::urQueueTest;
+using cudaKernelTest = uur::urQueueTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(cudaKernelTest);
 
 // The first argument stores the implicit global offset

@@ -5,7 +5,7 @@
 
 #include <uur/fixtures.h>
 
-using urContextRetainTest = uur::urContextTest;
+using urContextRetainTest = uur::urContextTest<>;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urContextRetainTest);
 
 TEST_P(urContextRetainTest, Success) {
