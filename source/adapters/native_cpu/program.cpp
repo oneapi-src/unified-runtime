@@ -11,6 +11,7 @@
 #include "ur_api.h"
 
 #include "common.hpp"
+#include <cstdint>
 #include "program.hpp"
 
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -26,12 +27,44 @@ urProgramCreateWithIL(ur_context_handle_t hContext, const void *pIL,
   DIE_NO_IMPLEMENTATION
 }
 
+// TODO: taken from CUDA adapter, move this to a common header?
+std::pair<std::string, std::string>
+splitMetadataName(const std::string &metadataName) {
+  size_t splitPos = metadataName.rfind('@');
+  if (splitPos == std::string::npos)
+    return std::make_pair(metadataName, std::string{});
+  return std::make_pair(metadataName.substr(0, splitPos),
+                        metadataName.substr(splitPos, metadataName.length()));
+}
+
+ur_result_t getReqdWGSize(const ur_program_metadata_t& MetadataElement, std::tuple<uint32_t, uint32_t, uint32_t>& res) {
+      size_t MDElemsSize = MetadataElement.size - sizeof(std::uint64_t);
+
+      // Expect between 1 and 3 32-bit integer values.
+      UR_ASSERT(MDElemsSize >= sizeof(std::uint32_t) &&
+                    MDElemsSize <= sizeof(std::uint32_t) * 3,
+                UR_RESULT_ERROR_INVALID_WORK_GROUP_SIZE);
+
+      // Get pointer to data, skipping 64-bit size at the start of the data.
+      const char *ValuePtr =
+          reinterpret_cast<const char *>(MetadataElement.value.pData) +
+          sizeof(std::uint64_t);
+      // Read values and pad with 1's for values not present.
+      std::uint32_t ReqdWorkGroupElements[] = {1, 1, 1};
+      std::memcpy(ReqdWorkGroupElements, ValuePtr, MDElemsSize);
+      std::get<0>(res) = ReqdWorkGroupElements[0];
+      std::get<1>(res) = ReqdWorkGroupElements[1];
+      std::get<2>(res) = ReqdWorkGroupElements[2];
+      return UR_RESULT_SUCCESS;
+}
+
 UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
     ur_context_handle_t hContext, ur_device_handle_t hDevice, size_t size,
     const uint8_t *pBinary, const ur_program_properties_t *pProperties,
     ur_program_handle_t *phProgram) {
   std::ignore = size;
   std::ignore = pProperties;
+
 
   UR_ASSERT(hContext, UR_RESULT_ERROR_INVALID_NULL_HANDLE);
   UR_ASSERT(hDevice, UR_RESULT_ERROR_INVALID_NULL_HANDLE);
@@ -40,6 +73,18 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
 
   auto hProgram = new ur_program_handle_t_(
       hContext, reinterpret_cast<const unsigned char *>(pBinary));
+  if(pProperties != nullptr) {
+    for(int i = 0; i < pProperties->count; i++) {
+      auto mdNode = pProperties->pMetadatas[i];
+      std::string mdName(mdNode.pName);
+      auto [Prefix, Tag] = splitMetadataName(mdName);
+      if (Tag == __SYCL_UR_PROGRAM_METADATA_TAG_REQD_WORK_GROUP_SIZE) {
+        std::tuple<uint32_t, uint32_t, uint32_t> reqdWGSize;
+        getReqdWGSize(mdNode, reqdWGSize);
+        hProgram->KernelReqdWorkGroupSizeMD[Prefix] = reqdWGSize;
+      }
+    }
+  }
 
   const nativecpu_entry *nativecpu_it =
       reinterpret_cast<const nativecpu_entry *>(pBinary);

@@ -30,6 +30,8 @@ struct ur_program_handle_t_ : RefCounted {
   };
 
   std::map<const char *, const unsigned char *, _compare> _kernels;
+  std::unordered_map<std::string, std::tuple<uint32_t, uint32_t, uint32_t>>
+      KernelReqdWorkGroupSizeMD;
 };
 
 // The nativecpu_entry struct is also defined as LLVM-IR in the

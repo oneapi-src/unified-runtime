@@ -59,6 +59,16 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
     DIE_NO_IMPLEMENTATION;
   }
 
+  // Check reqd_work_group_size
+  if(hKernel->HasReqdWGSize && pLocalWorkSize != nullptr) {
+    const auto& Reqd = hKernel->ReqdWGSize;
+    for(uint32_t Dim = 0; Dim < workDim; Dim++) {
+      if(pLocalWorkSize[Dim] != Reqd[Dim]) {
+        return UR_RESULT_ERROR_INVALID_WORK_GROUP_SIZE;
+      }
+    }
+  }
+
   // TODO: add proper error checking
   // TODO: add proper event dep management
   native_cpu::NDRDescT ndr(workDim, pGlobalWorkOffset, pGlobalWorkSize,
