@@ -1162,34 +1162,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemUnmap(
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemset(
-    ur_queue_handle_t Queue,      ///< [in] handle of the queue object
-    void *Ptr,                    ///< [in] pointer to USM memory object
-    int8_t ByteValue,             ///< [in] byte value to fill
-    size_t Count,                 ///< [in] size in bytes to be set
-    uint32_t NumEventsInWaitList, ///< [in] size of the event wait list
-    const ur_event_handle_t
-        *EventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                        ///< pointer to a list of events that must be complete
-                        ///< before this command can be executed. If nullptr,
-                        ///< the numEventsInWaitList must be 0, indicating
-                        ///< that this command does not wait on any event to
-                        ///< complete.
-    ur_event_handle_t *Event ///< [in,out][optional] return an event object that
-                             ///< identifies this particular command instance.
-) {
-  std::ignore = Queue;
-  std::ignore = Ptr;
-  std::ignore = ByteValue;
-  std::ignore = Count;
-  std::ignore = NumEventsInWaitList;
-  std::ignore = EventWaitList;
-  std::ignore = Event;
-  logger::error(logger::LegacyMessage("[UR][L0] {} function not implemented!"),
-                "{} function not implemented!", __FUNCTION__);
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-}
-
 UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy(
     ur_queue_handle_t Queue, ///< [in] handle of the queue object
     bool Blocking,           ///< [in] blocking or non-blocking copy
@@ -1374,39 +1346,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMFill2D(
   std::ignore = Pitch;
   std::ignore = PatternSize;
   std::ignore = Pattern;
-  std::ignore = Width;
-  std::ignore = Height;
-  std::ignore = NumEventsInWaitList;
-  std::ignore = EventWaitList;
-  std::ignore = OutEvent;
-  logger::error(logger::LegacyMessage("[UR][L0] {} function not implemented!"),
-                "{} function not implemented!", __FUNCTION__);
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-}
-
-UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemset2D(
-    ur_queue_handle_t Queue, ///< [in] handle of the queue to submit to.
-    void *Mem,               ///< [in] pointer to memory to be filled.
-    size_t Pitch,  ///< [in] the total width of the destination memory including
-                   ///< padding.
-    int Value,     ///< [in] the value to fill into the region in pMem.
-    size_t Width,  ///< [in] the width in bytes of each row to set.
-    size_t Height, ///< [in] the height of the columns to set.
-    uint32_t NumEventsInWaitList, ///< [in] size of the event wait list
-    const ur_event_handle_t
-        *EventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                        ///< pointer to a list of events that must be complete
-                        ///< before the kernel execution. If nullptr, the
-                        ///< numEventsInWaitList must be 0, indicating that no
-                        ///< wait event.
-    ur_event_handle_t
-        *OutEvent ///< [in,out][optional] return an event object that identifies
-                  ///< this particular kernel execution instance.
-) {
-  std::ignore = Queue;
-  std::ignore = Mem;
-  std::ignore = Pitch;
-  std::ignore = Value;
   std::ignore = Width;
   std::ignore = Height;
   std::ignore = NumEventsInWaitList;
