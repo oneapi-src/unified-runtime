@@ -29,7 +29,7 @@ struct NDRDescT {
     for (uint32_t I = 0; I < WorkDim; I++) {
       GlobalOffset[I] = GlobalWorkOffset[I];
       GlobalSize[I] = GlobalWorkSize[I];
-      LocalSize[I] = LocalWorkSize[I];
+      LocalSize[I] = LocalWorkSize ? LocalWorkSize[I] : 1;
     }
     for (uint32_t I = WorkDim; I < 3; I++) {
       GlobalSize[I] = 1;
