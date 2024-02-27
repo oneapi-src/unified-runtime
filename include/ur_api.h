@@ -9377,11 +9377,11 @@ typedef struct ur_event_set_callback_params_t {
 /// @details Each entry is a pointer to the parameter passed to the function;
 ///     allowing the callback the ability to modify the parameter's value
 typedef struct ur_enqueue_timestamp_recording_exp_t {
-    ur_queue_handle_t hQueue;
-    bool blocking;
-    uint32_t numEventsInWaitList;
-    const ur_event_handle_t *phEventWaitList;
-    ur_event_handle_t *phEvent;
+    ur_queue_handle_t *hQueue;
+    bool *blocking;
+    uint32_t *numEventsInWaitList;
+    const ur_event_handle_t **phEventWaitList;
+    ur_event_handle_t **phEvent;
 } ur_enqueue_timestamp_recording_exp_t;
 
 ///////////////////////////////////////////////////////////////////////////////
