@@ -25,18 +25,19 @@ void common_check(ur_queue_handle_t queue, ur_event_handle_t event) {
     uint64_t queuedTime = 0, submitTime = 0, startTime = 0, endTime = 0;
     ASSERT_SUCCESS(
         urEventGetProfilingInfo(event, UR_PROFILING_INFO_COMMAND_QUEUED,
-                                sizeof(uint64_t), queuedTime, nullptr));
+                                sizeof(uint64_t), &queuedTime, nullptr));
     ASSERT_SUCCESS(
         urEventGetProfilingInfo(event, UR_PROFILING_INFO_COMMAND_SUBMIT,
-                                sizeof(uint64_t), submitTime, nullptr));
+                                sizeof(uint64_t), &submitTime, nullptr));
     ASSERT_SUCCESS(
         urEventGetProfilingInfo(event, UR_PROFILING_INFO_COMMAND_START,
-                                sizeof(uint64_t), startTime, nullptr));
+                                sizeof(uint64_t), &startTime, nullptr));
     ASSERT_SUCCESS(
         urEventGetProfilingInfo(event, UR_PROFILING_INFO_COMMAND_SUBMIT,
                                 sizeof(uint64_t), submitTime, nullptr));
     ASSERT_SUCCESS(urEventGetProfilingInfo(event, UR_PROFILING_INFO_COMMAND_END,
-                                           sizeof(uint64_t), endTime, nullptr));
+                                           sizeof(uint64_t), &endTime,
+                                           nullptr));
     ASSERT_TRUE(queuedTime > 0);
     ASSERT_TRUE(submitTime > 0);
     ASSERT_TRUE(startTime > 0);
@@ -47,7 +48,7 @@ void common_check(ur_queue_handle_t queue, ur_event_handle_t event) {
 }
 
 TEST_P(urEnqueueTimestampRecordingExpTest, Success) {
-    ur_event_handle_t event = nulltpr;
+    ur_event_handle_t event = nullptr;
     ASSERT_SUCCESS(
         urEnqueueTimestampRecordingExp(queue, false, 0, nullptr, &event));
     ASSERT_SUCCESS(urQueueFinish(queue));
@@ -56,7 +57,7 @@ TEST_P(urEnqueueTimestampRecordingExpTest, Success) {
 }
 
 TEST_P(urEnqueueTimestampRecordingExpTest, SuccessBlocking) {
-    ur_event_handle_t event = nulltpr;
+    ur_event_handle_t event = nullptr;
     ASSERT_SUCCESS(
         urEnqueueTimestampRecordingExp(queue, true, 0, nullptr, &event));
     common_check(queue, event);
@@ -64,7 +65,7 @@ TEST_P(urEnqueueTimestampRecordingExpTest, SuccessBlocking) {
 }
 
 TEST_P(urEnqueueTimestampRecordingExpTest, InvalidNullHandleQueue) {
-    ur_event_handle_t event = nulltpr;
+    ur_event_handle_t event = nullptr;
     ASSERT_EQ_RESULT(
         urEnqueueTimestampRecordingExp(nullptr, false, 0, nullptr, &event),
         UR_RESULT_ERROR_INVALID_NULL_HANDLE);
@@ -77,7 +78,7 @@ TEST_P(urEnqueueTimestampRecordingExpTest, InvalidNullPointerEvent) {
 }
 
 TEST_P(urEnqueueTimestampRecordingExpTest, InvalidNullPtrEventWaitList) {
-    ur_event_handle_t event = nulltpr;
+    ur_event_handle_t event = nullptr;
     ASSERT_EQ_RESULT(
         urEnqueueTimestampRecordingExp(queue, true, 1, nullptr, &event),
         UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST);
