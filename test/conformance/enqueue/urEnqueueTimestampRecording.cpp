@@ -20,7 +20,7 @@ struct urEnqueueTimestampRecordingExpTest : uur::urQueueTest {
 };
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueTimestampRecordingExpTest);
 
-void common_check(ur_queue_handle_t queue, ur_event_handle_t event) {
+void common_check(ur_event_handle_t event) {
     // All successful runs should return a non-zero profiling results.
     uint64_t queuedTime = 0, submitTime = 0, startTime = 0, endTime = 0;
     ASSERT_SUCCESS(
@@ -32,9 +32,6 @@ void common_check(ur_queue_handle_t queue, ur_event_handle_t event) {
     ASSERT_SUCCESS(
         urEventGetProfilingInfo(event, UR_PROFILING_INFO_COMMAND_START,
                                 sizeof(uint64_t), &startTime, nullptr));
-    ASSERT_SUCCESS(
-        urEventGetProfilingInfo(event, UR_PROFILING_INFO_COMMAND_SUBMIT,
-                                sizeof(uint64_t), submitTime, nullptr));
     ASSERT_SUCCESS(urEventGetProfilingInfo(event, UR_PROFILING_INFO_COMMAND_END,
                                            sizeof(uint64_t), &endTime,
                                            nullptr));
@@ -52,7 +49,7 @@ TEST_P(urEnqueueTimestampRecordingExpTest, Success) {
     ASSERT_SUCCESS(
         urEnqueueTimestampRecordingExp(queue, false, 0, nullptr, &event));
     ASSERT_SUCCESS(urQueueFinish(queue));
-    common_check(queue, event);
+    common_check(event);
     ASSERT_SUCCESS(urEventRelease(event));
 }
 
@@ -60,7 +57,7 @@ TEST_P(urEnqueueTimestampRecordingExpTest, SuccessBlocking) {
     ur_event_handle_t event = nullptr;
     ASSERT_SUCCESS(
         urEnqueueTimestampRecordingExp(queue, true, 0, nullptr, &event));
-    common_check(queue, event);
+    common_check(event);
     ASSERT_SUCCESS(urEventRelease(event));
 }
 
