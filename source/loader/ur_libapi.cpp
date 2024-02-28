@@ -2201,7 +2201,7 @@ ur_result_t UR_APICALL urUSMHostAlloc(
     ur_usm_pool_handle_t
         pool, ///< [in][optional] Pointer to a pool created using urUSMPoolCreate
     size_t
-        size, ///< [in] size in bytes of the USM memory object to be allocated
+        size, ///< [in] minimum size in bytes of the USM memory object to be allocated
     void **ppMem ///< [out] pointer to USM host memory object
     ) try {
     auto pfnHostAlloc = ur_lib::context->urDdiTable.USM.pfnHostAlloc;
@@ -2260,7 +2260,7 @@ ur_result_t UR_APICALL urUSMDeviceAlloc(
     ur_usm_pool_handle_t
         pool, ///< [in][optional] Pointer to a pool created using urUSMPoolCreate
     size_t
-        size, ///< [in] size in bytes of the USM memory object to be allocated
+        size, ///< [in] minimum size in bytes of the USM memory object to be allocated
     void **ppMem ///< [out] pointer to USM device memory object
     ) try {
     auto pfnDeviceAlloc = ur_lib::context->urDdiTable.USM.pfnDeviceAlloc;
@@ -2320,7 +2320,7 @@ ur_result_t UR_APICALL urUSMSharedAlloc(
     ur_usm_pool_handle_t
         pool, ///< [in][optional] Pointer to a pool created using urUSMPoolCreate
     size_t
-        size, ///< [in] size in bytes of the USM memory object to be allocated
+        size, ///< [in] minimum size in bytes of the USM memory object to be allocated
     void **ppMem ///< [out] pointer to USM shared memory object
     ) try {
     auto pfnSharedAlloc = ur_lib::context->urDdiTable.USM.pfnSharedAlloc;
@@ -2937,6 +2937,8 @@ ur_result_t UR_APICALL urProgramCreateWithIL(
 ///     - Following a successful call to this entry point, `phProgram` will
 ///       contain a binary of type ::UR_PROGRAM_BINARY_TYPE_COMPILED_OBJECT or
 ///       ::UR_PROGRAM_BINARY_TYPE_LIBRARY for `hDevice`.
+///     - The device specified by `hDevice` must be device associated with
+///       context.
 ///
 /// @remarks
 ///   _Analogues_
