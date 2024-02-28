@@ -4012,7 +4012,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
     // extract platform's function pointer table
     auto dditable = reinterpret_cast<ur_queue_object_t *>(hQueue)->dditable;
     auto pfnEnqueueTimestampRecordingExp =
-        dditable->ur.Event.pfnEnqueueTimestampRecordingExp;
+        dditable->ur.EnqueueExp.pfnEnqueueTimestampRecordingExp;
     if (nullptr == pfnEnqueueTimestampRecordingExp) {
         return UR_RESULT_ERROR_UNINITIALIZED;
     }

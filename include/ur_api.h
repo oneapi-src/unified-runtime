@@ -10479,11 +10479,11 @@ typedef struct ur_enqueue_cooperative_kernel_launch_exp_params_t {
 /// @details Each entry is a pointer to the parameter passed to the function;
 ///     allowing the callback the ability to modify the parameter's value
 typedef struct ur_enqueue_timestamp_recording_exp_params_t {
-    ur_queue_handle_t *hQueue;
-    bool *blocking;
-    uint32_t *numEventsInWaitList;
-    const ur_event_handle_t **phEventWaitList;
-    ur_event_handle_t **phEvent;
+    ur_queue_handle_t *phQueue;
+    bool *pblocking;
+    uint32_t *pnumEventsInWaitList;
+    const ur_event_handle_t **pphEventWaitList;
+    ur_event_handle_t **pphEvent;
 } ur_enqueue_timestamp_recording_exp_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
