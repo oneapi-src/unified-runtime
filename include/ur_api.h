@@ -8762,7 +8762,7 @@ urKernelSuggestMaxCooperativeGroupCountExp(
 ///         + `NULL == hQueue`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `NULL == phEvent`
-+///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
+///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
 UR_APIEXPORT ur_result_t UR_APICALL
 urEnqueueTimestampRecordingExp(
     ur_queue_handle_t hQueue,                 ///< [in] handle of the queue object
