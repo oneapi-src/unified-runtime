@@ -25,7 +25,7 @@ etors:
 type: function
 desc: "Enqueue a command for recording the device timestamp"
 class: $xEnqueue
-name: EnqueueTimestampRecordingExp
+name: TimestampRecordingExp
 params:
     - type: $x_queue_handle_t
       name: hQueue
@@ -48,7 +48,7 @@ params:
       name: phEvent
       desc: |
             [in,out] return an event object that identifies this particular kernel execution instance. Profiling information can be queried
-            from this event as if `hQueue` had profiling enabled. Querying`UR_PROFILING_INFO_COMMAND_QUEUED` or `UR_PROFILING_INFO_COMMAND_SUBMIT`
+            from this event as if `hQueue` had profiling enabled. Querying `UR_PROFILING_INFO_COMMAND_QUEUED` or `UR_PROFILING_INFO_COMMAND_SUBMIT`
             reports the timestamp at the time of the call to this function. Querying `UR_PROFILING_INFO_COMMAND_START` or `UR_PROFILING_INFO_COMMAND_END`
             reports the timestamp recorded when the command is executed on the device.
 returns:
