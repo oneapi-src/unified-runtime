@@ -8749,6 +8749,7 @@ urKernelSuggestMaxCooperativeGroupCountExp(
 // Intel 'oneAPI' Unified Runtime Experimental APIs for enqueuing timestamp recordings
 #if !defined(__GNUC__)
 #pragma region enqueue timestamp recording(experimental)
+#endif
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Enqueues a timestamp recording to be stored in the resulting event.
 ///
