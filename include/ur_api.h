@@ -5881,34 +5881,6 @@ urEventSetCallback(
     void *pUserData                 ///< [in][out][optional] pointer to data to be passed to callback.
 );
 
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Enqueues a timestamp recording to be stored in the resulting event.
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_UNINITIALIZED
-///     - ::UR_RESULT_ERROR_DEVICE_LOST
-///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
-///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
-///         + `NULL == hQueue`
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///         + `NULL == phEvent`
-UR_APIEXPORT ur_result_t UR_APICALL
-urEnqueueTimestampRecordingExp(
-    ur_queue_handle_t hQueue,                 ///< [in] handle of the queue object
-    bool blocking,                            ///< [in] blocking or non-blocking enqueue
-    uint32_t numEventsInWaitList,             ///< [in] size of the event wait list
-    const ur_event_handle_t *phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                                              ///< pointer to a list of events that must be complete
-                                              ///< before this command can be executed. If nullptr,
-                                              ///< the numEventsInWaitList must be 0, indicating
-                                              ///< that this command does not wait on any event to
-                                              ///< complete.
-    ur_event_handle_t *phEvent                ///< [in,out] return an event object that identifies
-                                              ///< this particular command instance. This event has
-                                              ///< profiling info, even if it is not enabled on hQueue.
-);
-
 #if !defined(__GNUC__)
 #pragma endregion
 #endif
@@ -8774,6 +8746,45 @@ urKernelSuggestMaxCooperativeGroupCountExp(
 #if !defined(__GNUC__)
 #pragma endregion
 #endif
+// Intel 'oneAPI' Unified Runtime Experimental APIs for enqueuing timestamp recordings
+#if !defined(__GNUC__)
+#pragma region enqueue timestamp recording(experimental)
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Enqueues a timestamp recording to be stored in the resulting event.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hQueue`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == phEvent`
++///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
+UR_APIEXPORT ur_result_t UR_APICALL
+urEnqueueTimestampRecordingExp(
+    ur_queue_handle_t hQueue,                 ///< [in] handle of the queue object
+    bool blocking,                            ///< [in] indicates whether the call to this function should block until
+                                              ///< until the device timestamp recording command has executed on the
+                                              ///< device.
+    uint32_t numEventsInWaitList,             ///< [in] size of the event wait list
+    const ur_event_handle_t *phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+                                              ///< events that must be complete before the kernel execution.
+                                              ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait
+                                              ///< event.
+    ur_event_handle_t *phEvent                ///< [in,out] return an event object that identifies this particular kernel
+                                              ///< execution instance. Profiling information can be queried
+                                              ///< from this event as if `hQueue` had profiling enabled. Querying
+                                              ///< `UR_PROFILING_INFO_COMMAND_QUEUED` or `UR_PROFILING_INFO_COMMAND_SUBMIT`
+                                              ///< reports the timestamp at the time of the call to this function.
+                                              ///< Querying `UR_PROFILING_INFO_COMMAND_START` or `UR_PROFILING_INFO_COMMAND_END`
+                                              ///< reports the timestamp recorded when the command is executed on the device.
+);
+
+#if !defined(__GNUC__)
+#pragma endregion
+#endif
 // Intel 'oneAPI' Unified Runtime Experimental APIs for multi-device compile
 #if !defined(__GNUC__)
 #pragma region multi device compile(experimental)
@@ -9371,18 +9382,6 @@ typedef struct ur_event_set_callback_params_t {
     ur_event_callback_t *ppfnNotify;
     void **ppUserData;
 } ur_event_set_callback_params_t;
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function parameters for urEnqueueTimestampRecordingExp
-/// @details Each entry is a pointer to the parameter passed to the function;
-///     allowing the callback the ability to modify the parameter's value
-typedef struct ur_enqueue_timestamp_recording_exp_t {
-    ur_queue_handle_t *hQueue;
-    bool *blocking;
-    uint32_t *numEventsInWaitList;
-    const ur_event_handle_t **phEventWaitList;
-    ur_event_handle_t **phEvent;
-} ur_enqueue_timestamp_recording_exp_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urProgramCreateWithIL
@@ -10473,6 +10472,18 @@ typedef struct ur_enqueue_cooperative_kernel_launch_exp_params_t {
     const ur_event_handle_t **pphEventWaitList;
     ur_event_handle_t **pphEvent;
 } ur_enqueue_cooperative_kernel_launch_exp_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urEnqueueTimestampRecordingExp
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_enqueue_timestamp_recording_exp_params_t {
+    ur_queue_handle_t *hQueue;
+    bool *blocking;
+    uint32_t *numEventsInWaitList;
+    const ur_event_handle_t **phEventWaitList;
+    ur_event_handle_t **phEvent;
+} ur_enqueue_timestamp_recording_exp_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urBindlessImagesUnsampledImageHandleDestroyExp

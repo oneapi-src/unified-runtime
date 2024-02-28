@@ -3027,36 +3027,6 @@ __urdlllocal ur_result_t UR_APICALL urEventSetCallback(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urEnqueueTimestampRecordingExp
-__urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
-    ur_queue_handle_t hQueue,     ///< [in] handle of the queue object
-    bool blocking,                ///< [in] blocking or non-blocking enqueue
-    uint32_t numEventsInWaitList, ///< [in] size of the event wait list
-    const ur_event_handle_t
-        *phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                          ///< pointer to a list of events that must be complete
-                          ///< before this command can be executed. If nullptr,
-                          ///< the numEventsInWaitList must be 0, indicating
-                          ///< that this command does not wait on any event to
-                          ///< complete.
-    ur_event_handle_t
-        *phEvent ///< [in,out] return an event object that identifies
-                 ///< this particular command instance. This event has
-                 ///< profiling info, even if it is not enabled on hQueue.
-    ) try {
-    auto pfnEnqueueTimestampRecordingExp =
-        d_context.urDdiTable.Event.pfnEnqueueTimestampRecordingExp;
-    if (nullptr == pfnEnqueueTimestampRecordingExp) {
-        return UR_RESULT_ERROR_UNINITIALIZED;
-    }
-
-    return pfnEnqueueTimestampRecordingExp(
-        hQueue, blocking, numEventsInWaitList, phEventWaitList, phEvent);
-} catch (...) {
-    return exceptionToResult(std::current_exception());
-}
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueKernelLaunch
 __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunch(
     ur_queue_handle_t hQueue,   ///< [in] handle of the queue object
@@ -5496,6 +5466,44 @@ __urdlllocal ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
     return result;
 } catch (...) {
     return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Enqueue a command for recording the device timestamp
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hQueue`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == phEvent`
+///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
+ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
+    ur_queue_handle_t hQueue, ///< [in] handle of the queue object
+    bool
+        blocking, ///< [in] indicates whether the call to this function should block until
+    ///< until the device timestamp recording command has executed on the
+    ///< device.
+    uint32_t numEventsInWaitList, ///< [in] size of the event wait list
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the kernel execution.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait
+    ///< event.
+    ur_event_handle_t *
+        phEvent ///< [in,out] return an event object that identifies this particular kernel
+                ///< execution instance. Profiling information can be queried
+    ///< from this event as if `hQueue` had profiling enabled. Querying
+    ///< `UR_PROFILING_INFO_COMMAND_QUEUED` or `UR_PROFILING_INFO_COMMAND_SUBMIT`
+    ///< reports the timestamp at the time of the call to this function.
+    ///< Querying `UR_PROFILING_INFO_COMMAND_START` or `UR_PROFILING_INFO_COMMAND_END`
+    ///< reports the timestamp recorded when the command is executed on the device.
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+    return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

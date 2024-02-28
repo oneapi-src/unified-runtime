@@ -3215,7 +3215,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
         return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
-    ur_enqueue_timestamp_recording_exp_t params = {
+    ur_enqueue_timestamp_recording_exp_params_t params = {
         &hQueue, &blocking, &numEventsInWaitList, &phEventWaitList, &phEvent};
     uint64_t instance =
         context.notify_begin(UR_FUNCTION_ENQUEUE_TIMESTAMP_RECORDING_EXP,
