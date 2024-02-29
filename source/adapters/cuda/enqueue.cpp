@@ -1762,6 +1762,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
     const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent) {
 
   ur_result_t Result = UR_RESULT_SUCCESS;
+  std::unique_ptr<ur_event_handle_t_> RetImplEvent{nullptr};
   try {
     ScopedContext Active(hQueue->getContext());
     CUstream CuStream = hQueue->getNextComputeStream();
