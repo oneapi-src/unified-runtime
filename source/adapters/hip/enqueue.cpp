@@ -1917,7 +1917,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
     UR_CHECK_ERROR(RetImplEvent->record());
 
     if (blocking) {
-      UR_CHECK_ERROR(cuStreamSynchronize(HIPStream));
+      UR_CHECK_ERROR(hipStreamSynchronize(HIPStream));
     }
 
     *phEvent = RetImplEvent.release();
