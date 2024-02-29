@@ -674,7 +674,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
       Queue, CommandList, UseCopyEngine, /* AllowBatching */ false));
 
   UR_CALL(createEventAndAssociateQueue(
-      Queue, OutEvent, UR_EXT_COMMAND_TYPE_USER, CommandList,
+      Queue, OutEvent, UR_COMMAND_TIMESTAMP_RECORDING_EXP, CommandList,
       /* IsInternal */ false, /* HostVisible */ true));
   ze_event_handle_t ZeEvent = (*OutEvent)->ZeEvent;
   (*OutEvent)->WaitList = TmpWaitList;
