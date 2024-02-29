@@ -1912,12 +1912,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
 
     RetImplEvent =
         std::unique_ptr<ur_event_handle_t_>(ur_event_handle_t_::makeNative(
-            UR_COMMAND_TIMESTAMP_RECORDING_EXP, hQueue, CuStream));
+            UR_COMMAND_TIMESTAMP_RECORDING_EXP, hQueue, HIPStream));
     UR_CHECK_ERROR(RetImplEvent->start());
     UR_CHECK_ERROR(RetImplEvent->record());
 
     if (blocking) {
-      UR_CHECK_ERROR(cuStreamSynchronize(CuStream));
+      UR_CHECK_ERROR(cuStreamSynchronize(HIPStream));
     }
 
     *phEvent = RetImplEvent.release();
