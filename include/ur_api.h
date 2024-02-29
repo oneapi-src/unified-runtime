@@ -1649,7 +1649,7 @@ typedef enum ur_device_info_t {
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hDevice`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_DEVICE_INFO_INTEROP_SEMAPHORE_EXPORT_SUPPORT_EXP < propName`
+///         + `::UR_DEVICE_INFO_TIMESTAMP_RECORDING_SUPPORT_EXP < propName`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
 ///         + If `propName` is not supported by the adapter.
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
@@ -8751,7 +8751,7 @@ urKernelSuggestMaxCooperativeGroupCountExp(
 #pragma region enqueue timestamp recording(experimental)
 #endif
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Enqueues a timestamp recording to be stored in the resulting event.
+/// @brief Enqueue a command for recording the device timestamp
 ///
 /// @returns
 ///     - ::UR_RESULT_SUCCESS

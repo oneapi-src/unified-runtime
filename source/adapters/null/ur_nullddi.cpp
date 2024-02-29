@@ -5469,19 +5469,8 @@ __urdlllocal ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Enqueue a command for recording the device timestamp
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_UNINITIALIZED
-///     - ::UR_RESULT_ERROR_DEVICE_LOST
-///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
-///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
-///         + `NULL == hQueue`
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///         + `NULL == phEvent`
-///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
-ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
+/// @brief Intercept function for urEnqueueTimestampRecordingExp
+__urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     bool
         blocking, ///< [in] indicates whether the call to this function should block until
@@ -5512,9 +5501,7 @@ ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
                                           phEventWaitList, phEvent);
     } else {
         // generic implementation
-        if (nullptr != phEvent) {
-            *phEvent = reinterpret_cast<ur_event_handle_t>(d_context.get());
-        }
+        *phEvent = reinterpret_cast<ur_event_handle_t>(d_context.get());
     }
 
     return result;
@@ -6077,6 +6064,9 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetEnqueueExpProcAddrTable(
 
     pDdiTable->pfnCooperativeKernelLaunchExp =
         driver::urEnqueueCooperativeKernelLaunchExp;
+
+    pDdiTable->pfnTimestampRecordingExp =
+        driver::urEnqueueTimestampRecordingExp;
 
     return result;
 } catch (...) {
