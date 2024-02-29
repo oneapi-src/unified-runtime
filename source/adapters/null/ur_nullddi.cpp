@@ -5501,9 +5501,25 @@ ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
     ///< reports the timestamp at the time of the call to this function.
     ///< Querying `UR_PROFILING_INFO_COMMAND_START` or `UR_PROFILING_INFO_COMMAND_END`
     ///< reports the timestamp recorded when the command is executed on the device.
-) {
+    ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // if the driver has created a custom function, then call it instead of using the generic path
+    auto pfnTimestampRecordingExp =
+        d_context.urDdiTable.EnqueueExp.pfnTimestampRecordingExp;
+    if (nullptr != pfnTimestampRecordingExp) {
+        result = pfnTimestampRecordingExp(hQueue, blocking, numEventsInWaitList,
+                                          phEventWaitList, phEvent);
+    } else {
+        // generic implementation
+        if (nullptr != phEvent) {
+            *phEvent = reinterpret_cast<ur_event_handle_t>(d_context.get());
+        }
+    }
+
     return result;
+} catch (...) {
+    return exceptionToResult(std::current_exception());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

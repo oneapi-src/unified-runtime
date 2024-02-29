@@ -4011,9 +4011,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
 
     // extract platform's function pointer table
     auto dditable = reinterpret_cast<ur_queue_object_t *>(hQueue)->dditable;
-    auto pfnEnqueueTimestampRecordingExp =
-        dditable->ur.EnqueueExp.pfnEnqueueTimestampRecordingExp;
-    if (nullptr == pfnEnqueueTimestampRecordingExp) {
+    auto pfnTimestampRecordingExp =
+        dditable->ur.EnqueueExp.pfnTimestampRecordingExp;
+    if (nullptr == pfnTimestampRecordingExp) {
         return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
@@ -4028,9 +4028,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
             reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
     }
 
-    result =
-        pfnEnqueueTimestampRecordingExp(hQueue, blocking, numEventsInWaitList,
-                                        phEventWaitListLocal.data(), phEvent);
+    result = pfnTimestampRecordingExp(hQueue, blocking, numEventsInWaitList,
+                                      phEventWaitListLocal.data(), phEvent);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;

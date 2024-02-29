@@ -3209,9 +3209,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
                  ///< this particular command instance. This event has
                  ///< profiling info, even if it is not enabled on hQueue.
 ) {
-    auto pfnEnqueueTimestampRecordingExp =
-        context.urDdiTable.Event.pfnEnqueueTimestampRecordingExp;
-    if (nullptr == pfnEnqueueTimestampRecordingExp) {
+    auto pfnTimestampRecordingExp =
+        context.urDdiTable.EnqueueExp.pfnTimestampRecordingExp;
+    if (nullptr == pfnTimestampRecordingExp) {
         return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
@@ -3221,7 +3221,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
         context.notify_begin(UR_FUNCTION_ENQUEUE_TIMESTAMP_RECORDING_EXP,
                              "urEnqueueTimestampRecordingExp", &params);
 
-    ur_result_t result = pfnEnqueueTimestampRecordingExp(
+    ur_result_t result = pfnTimestampRecordingExp(
         hQueue, blocking, numEventsInWaitList, phEventWaitList, phEvent);
 
     context.notify_end(UR_FUNCTION_EVENT_SET_CALLBACK, "urEventSetCallback",

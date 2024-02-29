@@ -123,7 +123,6 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetEventProcAddrTable(
   pDdiTable->pfnGetNativeHandle = urEventGetNativeHandle;
   pDdiTable->pfnCreateWithNativeHandle = urEventCreateWithNativeHandle;
   pDdiTable->pfnSetCallback = urEventSetCallback;
-  pDdiTable->pfnEnqueueTimestampRecordingExp = urEnqueueTimestampRecordingExp;
 
   return retVal;
 }
@@ -454,6 +453,7 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetEnqueueExpProcAddrTable(
 
   pDdiTable->pfnCooperativeKernelLaunchExp =
       urEnqueueCooperativeKernelLaunchExp;
+  pDdiTable->pfnTimestampRecordingExp = urEnqueueTimestampRecordingExp;
 
   return UR_RESULT_SUCCESS;
 }

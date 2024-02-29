@@ -4706,14 +4706,14 @@ ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
                  ///< this particular command instance. This event has
                  ///< profiling info, even if it is not enabled on hQueue.
     ) try {
-    auto pfnEnqueueTimestampRecordingExp =
-        ur_lib::context->urDdiTable.Event.pfnEnqueueTimestampRecordingExp;
-    if (nullptr == pfnEnqueueTimestampRecordingExp) {
+    auto pfnTimestampRecordingExp =
+        ur_lib::context->urDdiTable.EnqueueExp.pfnTimestampRecordingExp;
+    if (nullptr == pfnTimestampRecordingExp) {
         return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
-    return pfnEnqueueTimestampRecordingExp(
-        hQueue, blocking, numEventsInWaitList, phEventWaitList, phEvent);
+    return pfnTimestampRecordingExp(hQueue, blocking, numEventsInWaitList,
+                                    phEventWaitList, phEvent);
 } catch (...) {
     return exceptionToResult(std::current_exception());
 }
