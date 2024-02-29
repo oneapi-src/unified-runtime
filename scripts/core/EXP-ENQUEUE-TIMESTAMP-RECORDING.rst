@@ -40,6 +40,9 @@ Enums
 * ${x}_device_info_t
     * ${X}_DEVICE_INFO_TIMESTAMP_RECORDING_SUPPORT_EXP
 
+* ${x}_command_t
+    * ${X}_COMMAND_TIMESTAMP_RECORDING_EXP
+
 Functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 * ${x}EnqueueTimestampRecordingExp

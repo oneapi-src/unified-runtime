@@ -218,12 +218,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventSetCallback(ur_event_handle_t,
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
-urEnqueueTimestampRecordingExp(ur_queue_handle_t, bool, uint32_t,
-                               const ur_event_handle_t *, ur_event_handle_t *) {
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-}
-
-UR_APIEXPORT ur_result_t UR_APICALL
 urEventWait(uint32_t numEvents, const ur_event_handle_t *phEventWaitList) {
   try {
     auto Context = phEventWaitList[0]->getContext();

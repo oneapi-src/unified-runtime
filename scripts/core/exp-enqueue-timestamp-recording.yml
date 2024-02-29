@@ -22,6 +22,15 @@ etors:
       value: "0x2010"
       desc: "[$x_bool_t] returns true if the device supports timestamp recording"
 --- #--------------------------------------------------------------------------
+type: enum
+extend: true
+desc: "Command Type experimental enumerations."
+name: $x_command_t
+etors:
+    - name: TIMESTAMP_RECORDING_EXP
+      value: "0x2002"
+      desc: Event created by $xEnqueueTimestampRecordingExp
+--- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command for recording the device timestamp"
 class: $xEnqueue

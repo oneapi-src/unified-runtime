@@ -8664,6 +8664,9 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_command_t value) {
     case UR_COMMAND_INTEROP_SEMAPHORE_SIGNAL_EXP:
         os << "UR_COMMAND_INTEROP_SEMAPHORE_SIGNAL_EXP";
         break;
+    case UR_COMMAND_TIMESTAMP_RECORDING_EXP:
+        os << "UR_COMMAND_TIMESTAMP_RECORDING_EXP";
+        break;
     default:
         os << "unknown enumerator";
         break;
