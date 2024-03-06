@@ -20,11 +20,14 @@ target_include_directories(ur_common PUBLIC
 )
 
 message(STATUS "Download Unified Memory Framework from github.com")
+if (NOT DEFINED UMF_REPO)
+    set(UMF_REPO "https://github.com/oneapi-src/unified-memory-framework.git")
+endif()
 
-set(UMF_REPO "https://github.com/oneapi-src/unified-memory-framework.git")
-
-# Merge pull request #119 from ldorau/Fix_arena_extent_split_and_arena_extent_merge
-set(UMF_TAG 9bf7a0dc4dff76844e10edbb5c6e9d917536ef6d)
+if (NOT DEFINED UMF_TAG)
+    # Merge pull request #119 from ldorau/Fix_arena_extent_split_and_arena_extent_merge
+    set(UMF_TAG 9bf7a0dc4dff76844e10edbb5c6e9d917536ef6d)
+endif()
 
 message(STATUS "Will fetch Unified Memory Framework from ${UMF_REPO}")
 
@@ -34,6 +37,11 @@ FetchContent_Declare(unified-memory-framework
     GIT_TAG           ${UMF_TAG}
 )
 
+if(UR_BUILD_TESTS)
+    set(UMF_BUILD_TESTS ON CACHE INTERNAL "Build UMF tests")
+else()
+    set(UMF_BUILD_TESTS OFF CACHE INTERNAL "Build UMF tests")
+endif()
 set(UMF_BUILD_LIBUMF_POOL_DISJOINT ON CACHE INTERNAL "Build Disjoint Pool")
 set(UMF_BUILD_OS_MEMORY_PROVIDER OFF CACHE INTERNAL "Build OS Provider")
 
@@ -47,3 +55,10 @@ target_link_libraries(ur_common PUBLIC
     ${CMAKE_DL_LIBS}
     ${PROJECT_NAME}::headers
 )
+
+if (UNIX)
+    set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+    set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+    find_package(Threads REQUIRED)
+    target_link_libraries(ur_common PUBLIC Threads::Threads)
+endif()

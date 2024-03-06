@@ -574,9 +574,12 @@ etors:
 - name: COMMAND_BUFFER_COMMAND_GET_INFO_EXP
   desc: Enumerator for $xCommandBufferCommandGetInfoExp
   value: '219'
+- name: DEVICE_GET_SELECTED
+  desc: Enumerator for $xDeviceGetSelected
+  value: '220'
 - name: EVENT_GET_SYNC_POINT_PROFILING_INFO_EXP
   desc: Enumerator for $xEventGetSyncPointProfilingInfoExp
-  value: '220'
+  value: '221'
 ---
 type: enum
 desc: Defines structure types
