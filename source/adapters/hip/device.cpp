@@ -758,7 +758,23 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
 #endif
     return ReturnValue(Capabilities);
   }
-  case UR_DEVICE_INFO_ATOMIC_MEMORY_SCOPE_CAPABILITIES:
+  case UR_DEVICE_INFO_ATOMIC_MEMORY_SCOPE_CAPABILITIES: {
+    uint64_t Capabilities = UR_MEMORY_SCOPE_CAPABILITY_FLAG_WORK_ITEM |
+                            UR_MEMORY_SCOPE_CAPABILITY_FLAG_SUB_GROUP |
+                            UR_MEMORY_SCOPE_CAPABILITY_FLAG_WORK_GROUP |
+                            UR_MEMORY_SCOPE_CAPABILITY_FLAG_DEVICE;
+#if __HIP_PLATFORM_NVIDIA__
+    // Nvidia introduced fence.sc for seq_cst only since SM 7.0.
+    int Major = 0;
+    UR_CHECK_ERROR(hipDeviceGetAttribute(
+        &Major, hipDeviceAttributeComputeCapabilityMajor, hDevice->get()));
+    if (Major >= 7)
+      Capabilities |= UR_MEMORY_SCOPE_CAPABILITY_FLAG_SYSTEM;
+#else
+    Capabilities |= UR_MEMORY_SCOPE_CAPABILITY_FLAG_SYSTEM;
+#endif
+    return ReturnValue(Capabilities);
+  }
   case UR_DEVICE_INFO_ATOMIC_FENCE_SCOPE_CAPABILITIES: {
     // SYCL2020 4.6.4.2 minimum mandated capabilities for
     // atomic_fence/memory_scope_capabilities.
