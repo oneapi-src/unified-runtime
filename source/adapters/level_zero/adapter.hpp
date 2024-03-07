@@ -25,4 +25,4 @@ struct ur_adapter_handle_t_ {
   ZeCache<Result<PlatformVec>> PlatformCache;
 };
 
-extern ur_adapter_handle_t_ Adapter;
+ur_adapter_handle_t getAdapter(bool initIfNull = true);

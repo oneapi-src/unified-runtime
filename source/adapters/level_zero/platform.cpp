@@ -27,9 +27,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urPlatformGet(
     uint32_t *NumPlatforms ///< [out][optional] returns the total number of
                            ///< platforms available.
 ) {
+  auto Adapter = getAdapter();
+
   // Platform handles are cached for reuse. This is to ensure consistent
   // handle pointers across invocations and to improve retrieval performance.
-  if (const auto *cached_platforms = Adapter.PlatformCache->get_value();
+  if (const auto *cached_platforms = Adapter->PlatformCache->get_value();
       cached_platforms) {
     uint32_t nplatforms = (uint32_t)cached_platforms->size();
     if (NumPlatforms) {
@@ -41,7 +43,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPlatformGet(
       }
     }
   } else {
-    return Adapter.PlatformCache->get_error();
+    return Adapter->PlatformCache->get_error();
   }
 
   return UR_RESULT_SUCCESS;
@@ -133,7 +135,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
   auto ZeDriver = ur_cast<ze_driver_handle_t>(NativePlatform);
 
   uint32_t NumPlatforms = 0;
-  ur_adapter_handle_t AdapterHandle = &Adapter;
+  ur_adapter_handle_t AdapterHandle = getAdapter();
   UR_CALL(urPlatformGet(&AdapterHandle, 1, 0, nullptr, &NumPlatforms));
 
   if (NumPlatforms) {

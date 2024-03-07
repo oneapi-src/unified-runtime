@@ -1441,8 +1441,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
   // "NativeHandle" must already be in the cache. If it is not, this must not be
   // a valid Level Zero device.
 
+  auto Adapter = getAdapter();
+
   ur_device_handle_t Dev = nullptr;
-  if (const auto *platforms = Adapter.PlatformCache->get_value()) {
+  if (const auto *platforms = Adapter->PlatformCache->get_value()) {
     for (const auto &p : *platforms) {
       Dev = p->getDeviceFromNativeHandle(ZeDevice);
       if (Dev) {
@@ -1453,7 +1455,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
       }
     }
   } else {
-    return Adapter.PlatformCache->get_error();
+    return Adapter->PlatformCache->get_error();
   }
 
   if (Dev == nullptr)
