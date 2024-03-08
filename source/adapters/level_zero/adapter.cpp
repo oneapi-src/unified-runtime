@@ -11,6 +11,14 @@
 #include "adapter.hpp"
 #include "ur_level_zero.hpp"
 
+// Due to multiple DLLMain definitions with SYCL, Global Adapter is init at
+// variable creation.
+#if defined(_WIN32)
+ur_adapter_handle_t_ *GlobalAdapter = new ur_adapter_handle_t_();
+#else
+ur_adapter_handle_t_ *GlobalAdapter;
+#endif
+
 UR_APIEXPORT ur_result_t UR_APICALL
 urInit(ur_device_init_flags_t
            DeviceFlags, ///< [in] device initialization flags.
@@ -48,8 +56,7 @@ ur_result_t initPlatforms(PlatformVec &platforms) noexcept try {
 ur_result_t adapterStateInit() { return UR_RESULT_SUCCESS; }
 
 ur_adapter_handle_t_::ur_adapter_handle_t_() {
-
-  Adapter.PlatformCache.Compute = [](Result<PlatformVec> &result) {
+  PlatformCache.Compute = [](Result<PlatformVec> &result) {
     static std::once_flag ZeCallCountInitialized;
     try {
       std::call_once(ZeCallCountInitialized, []() {
@@ -63,7 +70,7 @@ ur_adapter_handle_t_::ur_adapter_handle_t_() {
     }
 
     // initialize level zero only once.
-    if (Adapter.ZeResult == std::nullopt) {
+    if (GlobalAdapter->ZeResult == std::nullopt) {
       // Setting these environment variables before running zeInit will enable
       // the validation layer in the Level Zero loader.
       if (UrL0Debug & UR_L0_DEBUG_VALIDATION) {
@@ -82,20 +89,21 @@ ur_adapter_handle_t_::ur_adapter_handle_t_() {
       // We must only initialize the driver once, even if urPlatformGet() is
       // called multiple times.  Declaring the return value as "static" ensures
       // it's only called once.
-      Adapter.ZeResult = ZE_CALL_NOCHECK(zeInit, (ZE_INIT_FLAG_GPU_ONLY));
+      GlobalAdapter->ZeResult =
+          ZE_CALL_NOCHECK(zeInit, (ZE_INIT_FLAG_GPU_ONLY));
     }
-    assert(Adapter.ZeResult !=
+    assert(GlobalAdapter->ZeResult !=
            std::nullopt); // verify that level-zero is initialized
     PlatformVec platforms;
 
     // Absorb the ZE_RESULT_ERROR_UNINITIALIZED and just return 0 Platforms.
-    if (*Adapter.ZeResult == ZE_RESULT_ERROR_UNINITIALIZED) {
+    if (*GlobalAdapter->ZeResult == ZE_RESULT_ERROR_UNINITIALIZED) {
       result = std::move(platforms);
       return;
     }
-    if (*Adapter.ZeResult != ZE_RESULT_SUCCESS) {
+    if (*GlobalAdapter->ZeResult != ZE_RESULT_SUCCESS) {
       urPrint("zeInit: Level Zero initialization failure\n");
-      result = ze2urResult(*Adapter.ZeResult);
+      result = ze2urResult(*GlobalAdapter->ZeResult);
       return;
     }
 
@@ -108,7 +116,11 @@ ur_adapter_handle_t_::ur_adapter_handle_t_() {
   };
 }
 
-ur_adapter_handle_t_ Adapter{};
+void globalAdapterOnDemandCleanup() {
+  if (GlobalAdapter) {
+    delete GlobalAdapter;
+  }
+}
 
 ur_result_t adapterStateTeardown() {
   bool LeakFound = false;
@@ -195,6 +207,11 @@ ur_result_t adapterStateTeardown() {
   }
   if (LeakFound)
     return UR_RESULT_ERROR_INVALID_MEM_OBJECT;
+    // Due to multiple DLLMain definitions with SYCL, register to cleanup the
+    // Global Adapter after refcnt is 0
+#if defined(_WIN32)
+  std::atexit(globalAdapterOnDemandCleanup);
+#endif
 
   return UR_RESULT_SUCCESS;
 }
@@ -221,11 +238,23 @@ UR_APIEXPORT ur_result_t UR_APICALL urAdapterGet(
                           ///< adapters available.
 ) {
   if (NumEntries > 0 && Adapters) {
-    std::lock_guard<std::mutex> Lock{Adapter.Mutex};
-    if (Adapter.RefCount++ == 0) {
-      adapterStateInit();
+    if (GlobalAdapter) {
+      std::lock_guard<std::mutex> Lock{GlobalAdapter->Mutex};
+      if (GlobalAdapter->RefCount++ == 0) {
+        adapterStateInit();
+      }
+    } else {
+      // If the GetAdapter is called after the Library began or was torndown,
+      // then temporarily create a new Adapter handle and register a new
+      // cleanup.
+      GlobalAdapter = new ur_adapter_handle_t_();
+      std::lock_guard<std::mutex> Lock{GlobalAdapter->Mutex};
+      if (GlobalAdapter->RefCount++ == 0) {
+        adapterStateInit();
+      }
+      std::atexit(globalAdapterOnDemandCleanup);
     }
-    *Adapters = &Adapter;
+    *Adapters = GlobalAdapter;
   }
 
   if (NumAdapters) {
@@ -236,17 +265,22 @@ UR_APIEXPORT ur_result_t UR_APICALL urAdapterGet(
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urAdapterRelease(ur_adapter_handle_t) {
-  std::lock_guard<std::mutex> Lock{Adapter.Mutex};
-  if (--Adapter.RefCount == 0) {
-    return adapterStateTeardown();
+  // Check first if the Adapter pointer is valid
+  if (GlobalAdapter) {
+    std::lock_guard<std::mutex> Lock{GlobalAdapter->Mutex};
+    if (--GlobalAdapter->RefCount == 0) {
+      return adapterStateTeardown();
+    }
   }
 
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urAdapterRetain(ur_adapter_handle_t) {
-  std::lock_guard<std::mutex> Lock{Adapter.Mutex};
-  Adapter.RefCount++;
+  if (GlobalAdapter) {
+    std::lock_guard<std::mutex> Lock{GlobalAdapter->Mutex};
+    GlobalAdapter->RefCount++;
+  }
 
   return UR_RESULT_SUCCESS;
 }
@@ -275,7 +309,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urAdapterGetInfo(ur_adapter_handle_t,
   case UR_ADAPTER_INFO_BACKEND:
     return ReturnValue(UR_ADAPTER_BACKEND_LEVEL_ZERO);
   case UR_ADAPTER_INFO_REFERENCE_COUNT:
-    return ReturnValue(Adapter.RefCount.load());
+    return ReturnValue(GlobalAdapter->RefCount.load());
   default:
     return UR_RESULT_ERROR_INVALID_ENUMERATION;
   }
