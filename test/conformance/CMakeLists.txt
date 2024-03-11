@@ -119,6 +119,7 @@ if(UR_DPCXX)
     add_subdirectory(kernel)
     add_subdirectory(program)
     add_subdirectory(enqueue)
+    add_subdirectory(integration)
     add_subdirectory(exp_command_buffer)
 else()
     message(WARNING
