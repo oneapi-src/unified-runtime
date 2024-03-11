@@ -1,9 +1,9 @@
 name: Nightly
 
-on:
-  schedule:
+on: [push, pull_request]
+  # schedule:
     # Run every day at 23:00 UTC
-    - cron: '0 23 * * *'
+    # - cron: '0 23 * * *'
 
 permissions:
   contents: read
