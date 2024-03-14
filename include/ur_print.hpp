@@ -1663,8 +1663,8 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_device_init_flag_t val
     case UR_DEVICE_INIT_FLAG_MCA:
         os << "UR_DEVICE_INIT_FLAG_MCA";
         break;
-    case UR_DEVICE_INIT_FLAG_VPU:
-        os << "UR_DEVICE_INIT_FLAG_VPU";
+    case UR_DEVICE_INIT_FLAG_NPU:
+        os << "UR_DEVICE_INIT_FLAG_NPU";
         break;
     default:
         os << "unknown enumerator";
@@ -1721,14 +1721,14 @@ inline ur_result_t printFlag<ur_device_init_flag_t>(std::ostream &os, uint32_t f
         os << UR_DEVICE_INIT_FLAG_MCA;
     }
 
-    if ((val & UR_DEVICE_INIT_FLAG_VPU) == (uint32_t)UR_DEVICE_INIT_FLAG_VPU) {
-        val ^= (uint32_t)UR_DEVICE_INIT_FLAG_VPU;
+    if ((val & UR_DEVICE_INIT_FLAG_NPU) == (uint32_t)UR_DEVICE_INIT_FLAG_NPU) {
+        val ^= (uint32_t)UR_DEVICE_INIT_FLAG_NPU;
         if (!first) {
             os << " | ";
         } else {
             first = false;
         }
-        os << UR_DEVICE_INIT_FLAG_VPU;
+        os << UR_DEVICE_INIT_FLAG_NPU;
     }
     if (val != 0) {
         std::bitset<32> bits(val);
@@ -2114,8 +2114,8 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_device_type_t value) {
     case UR_DEVICE_TYPE_MCA:
         os << "UR_DEVICE_TYPE_MCA";
         break;
-    case UR_DEVICE_TYPE_VPU:
-        os << "UR_DEVICE_TYPE_VPU";
+    case UR_DEVICE_TYPE_NPU:
+        os << "UR_DEVICE_TYPE_NPU";
         break;
     default:
         os << "unknown enumerator";

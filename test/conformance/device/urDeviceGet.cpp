@@ -48,7 +48,7 @@ INSTANTIATE_TEST_SUITE_P(
     , urDeviceGetTestWithDeviceTypeParam,
     ::testing::Values(UR_DEVICE_TYPE_DEFAULT, UR_DEVICE_TYPE_GPU,
                       UR_DEVICE_TYPE_CPU, UR_DEVICE_TYPE_FPGA,
-                      UR_DEVICE_TYPE_MCA, UR_DEVICE_TYPE_VPU),
+                      UR_DEVICE_TYPE_MCA, UR_DEVICE_TYPE_NPU),
     [](const ::testing::TestParamInfo<ur_device_type_t> &info) {
         std::stringstream ss;
         ss << info.param;

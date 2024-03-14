@@ -11,10 +11,10 @@ INSTANTIATE_TEST_SUITE_P(
     , urLoaderInitTestWithParam,
     ::testing::Values(UR_DEVICE_INIT_FLAG_GPU, UR_DEVICE_INIT_FLAG_CPU,
                       UR_DEVICE_INIT_FLAG_FPGA, UR_DEVICE_INIT_FLAG_MCA,
-                      UR_DEVICE_INIT_FLAG_VPU,
+                      UR_DEVICE_INIT_FLAG_NPU,
                       /* Combinations */
                       UR_DEVICE_INIT_FLAG_GPU | UR_DEVICE_INIT_FLAG_CPU,
-                      UR_DEVICE_INIT_FLAG_FPGA | UR_DEVICE_INIT_FLAG_VPU),
+                      UR_DEVICE_INIT_FLAG_FPGA | UR_DEVICE_INIT_FLAG_NPU),
     [](const ::testing::TestParamInfo<ur_device_init_flags_t> &info) {
         std::stringstream ss;
         ur::details::printFlag<ur_device_init_flag_t>(ss, info.param);

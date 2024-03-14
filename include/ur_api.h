@@ -551,7 +551,7 @@ typedef enum ur_device_init_flag_t {
     UR_DEVICE_INIT_FLAG_CPU = UR_BIT(1),  ///< initialize CPU device adapters.
     UR_DEVICE_INIT_FLAG_FPGA = UR_BIT(2), ///< initialize FPGA device adapters.
     UR_DEVICE_INIT_FLAG_MCA = UR_BIT(3),  ///< initialize MCA device adapters.
-    UR_DEVICE_INIT_FLAG_VPU = UR_BIT(4),  ///< initialize VPU device adapters.
+    UR_DEVICE_INIT_FLAG_NPU = UR_BIT(4),  ///< initialize NPU device adapters.
     /// @cond
     UR_DEVICE_INIT_FLAG_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -1334,7 +1334,7 @@ typedef enum ur_device_type_t {
     UR_DEVICE_TYPE_CPU = 4,     ///< Central Processing Unit
     UR_DEVICE_TYPE_FPGA = 5,    ///< Field Programmable Gate Array
     UR_DEVICE_TYPE_MCA = 6,     ///< Memory Copy Accelerator
-    UR_DEVICE_TYPE_VPU = 7,     ///< Vision Processing Unit
+    UR_DEVICE_TYPE_NPU = 7,     ///< Neural Processing Unit
     /// @cond
     UR_DEVICE_TYPE_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -1367,7 +1367,7 @@ typedef enum ur_device_type_t {
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hPlatform`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_DEVICE_TYPE_VPU < DeviceType`
+///         + `::UR_DEVICE_TYPE_NPU < DeviceType`
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         + `NumEntries == 0 && phDevices != NULL`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
@@ -1410,7 +1410,7 @@ urDeviceGet(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hPlatform`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_DEVICE_TYPE_VPU < DeviceType`
+///         + `::UR_DEVICE_TYPE_NPU < DeviceType`
 ///     - ::UR_RESULT_ERROR_INVALID_VALUE
 UR_APIEXPORT ur_result_t UR_APICALL
 urDeviceGetSelected(
