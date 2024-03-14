@@ -353,10 +353,10 @@ int ur_program_create_with_il(TestState &state) {
     }
 
     std::vector<char> il_bin;
-    ur_program_handle_t program = nullptr;
-    ur_kernel_handle_t kernel = nullptr;
-    ur_queue_handle_t queue = nullptr;
-    ur_event_handle_t event = nullptr;
+    ur_program_handle_t program;
+    ur_kernel_handle_t kernel;
+    ur_queue_handle_t queue;
+    ur_event_handle_t event;
     auto &context = state.contexts[state.context_num]->handle;
     auto &device = state.devices[state.device_num];
     std::string kernel_name =
