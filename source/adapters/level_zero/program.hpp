@@ -10,6 +10,7 @@
 #pragma once
 
 #include "common.hpp"
+#include "ur_api.h"
 
 struct ur_program_handle_t_ : _ur_object {
   // ur_program_handle_t_() {}
@@ -147,4 +148,7 @@ struct ur_program_handle_t_ : _ur_object {
   // Program has been built.
   std::unordered_map<ze_device_handle_t, ze_module_build_log_handle_t>
       ZeBuildLogMap;
+
+  // Device handle provided at creation time with urProgramCreateWithBinary.
+  ur_device_handle_t BinaryDeviceHandle = nullptr;
 };
