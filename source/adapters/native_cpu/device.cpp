@@ -114,6 +114,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     // '0x8086' : 'Intel HD graphics vendor ID'
     return ReturnValue(uint32_t{0x8086});
   case UR_DEVICE_INFO_MAX_WORK_GROUP_SIZE:
+    // TODO: provide a mechanism to estimate/configure this.
     return ReturnValue(size_t{2048});
   case UR_DEVICE_INFO_MEM_BASE_ADDR_ALIGN:
     // Imported from level_zero

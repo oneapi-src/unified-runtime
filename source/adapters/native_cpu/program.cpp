@@ -28,7 +28,7 @@ urProgramCreateWithIL(ur_context_handle_t hContext, const void *pIL,
 }
 
 // TODO: taken from CUDA adapter, move this to a common header?
-std::pair<std::string, std::string>
+static std::pair<std::string, std::string>
 splitMetadataName(const std::string &metadataName) {
   size_t splitPos = metadataName.rfind('@');
   if (splitPos == std::string::npos)
@@ -37,7 +37,7 @@ splitMetadataName(const std::string &metadataName) {
                         metadataName.substr(splitPos, metadataName.length()));
 }
 
-ur_result_t getReqdWGSize(const ur_program_metadata_t &MetadataElement,
+static ur_result_t getReqdWGSize(const ur_program_metadata_t &MetadataElement,
                           std::tuple<uint32_t, uint32_t, uint32_t> &res) {
   size_t MDElemsSize = MetadataElement.size - sizeof(std::uint64_t);
 

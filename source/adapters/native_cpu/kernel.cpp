@@ -33,7 +33,7 @@ urKernelCreate(ur_program_handle_t hProgram, const char *pKernelName,
   // Set reqd_work_group_size for kernel if needed
   const auto &ReqdMap = hProgram->KernelReqdWorkGroupSizeMD;
   auto ReqdIt = ReqdMap.find(pKernelName);
-  if (ReqdIt != ReqdMap.end()) {
+  if (kernel && ReqdIt != ReqdMap.end()) {
     auto ReqdWGSize = ReqdIt->second;
     kernel->ReqdWGSize[0] = std::get<0>(ReqdWGSize);
     kernel->ReqdWGSize[1] = std::get<1>(ReqdWGSize);
