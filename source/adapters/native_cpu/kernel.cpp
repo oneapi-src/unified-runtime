@@ -31,7 +31,7 @@ urKernelCreate(ur_program_handle_t hProgram, const char *pKernelName,
   auto kernel = new ur_kernel_handle_t_(hProgram, pKernelName, *f);
 
   // Set reqd_work_group_size for kernel if needed
-  const auto& ReqdMap = hProgram->KernelReqdWorkGroupSizeMD;
+  const auto &ReqdMap = hProgram->KernelReqdWorkGroupSizeMD;
   auto ReqdIt = ReqdMap.find(pKernelName);
   if (ReqdIt != ReqdMap.end()) {
     auto ReqdWGSize = ReqdIt->second;
@@ -40,7 +40,6 @@ urKernelCreate(ur_program_handle_t hProgram, const char *pKernelName,
     kernel->ReqdWGSize[2] = std::get<2>(ReqdWGSize);
     kernel->HasReqdWGSize = true;
   }
-   
 
   *phKernel = kernel;
 
@@ -128,8 +127,7 @@ urKernelGetGroupInfo(ur_kernel_handle_t hKernel, ur_device_handle_t hDevice,
   }
   case UR_KERNEL_GROUP_INFO_COMPILE_WORK_GROUP_SIZE: {
     size_t GroupSize[3] = {0, 0, 0};
-    const auto &ReqdWGSizeMDMap =
-        hKernel->hProgram->KernelReqdWorkGroupSizeMD;
+    const auto &ReqdWGSizeMDMap = hKernel->hProgram->KernelReqdWorkGroupSizeMD;
     const auto ReqdWGSizeMD = ReqdWGSizeMDMap.find(hKernel->_name);
     if (ReqdWGSizeMD != ReqdWGSizeMDMap.end()) {
       const auto ReqdWGSize = ReqdWGSizeMD->second;
