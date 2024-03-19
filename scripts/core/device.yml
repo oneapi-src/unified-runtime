@@ -103,8 +103,8 @@ etors:
       desc: "Field Programmable Gate Array"
     - name: MCA
       desc: "Memory Copy Accelerator"
-    - name: VPU
-      desc: "Vision Processing Unit"
+    - name: NPU
+      desc: "Neural Processing Unit"
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Retrieves devices within a platform"

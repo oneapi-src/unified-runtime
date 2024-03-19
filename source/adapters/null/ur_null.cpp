@@ -105,7 +105,7 @@ context_t::context_t() {
             if (hPlatform == nullptr) {
                 return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
             }
-            if (UR_DEVICE_TYPE_VPU < DevicesType) {
+            if (UR_DEVICE_TYPE_NPU < DevicesType) {
                 return UR_RESULT_ERROR_INVALID_ENUMERATION;
             }
             if (phDevices != nullptr && NumEntries != 1) {

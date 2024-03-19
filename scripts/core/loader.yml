@@ -25,8 +25,8 @@ etors:
       desc: "initialize FPGA device adapters."
     - name: MCA
       desc: "initialize MCA device adapters."
-    - name: VPU
-      desc: "initialize VPU device adapters."
+    - name: NPU
+      desc: "initialize NPU device adapters."
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Create a loader config object."

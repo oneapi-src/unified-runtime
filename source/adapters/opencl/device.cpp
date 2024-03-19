@@ -71,7 +71,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGet(ur_platform_handle_t hPlatform,
     break;
   case UR_DEVICE_TYPE_FPGA:
   case UR_DEVICE_TYPE_MCA:
-  case UR_DEVICE_TYPE_VPU:
+  case UR_DEVICE_TYPE_NPU:
     Type = CL_DEVICE_TYPE_ACCELERATOR;
     break;
   case UR_DEVICE_TYPE_DEFAULT:
@@ -329,7 +329,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
         clGetDeviceInfo(cl_adapter::cast<cl_device_id>(hDevice), CLPropName,
                         sizeof(cl_device_type), &CLType, nullptr));
 
-    /* TODO UR: If the device is an Accelerator (FPGA, VPU, etc.), there is not
+    /* TODO UR: If the device is an Accelerator (FPGA, NPU, etc.), there is not
      * enough information in the OpenCL runtime to know exactly which type it
      * is. Assuming FPGA for now */
     /* TODO UR: In OpenCL, a device can have multiple types (e.g. CPU and GPU).
