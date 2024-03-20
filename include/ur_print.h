@@ -267,6 +267,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintMemoryScopeCapabilityFlags(enum ur_me
 UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceUsmAccessCapabilityFlags(enum ur_device_usm_access_capability_flag_t value, char *buffer, const size_t buff_size, size_t *out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Print ur_device_pci_address_t struct
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_INVALID_SIZE
+///         - `buff_size < out_size`
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDevicePciAddress(const struct ur_device_pci_address_t params, char *buffer, const size_t buff_size, size_t *out_size);
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_context_flag_t enum
 /// @returns
 ///     - ::UR_RESULT_SUCCESS

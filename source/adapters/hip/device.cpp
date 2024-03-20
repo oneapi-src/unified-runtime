@@ -806,18 +806,22 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_IMAGE_SRGB:
     return ReturnValue(false);
   case UR_DEVICE_INFO_PCI_ADDRESS: {
-    constexpr size_t AddressBufferSize = 13;
-    char AddressBuffer[AddressBufferSize];
-    UR_CHECK_ERROR(
-        hipDeviceGetPCIBusId(AddressBuffer, AddressBufferSize, hDevice->get()));
-    // A typical PCI address is 12 bytes + \0: "1234:67:90.2", but the HIP API
-    // is not guaranteed to use this format. In practice, it uses this format,
-    // at least in 5.3-5.5. To be on the safe side, we make sure the terminating
-    // \0 is set.
-    AddressBuffer[AddressBufferSize - 1] = '\0';
-    detail::ur::assertion(strnlen(AddressBuffer, AddressBufferSize) > 0);
-    return ReturnValue(AddressBuffer,
-                       strnlen(AddressBuffer, AddressBufferSize - 1) + 1);
+    int PciDomainId;
+    UR_CHECK_ERROR(hipDeviceGetAttribute(
+        &PciDomainId, hipDeviceAttributePciDomainID, hDevice->get()));
+    int PciBusId;
+    UR_CHECK_ERROR(hipDeviceGetAttribute(&PciBusId, hipDeviceAttributePciBusId,
+                                         hDevice->get()));
+    int PciDeviceId;
+    UR_CHECK_ERROR(hipDeviceGetAttribute(
+        &PciDeviceId, hipDeviceAttributePciDeviceId, hDevice->get()));
+    ur_device_pci_address_t PciAddr{
+        /*.domain = */ static_cast<uint32_t>(PciDomainId),
+        /*.bus = */ static_cast<uint32_t>(PciBusId),
+        /*.device = */ static_cast<uint32_t>(PciDeviceId),
+        /*.function = */ 0u,
+    };
+    return ReturnValue(PciAddr);
   }
   case UR_DEVICE_INFO_HOST_PIPE_READ_WRITE_SUPPORTED:
     return ReturnValue(false);
