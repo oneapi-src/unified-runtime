@@ -38,7 +38,7 @@ splitMetadataName(const std::string &metadataName) {
 }
 
 static ur_result_t getReqdWGSize(const ur_program_metadata_t &MetadataElement,
-                          std::tuple<uint32_t, uint32_t, uint32_t> &res) {
+                                 native_cpu::ReqdWGSize_t &res) {
   size_t MDElemsSize = MetadataElement.size - sizeof(std::uint64_t);
 
   // Expect between 1 and 3 32-bit integer values.
@@ -79,7 +79,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
       std::string mdName(mdNode.pName);
       auto [Prefix, Tag] = splitMetadataName(mdName);
       if (Tag == __SYCL_UR_PROGRAM_METADATA_TAG_REQD_WORK_GROUP_SIZE) {
-        std::tuple<uint32_t, uint32_t, uint32_t> reqdWGSize;
+        native_cpu::ReqdWGSize_t reqdWGSize;
         getReqdWGSize(mdNode, reqdWGSize);
         hProgram->KernelReqdWorkGroupSizeMD[Prefix] = reqdWGSize;
       }

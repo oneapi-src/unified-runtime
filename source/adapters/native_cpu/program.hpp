@@ -15,6 +15,10 @@
 #include "context.hpp"
 #include <map>
 
+namespace native_cpu {
+using ReqdWGSize_t = std::array<uint32_t, 3>;
+}
+
 struct ur_program_handle_t_ : RefCounted {
   ur_program_handle_t_(ur_context_handle_t ctx, const unsigned char *pBinary)
       : _ctx{ctx}, _ptr{pBinary} {}
@@ -30,7 +34,7 @@ struct ur_program_handle_t_ : RefCounted {
   };
 
   std::map<const char *, const unsigned char *, _compare> _kernels;
-  std::unordered_map<std::string, std::tuple<uint32_t, uint32_t, uint32_t>>
+  std::unordered_map<std::string, native_cpu::ReqdWGSize_t>
       KernelReqdWorkGroupSizeMD;
 };
 

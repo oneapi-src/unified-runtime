@@ -46,13 +46,17 @@ struct ur_kernel_handle_t_ : RefCounted {
       : hProgram(hProgram), _name{name}, _subhandler{std::move(subhandler)},
         HasReqdWGSize(false) {}
 
+  ur_kernel_handle_t_(ur_program_handle_t hProgram, const char *name,
+                      nativecpu_task_t subhandler,
+                      const native_cpu::ReqdWGSize_t &ReqdWGSize)
+      : hProgram(hProgram), _name{name}, _subhandler{std::move(subhandler)},
+        HasReqdWGSize(true), ReqdWGSize(ReqdWGSize) {}
+
   ur_program_handle_t hProgram;
   std::string _name;
   nativecpu_task_t _subhandler;
   std::vector<native_cpu::NativeCPUArgDesc> _args;
   std::vector<local_arg_info_t> _localArgInfo;
-  bool HasReqdWGSize;
-  std::array<uint32_t, 3> ReqdWGSize;
 
   // To be called before enqueing the kernel.
   void handleLocalArgs() {
@@ -73,6 +77,10 @@ struct ur_kernel_handle_t_ : RefCounted {
       free(_localMemPool);
     }
   }
+
+  bool hasReqdWGSize() { return HasReqdWGSize; }
+
+  const native_cpu::ReqdWGSize_t &getReqdWGSize() { return ReqdWGSize; }
 
 private:
   void updateMemPool() {
@@ -95,4 +103,6 @@ private:
   }
   void *_localMemPool = nullptr;
   size_t _localMemPoolSize = 0;
+  bool HasReqdWGSize;
+  native_cpu::ReqdWGSize_t ReqdWGSize;
 };

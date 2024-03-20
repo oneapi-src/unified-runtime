@@ -28,17 +28,15 @@ urKernelCreate(ur_program_handle_t hProgram, const char *pKernelName,
 
   auto f = reinterpret_cast<nativecpu_ptr_t>(
       const_cast<unsigned char *>(kernelEntry->second));
-  auto kernel = new ur_kernel_handle_t_(hProgram, pKernelName, *f);
+  ur_kernel_handle_t_ *kernel;
 
   // Set reqd_work_group_size for kernel if needed
   const auto &ReqdMap = hProgram->KernelReqdWorkGroupSizeMD;
   auto ReqdIt = ReqdMap.find(pKernelName);
-  if (kernel && ReqdIt != ReqdMap.end()) {
-    auto ReqdWGSize = ReqdIt->second;
-    kernel->ReqdWGSize[0] = std::get<0>(ReqdWGSize);
-    kernel->ReqdWGSize[1] = std::get<1>(ReqdWGSize);
-    kernel->ReqdWGSize[2] = std::get<2>(ReqdWGSize);
-    kernel->HasReqdWGSize = true;
+  if (ReqdIt != ReqdMap.end()) {
+    kernel = new ur_kernel_handle_t_(hProgram, pKernelName, *f, ReqdIt->second);
+  } else {
+    kernel = new ur_kernel_handle_t_(hProgram, pKernelName, *f);
   }
 
   *phKernel = kernel;

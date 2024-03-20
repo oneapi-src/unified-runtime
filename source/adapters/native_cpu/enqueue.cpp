@@ -60,8 +60,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
   }
 
   // Check reqd_work_group_size
-  if (hKernel->HasReqdWGSize && pLocalWorkSize != nullptr) {
-    const auto &Reqd = hKernel->ReqdWGSize;
+  if (hKernel->hasReqdWGSize() && pLocalWorkSize != nullptr) {
+    const auto &Reqd = hKernel->getReqdWGSize();
     for (uint32_t Dim = 0; Dim < workDim; Dim++) {
       if (pLocalWorkSize[Dim] != Reqd[Dim]) {
         return UR_RESULT_ERROR_INVALID_WORK_GROUP_SIZE;
