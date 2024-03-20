@@ -904,7 +904,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   }
 
   case UR_DEVICE_INFO_COMMAND_BUFFER_SUPPORT_EXP: {
-    cl_device_id Dev = cl_adapter::cast<cl_device_id>(hDevice);
+    cl_device_id Dev = hDevice->get();
     size_t ExtSize = 0;
     CL_RETURN_ON_FAILURE(
         clGetDeviceInfo(Dev, CL_DEVICE_EXTENSIONS, 0, nullptr, &ExtSize));

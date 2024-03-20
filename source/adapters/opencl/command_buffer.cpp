@@ -396,7 +396,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferGetInfoExp(
     ur_exp_command_buffer_info_t propName, size_t propSize, void *pPropValue,
     size_t *pPropSizeRet) {
 
-  cl_context CLContext = cl_adapter::cast<cl_context>(hCommandBuffer->hContext);
+  cl_context CLContext = hCommandBuffer->hContext->get();
   cl_ext::clGetCommandBufferInfoKHR_fn clGetCommandBufferInfoKHR = nullptr;
   cl_int Res =
       cl_ext::getExtFuncFromContext<decltype(clGetCommandBufferInfoKHR)>(
