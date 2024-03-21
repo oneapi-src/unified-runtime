@@ -1401,7 +1401,7 @@ struct urGlobalVariableTest : uur::urKernelExecutionTest {
     void SetUp() override {
 
         program_name = "device_global";
-        global_var = {"_Z7dev_var", 0};
+        global_var = {"dev_var", 0};
 
         /* Some adapters cannot use the mangled variable name directly.
          * Instead, in order to map the mangled variable to the internal name,
