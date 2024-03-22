@@ -377,3 +377,8 @@ urKernelSetArgSampler(ur_kernel_handle_t hKernel, uint32_t argIndex,
   }
   return Result;
 }
+
+UR_APIEXPORT ur_result_t UR_APICALL urKernelSetSpecializationConstants(
+    ur_kernel_handle_t, uint32_t, const ur_specialization_constant_info_t *) {
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+}

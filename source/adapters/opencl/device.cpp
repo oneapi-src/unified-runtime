@@ -820,7 +820,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_COMPILER_AVAILABLE:
   case UR_DEVICE_INFO_LINKER_AVAILABLE:
   case UR_DEVICE_INFO_PREFERRED_INTEROP_USER_SYNC:
-  case UR_DEVICE_INFO_KERNEL_SET_SPECIALIZATION_CONSTANTS:
   case UR_DEVICE_INFO_SUB_GROUP_INDEPENDENT_FORWARD_PROGRESS: {
     /* CL type: cl_bool
      * UR type: ur_bool_t */
@@ -967,6 +966,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
                        std::string::npos);
   }
   case UR_DEVICE_INFO_COMMAND_BUFFER_UPDATE_SUPPORT_EXP: {
+    return ReturnValue(false);
+  }
+  case UR_DEVICE_INFO_KERNEL_SET_SPECIALIZATION_CONSTANTS: {
     return ReturnValue(false);
   }
   default: {
