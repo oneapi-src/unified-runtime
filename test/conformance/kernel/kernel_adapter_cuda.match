@@ -6,4 +6,3 @@
 {{OPT}}urKernelSetArgPointerNegativeTest.InvalidKernelArgumentIndex/NVIDIA_CUDA_BACKEND___{{.*}}_
 {{OPT}}urKernelSetArgSamplerTest.InvalidKernelArgumentIndex/NVIDIA_CUDA_BACKEND___{{.*}}_
 {{OPT}}urKernelSetArgValueTest.InvalidKernelArgumentIndex/NVIDIA_CUDA_BACKEND___{{.*}}_
-{{OPT}}Segmentation fault

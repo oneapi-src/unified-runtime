@@ -1,4 +1,3 @@
-{{OPT}}{{Segmentation fault|Aborted}}
 {{OPT}}BufferFillCommandTest.UpdateParameters/AMD_HIP_BACKEND{{.*}}
 {{OPT}}BufferFillCommandTest.UpdateGlobalSize/AMD_HIP_BACKEND{{.*}}
 {{OPT}}BufferFillCommandTest.SeparateUpdateCalls/AMD_HIP_BACKEND{{.*}}
