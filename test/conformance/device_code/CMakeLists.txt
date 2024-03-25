@@ -67,6 +67,13 @@ macro(add_device_binary SOURCE_FILE)
         if(${TRIPLE} MATCHES "amd" AND ${KERNEL_NAME} MATCHES "image_copy")
             continue()
         endif()
+        # cuda and hip seem to do linking at compile time (rather than runtime)
+        if(${TRIPLE} MATCHES "nvptx" AND ${KERNEL_NAME} MATCHES "linker_error")
+            continue()
+        endif()
+        if(${TRIPLE} MATCHES "amd" AND ${KERNEL_NAME} MATCHES "linker_error")
+            continue()
+        endif()
         add_custom_command(OUTPUT ${EXE_PATH}
             COMMAND ${UR_DPCXX} -fsycl -fsycl-targets=${TRIPLE} -fsycl-device-code-split=off 
             ${AMD_TARGET_BACKEND} ${AMD_OFFLOAD_ARCH} ${AMD_NOGPULIB}
@@ -97,6 +104,7 @@ add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/usm_ll.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/saxpy.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/saxpy_usm.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/indexers_usm.cpp)
+add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/linker_error.cpp)
 
 set(KERNEL_HEADER ${UR_CONFORMANCE_DEVICE_BINARIES_DIR}/kernel_entry_points.h)
 add_custom_command(OUTPUT ${KERNEL_HEADER}
