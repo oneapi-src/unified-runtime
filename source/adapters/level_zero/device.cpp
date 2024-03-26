@@ -187,9 +187,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
     return ReturnValue(UUID, sizeof(UUID));
   }
   case UR_DEVICE_INFO_ATOMIC_64:
-    return ReturnValue(
-        static_cast<uint32_t>(Device->ZeDeviceModuleProperties->flags &
-                              ZE_DEVICE_MODULE_FLAG_INT64_ATOMICS));
+    return ReturnValue(bool(Device->ZeDeviceModuleProperties->flags &
+                            ZE_DEVICE_MODULE_FLAG_INT64_ATOMICS));
   case UR_DEVICE_INFO_EXTENSIONS: {
     // Convention adopted from OpenCL:
     //     "Returns a space separated list of extension names (the extension
@@ -256,11 +255,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
   // > The application must only use the module for the device, or its
   // > sub-devices, which was provided during creation.
   case UR_DEVICE_INFO_BUILD_ON_SUBDEVICE:
-    return ReturnValue(uint32_t{0});
+    return ReturnValue(false);
   case UR_DEVICE_INFO_COMPILER_AVAILABLE:
-    return ReturnValue(static_cast<uint32_t>(true));
+    return ReturnValue(true);
   case UR_DEVICE_INFO_LINKER_AVAILABLE:
-    return ReturnValue(static_cast<uint32_t>(true));
+    return ReturnValue(true);
   case UR_DEVICE_INFO_MAX_COMPUTE_UNITS: {
     uint32_t MaxComputeUnits =
         Device->ZeDeviceProperties->numEUsPerSubslice *
@@ -323,14 +322,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
     return ReturnValue(
         uint64_t{Device->ZeDeviceComputeProperties->maxSharedLocalMemory});
   case UR_DEVICE_INFO_IMAGE_SUPPORTED:
-    return ReturnValue(static_cast<uint32_t>(
-        Device->ZeDeviceImageProperties->maxImageDims1D > 0));
+    return ReturnValue(Device->ZeDeviceImageProperties->maxImageDims1D > 0);
   case UR_DEVICE_INFO_HOST_UNIFIED_MEMORY:
-    return ReturnValue(
-        static_cast<uint32_t>((Device->ZeDeviceProperties->flags &
-                               ZE_DEVICE_PROPERTY_FLAG_INTEGRATED) != 0));
+    return ReturnValue((Device->ZeDeviceProperties->flags &
+                        ZE_DEVICE_PROPERTY_FLAG_INTEGRATED) != 0);
   case UR_DEVICE_INFO_AVAILABLE:
-    return ReturnValue(static_cast<uint32_t>(ZeDevice ? true : false));
+    return ReturnValue(ZeDevice ? true : false);
   case UR_DEVICE_INFO_VENDOR:
     // TODO: Level-Zero does not return vendor's name at the moment
     // only the ID.
@@ -411,7 +408,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
   case UR_EXT_DEVICE_INFO_OPENCL_C_VERSION:
     return ReturnValue("");
   case UR_DEVICE_INFO_PREFERRED_INTEROP_USER_SYNC:
-    return ReturnValue(static_cast<uint32_t>(true));
+    return ReturnValue(true);
   case UR_DEVICE_INFO_PRINTF_BUFFER_SIZE:
     return ReturnValue(
         size_t{Device->ZeDeviceModuleProperties->printfBufferSize});
@@ -428,10 +425,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
     return ReturnValue(ur_device_exec_capability_flag_t{
         UR_DEVICE_EXEC_CAPABILITY_FLAG_NATIVE_KERNEL});
   case UR_DEVICE_INFO_ENDIAN_LITTLE:
-    return ReturnValue(static_cast<uint32_t>(true));
+    return ReturnValue(true);
   case UR_DEVICE_INFO_ERROR_CORRECTION_SUPPORT:
-    return ReturnValue(static_cast<uint32_t>(Device->ZeDeviceProperties->flags &
-                                             ZE_DEVICE_PROPERTY_FLAG_ECC));
+    return ReturnValue(
+        bool(Device->ZeDeviceProperties->flags & ZE_DEVICE_PROPERTY_FLAG_ECC));
   case UR_DEVICE_INFO_PROFILING_TIMER_RESOLUTION:
     return ReturnValue(
         static_cast<size_t>(Device->ZeDeviceProperties->timerResolution));
@@ -605,7 +602,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
   }
   case UR_DEVICE_INFO_SUB_GROUP_INDEPENDENT_FORWARD_PROGRESS: {
     // TODO: Not supported yet. Needs to be updated after support is added.
-    return ReturnValue(static_cast<uint32_t>(false));
+    return ReturnValue(false);
   }
   case UR_DEVICE_INFO_SUB_GROUP_SIZES_INTEL: {
     // ze_device_compute_properties.subGroupSizes is in uint32_t whereas the
@@ -784,7 +781,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
     return ReturnValue(uint32_t{Device->ZeDeviceProperties->numThreadsPerEU});
   case UR_DEVICE_INFO_MAX_MEMORY_BANDWIDTH:
     // currently not supported in level zero runtime
-    return UR_RESULT_ERROR_INVALID_VALUE;
+    return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
   case UR_DEVICE_INFO_BFLOAT16: {
     // bfloat16 math functions are not yet supported on Intel GPUs.
     return ReturnValue(bool{false});
@@ -836,9 +833,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
     return ReturnValue(capabilities);
   }
   case UR_DEVICE_INFO_MEM_CHANNEL_SUPPORT:
-    return ReturnValue(uint32_t{false});
+    return ReturnValue(false);
   case UR_DEVICE_INFO_IMAGE_SRGB:
-    return ReturnValue(uint32_t{false});
+    return ReturnValue(false);
 
   case UR_DEVICE_INFO_QUEUE_ON_DEVICE_PROPERTIES:
   case UR_DEVICE_INFO_QUEUE_ON_HOST_PROPERTIES: {
@@ -850,7 +847,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
         0)); //__read_write attribute currently undefinde in opencl
   }
   case UR_DEVICE_INFO_VIRTUAL_MEMORY_SUPPORT: {
-    return ReturnValue(static_cast<uint32_t>(true));
+    return ReturnValue(true);
   }
 
   case UR_DEVICE_INFO_ESIMD_SUPPORT: {
@@ -947,7 +944,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
   case UR_DEVICE_INFO_MAX_IMAGE_LINEAR_PITCH_EXP:
     urPrint("Unsupported ParamName in urGetDeviceInfo\n");
     urPrint("ParamName=%d(0x%x)\n", ParamName, ParamName);
-    return UR_RESULT_ERROR_INVALID_VALUE;
+    return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
   case UR_DEVICE_INFO_MIPMAP_SUPPORT_EXP:
     return ReturnValue(true);
   case UR_DEVICE_INFO_MIPMAP_ANISOTROPY_SUPPORT_EXP:
@@ -958,10 +955,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
   case UR_DEVICE_INFO_INTEROP_MEMORY_EXPORT_SUPPORT_EXP:
   case UR_DEVICE_INFO_INTEROP_SEMAPHORE_IMPORT_SUPPORT_EXP:
   case UR_DEVICE_INFO_INTEROP_SEMAPHORE_EXPORT_SUPPORT_EXP:
+  case UR_DEVICE_INFO_HOST_PIPE_READ_WRITE_SUPPORTED:
+  case UR_DEVICE_INFO_MAX_REGISTERS_PER_WORK_GROUP:
   default:
     urPrint("Unsupported ParamName in urGetDeviceInfo\n");
     urPrint("ParamName=%d(0x%x)\n", ParamName, ParamName);
-    return UR_RESULT_ERROR_INVALID_VALUE;
+    return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
   }
 
   return UR_RESULT_SUCCESS;
