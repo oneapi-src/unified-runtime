@@ -878,7 +878,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urBindlessImagesImageCopyExp(
         UR_CHECK_ERROR(cuMemcpy3DAsync(&cpy_desc, Stream));
       }
     }
-    // required sync to fix the random failure in device_to_device_copy tests
+    // Synchronization is required here to handle the case of copying data from
+    // host to device, then device to device and finally device to host.
+    // Without it, there is a risk of the copies not being executed in the
+    // intended order.
     cuStreamSynchronize(Stream);
     if (phEvent) {
       auto NewEvent = ur_event_handle_t_::makeNative(UR_COMMAND_MEM_IMAGE_COPY,
