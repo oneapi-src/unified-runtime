@@ -26,7 +26,7 @@ endif()
 
 if (NOT DEFINED UMF_TAG)
     # Merge pull request #391 from igchor/utils_as_interface
-    set(UMF_TAG 687f546ca3bc326a675c76c857a1084a87608b96)
+    set(UMF_TAG ea72c988fa9bb4fb16917ab72d4fa939c9f3125b)
 endif()
 
 message(STATUS "Will fetch Unified Memory Framework from ${UMF_REPO}")
