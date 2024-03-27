@@ -1437,13 +1437,13 @@ static ur_result_t ur2zeImageDesc(const ur_image_format_t *ImageFormat,
       break;
     default:
       urPrint("urMemImageCreate: unexpected data type Size\n");
-      return UR_RESULT_ERROR_INVALID_VALUE;
+      return UR_RESULT_ERROR_UNSUPPORTED_IMAGE_FORMAT;
     }
     break;
   }
   default:
     urPrint("format layout = %d\n", ImageFormat->channelOrder);
-    die("urMemImageCreate: unsupported image format layout\n");
+    return UR_RESULT_ERROR_UNSUPPORTED_IMAGE_FORMAT;
     break;
   }
 
@@ -1472,7 +1472,7 @@ static ur_result_t ur2zeImageDesc(const ur_image_format_t *ImageFormat,
     break;
   default:
     urPrint("urMemImageCreate: unsupported image type\n");
-    return UR_RESULT_ERROR_INVALID_VALUE;
+    return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
   }
 
   ZeImageDesc.arraylevels = ZeImageDesc.flags = 0;

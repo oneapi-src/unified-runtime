@@ -229,7 +229,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreate(
 
   UR_ASSERT(pImageDesc->stype == UR_STRUCTURE_TYPE_IMAGE_DESC,
             UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR);
-  UR_ASSERT(pImageDesc->type <= UR_MEM_TYPE_IMAGE1D_BUFFER,
+  UR_ASSERT(pImageDesc->type <= UR_MEM_TYPE_IMAGE1D_ARRAY,
             UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR);
   UR_ASSERT(pImageDesc->numMipLevel == 0,
             UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR);
@@ -247,7 +247,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreate(
   // We only support RBGA channel order
   // TODO: check SYCL CTS and spec. May also have to support BGRA
   UR_ASSERT(pImageFormat->channelOrder == UR_IMAGE_CHANNEL_ORDER_RGBA,
-            UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION);
+            UR_RESULT_ERROR_UNSUPPORTED_IMAGE_FORMAT);
 
   // We have to use cuArray3DCreate, which has some caveats. The height and
   // depth parameters must be set to 0 produce 1D or 2D arrays. pImageDesc gives
@@ -276,6 +276,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreate(
     ArrayDesc.Format = CU_AD_FORMAT_UNSIGNED_INT8;
     PixelTypeSizeBytes = 1;
     break;
+  case UR_IMAGE_CHANNEL_TYPE_SNORM_INT8:
   case UR_IMAGE_CHANNEL_TYPE_SIGNED_INT8:
     ArrayDesc.Format = CU_AD_FORMAT_SIGNED_INT8;
     PixelTypeSizeBytes = 1;
@@ -285,6 +286,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreate(
     ArrayDesc.Format = CU_AD_FORMAT_UNSIGNED_INT16;
     PixelTypeSizeBytes = 2;
     break;
+  case UR_IMAGE_CHANNEL_TYPE_SNORM_INT16:
   case UR_IMAGE_CHANNEL_TYPE_SIGNED_INT16:
     ArrayDesc.Format = CU_AD_FORMAT_SIGNED_INT16;
     PixelTypeSizeBytes = 2;
@@ -306,8 +308,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreate(
     PixelTypeSizeBytes = 4;
     break;
   default:
-    detail::ur::die(
-        "urMemImageCreate given unsupported image_channel_data_type");
+    return UR_RESULT_ERROR_UNSUPPORTED_IMAGE_FORMAT;
   }
 
   // When a dimension isn't used pImageDesc has the size set to 1
