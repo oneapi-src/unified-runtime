@@ -12,6 +12,8 @@
 
 #include "common.hpp"
 #include "nativecpu_state.hpp"
+#include "program.hpp"
+#include <array>
 #include <ur_api.h>
 #include <utility>
 
@@ -39,10 +41,19 @@ struct local_arg_info_t {
 
 struct ur_kernel_handle_t_ : RefCounted {
 
-  ur_kernel_handle_t_(const char *name, nativecpu_task_t subhandler)
-      : _name{name}, _subhandler{std::move(subhandler)} {}
+  ur_kernel_handle_t_(ur_program_handle_t hProgram, const char *name,
+                      nativecpu_task_t subhandler)
+      : hProgram(hProgram), _name{name}, _subhandler{std::move(subhandler)},
+        HasReqdWGSize(false) {}
 
-  const char *_name;
+  ur_kernel_handle_t_(ur_program_handle_t hProgram, const char *name,
+                      nativecpu_task_t subhandler,
+                      const native_cpu::ReqdWGSize_t &ReqdWGSize)
+      : hProgram(hProgram), _name{name}, _subhandler{std::move(subhandler)},
+        HasReqdWGSize(true), ReqdWGSize(ReqdWGSize) {}
+
+  ur_program_handle_t hProgram;
+  std::string _name;
   nativecpu_task_t _subhandler;
   std::vector<native_cpu::NativeCPUArgDesc> _args;
   std::vector<local_arg_info_t> _localArgInfo;
@@ -67,6 +78,10 @@ struct ur_kernel_handle_t_ : RefCounted {
     }
   }
 
+  bool hasReqdWGSize() { return HasReqdWGSize; }
+
+  const native_cpu::ReqdWGSize_t &getReqdWGSize() { return ReqdWGSize; }
+
 private:
   void updateMemPool() {
     // compute requested size.
@@ -88,4 +103,6 @@ private:
   }
   void *_localMemPool = nullptr;
   size_t _localMemPoolSize = 0;
+  bool HasReqdWGSize;
+  native_cpu::ReqdWGSize_t ReqdWGSize;
 };
