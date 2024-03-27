@@ -74,7 +74,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
   auto hProgram = new ur_program_handle_t_(
       hContext, reinterpret_cast<const unsigned char *>(pBinary));
   if (pProperties != nullptr) {
-    for (int i = 0; i < pProperties->count; i++) {
+    for (uint32_t i = 0; i < pProperties->count; i++) {
       auto mdNode = pProperties->pMetadatas[i];
       std::string mdName(mdNode.pName);
       auto [Prefix, Tag] = splitMetadataName(mdName);
