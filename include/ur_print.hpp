@@ -9877,8 +9877,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphAdapters))[i]);
+        os << (*(params->pphAdapters))[i];
     }
     os << "}";
 
@@ -9899,8 +9898,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphPlatforms))[i]);
+        os << (*(params->pphPlatforms))[i];
     }
     os << "}";
 
@@ -10056,8 +10054,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphDevices))[i]);
+        os << (*(params->pphDevices))[i];
     }
     os << "}";
 
@@ -10181,8 +10178,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphDevices))[i]);
+        os << (*(params->pphDevices))[i];
     }
     os << "}";
 
@@ -10312,8 +10308,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -10560,8 +10555,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphDevices))[i]);
+        os << (*(params->pphDevices))[i];
     }
     os << "}";
 
@@ -10623,8 +10617,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphDevices))[i]);
+        os << (*(params->pphDevices))[i];
     }
     os << "}";
 
@@ -10660,8 +10653,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphPrograms))[i]);
+        os << (*(params->pphPrograms))[i];
     }
     os << "}";
 
@@ -10703,8 +10695,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphDevices))[i]);
+        os << (*(params->pphDevices))[i];
     }
     os << "}";
 
@@ -10720,8 +10711,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphPrograms))[i]);
+        os << (*(params->pphPrograms))[i];
     }
     os << "}";
 
@@ -12192,8 +12182,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphAdapters))[i]);
+        os << (*(params->pphAdapters))[i];
     }
     os << "}";
 
@@ -12346,8 +12335,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -12383,8 +12371,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -12420,8 +12407,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -12484,8 +12470,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -12548,8 +12533,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -12637,8 +12621,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -12726,8 +12709,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -12790,8 +12772,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -12874,8 +12855,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -12938,8 +12918,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -13012,8 +12991,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -13086,8 +13064,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -13150,8 +13127,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -13214,8 +13190,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -13269,8 +13244,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -13328,8 +13302,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -13387,8 +13360,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -13441,8 +13413,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -13547,8 +13518,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -13621,8 +13591,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -13691,8 +13660,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -13761,8 +13729,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -13826,8 +13793,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -13891,8 +13857,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -13957,8 +13922,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -14266,8 +14230,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -14568,8 +14531,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -14611,8 +14573,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -15822,8 +15783,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphEventWaitList))[i]);
+        os << (*(params->pphEventWaitList))[i];
     }
     os << "}";
 
@@ -16328,8 +16288,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphDevices))[i]);
+        os << (*(params->pphDevices))[i];
     }
     os << "}";
 
@@ -16370,8 +16329,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphDevices))[i]);
+        os << (*(params->pphDevices))[i];
     }
     os << "}";
 
@@ -16475,8 +16433,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
             os << ", ";
         }
 
-        ur::details::printPtr(os,
-                              (*(params->pphSubDevices))[i]);
+        os << (*(params->pphSubDevices))[i];
     }
     os << "}";
 

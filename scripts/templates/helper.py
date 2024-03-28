@@ -105,13 +105,13 @@ class class_traits:
     Extracts traits from a type name
 """
 class type_traits:
-    RE_HANDLE   = r"(.*)handle_t"
-    RE_IPC      = r"(.*)ipc(.*)handle_t"
+    RE_HANDLE   = r"(.*)handle_t$"
+    RE_IPC      = r"(.*)ipc(.*)handle_t$"
     RE_POINTER  = r"(.*\w+)\*+"
     RE_PPOINTER = r"(.*\w+)\*{2,}"
     RE_DESC     = r"(.*)desc_t.*"
     RE_PROPS    = r"(.*)properties_t.*"
-    RE_FLAGS    = r"(.*)flags_t"
+    RE_FLAGS    = r"(.*)flags_t$"
     RE_ARRAY    = r"(.*)\[([1-9][0-9]*)\]"
 
     @staticmethod
