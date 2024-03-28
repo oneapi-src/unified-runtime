@@ -62,7 +62,7 @@ urPlatformGetInfo(ur_platform_handle_t hPlatform, ur_platform_info_t propName,
 
   switch (propName) {
   case UR_PLATFORM_INFO_NAME:
-    return ReturnValue("SYCL_NATIVE_CPU");
+    return ReturnValue("Intel SYCL Native CPU");
 
   case UR_PLATFORM_INFO_VENDOR_NAME:
     return ReturnValue("tbd");
