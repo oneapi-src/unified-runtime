@@ -44,7 +44,7 @@ jobs:
     - name: Install apt packages
       run: |
         sudo apt-get update
-        sudo apt-get install -y doxygen ${{matrix.compiler.c}}
+        sudo apt-get install -y libhwloc-dev doxygen ${{matrix.compiler.c}}
 
     - name: Install g++-7
       if: matrix.compiler.cxx == 'g++-7'
@@ -129,6 +129,11 @@ jobs:
 
     - name: Install pip packages
       run: pip install -r third_party/requirements.txt
+
+    - name: Install apt packages
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libhwloc-dev
 
     - name: Download DPC++
       run: |
@@ -240,6 +245,11 @@ jobs:
 
     - name: Install pip packages
       run: pip install -r third_party/requirements.txt
+
+    - name: Install apt packages
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libhwloc-dev
     
     - name: Init conda env
       uses: conda-incubator/setup-miniconda@9f54435e0e72c53962ee863144e47a4b094bfd35 # v2.3.0
@@ -318,7 +328,12 @@ jobs:
         Expand-Archive -Path "$WorkingDir\doxygen.zip"
         Add-Content $env:GITHUB_PATH "$WorkingDir\doxygen"
 
+    - name: Install hwloc
+      run: vcpkg install hwloc:x64-windows
+
     - name: Configure CMake
+      env:
+        PKG_CONFIG_PATH: "C:/vcpkg/packages/hwloc_x64-windows/lib/pkgconfig/"
       run: >
         cmake
         -B${{github.workspace}}/build
@@ -361,6 +376,9 @@ jobs:
 
     - name: Install prerequisites
       run: python3 -m pip install -r third_party/requirements.txt
+
+    - name: Install hwloc
+      run: brew install hwloc
 
     - name: Configure CMake
       run: >
