@@ -955,6 +955,17 @@ ur_queue_handle_t_::ur_queue_handle_t_(
   ComputeCommandBatch.QueueBatchSize =
       ZeCommandListBatchComputeConfig.startSize();
   CopyCommandBatch.QueueBatchSize = ZeCommandListBatchCopyConfig.startSize();
+
+  static const bool useDriverCounterBasedEvents = [] {
+    const char *UrRet = std::getenv("UR_L0_USE_DRIVER_COUNTER_BASED_EVENTS");
+    if (!UrRet)
+      return true;
+    return std::atoi(UrRet) != 0;
+  }();
+  this->CounterBasedEventsEnabled =
+      isInOrderQueue() && Device->useDriverInOrderLists() &&
+      useDriverCounterBasedEvents &&
+      Device->Platform->ZeDriverEventPoolCountingEventsExtensionFound;
 }
 
 void ur_queue_handle_t_::adjustBatchSizeForFullBatch(bool IsCopy) {
@@ -1236,7 +1247,8 @@ bool ur_queue_handle_t_::doReuseDiscardedEvents() {
 
 ur_result_t
 ur_queue_handle_t_::resetDiscardedEvent(ur_command_list_ptr_t CommandList) {
-  if (LastCommandEvent && LastCommandEvent->IsDiscarded) {
+  if (!CounterBasedEventsEnabled && LastCommandEvent &&
+      LastCommandEvent->IsDiscarded) {
     ZE2UR_CALL(zeCommandListAppendBarrier,
                (CommandList->first, nullptr, 1, &(LastCommandEvent->ZeEvent)));
     ZE2UR_CALL(zeCommandListAppendEventReset,
@@ -1519,7 +1531,8 @@ ur_result_t createEventAndAssociateQueue(ur_queue_handle_t Queue,
 
   if (*Event == nullptr)
     UR_CALL(EventCreate(Queue->Context, Queue, IsMultiDevice,
-                        HostVisible.value(), Event));
+                        HostVisible.value(), Event,
+                        Queue->CounterBasedEventsEnabled));
 
   (*Event)->UrQueue = Queue;
   (*Event)->CommandType = CommandType;
@@ -1883,9 +1896,10 @@ ur_result_t ur_queue_handle_t_::createCommandList(
   std::tie(CommandList, std::ignore) = CommandListMap.insert(
       std::pair<ze_command_list_handle_t, ur_command_list_info_t>(
           ZeCommandList, {ZeFence, false, false, ZeCommandQueue, ZeQueueDesc}));
-
-  UR_CALL(insertStartBarrierIfDiscardEventsMode(CommandList));
-  UR_CALL(insertActiveBarriers(CommandList, UseCopyEngine));
+  if (!CounterBasedEventsEnabled) {
+    UR_CALL(insertStartBarrierIfDiscardEventsMode(CommandList));
+    UR_CALL(insertActiveBarriers(CommandList, UseCopyEngine));
+  }
   return UR_RESULT_SUCCESS;
 }
 
