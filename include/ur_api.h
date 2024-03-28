@@ -7944,6 +7944,9 @@ typedef struct ur_exp_command_buffer_desc_t {
                                ///< ::UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_DESC
     const void *pNext;         ///< [in][optional] pointer to extension-specific structure
     ur_bool_t isUpdatable;     ///< [in] Commands in a finalized command-buffer can be updated.
+    ur_bool_t isInOrder;       ///< [in] Commands in a command-buffer may be executed in-order without
+                               ///< explicit dependencies.
+    ur_bool_t enableProfiling; ///< [in] Command-buffer profiling is enabled.
 
 } ur_exp_command_buffer_desc_t;
 

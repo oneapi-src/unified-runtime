@@ -1519,7 +1519,7 @@ ur_result_t createEventAndAssociateQueue(ur_queue_handle_t Queue,
 
   if (*Event == nullptr)
     UR_CALL(EventCreate(Queue->Context, Queue, IsMultiDevice,
-                        HostVisible.value(), Event));
+                        HostVisible.value(), false, Event));
 
   (*Event)->UrQueue = Queue;
   (*Event)->CommandType = CommandType;
