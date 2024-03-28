@@ -9,7 +9,9 @@
 //===----------------------------------------------------------------------===//
 
 #include "kernel.hpp"
+#include "enqueue.hpp"
 #include "memory.hpp"
+#include "queue.hpp"
 #include "sampler.hpp"
 
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -372,6 +374,44 @@ urKernelSetArgSampler(ur_kernel_handle_t hKernel, uint32_t argIndex,
   try {
     uint32_t SamplerProps = hArgValue->Props;
     hKernel->setKernelArg(argIndex, sizeof(uint32_t), (void *)&SamplerProps);
+  } catch (ur_result_t Err) {
+    Result = Err;
+  }
+  return Result;
+}
+
+UR_APIEXPORT ur_result_t UR_APICALL urKernelGetSuggestedLocalWorkSize(
+    ur_kernel_handle_t hKernel, ur_queue_handle_t hQueue, uint32_t workDim,
+    const size_t *pGlobalWorkOffset, const size_t *pGlobalWorkSize,
+    size_t *pSuggestedLocalWorkSize) {
+  // Preconditions
+  UR_ASSERT(hQueue->getContext() == hKernel->getContext(),
+            UR_RESULT_ERROR_INVALID_KERNEL);
+  UR_ASSERT(workDim > 0, UR_RESULT_ERROR_INVALID_WORK_DIMENSION);
+  UR_ASSERT(workDim < 4, UR_RESULT_ERROR_INVALID_WORK_DIMENSION);
+
+  std::ignore = pGlobalWorkOffset;
+  ur_context_handle_t Context = hQueue->getContext();
+  ur_device_handle_t Device = hQueue->Device;
+  ur_result_t Result = UR_RESULT_SUCCESS;
+  size_t MaxWorkGroupSize = 0u;
+  size_t ThreadsPerBlock[3] = {};
+
+  try {
+    // Set the active context here as guessLocalWorkSize needs an active context
+    ScopedContext Active(Context);
+
+    MaxWorkGroupSize = Device->getMaxWorkGroupSize();
+    guessLocalWorkSize(Device, ThreadsPerBlock, pGlobalWorkSize, workDim,
+                       hKernel);
+
+    if (MaxWorkGroupSize <
+        ThreadsPerBlock[0] * ThreadsPerBlock[1] * ThreadsPerBlock[2]) {
+      return UR_RESULT_ERROR_INVALID_WORK_GROUP_SIZE;
+    }
+
+    std::copy(ThreadsPerBlock, ThreadsPerBlock + workDim,
+              pSuggestedLocalWorkSize);
   } catch (ur_result_t Err) {
     Result = Err;
   }
