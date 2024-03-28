@@ -22,3 +22,6 @@
 {{OPT}}urProgramGetInfoTest.InvalidNullHandleProgram/NVIDIA_CUDA_BACKEND___{{.*}}___UR_PROGRAM_INFO_KERNEL_NAMES
 {{OPT}}urProgramLinkTest.Success/NVIDIA_CUDA_BACKEND___{{.*}}_
 {{OPT}}urProgramSetSpecializationConstantsTest.Success/NVIDIA_CUDA_BACKEND___{{.*}}_
+{{OPT}}urProgramSetSpecializationConstantsTest.InvalidValueSize/NVIDIA_CUDA_BACKEND___{{.*}}_
+{{OPT}}urProgramSetSpecializationConstantsTest.InvalidValueId/NVIDIA_CUDA_BACKEND___{{.*}}_
+{{OPT}}urProgramSetSpecializationConstantsTest.InvalidValuePtr/NVIDIA_CUDA_BACKEND___{{.*}}_
