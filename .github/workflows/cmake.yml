@@ -189,6 +189,16 @@ jobs:
         mkdir dpcpp_compiler
         tar -xvf ${{github.workspace}}/dpcpp_compiler.tar.gz -C dpcpp_compiler
 
+    - name: Build Level Zero
+      if: ${{matrix.adapter.name == 'L0'}}
+      run: |
+        git clone --branch v1.16.1 --depth 1 https://github.com/oneapi-src/level-zero.git
+        cd level-zero
+        mkdir build && cd build
+        cmake -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=${{matrix.build_type}} ..
+        make -j $(nproc)
+        cd ${{github.workspace}}
+
     - name: Configure CMake
       run: >
         cmake
@@ -202,6 +212,8 @@ jobs:
         -DUR_BUILD_ADAPTER_${{matrix.adapter.name}}=ON
         -DUR_DPCXX=${{github.workspace}}/dpcpp_compiler/bin/clang++
         -DUR_SYCL_LIBRARY_DIR=${{github.workspace}}/dpcpp_compiler/lib
+        -DLEVEL_ZERO_LIBRARY=${{github.workspace}}/level-zero/build/lib/libze_loader.so
+        -DLEVEL_ZERO_INCLUDE_DIR=${{github.workspace}}/level-zero/include
         ${{ matrix.adapter.name == 'HIP' && '-DUR_CONFORMANCE_AMD_ARCH=gfx1030' || '' }} 
         ${{ matrix.adapter.name == 'HIP' && '-DUR_HIP_PLATFORM=AMD' || '' }}
 
@@ -211,6 +223,8 @@ jobs:
 
     - name: Test adapter specific
       working-directory: ${{github.workspace}}/build
+      env:
+        LD_LIBRARY_PATH: ${{github.workspace}}/level-zero/build/lib
       run: ctest -C ${{matrix.build_type}} --output-on-failure -L "adapter-specific" --timeout 180
 
     - name: Test adapters
