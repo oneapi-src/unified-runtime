@@ -16,6 +16,7 @@ struct app {
     bool verbose = false;
     bool linear_ids = true;
     bool ignore_device_selector = false;
+    bool suppress_number_printing = false;
     ur_loader_config_handle_t loaderConfig = nullptr;
     std::vector<ur_adapter_handle_t> adapters;
     std::unordered_map<ur_adapter_handle_t, std::vector<ur_platform_handle_t>>
@@ -33,6 +34,7 @@ struct app {
                              "To see all devices, use the "
                              "--ignore-device-selector CLI option.\n\n",
                              device_selector);
+                suppress_number_printing = true;
             }
         }
         UR_CHECK(urLoaderConfigCreate(&loaderConfig));
@@ -144,8 +146,10 @@ options:
                     if (linear_ids) {
                         std::cout << "[" << adapter_backend << ":"
                                   << device_type << "]";
-                        std::cout << "[" << adapter_backend << ":"
-                                  << adapter_device_id << "]";
+                        if (!suppress_number_printing) {
+                            std::cout << "[" << adapter_backend << ":"
+                                      << adapter_device_id << "]";
+                        }
                     } else {
                         std::cout << "[adapter(" << adapterIndex << ","
                                   << adapter_backend << "):"

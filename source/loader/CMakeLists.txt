@@ -3,6 +3,10 @@
 # See LICENSE.TXT
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
+if(UR_ENABLE_DEVICE_SELECTOR)
+    add_subdirectory(device_selector)
+endif()
+
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/UrLoaderVersion.rc.in
     ${CMAKE_CURRENT_BINARY_DIR}/UrLoaderVersion.rc
@@ -43,7 +47,11 @@ if(UR_ENABLE_TRACING)
     target_compile_definitions(ur_loader PRIVATE XPTI_STATIC_LIBRARY)
 endif()
 
-if (UNIX)
+if(UR_ENABLE_DEVICE_SELECTOR)
+    target_compile_definitions(ur_loader PRIVATE UR_ENABLE_DEVICE_SELECTOR)
+endif()
+
+if(UNIX)
     set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
     set(THREADS_PREFER_PTHREAD_FLAG TRUE)
     find_package(Threads REQUIRED)

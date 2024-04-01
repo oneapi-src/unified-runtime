@@ -232,6 +232,22 @@ ur_result_t UR_APICALL urLoaderInit(
         result = ur_lib::context->Init(device_flags, hLoaderConfig);
     });
 
+#if UR_ENABLE_DEVICE_SELECTOR
+    if (auto deviceSelector = ur_getenv("ONEAPI_DEVICE_SELECTOR")) {
+        ur_lib::context->deviceSelectorEnabled = true;
+        if (auto error =
+                ur_lib::context->matcher.init(deviceSelector.value())) {
+            std::fprintf(stderr, "error: ONEAPI_DEVICE_SELECTOR: %s\n",
+                         error->message.c_str());
+            // TODO: Do something here, propogate the error up the stack so
+            // SYCL can throw an exception.
+        }
+        if (auto error = ur_lib::context->enumerateSelectedDevices()) {
+            return error;
+        }
+    }
+#endif
+
     return result;
 } catch (...) {
     return exceptionToResult(std::current_exception());

@@ -116,10 +116,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGet(
     std::copy_n(MatchedDevices.begin(), N, Devices);
 
   if (NumDevices) {
-    if (*NumDevices == 0)
-      *NumDevices = ZeDeviceCount;
-    else
-      *NumDevices = N;
+    *NumDevices = ZeDeviceCount;
   }
 
   return UR_RESULT_SUCCESS;

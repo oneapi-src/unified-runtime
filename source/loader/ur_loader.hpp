@@ -44,6 +44,14 @@ class context_t {
 extern context_t *context;
 extern ur_event_factory_t ur_event_factory;
 
+ur_result_t getSelectedDevices(
+    ur_platform_handle_t hPlatform,
+    ur_device_type_t DeviceType,
+    uint32_t NumEntries,
+    ur_device_handle_t *phDevices,
+    uint32_t *pNumDevices
+);
+
 } // namespace ur_loader
 
 #endif /* UR_LOADER_HPP */

@@ -19,6 +19,7 @@
 #include "ur_proxy_layer.hpp"
 #include "ur_util.hpp"
 
+#include "device_selector/matcher.hpp"
 #include "validation/ur_validation_layer.hpp"
 #if UR_ENABLE_TRACING
 #include "tracing/ur_tracing_layer.hpp"
@@ -51,6 +52,12 @@ struct ur_loader_config_handle_t_ {
 };
 
 namespace ur_lib {
+struct device_desc_t {
+    ur_platform_handle_t hPlatform = nullptr;
+    ur_device_handle_t hDevice = nullptr;
+    ur::device_selector::Descriptor desc;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 class __urdlllocal context_t {
   public:
@@ -87,6 +94,14 @@ class __urdlllocal context_t {
     void parseEnvEnabledLayers();
     void initLayers() const;
     void tearDownLayers() const;
+
+#if UR_ENABLE_DEVICE_SELECTOR
+    bool deviceSelectorEnabled = false;
+    ur::device_selector::Matcher matcher;
+    std::vector<device_desc_t> selectedDevices;
+
+    ur_result_t enumerateSelectedDevices();
+#endif
 };
 
 extern context_t *context;
