@@ -244,8 +244,7 @@ ur_result_t urTextureCreate(ur_sampler_handle_t hSampler,
     /// Sampler property layout:
     /// |     <bits>     | <usage>
     /// -----------------------------------
-    /// |  31 30 ... 13  | N/A
-    /// |       12       | cubemap filter mode
+    /// |  31 30 ... 12  | N/A
     /// |       11       | mip filter mode
     /// |    10 9 8      | addressing mode 3
     /// |     7 6 5      | addressing mode 2
@@ -306,13 +305,6 @@ ur_result_t urTextureCreate(ur_sampler_handle_t hSampler,
     // CUDA default promotes 8-bit and 16-bit integers to float between [0,1]
     // This flag prevents this behaviour.
     ImageTexDesc.flags |= CU_TRSF_READ_AS_INTEGER;
-
-    // Cubemap attributes
-    ur_exp_sampler_cubemap_filter_mode_t CubemapFilterModeProp =
-        hSampler->getCubemapFilterMode();
-    if (CubemapFilterModeProp == UR_EXP_SAMPLER_CUBEMAP_FILTER_MODE_SEAMLESS) {
-      ImageTexDesc.flags |= CU_TRSF_SEAMLESS_CUBEMAP;
-    }
 
     CUtexObject Texture;
     UR_CHECK_ERROR(
@@ -425,11 +417,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urBindlessImagesImageAllocateExp(
     array_desc.Height = pImageDesc->height;
     array_desc.Depth = pImageDesc->arraySize;
     array_desc.Flags |= CUDA_ARRAY3D_LAYERED;
-    break;
-  case UR_MEM_TYPE_IMAGE_CUBEMAP_EXP:
-    array_desc.Height = pImageDesc->height;
-    array_desc.Depth = pImageDesc->arraySize; // Should be 6 ONLY
-    array_desc.Flags |= CUDA_ARRAY3D_CUBEMAP;
     break;
   default:
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
@@ -728,8 +715,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urBindlessImagesImageCopyExp(
         cpy_desc.Depth = copyExtent.depth;
         UR_CHECK_ERROR(cuMemcpy3DAsync(&cpy_desc, Stream));
       } else if (pImageDesc->type == UR_MEM_TYPE_IMAGE1D_ARRAY ||
-                 pImageDesc->type == UR_MEM_TYPE_IMAGE2D_ARRAY ||
-                 pImageDesc->type == UR_MEM_TYPE_IMAGE_CUBEMAP_EXP) {
+                 pImageDesc->type == UR_MEM_TYPE_IMAGE2D_ARRAY) {
         CUDA_MEMCPY3D cpy_desc = {};
         cpy_desc.srcXInBytes = srcOffset.x * PixelSizeBytes;
         cpy_desc.srcY = srcOffset.y;
@@ -812,8 +798,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urBindlessImagesImageCopyExp(
         cpy_desc.Depth = copyExtent.depth;
         UR_CHECK_ERROR(cuMemcpy3DAsync(&cpy_desc, Stream));
       } else if (pImageDesc->type == UR_MEM_TYPE_IMAGE1D_ARRAY ||
-                 pImageDesc->type == UR_MEM_TYPE_IMAGE2D_ARRAY ||
-                 pImageDesc->type == UR_MEM_TYPE_IMAGE_CUBEMAP_EXP) {
+                 pImageDesc->type == UR_MEM_TYPE_IMAGE2D_ARRAY) {
         CUDA_MEMCPY3D cpy_desc = {};
         cpy_desc.srcXInBytes = srcOffset.x;
         cpy_desc.srcY = srcOffset.y;
