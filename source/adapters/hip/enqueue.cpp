@@ -1654,65 +1654,42 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
     // the copies since ROCm 5.6.0+. See: https://github.com/ROCm/clr/issues/40
     // TODO: Add maximum HIP_VERSION when bug has been fixed.
 #if HIP_VERSION >= 50600000
-    hipPointerAttribute_t srcAttribs{};
-    hipPointerAttribute_t dstAttribs{};
+    bool srcIsHost{false};
+    bool dstIsHost{false};
+    bool srcIsDevice{false};
+    bool dstIsDevice{false};
 
-    // Determine if pSrc and/or pDst are system allocated pageable host memory.
-    bool srcIsSystemAlloc{false};
-    bool dstIsSystemAlloc{false};
-
-    hipError_t hipRes{};
-    // Error code hipErrorInvalidValue returned from hipPointerGetAttributes
-    // for a non-null pointer refers to an OS-allocation, hence we can work
-    // with the assumption that this is a pointer to a pageable host memory.
-    // Since ROCm version 6.0.0, the enum hipMemoryType can also be marked as
-    // hipMemoryTypeUnregistered explicitly to relay that information better.
-    // This means we cannot rely on any attribute result, hence we just mark
-    // the pointer handle as system allocated pageable host memory.
-    // The HIP runtime can handle the registering/unregistering of the memory
-    // as long as the right copy-kind (direction) is provided to hipMemcpy2D*.
-    hipRes = hipPointerGetAttributes(&srcAttribs, pSrc);
-    if (hipRes == hipErrorInvalidValue && pSrc)
-      srcIsSystemAlloc = true;
-    hipRes = hipPointerGetAttributes(&dstAttribs, (const void *)pDst);
-    if (hipRes == hipErrorInvalidValue && pDst)
-      dstIsSystemAlloc = true;
+    static const auto IsHostPinnedOrPageableMemory = [](unsigned int Type) {
 #if HIP_VERSION_MAJOR >= 6
-    srcIsSystemAlloc |= srcAttribs.type == hipMemoryTypeUnregistered;
-    dstIsSystemAlloc |= dstAttribs.type == hipMemoryTypeUnregistered;
+      return Type == hipMemoryTypeHost || Type == hipMemoryTypeUnregistered;
+#else
+      return Type == hipMemoryTypeHost;
 #endif
+    };
 
-    unsigned int srcMemType{srcAttribs.type};
-    unsigned int dstMemType{dstAttribs.type};
-
-    // ROCm 5.7.1 finally started updating the type attribute member to
-    // hipMemoryTypeManaged for shared memory allocations(hipMallocManaged).
-    // Hence, we use a separate query that verifies the pointer use via flags.
-#if HIP_VERSION >= 50700001
-    // Determine the source/destination memory type for shared allocations.
-    //
-    // NOTE: The hipPointerGetAttribute API is marked as [BETA] and fails with
-    // exit code -11 when passing a system allocated pointer to it.
-    if (!srcIsSystemAlloc && srcAttribs.isManaged) {
-      UR_ASSERT(srcAttribs.hostPointer && srcAttribs.devicePointer,
-                UR_RESULT_ERROR_INVALID_VALUE);
-      UR_CHECK_ERROR(hipPointerGetAttribute(
-          &srcMemType, HIP_POINTER_ATTRIBUTE_MEMORY_TYPE,
-          reinterpret_cast<hipDeviceptr_t>(const_cast<void *>(pSrc))));
+    ::Result<unsigned int> srcTypeResult{getPointerMemoryTypeOrInvalid(pSrc)};
+    if (!srcTypeResult.is_err()) {
+      unsigned int srcMemType = *srcTypeResult.get_value();
+      if (srcMemType == hipMemoryTypeManaged)
+        srcMemType = getManagedMemoryPointerLocation(srcMemType,
+                                                     const_cast<void *>(pSrc));
+      srcIsHost = IsHostPinnedOrPageableMemory(srcMemType);
+      srcIsDevice = srcMemType == hipMemoryTypeDevice;
+    } else {
+      srcIsHost = srcTypeResult.get_error() == UR_RESULT_ERROR_INVALID_VALUE;
     }
-    if (!dstIsSystemAlloc && dstAttribs.isManaged) {
-      UR_ASSERT(dstAttribs.hostPointer && dstAttribs.devicePointer,
-                UR_RESULT_ERROR_INVALID_VALUE);
-      UR_CHECK_ERROR(
-          hipPointerGetAttribute(&dstMemType, HIP_POINTER_ATTRIBUTE_MEMORY_TYPE,
-                                 reinterpret_cast<hipDeviceptr_t>(pDst)));
-    }
-#endif
 
-    const bool srcIsHost{(srcMemType == hipMemoryTypeHost) || srcIsSystemAlloc};
-    const bool srcIsDevice{srcMemType == hipMemoryTypeDevice};
-    const bool dstIsHost{(dstMemType == hipMemoryTypeHost) || dstIsSystemAlloc};
-    const bool dstIsDevice{dstMemType == hipMemoryTypeDevice};
+    ::Result<unsigned int> dstTypeResult{
+        getPointerMemoryTypeOrInvalid(reinterpret_cast<const void *>(pDst))};
+    if (!dstTypeResult.is_err()) {
+      unsigned int dstMemType = *dstTypeResult.get_value();
+      if (dstMemType == hipMemoryTypeManaged)
+        dstMemType = getManagedMemoryPointerLocation(dstMemType, pDst);
+      dstIsHost = IsHostPinnedOrPageableMemory(dstMemType);
+      dstIsDevice = dstMemType == hipMemoryTypeDevice;
+    } else {
+      dstIsHost = dstTypeResult.get_error() == UR_RESULT_ERROR_INVALID_VALUE;
+    }
 
     unsigned int cpyKind{};
     if (srcIsHost && dstIsHost)

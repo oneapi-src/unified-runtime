@@ -19,6 +19,30 @@
 #include <hip/hip_runtime.h>
 #include <ur/ur.hpp>
 
+inline static unsigned int
+getHipMemoryType(const hipPointerAttribute_t &Attributes) noexcept {
+#if HIP_VERSION >= 50600000
+  return Attributes.type;
+#else
+  return Attributes.memoryType;
+#endif
+}
+
+// Helper to determine the memory type for managed HIP pointer allocations.
+// ROCm 5.7.1 started updating the type attribute member to hipMemoryTypeManaged
+// for shared memory allocations alongside the IsManaged attribute member.
+[[maybe_unused]] unsigned int
+getManagedMemoryPointerLocation(unsigned int MemType, void *pMem);
+
+// Before ROCm 6, there was no good indication for (system) memory allocations
+// that are not registered as part of the HIP memory subsystem. We had to use
+// the hipErrorInvalidValue error code returned from hipPointerGetAttributes for
+// a non-null pointer assuming this to be a pointer to a pageable host memory.
+// Since ROCm version 6.0.0, the enum hipMemoryType value can now be set as
+// hipMemoryTypeUnregistered explicitly, but until then that does not exist.
+[[maybe_unused]] Result<unsigned int>
+getPointerMemoryTypeOrInvalid(const void *pMem);
+
 // Before ROCm 6, hipify doesn't support cuArrayGetDescriptor, on AMD the
 // hipArray can just be indexed, but on NVidia it is an opaque type and needs to
 // go through cuArrayGetDescriptor so implement a utility function to get the

@@ -180,3 +180,31 @@ ur_result_t urGetLastResult(ur_platform_handle_t, const char **ppMessage) {
   *ppMessage = &ErrorMessage[0];
   return ErrorMessageCode;
 }
+
+[[maybe_unused]] unsigned int
+getManagedMemoryPointerLocation(unsigned int MemType,
+                                [[maybe_unused]] void *pMem) {
+#if HIP_VERSION_MAJOR >= 5
+  assert(MemType == hipMemoryTypeManaged);
+  // Query the actual pointer location as an unsigned value via use flags.
+  UR_CHECK_ERROR(
+      hipPointerGetAttribute(&MemType, HIP_POINTER_ATTRIBUTE_MEMORY_TYPE,
+                             reinterpret_cast<hipDeviceptr_t>(pMem)));
+  // Verify the memory location; it should only be one of device or host.
+  UR_ASSERT(MemType == hipMemoryTypeHost || MemType == hipMemoryTypeDevice,
+            UR_RESULT_ERROR_INVALID_MEM_OBJECT);
+#endif
+  return MemType;
+}
+
+[[maybe_unused]] Result<unsigned int>
+getMemoryTypePointerAttributeOrInvalidValue(const void *pMem) {
+  hipPointerAttribute_t Attributes{};
+  hipError_t Ret = hipPointerGetAttributes(&Attributes, pMem);
+  if (Ret == hipErrorInvalidValue && pMem)
+    return mapErrorUR(Ret);
+  // Direct usage of the function, instead of UR_CHECK_ERROR, to get line
+  // offset.
+  checkErrorUR(Ret, __func__, __LINE__ - 4, __FILE__);
+  return getHipMemoryType(Attributes);
+}
