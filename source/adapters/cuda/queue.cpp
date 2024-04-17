@@ -32,6 +32,16 @@ void ur_queue_handle_t_::transferStreamWaitForBarrierIfNeeded(
   }
 }
 
+ur_queue_handle_t_::~ur_queue_handle_t_() {
+  urContextRelease(Context);
+  urDeviceRelease(Device);
+
+  while (!CachedEvents.empty()) {
+    std::unique_ptr<ur_event_handle_t_> p{CachedEvents.top()};
+    CachedEvents.pop();
+  }
+}
+
 CUstream ur_queue_handle_t_::getNextComputeStream(uint32_t *StreamToken) {
   uint32_t StreamI;
   uint32_t Token;

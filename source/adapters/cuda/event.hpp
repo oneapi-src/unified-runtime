@@ -90,6 +90,21 @@ public:
     const bool RequiresTimings =
         Queue->URFlags & UR_QUEUE_FLAG_PROFILING_ENABLE ||
         Type == UR_COMMAND_TIMESTAMP_RECORDING_EXP;
+    if (Queue->has_cached_events()) {
+      auto retEvent = Queue->get_cached_event();
+
+      retEvent->Stream = Stream;
+      retEvent->StreamToken = StreamToken;
+      retEvent->CommandType = Type;
+      retEvent->Queue = Queue;
+      retEvent->Context = Queue->Context;
+      retEvent->RefCount = 1;
+
+      urQueueRetain(retEvent->Queue);
+      urContextRetain(retEvent->Context);
+
+      return retEvent;
+    }
     native_type EvEnd = nullptr, EvQueued = nullptr, EvStart = nullptr;
     UR_CHECK_ERROR(cuEventCreate(
         &EvEnd, RequiresTimings ? CU_EVENT_DEFAULT : CU_EVENT_DISABLE_TIMING));
@@ -107,7 +122,7 @@ public:
     return new ur_event_handle_t_(context, eventNative);
   }
 
-  ur_result_t release();
+  void reset();
 
   ~ur_event_handle_t_();
 
