@@ -83,6 +83,21 @@ public:
   static ur_event_handle_t
   makeNative(ur_command_t Type, ur_queue_handle_t Queue, CUstream Stream,
              uint32_t StreamToken = std::numeric_limits<uint32_t>::max()) {
+    if (Queue->has_cached_events()) {
+      auto retEvent = Queue->get_cached_event();
+
+      retEvent->Stream = Stream;
+      retEvent->StreamToken = StreamToken;
+      retEvent->CommandType = Type;
+      retEvent->Queue = Queue;
+      retEvent->Context = Queue->Context;
+      retEvent->RefCount = 1;
+
+      urQueueRetain(retEvent->Queue);
+      urContextRetain(retEvent->Context);
+
+      return retEvent;
+    }
     const bool ProfilingEnabled =
         Queue->URFlags & UR_QUEUE_FLAG_PROFILING_ENABLE;
     native_type EvEnd = nullptr, EvQueued = nullptr, EvStart = nullptr;
@@ -102,7 +117,7 @@ public:
     return new ur_event_handle_t_(context, eventNative);
   }
 
-  ur_result_t release();
+  void reset();
 
   ~ur_event_handle_t_();
 
