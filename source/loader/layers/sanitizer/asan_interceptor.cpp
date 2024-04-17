@@ -596,7 +596,7 @@ SanitizerInterceptor::registerDeviceGlobals(ur_context_handle_t Context,
             Queue, Program, kSPIR_AsanDeviceGlobalCount, true,
             sizeof(NumOfDeviceGlobal), 0, &NumOfDeviceGlobal, 0, nullptr,
             nullptr);
-        if (Result == UR_RESULT_ERROR_INVALID_ARGUMENT) {
+        if (Result != UR_RESULT_SUCCESS) {
             context.logger.info("No device globals");
             continue;
         } else if (Result != UR_RESULT_SUCCESS) {
