@@ -82,6 +82,21 @@ public:
   static ur_event_handle_t
   makeNative(ur_command_t Type, ur_queue_handle_t Queue, hipStream_t Stream,
              uint32_t StreamToken = std::numeric_limits<uint32_t>::max()) {
+    if (Queue->has_cached_events()) {
+      auto retEvent = Queue->get_cached_event();
+
+      retEvent->Stream = Stream;
+      retEvent->StreamToken = StreamToken;
+      retEvent->CommandType = Type;
+      retEvent->Queue = Queue;
+      retEvent->Context = Queue->Context;
+      retEvent->RefCount = 1;
+
+      urQueueRetain(retEvent->Queue);
+      urContextRetain(retEvent->Context);
+
+      return retEvent;
+    }
     return new ur_event_handle_t_(Type, Queue->getContext(), Queue, Stream,
                                   StreamToken);
   }
@@ -91,7 +106,7 @@ public:
     return new ur_event_handle_t_(context, eventNative);
   }
 
-  ur_result_t release();
+  void reset();
 
   ~ur_event_handle_t_();
 

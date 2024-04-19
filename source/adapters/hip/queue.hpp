@@ -10,6 +10,7 @@
 #pragma once
 
 #include "common.hpp"
+#include <stack>
 
 using ur_stream_quard = std::unique_lock<std::mutex>;
 
@@ -30,6 +31,9 @@ struct ur_queue_handle_t_ {
   // keep track of which streams have applied barrier
   std::vector<bool> ComputeAppliedBarrier;
   std::vector<bool> TransferAppliedBarrier;
+  // CachedEvents assumes ownership of events.
+  // Events on the stack are destructed when queue is destructed as well.
+  std::stack<ur_event_handle_t> CachedEvents;
   ur_context_handle_t Context;
   ur_device_handle_t Device;
   hipEvent_t BarrierEvent = nullptr;
@@ -72,10 +76,7 @@ struct ur_queue_handle_t_ {
     urDeviceRetain(Device);
   }
 
-  ~ur_queue_handle_t_() {
-    urContextRelease(Context);
-    urDeviceRelease(Device);
-  }
+  ~ur_queue_handle_t_();
 
   void computeStreamWaitForBarrierIfNeeded(hipStream_t Stream,
                                            uint32_t Stream_i);
@@ -242,4 +243,14 @@ struct ur_queue_handle_t_ {
   uint32_t getNextEventId() noexcept { return ++EventCount; }
 
   bool backendHasOwnership() const noexcept { return HasOwnership; }
+
+  bool has_cached_events() const { return !CachedEvents.empty(); }
+
+  // Returns and removes an event from the CachedEvents stack.
+  ur_event_handle_t get_cached_event() {
+    assert(has_cached_events());
+    auto retEv = CachedEvents.top();
+    CachedEvents.pop();
+    return retEv;
+  }
 };

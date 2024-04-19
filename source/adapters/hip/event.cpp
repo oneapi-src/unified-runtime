@@ -47,11 +47,32 @@ ur_event_handle_t_::ur_event_handle_t_(ur_context_handle_t Context,
   urContextRetain(Context);
 }
 
+void ur_event_handle_t_::reset() {
+  RefCount = 0;
+  HasBeenWaitedOn = false;
+  IsRecorded = false;
+  IsStarted = false;
+  Queue = nullptr;
+  Context = nullptr;
+}
+
 ur_event_handle_t_::~ur_event_handle_t_() {
+  if (HasOwnership) {
+    if (EvEnd)
+      UR_CHECK_ERROR(hipEventDestroy(EvEnd));
+
+    if (EvQueued)
+      UR_CHECK_ERROR(hipEventDestroy(EvQueued));
+
+    if (EvStart)
+      UR_CHECK_ERROR(hipEventDestroy(EvStart));
+  }
   if (Queue != nullptr) {
     urQueueRelease(Queue);
   }
-  urContextRelease(Context);
+  if (Context != nullptr) {
+    urContextRelease(Context);
+  }
 }
 
 ur_result_t ur_event_handle_t_::start() {
@@ -171,21 +192,6 @@ ur_result_t ur_event_handle_t_::wait() {
   return Result;
 }
 
-ur_result_t ur_event_handle_t_::release() {
-  if (!backendHasOwnership())
-    return UR_RESULT_SUCCESS;
-
-  assert(Queue != nullptr);
-  UR_CHECK_ERROR(hipEventDestroy(EvEnd));
-
-  if (Queue->URFlags & UR_QUEUE_FLAG_PROFILING_ENABLE || isTimestampEvent()) {
-    UR_CHECK_ERROR(hipEventDestroy(EvQueued));
-    UR_CHECK_ERROR(hipEventDestroy(EvStart));
-  }
-
-  return UR_RESULT_SUCCESS;
-}
-
 UR_APIEXPORT ur_result_t UR_APICALL
 urEventWait(uint32_t numEvents, const ur_event_handle_t *phEventWaitList) {
   UR_ASSERT(numEvents > 0, UR_RESULT_ERROR_INVALID_VALUE);
@@ -293,7 +299,21 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventRelease(ur_event_handle_t hEvent) {
     std::unique_ptr<ur_event_handle_t_> event_ptr{hEvent};
     ur_result_t Result = UR_RESULT_ERROR_INVALID_EVENT;
     try {
-      Result = hEvent->release();
+      if (!hEvent->backendHasOwnership()) {
+        Result = UR_RESULT_SUCCESS;
+      } else {
+        assert(hEvent->getQueue() != nullptr);
+        assert(hEvent->getContext() != nullptr);
+
+        auto queue = event_ptr->getQueue();
+        auto context = event_ptr->getContext();
+
+        event_ptr->reset();
+        queue->CachedEvents.emplace(event_ptr.release());
+        urQueueRelease(queue);
+        urContextRelease(context);
+        Result = UR_RESULT_SUCCESS;
+      }
     } catch (...) {
       Result = UR_RESULT_ERROR_OUT_OF_RESOURCES;
     }
