@@ -16,6 +16,8 @@
 #include "memory.hpp"
 #include "queue.hpp"
 
+#include <ur/ur.hpp>
+
 extern size_t imageElementByteSize(hipArray_Format ArrayFormat);
 
 ur_result_t enqueueEventsWait(ur_queue_handle_t, hipStream_t Stream,
@@ -48,23 +50,29 @@ ur_result_t enqueueEventsWait(ur_queue_handle_t, hipStream_t Stream,
   }
 }
 
-void simpleGuessLocalWorkSize(size_t *ThreadsPerBlock,
-                              const size_t *GlobalWorkSize,
-                              const size_t MaxThreadsPerBlock[3],
-                              ur_kernel_handle_t Kernel) {
+// Determine local work sizes that result in uniform work groups.
+// The default threadsPerBlock only require handling the first work_dim
+// dimension.
+void guessLocalWorkSize(ur_device_handle_t Device, size_t *ThreadsPerBlock,
+                        const size_t *GlobalWorkSize, const uint32_t WorkDim,
+                        const size_t MaxThreadsPerBlock[3]) {
   assert(ThreadsPerBlock != nullptr);
   assert(GlobalWorkSize != nullptr);
-  assert(Kernel != nullptr);
 
-  std::ignore = Kernel;
-
-  ThreadsPerBlock[0] = std::min(MaxThreadsPerBlock[0], GlobalWorkSize[0]);
-
-  // Find a local work group size that is a divisor of the global
-  // work group size to produce uniform work groups.
-  while (GlobalWorkSize[0] % ThreadsPerBlock[0]) {
-    --ThreadsPerBlock[0];
+  // FIXME: The below assumes a three dimensional range but this is not
+  // guaranteed by UR.
+  size_t GlobalSizeNormalized[3] = {1, 1, 1};
+  for (uint32_t i = 0; i < WorkDim; i++) {
+    GlobalSizeNormalized[i] = GlobalWorkSize[i];
   }
+
+  size_t MaxBlockDim[3];
+  MaxBlockDim[0] = MaxThreadsPerBlock[0];
+  MaxBlockDim[1] = Device->getMaxBlockDimY();
+  MaxBlockDim[2] = Device->getMaxBlockDimZ();
+
+  roundToHighestFactorOfGlobalSizeIn3d(ThreadsPerBlock, GlobalSizeNormalized,
+                                       MaxBlockDim, MaxThreadsPerBlock[0]);
 }
 
 namespace {
@@ -761,29 +769,19 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
   return Result;
 }
 
-// HIP has no memset functions that allow setting values more than 4 bytes. UR
-// API lets you pass an arbitrary "pattern" to the buffer fill, which can be
-// more than 4 bytes. We must break up the pattern into 1 byte values, and set
-// the buffer using multiple strided calls.  The first 4 patterns are set using
-// hipMemsetD32Async then all subsequent 1 byte patterns are set using
-// hipMemset2DAsync which is called for each pattern.
-ur_result_t commonMemSetLargePattern(hipStream_t Stream, uint32_t PatternSize,
-                                     size_t Size, const void *pPattern,
-                                     hipDeviceptr_t Ptr) {
-  // Calculate the number of patterns, stride, number of times the pattern
-  // needs to be applied, and the number of times the first 32 bit pattern
-  // needs to be applied.
+static inline void memsetRemainPattern(hipStream_t Stream, uint32_t PatternSize,
+                                       size_t Size, const void *pPattern,
+                                       hipDeviceptr_t Ptr) {
+
+  // Calculate the number of patterns, stride and the number of times the
+  // pattern needs to be applied.
   auto NumberOfSteps = PatternSize / sizeof(uint8_t);
   auto Pitch = NumberOfSteps * sizeof(uint8_t);
   auto Height = Size / NumberOfSteps;
-  auto Count32 = Size / sizeof(uint32_t);
 
-  // Get 4-byte chunk of the pattern and call hipMemsetD32Async
-  auto Value = *(static_cast<const uint32_t *>(pPattern));
-  UR_CHECK_ERROR(hipMemsetD32Async(Ptr, Value, Count32, Stream));
   for (auto step = 4u; step < NumberOfSteps; ++step) {
     // take 1 byte of the pattern
-    Value = *(static_cast<const uint8_t *>(pPattern) + step);
+    auto Value = *(static_cast<const uint8_t *>(pPattern) + step);
 
     // offset the pointer to the part of the buffer we want to write to
     auto OffsetPtr = reinterpret_cast<void *>(reinterpret_cast<uint8_t *>(Ptr) +
@@ -793,6 +791,55 @@ ur_result_t commonMemSetLargePattern(hipStream_t Stream, uint32_t PatternSize,
     UR_CHECK_ERROR(hipMemset2DAsync(OffsetPtr, Pitch, Value, sizeof(uint8_t),
                                     Height, Stream));
   }
+}
+
+// HIP has no memset functions that allow setting values more than 4 bytes. UR
+// API lets you pass an arbitrary "pattern" to the buffer fill, which can be
+// more than 4 bytes. We must break up the pattern into 1 byte values, and set
+// the buffer using multiple strided calls.  The first 4 patterns are set using
+// hipMemsetD32Async then all subsequent 1 byte patterns are set using
+// hipMemset2DAsync which is called for each pattern.
+ur_result_t commonMemSetLargePattern(hipStream_t Stream, uint32_t PatternSize,
+                                     size_t Size, const void *pPattern,
+                                     hipDeviceptr_t Ptr) {
+
+  // Get 4-byte chunk of the pattern and call hipMemsetD32Async
+  auto Count32 = Size / sizeof(uint32_t);
+  auto Value = *(static_cast<const uint32_t *>(pPattern));
+  UR_CHECK_ERROR(hipMemsetD32Async(Ptr, Value, Count32, Stream));
+
+  // There is a bug in ROCm prior to 6.0.0 version which causes hipMemset2D
+  // to behave incorrectly when acting on host pinned memory.
+  // In such a case, the memset operation is partially emulated with memcpy.
+#if HIP_VERSION_MAJOR < 6
+  hipPointerAttribute_t ptrAttribs{};
+  UR_CHECK_ERROR(hipPointerGetAttributes(&ptrAttribs, (const void *)Ptr));
+
+  // The hostPointer attribute is non-null also for shared memory allocations.
+  // To make sure that this workaround only executes for host pinned memory, we
+  // need to check that isManaged attribute is false.
+  if (ptrAttribs.hostPointer && !ptrAttribs.isManaged) {
+    const auto NumOfCopySteps = Size / PatternSize;
+    const auto Offset = sizeof(uint32_t);
+    const auto LeftPatternSize = PatternSize - Offset;
+    const auto OffsetPatternPtr = reinterpret_cast<const void *>(
+        reinterpret_cast<const uint8_t *>(pPattern) + Offset);
+
+    // Loop through the memory area to memset, advancing each time by the
+    // PatternSize and memcpy the left over pattern bits.
+    for (uint32_t i = 0; i < NumOfCopySteps; ++i) {
+      auto OffsetDstPtr = reinterpret_cast<void *>(
+          reinterpret_cast<uint8_t *>(Ptr) + Offset + i * PatternSize);
+      UR_CHECK_ERROR(hipMemcpyAsync(OffsetDstPtr, OffsetPatternPtr,
+                                    LeftPatternSize, hipMemcpyHostToHost,
+                                    Stream));
+    }
+  } else {
+    memsetRemainPattern(Stream, PatternSize, Size, pPattern, Ptr);
+  }
+#else
+  memsetRemainPattern(Stream, PatternSize, Size, pPattern, Ptr);
+#endif
   return UR_RESULT_SUCCESS;
 }
 
@@ -1610,25 +1657,57 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
     hipPointerAttribute_t srcAttribs{};
     hipPointerAttribute_t dstAttribs{};
 
+    // Determine if pSrc and/or pDst are system allocated pageable host memory.
     bool srcIsSystemAlloc{false};
     bool dstIsSystemAlloc{false};
 
     hipError_t hipRes{};
-    // hipErrorInvalidValue returned from hipPointerGetAttributes for a non-null
-    // pointer refers to an OS-allocation, hence pageable host memory. However,
-    // this means we cannot rely on the attributes result, hence we mark system
-    // pageable memory allocation manually as host memory. The HIP runtime can
-    // handle the registering/unregistering of the memory as long as the right
-    // copy-kind (direction) is provided to hipMemcpy2DAsync for this case.
-    hipRes = hipPointerGetAttributes(&srcAttribs, (const void *)pSrc);
+    // Error code hipErrorInvalidValue returned from hipPointerGetAttributes
+    // for a non-null pointer refers to an OS-allocation, hence we can work
+    // with the assumption that this is a pointer to a pageable host memory.
+    // Since ROCm version 6.0.0, the enum hipMemoryType can also be marked as
+    // hipMemoryTypeUnregistered explicitly to relay that information better.
+    // This means we cannot rely on any attribute result, hence we just mark
+    // the pointer handle as system allocated pageable host memory.
+    // The HIP runtime can handle the registering/unregistering of the memory
+    // as long as the right copy-kind (direction) is provided to hipMemcpy2D*.
+    hipRes = hipPointerGetAttributes(&srcAttribs, pSrc);
     if (hipRes == hipErrorInvalidValue && pSrc)
       srcIsSystemAlloc = true;
     hipRes = hipPointerGetAttributes(&dstAttribs, (const void *)pDst);
     if (hipRes == hipErrorInvalidValue && pDst)
       dstIsSystemAlloc = true;
+#if HIP_VERSION_MAJOR >= 6
+    srcIsSystemAlloc |= srcAttribs.type == hipMemoryTypeUnregistered;
+    dstIsSystemAlloc |= dstAttribs.type == hipMemoryTypeUnregistered;
+#endif
 
-    const unsigned int srcMemType{srcAttribs.type};
-    const unsigned int dstMemType{dstAttribs.type};
+    unsigned int srcMemType{srcAttribs.type};
+    unsigned int dstMemType{dstAttribs.type};
+
+    // ROCm 5.7.1 finally started updating the type attribute member to
+    // hipMemoryTypeManaged for shared memory allocations(hipMallocManaged).
+    // Hence, we use a separate query that verifies the pointer use via flags.
+#if HIP_VERSION >= 50700001
+    // Determine the source/destination memory type for shared allocations.
+    //
+    // NOTE: The hipPointerGetAttribute API is marked as [BETA] and fails with
+    // exit code -11 when passing a system allocated pointer to it.
+    if (!srcIsSystemAlloc && srcAttribs.isManaged) {
+      UR_ASSERT(srcAttribs.hostPointer && srcAttribs.devicePointer,
+                UR_RESULT_ERROR_INVALID_VALUE);
+      UR_CHECK_ERROR(hipPointerGetAttribute(
+          &srcMemType, HIP_POINTER_ATTRIBUTE_MEMORY_TYPE,
+          reinterpret_cast<hipDeviceptr_t>(const_cast<void *>(pSrc))));
+    }
+    if (!dstIsSystemAlloc && dstAttribs.isManaged) {
+      UR_ASSERT(dstAttribs.hostPointer && dstAttribs.devicePointer,
+                UR_RESULT_ERROR_INVALID_VALUE);
+      UR_CHECK_ERROR(
+          hipPointerGetAttribute(&dstMemType, HIP_POINTER_ATTRIBUTE_MEMORY_TYPE,
+                                 reinterpret_cast<hipDeviceptr_t>(pDst)));
+    }
+#endif
 
     const bool srcIsHost{(srcMemType == hipMemoryTypeHost) || srcIsSystemAlloc};
     const bool srcIsDevice{srcMemType == hipMemoryTypeDevice};
@@ -1677,19 +1756,12 @@ ur_result_t deviceGlobalCopyHelper(
     bool blocking, size_t count, size_t offset, void *ptr,
     uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
     ur_event_handle_t *phEvent, GlobalVariableCopy CopyType) {
-  // Since HIP requires a the global variable to be referenced by name, we use
-  // metadata to find the correct name to access it by.
-  auto DeviceGlobalNameIt = hProgram->GlobalIDMD.find(name);
-  if (DeviceGlobalNameIt == hProgram->GlobalIDMD.end())
-    return UR_RESULT_ERROR_INVALID_VALUE;
-  std::string DeviceGlobalName = DeviceGlobalNameIt->second;
 
   try {
-    hipDeviceptr_t DeviceGlobal = 0;
+    hipDeviceptr_t DeviceGlobal = nullptr;
     size_t DeviceGlobalSize = 0;
-    UR_CHECK_ERROR(hipModuleGetGlobal(&DeviceGlobal, &DeviceGlobalSize,
-                                      hProgram->get(),
-                                      DeviceGlobalName.c_str()));
+    UR_CHECK_ERROR(hProgram->getGlobalVariablePointer(name, &DeviceGlobal,
+                                                      &DeviceGlobalSize));
 
     if (offset + count > DeviceGlobalSize)
       return UR_RESULT_ERROR_INVALID_VALUE;
@@ -1793,8 +1865,8 @@ setKernelParams(const ur_device_handle_t Device, const uint32_t WorkDim,
             return err;
         }
       } else {
-        simpleGuessLocalWorkSize(ThreadsPerBlock, GlobalWorkSize,
-                                 MaxThreadsPerBlock, Kernel);
+        guessLocalWorkSize(Device, ThreadsPerBlock, GlobalWorkSize, WorkDim,
+                           MaxThreadsPerBlock);
       }
     }
 

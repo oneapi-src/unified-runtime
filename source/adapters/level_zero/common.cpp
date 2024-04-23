@@ -9,6 +9,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "common.hpp"
+#include "logger/ur_logger.hpp"
 #include "usm.hpp"
 
 ur_result_t ze2urResult(ze_result_t ZeResult) {
@@ -58,17 +59,10 @@ ur_result_t ze2urResult(ze_result_t ZeResult) {
     return UR_RESULT_ERROR_OUT_OF_DEVICE_MEMORY;
   case ZE_RESULT_ERROR_OUT_OF_HOST_MEMORY:
     return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
+  case ZE_RESULT_ERROR_UNSUPPORTED_FEATURE:
+    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   default:
     return UR_RESULT_ERROR_UNKNOWN;
-  }
-}
-
-void urPrint(const char *Format, ...) {
-  if (UrL0Debug & UR_L0_DEBUG_BASIC) {
-    va_list Args;
-    va_start(Args, Format);
-    vfprintf(stderr, Format, Args);
-    va_end(Args);
   }
 }
 
@@ -84,8 +78,8 @@ bool setEnvVar(const char *name, const char *value) {
   int Res = setenv(name, value, 1);
 #endif
   if (Res != 0) {
-    urPrint("UR L0 Adapter was unable to set the environment variable: %s\n",
-            name);
+    logger::debug(
+        "UR L0 Adapter was unable to set the environment variable: {}", name);
     return false;
   }
   return true;
@@ -147,7 +141,7 @@ inline void zeParseError(ze_result_t ZeError, const char *&ErrorString) {
 
 ze_result_t ZeCall::doCall(ze_result_t ZeResult, const char *ZeName,
                            const char *ZeArgs, bool TraceError) {
-  urPrint("ZE ---> %s%s\n", ZeName, ZeArgs);
+  logger::debug("ZE ---> {}{}", ZeName, ZeArgs);
 
   if (UrL0LeaksDebug) {
     ++(*ZeCallCount)[ZeName];
@@ -156,7 +150,7 @@ ze_result_t ZeCall::doCall(ze_result_t ZeResult, const char *ZeName,
   if (ZeResult && TraceError) {
     const char *ErrorString = "Unknown";
     zeParseError(ZeResult, ErrorString);
-    urPrint("Error (%s) in %s\n", ErrorString, ZeName);
+    logger::error("Error ({}) in {}", ErrorString, ZeName);
   }
   return ZeResult;
 }
@@ -171,6 +165,40 @@ template <> ze_structure_type_t getZeStructureType<ze_fence_desc_t>() {
 template <> ze_structure_type_t getZeStructureType<ze_command_list_desc_t>() {
   return ZE_STRUCTURE_TYPE_COMMAND_LIST_DESC;
 }
+template <>
+ze_structure_type_t
+getZeStructureType<ze_mutable_command_list_exp_properties_t>() {
+  return ZE_STRUCTURE_TYPE_MUTABLE_COMMAND_LIST_EXP_PROPERTIES;
+}
+template <>
+ze_structure_type_t getZeStructureType<ze_mutable_command_list_exp_desc_t>() {
+  return ZE_STRUCTURE_TYPE_MUTABLE_COMMAND_LIST_EXP_DESC;
+}
+template <>
+ze_structure_type_t getZeStructureType<ze_mutable_command_id_exp_desc_t>() {
+  return ZE_STRUCTURE_TYPE_MUTABLE_COMMAND_ID_EXP_DESC;
+}
+template <>
+ze_structure_type_t getZeStructureType<ze_mutable_group_count_exp_desc_t>() {
+  return ZE_STRUCTURE_TYPE_MUTABLE_GROUP_COUNT_EXP_DESC;
+}
+template <>
+ze_structure_type_t getZeStructureType<ze_mutable_group_size_exp_desc_t>() {
+  return ZE_STRUCTURE_TYPE_MUTABLE_GROUP_SIZE_EXP_DESC;
+}
+template <>
+ze_structure_type_t getZeStructureType<ze_mutable_global_offset_exp_desc_t>() {
+  return ZE_STRUCTURE_TYPE_MUTABLE_GLOBAL_OFFSET_EXP_DESC;
+}
+template <>
+ze_structure_type_t
+getZeStructureType<ze_mutable_kernel_argument_exp_desc_t>() {
+  return ZE_STRUCTURE_TYPE_MUTABLE_KERNEL_ARGUMENT_EXP_DESC;
+}
+template <>
+ze_structure_type_t getZeStructureType<ze_mutable_commands_exp_desc_t>() {
+  return ZE_STRUCTURE_TYPE_MUTABLE_COMMANDS_EXP_DESC;
+}
 template <> ze_structure_type_t getZeStructureType<ze_context_desc_t>() {
   return ZE_STRUCTURE_TYPE_CONTEXT_DESC;
 }
@@ -178,6 +206,11 @@ template <>
 ze_structure_type_t
 getZeStructureType<ze_relaxed_allocation_limits_exp_desc_t>() {
   return ZE_STRUCTURE_TYPE_RELAXED_ALLOCATION_LIMITS_EXP_DESC;
+}
+template <>
+ze_structure_type_t
+getZeStructureType<ze_kernel_max_group_size_properties_ext_t>() {
+  return ZE_STRUCTURE_TYPE_KERNEL_MAX_GROUP_SIZE_EXT_PROPERTIES;
 }
 template <> ze_structure_type_t getZeStructureType<ze_host_mem_alloc_desc_t>() {
   return ZE_STRUCTURE_TYPE_HOST_MEM_ALLOC_DESC;
@@ -216,6 +249,10 @@ template <> ze_structure_type_t getZeStructureType<ze_driver_properties_t>() {
 }
 template <> ze_structure_type_t getZeStructureType<ze_device_properties_t>() {
   return ZE_STRUCTURE_TYPE_DEVICE_PROPERTIES;
+}
+template <>
+ze_structure_type_t getZeStructureType<ze_device_p2p_properties_t>() {
+  return ZE_STRUCTURE_TYPE_DEVICE_P2P_PROPERTIES;
 }
 template <>
 ze_structure_type_t getZeStructureType<ze_device_compute_properties_t>() {

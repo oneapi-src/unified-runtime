@@ -9,6 +9,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "program.hpp"
+#include "logger/ur_logger.hpp"
 #include "ur_level_zero.hpp"
 
 extern "C" {
@@ -405,8 +406,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramLinkExp(
         ZeModuleDesc.pBuildFlags = ZeExtModuleDesc.pBuildFlags[0];
         ZeModuleDesc.pConstants = ZeExtModuleDesc.pConstants[0];
       } else {
-        urPrint("urProgramLink: level_zero driver does not have static linking "
-                "support.");
+        logger::error(
+            "urProgramLink: level_zero driver does not have static linking "
+            "support.");
         return UR_RESULT_ERROR_INVALID_VALUE;
       }
     }
@@ -576,6 +578,33 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramGetFunctionPointer(
   if (ZeResult == ZE_RESULT_ERROR_INVALID_FUNCTION_NAME) {
     *FunctionPointerRet = 0;
     return UR_RESULT_ERROR_INVALID_KERNEL_NAME;
+  }
+
+  return ze2urResult(ZeResult);
+}
+
+UR_APIEXPORT ur_result_t UR_APICALL urProgramGetGlobalVariablePointer(
+    ur_device_handle_t
+        Device, ///< [in] handle of the device to retrieve the pointer for.
+    ur_program_handle_t
+        Program, ///< [in] handle of the program where the global variable is.
+    const char *GlobalVariableName, ///< [in] mangled name of the global
+                                    ///< variable to retrieve the pointer for.
+    size_t *GlobalVariableSizeRet,  ///< [out][optional] Returns the size of the
+                                    ///< global variable if it is found in the
+                                    ///< program.
+    void **GlobalVariablePointerRet ///< [out] Returns the pointer to the global
+                                    ///< variable if it is found in the program.
+) {
+  std::ignore = Device;
+  std::scoped_lock<ur_shared_mutex> lock(Program->Mutex);
+
+  ze_result_t ZeResult =
+      zeModuleGetGlobalPointer(Program->ZeModule, GlobalVariableName,
+                               GlobalVariableSizeRet, GlobalVariablePointerRet);
+
+  if (ZeResult == ZE_RESULT_ERROR_UNSUPPORTED_FEATURE) {
+    return UR_RESULT_ERROR_INVALID_VALUE;
   }
 
   return ze2urResult(ZeResult);
@@ -769,7 +798,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramGetBuildInfo(
     // program.
     return ReturnValue("");
   } else {
-    urPrint("urProgramGetBuildInfo: unsupported ParamName\n");
+    logger::error("urProgramGetBuildInfo: unsupported ParamName");
     return UR_RESULT_ERROR_INVALID_VALUE;
   }
   return UR_RESULT_SUCCESS;
@@ -785,7 +814,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramSetSpecializationConstant(
   std::ignore = SpecId;
   std::ignore = SpecSize;
   std::ignore = SpecValue;
-  urPrint("[UR][L0] %s function not implemented!\n", __FUNCTION__);
+  logger::error(logger::LegacyMessage("[UR][L0] {} function not implemented!"),
+                "{} function not implemented!");
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
