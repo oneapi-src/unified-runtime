@@ -3,12 +3,10 @@
 // See LICENSE.TXT
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-#ifndef UR_CONFORMANCE_PLATFORM_FIXTURES_H_INCLUDED
-#define UR_CONFORMANCE_PLATFORM_FIXTURES_H_INCLUDED
+#ifndef UR_CONFORMANCE_INCLUDE_FIXTURES_PLATFORM_H_INCLUDED
+#define UR_CONFORMANCE_INCLUDE_FIXTURES_PLATFORM_H_INCLUDED
 
-#include <uur/fixtures.h>
 namespace uur {
-namespace platform {
 
 struct urTest : ::testing::Test {
 
@@ -60,15 +58,11 @@ struct urPlatformsTest : urTest {
 struct urPlatformTest : urPlatformsTest {
 
     void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(urPlatformsTest::SetUp());
-        ASSERT_GE(platforms.size(), 1);
-        platform = platforms[0]; // TODO - which to choose?
+        platform = uur::PlatformEnvironment::instance->platform;
     }
 
     ur_platform_handle_t platform;
 };
-
-} // namespace platform
 } // namespace uur
 
-#endif // UR_CONFORMANCE_PLATFORM_FIXTURES_H_INCLUDED
+#endif // UR_CONFORMANCE_INCLUDE_FIXTURES_PLATFORM_H_INCLUDED
