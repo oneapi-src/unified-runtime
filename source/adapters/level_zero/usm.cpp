@@ -338,30 +338,28 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMHostAlloc(
   // find the allocator depending on context as we do for Shared and Device
   // allocations.
   umf_memory_pool_handle_t hPoolInternal = nullptr;
-  if (!UseUSMAllocator)
+  if (!UseUSMAllocator) {
     hPoolInternal = Context->HostMemProxyPool.get();
-}
-else if (Pool) {
-  hPoolInternal = Pool->HostMemPool.get();
-}
-else {
-  hPoolInternal = Context->HostMemPool.get();
-}
+  } else if (Pool) {
+    hPoolInternal = Pool->HostMemPool.get();
+  } else {
+    hPoolInternal = Context->HostMemPool.get();
+  }
 
-*RetMem = umfPoolAlignedMalloc(hPoolInternal, Size, Align);
-if (*RetMem == nullptr) {
-  auto umfRet = umfPoolGetLastAllocationError(hPoolInternal);
-  return umf2urResult(umfRet);
-}
+  *RetMem = umfPoolAlignedMalloc(hPoolInternal, Size, Align);
+  if (*RetMem == nullptr) {
+    auto umfRet = umfPoolGetLastAllocationError(hPoolInternal);
+    return umf2urResult(umfRet);
+  }
 
-if (IndirectAccessTrackingEnabled) {
-  // Keep track of all memory allocations in the context
-  Context->MemAllocs.emplace(std::piecewise_construct,
-                             std::forward_as_tuple(*RetMem),
-                             std::forward_as_tuple(Context));
-}
+  if (IndirectAccessTrackingEnabled) {
+    // Keep track of all memory allocations in the context
+    Context->MemAllocs.emplace(std::piecewise_construct,
+                               std::forward_as_tuple(*RetMem),
+                               std::forward_as_tuple(Context));
+  }
 
-return UR_RESULT_SUCCESS;
+  return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urUSMDeviceAlloc(
