@@ -623,8 +623,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
 
     /* cl_device_atomic_capabilities is uint64_t and
      * ur_memory_scope_capability_flags_t is uint32_t */
-    return ReturnValue(
-        static_cast<ur_memory_scope_capability_flags_t>(URCapabilities));
+    return ReturnValue(URCapabilities);
   }
 
   case UR_DEVICE_INFO_ATOMIC_FENCE_ORDER_CAPABILITIES: {
@@ -671,8 +670,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
 
     /* cl_device_atomic_capabilities is uint64_t and
      * ur_memory_order_capability_flags_t is uint32_t */
-    return ReturnValue(
-        static_cast<ur_memory_order_capability_flags_t>(URCapabilities));
+    return ReturnValue(URCapabilities);
   }
 
   case UR_DEVICE_INFO_ATOMIC_FENCE_SCOPE_CAPABILITIES: {
@@ -742,8 +740,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
 
     /* cl_device_atomic_capabilities is uint64_t and
      * ur_memory_scope_capability_flags_t is uint32_t */
-    return ReturnValue(
-        static_cast<ur_memory_scope_capability_flags_t>(URCapabilities));
+    return ReturnValue(URCapabilities);
   }
 
   case UR_DEVICE_INFO_IMAGE_SRGB: {
