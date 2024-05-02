@@ -1130,7 +1130,7 @@ struct urProgramTest : urQueueTest {
         ASSERT_SUCCESS(urPlatformGetInfo(platform, UR_PLATFORM_INFO_BACKEND,
                                          sizeof(backend), &backend, nullptr));
         // Images and samplers are not available on AMD
-        if (program_name == "image_copy" &&
+        if (program_name == "image_sampled_copy" &&
             backend == UR_PLATFORM_BACKEND_HIP) {
             GTEST_SKIP();
         }
@@ -1168,7 +1168,7 @@ template <class T> struct urProgramTestWithParam : urQueueTestWithParam<T> {
                                          UR_PLATFORM_INFO_BACKEND,
                                          sizeof(backend), &backend, nullptr));
         // Images and samplers are not available on AMD
-        if (program_name == "image_copy" &&
+        if (program_name == "image_sampled_copy" &&
             backend == UR_PLATFORM_BACKEND_HIP) {
             GTEST_SKIP();
         }
