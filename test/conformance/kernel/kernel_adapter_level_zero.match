@@ -23,3 +23,4 @@ urKernelSetSpecializationConstantsTest.Success/Intel_R__oneAPI_Unified_Runtime_o
 urKernelSetSpecializationConstantsTest.InvalidNullHandleKernel/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
 urKernelSetSpecializationConstantsTest.InvalidNullPointerSpecConstants/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
 urKernelSetSpecializationConstantsTest.InvalidSizeCount/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
+{{OPT}}{{Segmentation fault|Aborted}}
