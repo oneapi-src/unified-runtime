@@ -280,45 +280,40 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
   std::vector<ur_command_list_ptr_t> CmdLists;
 
   // There must be at least one L0 queue.
-  auto &ComputeGroup = Queue->ComputeQueueGroupsByTID.get();
-  auto &CopyGroup = Queue->CopyQueueGroupsByTID.get();
+  auto &ComputeGroup = Queue->ComputeQueueGroup;
+  auto &CopyGroup = Queue->CopyQueueGroup;
   UR_ASSERT(!ComputeGroup.ZeQueues.empty() || !CopyGroup.ZeQueues.empty(),
             UR_RESULT_ERROR_INVALID_QUEUE);
 
-  size_t NumQueues = 0;
-  for (auto &QueueMap :
-       {Queue->ComputeQueueGroupsByTID, Queue->CopyQueueGroupsByTID})
-    for (auto &QueueGroup : QueueMap)
-      NumQueues += QueueGroup.second.ZeQueues.size();
+  size_t NumQueues = ComputeGroup.ZeQueues.size() + CopyGroup.ZeQueues.size();
 
   OkToBatch = true;
   // Get an available command list tied to each command queue. We need
   // these so a queue-wide barrier can be inserted into each command
   // queue.
   CmdLists.reserve(NumQueues);
-  for (auto &QueueMap :
-       {Queue->ComputeQueueGroupsByTID, Queue->CopyQueueGroupsByTID})
-    for (auto &QueueGroup : QueueMap) {
-      bool UseCopyEngine =
-          QueueGroup.second.Type != ur_queue_handle_t_::queue_type::Compute;
-      if (Queue->UsingImmCmdLists) {
-        // If immediate command lists are being used, each will act as their own
-        // queue, so we must insert a barrier into each.
-        for (auto &ImmCmdList : QueueGroup.second.ImmCmdLists)
-          if (ImmCmdList != Queue->CommandListMap.end())
-            CmdLists.push_back(ImmCmdList);
-      } else {
-        for (auto ZeQueue : QueueGroup.second.ZeQueues) {
-          if (ZeQueue) {
-            ur_command_list_ptr_t CmdList;
-            UR_CALL(Queue->Context->getAvailableCommandList(
-                Queue, CmdList, UseCopyEngine, NumEventsInWaitList,
-                EventWaitList, OkToBatch, &ZeQueue));
-            CmdLists.push_back(CmdList);
-          }
+  for (auto QueueGroup : {&Queue->ComputeQueueGroup, &Queue->CopyQueueGroup}) {
+    bool UseCopyEngine =
+        QueueGroup->Type != ur_queue_handle_t_::queue_type::Compute;
+    if (Queue->UsingImmCmdLists) {
+      // If immediate command lists are being used, each will act as their own
+      // queue, so we must insert a barrier into each.
+      for (auto &ImmCmdList : QueueGroup->ImmCmdLists)
+        if (ImmCmdList != Queue->CommandListMap.end())
+          CmdLists.push_back(ImmCmdList);
+    } else {
+      for (auto ZeQueue : QueueGroup->ZeQueues) {
+        if (ZeQueue) {
+          ur_command_list_ptr_t CmdList;
+          // TODO(cache): just iterate over command lists, not queues
+          UR_CALL(Queue->Context->getAvailableCommandList(
+              Queue, CmdList, UseCopyEngine, NumEventsInWaitList, EventWaitList,
+              OkToBatch, &ZeQueue));
+          CmdLists.push_back(CmdList);
         }
       }
     }
+  }
 
   // If no activity has occurred on the queue then there will be no cmdlists.
   // We need one for generating an Event, so create one.
@@ -1314,7 +1309,8 @@ ur_result_t _ur_ze_event_list_t::createAndRetainUrZeEventList(
         // new command list is different from the last used command list then
         // signal new event from the last immediate command list. We are going
         // to insert a barrier in the new command list waiting for that event.
-        auto QueueGroup = CurQueue->getQueueGroup(UseCopyEngine);
+        auto QueueGroup = UseCopyEngine ? CurQueue->CopyQueueGroup
+                                        : CurQueue->ComputeQueueGroup;
         uint32_t QueueGroupOrdinal, QueueIndex;
         auto NextIndex =
             QueueGroup.getQueueIndex(&QueueGroupOrdinal, &QueueIndex,
@@ -1363,7 +1359,8 @@ ur_result_t _ur_ze_event_list_t::createAndRetainUrZeEventList(
   // the same UR Queue.
   if (CurQueue->Device->useDriverInOrderLists() && CurQueue->isInOrderQueue() &&
       CurQueue->UsingImmCmdLists) {
-    auto QueueGroup = CurQueue->getQueueGroup(UseCopyEngine);
+    auto QueueGroup =
+        UseCopyEngine ? CurQueue->CopyQueueGroup : CurQueue->ComputeQueueGroup;
     uint32_t QueueGroupOrdinal, QueueIndex;
     auto NextIndex = QueueGroup.getQueueIndex(&QueueGroupOrdinal, &QueueIndex,
                                               /*QueryOnly */ true);

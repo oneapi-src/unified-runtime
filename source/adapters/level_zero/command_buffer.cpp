@@ -1021,7 +1021,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferEnqueueExp(
   std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
   // Use compute engine rather than copy engine
   const auto UseCopyEngine = false;
-  auto &QGroup = Queue->getQueueGroup(UseCopyEngine);
+
+  // TODO(cache): use getAvailableCommandList here
+  auto &QGroup = Queue->ComputeQueueGroup;
   uint32_t QueueGroupOrdinal;
   auto &ZeCommandQueue = QGroup.getZeQueue(&QueueGroupOrdinal);
 

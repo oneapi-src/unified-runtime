@@ -11,6 +11,7 @@
 
 #include <list>
 #include <map>
+#include <stack>
 #include <stdarg.h>
 #include <string>
 #include <unordered_map>
@@ -27,9 +28,41 @@
 
 #include <umf_helpers.hpp>
 
-struct l0_command_list_cache_info {
-  ZeStruct<ze_command_queue_desc_t> ZeQueueDesc;
-  bool InOrderList = false;
+struct immediate_command_list_descriptor_t {
+  ze_device_handle_t Device;
+  ZeStruct<ze_command_queue_desc_t> QueueDesc;
+  bool operator==(const immediate_command_list_descriptor_t &rhs) const;
+};
+
+struct regular_command_list_descriptor_t {
+  ze_device_handle_t Device;
+  bool IsInOrder;
+  uint32_t Ordinal;
+  bool operator==(const regular_command_list_descriptor_t &rhs) const;
+};
+
+using command_list_descriptor_t =
+    std::variant<immediate_command_list_descriptor_t,
+                 regular_command_list_descriptor_t>;
+
+struct command_list_descriptor_hash_t {
+  inline size_t operator()(const command_list_descriptor_t &desc) const;
+};
+
+struct command_list_cache {
+  ~command_list_cache();
+
+  std::optional<ze_command_list_handle_t>
+  getCommandList(const command_list_descriptor_t &desc);
+  void addCommandList(const command_list_descriptor_t &desc,
+                      ze_command_list_handle_t cmdList);
+
+private:
+  std::unordered_map<command_list_descriptor_t,
+                     std::stack<ze_command_list_handle_t>,
+                     command_list_descriptor_hash_t>
+      ZeCommandListCache;
+  ur_mutex ZeCommandListCacheMutex;
 };
 
 struct ur_context_handle_t_ : _ur_object {
@@ -71,10 +104,6 @@ struct ur_context_handle_t_ : _ur_object {
   // called from simultaneous threads.
   ur_mutex ImmediateCommandListMutex;
 
-  // Mutex Lock for the Command List Cache. This lock is used to control both
-  // compute and copy command list caches.
-  ur_mutex ZeCommandListCacheMutex;
-
   // If context contains one device or sub-devices of the same device, we want
   // to save this device.
   // This field is only set at ur_context_handle_t creation time, and cannot
@@ -82,22 +111,11 @@ struct ur_context_handle_t_ : _ur_object {
   // ur_context_handle_t.
   ur_device_handle_t SingleRootDevice = nullptr;
 
-  // Cache of all currently available/completed command/copy lists.
-  // Note that command-list can only be re-used on the same device.
-  //
-  // TODO: explore if we should use root-device for creating command-lists
-  // as spec says that in that case any sub-device can re-use it: "The
-  // application must only use the command list for the device, or its
-  // sub-devices, which was provided during creation."
-  //
-  std::unordered_map<ze_device_handle_t,
-                     std::list<std::pair<ze_command_list_handle_t,
-                                         l0_command_list_cache_info>>>
-      ZeComputeCommandListCache;
-  std::unordered_map<ze_device_handle_t,
-                     std::list<std::pair<ze_command_list_handle_t,
-                                         l0_command_list_cache_info>>>
-      ZeCopyCommandListCache;
+  // Get reference to the command list cache for a given list type
+  // TODO: get rid of UseCopyEngine - just use ordinal?
+  auto &getCommandListCache(bool UseCopyEngine) {
+    return UseCopyEngine ? CopyListCache : ComputeListCache;
+  }
 
   // Store USM pool for USM shared and device allocations. There is 1 memory
   // pool per each pair of (context, device) per each memory type.
@@ -302,7 +320,21 @@ struct ur_context_handle_t_ : _ur_object {
   // For that the Device or its root devices need to be in the context.
   bool isValidDevice(ur_device_handle_t Device) const;
 
+  // TODO(cache): move this out of Context
+  static size_t CmdListsCleanupThreshold;
+
 private:
+  // Cache of all currently available/completed command/copy lists.
+  // Note that command-list can only be re-used on the same device.
+  //
+  // TODO: explore if we should use root-device for creating command-lists
+  // as spec says that in that case any sub-device can re-use it: "The
+  // application must only use the command list for the device, or its
+  // sub-devices, which was provided during creation."
+  //
+  command_list_cache ComputeListCache;
+  command_list_cache CopyListCache;
+
   // Get the cache of events for a provided scope and profiling mode.
   auto getEventCache(bool HostVisible, bool WithProfiling,
                      ur_device_handle_t Device) {

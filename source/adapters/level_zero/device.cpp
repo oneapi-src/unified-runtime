@@ -1062,8 +1062,6 @@ ur_device_handle_t_::useImmediateCommandLists() {
     return NotUsed;
   case 1:
     return PerQueue;
-  case 2:
-    return PerThreadPerQueue;
   default:
     return NotUsed;
   }

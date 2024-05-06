@@ -18,6 +18,72 @@
 #include "queue.hpp"
 #include "ur_level_zero.hpp"
 
+bool immediate_command_list_descriptor_t::operator==(
+    const immediate_command_list_descriptor_t &rhs) const {
+  return Device == rhs.Device && QueueDesc.flags == rhs.QueueDesc.flags &&
+         QueueDesc.mode == rhs.QueueDesc.mode &&
+         QueueDesc.priority == rhs.QueueDesc.priority;
+}
+
+bool regular_command_list_descriptor_t::operator==(
+    const regular_command_list_descriptor_t &rhs) const {
+  return Device == rhs.Device && Ordinal == rhs.Ordinal &&
+         IsInOrder == rhs.IsInOrder;
+}
+
+inline size_t command_list_descriptor_hash_t::operator()(
+    const command_list_descriptor_t &desc) const {
+  if (auto ImmCmdDesc =
+          std::get_if<immediate_command_list_descriptor_t>(&desc)) {
+    return combine_hashes(0, ImmCmdDesc->Device, ImmCmdDesc->QueueDesc.ordinal,
+                          ImmCmdDesc->QueueDesc.flags,
+                          ImmCmdDesc->QueueDesc.mode,
+                          ImmCmdDesc->QueueDesc.priority);
+  } else {
+    auto RegCmdDesc = std::get<regular_command_list_descriptor_t>(desc);
+    return combine_hashes(0, RegCmdDesc.Device, RegCmdDesc.IsInOrder,
+                          RegCmdDesc.Ordinal);
+  }
+}
+
+command_list_cache::~command_list_cache() {
+  for (auto &Kv : ZeCommandListCache) {
+    while (Kv.second.size() > 0) {
+      auto ZeCommandList = Kv.second.top();
+      if (ZeCommandList) {
+        ZE_CALL_NOCHECK(zeCommandListDestroy, (ZeCommandList));
+      }
+      Kv.second.pop();
+    }
+  }
+}
+
+std::optional<ze_command_list_handle_t>
+command_list_cache::getCommandList(const command_list_descriptor_t &desc) {
+  std::scoped_lock<ur_mutex> Lock(ZeCommandListCacheMutex);
+  auto it = ZeCommandListCache.find(desc);
+  if (it == ZeCommandListCache.end())
+    return std::nullopt;
+
+  assert(!it->second.empty());
+
+  auto CommandListHandle = it->second.top();
+  it->second.pop();
+
+  if (it->second.empty())
+    ZeCommandListCache.erase(it);
+
+  return std::make_optional(CommandListHandle);
+}
+
+void command_list_cache::addCommandList(const command_list_descriptor_t &desc,
+                                        ze_command_list_handle_t cmdList) {
+  // TODO: add a limit?
+  std::scoped_lock<ur_mutex> Lock(ZeCommandListCacheMutex);
+  auto [it, _] = ZeCommandListCache.try_emplace(desc);
+  it->second.push(cmdList);
+}
+
 UR_APIEXPORT ur_result_t UR_APICALL urContextCreate(
     uint32_t DeviceCount, ///< [in] the number of devices given in phDevices
     const ur_device_handle_t
@@ -428,29 +494,6 @@ ur_result_t ur_context_handle_t_::finalize() {
   if (ZeResult && ZeResult != ZE_RESULT_ERROR_UNINITIALIZED)
     return ze2urResult(ZeResult);
 
-  std::scoped_lock<ur_mutex> Lock(ZeCommandListCacheMutex);
-  for (auto &List : ZeComputeCommandListCache) {
-    for (auto &Item : List.second) {
-      ze_command_list_handle_t ZeCommandList = Item.first;
-      if (ZeCommandList) {
-        auto ZeResult = ZE_CALL_NOCHECK(zeCommandListDestroy, (ZeCommandList));
-        // Gracefully handle the case that L0 was already unloaded.
-        if (ZeResult && ZeResult != ZE_RESULT_ERROR_UNINITIALIZED)
-          return ze2urResult(ZeResult);
-      }
-    }
-  }
-  for (auto &List : ZeCopyCommandListCache) {
-    for (auto &Item : List.second) {
-      ze_command_list_handle_t ZeCommandList = Item.first;
-      if (ZeCommandList) {
-        auto ZeResult = ZE_CALL_NOCHECK(zeCommandListDestroy, (ZeCommandList));
-        // Gracefully handle the case that L0 was already unloaded.
-        if (ZeResult && ZeResult != ZE_RESULT_ERROR_UNINITIALIZED)
-          return ze2urResult(ZeResult);
-      }
-    }
-  }
   return UR_RESULT_SUCCESS;
 }
 
@@ -623,7 +666,7 @@ ur_context_handle_t_::decrementUnreleasedEventsInPool(ur_event_handle_t Event) {
 
 // Get value of the threshold for number of active command lists allowed before
 // we start heuristically cleaning them up.
-static const size_t CmdListsCleanupThreshold = [] {
+size_t ur_context_handle_t_::CmdListsCleanupThreshold = [] {
   const char *UrRet = std::getenv("UR_L0_COMMANDLISTS_CLEANUP_THRESHOLD");
   const char *PiRet =
       std::getenv("SYCL_PI_LEVEL_ZERO_COMMANDLISTS_CLEANUP_THRESHOLD");
@@ -643,6 +686,7 @@ static const size_t CmdListsCleanupThreshold = [] {
 }();
 
 // Retrieve an available command list to be used in a PI call.
+// TODO(cache): remove ForcedCmdQueue
 ur_result_t ur_context_handle_t_::getAvailableCommandList(
     ur_queue_handle_t Queue, ur_command_list_ptr_t &CommandList,
     bool UseCopyEngine, uint32_t NumEventsInWaitList,
@@ -650,7 +694,11 @@ ur_result_t ur_context_handle_t_::getAvailableCommandList(
     ze_command_queue_handle_t *ForcedCmdQueue) {
   // Immediate commandlists have been pre-allocated and are always available.
   if (Queue->UsingImmCmdLists) {
-    CommandList = Queue->getQueueGroup(UseCopyEngine).getImmCmdList();
+    CommandList =
+        (UseCopyEngine ? Queue->CopyQueueGroup : Queue->ComputeQueueGroup)
+            .getImmCmdList();
+
+    // TODO(cache): remove this from the hot path
     if (CommandList->second.EventList.size() >=
         Queue->getImmdCmmdListsEventCleanupThreshold()) {
       std::vector<ur_event_handle_t> EventListToCleanup;
@@ -662,6 +710,7 @@ ur_result_t ur_context_handle_t_::getAvailableCommandList(
       return Res;
     return UR_RESULT_SUCCESS;
   } else {
+    // TODO(cache): remove this from the hot path
     // Cleanup regular command-lists if there are too many.
     // It handles the case that the queue is not synced to the host
     // for a long time and we want to reclaim the command-lists for
@@ -700,86 +749,16 @@ ur_result_t ur_context_handle_t_::getAvailableCommandList(
     // have been enqueued into the command-list when they were created.
   }
 
-  // Create/Reuse the command list, because in Level Zero commands are added to
-  // the command lists, and later are then added to the command queue.
-  // Each command list is paired with an associated fence to track when the
-  // command list is available for reuse.
-  ur_result_t ur_result = UR_RESULT_ERROR_OUT_OF_RESOURCES;
-
-  // Initally, we need to check if a command list has already been created
-  // on this device that is available for use. If so, then reuse that
-  // Level-Zero Command List and Fence for this PI call.
-  {
-    // Make sure to acquire the lock before checking the size, or there
-    // will be a race condition.
-    std::scoped_lock<ur_mutex> Lock(Queue->Context->ZeCommandListCacheMutex);
-    // Under mutex since operator[] does insertion on the first usage for
-    // every unique ZeDevice.
-    auto &ZeCommandListCache =
-        UseCopyEngine
-            ? Queue->Context->ZeCopyCommandListCache[Queue->Device->ZeDevice]
-            : Queue->Context
-                  ->ZeComputeCommandListCache[Queue->Device->ZeDevice];
-
-    for (auto ZeCommandListIt = ZeCommandListCache.begin();
-         ZeCommandListIt != ZeCommandListCache.end(); ++ZeCommandListIt) {
-      // If this is an InOrder Queue, then only allow lists which are in order.
-      if (Queue->Device->useDriverInOrderLists() && Queue->isInOrderQueue() &&
-          !(ZeCommandListIt->second.InOrderList)) {
-        continue;
-      }
-      auto &ZeCommandList = ZeCommandListIt->first;
-      auto it = Queue->CommandListMap.find(ZeCommandList);
-      if (it != Queue->CommandListMap.end()) {
-        if (ForcedCmdQueue && *ForcedCmdQueue != it->second.ZeQueue)
-          continue;
-        CommandList = it;
-        if (CommandList->second.ZeFence != nullptr)
-          CommandList->second.ZeFenceInUse = true;
-      } else {
-        // If there is a command list available on this context, but it
-        // wasn't yet used in this queue then create a new entry in this
-        // queue's map to hold the fence and other associated command
-        // list information.
-        auto &QGroup = Queue->getQueueGroup(UseCopyEngine);
-        uint32_t QueueGroupOrdinal;
-        auto &ZeCommandQueue = ForcedCmdQueue
-                                   ? *ForcedCmdQueue
-                                   : QGroup.getZeQueue(&QueueGroupOrdinal);
-        if (ForcedCmdQueue)
-          QueueGroupOrdinal = QGroup.getCmdQueueOrdinal(ZeCommandQueue);
-
-        ze_fence_handle_t ZeFence;
-        ZeStruct<ze_fence_desc_t> ZeFenceDesc;
-        ZE2UR_CALL(zeFenceCreate, (ZeCommandQueue, &ZeFenceDesc, &ZeFence));
-        ZeStruct<ze_command_queue_desc_t> ZeQueueDesc;
-        ZeQueueDesc.ordinal = QueueGroupOrdinal;
-
-        CommandList =
-            Queue->CommandListMap
-                .emplace(ZeCommandList,
-                         ur_command_list_info_t(ZeFence, true, false,
-                                                ZeCommandQueue, ZeQueueDesc,
-                                                Queue->useCompletionBatching()))
-                .first;
-      }
-      ZeCommandListCache.erase(ZeCommandListIt);
-      if (auto Res = Queue->insertStartBarrierIfDiscardEventsMode(CommandList))
-        return Res;
-      if (auto Res = Queue->insertActiveBarriers(CommandList, UseCopyEngine))
-        return Res;
-      return UR_RESULT_SUCCESS;
-    }
-  }
-
-  // If there are no available command lists in the cache, then we check for
-  // command lists that have already signalled, but have not been added to the
-  // available list yet. Each command list has a fence associated which tracks
+  // Each command list has a fence associated which tracks
   // if a command list has completed dispatch of its commands and is ready for
   // reuse. If a command list is found to have been signalled, then the
   // command list & fence are reset and we return.
   for (auto it = Queue->CommandListMap.begin();
        it != Queue->CommandListMap.end(); ++it) {
+    if (ForcedCmdQueue && *ForcedCmdQueue != it->second.ZeQueue) {
+      continue;
+    }
+
     // Make sure this is the command list type needed.
     if (UseCopyEngine != it->second.isCopy(Queue))
       continue;
@@ -790,8 +769,9 @@ ur_result_t ur_context_handle_t_::getAvailableCommandList(
       continue;
     }
 
-    ze_result_t ZeResult =
-        ZE_CALL_NOCHECK(zeFenceQueryStatus, (it->second.ZeFence));
+    ze_result_t ZeResult = ZE_RESULT_SUCCESS;
+    if (it->second.ZeFenceInUse)
+      ZeResult = ZE_CALL_NOCHECK(zeFenceQueryStatus, (it->second.ZeFence));
     if (ZeResult == ZE_RESULT_SUCCESS) {
       std::vector<ur_event_handle_t> EventListToCleanup;
       Queue->resetCommandList(it, false, EventListToCleanup);
@@ -807,9 +787,11 @@ ur_result_t ur_context_handle_t_::getAvailableCommandList(
 
   // If there are no available command lists nor signalled command lists,
   // then we must create another command list.
-  ur_result = Queue->createCommandList(UseCopyEngine, CommandList);
+  UR_CALL(Queue->initializeSingleRegularCommandList(
+      (UseCopyEngine ? Queue->CopyQueueGroup : Queue->ComputeQueueGroup),
+      CommandList, ForcedCmdQueue));
   CommandList->second.ZeFenceInUse = true;
-  return ur_result;
+  return UR_RESULT_SUCCESS;
 }
 
 bool ur_context_handle_t_::isValidDevice(ur_device_handle_t Device) const {

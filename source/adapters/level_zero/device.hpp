@@ -135,10 +135,7 @@ struct ur_device_handle_t_ : _ur_object {
     // Immediate commandlists are not used.
     NotUsed = 0,
     // One set of compute and copy immediate commandlists per queue.
-    PerQueue,
-    // One set of compute and copy immediate commandlists per host thread that
-    // accesses the queue.
-    PerThreadPerQueue
+    PerQueue
   };
   // Read env settings to select immediate commandlist mode.
   ImmCmdlistMode useImmediateCommandLists();

@@ -408,42 +408,40 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueGetInfo(
         Queue->hasOpenCommandList(IsCopy{false}))
       return ReturnValue(false);
 
-    for (const auto &QueueMap :
-         {Queue->ComputeQueueGroupsByTID, Queue->CopyQueueGroupsByTID}) {
-      for (const auto &QueueGroup : QueueMap) {
-        if (Queue->UsingImmCmdLists) {
-          // Immediate command lists are not associated with any Level Zero
-          // queue, that's why we have to check status of events in each
-          // immediate command list. Start checking from the end and exit early
-          // if some event is not completed.
-          for (const auto &ImmCmdList : QueueGroup.second.ImmCmdLists) {
-            if (ImmCmdList == Queue->CommandListMap.end())
-              continue;
+    for (const auto QueueGroup :
+         {&Queue->ComputeQueueGroup, &Queue->CopyQueueGroup}) {
+      if (Queue->UsingImmCmdLists) {
+        // Immediate command lists are not associated with any Level Zero
+        // queue, that's why we have to check status of events in each
+        // immediate command list. Start checking from the end and exit early
+        // if some event is not completed.
+        for (const auto &ImmCmdList : QueueGroup->ImmCmdLists) {
+          if (ImmCmdList == Queue->CommandListMap.end())
+            continue;
 
-            const auto &EventList = ImmCmdList->second.EventList;
-            for (auto It = EventList.crbegin(); It != EventList.crend(); It++) {
-              ze_result_t ZeResult =
-                  ZE_CALL_NOCHECK(zeEventQueryStatus, ((*It)->ZeEvent));
-              if (ZeResult == ZE_RESULT_NOT_READY) {
-                return ReturnValue(false);
-              } else if (ZeResult != ZE_RESULT_SUCCESS) {
-                return ze2urResult(ZeResult);
-              }
-            }
-          }
-        } else {
-          for (const auto &ZeQueue : QueueGroup.second.ZeQueues) {
-            if (!ZeQueue)
-              continue;
-            // Provide 0 as the timeout parameter to immediately get the status
-            // of the Level Zero queue.
-            ze_result_t ZeResult = ZE_CALL_NOCHECK(zeCommandQueueSynchronize,
-                                                   (ZeQueue, /* timeout */ 0));
+          const auto &EventList = ImmCmdList->second.EventList;
+          for (auto It = EventList.crbegin(); It != EventList.crend(); It++) {
+            ze_result_t ZeResult =
+                ZE_CALL_NOCHECK(zeEventQueryStatus, ((*It)->ZeEvent));
             if (ZeResult == ZE_RESULT_NOT_READY) {
               return ReturnValue(false);
             } else if (ZeResult != ZE_RESULT_SUCCESS) {
               return ze2urResult(ZeResult);
             }
+          }
+        }
+      } else {
+        for (const auto &ZeQueue : QueueGroup->ZeQueues) {
+          if (!ZeQueue)
+            continue;
+          // Provide 0 as the timeout parameter to immediately get the status
+          // of the Level Zero queue.
+          ze_result_t ZeResult = ZE_CALL_NOCHECK(zeCommandQueueSynchronize,
+                                                 (ZeQueue, /* timeout */ 0));
+          if (ZeResult == ZE_RESULT_NOT_READY) {
+            return ReturnValue(false);
+          } else if (ZeResult != ZE_RESULT_SUCCESS) {
+            return ze2urResult(ZeResult);
           }
         }
       }
@@ -459,17 +457,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueGetInfo(
 
   return UR_RESULT_SUCCESS;
 }
-
-// Controls if we should choose doing eager initialization
-// to make it happen on warmup paths and have the reportable
-// paths be less likely affected.
-//
-static bool doEagerInit = [] {
-  const char *UrRet = std::getenv("UR_L0_EAGER_INIT");
-  const char *PiRet = std::getenv("SYCL_EAGER_INIT");
-  const char *EagerInit = UrRet ? UrRet : (PiRet ? PiRet : nullptr);
-  return EagerInit ? std::atoi(EagerInit) != 0 : false;
-}();
 
 UR_APIEXPORT ur_result_t UR_APICALL urQueueCreate(
     ur_context_handle_t Context, ///< [in] handle of the context object
@@ -537,46 +524,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreate(
     return UR_RESULT_ERROR_UNKNOWN;
   }
 
-  // Do eager initialization of Level Zero handles on request.
-  if (doEagerInit) {
-    ur_queue_handle_t Q = *Queue;
-    // Creates said number of command-lists.
-    auto warmupQueueGroup = [Q](bool UseCopyEngine,
-                                uint32_t RepeatCount) -> ur_result_t {
-      ur_command_list_ptr_t CommandList;
-      while (RepeatCount--) {
-        if (Q->UsingImmCmdLists) {
-          CommandList = Q->getQueueGroup(UseCopyEngine).getImmCmdList();
-        } else {
-          // Heuristically create some number of regular command-list to reuse.
-          for (int I = 0; I < 10; ++I) {
-            UR_CALL(Q->createCommandList(UseCopyEngine, CommandList));
-            // Immediately return them to the cache of available command-lists.
-            std::vector<ur_event_handle_t> EventsUnused;
-            UR_CALL(Q->resetCommandList(CommandList, true /* MakeAvailable */,
-                                        EventsUnused));
-          }
-        }
-      }
-      return UR_RESULT_SUCCESS;
-    };
-    // Create as many command-lists as there are queues in the group.
-    // With this the underlying round-robin logic would initialize all
-    // native queues, and create command-lists and their fences.
-    // At this point only the thread creating the queue will have associated
-    // command-lists. Other threads have not accessed the queue yet. So we can
-    // only warmup the initial thread's command-lists.
-    const auto &QueueGroup = Q->ComputeQueueGroupsByTID.get();
-    UR_CALL(warmupQueueGroup(false, QueueGroup.UpperIndex -
-                                        QueueGroup.LowerIndex + 1));
-    if (Q->useCopyEngine()) {
-      const auto &QueueGroup = Q->CopyQueueGroupsByTID.get();
-      UR_CALL(warmupQueueGroup(true, QueueGroup.UpperIndex -
-                                         QueueGroup.LowerIndex + 1));
-    }
-    // TODO: warmup event pools. Both host-visible and device-only.
-  }
-
   return UR_RESULT_SUCCESS;
 }
 
@@ -629,6 +576,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueRelease(
         // Destroy completions batches if they are being used. This needs
         // to happen prior to resetCommandList so that all events are
         // checked.
+        // TODO(cache): split regular vs immediate cmd lists path
         it->second.completions.reset();
         Queue->resetCommandList(it, true, EventListToCleanup);
       }
@@ -642,25 +590,33 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueRelease(
         if (ZeResult && ZeResult != ZE_RESULT_ERROR_UNINITIALIZED)
           return ze2urResult(ZeResult);
       }
+      // TODO(cache): move this to a separate function
       if (Queue->UsingImmCmdLists && Queue->OwnZeCommandQueue) {
-        std::scoped_lock<ur_mutex> Lock(
-            Queue->Context->ZeCommandListCacheMutex);
         const ur_command_list_info_t &MapEntry = it->second;
         if (MapEntry.CanReuse) {
-          // Add commandlist to the cache for future use.
-          // It will be deleted when the context is destroyed.
-          auto &ZeCommandListCache =
-              MapEntry.isCopy(Queue)
-                  ? Queue->Context
-                        ->ZeCopyCommandListCache[Queue->Device->ZeDevice]
-                  : Queue->Context
-                        ->ZeComputeCommandListCache[Queue->Device->ZeDevice];
-          struct l0_command_list_cache_info ListInfo;
-          ListInfo.ZeQueueDesc = it->second.ZeQueueDesc;
-          ListInfo.InOrderList = it->second.IsInOrderList;
-          ZeCommandListCache.push_back({it->first, ListInfo});
+          immediate_command_list_descriptor_t Desc{Queue->Device->ZeDevice,
+                                                   it->second.ZeQueueDesc};
+          Queue->Context->getCommandListCache(MapEntry.isCopy(Queue))
+              .addCommandList(Desc, it->first);
         } else {
-          // A non-reusable comamnd list that came from a make_queue call is
+          // A non-reusable command list that came from a make_queue call is
+          // destroyed since it cannot be recycled.
+          ze_command_list_handle_t ZeCommandList = it->first;
+          if (ZeCommandList) {
+            ZE2UR_CALL(zeCommandListDestroy, (ZeCommandList));
+          }
+        }
+      } else if (Queue->OwnZeCommandQueue) {
+        // Regular command lists
+        const ur_command_list_info_t &MapEntry = it->second;
+        if (MapEntry.CanReuse) {
+          regular_command_list_descriptor_t Desc{
+              Queue->Device->ZeDevice, it->second.IsInOrderList,
+              it->second.ZeQueueDesc.ordinal};
+          Queue->Context->getCommandListCache(MapEntry.isCopy(Queue))
+              .addCommandList(Desc, it->first);
+        } else {
+          // A non-reusable command list that came from a make_queue call is
           // destroyed since it cannot be recycled.
           ze_command_list_handle_t ZeCommandList = it->first;
           if (ZeCommandList) {
@@ -699,8 +655,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueGetNativeHandle(
 
   int32_t NativeHandleDesc{};
 
-  // Get handle to this thread's queue group.
-  auto &QueueGroup = Queue->getQueueGroup(false /*compute*/);
+  auto &QueueGroup = Queue->ComputeQueueGroup;
 
   if (Queue->UsingImmCmdLists) {
     auto ZeCmdList = ur_cast<ze_command_list_handle_t *>(NativeQueue);
@@ -712,7 +667,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueGetNativeHandle(
     auto ZeQueue = ur_cast<ze_command_queue_handle_t *>(NativeQueue);
 
     // Extract a Level Zero compute queue handle from the given PI queue
-    auto &QueueGroup = Queue->getQueueGroup(false /*compute*/);
     uint32_t QueueGroupOrdinalUnused;
     *ZeQueue = QueueGroup.getZeQueue(&QueueGroupOrdinalUnused);
     // TODO: How to pass this up in the urQueueGetNativeHandle interface?
@@ -804,7 +758,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
     } catch (...) {
       return UR_RESULT_ERROR_UNKNOWN;
     }
-    auto &InitialGroup = (*RetQueue)->ComputeQueueGroupsByTID.begin()->second;
+    auto &InitialGroup = (*RetQueue)->ComputeQueueGroup;
     InitialGroup.setImmCmdList(*RetQueue,
                                ur_cast<ze_command_list_handle_t>(NativeQueue));
   } else {
@@ -848,12 +802,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueFinish(
     UR_CALL(UrQueue->executeAllOpenCommandLists());
 
     // Make a copy of queues to sync and release the lock.
-    for (auto &QueueMap :
-         {UrQueue->ComputeQueueGroupsByTID, UrQueue->CopyQueueGroupsByTID})
-      for (auto &QueueGroup : QueueMap)
-        std::copy(QueueGroup.second.ZeQueues.begin(),
-                  QueueGroup.second.ZeQueues.end(),
-                  std::back_inserter(ZeQueues));
+    for (auto QueueGroup :
+         {&UrQueue->ComputeQueueGroup, &UrQueue->CopyQueueGroup})
+      std::copy(QueueGroup->ZeQueues.begin(), QueueGroup->ZeQueues.end(),
+                std::back_inserter(ZeQueues));
 
     // Remember the last command's event.
     auto LastCommandEvent = UrQueue->LastCommandEvent;
@@ -1067,7 +1019,9 @@ ur_queue_handle_t_::ur_queue_handle_t_(
     std::vector<ze_command_queue_handle_t> &CopyQueues,
     ur_context_handle_t Context, ur_device_handle_t Device,
     bool OwnZeCommandQueue, ur_queue_flags_t Properties, int ForceComputeIndex)
-    : Context{Context}, Device{Device}, OwnZeCommandQueue{OwnZeCommandQueue},
+    : ComputeQueueGroup(this, queue_type::Compute),
+      CopyQueueGroup(this, queue_type::MainCopy), Context{Context},
+      Device{Device}, OwnZeCommandQueue{OwnZeCommandQueue},
       Properties(Properties) {
   // Set the type of commandlists the queue will use when user-selected
   // submission mode. Otherwise use env var setting and if unset, use default.
@@ -1088,8 +1042,6 @@ ur_queue_handle_t_::ur_queue_handle_t_(
   // First, see if the queue's device allows for round-robin or it is
   // fixed to one particular compute CCS (it is so for sub-sub-devices).
   auto &ComputeQueueGroupInfo = Device->QueueGroup[queue_type::Compute];
-  ur_queue_group_t ComputeQueueGroup{reinterpret_cast<ur_queue_handle_t>(this),
-                                     queue_type::Compute};
   ComputeQueueGroup.ZeQueues = ComputeQueues;
   // Create space to hold immediate commandlists corresponding to the
   // ZeQueues
@@ -1132,11 +1084,7 @@ ur_queue_handle_t_::ur_queue_handle_t_(
         ComputeQueueGroup.ZeQueues.size(), CommandListMap.end());
   }
 
-  ComputeQueueGroupsByTID.set(ComputeQueueGroup);
-
   // Copy group initialization.
-  ur_queue_group_t CopyQueueGroup{reinterpret_cast<ur_queue_handle_t>(this),
-                                  queue_type::MainCopy};
   const auto &Range = getRangeOfAllowedCopyEngines((ur_device_handle_t)Device);
   if (Range.first < 0 || Range.second < 0) {
     // We are asked not to use copy engines, just do nothing.
@@ -1159,7 +1107,12 @@ ur_queue_handle_t_::ur_queue_handle_t_(
       }
     }
   }
-  CopyQueueGroupsByTID.set(CopyQueueGroup);
+
+  if (UsingImmCmdLists) {
+    initializeImmediateCommandLists();
+  } else {
+    initializeRegularCommandLists();
+  }
 
   // Initialize compute/copy command batches.
   ComputeCommandBatch.OpenCommandList = CommandListMap.end();
@@ -1181,6 +1134,64 @@ ur_queue_handle_t_::ur_queue_handle_t_(
       UsingImmCmdLists && isInOrderQueue() && Device->useDriverInOrderLists() &&
       useDriverCounterBasedEvents &&
       Device->Platform->ZeDriverEventPoolCountingEventsExtensionFound;
+}
+
+// TODO(cache): remove ForcedCmdQueue
+ur_result_t ur_queue_handle_t_::initializeSingleRegularCommandList(
+    ur_queue_group_t &QueueGroup, ur_command_list_ptr_t &CommandList,
+    ze_command_queue_handle_t *ForcedCmdQueue) {
+  bool IsInOrder = Device->useDriverInOrderLists() && isInOrderQueue();
+
+  uint32_t Ordinal;
+  auto ZeQueue = QueueGroup.getZeQueue(&Ordinal);
+  regular_command_list_descriptor_t Desc{Device->ZeDevice, IsInOrder, Ordinal};
+  auto ZeCommandListOpt =
+      Context->getCommandListCache(QueueGroup.isCopy()).getCommandList(Desc);
+
+  if (ForcedCmdQueue) {
+    ZeQueue = *ForcedCmdQueue;
+  }
+
+  if (!ZeCommandListOpt.has_value()) {
+    UR_CALL(createCommandList(QueueGroup.isCopy(), CommandList, &ZeQueue));
+  } else {
+    ze_fence_handle_t ZeFence;
+    ZeStruct<ze_fence_desc_t> ZeFenceDesc;
+    ZE2UR_CALL(zeFenceCreate, (ZeQueue, &ZeFenceDesc, &ZeFence));
+    ZeStruct<ze_command_queue_desc_t> ZeQueueDesc;
+    ZeQueueDesc.ordinal = Ordinal;
+
+    CommandList = CommandListMap
+                      .emplace(ZeCommandListOpt.value(),
+                               ur_command_list_info_t(ZeFence, true, false,
+                                                      ZeQueue, ZeQueueDesc,
+                                                      useCompletionBatching()))
+                      .first;
+  }
+
+  return UR_RESULT_SUCCESS;
+}
+
+ur_result_t ur_queue_handle_t_::initializeRegularCommandLists() {
+  // TODO: make this an env variable? Should this be a hard limit per queue?
+  static constexpr size_t InitialNumRegularLists = 10;
+  for (auto QueueGroup : {&ComputeQueueGroup, &CopyQueueGroup}) {
+    for (size_t I = 0; I < QueueGroup->ZeQueues.size() * InitialNumRegularLists;
+         I++) {
+      ur_command_list_ptr_t CommandList;
+      UR_CALL(initializeSingleRegularCommandList(*QueueGroup, CommandList));
+    }
+  }
+  return UR_RESULT_SUCCESS;
+}
+
+ur_result_t ur_queue_handle_t_::initializeImmediateCommandLists() {
+  for (auto QueueGroup : {&ComputeQueueGroup, &CopyQueueGroup}) {
+    for (size_t I = 0; I < QueueGroup->ZeQueues.size(); I++) {
+      QueueGroup->getImmCmdList();
+    }
+  }
+  return UR_RESULT_SUCCESS;
 }
 
 void ur_queue_handle_t_::adjustBatchSizeForFullBatch(bool IsCopy) {
@@ -1582,16 +1593,14 @@ ur_result_t urQueueReleaseInternal(ur_queue_handle_t Queue) {
   }
 
   if (UrQueue->OwnZeCommandQueue) {
-    for (auto &QueueMap :
-         {UrQueue->ComputeQueueGroupsByTID, UrQueue->CopyQueueGroupsByTID})
-      for (auto &QueueGroup : QueueMap)
-        for (auto &ZeQueue : QueueGroup.second.ZeQueues)
-          if (ZeQueue) {
-            auto ZeResult = ZE_CALL_NOCHECK(zeCommandQueueDestroy, (ZeQueue));
-            // Gracefully handle the case that L0 was already unloaded.
-            if (ZeResult && ZeResult != ZE_RESULT_ERROR_UNINITIALIZED)
-              return ze2urResult(ZeResult);
-          }
+    for (auto QueueGroup : {&Queue->ComputeQueueGroup, &Queue->CopyQueueGroup})
+      for (auto &ZeQueue : QueueGroup->ZeQueues)
+        if (ZeQueue) {
+          auto ZeResult = ZE_CALL_NOCHECK(zeCommandQueueDestroy, (ZeQueue));
+          // Gracefully handle the case that L0 was already unloaded.
+          if (ZeResult && ZeResult != ZE_RESULT_ERROR_UNINITIALIZED)
+            return ze2urResult(ZeResult);
+        }
   }
 
   Queue->clearEndTimeRecordings();
@@ -1710,39 +1719,35 @@ ur_result_t ur_queue_handle_t_::synchronize() {
 
       // clean up all events known to have been completed as well,
       // so they can be reused later
-      for (auto &QueueMap : {ComputeQueueGroupsByTID, CopyQueueGroupsByTID}) {
-        for (auto &QueueGroup : QueueMap) {
-          if (UsingImmCmdLists) {
-            for (auto &ImmCmdList : QueueGroup.second.ImmCmdLists) {
-              if (ImmCmdList == this->CommandListMap.end())
-                continue;
-              // Cleanup all events from the synced command list.
-              CleanupEventListFromResetCmdList(ImmCmdList->second.EventList,
-                                               true);
-              ImmCmdList->second.EventList.clear();
-            }
+      for (auto QueueGroup : {&ComputeQueueGroup, &CopyQueueGroup}) {
+        if (UsingImmCmdLists) {
+          for (auto &ImmCmdList : QueueGroup->ImmCmdLists) {
+            if (ImmCmdList == this->CommandListMap.end())
+              continue;
+            // Cleanup all events from the synced command list.
+            CleanupEventListFromResetCmdList(ImmCmdList->second.EventList,
+                                             true);
+            ImmCmdList->second.EventList.clear();
           }
         }
       }
     } else {
       // Otherwise sync all L0 queues/immediate command-lists.
-      for (auto &QueueMap : {ComputeQueueGroupsByTID, CopyQueueGroupsByTID}) {
-        for (auto &QueueGroup : QueueMap) {
-          if (UsingImmCmdLists) {
-            for (auto &ImmCmdList : QueueGroup.second.ImmCmdLists)
-              UR_CALL(syncImmCmdList(this, ImmCmdList));
-          } else {
-            for (auto &ZeQueue : QueueGroup.second.ZeQueues)
-              if (ZeQueue) {
-                if (UrL0QueueSyncNonBlocking) {
-                  this->Mutex.unlock();
-                  ZE2UR_CALL(zeHostSynchronize, (ZeQueue));
-                  this->Mutex.lock();
-                } else {
-                  ZE2UR_CALL(zeHostSynchronize, (ZeQueue));
-                }
+      for (auto QueueGroup : {&ComputeQueueGroup, &CopyQueueGroup}) {
+        if (UsingImmCmdLists) {
+          for (auto &ImmCmdList : QueueGroup->ImmCmdLists)
+            UR_CALL(syncImmCmdList(this, ImmCmdList));
+        } else {
+          for (auto &ZeQueue : QueueGroup->ZeQueues)
+            if (ZeQueue) {
+              if (UrL0QueueSyncNonBlocking) {
+                this->Mutex.unlock();
+                ZE2UR_CALL(zeHostSynchronize, (ZeQueue));
+                this->Mutex.lock();
+              } else {
+                ZE2UR_CALL(zeHostSynchronize, (ZeQueue));
               }
-          }
+            }
         }
       }
     }
@@ -2067,16 +2072,14 @@ ur_result_t ur_queue_handle_t_::resetCommandList(
 
   // Standard commandlists move in and out of the cache as they are recycled.
   // Immediate commandlists are always available.
-  if (CommandList->second.ZeFence != nullptr && MakeAvailable) {
-    std::scoped_lock<ur_mutex> Lock(this->Context->ZeCommandListCacheMutex);
-    auto &ZeCommandListCache =
-        UseCopyEngine
-            ? this->Context->ZeCopyCommandListCache[this->Device->ZeDevice]
-            : this->Context->ZeComputeCommandListCache[this->Device->ZeDevice];
-    struct l0_command_list_cache_info ListInfo;
-    ListInfo.ZeQueueDesc = CommandList->second.ZeQueueDesc;
-    ListInfo.InOrderList = CommandList->second.IsInOrderList;
-    ZeCommandListCache.push_back({CommandList->first, ListInfo});
+  if (CommandList->second.ZeFence != nullptr && MakeAvailable &&
+      CommandListMap.size() > ur_context_handle_t_::CmdListsCleanupThreshold) {
+    regular_command_list_descriptor_t Desc{
+        Device->ZeDevice, CommandList->second.IsInOrderList,
+        CommandList->second.ZeQueueDesc.ordinal};
+    Context->getCommandListCache(UseCopyEngine)
+        .addCommandList(Desc, CommandList->first);
+    CommandListMap.erase(CommandList);
   }
 
   return UR_RESULT_SUCCESS;
@@ -2121,12 +2124,6 @@ ur_queue_handle_t_::eventOpenCommandList(ur_event_handle_t Event) {
       return CopyCommandBatch.OpenCommandList;
   }
   return CommandListMap.end();
-}
-
-ur_queue_handle_t_::ur_queue_group_t &
-ur_queue_handle_t_::getQueueGroup(bool UseCopyEngine) {
-  auto &Map = (UseCopyEngine ? CopyQueueGroupsByTID : ComputeQueueGroupsByTID);
-  return Map.get();
 }
 
 // Return the index of the next queue to use based on a
@@ -2241,7 +2238,7 @@ ur_result_t ur_queue_handle_t_::createCommandList(
   ze_command_list_handle_t ZeCommandList;
 
   uint32_t QueueGroupOrdinal;
-  auto &QGroup = getQueueGroup(UseCopyEngine);
+  auto &QGroup = UseCopyEngine ? CopyQueueGroup : ComputeQueueGroup;
   auto &ZeCommandQueue =
       ForcedCmdQueue ? *ForcedCmdQueue : QGroup.getZeQueue(&QueueGroupOrdinal);
   if (ForcedCmdQueue)
@@ -2344,15 +2341,13 @@ static const bool UseCopyEngineForInOrderQueue = [] {
 }();
 
 bool ur_queue_handle_t_::useCopyEngine(bool PreferCopyEngine) const {
-  auto InitialCopyGroup = CopyQueueGroupsByTID.begin()->second;
-  return PreferCopyEngine && InitialCopyGroup.ZeQueues.size() > 0 &&
+  return PreferCopyEngine && CopyQueueGroup.ZeQueues.size() > 0 &&
          (!isInOrderQueue() || UseCopyEngineForInOrderQueue);
 }
 
 // This function will return one of po6ssibly multiple available
 // immediate commandlists associated with this Queue.
 ur_command_list_ptr_t &ur_queue_handle_t_::ur_queue_group_t::getImmCmdList() {
-
   uint32_t QueueIndex, QueueOrdinal;
   auto Index = getQueueIndex(&QueueOrdinal, &QueueIndex);
 
@@ -2383,47 +2378,29 @@ ur_command_list_ptr_t &ur_queue_handle_t_::ur_queue_group_t::getImmCmdList() {
 
   // Check if context's command list cache has an immediate command list with
   // matching index.
-  ze_command_list_handle_t ZeCommandList = nullptr;
-  {
-    // Acquire lock to avoid race conditions.
-    std::scoped_lock<ur_mutex> Lock(Queue->Context->ZeCommandListCacheMutex);
-    // Under mutex since operator[] does insertion on the first usage for every
-    // unique ZeDevice.
-    auto &ZeCommandListCache =
-        isCopy()
-            ? Queue->Context->ZeCopyCommandListCache[Queue->Device->ZeDevice]
-            : Queue->Context
-                  ->ZeComputeCommandListCache[Queue->Device->ZeDevice];
-    for (auto ZeCommandListIt = ZeCommandListCache.begin();
-         ZeCommandListIt != ZeCommandListCache.end(); ++ZeCommandListIt) {
-      const auto &Desc = (*ZeCommandListIt).second.ZeQueueDesc;
-      if (Desc.index == ZeCommandQueueDesc.index &&
-          Desc.flags == ZeCommandQueueDesc.flags &&
-          Desc.mode == ZeCommandQueueDesc.mode &&
-          Desc.priority == ZeCommandQueueDesc.priority) {
-        ZeCommandList = (*ZeCommandListIt).first;
-        ZeCommandListCache.erase(ZeCommandListIt);
-        break;
-      }
-    }
-  }
+  auto ZeCommandListOpt =
+      Queue->Context->getCommandListCache(isCopy()).getCommandList(
+          immediate_command_list_descriptor_t{Queue->Device->ZeDevice,
+                                              ZeCommandQueueDesc});
 
   // If cache didn't contain a command list, create one.
-  if (!ZeCommandList) {
+  if (!ZeCommandListOpt) {
     logger::debug("[getZeQueue]: create queue ordinal = {}, index = {} "
                   "(round robin in [{}, {}]) priority = {}",
                   ZeCommandQueueDesc.ordinal, ZeCommandQueueDesc.index,
                   LowerIndex, UpperIndex, Priority);
 
+    ze_command_list_handle_t ZeCommandList;
     ZE_CALL_NOCHECK(zeCommandListCreateImmediate,
                     (Queue->Context->ZeContext, Queue->Device->ZeDevice,
                      &ZeCommandQueueDesc, &ZeCommandList));
+    ZeCommandListOpt = ZeCommandList;
   }
 
   ImmCmdLists[Index] =
       Queue->CommandListMap
           .insert(std::pair<ze_command_list_handle_t, ur_command_list_info_t>{
-              ZeCommandList,
+              ZeCommandListOpt.value(),
               ur_command_list_info_t(nullptr, true, false, nullptr,
                                      ZeCommandQueueDesc,
                                      Queue->useCompletionBatching())})
