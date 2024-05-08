@@ -139,6 +139,7 @@ add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/saxpy.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/saxpy_usm.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/indexers_usm.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/build_failure.cpp)
+add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/increment.cpp)
 
 set(KERNEL_HEADER ${UR_CONFORMANCE_DEVICE_BINARIES_DIR}/kernel_entry_points.h)
 add_custom_command(OUTPUT ${KERNEL_HEADER}
