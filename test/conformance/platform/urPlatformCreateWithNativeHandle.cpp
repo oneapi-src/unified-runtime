@@ -9,7 +9,7 @@ using urPlatformCreateWithNativeHandleTest = uur::platform::urPlatformTest;
 
 TEST_F(urPlatformCreateWithNativeHandleTest, Success) {
     for (auto platform : platforms) {
-        ur_native_handle_t native_handle = nullptr;
+        ur_native_handle_t native_handle = 0;
         if (urPlatformGetNativeHandle(platform, &native_handle)) {
             continue;
         };
@@ -32,7 +32,7 @@ TEST_F(urPlatformCreateWithNativeHandleTest, Success) {
 
 TEST_F(urPlatformCreateWithNativeHandleTest, InvalidNullPointerPlatform) {
     for (auto platform : platforms) {
-        ur_native_handle_t native_handle = nullptr;
+        ur_native_handle_t native_handle = 0;
         if (urPlatformGetNativeHandle(platform, &native_handle)) {
             continue;
         }

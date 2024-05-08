@@ -9,7 +9,7 @@ using urContextCreateWithNativeHandleTest = uur::urContextTest;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urContextCreateWithNativeHandleTest);
 
 TEST_P(urContextCreateWithNativeHandleTest, Success) {
-    ur_native_handle_t native_context = nullptr;
+    ur_native_handle_t native_context = 0;
     if (urContextGetNativeHandle(context, &native_context)) {
         GTEST_SKIP();
     }
