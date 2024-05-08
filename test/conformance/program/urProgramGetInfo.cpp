@@ -18,7 +18,7 @@ UUR_TEST_SUITE_P(
     urProgramGetInfoTest,
     ::testing::Values(UR_PROGRAM_INFO_REFERENCE_COUNT, UR_PROGRAM_INFO_CONTEXT,
                       UR_PROGRAM_INFO_NUM_DEVICES, UR_PROGRAM_INFO_DEVICES,
-                      UR_PROGRAM_INFO_SOURCE, UR_PROGRAM_INFO_BINARY_SIZES,
+                      UR_PROGRAM_INFO_IL, UR_PROGRAM_INFO_BINARY_SIZES,
                       UR_PROGRAM_INFO_BINARIES, UR_PROGRAM_INFO_NUM_KERNELS,
                       UR_PROGRAM_INFO_KERNEL_NAMES),
     uur::deviceTestWithParamPrinter<ur_program_info_t>);
@@ -83,6 +83,10 @@ TEST_P(urProgramGetInfoTest, Success) {
         auto returned_kernel_names =
             reinterpret_cast<char *>(property_value.data());
         ASSERT_STRNE(returned_kernel_names, "");
+        break;
+    }
+    case UR_PROGRAM_INFO_IL: {
+        ASSERT_EQ(property_value, *il_binary.get());
         break;
     }
     default:
