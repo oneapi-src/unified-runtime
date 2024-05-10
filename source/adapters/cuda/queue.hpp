@@ -61,6 +61,8 @@ struct ur_queue_handle_t_ {
   std::mutex ComputeStreamMutex;
   std::mutex TransferStreamMutex;
   std::mutex BarrierMutex;
+  // The event cache might be accessed in multiple threads.
+  std::mutex CacheMutex;
   bool HasOwnership;
 
   ur_queue_handle_t_(std::vector<CUstream> &&ComputeStreams,
@@ -249,8 +251,14 @@ struct ur_queue_handle_t_ {
 
   bool has_cached_events() const { return !CachedEvents.empty(); }
 
+  void cache_event(ur_event_handle_t Event) {
+    std::lock_guard<std::mutex> CacheGuard(CacheMutex);
+    CachedEvents.push(Event);
+  }
+
   // Returns and removes an event from the CachedEvents stack.
   ur_event_handle_t get_cached_event() {
+    std::lock_guard<std::mutex> CacheGuard(CacheMutex);
     assert(has_cached_events());
     auto retEv = CachedEvents.top();
     CachedEvents.pop();

@@ -122,6 +122,8 @@ public:
     return new ur_event_handle_t_(context, eventNative);
   }
 
+  // Resets attributes of an event.
+  // Throws an error if its RefCount is not 0.
   void reset();
 
   ~ur_event_handle_t_();
