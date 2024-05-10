@@ -48,7 +48,9 @@ ur_event_handle_t_::ur_event_handle_t_(ur_context_handle_t Context,
 }
 
 void ur_event_handle_t_::reset() {
-  RefCount = 0;
+  detail::ur::assertion(
+      RefCount == 0, "Attempting to reset an event that is still referenced");
+
   HasBeenWaitedOn = false;
   IsRecorded = false;
   IsStarted = false;
@@ -67,10 +69,10 @@ ur_event_handle_t_::~ur_event_handle_t_() {
     if (EvStart)
       UR_CHECK_ERROR(hipEventDestroy(EvStart));
   }
-  if (Queue != nullptr) {
+  if (Queue) {
     urQueueRelease(Queue);
   }
-  if (Context != nullptr) {
+  if (Context) {
     urContextRelease(Context);
   }
 }
@@ -300,27 +302,25 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventRelease(ur_event_handle_t hEvent) {
     ur_result_t Result = UR_RESULT_ERROR_INVALID_EVENT;
     try {
       if (!hEvent->backendHasOwnership()) {
-        Result = UR_RESULT_SUCCESS;
+        return UR_RESULT_SUCCESS;
       } else {
-        assert(hEvent->getQueue() != nullptr);
-        assert(hEvent->getContext() != nullptr);
-
-        auto queue = event_ptr->getQueue();
-        auto context = event_ptr->getContext();
+        auto Queue = event_ptr->getQueue();
+        auto Context = event_ptr->getContext();
 
         event_ptr->reset();
-        queue->CachedEvents.emplace(event_ptr.release());
-        urQueueRelease(queue);
-        urContextRelease(context);
-        Result = UR_RESULT_SUCCESS;
+        if (Queue) {
+          Queue->cache_event(event_ptr.release());
+          urQueueRelease(Queue);
+        }
+        urContextRelease(Context);
+
+        return UR_RESULT_SUCCESS;
       }
     } catch (...) {
-      Result = UR_RESULT_ERROR_OUT_OF_RESOURCES;
+      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
     }
-    return Result;
   }
-
-  return UR_RESULT_SUCCESS;
+  return UR_RESULT_ERROR_INVALID_EVENT;
 }
 
 /// Gets the native HIP handle of a UR event object

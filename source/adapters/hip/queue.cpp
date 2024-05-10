@@ -32,9 +32,8 @@ ur_queue_handle_t_::~ur_queue_handle_t_() {
   urContextRelease(Context);
   urDeviceRelease(Device);
 
-  while (!CachedEvents.empty()) {
-    std::unique_ptr<ur_event_handle_t_> p{CachedEvents.top()};
-    CachedEvents.pop();
+  while (has_cached_events()) {
+    get_cached_event();
   }
 }
 

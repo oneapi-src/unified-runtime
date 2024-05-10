@@ -43,8 +43,8 @@ ur_event_handle_t_::ur_event_handle_t_(ur_context_handle_t Context,
 }
 
 void ur_event_handle_t_::reset() {
-  detail::ur::assertion(RefCount == 0,
-                        "Attempting to reset an event that is still referenced");
+  detail::ur::assertion(
+      RefCount == 0, "Attempting to reset an event that is still referenced");
 
   HasBeenWaitedOn = false;
   IsRecorded = false;
@@ -64,10 +64,10 @@ ur_event_handle_t_::~ur_event_handle_t_() {
     if (EvStart)
       UR_CHECK_ERROR(cuEventDestroy(EvStart));
   }
-  if (Queue != nullptr) {
+  if (Queue) {
     urQueueRelease(Queue);
   }
-  if (Context != nullptr) {
+  if (Context) {
     urContextRelease(Context);
   }
 }
@@ -261,33 +261,28 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventRelease(ur_event_handle_t hEvent) {
   // decrement ref count. If it is 0, delete the event.
   if (hEvent->decrementReferenceCount() == 0) {
     std::unique_ptr<ur_event_handle_t_> event_ptr{hEvent};
-    ur_result_t Result = UR_RESULT_ERROR_INVALID_EVENT;
     try {
       ScopedContext Active(hEvent->getContext());
-    if (!hEvent->backendHasOwnership()) {
-      return UR_RESULT_SUCCESS;
-    }
-    else {
-      auto Queue = event_ptr->getQueue();
-      auto Context = event_ptr->getContext();
+      if (!hEvent->backendHasOwnership()) {
+        return UR_RESULT_SUCCESS;
+      } else {
+        auto Queue = event_ptr->getQueue();
+        auto Context = event_ptr->getContext();
 
-      event_ptr->reset();
-      if (Queue) {
-        Queue->cache_event(event_ptr.release());
-        urQueueRelease(Queue);
-      }
-      if (Context) {
+        event_ptr->reset();
+        if (Queue) {
+          Queue->cache_event(event_ptr.release());
+          urQueueRelease(Queue);
+        }
         urContextRelease(Context);
-      }
-      return UR_RESULT_SUCCESS;
-    }
-    } catch (...) {
-      Result = UR_RESULT_ERROR_OUT_OF_RESOURCES;
-    }
-    return Result;
-  }
 
-  return UR_RESULT_SUCCESS;
+        return UR_RESULT_SUCCESS;
+      }
+    } catch (...) {
+      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+    }
+  }
+  return UR_RESULT_ERROR_INVALID_EVENT;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEventGetNativeHandle(
