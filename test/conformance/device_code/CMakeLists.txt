@@ -107,11 +107,26 @@ macro(add_device_binary SOURCE_FILE)
 
             COMMAND ${CMAKE_COMMAND} -E env ${EXTRA_ENV} ${UR_DEVICE_CODE_EXTRACTOR} --stem="${TRIPLE}.bin" ${EXE_PATH}
 
+            COMMAND md5sum "${BIN_PATH}"
+
             WORKING_DIRECTORY "${DEVICE_BINARY_DIR}"
             DEPENDS ${SOURCE_FILE}
         )
         add_custom_target(generate_${KERNEL_NAME}_${TRIPLE} DEPENDS ${BIN_PATH})
         add_dependencies(generate_device_binaries generate_${KERNEL_NAME}_${TRIPLE})
+
+        if(${KERNEL_NAME} MATCHES "sampler_read")
+            add_custom_command(OUTPUT "${EXE_PATH}.cmakemarker"
+                COMMAND ${CMAKE_COMMAND} -E env ${EXTRA_ENV} "${EXE_PATH}"
+
+                COMMAND "touch" "${EXE_PATH}.cmakemarker"
+
+                WORKING_DIRECTORY "${DEVICE_BINARY_DIR}"
+                DEPENDS ${BIN_PATH}
+            )
+            add_custom_target(test_test_test DEPENDS "${EXE_PATH}.cmakemarker")
+            add_dependencies(generate_device_binaries test_test_test)
+        endif()
     endforeach()
 
     set(IH_PATH "${DEVICE_BINARY_DIR}/${KERNEL_NAME}.ih")
@@ -149,6 +164,7 @@ add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/build_failure.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/fixed_wg_size.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/standard_types.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/subgroup.cpp)
+add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/sampler_read.cpp)
 
 set(KERNEL_HEADER ${UR_CONFORMANCE_DEVICE_BINARIES_DIR}/kernel_entry_points.h)
 add_custom_command(OUTPUT ${KERNEL_HEADER}
