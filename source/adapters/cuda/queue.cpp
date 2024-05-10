@@ -36,8 +36,10 @@ ur_queue_handle_t_::~ur_queue_handle_t_() {
   urContextRelease(Context);
   urDeviceRelease(Device);
 
-  while (has_cached_events()) {
-    get_cached_event();
+  std::lock_guard<std::mutex> CacheGuard(CacheMutex);
+  while (!CachedEvents.empty()) {
+    std::unique_ptr<ur_event_handle_t_> Ev{CachedEvents.top()};
+    CachedEvents.pop();
   }
 }
 
