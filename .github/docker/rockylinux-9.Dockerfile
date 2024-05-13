@@ -4,18 +4,17 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #
-# Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
+# Dockerfile - a 'recipe' for Docker to build an image of rockylinux-based
 #              environment for building the Unified Runtime project.
 #
 
-# Pull base image ("22.04")
-FROM registry.hub.docker.com/library/ubuntu@sha256:e6173d4dc55e76b87c4af8db8821b1feae4146dd47341e4d431118c7dd060a74
+# Pull base image ("9")
+FROM registry.hub.docker.com/library/rockylinux@sha256:c944604c0c759f5d164ffbdf0bbab2fac582b739938937403c067ab634a0518a
 
 # Set environment variables
-ENV OS ubuntu
-ENV OS_VER 22.04
+ENV OS rockylinux
+ENV OS_VER 9
 ENV NOTTY 1
-ENV DEBIAN_FRONTEND noninteractive
 
 # Additional parameters to build docker without building components.
 # These ARGs can be set in docker building phase and are used
@@ -25,9 +24,11 @@ ARG SKIP_LIBBACKTRACE_BUILD
 
 # Base development packages
 ARG BASE_DEPS="\
-	build-essential \
 	cmake \
-	git"
+	git \
+	glibc-devel \
+	libstdc++-devel \
+	make"
 
 # Unified Runtime's dependencies
 ARG UR_DEPS="\
@@ -38,26 +39,27 @@ ARG UR_DEPS="\
 # Miscellaneous for our builds/CI (optional)
 ARG MISC_DEPS="\
 	clang \
-	libncurses5 \
+	ncurses-libs-6.2 \
+	passwd \
 	sudo \
-	wget \
-	whois"
+	wget"
 
 # Update and install required packages
-RUN apt-get update \
- && apt-get install -y --no-install-recommends \
+RUN dnf update -y \
+ && dnf --enablerepo devel install -y \
 	${BASE_DEPS} \
 	${UR_DEPS} \
 	${MISC_DEPS} \
- && rm -rf /var/lib/apt/lists/* \
- && apt-get clean all
+ && dnf clean all
 
 # Prepare a dir (accessible by anyone)
 RUN mkdir --mode 777 /opt/ur/
 
 # Additional dev. dependencies (installed via pip)
+#
+# It's actively used and tested only on selected distros. Be aware
+# they may not work, because pip packages list differ from OS to OS.
 COPY third_party/requirements.txt /opt/ur/requirements.txt
-RUN pip3 install --no-cache-dir -r /opt/ur/requirements.txt
 
 # Install DPC++
 COPY .github/docker/install_dpcpp.sh /opt/ur/install_dpcpp.sh
@@ -71,4 +73,12 @@ RUN /opt/ur/install_libbacktrace.sh
 # Add a new (non-root) 'test_user'
 ENV USER test_user
 ENV USERPASS pass
-RUN useradd -m "${USER}" -g sudo -p "$(mkpasswd ${USERPASS})"
+# Change shell to bash with safe pipe usage
+SHELL [ "/bin/bash", "-o", "pipefail", "-c" ]
+RUN useradd -m $USER \
+ && echo "${USERPASS}" | passwd "${USER}" --stdin \
+ && gpasswd wheel -a "${USER}" \
+ && echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+# Change shell back to default
+SHELL ["/bin/sh", "-c"]

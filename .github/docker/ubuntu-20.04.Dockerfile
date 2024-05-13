@@ -8,12 +8,12 @@
 #              environment for building the Unified Runtime project.
 #
 
-# Pull base image ("22.04")
-FROM registry.hub.docker.com/library/ubuntu@sha256:e6173d4dc55e76b87c4af8db8821b1feae4146dd47341e4d431118c7dd060a74
+# Pull base image ("20.04")
+FROM registry.hub.docker.com/library/ubuntu@sha256:f2034e7195f61334e6caff6ecf2e965f92d11e888309065da85ff50c617732b8
 
 # Set environment variables
 ENV OS ubuntu
-ENV OS_VER 22.04
+ENV OS_VER 20.04
 ENV NOTTY 1
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -38,6 +38,7 @@ ARG UR_DEPS="\
 # Miscellaneous for our builds/CI (optional)
 ARG MISC_DEPS="\
 	clang \
+	g++-7 \
 	libncurses5 \
 	sudo \
 	wget \
@@ -58,11 +59,6 @@ RUN mkdir --mode 777 /opt/ur/
 # Additional dev. dependencies (installed via pip)
 COPY third_party/requirements.txt /opt/ur/requirements.txt
 RUN pip3 install --no-cache-dir -r /opt/ur/requirements.txt
-
-# Install DPC++
-COPY .github/docker/install_dpcpp.sh /opt/ur/install_dpcpp.sh
-ENV DPCPP_PATH=/opt/dpcpp
-RUN /opt/ur/install_dpcpp.sh
 
 # Install libbacktrace
 COPY .github/docker/install_libbacktrace.sh /opt/ur/install_libbacktrace.sh
