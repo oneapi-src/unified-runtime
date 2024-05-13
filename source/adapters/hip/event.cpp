@@ -318,8 +318,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventRelease(ur_event_handle_t hEvent) {
     } catch (...) {
       return UR_RESULT_ERROR_OUT_OF_RESOURCES;
     }
+    return UR_RESULT_ERROR_INVALID_EVENT;
   }
-  return UR_RESULT_ERROR_INVALID_EVENT;
+  return UR_RESULT_SUCCESS;
 }
 
 /// Gets the native HIP handle of a UR event object
