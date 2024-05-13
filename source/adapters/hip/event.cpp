@@ -312,13 +312,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventRelease(ur_event_handle_t hEvent) {
           urQueueRelease(Queue);
         }
         urContextRelease(Context);
-
-        return UR_RESULT_SUCCESS;
       }
-    } catch (...) {
-      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+    } catch (ur_result_t Err) {
+      return Err;
     }
-    return UR_RESULT_ERROR_INVALID_EVENT;
   }
   return UR_RESULT_SUCCESS;
 }
