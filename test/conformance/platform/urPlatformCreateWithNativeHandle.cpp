@@ -5,7 +5,7 @@
 
 #include "uur/fixtures.h"
 
-using urPlatformCreateWithNativeHandleTest = uur::urPlatformTest;
+using urPlatformCreateWithNativeHandleTest = uur::urPlatformsTest;
 
 TEST_F(urPlatformCreateWithNativeHandleTest, Success) {
     for (auto platform : platforms) {

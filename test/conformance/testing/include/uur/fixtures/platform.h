@@ -11,26 +11,8 @@ namespace uur {
 struct urTest : ::testing::Test {
 
     void SetUp() override {
-        ur_device_init_flags_t device_flags = 0;
-        ASSERT_SUCCESS(urLoaderConfigCreate(&loader_config));
-        ASSERT_SUCCESS(urLoaderConfigEnableLayer(loader_config,
-                                                 "UR_LAYER_FULL_VALIDATION"));
-        ASSERT_SUCCESS(urLoaderInit(device_flags, loader_config));
-
-        uint32_t adapter_count;
-        ASSERT_SUCCESS(urAdapterGet(0, nullptr, &adapter_count));
-        adapters.resize(adapter_count);
-        ASSERT_SUCCESS(urAdapterGet(adapter_count, adapters.data(), nullptr));
-    }
-
-    void TearDown() override {
-        for (auto adapter : adapters) {
-            ASSERT_SUCCESS(urAdapterRelease(adapter));
-        }
-        if (loader_config) {
-            ASSERT_SUCCESS(urLoaderConfigRelease(loader_config));
-        }
-        ASSERT_SUCCESS(urLoaderTearDown());
+        loader_config = uur::PlatformEnvironment::instance->loader_config;
+        adapters = uur::PlatformEnvironment::instance->adapters;
     }
 
     ur_loader_config_handle_t loader_config = nullptr;
@@ -41,15 +23,7 @@ struct urPlatformsTest : urTest {
 
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(urTest::SetUp());
-        uint32_t count;
-        ASSERT_SUCCESS(urPlatformGet(adapters.data(),
-                                     static_cast<uint32_t>(adapters.size()), 0,
-                                     nullptr, &count));
-        ASSERT_NE(count, 0);
-        platforms.resize(count);
-        ASSERT_SUCCESS(urPlatformGet(adapters.data(),
-                                     static_cast<uint32_t>(adapters.size()),
-                                     count, platforms.data(), nullptr));
+        platforms = uur::PlatformEnvironment::instance->platforms;
     }
 
     std::vector<ur_platform_handle_t> platforms;
@@ -58,6 +32,7 @@ struct urPlatformsTest : urTest {
 struct urPlatformTest : urPlatformsTest {
 
     void SetUp() override {
+        UUR_RETURN_ON_FATAL_FAILURE(urPlatformsTest::SetUp());
         platform = uur::PlatformEnvironment::instance->platform;
     }
 

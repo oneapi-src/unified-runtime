@@ -94,7 +94,7 @@ endfunction()
 
 function(add_conformance_test_with_platform_environment name)
     add_conformance_test(${name} ${ARGN})
-    target_compile_definitions("test-${name}" PRIVATE PLATFORM_ENVIRONMENT)
+    target_compile_definitions("test-${name}" PRIVATE PLATFORM_ENVIRONMENT TEST_NAME="${name}")
 endfunction()
 
 add_subdirectory(testing)

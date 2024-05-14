@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
     auto *environment = new uur::DevicesEnvironment(argc, argv);
 #endif
 #ifdef PLATFORM_ENVIRONMENT
-    auto *environment = new uur::PlatformEnvironment(argc, argv);
+    auto *environment = new uur::PlatformEnvironment(argc, argv, TEST_NAME);
 #endif
     ::testing::InitGoogleTest(&argc, argv);
 #if defined(DEVICES_ENVIRONMENT) || defined(PLATFORM_ENVIRONMENT) ||           \
