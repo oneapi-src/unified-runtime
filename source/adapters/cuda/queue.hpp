@@ -262,7 +262,7 @@ struct ur_queue_handle_t_ {
   // Returns and removes an event from the CachedEvents stack.
   ur_event_handle_t get_cached_event() {
     std::lock_guard<std::mutex> CacheGuard(CacheMutex);
-    assert(has_cached_events());
+    assert(!CachedEvents.empty());
     auto RetEv = CachedEvents.top();
     CachedEvents.pop();
     return RetEv;
