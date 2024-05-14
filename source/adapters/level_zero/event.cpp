@@ -17,7 +17,6 @@
 #include "command_buffer.hpp"
 #include "common.hpp"
 #include "event.hpp"
-#include "logger/ur_logger.hpp"
 #include "ur_level_zero.hpp"
 
 void printZeEventList(const _ur_ze_event_list_t &UrZeEventList) {
@@ -367,8 +366,16 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
   }
 
   // Execute each command list so the barriers can be encountered.
-  for (ur_command_list_ptr_t &CmdList : CmdLists)
+  for (ur_command_list_ptr_t &CmdList : CmdLists) {
+    bool IsCopy =
+        CmdList->second.isCopy(reinterpret_cast<ur_queue_handle_t>(Queue));
+    const auto &CommandBatch =
+        (IsCopy) ? Queue->CopyCommandBatch : Queue->ComputeCommandBatch;
+    // Only batch if the matching CmdList is already open.
+    OkToBatch = CommandBatch.OpenCommandList == CmdList;
+
     UR_CALL(Queue->executeCommandList(CmdList, false, OkToBatch));
+  }
 
   UR_CALL(Queue->ActiveBarriers.clear());
   auto UREvent = reinterpret_cast<ur_event_handle_t>(*Event);
@@ -689,7 +696,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventWait(
             die("The host-visible proxy event missing");
 
           ze_event_handle_t ZeEvent = HostVisibleEvent->ZeEvent;
-          logger::debug("ZeEvent = {}", ur_cast<std::uintptr_t>(ZeEvent));
+          urPrint("ZeEvent = %#llx\n", ur_cast<std::uintptr_t>(ZeEvent));
           // If this event was an inner batched event, then sync with
           // the Queue instead of waiting on the event.
           if (HostVisibleEvent->IsInnerBatchedEvent && Event->ZeBatchedQueue) {
