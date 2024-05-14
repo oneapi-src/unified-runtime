@@ -14,7 +14,6 @@
 #include <string.h>
 
 #include "context.hpp"
-#include "logger/ur_logger.hpp"
 #include "queue.hpp"
 #include "ur_level_zero.hpp"
 
@@ -176,8 +175,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextSetExtendedDeleter(
   std::ignore = Context;
   std::ignore = Deleter;
   std::ignore = UserData;
-  logger::error(logger::LegacyMessage("[UR][L0] {} function not implemented!"),
-                "{} function not implemented!", __FUNCTION__);
+  urPrint("[UR][L0] %s function not implemented!\n", __FUNCTION__);
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
@@ -513,8 +511,7 @@ ur_result_t ur_context_handle_t_::getFreeSlotInExistingOrNewPool(
       ZeEventPoolDesc.flags |= ZE_EVENT_POOL_FLAG_HOST_VISIBLE;
     if (ProfilingEnabled)
       ZeEventPoolDesc.flags |= ZE_EVENT_POOL_FLAG_KERNEL_TIMESTAMP;
-    logger::debug("ze_event_pool_desc_t flags set to: {}",
-                  ZeEventPoolDesc.flags);
+    urPrint("ze_event_pool_desc_t flags set to: %d\n", ZeEventPoolDesc.flags);
 
     std::vector<ze_device_handle_t> ZeDevices;
     if (ZeDevice) {
