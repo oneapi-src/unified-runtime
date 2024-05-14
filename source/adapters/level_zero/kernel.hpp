@@ -15,16 +15,36 @@
 
 struct ur_kernel_handle_t_ : _ur_object {
   ur_kernel_handle_t_(bool OwnZeHandle, ur_program_handle_t Program)
-      : Context{nullptr}, Program{Program}, ZeKernel{nullptr},
-        SubmissionsCount{0}, MemAllocs{} {
+      : Context{nullptr}, Program{Program}, SubmissionsCount{0}, MemAllocs{} {
     OwnNativeHandle = OwnZeHandle;
   }
 
   ur_kernel_handle_t_(ze_kernel_handle_t Kernel, bool OwnZeHandle,
                       ur_context_handle_t Context)
-      : Context{Context}, Program{nullptr}, ZeKernel{Kernel},
-        SubmissionsCount{0}, MemAllocs{} {
+      : Context{Context}, Program{nullptr}, SubmissionsCount{0}, MemAllocs{} {
     OwnNativeHandle = OwnZeHandle;
+    createdFromNativeHandle = true;
+    ZeKernels.push_back({nullptr, Kernel});
+  }
+
+  ze_kernel_handle_t getZeKernel(ur_device_handle_t Device) {
+    assert(Device);
+
+    if (createdFromNativeHandle) {
+      assert(ZeKernels.size() == 1);
+      assert(ZeKernels[0].first == nullptr);
+
+      return ZeKernels.at(0).second;
+    }
+
+    auto ZeDevice =
+        Device->RootDevice ? Device->RootDevice->ZeDevice : Device->ZeDevice;
+
+    for (auto &K : ZeKernels) {
+      if (K.first == ZeDevice)
+        return K.second;
+    }
+    return nullptr;
   }
 
   // Keep the program of the kernel.
@@ -33,17 +53,13 @@ struct ur_kernel_handle_t_ : _ur_object {
   // Keep the program of the kernel.
   ur_program_handle_t Program;
 
-  // Level Zero function handle.
-  ze_kernel_handle_t ZeKernel;
+  // Vector of L0 kernels for all devices.
+  std::vector<std::pair<ze_device_handle_t, ze_kernel_handle_t>> ZeKernels;
 
-  // Map of L0 kernels created for all the devices for which a UR Program
-  // has been built. It may contain duplicated kernel entries for a root
-  // device and its sub-devices.
-  std::unordered_map<ze_device_handle_t, ze_kernel_handle_t> ZeKernelMap;
-
-  // Vector of L0 kernels. Each entry is unique, so this is used for
-  // destroying the kernels instead of ZeKernelMap
-  std::vector<ze_kernel_handle_t> ZeKernels;
+  // Whether this kernel has been created from a native handle.
+  // In such case, ZeKernels contains only one element with device handle
+  // set to nullptr.
+  bool createdFromNativeHandle{false};
 
   // Counter to track the number of submissions of the kernel.
   // When this value is zero, it means that kernel is not submitted for an
@@ -107,3 +123,10 @@ struct ur_kernel_handle_t_ : _ur_object {
   ZeCache<ZeStruct<ze_kernel_properties_t>> ZeKernelProperties;
   ZeCache<std::string> ZeKernelName;
 };
+
+/// Helper function for calculating work dimensions for kernels
+ur_result_t calculateKernelWorkDimensions(
+    ur_kernel_handle_t Kernel, ur_device_handle_t Device,
+    ze_group_count_t &ZeThreadGroupDimensions, uint32_t (&WG)[3],
+    uint32_t WorkDim, const size_t *GlobalWorkSize,
+    const size_t *LocalWorkSize);
