@@ -52,7 +52,7 @@ jobs:
         sudo apt-get install -y ${{matrix.compiler.cxx}}
 
     - name: Install pip packages
-      run: pip install -r third_party/requirements.txt
+      run: pip install -r third_party/requirements.txt --require-hashes
 
     - name: Install libbacktrace
       if: matrix.libbacktrace == '-DVAL_USE_LIBBACKTRACE_BACKTRACE=ON'
@@ -128,7 +128,7 @@ jobs:
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
     - name: Install pip packages
-      run: pip install -r third_party/requirements.txt
+      run: pip install -r third_party/requirements.txt --require-hashes
 
     - name: Download DPC++
       run: |
@@ -227,7 +227,7 @@ jobs:
         python-version: 3.9
 
     - name: Install prerequisites
-      run: python3 -m pip install -r third_party/requirements.txt
+      run: python3 -m pip install -r third_party/requirements.txt --require-hashes
 
     - name: Install doxygen
       run: |
@@ -278,7 +278,7 @@ jobs:
         python-version: 3.9
 
     - name: Install prerequisites
-      run: python3 -m pip install -r third_party/requirements.txt
+      run: python3 -m pip install -r third_party/requirements.txt --require-hashes
 
     - name: Configure CMake
       run: >

@@ -38,7 +38,7 @@ jobs:
           sudo apt-get install -y doxygen
 
       - name: Install prerequisites
-        run: python3 -m pip install -r third_party/requirements.txt
+        run: python3 -m pip install -r third_party/requirements.txt --require-hashes
 
       - name: Setup Pages
         uses: actions/configure-pages@1f0c5cde4bc74cd7e1254d0cb4de8d49e9068c7d # v4.0.0

@@ -29,7 +29,7 @@ jobs:
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
     - name: Install pip packages
-      run: pip install -r third_party/requirements.txt
+      run: pip install -r third_party/requirements.txt --require-hashes
 
     - name: Init conda env
       uses: conda-incubator/setup-miniconda@9f54435e0e72c53962ee863144e47a4b094bfd35 # v2.3.0

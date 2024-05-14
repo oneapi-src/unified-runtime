@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Install pip packages
-        run: pip install -r third_party/requirements.txt
+        run: pip install -r third_party/requirements.txt --require-hashes
 
       # Scan all files, except for dev. scripts
       - name: Run Bandit
