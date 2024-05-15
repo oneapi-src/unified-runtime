@@ -18,6 +18,74 @@
 #include "queue.hpp"
 #include "ur_level_zero.hpp"
 
+namespace v2 {
+bool immediate_command_list_descriptor_t::operator==(
+    const immediate_command_list_descriptor_t &rhs) const {
+  return Device == rhs.Device && QueueDesc.flags == rhs.QueueDesc.flags &&
+         QueueDesc.mode == rhs.QueueDesc.mode &&
+         QueueDesc.priority == rhs.QueueDesc.priority;
+}
+
+bool regular_command_list_descriptor_t::operator==(
+    const regular_command_list_descriptor_t &rhs) const {
+  return Device == rhs.Device && Ordinal == rhs.Ordinal &&
+         IsInOrder == rhs.IsInOrder;
+}
+
+inline size_t command_list_descriptor_hash_t::operator()(
+    const command_list_descriptor_t &desc) const {
+  if (auto ImmCmdDesc =
+          std::get_if<immediate_command_list_descriptor_t>(&desc)) {
+    return combine_hashes(0, ImmCmdDesc->Device, ImmCmdDesc->QueueDesc.ordinal,
+                          ImmCmdDesc->QueueDesc.flags,
+                          ImmCmdDesc->QueueDesc.mode,
+                          ImmCmdDesc->QueueDesc.priority);
+  } else {
+    auto RegCmdDesc = std::get<regular_command_list_descriptor_t>(desc);
+    return combine_hashes(0, RegCmdDesc.Device, RegCmdDesc.IsInOrder,
+                          RegCmdDesc.Ordinal);
+  }
+}
+
+command_list_cache::~command_list_cache() {
+  for (auto &Kv : ZeCommandListCache) {
+    while (Kv.second.size() > 0) {
+      auto ZeCommandList = Kv.second.top();
+      if (ZeCommandList) {
+        ZE_CALL_NOCHECK(zeCommandListDestroy, (ZeCommandList));
+      }
+      Kv.second.pop();
+    }
+  }
+}
+
+ze_command_list_handle_t
+command_list_cache::getCommandList(const command_list_descriptor_t &desc) {
+  std::scoped_lock<ur_mutex> Lock(ZeCommandListCacheMutex);
+  auto it = ZeCommandListCache.find(desc);
+  if (it == ZeCommandListCache.end())
+    return nullptr;
+
+  assert(!it->second.empty());
+
+  auto CommandListHandle = it->second.top();
+  it->second.pop();
+
+  if (it->second.empty())
+    ZeCommandListCache.erase(it);
+
+  return CommandListHandle;
+}
+
+void command_list_cache::addCommandList(const command_list_descriptor_t &desc,
+                                        ze_command_list_handle_t cmdList) {
+  // TODO: add a limit?
+  std::scoped_lock<ur_mutex> Lock(ZeCommandListCacheMutex);
+  auto [it, _] = ZeCommandListCache.try_emplace(desc);
+  it->second.push(cmdList);
+}
+} // namespace v2
+
 UR_APIEXPORT ur_result_t UR_APICALL urContextCreate(
     uint32_t DeviceCount, ///< [in] the number of devices given in phDevices
     const ur_device_handle_t

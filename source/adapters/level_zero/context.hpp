@@ -11,6 +11,7 @@
 
 #include <list>
 #include <map>
+#include <stack>
 #include <stdarg.h>
 #include <string>
 #include <unordered_map>
@@ -26,6 +27,45 @@
 #include "queue.hpp"
 
 #include <umf_helpers.hpp>
+
+namespace v2 {
+struct immediate_command_list_descriptor_t {
+  ze_device_handle_t Device;
+  ZeStruct<ze_command_queue_desc_t> QueueDesc;
+  bool operator==(const immediate_command_list_descriptor_t &rhs) const;
+};
+
+struct regular_command_list_descriptor_t {
+  ze_device_handle_t Device;
+  bool IsInOrder;
+  uint32_t Ordinal;
+  bool operator==(const regular_command_list_descriptor_t &rhs) const;
+};
+
+using command_list_descriptor_t =
+    std::variant<immediate_command_list_descriptor_t,
+                 regular_command_list_descriptor_t>;
+
+struct command_list_descriptor_hash_t {
+  inline size_t operator()(const command_list_descriptor_t &desc) const;
+};
+
+struct command_list_cache {
+  ~command_list_cache();
+
+  ze_command_list_handle_t
+  getCommandList(const command_list_descriptor_t &desc);
+  void addCommandList(const command_list_descriptor_t &desc,
+                      ze_command_list_handle_t cmdList);
+
+private:
+  std::unordered_map<command_list_descriptor_t,
+                     std::stack<ze_command_list_handle_t>,
+                     command_list_descriptor_hash_t>
+      ZeCommandListCache;
+  ur_mutex ZeCommandListCacheMutex;
+};
+} // namespace v2
 
 struct l0_command_list_cache_info {
   ZeStruct<ze_command_queue_desc_t> ZeQueueDesc;
@@ -98,6 +138,10 @@ struct ur_context_handle_t_ : _ur_object {
                      std::list<std::pair<ze_command_list_handle_t,
                                          l0_command_list_cache_info>>>
       ZeCopyCommandListCache;
+
+  // TODO: this should replace the above 2 unordered_maps. To do this
+  // we need to get rid of ForcedCmdQueue from getAvailableCommandList
+  v2::command_list_cache V2CommandListCache;
 
   // Store USM pool for USM shared and device allocations. There is 1 memory
   // pool per each pair of (context, device) per each memory type.
