@@ -1,0 +1,127 @@
+#
+# Copyright (C) 2024 Intel Corporation
+#
+# Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
+# See LICENSE.TXT
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
+# See YaML.md for syntax definition
+#
+--- #--------------------------------------------------------------------------
+type: header
+desc: "Intel $OneApi Unified Runtime Experimental APIs for (kernel) Launch Config"
+ordinal: "99"
+--- #--------------------------------------------------------------------------
+type: macro
+desc: "The extension string that defines support for the Launch Config extension, which is returned when querying device extensions."
+name: $X_LAUNCH_CONFIG_EXTENSION_STRING_EXP
+value: "\"$x_exp_launch_config\""
+--- #--------------------------------------------------------------------------
+type: enum
+desc: "specify launch attr"
+class: $xLaunchConfig
+name: $x_exp_launch_attr_id_t
+typed_etors: True
+etors:
+    - name: UR_CLUSTER_DIMENSION
+      desc: "triple specifying the cluster dimension."
+      value: "$X_BIT(0)"
+    - name: UR_ATTR_OTHER
+      desc: "another launch attribute....e.g. cooperative kernel launch,local or global block size, or any future attribute etc etc"
+      value: "$X_BIT(1)"
+--- #--------------------------------------------------------------------------
+type: handle
+desc: "Handle of launch attribute object"
+class: $xLaunchConfig
+name: "$x_exp_launch_attr_handle_t"
+--- #--------------------------------------------------------------------------
+type: handle
+desc: "Handle of launch config object"
+class: $xLaunchConfig
+name: "$x_exp_launch_config_handle_t"
+--- #--------------------------------------------------------------------------
+type: function
+desc: ""
+class: $xLaunchConfig
+name: KernelSetLaunchAttrExp
+ordinal: "0"
+analogue:
+    - "none"
+details:
+    - "Sets the launch config using a list of attributes"
+    - "Consult the appropriate adapter driver documentation for details of adapter specific behavior and native error codes that may be returned."
+params:
+    - type: $x_exp_launch_attr_handle_t
+      name: launchAttrs
+      desc: "[in] launch attr handle"
+    - type: $x_exp_launch_attr_id_t
+      name: attrName
+      desc: "[in] identifier of launch Attribute to retrieve"
+    - type: "size_t"
+      name: attrSize
+      desc: |
+            [in] the number of bytes pointed to by pAttrValue.
+    - type: "void*"
+      name: pAttrValue
+      desc: |
+            [out][optional][typename(attrName, attrSize)] array of bytes holding the launch attribute data.
+            If attrSize is not equal to or greater than the real number of bytes needed to return the info
+            then the $X_RESULT_ERROR_INVALID_SIZE error is returned and pAttrValue is not used.
+returns:
+    - $X_RESULT_SUCCESS
+    - $X_RESULT_ERROR_ADAPTER_SPECIFIC
+    - $X_RESULT_ERROR_UNSUPPORTED_ENUMERATION:
+        - "If `attrName` is not supported by the adapter."
+    - $X_RESULT_ERROR_INVALID_SIZE:
+        - "`attrSize == 0 && pPropValue != NULL`"
+        - "If `attrSize` is less than the real number of bytes needed to return the info."
+    - $X_RESULT_ERROR_INVALID_NULL_POINTER:
+        - "`attrSize != 0 && pAttrValue == NULL`"
+        - "`pAttrValue == NULL`"
+--- #--------------------------------------------------------------------------
+type: function
+desc: ""
+class: $xLaunchConfig
+name: KernelSetLaunchConfigExp
+ordinal: "0"
+analogue:
+    - "none"
+details:
+    - "Sets the launch config using a list of attributes"
+    - "Consult the appropriate adapter driver documentation for details of adapter specific behavior and native error codes that may be returned."
+params:
+    - type: $x_exp_launch_config_handle_t
+      name: launchConfig
+      desc: "[in] handle of launch config object"
+    - type: $x_exp_launch_attr_handle_t*
+      name: launchAttrs
+      desc: "[in] array of handles of launch config attrs"
+    - type: "size_t"
+      name: numAttrs
+      desc: |
+            [in] the number of attrs pointed to by launchAttrs.
+returns:
+    - $X_RESULT_SUCCESS
+    - $X_RESULT_ERROR_ADAPTER_SPECIFIC
+--- #--------------------------------------------------------------------------
+type: function
+desc: "Launch Kernel with Launch Time Config"
+class: $xLaunchConfig
+name: EnqueueKernelLaunchCustomExp
+ordinal: "0"
+analogue:
+    - "**cuLaunchKernelEx**"
+details:
+    - "Launches the kernel using the specified launch config"
+    - "TODO: deal with events for multi-stream queues..."
+    - "Consult the appropriate adapter driver documentation for details of adapter specific behavior and native error codes that may be returned."
+params:
+    - type: $x_exp_launch_config_handle_t
+      name: launchConfig
+      desc: "[in] handle of the launch config object"
+    - type: $x_kernel_handle_t
+      name: hKernel
+      desc: "[in] handle of the kernel object"
+returns:
+    - $X_RESULT_SUCCESS
+    - $X_RESULT_ERROR_ADAPTER_SPECIFIC
