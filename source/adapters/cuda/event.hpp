@@ -90,16 +90,15 @@ public:
     const bool RequiresTimings =
         Queue->URFlags & UR_QUEUE_FLAG_PROFILING_ENABLE ||
         Type == UR_COMMAND_TIMESTAMP_RECORDING_EXP;
-    native_type EvEnd = nullptr, EvQueued = nullptr, EvStart = nullptr;
+    native_type EvEnd = nullptr, EvStart = nullptr;
     UR_CHECK_ERROR(cuEventCreate(
         &EvEnd, RequiresTimings ? CU_EVENT_DEFAULT : CU_EVENT_DISABLE_TIMING));
 
     if (RequiresTimings) {
-      UR_CHECK_ERROR(cuEventCreate(&EvQueued, CU_EVENT_DEFAULT));
       UR_CHECK_ERROR(cuEventCreate(&EvStart, CU_EVENT_DEFAULT));
     }
     return new ur_event_handle_t_(Type, Queue->getContext(), Queue, EvEnd,
-                                  EvQueued, EvStart, Stream, StreamToken);
+                                  EvStart, Stream, StreamToken);
   }
 
   static ur_event_handle_t makeWithNative(ur_context_handle_t context,
@@ -116,7 +115,7 @@ private:
   // make_user static members in order to create a pi_event for CUDA.
   ur_event_handle_t_(ur_command_t Type, ur_context_handle_t Context,
                      ur_queue_handle_t Queue, native_type EvEnd,
-                     native_type EvQueued, native_type EvStart, CUstream Stream,
+                     native_type EvStart, CUstream Stream,
                      uint32_t StreamToken);
 
   // This constructor is private to force programmers to use the
@@ -145,9 +144,6 @@ private:
                      // a user event, this will be nullptr.
 
   native_type EvStart; // CUDA event handle associated with the start
-
-  native_type EvQueued; // CUDA event handle associated with the time
-                        // the command was enqueued
 
   ur_queue_handle_t Queue; // ur_queue_handle_t associated with the event. If
                            // this is a user event, this will be nullptr.

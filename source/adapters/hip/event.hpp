@@ -130,8 +130,6 @@ private:
 
   native_type EvStart; // HIP event handle associated with the start
 
-  native_type EvQueued; // HIP event handle associated with the time
-                        // the command was enqueued
 
   ur_queue_handle_t Queue; // ur_queue_handle_t associated with the event. If
                            // this is a user event, this will be nullptr.

@@ -20,7 +20,7 @@ ur_event_handle_t_::ur_event_handle_t_(ur_command_t Type,
     : CommandType{Type}, RefCount{1}, HasOwnership{true},
       HasBeenWaitedOn{false}, IsRecorded{false}, IsStarted{false},
       StreamToken{StreamToken}, EventId{0}, EvEnd{nullptr}, EvStart{nullptr},
-      EvQueued{nullptr}, Queue{Queue}, Stream{Stream}, Context{Context} {
+      Queue{Queue}, Stream{Stream}, Context{Context} {
 
   bool ProfilingEnabled =
       Queue->URFlags & UR_QUEUE_FLAG_PROFILING_ENABLE || isTimestampEvent();
@@ -29,7 +29,6 @@ ur_event_handle_t_::ur_event_handle_t_(ur_command_t Type,
       &EvEnd, ProfilingEnabled ? hipEventDefault : hipEventDisableTiming));
 
   if (ProfilingEnabled) {
-    UR_CHECK_ERROR(hipEventCreateWithFlags(&EvQueued, hipEventDefault));
     UR_CHECK_ERROR(hipEventCreateWithFlags(&EvStart, hipEventDefault));
   }
 
@@ -42,7 +41,7 @@ ur_event_handle_t_::ur_event_handle_t_(ur_context_handle_t Context,
     : CommandType{UR_COMMAND_EVENTS_WAIT}, RefCount{1}, HasOwnership{false},
       HasBeenWaitedOn{false}, IsRecorded{false}, IsStarted{false},
       StreamToken{std::numeric_limits<uint32_t>::max()}, EventId{0},
-      EvEnd{EventNative}, EvStart{nullptr}, EvQueued{nullptr}, Queue{nullptr},
+      EvEnd{EventNative}, EvStart{nullptr}, Queue{nullptr},
       Stream{nullptr}, Context{Context} {
   urContextRetain(Context);
 }
@@ -60,8 +59,6 @@ ur_result_t ur_event_handle_t_::start() {
 
   try {
     if (Queue->URFlags & UR_QUEUE_FLAG_PROFILING_ENABLE || isTimestampEvent()) {
-      // NOTE: This relies on the default stream to be unused.
-      UR_CHECK_ERROR(hipEventRecord(EvQueued, 0));
       UR_CHECK_ERROR(hipEventRecord(EvStart, Queue->get()));
     }
   } catch (ur_result_t Error) {
@@ -179,7 +176,6 @@ ur_result_t ur_event_handle_t_::release() {
   UR_CHECK_ERROR(hipEventDestroy(EvEnd));
 
   if (Queue->URFlags & UR_QUEUE_FLAG_PROFILING_ENABLE || isTimestampEvent()) {
-    UR_CHECK_ERROR(hipEventDestroy(EvQueued));
     UR_CHECK_ERROR(hipEventDestroy(EvStart));
   }
 

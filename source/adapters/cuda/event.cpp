@@ -21,13 +21,13 @@
 ur_event_handle_t_::ur_event_handle_t_(ur_command_t Type,
                                        ur_context_handle_t Context,
                                        ur_queue_handle_t Queue,
-                                       native_type EvEnd, native_type EvQueued,
+                                       native_type EvEnd,
                                        native_type EvStart, CUstream Stream,
                                        uint32_t StreamToken)
     : CommandType{Type}, RefCount{1}, HasOwnership{true},
       HasBeenWaitedOn{false}, IsRecorded{false}, IsStarted{false},
       StreamToken{StreamToken}, EventID{0}, EvEnd{EvEnd}, EvStart{EvStart},
-      EvQueued{EvQueued}, Queue{Queue}, Stream{Stream}, Context{Context} {
+      Queue{Queue}, Stream{Stream}, Context{Context} {
   urQueueRetain(Queue);
   urContextRetain(Context);
 }
@@ -37,7 +37,7 @@ ur_event_handle_t_::ur_event_handle_t_(ur_context_handle_t Context,
     : CommandType{UR_COMMAND_EVENTS_WAIT}, RefCount{1}, HasOwnership{false},
       HasBeenWaitedOn{false}, IsRecorded{false}, IsStarted{false},
       StreamToken{std::numeric_limits<uint32_t>::max()}, EventID{0},
-      EvEnd{EventNative}, EvStart{nullptr}, EvQueued{nullptr}, Queue{nullptr},
+      EvEnd{EventNative}, EvStart{nullptr}, Queue{nullptr},
       Stream{nullptr}, Context{Context} {
   urContextRetain(Context);
 }
@@ -55,8 +55,6 @@ ur_result_t ur_event_handle_t_::start() {
 
   try {
     if (Queue->URFlags & UR_QUEUE_FLAG_PROFILING_ENABLE || isTimestampEvent()) {
-      // NOTE: This relies on the default stream to be unused.
-      UR_CHECK_ERROR(cuEventRecord(EvQueued, 0));
       UR_CHECK_ERROR(cuEventRecord(EvStart, Stream));
     }
   } catch (ur_result_t Err) {
@@ -88,7 +86,7 @@ bool ur_event_handle_t_::isCompleted() const noexcept try {
 
 uint64_t ur_event_handle_t_::getQueuedTime() const {
   assert(isStarted());
-  return Queue->get_device()->getElapsedTime(EvQueued);
+  return Queue->get_device()->getElapsedTime(EvStart);
 }
 
 uint64_t ur_event_handle_t_::getStartTime() const {
@@ -150,7 +148,6 @@ ur_result_t ur_event_handle_t_::release() {
   UR_CHECK_ERROR(cuEventDestroy(EvEnd));
 
   if (Queue->URFlags & UR_QUEUE_FLAG_PROFILING_ENABLE || isTimestampEvent()) {
-    UR_CHECK_ERROR(cuEventDestroy(EvQueued));
     UR_CHECK_ERROR(cuEventDestroy(EvStart));
   }
 
