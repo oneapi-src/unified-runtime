@@ -130,7 +130,6 @@ private:
 
   native_type EvStart; // HIP event handle associated with the start
 
-
   ur_queue_handle_t Queue; // ur_queue_handle_t associated with the event. If
                            // this is a user event, this will be nullptr.
 
