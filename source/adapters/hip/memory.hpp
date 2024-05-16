@@ -126,7 +126,7 @@ public:
   void unmap(void *) noexcept {
     assert(MapPtr != nullptr);
 
-    if (MapPtr != HostPtr) {
+    if (MapPtr != (static_cast<char *>(HostPtr) + MapOffset)) {
       free(MapPtr);
     }
     MapPtr = nullptr;
