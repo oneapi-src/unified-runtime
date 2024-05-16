@@ -72,11 +72,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
   UR_ASSERT(phProgram, UR_RESULT_ERROR_INVALID_NULL_POINTER);
   UR_ASSERT(pBinary != nullptr, UR_RESULT_ERROR_INVALID_NULL_POINTER);
 
-  auto hProgram = new ur_program_handle_t_(
-      hContext, reinterpret_cast<const unsigned char *>(pBinary));
+  std::unique_ptr<ur_program_handle_t_> hProgram{new ur_program_handle_t_{
+      hContext, reinterpret_cast<const unsigned char *>(pBinary)}};
+
   if (pProperties != nullptr) {
     for (uint32_t i = 0; i < pProperties->count; i++) {
-      auto mdNode = pProperties->pMetadatas[i];
+      const auto &mdNode = pProperties->pMetadatas[i];
       std::string mdName(mdNode.pName);
       auto [Prefix, Tag] = splitMetadataName(mdName);
       if (Tag == __SYCL_UR_PROGRAM_METADATA_TAG_REQD_WORK_GROUP_SIZE) {
@@ -98,7 +99,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
     nativecpu_it++;
   }
 
-  *phProgram = hProgram;
+  *phProgram = hProgram.release();
 
   return UR_RESULT_SUCCESS;
 }
