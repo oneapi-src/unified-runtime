@@ -129,6 +129,18 @@ ur_result_t ur_event_handle_t_::record() {
   return Result;
 }
 
+ur_result_t ur_event_handle_t_::make_end_event_same_as_start() {
+  if (isRecorded() || !isStarted()) {
+    return UR_RESULT_ERROR_INVALID_EVENT;
+  }
+  UR_ASSERT(Queue, UR_RESULT_ERROR_INVALID_QUEUE);
+
+  EvEnd = EvStart;
+  IsRecorded = true;
+
+  return UR_RESULT_SUCCESS;
+}
+
 ur_result_t ur_event_handle_t_::wait() {
   ur_result_t Result = UR_RESULT_SUCCESS;
   try {
@@ -147,7 +159,9 @@ ur_result_t ur_event_handle_t_::release() {
 
   assert(Queue != nullptr);
 
-  UR_CHECK_ERROR(cuEventDestroy(EvEnd));
+  // Avoid double free if using timestamp
+  if (!isTimestampEvent())
+    UR_CHECK_ERROR(cuEventDestroy(EvEnd));
 
   if (Queue->URFlags & UR_QUEUE_FLAG_PROFILING_ENABLE || isTimestampEvent()) {
     UR_CHECK_ERROR(cuEventDestroy(EvQueued));

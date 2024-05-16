@@ -23,6 +23,8 @@ public:
 
   ur_result_t record();
 
+  ur_result_t make_end_event_same_as_start();
+
   ur_result_t wait();
 
   ur_result_t start();
@@ -91,8 +93,13 @@ public:
         Queue->URFlags & UR_QUEUE_FLAG_PROFILING_ENABLE ||
         Type == UR_COMMAND_TIMESTAMP_RECORDING_EXP;
     native_type EvEnd = nullptr, EvQueued = nullptr, EvStart = nullptr;
-    UR_CHECK_ERROR(cuEventCreate(
-        &EvEnd, RequiresTimings ? CU_EVENT_DEFAULT : CU_EVENT_DISABLE_TIMING));
+
+    // Timestamp will use same event for EvStart and EvEnd, so don't create
+    // EvEnd
+    if (Type != UR_COMMAND_TIMESTAMP_RECORDING_EXP)
+      UR_CHECK_ERROR(cuEventCreate(&EvEnd, RequiresTimings
+                                               ? CU_EVENT_DEFAULT
+                                               : CU_EVENT_DISABLE_TIMING));
 
     if (RequiresTimings) {
       UR_CHECK_ERROR(cuEventCreate(&EvQueued, CU_EVENT_DEFAULT));

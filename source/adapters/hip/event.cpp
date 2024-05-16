@@ -25,8 +25,11 @@ ur_event_handle_t_::ur_event_handle_t_(ur_command_t Type,
   bool ProfilingEnabled =
       Queue->URFlags & UR_QUEUE_FLAG_PROFILING_ENABLE || isTimestampEvent();
 
-  UR_CHECK_ERROR(hipEventCreateWithFlags(
-      &EvEnd, ProfilingEnabled ? hipEventDefault : hipEventDisableTiming));
+  // Timestamp will use same event for EvStart and EvEnd, so don't create
+  // EvEnd
+  if (!isTimestampEvent())
+    UR_CHECK_ERROR(hipEventCreateWithFlags(
+        &EvEnd, ProfilingEnabled ? hipEventDefault : hipEventDisableTiming));
 
   if (ProfilingEnabled) {
     UR_CHECK_ERROR(hipEventCreateWithFlags(&EvQueued, hipEventDefault));
@@ -159,6 +162,18 @@ ur_result_t ur_event_handle_t_::record() {
   return Result;
 }
 
+ur_result_t ur_event_handle_t_::make_end_event_same_as_start() {
+  if (isRecorded() || !isStarted()) {
+    return UR_RESULT_ERROR_INVALID_EVENT;
+  }
+  UR_ASSERT(Queue, UR_RESULT_ERROR_INVALID_QUEUE);
+
+  EvEnd = EvStart;
+  IsRecorded = true;
+
+  return UR_RESULT_SUCCESS;
+}
+
 ur_result_t ur_event_handle_t_::wait() {
   ur_result_t Result = UR_RESULT_SUCCESS;
   try {
@@ -176,7 +191,10 @@ ur_result_t ur_event_handle_t_::release() {
     return UR_RESULT_SUCCESS;
 
   assert(Queue != nullptr);
-  UR_CHECK_ERROR(hipEventDestroy(EvEnd));
+
+  // Avoid double free if using timestamp
+  if (!isTimestampEvent())
+    UR_CHECK_ERROR(hipEventDestroy(EvEnd));
 
   if (Queue->URFlags & UR_QUEUE_FLAG_PROFILING_ENABLE || isTimestampEvent()) {
     UR_CHECK_ERROR(hipEventDestroy(EvQueued));

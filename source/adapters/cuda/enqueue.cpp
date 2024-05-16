@@ -1727,7 +1727,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
         std::unique_ptr<ur_event_handle_t_>(ur_event_handle_t_::makeNative(
             UR_COMMAND_TIMESTAMP_RECORDING_EXP, hQueue, CuStream));
     UR_CHECK_ERROR(RetImplEvent->start());
-    UR_CHECK_ERROR(RetImplEvent->record());
+    UR_CHECK_ERROR(RetImplEvent->make_end_event_same_as_start());
 
     if (blocking) {
       UR_CHECK_ERROR(cuStreamSynchronize(CuStream));
