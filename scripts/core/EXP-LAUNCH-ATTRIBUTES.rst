@@ -54,17 +54,24 @@ API
 
 Macros
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 * ${X}_LAUNCH_ATTRIBUTES_EXTENSION_STRING_EXP
 
 Enums
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* ${x}_exp_launch_attribute_t
+* ${x}_exp_launch_attribute_id_t
+
+Types
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* ${x}_exp_launch_attribute_handle_t
 
 Functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-* ${x}KernelSetLaunchAttributesExp
-* ${x}EnqueueKernelLaunchCustomExp
+
+* ${x}LaunchAttributesSetLaunchAttributeExp
+* ${x}LaunchAttributesEnqueueKernelLaunchCustomExp
 
 Support
 --------------------------------------------------------------------------------

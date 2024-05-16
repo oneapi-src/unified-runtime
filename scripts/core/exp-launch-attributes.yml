@@ -18,12 +18,11 @@ name: $X_LAUNCH_ATTRIBUTES_EXTENSION_STRING_EXP
 value: "\"$x_exp_launch_attributes\""
 --- #--------------------------------------------------------------------------
 type: enum
-extend: True
 desc: "Specifies a launch attribute ID"
 class: $xLaunchAttributes
 name: $x_exp_launch_attribute_id_t
 etors:
-    - name: UR_LAUNCH_ATTRIBUTE_CLUSTER_DIMENSION
+    - name: LAUNCH_ATTRIBUTE_CLUSTER_DIMENSION_EXP
       desc: "Three unsigned int values specifying the cluster dimensions."
       value: "0x2000"
 --- #--------------------------------------------------------------------------
@@ -35,7 +34,7 @@ name: "$x_exp_launch_attribute_handle_t"
 type: function
 desc: "Sets the launch attribute"
 class: $xLaunchAttributes
-name: KernelSetLaunchAttributeExp
+name: SetLaunchAttributeExp
 ordinal: "0"
 analogue:
     - "none"
@@ -107,7 +106,7 @@ params:
     - type: $x_exp_launch_attribute_handle_t*
       name: launchAttrList
       desc: "[in][range(0, numAttrsInLaunchAttrList)] pointer to a list of launch attributes"
-    - type: ur_event_handle_t *
+    - type: ur_event_handle_t*
       name: phEvent
       desc: "[out][optional] return an event object that identifies this particular kernel execution instance."
 returns:
