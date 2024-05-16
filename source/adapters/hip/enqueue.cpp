@@ -483,7 +483,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
       *phEvent = ur_event_handle_t_::makeNative(
           UR_COMMAND_EVENTS_WAIT_WITH_BARRIER, hQueue, HIPStream, StreamToken);
       UR_CHECK_ERROR((*phEvent)->start());
-      UR_CHECK_ERROR((*phEvent)->record());
+      UR_CHECK_ERROR((*phEvent)->make_end_event_same_as_start());
     }
 
     return UR_RESULT_SUCCESS;
@@ -1274,7 +1274,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferMap(
         *phEvent = ur_event_handle_t_::makeNative(
             UR_COMMAND_MEM_BUFFER_MAP, hQueue, hQueue->getNextTransferStream());
         UR_CHECK_ERROR((*phEvent)->start());
-        UR_CHECK_ERROR((*phEvent)->record());
+        UR_CHECK_ERROR((*phEvent)->make_end_event_same_as_start());
       } catch (ur_result_t Error) {
         Result = Error;
       }
@@ -1324,7 +1324,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemUnmap(
         *phEvent = ur_event_handle_t_::makeNative(
             UR_COMMAND_MEM_UNMAP, hQueue, hQueue->getNextTransferStream());
         UR_CHECK_ERROR((*phEvent)->start());
-        UR_CHECK_ERROR((*phEvent)->record());
+        UR_CHECK_ERROR((*phEvent)->make_end_event_same_as_start());
       } catch (ur_result_t Error) {
         Result = Error;
       }

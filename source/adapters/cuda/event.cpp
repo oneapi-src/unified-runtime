@@ -159,8 +159,8 @@ ur_result_t ur_event_handle_t_::release() {
 
   assert(Queue != nullptr);
 
-  // Avoid double free if using timestamp
-  if (!isTimestampEvent())
+  // Avoid double free
+  if (differentNativeEventsForStartAndEnd(CommandType))
     UR_CHECK_ERROR(cuEventDestroy(EvEnd));
 
   if (Queue->URFlags & UR_QUEUE_FLAG_PROFILING_ENABLE || isTimestampEvent()) {

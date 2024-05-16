@@ -8,6 +8,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include <ur/ur.hpp>
+
 #include "event.hpp"
 #include "common.hpp"
 #include "context.hpp"
@@ -25,9 +27,8 @@ ur_event_handle_t_::ur_event_handle_t_(ur_command_t Type,
   bool ProfilingEnabled =
       Queue->URFlags & UR_QUEUE_FLAG_PROFILING_ENABLE || isTimestampEvent();
 
-  // Timestamp will use same event for EvStart and EvEnd, so don't create
-  // EvEnd
-  if (!isTimestampEvent())
+  // Some commands use same event for EvStart and EvEnd, so don't create EvEnd
+  if (differentNativeEventsForStartAndEnd(CommandType))
     UR_CHECK_ERROR(hipEventCreateWithFlags(
         &EvEnd, ProfilingEnabled ? hipEventDefault : hipEventDisableTiming));
 
@@ -192,8 +193,8 @@ ur_result_t ur_event_handle_t_::release() {
 
   assert(Queue != nullptr);
 
-  // Avoid double free if using timestamp
-  if (!isTimestampEvent())
+  // Avoid double free
+  if (differentNativeEventsForStartAndEnd(CommandType))
     UR_CHECK_ERROR(hipEventDestroy(EvEnd));
 
   if (Queue->URFlags & UR_QUEUE_FLAG_PROFILING_ENABLE || isTimestampEvent()) {

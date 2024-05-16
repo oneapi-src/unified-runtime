@@ -94,9 +94,9 @@ public:
         Type == UR_COMMAND_TIMESTAMP_RECORDING_EXP;
     native_type EvEnd = nullptr, EvQueued = nullptr, EvStart = nullptr;
 
-    // Timestamp will use same event for EvStart and EvEnd, so don't create
+    // Some commands will use same event for EvStart and EvEnd, so don't create
     // EvEnd
-    if (Type != UR_COMMAND_TIMESTAMP_RECORDING_EXP)
+    if (differentNativeEventsForStartAndEnd(Type))
       UR_CHECK_ERROR(cuEventCreate(&EvEnd, RequiresTimings
                                                ? CU_EVENT_DEFAULT
                                                : CU_EVENT_DISABLE_TIMING));

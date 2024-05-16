@@ -375,3 +375,13 @@ static inline void roundToHighestFactorOfGlobalSizeIn3d(
                MaxBlockDim[2]));
   roundToHighestFactorOfGlobalSize(ThreadsPerBlock[2], GlobalSize[2]);
 }
+
+namespace {
+// Start and end events refer to the same native events for some commands
+static inline bool differentNativeEventsForStartAndEnd(ur_command_t T) {
+  return !(T & (UR_COMMAND_TIMESTAMP_RECORDING_EXP |
+                UR_COMMAND_EVENTS_WAIT_WITH_BARRIER |
+                UR_COMMAND_MEM_BUFFER_MAP | UR_COMMAND_MEM_UNMAP));
+}
+} // namespace
+
