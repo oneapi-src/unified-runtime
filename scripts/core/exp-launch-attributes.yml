@@ -18,14 +18,14 @@ name: $X_LAUNCH_ATTRIBUTES_EXTENSION_STRING_EXP
 value: "\"$x_exp_launch_attributes\""
 --- #--------------------------------------------------------------------------
 type: enum
+extend: True
 desc: "Specifies a launch attribute ID"
 class: $xLaunchAttributes
 name: $x_exp_launch_attribute_id_t
-typed_etors: True
 etors:
     - name: UR_LAUNCH_ATTRIBUTE_CLUSTER_DIMENSION
       desc: "Three unsigned int values specifying the cluster dimensions."
-      value: "$X_BIT(0)"
+      value: "0x2000"
 --- #--------------------------------------------------------------------------
 type: handle
 desc: "Handle of launch attribute object"
@@ -33,7 +33,7 @@ class: $xLaunchAttributes
 name: "$x_exp_launch_attribute_handle_t"
 --- #--------------------------------------------------------------------------
 type: function
-desc: ""
+desc: "Sets the launch attribute"
 class: $xLaunchAttributes
 name: KernelSetLaunchAttributeExp
 ordinal: "0"
@@ -44,7 +44,7 @@ details:
 params:
     - type: $x_exp_launch_attribute_handle_t*
       name: launchAttr
-      desc: "[in] pointer to launch attribute handle address"
+      desc: "[in][range(0, 1)] pointer to launch attribute handle address"
     - type: $x_exp_launch_attribute_id_t
       name: attrID
       desc: "[in] ID of launch attribute"
@@ -101,12 +101,15 @@ params:
     - type: const ur_event_handle_t*
       name: phEventWaitList
       desc: "[in][optional][range(0, numEventsInWaitList)] pointer to a list of events that must be complete before the kernel execution. If nullptr, the numEventsInWaitList must be 0, indicating that no wait event. "
+    - type: uint32_t
+      name: numAttrsInLaunchAttrList
+      desc: "[in] size of the launch attr list"
+    - type: $x_exp_launch_attribute_handle_t*
+      name: launchAttrList
+      desc: "[in][range(0, numAttrsInLaunchAttrList)] pointer to a list of launch attributes"
     - type: ur_event_handle_t *
       name: phEvent
       desc: "[out][optional] return an event object that identifies this particular kernel execution instance."
-    - type: $x_exp_launch_attribute_handle_t*
-      name: launchAttrList
-      desc: "[in] pointer to a list of launch attributes"
 returns:
     - $X_RESULT_SUCCESS
     - $X_RESULT_ERROR_UNINITIALIZED
@@ -131,4 +134,3 @@ returns:
     - $X_RESULT_ERROR_INVALID_VALUE
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
-    
