@@ -378,10 +378,9 @@ static inline void roundToHighestFactorOfGlobalSizeIn3d(
 
 namespace {
 // Start and end events refer to the same native events for some commands
-static inline bool differentNativeEventsForStartAndEnd(ur_command_t T) {
+inline bool differentNativeEventsForStartAndEnd(ur_command_t T) {
   return !(T & (UR_COMMAND_TIMESTAMP_RECORDING_EXP |
                 UR_COMMAND_EVENTS_WAIT_WITH_BARRIER |
                 UR_COMMAND_MEM_BUFFER_MAP | UR_COMMAND_MEM_UNMAP));
 }
 } // namespace
-

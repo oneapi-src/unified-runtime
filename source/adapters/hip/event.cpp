@@ -58,7 +58,7 @@ ur_event_handle_t_::~ur_event_handle_t_() {
   urContextRelease(Context);
 }
 
-ur_result_t ur_event_handle_t_::start() {
+ur_result_t ur_event_handle_t_::start(bool MakeEndSameAsStart) {
   assert(!isStarted());
   ur_result_t Result = UR_RESULT_SUCCESS;
 
@@ -70,6 +70,11 @@ ur_result_t ur_event_handle_t_::start() {
     }
   } catch (ur_result_t Error) {
     Result = Error;
+  }
+
+  if (MakeEndSameAsStart) {
+    IsRecorded = true;
+    EvEnd = EvStart;
   }
 
   IsStarted = true;
@@ -161,18 +166,6 @@ ur_result_t ur_event_handle_t_::record() {
   }
 
   return Result;
-}
-
-ur_result_t ur_event_handle_t_::make_end_event_same_as_start() {
-  if (isRecorded() || !isStarted()) {
-    return UR_RESULT_ERROR_INVALID_EVENT;
-  }
-  UR_ASSERT(Queue, UR_RESULT_ERROR_INVALID_QUEUE);
-
-  EvEnd = EvStart;
-  IsRecorded = true;
-
-  return UR_RESULT_SUCCESS;
 }
 
 ur_result_t ur_event_handle_t_::wait() {

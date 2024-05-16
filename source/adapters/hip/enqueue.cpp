@@ -482,8 +482,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
     if (phEvent) {
       *phEvent = ur_event_handle_t_::makeNative(
           UR_COMMAND_EVENTS_WAIT_WITH_BARRIER, hQueue, HIPStream, StreamToken);
-      UR_CHECK_ERROR((*phEvent)->start());
-      UR_CHECK_ERROR((*phEvent)->make_end_event_same_as_start());
+      UR_CHECK_ERROR((*phEvent)->start(true /*MakeEndSameAsStart=*/));
     }
 
     return UR_RESULT_SUCCESS;
@@ -1273,8 +1272,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferMap(
       try {
         *phEvent = ur_event_handle_t_::makeNative(
             UR_COMMAND_MEM_BUFFER_MAP, hQueue, hQueue->getNextTransferStream());
-        UR_CHECK_ERROR((*phEvent)->start());
-        UR_CHECK_ERROR((*phEvent)->make_end_event_same_as_start());
+        UR_CHECK_ERROR((*phEvent)->start(true /*MakeEndSameAsStart=*/));
       } catch (ur_result_t Error) {
         Result = Error;
       }
@@ -1323,8 +1321,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemUnmap(
       try {
         *phEvent = ur_event_handle_t_::makeNative(
             UR_COMMAND_MEM_UNMAP, hQueue, hQueue->getNextTransferStream());
-        UR_CHECK_ERROR((*phEvent)->start());
-        UR_CHECK_ERROR((*phEvent)->make_end_event_same_as_start());
+        UR_CHECK_ERROR((*phEvent)->start(true /*MakeEndSameAsStart=*/));
       } catch (ur_result_t Error) {
         Result = Error;
       }
@@ -1999,8 +1996,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
     RetImplEvent =
         std::unique_ptr<ur_event_handle_t_>(ur_event_handle_t_::makeNative(
             UR_COMMAND_TIMESTAMP_RECORDING_EXP, hQueue, HIPStream));
-    UR_CHECK_ERROR(RetImplEvent->start());
-    UR_CHECK_ERROR(RetImplEvent->make_end_event_same_as_start());
+    UR_CHECK_ERROR((*phEvent)->start(true /*MakeEndSameAsStart=*/));
 
     if (blocking) {
       UR_CHECK_ERROR(hipStreamSynchronize(HIPStream));
