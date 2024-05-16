@@ -8,7 +8,7 @@ using urDeviceCreateWithNativeHandleTest = uur::urAllDevicesTest;
 
 TEST_F(urDeviceCreateWithNativeHandleTest, Success) {
     for (auto device : devices) {
-        ur_native_handle_t native_handle = nullptr;
+        ur_native_handle_t native_handle = 0;
         if (urDeviceGetNativeHandle(device, &native_handle)) {
             continue;
         }
