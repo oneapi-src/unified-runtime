@@ -583,6 +583,12 @@ etors:
 - name: ENQUEUE_TIMESTAMP_RECORDING_EXP
   desc: Enumerator for $xEnqueueTimestampRecordingExp
   value: '223'
+- name: KERNEL_SET_LAUNCH_ATTRIBUTE_EXP
+  desc: Enumerator for $xKernelSetLaunchAttributeExp
+  value: '224'
+- name: ENQUEUE_KERNEL_LAUNCH_CUSTOM_EXP
+  desc: Enumerator for $xEnqueueKernelLaunchCustomExp
+  value: '225'
 ---
 type: enum
 desc: Defines structure types

@@ -8362,6 +8362,143 @@ ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Sets the launch attribute
+///
+/// @details
+///     - Sets the launch attribute.
+///
+/// @remarks
+///   _Analogues_
+///     - none
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == launchAttr`
+///         + `attrSize != 0 && pAttrValue == NULL`
+///         + `pAttrValue == NULL`
+///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
+///         + `::UR_EXP_LAUNCH_ATTRIBUTE_ID_UR_LAUNCH_ATTRIBUTE_CLUSTER_DIMENSION < attrID`
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
+///         + If `attrID` is not supported by the adapter.
+///     - ::UR_RESULT_ERROR_INVALID_SIZE
+///         + `attrSize == 0 && pPropValue != NULL`
+///         + If `attrSize` is less than the real number of bytes needed to return the attribute values.
+ur_result_t UR_APICALL urKernelSetLaunchAttributeExp(
+    ur_exp_launch_attribute_handle_t *
+        launchAttr, ///< [in][range(0, 1)] pointer to launch attribute handle address
+    ur_exp_launch_attribute_id_t attrID, ///< [in] ID of launch attribute
+    size_t attrSize, ///< [in] the number of bytes pointed to by pAttrValue.
+    void *
+        pAttrValue ///< [out][optional][typename(attrID, attrSize)] array of bytes holding the
+                   ///< launch attribute data.
+    ///< If attrSize is not equal to or greater than the real number of bytes
+    ///< needed to return the
+    ///< attribute values then the ::UR_RESULT_ERROR_INVALID_SIZE error is
+    ///< returned and pAttrValue is not used.
+    ) try {
+    auto pfnSetLaunchAttributeExp =
+        ur_lib::context->urDdiTable.KernelExp.pfnSetLaunchAttributeExp;
+    if (nullptr == pfnSetLaunchAttributeExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    return pfnSetLaunchAttributeExp(launchAttr, attrID, attrSize, pAttrValue);
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Launch Kernel with custom Launch Attributes
+///
+/// @details
+///     - Launches the kernel using the specified launch attributes
+///     - Consult the appropriate adapter driver documentation for details of
+///       adapter specific behavior and native error codes that may be returned.
+///
+/// @remarks
+///   _Analogues_
+///     - **cuLaunchKernelEx**
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hQueue`
+///         + `NULL == hKernel`
+///         + NULL == hQueue
+///         + NULL == hKernel
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pGlobalWorkSize`
+///         + `NULL == launchAttrList`
+///         + NULL == pGlobalWorkSize
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_QUEUE
+///     - ::UR_RESULT_ERROR_INVALID_KERNEL
+///     - ::UR_RESULT_ERROR_INVALID_EVENT
+///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
+///         + phEventWaitList == NULL && numEventsInWaitList > 0
+///         + phEventWaitList != NULL && numEventsInWaitList == 0
+///         + If event objects in phEventWaitList are not valid events.
+///     - ::UR_RESULT_ERROR_IN_EVENT_LIST_EXEC_STATUS
+///         + An event in phEventWaitList has ::UR_EVENT_STATUS_ERROR
+///     - ::UR_RESULT_ERROR_INVALID_WORK_DIMENSION
+///     - ::UR_RESULT_ERROR_INVALID_WORK_GROUP_SIZE
+///     - ::UR_RESULT_ERROR_INVALID_VALUE
+///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
+///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
+    ur_queue_handle_t hQueue,   ///< [in] handle of the queue object
+    ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
+    uint32_t
+        workDim, ///< [in] number of dimensions, from 1 to 3, to specify the global and
+                 ///< work-group work-items
+    const size_t *
+        pGlobalWorkSize, ///< [in] pointer to an array of workDim unsigned values that specify the
+    ///< number of global work-items in workDim that will execute the kernel
+    ///< function
+    const size_t *
+        pLocalWorkSize, ///< [in][optional] pointer to an array of workDim unsigned values that
+    ///< specify the number of local work-items forming a work-group that will
+    ///< execute the kernel function. If nullptr, the runtime implementation
+    ///< will choose the work-group size.
+    uint32_t numEventsInWaitList, ///< [in] size of the event wait list
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the kernel execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating that no wait event.
+    uint32_t numAttrsInLaunchAttrList, ///< [in] size of the launch attr list
+    ur_exp_launch_attribute_handle_t *
+        launchAttrList, ///< [in][range(0, numAttrsInLaunchAttrList)] pointer to a list of launch
+                        ///< attributes
+    ur_event_handle_t *
+        phEvent ///< [out][optional] return an event object that identifies this particular
+                ///< kernel execution instance.
+    ) try {
+    auto pfnKernelLaunchCustomExp =
+        ur_lib::context->urDdiTable.EnqueueExp.pfnKernelLaunchCustomExp;
+    if (nullptr == pfnKernelLaunchCustomExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    return pfnKernelLaunchCustomExp(hQueue, hKernel, workDim, pGlobalWorkSize,
+                                    pLocalWorkSize, numEventsInWaitList,
+                                    phEventWaitList, numAttrsInLaunchAttrList,
+                                    launchAttrList, phEvent);
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Produces an executable program from one program, negates need for the
 ///        linking step.
 ///

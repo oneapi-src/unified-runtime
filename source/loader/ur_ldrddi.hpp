@@ -98,6 +98,12 @@ using ur_exp_command_buffer_command_factory_t =
     singleton_factory_t<ur_exp_command_buffer_command_object_t,
                         ur_exp_command_buffer_command_handle_t>;
 
+using ur_exp_launch_attribute_object_t =
+    object_t<ur_exp_launch_attribute_handle_t>;
+using ur_exp_launch_attribute_factory_t =
+    singleton_factory_t<ur_exp_launch_attribute_object_t,
+                        ur_exp_launch_attribute_handle_t>;
+
 } // namespace ur_loader
 
 #endif /* UR_LOADER_LDRDDI_H */

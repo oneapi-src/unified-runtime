@@ -1011,6 +1011,14 @@ ur_result_t urPrintExpCommandBufferUpdateKernelLaunchDesc(
     return str_copy(&ss, buffer, buff_size, out_size);
 }
 
+ur_result_t urPrintExpLaunchAttributeId(enum ur_exp_launch_attribute_id_t value,
+                                        char *buffer, const size_t buff_size,
+                                        size_t *out_size) {
+    std::stringstream ss;
+    ss << value;
+    return str_copy(&ss, buffer, buff_size, out_size);
+}
+
 ur_result_t urPrintExpPeerInfo(enum ur_exp_peer_info_t value, char *buffer,
                                const size_t buff_size, size_t *out_size) {
     std::stringstream ss;
@@ -1645,6 +1653,14 @@ ur_result_t urPrintEnqueueWriteHostPipeParams(
     return str_copy(&ss, buffer, buff_size, out_size);
 }
 
+ur_result_t urPrintEnqueueKernelLaunchCustomExpParams(
+    const struct ur_enqueue_kernel_launch_custom_exp_params_t *params,
+    char *buffer, const size_t buff_size, size_t *out_size) {
+    std::stringstream ss;
+    ss << params;
+    return str_copy(&ss, buffer, buff_size, out_size);
+}
+
 ur_result_t urPrintEnqueueCooperativeKernelLaunchExpParams(
     const struct ur_enqueue_cooperative_kernel_launch_exp_params_t *params,
     char *buffer, const size_t buff_size, size_t *out_size) {
@@ -1790,6 +1806,14 @@ ur_result_t urPrintKernelGetNativeHandleParams(
 
 ur_result_t urPrintKernelCreateWithNativeHandleParams(
     const struct ur_kernel_create_with_native_handle_params_t *params,
+    char *buffer, const size_t buff_size, size_t *out_size) {
+    std::stringstream ss;
+    ss << params;
+    return str_copy(&ss, buffer, buff_size, out_size);
+}
+
+ur_result_t urPrintKernelSetLaunchAttributeExpParams(
+    const struct ur_kernel_set_launch_attribute_exp_params_t *params,
     char *buffer, const size_t buff_size, size_t *out_size) {
     std::stringstream ss;
     ss << params;

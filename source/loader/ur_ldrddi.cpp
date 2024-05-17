@@ -33,6 +33,7 @@ ur_exp_interop_mem_factory_t ur_exp_interop_mem_factory;
 ur_exp_interop_semaphore_factory_t ur_exp_interop_semaphore_factory;
 ur_exp_command_buffer_factory_t ur_exp_command_buffer_factory;
 ur_exp_command_buffer_command_factory_t ur_exp_command_buffer_command_factory;
+ur_exp_launch_attribute_factory_t ur_exp_launch_attribute_factory;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urAdapterGet
@@ -7717,6 +7718,113 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urKernelSetLaunchAttributeExp
+__urdlllocal ur_result_t UR_APICALL urKernelSetLaunchAttributeExp(
+    ur_exp_launch_attribute_handle_t *
+        launchAttr, ///< [in][range(0, 1)] pointer to launch attribute handle address
+    ur_exp_launch_attribute_id_t attrID, ///< [in] ID of launch attribute
+    size_t attrSize, ///< [in] the number of bytes pointed to by pAttrValue.
+    void *
+        pAttrValue ///< [out][optional][typename(attrID, attrSize)] array of bytes holding the
+                   ///< launch attribute data.
+    ///< If attrSize is not equal to or greater than the real number of bytes
+    ///< needed to return the
+    ///< attribute values then the ::UR_RESULT_ERROR_INVALID_SIZE error is
+    ///< returned and pAttrValue is not used.
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // extract platform's function pointer table
+    auto dditable =
+        reinterpret_cast<ur_exp_launch_attribute_object_t *>(*launchAttr)
+            ->dditable;
+    auto pfnSetLaunchAttributeExp =
+        dditable->ur.KernelExp.pfnSetLaunchAttributeExp;
+    if (nullptr == pfnSetLaunchAttributeExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handles to platform handles
+    auto launchAttrLocal = std::vector<ur_exp_launch_attribute_handle_t>(1);
+    for (size_t i = 0; i < 1; ++i) {
+        launchAttrLocal[i] =
+            reinterpret_cast<ur_exp_launch_attribute_object_t *>(launchAttr[i])
+                ->handle;
+    }
+
+    // forward to device-platform
+    result = pfnSetLaunchAttributeExp(launchAttrLocal.data(), attrID, attrSize,
+                                      pAttrValue);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urEnqueueKernelLaunchCustomExp
+__urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
+    ur_queue_handle_t hQueue,   ///< [in] handle of the queue object
+    ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
+    uint32_t
+        workDim, ///< [in] number of dimensions, from 1 to 3, to specify the global and
+                 ///< work-group work-items
+    const size_t *
+        pGlobalWorkSize, ///< [in] pointer to an array of workDim unsigned values that specify the
+    ///< number of global work-items in workDim that will execute the kernel
+    ///< function
+    const size_t *
+        pLocalWorkSize, ///< [in][optional] pointer to an array of workDim unsigned values that
+    ///< specify the number of local work-items forming a work-group that will
+    ///< execute the kernel function. If nullptr, the runtime implementation
+    ///< will choose the work-group size.
+    uint32_t numEventsInWaitList, ///< [in] size of the event wait list
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the kernel execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating that no wait event.
+    uint32_t numAttrsInLaunchAttrList, ///< [in] size of the launch attr list
+    ur_exp_launch_attribute_handle_t *
+        launchAttrList, ///< [in][range(0, numAttrsInLaunchAttrList)] pointer to a list of launch
+                        ///< attributes
+    ur_event_handle_t *
+        phEvent ///< [out][optional] return an event object that identifies this particular
+                ///< kernel execution instance.
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // extract platform's function pointer table
+    auto dditable = reinterpret_cast<ur_queue_object_t *>(hQueue)->dditable;
+    auto pfnKernelLaunchCustomExp =
+        dditable->ur.EnqueueExp.pfnKernelLaunchCustomExp;
+    if (nullptr == pfnKernelLaunchCustomExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    hQueue = reinterpret_cast<ur_queue_object_t *>(hQueue)->handle;
+
+    // convert loader handle to platform handle
+    hKernel = reinterpret_cast<ur_kernel_object_t *>(hKernel)->handle;
+
+    // convert loader handles to platform handles
+    auto launchAttrListLocal =
+        std::vector<ur_exp_launch_attribute_handle_t>(numAttrsInLaunchAttrList);
+    for (size_t i = 0; i < numAttrsInLaunchAttrList; ++i) {
+        launchAttrListLocal[i] =
+            reinterpret_cast<ur_exp_launch_attribute_object_t *>(
+                launchAttrList[i])
+                ->handle;
+    }
+
+    // forward to device-platform
+    result = pfnKernelLaunchCustomExp(hQueue, hKernel, workDim, pGlobalWorkSize,
+                                      pLocalWorkSize, numEventsInWaitList,
+                                      phEventWaitList, numAttrsInLaunchAttrList,
+                                      launchAttrListLocal.data(), phEvent);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramBuildExp
 __urdlllocal ur_result_t UR_APICALL urProgramBuildExp(
     ur_program_handle_t hProgram, ///< [in] Handle of the program to build.
@@ -8434,6 +8542,8 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetEnqueueExpProcAddrTable(
         if (ur_loader::context->platforms.size() != 1 ||
             ur_loader::context->forceIntercept) {
             // return pointers to loader's DDIs
+            pDdiTable->pfnKernelLaunchCustomExp =
+                ur_loader::urEnqueueKernelLaunchCustomExp;
             pDdiTable->pfnCooperativeKernelLaunchExp =
                 ur_loader::urEnqueueCooperativeKernelLaunchExp;
             pDdiTable->pfnTimestampRecordingExp =
@@ -8621,6 +8731,8 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetKernelExpProcAddrTable(
         if (ur_loader::context->platforms.size() != 1 ||
             ur_loader::context->forceIntercept) {
             // return pointers to loader's DDIs
+            pDdiTable->pfnSetLaunchAttributeExp =
+                ur_loader::urKernelSetLaunchAttributeExp;
             pDdiTable->pfnSuggestMaxCooperativeGroupCountExp =
                 ur_loader::urKernelSuggestMaxCooperativeGroupCountExp;
         } else {

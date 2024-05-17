@@ -60,6 +60,8 @@ template <>
 struct is_handle<ur_exp_command_buffer_handle_t> : std::true_type {};
 template <>
 struct is_handle<ur_exp_command_buffer_command_handle_t> : std::true_type {};
+template <>
+struct is_handle<ur_exp_launch_attribute_handle_t> : std::true_type {};
 template <typename T>
 inline constexpr bool is_handle_v = is_handle<T>::value;
 template <typename T>
@@ -208,6 +210,9 @@ template <>
 inline ur_result_t printTagged(std::ostream &os, const void *ptr, ur_exp_command_buffer_command_info_t value, size_t size);
 
 template <>
+inline ur_result_t printTagged(std::ostream &os, const void *ptr, ur_exp_launch_attribute_id_t value, size_t size);
+
+template <>
 inline ur_result_t printTagged(std::ostream &os, const void *ptr, ur_exp_peer_info_t value, size_t size);
 
 } // namespace ur::details
@@ -335,6 +340,7 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
 inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_exp_command_buffer_update_pointer_arg_desc_t params);
 inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_exp_command_buffer_update_value_arg_desc_t params);
 inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_exp_command_buffer_update_kernel_launch_desc_t params);
+inline std::ostream &operator<<(std::ostream &os, enum ur_exp_launch_attribute_id_t value);
 inline std::ostream &operator<<(std::ostream &os, enum ur_exp_peer_info_t value);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -918,6 +924,12 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_function_t value) {
         break;
     case UR_FUNCTION_ENQUEUE_TIMESTAMP_RECORDING_EXP:
         os << "UR_FUNCTION_ENQUEUE_TIMESTAMP_RECORDING_EXP";
+        break;
+    case UR_FUNCTION_KERNEL_SET_LAUNCH_ATTRIBUTE_EXP:
+        os << "UR_FUNCTION_KERNEL_SET_LAUNCH_ATTRIBUTE_EXP";
+        break;
+    case UR_FUNCTION_ENQUEUE_KERNEL_LAUNCH_CUSTOM_EXP:
+        os << "UR_FUNCTION_ENQUEUE_KERNEL_LAUNCH_CUSTOM_EXP";
         break;
     default:
         os << "unknown enumerator";
@@ -9838,6 +9850,51 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_exp_command_bu
     return os;
 }
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_exp_launch_attribute_id_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, enum ur_exp_launch_attribute_id_t value) {
+    switch (value) {
+    case UR_EXP_LAUNCH_ATTRIBUTE_ID_UR_LAUNCH_ATTRIBUTE_CLUSTER_DIMENSION:
+        os << "UR_EXP_LAUNCH_ATTRIBUTE_ID_UR_LAUNCH_ATTRIBUTE_CLUSTER_DIMENSION";
+        break;
+    default:
+        os << "unknown enumerator";
+        break;
+    }
+    return os;
+}
+namespace ur::details {
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print ur_exp_launch_attribute_id_t enum value
+template <>
+inline ur_result_t printTagged(std::ostream &os, const void *ptr, ur_exp_launch_attribute_id_t value, size_t size) {
+    if (ptr == NULL) {
+        return printPtr(os, ptr);
+    }
+
+    switch (value) {
+    case UR_EXP_LAUNCH_ATTRIBUTE_ID_UR_LAUNCH_ATTRIBUTE_CLUSTER_DIMENSION: {
+        const uint32_t *tptr = (const uint32_t *)ptr;
+        if (sizeof(uint32_t) > size) {
+            os << "invalid size (is: " << size << ", expected: >=" << sizeof(uint32_t) << ")";
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+        os << (const void *)(tptr) << " (";
+
+        os << *tptr;
+
+        os << ")";
+    } break;
+    default:
+        os << "unknown enumerator";
+        return UR_RESULT_ERROR_INVALID_ENUMERATION;
+    }
+    return UR_RESULT_SUCCESS;
+}
+} // namespace ur::details
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Print operator for the ur_exp_peer_info_t type
 /// @returns
 ///     std::ostream &
@@ -11370,6 +11427,40 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
 
     ur::details::printPtr(os,
                           *(params->pphKernel));
+
+    return os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_kernel_set_launch_attribute_exp_params_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_kernel_set_launch_attribute_exp_params_t *params) {
+
+    os << ".launchAttr = {";
+    for (size_t i = 0; *(params->plaunchAttr) != NULL && i < *params->p1; ++i) {
+        if (i != 0) {
+            os << ", ";
+        }
+
+        ur::details::printPtr(os,
+                              (*(params->plaunchAttr))[i]);
+    }
+    os << "}";
+
+    os << ", ";
+    os << ".attrID = ";
+
+    os << *(params->pattrID);
+
+    os << ", ";
+    os << ".attrSize = ";
+
+    os << *(params->pattrSize);
+
+    os << ", ";
+    os << ".pAttrValue = ";
+    ur::details::printTagged(os, *(params->ppAttrValue), *(params->pattrID), *(params->pattrSize));
 
     return os;
 }
@@ -14047,6 +14138,83 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
 
         ur::details::printPtr(os,
                               (*(params->pphEventWaitList))[i]);
+    }
+    os << "}";
+
+    os << ", ";
+    os << ".phEvent = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphEvent));
+
+    return os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_enqueue_kernel_launch_custom_exp_params_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_enqueue_kernel_launch_custom_exp_params_t *params) {
+
+    os << ".hQueue = ";
+
+    ur::details::printPtr(os,
+                          *(params->phQueue));
+
+    os << ", ";
+    os << ".hKernel = ";
+
+    ur::details::printPtr(os,
+                          *(params->phKernel));
+
+    os << ", ";
+    os << ".workDim = ";
+
+    os << *(params->pworkDim);
+
+    os << ", ";
+    os << ".pGlobalWorkSize = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppGlobalWorkSize));
+
+    os << ", ";
+    os << ".pLocalWorkSize = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppLocalWorkSize));
+
+    os << ", ";
+    os << ".numEventsInWaitList = ";
+
+    os << *(params->pnumEventsInWaitList);
+
+    os << ", ";
+    os << ".phEventWaitList = {";
+    for (size_t i = 0; *(params->pphEventWaitList) != NULL && i < *params->pnumEventsInWaitList; ++i) {
+        if (i != 0) {
+            os << ", ";
+        }
+
+        ur::details::printPtr(os,
+                              (*(params->pphEventWaitList))[i]);
+    }
+    os << "}";
+
+    os << ", ";
+    os << ".numAttrsInLaunchAttrList = ";
+
+    os << *(params->pnumAttrsInLaunchAttrList);
+
+    os << ", ";
+    os << ".launchAttrList = {";
+    for (size_t i = 0; *(params->plaunchAttrList) != NULL && i < *params->pnumAttrsInLaunchAttrList; ++i) {
+        if (i != 0) {
+            os << ", ";
+        }
+
+        ur::details::printPtr(os,
+                              (*(params->plaunchAttrList))[i]);
     }
     os << "}";
 
@@ -16991,6 +17159,9 @@ inline ur_result_t UR_APICALL printFunctionParams(std::ostream &os, ur_function_
     case UR_FUNCTION_KERNEL_CREATE_WITH_NATIVE_HANDLE: {
         os << (const struct ur_kernel_create_with_native_handle_params_t *)params;
     } break;
+    case UR_FUNCTION_KERNEL_SET_LAUNCH_ATTRIBUTE_EXP: {
+        os << (const struct ur_kernel_set_launch_attribute_exp_params_t *)params;
+    } break;
     case UR_FUNCTION_KERNEL_SET_ARG_VALUE: {
         os << (const struct ur_kernel_set_arg_value_params_t *)params;
     } break;
@@ -17185,6 +17356,9 @@ inline ur_result_t UR_APICALL printFunctionParams(std::ostream &os, ur_function_
     } break;
     case UR_FUNCTION_ENQUEUE_WRITE_HOST_PIPE: {
         os << (const struct ur_enqueue_write_host_pipe_params_t *)params;
+    } break;
+    case UR_FUNCTION_ENQUEUE_KERNEL_LAUNCH_CUSTOM_EXP: {
+        os << (const struct ur_enqueue_kernel_launch_custom_exp_params_t *)params;
     } break;
     case UR_FUNCTION_ENQUEUE_COOPERATIVE_KERNEL_LAUNCH_EXP: {
         os << (const struct ur_enqueue_cooperative_kernel_launch_exp_params_t *)params;

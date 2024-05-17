@@ -70,8 +70,8 @@ Types
 Functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* ${x}LaunchAttributesSetLaunchAttributeExp
-* ${x}LaunchAttributesEnqueueKernelLaunchCustomExp
+* ${x}KernelSetLaunchAttributeExp
+* ${x}EnqueueKernelLaunchCustomExp
 
 Support
 --------------------------------------------------------------------------------

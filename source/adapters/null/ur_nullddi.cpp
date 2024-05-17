@@ -5555,6 +5555,87 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urKernelSetLaunchAttributeExp
+__urdlllocal ur_result_t UR_APICALL urKernelSetLaunchAttributeExp(
+    ur_exp_launch_attribute_handle_t *
+        launchAttr, ///< [in][range(0, 1)] pointer to launch attribute handle address
+    ur_exp_launch_attribute_id_t attrID, ///< [in] ID of launch attribute
+    size_t attrSize, ///< [in] the number of bytes pointed to by pAttrValue.
+    void *
+        pAttrValue ///< [out][optional][typename(attrID, attrSize)] array of bytes holding the
+                   ///< launch attribute data.
+    ///< If attrSize is not equal to or greater than the real number of bytes
+    ///< needed to return the
+    ///< attribute values then the ::UR_RESULT_ERROR_INVALID_SIZE error is
+    ///< returned and pAttrValue is not used.
+    ) try {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // if the driver has created a custom function, then call it instead of using the generic path
+    auto pfnSetLaunchAttributeExp =
+        d_context.urDdiTable.KernelExp.pfnSetLaunchAttributeExp;
+    if (nullptr != pfnSetLaunchAttributeExp) {
+        result =
+            pfnSetLaunchAttributeExp(launchAttr, attrID, attrSize, pAttrValue);
+    } else {
+        // generic implementation
+    }
+
+    return result;
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urEnqueueKernelLaunchCustomExp
+__urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
+    ur_queue_handle_t hQueue,   ///< [in] handle of the queue object
+    ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
+    uint32_t
+        workDim, ///< [in] number of dimensions, from 1 to 3, to specify the global and
+                 ///< work-group work-items
+    const size_t *
+        pGlobalWorkSize, ///< [in] pointer to an array of workDim unsigned values that specify the
+    ///< number of global work-items in workDim that will execute the kernel
+    ///< function
+    const size_t *
+        pLocalWorkSize, ///< [in][optional] pointer to an array of workDim unsigned values that
+    ///< specify the number of local work-items forming a work-group that will
+    ///< execute the kernel function. If nullptr, the runtime implementation
+    ///< will choose the work-group size.
+    uint32_t numEventsInWaitList, ///< [in] size of the event wait list
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the kernel execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating that no wait event.
+    uint32_t numAttrsInLaunchAttrList, ///< [in] size of the launch attr list
+    ur_exp_launch_attribute_handle_t *
+        launchAttrList, ///< [in][range(0, numAttrsInLaunchAttrList)] pointer to a list of launch
+                        ///< attributes
+    ur_event_handle_t *
+        phEvent ///< [out][optional] return an event object that identifies this particular
+                ///< kernel execution instance.
+    ) try {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // if the driver has created a custom function, then call it instead of using the generic path
+    auto pfnKernelLaunchCustomExp =
+        d_context.urDdiTable.EnqueueExp.pfnKernelLaunchCustomExp;
+    if (nullptr != pfnKernelLaunchCustomExp) {
+        result = pfnKernelLaunchCustomExp(
+            hQueue, hKernel, workDim, pGlobalWorkSize, pLocalWorkSize,
+            numEventsInWaitList, phEventWaitList, numAttrsInLaunchAttrList,
+            launchAttrList, phEvent);
+    } else {
+        // generic implementation
+    }
+
+    return result;
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramBuildExp
 __urdlllocal ur_result_t UR_APICALL urProgramBuildExp(
     ur_program_handle_t hProgram, ///< [in] Handle of the program to build.
@@ -6107,6 +6188,9 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetEnqueueExpProcAddrTable(
 
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    pDdiTable->pfnKernelLaunchCustomExp =
+        driver::urEnqueueKernelLaunchCustomExp;
+
     pDdiTable->pfnCooperativeKernelLaunchExp =
         driver::urEnqueueCooperativeKernelLaunchExp;
 
@@ -6245,6 +6329,8 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetKernelExpProcAddrTable(
     }
 
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    pDdiTable->pfnSetLaunchAttributeExp = driver::urKernelSetLaunchAttributeExp;
 
     pDdiTable->pfnSuggestMaxCooperativeGroupCountExp =
         driver::urKernelSuggestMaxCooperativeGroupCountExp;

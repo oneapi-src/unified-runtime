@@ -19,21 +19,21 @@ value: "\"$x_exp_launch_attributes\""
 --- #--------------------------------------------------------------------------
 type: enum
 desc: "Specifies a launch attribute ID"
-class: $xLaunchAttributes
+class: $xKernel
 name: $x_exp_launch_attribute_id_t
+typed_etors: True
 etors:
-    - name: LAUNCH_ATTRIBUTE_CLUSTER_DIMENSION_EXP
-      desc: "Three unsigned int values specifying the cluster dimensions."
-      value: "0x2000"
+    - name: UR_LAUNCH_ATTRIBUTE_CLUSTER_DIMENSION
+      desc: "[uint32_t] 1 cluster dimensions"
 --- #--------------------------------------------------------------------------
 type: handle
 desc: "Handle of launch attribute object"
-class: $xLaunchAttributes
+class: $xKernel
 name: "$x_exp_launch_attribute_handle_t"
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Sets the launch attribute"
-class: $xLaunchAttributes
+class: $xKernel
 name: SetLaunchAttributeExp
 ordinal: "0"
 analogue:
@@ -70,8 +70,8 @@ returns:
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Launch Kernel with custom Launch Attributes"
-class: $xLaunchAttributes
-name: EnqueueKernelLaunchCustomExp
+class: $xEnqueue
+name: KernelLaunchCustomExp
 ordinal: "0"
 analogue:
     - "**cuLaunchKernelEx**"
