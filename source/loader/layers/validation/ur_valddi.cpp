@@ -9030,12 +9030,16 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetLaunchAttributeExp(
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
 
+        if (launchAttr == NULL) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
         if (UR_EXP_LAUNCH_ATTRIBUTE_ID_UR_LAUNCH_ATTRIBUTE_CLUSTER_DIMENSION <
             attrID) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
 
-        if (attrSize == 0 && pPropValue != NULL) {
+        if (attrSize == 0 && pAttrValue != NULL) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
     }

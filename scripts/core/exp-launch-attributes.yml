@@ -62,11 +62,12 @@ returns:
     - $X_RESULT_ERROR_UNSUPPORTED_ENUMERATION:
         - "If `attrID` is not supported by the adapter."
     - $X_RESULT_ERROR_INVALID_SIZE:
-        - "`attrSize == 0 && pPropValue != NULL`"
+        - "`attrSize == 0 && pAttrValue != NULL`"
         - "If `attrSize` is less than the real number of bytes needed to return the attribute values."
     - $X_RESULT_ERROR_INVALID_NULL_POINTER:
         - "`attrSize != 0 && pAttrValue == NULL`"
         - "`pAttrValue == NULL`"
+        - "`launchAttr == NULL`"
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Launch Kernel with custom Launch Attributes"

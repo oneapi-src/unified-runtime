@@ -8982,13 +8982,14 @@ typedef struct ur_exp_launch_attribute_handle_t_ *ur_exp_launch_attribute_handle
 ///         + `NULL == launchAttr`
 ///         + `attrSize != 0 && pAttrValue == NULL`
 ///         + `pAttrValue == NULL`
+///         + `launchAttr == NULL`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
 ///         + `::UR_EXP_LAUNCH_ATTRIBUTE_ID_UR_LAUNCH_ATTRIBUTE_CLUSTER_DIMENSION < attrID`
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
 ///         + If `attrID` is not supported by the adapter.
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
-///         + `attrSize == 0 && pPropValue != NULL`
+///         + `attrSize == 0 && pAttrValue != NULL`
 ///         + If `attrSize` is less than the real number of bytes needed to return the attribute values.
 UR_APIEXPORT ur_result_t UR_APICALL
 urKernelSetLaunchAttributeExp(
