@@ -1230,15 +1230,21 @@ ur_result_t EventCreate(ur_context_handle_t Context, ur_queue_handle_t Queue,
   bool ProfilingEnabled =
       ForceDisableProfiling ? false : (!Queue || Queue->isProfilingEnabled());
   bool UsingImmediateCommandlists = !Queue || Queue->UsingImmCmdLists;
+  EventFlags Flags = static_cast<EventFlags>(
+      ProfilingEnabled                 ? ENABLE_PROFILER
+      : 0 | UsingImmediateCommandlists ? USING_IMM_CMDLIST
+      : 0 | HostVisible                ? HOST_VISIBLE
+      : 0 | IsMultiDevice              ? MULTIDEVICE
+      : 0 | CounterBasedEventEnabled   ? COUNTER_BASED
+                                       : 0);
 
   ur_device_handle_t Device = nullptr;
 
-  if (!IsMultiDevice && Queue) {
+  if (Flags & MULTIDEVICE && Queue) {
     Device = Queue->Device;
   }
 
-  if (auto CachedEvent = Context->getEventFromContextCache(
-          HostVisible, ProfilingEnabled, Device, CounterBasedEventEnabled)) {
+  if (auto CachedEvent = Context->getEventFromContextCache(Flags, Device)) {
     *RetEvent = CachedEvent;
     return UR_RESULT_SUCCESS;
   }
@@ -1248,16 +1254,15 @@ ur_result_t EventCreate(ur_context_handle_t Context, ur_queue_handle_t Queue,
 
   size_t Index = 0;
 
-  if (auto Res = Context->getFreeSlotInExistingOrNewPool(
-          ZeEventPool, Index, HostVisible, ProfilingEnabled, Device,
-          CounterBasedEventEnabled, UsingImmediateCommandlists))
+  if (auto Res = Context->getFreeSlotInExistingOrNewPool(ZeEventPool, Index,
+                                                         Flags, Device))
     return Res;
 
   ZeStruct<ze_event_desc_t> ZeEventDesc;
   ZeEventDesc.index = Index;
   ZeEventDesc.wait = 0;
 
-  if (HostVisible || CounterBasedEventEnabled) {
+  if (Flags & USING_IMM_CMDLIST || Flags & COUNTER_BASED) {
     ZeEventDesc.signal = ZE_EVENT_SCOPE_FLAG_HOST;
   } else {
     //
@@ -1282,8 +1287,8 @@ ur_result_t EventCreate(ur_context_handle_t Context, ur_queue_handle_t Queue,
   } catch (...) {
     return UR_RESULT_ERROR_UNKNOWN;
   }
-  (*RetEvent)->CounterBasedEventsEnabled = CounterBasedEventEnabled;
-  if (HostVisible)
+  (*RetEvent)->CounterBasedEventsEnabled = Flags & COUNTER_BASED;
+  if (Flags & HOST_VISIBLE)
     (*RetEvent)->HostVisibleEvent =
         reinterpret_cast<ur_event_handle_t>(*RetEvent);
 

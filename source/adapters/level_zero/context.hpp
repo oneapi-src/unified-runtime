@@ -197,17 +197,12 @@ struct ur_context_handle_t_ : _ur_object {
   // slot for a host-visible event. The ProfilingEnabled tells is we need a
   // slot for an event with profiling capabilities.
   ur_result_t getFreeSlotInExistingOrNewPool(ze_event_pool_handle_t &, size_t &,
-                                             bool HostVisible,
-                                             bool ProfilingEnabled,
-                                             ur_device_handle_t Device,
-                                             bool CounterBasedEventEnabled,
-                                             bool UsingImmCmdList);
+                                             EventFlags Flags,
+                                             ur_device_handle_t Device);
 
   // Get ur_event_handle_t from cache.
-  ur_event_handle_t getEventFromContextCache(bool HostVisible,
-                                             bool WithProfiling,
-                                             ur_device_handle_t Device,
-                                             bool CounterBasedEventEnabled);
+  ur_event_handle_t getEventFromContextCache(EventFlags Flags,
+                                             ur_device_handle_t Device);
 
   // Add ur_event_handle_t to cache.
   void addEventToContextCache(ur_event_handle_t);
@@ -222,17 +217,15 @@ struct ur_context_handle_t_ : _ur_object {
   };
 
   std::list<ze_event_pool_handle_t> *
-  getZeEventPoolCache(bool HostVisible, bool WithProfiling,
-                      bool CounterBasedEventEnabled, bool UsingImmediateCmdList,
-                      ze_device_handle_t ZeDevice) {
+  getZeEventPoolCache(EventFlags Flags, ze_device_handle_t ZeDevice) {
     EventPoolCacheType CacheType;
 
-    calculateCacheIndex(HostVisible, CounterBasedEventEnabled,
-                        UsingImmediateCmdList, CacheType);
+    calculateCacheIndex(Flags, CacheType);
     if (ZeDevice) {
       auto ZeEventPoolCacheMap =
-          WithProfiling ? &ZeEventPoolCacheDeviceMap[CacheType * 2]
-                        : &ZeEventPoolCacheDeviceMap[CacheType * 2 + 1];
+          Flags & ENABLE_PROFILER
+              ? &ZeEventPoolCacheDeviceMap[CacheType * 2]
+              : &ZeEventPoolCacheDeviceMap[CacheType * 2 + 1];
       if (ZeEventPoolCacheMap->find(ZeDevice) == ZeEventPoolCacheMap->end()) {
         ZeEventPoolCache.emplace_back();
         ZeEventPoolCacheMap->insert(
@@ -240,27 +233,26 @@ struct ur_context_handle_t_ : _ur_object {
       }
       return &ZeEventPoolCache[(*ZeEventPoolCacheMap)[ZeDevice]];
     } else {
-      return WithProfiling ? &ZeEventPoolCache[CacheType * 2]
-                           : &ZeEventPoolCache[CacheType * 2 + 1];
+      return Flags & ENABLE_PROFILER ? &ZeEventPoolCache[CacheType * 2]
+                                     : &ZeEventPoolCache[CacheType * 2 + 1];
     }
   }
 
-  ur_result_t calculateCacheIndex(bool HostVisible,
-                                  bool CounterBasedEventEnabled,
-                                  bool UsingImmediateCmdList,
+  ur_result_t calculateCacheIndex(EventFlags Flags,
                                   EventPoolCacheType &CacheType) {
-    if (CounterBasedEventEnabled && HostVisible && !UsingImmediateCmdList) {
+    if (Flags & COUNTER_BASED && Flags & HOST_VISIBLE &&
+        !(Flags & USING_IMM_CMDLIST)) {
       CacheType = HostVisibleCounterBasedRegularCacheType;
-    } else if (CounterBasedEventEnabled && !HostVisible &&
-               !UsingImmediateCmdList) {
+    } else if (Flags & COUNTER_BASED && !(Flags & HOST_VISIBLE) &&
+               !(Flags & USING_IMM_CMDLIST)) {
       CacheType = HostInvisibleCounterBasedRegularCacheType;
-    } else if (CounterBasedEventEnabled && HostVisible &&
-               UsingImmediateCmdList) {
+    } else if (Flags & COUNTER_BASED && Flags & HOST_VISIBLE &&
+               Flags & USING_IMM_CMDLIST) {
       CacheType = HostVisibleCounterBasedImmediateCacheType;
-    } else if (CounterBasedEventEnabled && !HostVisible &&
-               UsingImmediateCmdList) {
+    } else if (Flags & COUNTER_BASED && !Flags & HOST_VISIBLE &&
+               Flags & USING_IMM_CMDLIST) {
       CacheType = HostInvisibleCounterBasedImmediateCacheType;
-    } else if (!CounterBasedEventEnabled && HostVisible) {
+    } else if (!(Flags & COUNTER_BASED) && Flags & HOST_VISIBLE) {
       CacheType = HostVisibleCacheType;
     } else {
       CacheType = HostInvisibleCacheType;
@@ -304,12 +296,12 @@ struct ur_context_handle_t_ : _ur_object {
 
 private:
   // Get the cache of events for a provided scope and profiling mode.
-  auto getEventCache(bool HostVisible, bool WithProfiling,
-                     ur_device_handle_t Device) {
-    if (HostVisible) {
+  auto getEventCache(EventFlags Flags, ur_device_handle_t Device) {
+    if (Flags & HOST_VISIBLE) {
       if (Device) {
-        auto EventCachesMap =
-            WithProfiling ? &EventCachesDeviceMap[0] : &EventCachesDeviceMap[1];
+        auto EventCachesMap = Flags & ENABLE_PROFILER
+                                  ? &EventCachesDeviceMap[0]
+                                  : &EventCachesDeviceMap[1];
         if (EventCachesMap->find(Device) == EventCachesMap->end()) {
           EventCaches.emplace_back();
           EventCachesMap->insert(
@@ -317,12 +309,13 @@ private:
         }
         return &EventCaches[(*EventCachesMap)[Device]];
       } else {
-        return WithProfiling ? &EventCaches[0] : &EventCaches[1];
+        return Flags & ENABLE_PROFILER ? &EventCaches[0] : &EventCaches[1];
       }
     } else {
       if (Device) {
-        auto EventCachesMap =
-            WithProfiling ? &EventCachesDeviceMap[2] : &EventCachesDeviceMap[3];
+        auto EventCachesMap = Flags & ENABLE_PROFILER
+                                  ? &EventCachesDeviceMap[2]
+                                  : &EventCachesDeviceMap[3];
         if (EventCachesMap->find(Device) == EventCachesMap->end()) {
           EventCaches.emplace_back();
           EventCachesMap->insert(
@@ -330,7 +323,7 @@ private:
         }
         return &EventCaches[(*EventCachesMap)[Device]];
       } else {
-        return WithProfiling ? &EventCaches[2] : &EventCaches[3];
+        return Flags & ENABLE_PROFILER ? &EventCaches[2] : &EventCaches[3];
       }
     }
   }
