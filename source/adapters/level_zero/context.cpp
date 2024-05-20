@@ -561,7 +561,7 @@ ur_context_handle_t_::getEventFromContextCache(EventFlags Flags,
 
   auto It = Cache->begin();
   ur_event_handle_t Event = *It;
-  if (Event->CounterBasedEventsEnabled != Flags & COUNTER_BASED) {
+  if (Event->CounterBasedEventsEnabled != (Flags & COUNTER_BASED)) {
     return nullptr;
   }
   Cache->erase(It);

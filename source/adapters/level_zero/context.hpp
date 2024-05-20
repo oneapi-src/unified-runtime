@@ -249,7 +249,7 @@ struct ur_context_handle_t_ : _ur_object {
     } else if (Flags & COUNTER_BASED && Flags & HOST_VISIBLE &&
                Flags & USING_IMM_CMDLIST) {
       CacheType = HostVisibleCounterBasedImmediateCacheType;
-    } else if (Flags & COUNTER_BASED && !Flags & HOST_VISIBLE &&
+    } else if (Flags & COUNTER_BASED && !(Flags & HOST_VISIBLE) &&
                Flags & USING_IMM_CMDLIST) {
       CacheType = HostInvisibleCounterBasedImmediateCacheType;
     } else if (!(Flags & COUNTER_BASED) && Flags & HOST_VISIBLE) {
