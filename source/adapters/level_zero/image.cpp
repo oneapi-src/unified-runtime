@@ -753,7 +753,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urBindlessImagesSampledImageCreateExp(
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urBindlessImagesImageCopyExp(
-    ur_queue_handle_t hQueue, void *pDst, void *pSrc,
+    ur_queue_handle_t hQueue, void *pDst, const void *pSrc,
     const ur_image_format_t *pImageFormat, const ur_image_desc_t *pImageDesc,
     ur_exp_image_copy_flags_t imageCopyFlags, ur_rect_offset_t srcOffset,
     ur_rect_offset_t dstOffset, ur_rect_region_t copyExtent,
@@ -838,7 +838,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urBindlessImagesImageCopyExp(
       ze_image_region_t SrcRegion;
       UR_CALL(getImageRegionHelper(ZeImageDesc, &srcOffset, &copyExtent,
                                    SrcRegion));
-      auto *UrImage = static_cast<_ur_image *>(pSrc);
+      auto *UrImage = static_cast<const _ur_image *>(pSrc);
       ZE2UR_CALL(zeCommandListAppendImageCopyToMemory,
                  (ZeCommandList, pDst, UrImage->ZeImage, &SrcRegion, ZeEvent,
                   WaitList.Length, WaitList.ZeEventList));
