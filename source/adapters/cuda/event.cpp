@@ -49,7 +49,7 @@ ur_event_handle_t_::~ur_event_handle_t_() {
   urContextRelease(Context);
 }
 
-ur_result_t ur_event_handle_t_::start() {
+ur_result_t ur_event_handle_t_::start(bool MakeEndSameAsStart) {
   assert(!isStarted());
   ur_result_t Result = UR_RESULT_SUCCESS;
 
@@ -62,7 +62,10 @@ ur_result_t ur_event_handle_t_::start() {
   } catch (ur_result_t Err) {
     Result = Err;
   }
-
+  if (MakeEndSameAsStart) {
+    IsRecorded = true;
+    EvEnd = EvStart;
+  }
   IsStarted = true;
   return Result;
 }
@@ -147,7 +150,9 @@ ur_result_t ur_event_handle_t_::release() {
 
   assert(Queue != nullptr);
 
-  UR_CHECK_ERROR(cuEventDestroy(EvEnd));
+  // Avoid double free
+  if (differentNativeEventsForStartAndEnd(CommandType))
+    UR_CHECK_ERROR(cuEventDestroy(EvEnd));
 
   if (Queue->URFlags & UR_QUEUE_FLAG_PROFILING_ENABLE || isTimestampEvent()) {
     UR_CHECK_ERROR(cuEventDestroy(EvQueued));

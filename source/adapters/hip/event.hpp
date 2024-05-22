@@ -22,7 +22,7 @@ public:
 
   ur_result_t wait();
 
-  ur_result_t start();
+  ur_result_t start(bool MakeEndSameAsStart = false);
 
   native_type get() const noexcept { return EvEnd; };
 
