@@ -3,7 +3,6 @@
 // See LICENSE.TXT
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-#include "helpers.h"
 #include <uur/fixtures.h>
 
 using urDeviceGetSelectedTest = uur::urPlatformTest;

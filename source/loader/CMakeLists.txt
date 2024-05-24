@@ -47,9 +47,8 @@ if(UR_ENABLE_TRACING)
     target_compile_definitions(ur_loader PRIVATE XPTI_STATIC_LIBRARY)
 endif()
 
-if(UR_ENABLE_DEVICE_SELECTOR)
-    target_compile_definitions(ur_loader PRIVATE UR_ENABLE_DEVICE_SELECTOR)
-endif()
+target_compile_definitions(ur_loader PRIVATE
+    UR_ENABLE_DEVICE_SELECTOR=$<BOOL:${UR_ENABLE_DEVICE_SELECTOR}>)
 
 if(UNIX)
     set(CMAKE_THREAD_PREFER_PTHREAD TRUE)

@@ -336,8 +336,8 @@ ur_result_t urDeviceGetSelected(ur_platform_handle_t hPlatform,
                                 uint32_t *pNumDevices) {
 #if UR_ENABLE_DEVICE_SELECTOR
     if (!context->deviceSelectorEnabled) {
-        return urDeviceGet(hPlatform, deviceType, numEntries, phDevices,
-                           pNumDevices);
+        return context->urDdiTable.Device.pfnGet(
+            hPlatform, deviceType, numEntries, phDevices, pNumDevices);
     }
 
     if (hPlatform == nullptr) {
@@ -389,8 +389,8 @@ ur_result_t urDeviceGetSelected(ur_platform_handle_t hPlatform,
 
     return UR_RESULT_SUCCESS;
 #else
-    return urDeviceGet(hPlatform, deviceType, numEntries, phDevices,
-                       pNumDevices);
+    return context->urDdiTable.Device.pfnGet(hPlatform, deviceType, numEntries,
+                                             phDevices, pNumDevices);
 #endif
 }
 
