@@ -103,7 +103,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMFree(ur_context_handle_t hContext,
   }
 }
 
-ur_result_t USMDeviceAllocImpl(void **ResultPtr, ur_context_handle_t,
+ur_result_t USMDeviceAllocImpl(void **ResultPtr, ur_context_handle_t hContext,
                                ur_device_handle_t Device,
                                ur_usm_device_mem_flags_t, size_t Size,
                                [[maybe_unused]] uint32_t Alignment) {
@@ -114,7 +114,11 @@ ur_result_t USMDeviceAllocImpl(void **ResultPtr, ur_context_handle_t,
     return Err;
   }
 
-  assert(checkUSMImplAlignment(Alignment, ResultPtr));
+  if (!checkUSMImplAlignment(Alignment, ResultPtr)) {
+    urUSMFree(hContext, *ResultPtr);
+    return UR_RESULT_ERROR_UNSUPPORTED_ALIGNMENT;
+  }
+
   return UR_RESULT_SUCCESS;
 }
 
@@ -130,8 +134,11 @@ ur_result_t USMSharedAllocImpl(void **ResultPtr, ur_context_handle_t,
     return Err;
   }
 
-  assert(checkUSMImplAlignment(Alignment, ResultPtr));
-  return UR_RESULT_SUCCESS;
+  if (!checkUSMImplAlignment(Alignment, ResultPtr)) {
+    urUSMFree(hContext, *ResultPtr);
+    return UR_RESULT_ERROR_UNSUPPORTED_ALIGNMENT;
+  }
+  | return UR_RESULT_SUCCESS;
 }
 
 ur_result_t USMHostAllocImpl(void **ResultPtr,
@@ -144,7 +151,10 @@ ur_result_t USMHostAllocImpl(void **ResultPtr,
     return Err;
   }
 
-  assert(checkUSMImplAlignment(Alignment, ResultPtr));
+  if (!checkUSMImplAlignment(Alignment, ResultPtr)) {
+    urUSMFree(hContext, *ResultPtr);
+    return UR_RESULT_ERROR_UNSUPPORTED_ALIGNMENT;
+  }
   return UR_RESULT_SUCCESS;
 }
 
@@ -166,8 +176,8 @@ urUSMGetMemAllocInfo(ur_context_handle_t hContext, const void *pMem,
         // pointer not known to the HIP subsystem
         return ReturnValue(UR_USM_TYPE_UNKNOWN);
       }
-      // Direct usage of the function, instead of UR_CHECK_ERROR, so we can get
-      // the line offset.
+      // Direct usage of the function, instead of UR_CHECK_ERROR, so we can
+      // get the line offset.
       checkErrorUR(Ret, __func__, __LINE__ - 5, __FILE__);
       // ROCm 6.0.0 introduces hipMemoryTypeUnregistered in the hipMemoryType
       // enum to mark unregistered allocations (i.e., via system allocators).
@@ -376,11 +386,11 @@ bool ur_usm_pool_handle_t_::hasUMFPool(umf_memory_pool_t *umf_pool) {
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urUSMPoolCreate(
-    ur_context_handle_t Context, ///< [in] handle of the context object
-    ur_usm_pool_desc_t
-        *PoolDesc, ///< [in] pointer to USM pool descriptor. Can be chained with
-                   ///< ::ur_usm_pool_limits_desc_t
-    ur_usm_pool_handle_t *Pool ///< [out] pointer to USM memory pool
+    ur_context_handle_t Context,  ///< [in] handle of the context object
+    ur_usm_pool_desc_t *PoolDesc, ///< [in] pointer to USM pool descriptor.
+                                  ///< Can be chained with
+                                  ///< ::ur_usm_pool_limits_desc_t
+    ur_usm_pool_handle_t *Pool    ///< [out] pointer to USM memory pool
 ) {
   // Without pool tracking we can't free pool allocations.
 #ifdef UMF_ENABLE_POOL_TRACKING
