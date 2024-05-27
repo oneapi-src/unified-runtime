@@ -28,17 +28,15 @@ def percent(amount, total):
 
 def summarize_results(results):
     total = results['Total']
-    total_passed = len(results['Passed'])
-    total_skipped = len(results['Skipped'])
-    total_failed = len(results['Failed'])
-    total_crashed = total - (total_passed + total_skipped + total_failed)
+    total_passed = results['Passed']
+    total_skipped = results['Skipped']
+    total_failed = results['Failed']
 
     pass_rate_incl_skipped = percent(total_passed + total_skipped, total)
     pass_rate_excl_skipped = percent(total_passed, total)
 
     skipped_rate = percent(total_skipped, total)
     failed_rate = percent(total_failed, total)
-    crash_rate = percent(total_crashed, total)
 
     ljust_param = len(str(total))
 
@@ -48,29 +46,23 @@ f"""[CTest Parser] Results:
     Passed   [{str(total_passed).ljust(ljust_param)}]    ({pass_rate_incl_skipped}%) - ({pass_rate_excl_skipped}% with skipped tests excluded)
     Skipped  [{str(total_skipped).ljust(ljust_param)}]    ({skipped_rate}%)
     Failed   [{str(total_failed).ljust(ljust_param)}]    ({failed_rate}%)
-    Crashed  [{str(total_crashed).ljust(ljust_param)}]    ({crash_rate}%)
 """
     )
 
-def parse_results(results):
-    parsed_results = {"Passed": {}, "Skipped":{}, "Failed": {}, 'Crashed': {}, 'Total':0, 'Success':True}
-    for _, result in results.items():
-        if result['actual'] is None:
-            parsed_results['Success'] = False
-            parsed_results['Total'] += result['expected']['tests']
-            continue
-
-        parsed_results['Total'] += result['actual']['tests']
-        for testsuite in result['actual'].get('testsuites'):
-            for test in testsuite.get('testsuite'):
-                test_name = f"{testsuite['name']}.{test['name']}"
-                test_time = test['time']
-                if 'failures' in test:
-                    parsed_results['Failed'][test_name] = {'time': test_time}
-                elif test['result'] == 'SKIPPED':
-                    parsed_results['Skipped'][test_name] = {'time': test_time}
-                else:
-                    parsed_results['Passed'][test_name] = {'time': test_time}
+def parse_results(results: dict):
+    parsed_results = {"Passed": 0, "Skipped": 0, "Failed": 0, "Total": 0}
+    for result in results.values():
+        parsed_results['Failed'] += result['failures']
+        parsed_results['Total'] += result['tests']
+        for testsuite in result['testsuites']:
+            for test in testsuite['testsuite']:
+                if test['result'] == 'SKIPPED':
+                    parsed_results['Skipped'] += 1
+    parsed_results["Passed"] += (
+        parsed_results["Total"] -
+        parsed_results["Failed"] -
+        parsed_results["Skipped"]
+    )
     return parsed_results
 
 def run(args):
@@ -82,22 +74,6 @@ def run(args):
 
     test_suite_names = get_cts_test_suite_names(f"{args.ctest_path}/test/conformance/")
 
-    ## try and list all the available tests
-    for suite in test_suite_names:
-        results[suite] = {}
-        test_executable = f"{args.ctest_path}/bin/test-{suite}"
-        process = Popen([test_executable, "--gtest_list_tests"], env=env,
-                        stdout=DEVNULL if args.quiet else None,
-                        stderr=DEVNULL if args.quiet else None)
-        process.wait()
-        try:
-            with open(tmp_results_file,'r') as test_list:
-                all_tests = json.load(test_list)
-                results[suite]['expected'] = all_tests
-            os.remove(tmp_results_file)
-        except FileNotFoundError:
-            print(f"Could not discover tests for {suite}")
-
     for suite in test_suite_names:
         ctest_path = f"{args.ctest_path}/test/conformance/{suite}"
         process = Popen(['ctest',ctest_path], env=env, cwd=ctest_path,
@@ -108,11 +84,11 @@ def run(args):
         try:
             with open(tmp_results_file, 'r') as results_file:
                 json_data = json.load(results_file)
-                results[suite]['actual'] = json_data
+                results[suite] = json_data
             os.remove(tmp_results_file)
         except FileNotFoundError:
-            results[suite]['actual'] = None
-            print('\033[91m' + f"Conformance test suite '{suite}' : likely crashed!" + '\033[0m')
+            print(f"\033[91mConformance test suite '{suite}' : likely crashed! Unable to calculate pass rate.\033[0m")
+            exit(1)
 
     return results
 
