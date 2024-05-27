@@ -121,7 +121,7 @@ ur_result_t USMDeviceAllocImpl(void **ResultPtr, ur_context_handle_t hContext,
   return UR_RESULT_SUCCESS;
 }
 
-ur_result_t USMSharedAllocImpl(void **ResultPtr, ur_context_handle_t,
+ur_result_t USMSharedAllocImpl(void **ResultPtr, ur_context_handle_t hContext,
                                ur_device_handle_t Device,
                                ur_usm_host_mem_flags_t,
                                ur_usm_device_mem_flags_t, size_t Size,
@@ -141,7 +141,7 @@ ur_result_t USMSharedAllocImpl(void **ResultPtr, ur_context_handle_t,
 }
 
 ur_result_t USMHostAllocImpl(void **ResultPtr,
-                             [[maybe_unused]] ur_context_handle_t Context,
+                             [[maybe_unused]] ur_context_handle_t hContext,
                              ur_usm_host_mem_flags_t, size_t Size,
                              [[maybe_unused]] uint32_t Alignment) {
   try {
