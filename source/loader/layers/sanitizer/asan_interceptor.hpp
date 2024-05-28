@@ -255,6 +255,7 @@ class SanitizerInterceptor {
     uint64_t cl_MaxRZSize = 2048;
     uint32_t cl_MaxQuarantineSizeMB = 0;
     bool cl_DetectLocals = true;
+    bool cl_DetectPrivates = false;
 
     std::unique_ptr<Quarantine> m_Quarantine;
 };

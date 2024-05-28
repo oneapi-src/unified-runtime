@@ -202,6 +202,12 @@ SanitizerInterceptor::SanitizerInterceptor() {
         auto Value = KV->second.front();
         cl_DetectLocals = Value == "1" || Value == "true" ? true : false;
     }
+
+    KV = Options->find("detect_privates");
+    if (KV != Options->end()) {
+        auto Value = KV->second.front();
+        cl_DetectPrivates = Value == "1" || Value == "true" ? true : false;
+    }
 }
 
 SanitizerInterceptor::~SanitizerInterceptor() {
@@ -720,7 +726,7 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
         }
 
         if (LaunchInfo.LocalWorkSize.empty()) {
-            LaunchInfo.LocalWorkSize.reserve(3);
+            LaunchInfo.LocalWorkSize.resize(3);
             // FIXME: This is W/A until urKernelSuggestGroupSize is added
             LaunchInfo.LocalWorkSize[0] = 1;
             LaunchInfo.LocalWorkSize[1] = 1;
@@ -785,6 +791,26 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
                     (void *)LaunchInfo.Data->LocalShadowOffset,
                     (void *)LaunchInfo.Data->LocalShadowOffsetEnd);
             }
+        }
+
+        // Write shadow memory offset for private memory
+        if (cl_DetectPrivates) {
+            if (DeviceInfo->Type == DeviceType::CPU) {
+                LaunchInfo.Data->PrivateShadowOffset = DeviceInfo->ShadowOffset;
+            } else if (DeviceInfo->Type == DeviceType::GPU_PVC) {
+                size_t PrivateShadowMemorySize =
+                    (NumWG * ASAN_PRIVATE_SIZE) >> ASAN_SHADOW_SCALE;
+
+                context.logger.debug("PrivateMemoryInfo(WorkGroup={}, "
+                                     "PrivateShadowMemorySize={})",
+                                     NumWG, PrivateShadowMemorySize);
+
+                UR_CALL(EnqueueAllocateDevice(
+                    PrivateShadowMemorySize,
+                    LaunchInfo.Data->PrivateShadowOffset));
+            }
+            context.logger.info("ShadowMemory(Private, {})",
+                                (void *)LaunchInfo.Data->PrivateShadowOffset);
         }
     } while (false);
 
