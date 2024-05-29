@@ -144,14 +144,10 @@ ur_result_t USMDeviceAllocImpl(void **ResultPtr, ur_context_handle_t hContext,
   const bool validAlignment =
       (Alignment == 0 ||
        reinterpret_cast<std::uintptr_t>(*ResultPtr) % Alignment == 0);
-#ifdef NDEBUG
   if (!validAlignment) {
     urUSMFree(hContext, *ResultPtr);
-    return UR_RESULT_ERROR_UNSUPPORTED_ALIGNMENT;
+    return UR_RESULT_ERROR_INVALID_VALUE;
   }
-#else
-  assert(validAlignment);
-#endif
   return UR_RESULT_SUCCESS;
 }
 
@@ -171,14 +167,10 @@ ur_result_t USMSharedAllocImpl(void **ResultPtr, ur_context_handle_t hContext,
   const bool validAlignment =
       (Alignment == 0 ||
        reinterpret_cast<std::uintptr_t>(*ResultPtr) % Alignment == 0);
-#ifdef NDEBUG
   if (!validAlignment) {
     urUSMFree(hContext, *ResultPtr);
-    return UR_RESULT_ERROR_UNSUPPORTED_ALIGNMENT;
+    return UR_RESULT_ERROR_INVALID_VALUE;
   }
-#else
-  assert(validAlignment);
-#endif
   return UR_RESULT_SUCCESS;
 }
 
@@ -194,14 +186,10 @@ ur_result_t USMHostAllocImpl(void **ResultPtr, ur_context_handle_t hContext,
   const bool validAlignment =
       (Alignment == 0 ||
        reinterpret_cast<std::uintptr_t>(*ResultPtr) % Alignment == 0);
-#ifdef NDEBUG
   if (!validAlignment) {
     urUSMFree(hContext, *ResultPtr);
-    return UR_RESULT_ERROR_UNSUPPORTED_ALIGNMENT;
+    return UR_RESULT_ERROR_INVALID_VALUE;
   }
-#else
-  assert(validAlignment);
-#endif
   return UR_RESULT_SUCCESS;
 }
 

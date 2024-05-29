@@ -116,7 +116,7 @@ ur_result_t USMDeviceAllocImpl(void **ResultPtr, ur_context_handle_t hContext,
 
   if (!checkUSMImplAlignment(Alignment, ResultPtr)) {
     urUSMFree(hContext, *ResultPtr);
-    return UR_RESULT_ERROR_UNSUPPORTED_ALIGNMENT;
+    return UR_RESULT_ERROR_INVALID_VALUE;
   }
   return UR_RESULT_SUCCESS;
 }
@@ -135,7 +135,7 @@ ur_result_t USMSharedAllocImpl(void **ResultPtr, ur_context_handle_t hContext,
 
   if (!checkUSMImplAlignment(Alignment, ResultPtr)) {
     urUSMFree(hContext, *ResultPtr);
-    return UR_RESULT_ERROR_UNSUPPORTED_ALIGNMENT;
+    return UR_RESULT_ERROR_INVALID_VALUE;
   }
   return UR_RESULT_SUCCESS;
 }
@@ -152,7 +152,7 @@ ur_result_t USMHostAllocImpl(void **ResultPtr,
 
   if (!checkUSMImplAlignment(Alignment, ResultPtr)) {
     urUSMFree(hContext, *ResultPtr);
-    return UR_RESULT_ERROR_UNSUPPORTED_ALIGNMENT;
+    return UR_RESULT_ERROR_INVALID_VALUE;
   }
   return UR_RESULT_SUCCESS;
 }
