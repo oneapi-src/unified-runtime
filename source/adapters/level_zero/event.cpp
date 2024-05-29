@@ -1230,7 +1230,7 @@ ur_result_t EventCreate(ur_context_handle_t Context, ur_queue_handle_t Queue,
   bool ProfilingEnabled =
       ForceDisableProfiling ? false : (!Queue || Queue->isProfilingEnabled());
   bool UsingImmediateCommandlists = !Queue || Queue->UsingImmCmdLists;
-  EventFlags Flags = static_cast<EventFlags>(
+  enum ur_event_flag_t Flags = static_cast<enum ur_event_flag_t>(
       ProfilingEnabled                 ? ENABLE_PROFILER
       : 0 | UsingImmediateCommandlists ? USING_IMM_CMDLIST
       : 0 | HostVisible                ? HOST_VISIBLE

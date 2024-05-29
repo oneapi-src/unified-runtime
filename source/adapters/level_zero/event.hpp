@@ -132,7 +132,7 @@ struct ur_event_handle_t_ : _ur_object {
     OwnNativeHandle = OwnZeEvent;
   }
 
-  EventFlags flags;
+  enum ur_event_flag_t flags;
   // Level Zero event handle.
   ze_event_handle_t ZeEvent;
 

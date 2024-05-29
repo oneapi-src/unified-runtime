@@ -197,11 +197,11 @@ struct ur_context_handle_t_ : _ur_object {
   // slot for a host-visible event. The ProfilingEnabled tells is we need a
   // slot for an event with profiling capabilities.
   ur_result_t getFreeSlotInExistingOrNewPool(ze_event_pool_handle_t &, size_t &,
-                                             EventFlags Flags,
+                                             enum ur_event_flag_t Flags,
                                              ur_device_handle_t Device);
 
   // Get ur_event_handle_t from cache.
-  ur_event_handle_t getEventFromContextCache(EventFlags Flags,
+  ur_event_handle_t getEventFromContextCache(enum ur_event_flag_t Flags,
                                              ur_device_handle_t Device);
 
   // Add ur_event_handle_t to cache.
@@ -217,7 +217,7 @@ struct ur_context_handle_t_ : _ur_object {
   };
 
   std::list<ze_event_pool_handle_t> *
-  getZeEventPoolCache(EventFlags Flags, ze_device_handle_t ZeDevice) {
+  getZeEventPoolCache(enum ur_event_flag_t Flags, ze_device_handle_t ZeDevice) {
     EventPoolCacheType CacheType;
 
     calculateCacheIndex(Flags, CacheType);
@@ -238,7 +238,7 @@ struct ur_context_handle_t_ : _ur_object {
     }
   }
 
-  ur_result_t calculateCacheIndex(EventFlags Flags,
+  ur_result_t calculateCacheIndex(enum ur_event_flag_t Flags,
                                   EventPoolCacheType &CacheType) {
     if (Flags & COUNTER_BASED && Flags & HOST_VISIBLE &&
         !(Flags & USING_IMM_CMDLIST)) {
@@ -296,7 +296,7 @@ struct ur_context_handle_t_ : _ur_object {
 
 private:
   // Get the cache of events for a provided scope and profiling mode.
-  auto getEventCache(EventFlags Flags, ur_device_handle_t Device) {
+  auto getEventCache(enum ur_event_flag_t Flags, ur_device_handle_t Device) {
     if (Flags & HOST_VISIBLE) {
       if (Device) {
         auto EventCachesMap = Flags & ENABLE_PROFILER
