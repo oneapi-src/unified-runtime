@@ -1359,7 +1359,20 @@ ur_result_t _ur_ze_event_list_t::createAndRetainUrZeEventList(
 
         std::shared_lock<ur_shared_mutex> Lock(EventList[I]->Mutex);
 
-        if (Queue && Queue->Device != CurQueueDevice &&
+        ur_device_handle_t QueueRootDevice;
+        ur_device_handle_t CurrentQueueRootDevice;
+        if (Queue) {
+          QueueRootDevice = Queue->Device;
+          CurrentQueueRootDevice = CurQueueDevice;
+          if (Queue->Device->isSubDevice()) {
+            QueueRootDevice = Queue->Device->RootDevice;
+          }
+          if (CurQueueDevice->isSubDevice()) {
+            CurrentQueueRootDevice = CurQueueDevice->RootDevice;
+          }
+        }
+
+        if (Queue && QueueRootDevice != CurrentQueueRootDevice &&
             !EventList[I]->IsMultiDevice) {
           ze_event_handle_t MultiDeviceZeEvent = nullptr;
           ur_event_handle_t MultiDeviceEvent;
@@ -1373,9 +1386,10 @@ ur_result_t _ur_ze_event_list_t::createAndRetainUrZeEventList(
           const auto &ZeCommandList = CommandList->first;
           EventList[I]->RefCount.increment();
 
-          zeCommandListAppendWaitOnEvents(ZeCommandList, 1u,
-                                          &EventList[I]->ZeEvent);
-          zeEventHostSignal(MultiDeviceZeEvent);
+          ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
+                     (ZeCommandList, 1u, &EventList[I]->ZeEvent));
+          if (!MultiDeviceEvent->CounterBasedEventsEnabled)
+            ZE2UR_CALL(zeEventHostSignal, (MultiDeviceZeEvent));
 
           UR_CALL(Queue->executeCommandList(CommandList, /* IsBlocking */ false,
                                             /* OkToBatchCommand */ true));
