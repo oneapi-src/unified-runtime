@@ -29,7 +29,6 @@ void ReportBadFree(uptr Addr, const StackTrace &stack,
     if (!AI) {
         context.logger.always("{} may be allocated on Host Memory",
                               (void *)Addr);
-        exit(1);
     }
 
     assert(!AI->IsReleased && "Chunk must be not released");
@@ -39,8 +38,6 @@ void ReportBadFree(uptr Addr, const StackTrace &stack,
                           (void *)AI->UserBegin, (void *)AI->UserEnd);
     context.logger.always("allocated here:");
     AI->AllocStack.print();
-
-    exit(1);
 }
 
 void ReportBadContext(uptr Addr, const StackTrace &stack,
@@ -60,8 +57,6 @@ void ReportBadContext(uptr Addr, const StackTrace &stack,
         context.logger.always("freed here:");
         AI->ReleaseStack.print();
     }
-
-    exit(1);
 }
 
 void ReportDoubleFree(uptr Addr, const StackTrace &Stack,
@@ -78,13 +73,11 @@ void ReportDoubleFree(uptr Addr, const StackTrace &Stack,
     AI->ReleaseStack.print();
     context.logger.always("previously allocated here:");
     AI->AllocStack.print();
-    exit(1);
 }
 
 void ReportGenericError(const DeviceSanitizerReport &Report) {
     context.logger.always("\n====ERROR: DeviceSanitizer: {}",
                           ToString(Report.ErrorType));
-    exit(1);
 }
 
 void ReportOutOfBoundsError(const DeviceSanitizerReport &Report,
@@ -106,8 +99,6 @@ void ReportOutOfBoundsError(const DeviceSanitizerReport &Report,
         KernelName.c_str(), Report.LID0, Report.LID1, Report.LID2, Report.GID0,
         Report.GID1, Report.GID2);
     context.logger.always("  #0 {} {}:{}", Func, File, Report.Line);
-
-    exit(1);
 }
 
 void ReportUseAfterFree(const DeviceSanitizerReport &Report,
@@ -153,8 +144,6 @@ void ReportUseAfterFree(const DeviceSanitizerReport &Report,
         context.logger.always("released here:");
         AllocInfo->ReleaseStack.print();
     }
-
-    exit(1);
 }
 
 } // namespace ur_sanitizer_layer
