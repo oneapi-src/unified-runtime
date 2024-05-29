@@ -1388,8 +1388,7 @@ ur_result_t _ur_ze_event_list_t::createAndRetainUrZeEventList(
 
           ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
                      (ZeCommandList, 1u, &EventList[I]->ZeEvent));
-          if (!MultiDeviceEvent->CounterBasedEventsEnabled)
-            ZE2UR_CALL(zeEventHostSignal, (MultiDeviceZeEvent));
+          ZE2UR_CALL(zeEventHostSignal, (MultiDeviceZeEvent));
 
           UR_CALL(Queue->executeCommandList(CommandList, /* IsBlocking */ false,
                                             /* OkToBatchCommand */ true));
