@@ -323,15 +323,25 @@ ur_result_t USMHostMemoryProvider::allocateImpl(void **ResultPtr, size_t Size,
 ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t Context,
                                              ur_usm_pool_desc_t *PoolDesc)
     : Context(Context) {
-  if (PoolDesc) {
-    if (auto *Limits = find_stype_node<ur_usm_pool_limits_desc_t>(PoolDesc)) {
+  assert(PoolDesc);
+  const void *pNext = PoolDesc->pNext;
+  while (pNext != nullptr) {
+    const ur_base_desc_t *BaseDesc = static_cast<const ur_base_desc_t *>(pNext);
+    switch (BaseDesc->stype) {
+    case UR_STRUCTURE_TYPE_USM_POOL_LIMITS_DESC: {
+      const ur_usm_pool_limits_desc_t *Limits =
+          reinterpret_cast<const ur_usm_pool_limits_desc_t *>(BaseDesc);
       for (auto &config : DisjointPoolConfigs.Configs) {
         config.MaxPoolableSize = Limits->maxPoolableSize;
         config.SlabMinSize = Limits->minDriverAllocSize;
       }
-    } else {
+      break;
+    }
+    default: {
       throw UsmAllocationException(UR_RESULT_ERROR_INVALID_ARGUMENT);
     }
+    }
+    pNext = BaseDesc->pNext;
   }
 
   auto MemProvider =
@@ -379,7 +389,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMPoolCreate(
     ur_usm_pool_handle_t *Pool ///< [out] pointer to USM memory pool
 ) {
   // Without pool tracking we can't free pool allocations.
-#ifdef UMF_ENABLE_POOL_TRACKING
+#if defined(UMF_ENABLE_POOL_TRACKING) && HIP_VERSION_MAJOR >= 6
+  assert(PoolDesc);
   if (PoolDesc->flags & UR_USM_POOL_FLAG_ZERO_INITIALIZE_BLOCK) {
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
