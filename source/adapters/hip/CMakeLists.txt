@@ -100,6 +100,12 @@ if(NOT MSVC)
     )
 endif()
 
+if(UMF_ENABLE_POOL_TRACKING)
+  target_compile_definitions(ur_adapter_hip PRIVATE UMF_ENABLE_POOL_TRACKING)
+else()
+  message(WARNING "HIP adapter USM pools are disabled, set UMF_ENABLE_POOL_TRACKING to enable them")
+endif()
+
 set_target_properties(${TARGET_NAME} PROPERTIES
     VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
     SOVERSION "${PROJECT_VERSION_MAJOR}"
