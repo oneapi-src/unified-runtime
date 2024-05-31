@@ -522,7 +522,8 @@ ur_result_t ur_context_handle_t_::getFreeSlotInExistingOrNewPool(
                   ZeEventPoolDesc.flags);
     if (CounterBasedEventEnabled) {
       if (UsingImmCmdList) {
-        counterBasedExt.flags = ZE_EVENT_POOL_COUNTER_BASED_EXP_FLAG_IMMEDIATE;
+        //FIXME DEBUG
+        counterBasedExt.flags = ZE_EVENT_POOL_COUNTER_BASED_EXP_FLAG_IMMEDIATE | ZE_EVENT_POOL_COUNTER_BASED_EXP_FLAG_NON_IMMEDIATE;
       } else {
         counterBasedExt.flags =
             ZE_EVENT_POOL_COUNTER_BASED_EXP_FLAG_NON_IMMEDIATE;

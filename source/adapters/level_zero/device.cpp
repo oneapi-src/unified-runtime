@@ -1089,6 +1089,24 @@ bool ur_device_handle_t_::useDriverInOrderLists() {
   return UseDriverInOrderLists;
 }
 
+bool ur_device_handle_t_::useDriverCounterBasedEvents() {
+  static const bool UseDriverCounterBasedEvents = [this] {
+    const char *UrRet = std::getenv("UR_L0_USE_DRIVER_COUNTER_BASED_EVENTS");
+    if (!UrRet) {
+      if (this->isPVC())
+        return true;
+      return false;
+    }
+    return std::atoi(UrRet) != 0;
+  }();
+
+  // FIXME
+  //  std::cerr << "useDriverCounterBasedEvents: " << UseDriverCounterBasedEvent
+  //  << std::endl;
+
+  return UseDriverCounterBasedEvents;
+}
+
 ur_result_t ur_device_handle_t_::initialize(int SubSubDeviceOrdinal,
                                             int SubSubDeviceIndex) {
   // Maintain various device properties cache.

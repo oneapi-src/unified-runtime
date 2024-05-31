@@ -1168,19 +1168,18 @@ ur_queue_handle_t_::ur_queue_handle_t_(
       ZeCommandListBatchComputeConfig.startSize();
   CopyCommandBatch.QueueBatchSize = ZeCommandListBatchCopyConfig.startSize();
 
-  static const bool useDriverCounterBasedEvents = [Device] {
-    const char *UrRet = std::getenv("UR_L0_USE_DRIVER_COUNTER_BASED_EVENTS");
-    if (!UrRet) {
-      if (Device->isPVC())
-        return true;
-      return false;
-    }
-    return std::atoi(UrRet) != 0;
-  }();
   this->CounterBasedEventsEnabled =
       UsingImmCmdLists && isInOrderQueue() && Device->useDriverInOrderLists() &&
-      useDriverCounterBasedEvents &&
+      Device->useDriverCounterBasedEvents() &&
       Device->Platform->ZeDriverEventPoolCountingEventsExtensionFound;
+  //  std::cerr << "CounterBasedEventsEnabled: " <<
+  //  this->CounterBasedEventsEnabled << std::endl; std::cerr <<
+  //  "UsingImmCmdLists: " << UsingImmCmdLists << std::endl; std::cerr <<
+  //  "isInOrderQueue() " << isInOrderQueue() << std::endl; std::cerr <<
+  //  "Device->useDriverInOrderLists() " << Device->useDriverInOrderLists() <<
+  //  std::endl; std::cerr << "ZeDriverEventPoolCountingEventsExtensionFound: "
+  //  << Device->Platform->ZeDriverEventPoolCountingEventsExtensionFound <<
+  //  std::endl;
 }
 
 void ur_queue_handle_t_::adjustBatchSizeForFullBatch(bool IsCopy) {

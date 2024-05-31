@@ -146,6 +146,10 @@ struct ur_device_handle_t_ : _ur_object {
   // Whether Adapter uses driver's implementation of in-order lists or not
   bool useDriverInOrderLists();
 
+  // Whether the Adapter uses counter based events for in-order command-lists
+  // FIXME Is this true for every scenario
+  bool useDriverCounterBasedEvents();
+
   // Returns whether immediate command lists are used on this device.
   ImmCmdlistMode ImmCommandListUsed{};
 
