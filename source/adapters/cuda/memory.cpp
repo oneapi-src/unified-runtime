@@ -137,6 +137,24 @@ UR_APIEXPORT ur_result_t UR_APICALL
 urMemGetNativeHandle(ur_mem_handle_t hMem, ur_device_handle_t Device,
                      ur_native_handle_t *phNativeMem) {
   try {
+    // Note that this entry point may be called for a device that may not be the
+    // last device to write to the MemBuffer, meaning we must perform the copy
+    // from a different device to the passed device, and then return the
+    // allocation on the device arg
+    if (hMem->LastEventWritingToMemObj &&
+        hMem->LastEventWritingToMemObj->getQueue()->getDevice() != Device) {
+      auto Buffer = std::get<BufferMem>(hMem->Mem);
+      // All operations synchronous
+      ur_lock MemoryMigrationLock{hMem->MemoryMigrationMutex};
+      urEventWait(1, &hMem->LastEventWritingToMemObj);
+      if (auto Result = cuMemcpyDtoD(
+              Buffer.getPtr(Device),
+              Buffer.getPtr(
+                  hMem->LastEventWritingToMemObj->getQueue()->getDevice()),
+              Buffer.getSize());
+          Result != CUDA_SUCCESS)
+        throw Result;
+    }
     *phNativeMem = reinterpret_cast<ur_native_handle_t>(
         std::get<BufferMem>(hMem->Mem).getPtr(Device));
   } catch (ur_result_t Err) {

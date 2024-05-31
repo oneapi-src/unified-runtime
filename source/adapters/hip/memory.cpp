@@ -282,28 +282,53 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemGetInfo(ur_mem_handle_t hMemory,
 UR_APIEXPORT ur_result_t UR_APICALL
 urMemGetNativeHandle(ur_mem_handle_t hMem, ur_device_handle_t Device,
                      ur_native_handle_t *phNativeMem) {
-#if defined(__HIP_PLATFORM_NVIDIA__)
-  if (sizeof(BufferMem::native_type) > sizeof(ur_native_handle_t)) {
-    // Check that all the upper bits that cannot be represented by
-    // ur_native_handle_t are empty.
-    // NOTE: The following shift might trigger a warning, but the check in the
-    // if above makes sure that this does not underflow.
-    BufferMem::native_type UpperBits =
-        std::get<BufferMem>(hMem->Mem).getPtr(Device) >>
-        (sizeof(ur_native_handle_t) * CHAR_BIT);
-    if (UpperBits) {
-      // Return an error if any of the remaining bits is non-zero.
-      return UR_RESULT_ERROR_INVALID_MEM_OBJECT;
+
+  try {
+    // Note that this entry point may be called for a device that may not be the
+    // last device to write to the MemBuffer, meaning we must perform the copy
+    // from a different device to the passed device, and then return the
+    // allocation on the device arg
+    if (hMem->LastEventWritingToMemObj &&
+        hMem->LastEventWritingToMemObj->getQueue()->getDevice() != Device) {
+      auto Buffer = std::get<BufferMem>(hMem->Mem);
+      // All operations synchronous
+      ur_lock MemoryMigrationLock{hMem->MemoryMigrationMutex};
+      urEventWait(1, &hMem->LastEventWritingToMemObj);
+      if (auto Result = hipMemcpyDtoD(
+              Buffer.getPtr(Device),
+              Buffer.getPtr(
+                  hMem->LastEventWritingToMemObj->getQueue()->getDevice()),
+              Buffer.getSize());
+          Result != hipSuccess)
+        throw Result;
     }
-  }
-  *phNativeMem = reinterpret_cast<ur_native_handle_t>(
-      std::get<BufferMem>(hMem->Mem).getPtr(Device));
+#if defined(__HIP_PLATFORM_NVIDIA__)
+    if (sizeof(BufferMem::native_type) > sizeof(ur_native_handle_t)) {
+      // Check that all the upper bits that cannot be represented by
+      // ur_native_handle_t are empty.
+      // NOTE: The following shift might trigger a warning, but the check in the
+      // if above makes sure that this does not underflow.
+      BufferMem::native_type UpperBits =
+          std::get<BufferMem>(hMem->Mem).getPtr(Device) >>
+          (sizeof(ur_native_handle_t) * CHAR_BIT);
+      if (UpperBits) {
+        // Return an error if any of the remaining bits is non-zero.
+        return UR_RESULT_ERROR_INVALID_MEM_OBJECT;
+      }
+    }
+    *phNativeMem = reinterpret_cast<ur_native_handle_t>(
+        std::get<BufferMem>(hMem->Mem).getPtr(Device));
 #elif defined(__HIP_PLATFORM_AMD__)
-  *phNativeMem = reinterpret_cast<ur_native_handle_t>(
-      std::get<BufferMem>(hMem->Mem).getPtr(Device));
+    *phNativeMem = reinterpret_cast<ur_native_handle_t>(
+        std::get<BufferMem>(hMem->Mem).getPtr(Device));
 #else
 #error("Must define exactly one of __HIP_PLATFORM_AMD__ or __HIP_PLATFORM_NVIDIA__");
 #endif
+  } catch (ur_result_t Err) {
+    return Err;
+  } catch (...) {
+    return UR_RESULT_ERROR_UNKNOWN;
+  }
   return UR_RESULT_SUCCESS;
 }
 
