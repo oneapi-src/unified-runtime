@@ -583,6 +583,9 @@ etors:
 - name: ENQUEUE_TIMESTAMP_RECORDING_EXP
   desc: Enumerator for $xEnqueueTimestampRecordingExp
   value: '223'
+- name: LOADER_CONFIG_SET_FUNCTION_CALLBACK
+  desc: Enumerator for $xLoaderConfigSetFunctionCallback
+  value: '224'
 ---
 type: enum
 desc: Defines structure types
@@ -693,3 +696,6 @@ etors:
 - name: USM_ALLOC_LOCATION_DESC
   desc: $x_usm_alloc_location_desc_t
   value: '35'
+- name: CALLBACK_LAYER_PROPERTIES
+  desc: $x_callback_layer_properties_t
+  value: '36'

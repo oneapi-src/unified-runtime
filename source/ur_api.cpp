@@ -181,6 +181,38 @@ ur_result_t UR_APICALL urLoaderConfigSetCodeLocationCallback(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Set a function callback to be called before, after or instead of a
+///        given entry point
+///
+/// @details
+///     - The provided function pointer must match the signature of the entry
+///       point it will be associated with.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hLoaderConfig`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pCallbackLayerProperties`
+///         + `NULL == pCallbackLayerProperties->name`
+///         + `NULL == pCallbackLayerProperties->pCallbackFuncPointer`
+///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
+///         + `::UR_CALLBACK_OVERRIDE_MODE_AFTER < pCallbackLayerProperties->mode`
+ur_result_t UR_APICALL urLoaderConfigSetFunctionCallback(
+    ur_loader_config_handle_t
+        hLoaderConfig, ///< [in] Handle to config object the layer will be enabled for.
+    ur_callback_layer_properties_t *
+        pCallbackLayerProperties ///< [in] Pointer to struct chain with one or more function callback
+                                 ///< definitions.
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Initialize the 'oneAPI' loader
 ///
 /// @details

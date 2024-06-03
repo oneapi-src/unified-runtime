@@ -4,11 +4,14 @@ from templates import helper as th
 %><%
     n=namespace
     N=n.upper()
+
     x=tags['$x']
     X=x.upper()
+
+    handle_create_get_retain_release_funcs=th.get_handle_create_get_retain_release_functions(specs, n, tags)
 %>/*
  *
- * Copyright (C) 2023 Intel Corporation
+ * Copyright (C) 2023-2024 Intel Corporation
  *
  * Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
  * See LICENSE.TXT
@@ -17,21 +20,23 @@ from templates import helper as th
  * @file ${name}.cpp
  *
  */
+#include "${x}_callback_layer.hpp"
 
-#include <iostream>
-#include "${x}_tracing_layer.hpp"
-#include <stdio.h>
-
-namespace ur_tracing_layer
+namespace ur_callback_layer
 {
     %for obj in th.get_adapter_functions(specs):
+    <%
+        func_name=th.make_func_name(n, tags, obj)
+        func_params=", ".join(th.make_param_lines(n, tags, obj, format=["name"]))
+        func_pointer_type=th.make_pfn_type(n, tags, obj)
+    %>
     ///////////////////////////////////////////////////////////////////////////////
     /// @brief Intercept function for ${th.make_func_name(n, tags, obj)}
     %if 'condition' in obj:
     #if ${th.subt(n, tags, obj['condition'])}
     %endif
     __${x}dlllocal ${x}_result_t ${X}_APICALL
-    ${th.make_func_name(n, tags, obj)}(
+    ${func_name}(
         %for line in th.make_param_lines(n, tags, obj):
         ${line}
         %endfor
@@ -39,21 +44,37 @@ namespace ur_tracing_layer
     {
         auto ${th.make_pfn_name(n, tags, obj)} = context.${n}DdiTable.${th.get_table_name(n, tags, obj)}.${th.make_pfn_name(n, tags, obj)};
 
-        if( nullptr == ${th.make_pfn_name(n, tags, obj)} )
-            return ${X}_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        if( nullptr == ${th.make_pfn_name(n, tags, obj)} ) {
+            return ${X}_RESULT_ERROR_UNINITIALIZED;
+        }
 
-        ${th.make_pfncb_param_type(n, tags, obj)} params = { &${",&".join(th.make_param_lines(n, tags, obj, format=["name"]))} };
-        uint64_t instance = context.notify_begin(${th.make_func_etor(n, tags, obj)}, "${th.make_func_name(n, tags, obj)}", &params);
+        ${x}_result_t result = UR_RESULT_SUCCESS;
 
-        context.logger.info("---> ${th.make_func_name(n, tags, obj)}");
+        auto beforeCallback = reinterpret_cast<${func_pointer_type}>(
+                context.apiCallbacks.get_before_callback("${func_name}"));
+        if(beforeCallback) {
+            result = beforeCallback( ${func_params} );
+            if(result != UR_RESULT_SUCCESS) {
+                return result;
+            }
+        }
 
-        ${x}_result_t result = ${th.make_pfn_name(n, tags, obj)}( ${", ".join(th.make_param_lines(n, tags, obj, format=["name"]))} );
+        auto replaceCallback = reinterpret_cast<${func_pointer_type}>(
+                context.apiCallbacks.get_replace_callback("${func_name}"));
+        if(replaceCallback) {
+            result = replaceCallback( ${func_params} );
+        } else {
+            result = ${th.make_pfn_name(n, tags, obj)}( ${func_params} );
+        }
+        if(result != UR_RESULT_SUCCESS) {
+            return result;
+        }
 
-        context.notify_end(${th.make_func_etor(n, tags, obj)}, "${th.make_func_name(n, tags, obj)}", &params, &result, instance);
-
-        std::ostringstream args_str;
-        ur::extras::printFunctionParams(args_str, ${th.make_func_etor(n, tags, obj)}, &params);
-        context.logger.info("({}) -> {};\n", args_str.str(), result);
+        auto afterCallback = reinterpret_cast<${func_pointer_type}>(
+                context.apiCallbacks.get_after_callback("${func_name}"));
+        if(afterCallback) {
+            return afterCallback( ${func_params} );
+        }
 
         return result;
     }
@@ -62,7 +83,6 @@ namespace ur_tracing_layer
     %endif
 
     %endfor
-
     %for tbl in th.get_pfntables(specs, meta, n, tags):
     ///////////////////////////////////////////////////////////////////////////////
     /// @brief Exported function for filling application's ${tbl['name']} table
@@ -72,20 +92,20 @@ namespace ur_tracing_layer
     ///     - ::${X}_RESULT_SUCCESS
     ///     - ::${X}_RESULT_ERROR_INVALID_NULL_POINTER
     ///     - ::${X}_RESULT_ERROR_UNSUPPORTED_VERSION
-    __${x}dlllocal ${x}_result_t ${X}_APICALL
+    ${X}_DLLEXPORT ${x}_result_t ${X}_APICALL
     ${tbl['export']['name']}(
         %for line in th.make_param_lines(n, tags, tbl['export']):
         ${line}
         %endfor
         )
     {
-        auto& dditable = ur_tracing_layer::context.${n}DdiTable.${tbl['name']};
+        auto& dditable = ur_callback_layer::context.${n}DdiTable.${tbl['name']};
 
         if( nullptr == pDdiTable )
             return ${X}_RESULT_ERROR_INVALID_NULL_POINTER;
 
-        if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) != UR_MAJOR_VERSION(version) ||
-            UR_MINOR_VERSION(ur_tracing_layer::context.version) > UR_MINOR_VERSION(version))
+        if (UR_MAJOR_VERSION(ur_callback_layer::context.version) != UR_MAJOR_VERSION(version) ||
+            UR_MINOR_VERSION(ur_callback_layer::context.version) > UR_MINOR_VERSION(version))
             return ${X}_RESULT_ERROR_UNSUPPORTED_VERSION;
 
         ${x}_result_t result = ${X}_RESULT_SUCCESS;
@@ -95,7 +115,7 @@ namespace ur_tracing_layer
     #if ${th.subt(n, tags, obj['condition'])}
         %endif
         dditable.${th.append_ws(th.make_pfn_name(n, tags, obj), 43)} = pDdiTable->${th.make_pfn_name(n, tags, obj)};
-        pDdiTable->${th.append_ws(th.make_pfn_name(n, tags, obj), 41)} = ur_tracing_layer::${th.make_func_name(n, tags, obj)};
+        pDdiTable->${th.append_ws(th.make_pfn_name(n, tags, obj), 41)} = ur_callback_layer::${th.make_func_name(n, tags, obj)};
         %if 'condition' in obj:
     #else
         dditable.${th.append_ws(th.make_pfn_name(n, tags, obj), 43)} = nullptr;
@@ -106,31 +126,28 @@ namespace ur_tracing_layer
         %endfor
         return result;
     }
-    %endfor
 
+    %endfor
     ${x}_result_t
     context_t::init(ur_dditable_t *dditable,
                     const std::set<std::string> &enabledLayerNames,
-                    codeloc_data codelocData, api_callbacks) {
+                    codeloc_data, api_callbacks apiCallbacks) {
         ${x}_result_t result = ${X}_RESULT_SUCCESS;
-        
+
         if(!enabledLayerNames.count(name)) {
             return result;
         }
 
-        // Recreate the logger in case env variables have been modified between
-        // program launch and the call to `urLoaderInit`
-        logger = logger::create_logger("tracing", true, true);
+        ur_callback_layer::context.apiCallbacks = apiCallbacks;
 
-        ur_tracing_layer::context.codelocData = codelocData;
-
-    %for tbl in th.get_pfntables(specs, meta, n, tags):
-        if( ${X}_RESULT_SUCCESS == result )
+        %for tbl in th.get_pfntables(specs, meta, n, tags):
+        if ( ${X}_RESULT_SUCCESS == result )
         {
-            result = ur_tracing_layer::${tbl['export']['name']}( ${X}_API_VERSION_CURRENT, &dditable->${tbl['name']} );
+            result = ur_callback_layer::${tbl['export']['name']}( ${X}_API_VERSION_CURRENT, &dditable->${tbl['name']} );
         }
-
-    %endfor
+        
+        %endfor
         return result;
     }
-} /* namespace ur_tracing_layer */
+
+} // namespace ur_callback_layer

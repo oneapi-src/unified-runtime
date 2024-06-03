@@ -187,6 +187,51 @@ params:
       name: pUserData
       desc: "[in][out][optional] pointer to data to be passed to callback."
 --- #--------------------------------------------------------------------------
+type: enum
+desc: "Callback override mode"
+class: $xLoaderConfig
+name: $x_callback_override_mode_t
+etors:
+    - name: BEFORE
+      desc: "Invoke callback before function."
+    - name: REPLACE
+      desc: "Invoke callback instead of function."
+    - name: AFTER
+      desc: "Invoke callback after function."
+--- #--------------------------------------------------------------------------
+type: struct
+desc: "Callback layer properties"
+details: "The pNext member of this struct can be used to chain additional instances of it, allowing multiple callback assignments at once."
+class: $xLoaderConfig
+name: $x_callback_layer_properties_t
+base: $x_base_properties_t
+members:
+    - type: const char*
+      name: name
+      desc: "[in] Full name of the function to associate callback with."
+    - type: $x_callback_override_mode_t
+      name: mode
+      desc: "[in] Override mode for this callback."
+    - type: void*
+      name: pCallbackFuncPointer
+      desc: "[in] Callback function pointer. Must match the signature of the named function."
+--- #--------------------------------------------------------------------------
+type: function
+desc: "Set a function callback to be called before, after or instead of a given entry point"
+details:
+    - "The provided function pointer must match the signature of the entry point it will be associated with."
+class: $xLoaderConfig
+loader_only: True
+name: "SetFunctionCallback"
+decl: static
+params:
+    - type: $x_loader_config_handle_t
+      name: hLoaderConfig
+      desc: "[in] Handle to config object the layer will be enabled for."
+    - type: $x_callback_layer_properties_t*
+      name: pCallbackLayerProperties
+      desc: "[in] Pointer to struct chain with one or more function callback definitions."
+--- #--------------------------------------------------------------------------
 type: function
 desc: "Initialize the $OneApi loader"
 class: $xLoader

@@ -173,7 +173,7 @@ namespace ur_validation_layer
     ${x}_result_t
     context_t::init(ur_dditable_t *dditable,
                     const std::set<std::string> &enabledLayerNames,
-                    codeloc_data) {
+                    codeloc_data, api_callbacks) {
         ${x}_result_t result = ${X}_RESULT_SUCCESS;
 
         if (enabledLayerNames.count(nameFullValidation)) {

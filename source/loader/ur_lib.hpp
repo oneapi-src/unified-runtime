@@ -14,11 +14,13 @@
 #define UR_LOADER_LIB_H 1
 
 #include "ur_api.h"
+#include "ur_callbacks.hpp"
 #include "ur_codeloc.hpp"
 #include "ur_ddi.h"
 #include "ur_proxy_layer.hpp"
 #include "ur_util.hpp"
 
+#include "callback/ur_callback_layer.hpp"
 #include "validation/ur_validation_layer.hpp"
 #if UR_ENABLE_TRACING
 #include "tracing/ur_tracing_layer.hpp"
@@ -48,6 +50,7 @@ struct ur_loader_config_handle_t_ {
     std::set<std::string> &getEnabledLayerNames() { return enabledLayers; }
 
     codeloc_data codelocData;
+    api_callbacks apiCallbacks;
 };
 
 namespace ur_lib {
@@ -75,13 +78,14 @@ class __urdlllocal context_t {
         &ur_tracing_layer::context,
 #endif
 #if UR_ENABLE_SANITIZER
-        &ur_sanitizer_layer::context
+        &ur_sanitizer_layer::context,
 #endif
-    };
+        &ur_callback_layer::context};
     std::string availableLayers;
     std::set<std::string> enabledLayerNames;
 
     codeloc_data codelocData;
+    api_callbacks apiCallbacks;
 
     bool layerExists(const std::string &layerName) const;
     void parseEnvEnabledLayers();
@@ -104,6 +108,9 @@ ur_result_t
 urLoaderConfigSetCodeLocationCallback(ur_loader_config_handle_t hLoaderConfig,
                                       ur_code_location_callback_t pfnCodeloc,
                                       void *pUserData);
+ur_result_t urLoaderConfigSetFunctionCallback(
+    ur_loader_config_handle_t hLoaderConfig,
+    ur_callback_layer_properties_t *pCallbackLayerProperties);
 
 ur_result_t urDeviceGetSelected(ur_platform_handle_t hPlatform,
                                 ur_device_type_t DeviceType,

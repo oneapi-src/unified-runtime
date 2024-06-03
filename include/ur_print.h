@@ -99,6 +99,22 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigInfo(enum ur_loader_confi
 UR_APIEXPORT ur_result_t UR_APICALL urPrintCodeLocation(const struct ur_code_location_t params, char *buffer, const size_t buff_size, size_t *out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Print ur_callback_override_mode_t enum
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_INVALID_SIZE
+///         - `buff_size < out_size`
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCallbackOverrideMode(enum ur_callback_override_mode_t value, char *buffer, const size_t buff_size, size_t *out_size);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print ur_callback_layer_properties_t struct
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_INVALID_SIZE
+///         - `buff_size < out_size`
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCallbackLayerProperties(const struct ur_callback_layer_properties_t params, char *buffer, const size_t buff_size, size_t *out_size);
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_adapter_info_t enum
 /// @returns
 ///     - ::UR_RESULT_SUCCESS
@@ -1057,6 +1073,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigEnableLayerParams(const s
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
 UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigSetCodeLocationCallbackParams(const struct ur_loader_config_set_code_location_callback_params_t *params, char *buffer, const size_t buff_size, size_t *out_size);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print ur_loader_config_set_function_callback_params_t struct
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_INVALID_SIZE
+///         - `buff_size < out_size`
+UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigSetFunctionCallbackParams(const struct ur_loader_config_set_function_callback_params_t *params, char *buffer, const size_t buff_size, size_t *out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_platform_get_params_t struct

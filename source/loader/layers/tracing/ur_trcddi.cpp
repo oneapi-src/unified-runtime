@@ -8965,7 +8965,7 @@ __urdlllocal ur_result_t UR_APICALL urGetDeviceProcAddrTable(
 
 ur_result_t context_t::init(ur_dditable_t *dditable,
                             const std::set<std::string> &enabledLayerNames,
-                            codeloc_data codelocData) {
+                            codeloc_data codelocData, api_callbacks) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
     if (!enabledLayerNames.count(name)) {

@@ -89,9 +89,12 @@ target_sources(ur_loader
         ${CMAKE_CURRENT_SOURCE_DIR}/ur_lib.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ur_lib.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ur_codeloc.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ur_callbacks.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ur_print.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/validation/ur_valddi.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/validation/ur_validation_layer.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/callback/ur_callback_layer.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/callback/ur_callbackddi.cpp
 )
 
 if(UR_ENABLE_TRACING)
@@ -138,7 +141,6 @@ if(UR_ENABLE_SANITIZER)
         "${CMAKE_CURRENT_SOURCE_DIR}/../"
     )
 endif()
-
 
 # link validation backtrace dependencies
 if(UNIX)

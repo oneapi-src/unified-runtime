@@ -223,6 +223,7 @@ typedef enum ur_function_t {
     UR_FUNCTION_COMMAND_BUFFER_GET_INFO_EXP = 221,                             ///< Enumerator for ::urCommandBufferGetInfoExp
     UR_FUNCTION_COMMAND_BUFFER_COMMAND_GET_INFO_EXP = 222,                     ///< Enumerator for ::urCommandBufferCommandGetInfoExp
     UR_FUNCTION_ENQUEUE_TIMESTAMP_RECORDING_EXP = 223,                         ///< Enumerator for ::urEnqueueTimestampRecordingExp
+    UR_FUNCTION_LOADER_CONFIG_SET_FUNCTION_CALLBACK = 224,                     ///< Enumerator for ::urLoaderConfigSetFunctionCallback
     /// @cond
     UR_FUNCTION_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -267,6 +268,7 @@ typedef enum ur_structure_type_t {
     UR_STRUCTURE_TYPE_KERNEL_ARG_VALUE_PROPERTIES = 32,                      ///< ::ur_kernel_arg_value_properties_t
     UR_STRUCTURE_TYPE_KERNEL_ARG_LOCAL_PROPERTIES = 33,                      ///< ::ur_kernel_arg_local_properties_t
     UR_STRUCTURE_TYPE_USM_ALLOC_LOCATION_DESC = 35,                          ///< ::ur_usm_alloc_location_desc_t
+    UR_STRUCTURE_TYPE_CALLBACK_LAYER_PROPERTIES = 36,                        ///< ::ur_callback_layer_properties_t
     UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_DESC = 0x1000,                      ///< ::ur_exp_command_buffer_desc_t
     UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_KERNEL_LAUNCH_DESC = 0x1001, ///< ::ur_exp_command_buffer_update_kernel_launch_desc_t
     UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_MEMOBJ_ARG_DESC = 0x1002,    ///< ::ur_exp_command_buffer_update_memobj_arg_desc_t
@@ -736,6 +738,62 @@ urLoaderConfigSetCodeLocationCallback(
     ur_loader_config_handle_t hLoaderConfig, ///< [in] Handle to config object the layer will be enabled for.
     ur_code_location_callback_t pfnCodeloc,  ///< [in] Function pointer to code location callback.
     void *pUserData                          ///< [in][out][optional] pointer to data to be passed to callback.
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Callback override mode
+typedef enum ur_callback_override_mode_t {
+    UR_CALLBACK_OVERRIDE_MODE_BEFORE = 0,  ///< Invoke callback before function.
+    UR_CALLBACK_OVERRIDE_MODE_REPLACE = 1, ///< Invoke callback instead of function.
+    UR_CALLBACK_OVERRIDE_MODE_AFTER = 2,   ///< Invoke callback after function.
+    /// @cond
+    UR_CALLBACK_OVERRIDE_MODE_FORCE_UINT32 = 0x7fffffff
+    /// @endcond
+
+} ur_callback_override_mode_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Callback layer properties
+///
+/// @details
+/// The pNext member of this struct can be used to chain additional instances of it, allowing multiple callback assignments at once.
+typedef struct ur_callback_layer_properties_t {
+    ur_structure_type_t stype;        ///< [in] type of this structure, must be
+                                      ///< ::UR_STRUCTURE_TYPE_CALLBACK_LAYER_PROPERTIES
+    void *pNext;                      ///< [in,out][optional] pointer to extension-specific structure
+    const char *name;                 ///< [in] Full name of the function to associate callback with.
+    ur_callback_override_mode_t mode; ///< [in] Override mode for this callback.
+    void *pCallbackFuncPointer;       ///< [in] Callback function pointer. Must match the signature of the named
+                                      ///< function.
+
+} ur_callback_layer_properties_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Set a function callback to be called before, after or instead of a
+///        given entry point
+///
+/// @details
+///     - The provided function pointer must match the signature of the entry
+///       point it will be associated with.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hLoaderConfig`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pCallbackLayerProperties`
+///         + `NULL == pCallbackLayerProperties->name`
+///         + `NULL == pCallbackLayerProperties->pCallbackFuncPointer`
+///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
+///         + `::UR_CALLBACK_OVERRIDE_MODE_AFTER < pCallbackLayerProperties->mode`
+UR_APIEXPORT ur_result_t UR_APICALL
+urLoaderConfigSetFunctionCallback(
+    ur_loader_config_handle_t hLoaderConfig,                 ///< [in] Handle to config object the layer will be enabled for.
+    ur_callback_layer_properties_t *pCallbackLayerProperties ///< [in] Pointer to struct chain with one or more function callback
+                                                             ///< definitions.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -9330,6 +9388,15 @@ typedef struct ur_loader_config_set_code_location_callback_params_t {
     ur_code_location_callback_t *ppfnCodeloc;
     void **ppUserData;
 } ur_loader_config_set_code_location_callback_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urLoaderConfigSetFunctionCallback
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_loader_config_set_function_callback_params_t {
+    ur_loader_config_handle_t *phLoaderConfig;
+    ur_callback_layer_properties_t **ppCallbackLayerProperties;
+} ur_loader_config_set_function_callback_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urPlatformGet
