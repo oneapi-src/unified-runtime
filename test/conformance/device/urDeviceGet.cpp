@@ -1,47 +1,45 @@
 // Copyright (C) 2022-2023 Intel Corporation
-// Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
-// See LICENSE.TXT
-// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+// Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM
+// Exceptions. See LICENSE.TXT SPDX-License-Identifier: Apache-2.0 WITH
+// LLVM-exception
 
 #include <uur/fixtures.h>
 
 using urDeviceGetTest = uur::urPlatformTest;
 
 TEST_F(urDeviceGetTest, Success) {
-    uint32_t count = 0;
-    ASSERT_SUCCESS(
-        urDeviceGet(platform, UR_DEVICE_TYPE_ALL, 0, nullptr, &count));
-    ASSERT_NE(count, 0);
-    std::vector<ur_device_handle_t> devices(count);
-    ASSERT_SUCCESS(urDeviceGet(platform, UR_DEVICE_TYPE_ALL, count,
-                               devices.data(), nullptr));
-    for (auto device : devices) {
-        ASSERT_NE(nullptr, device);
-    }
+  uint32_t count = 0;
+  ASSERT_SUCCESS(urDeviceGet(platform, UR_DEVICE_TYPE_ALL, 0, nullptr, &count));
+  ASSERT_NE(count, 0);
+  std::vector<ur_device_handle_t> devices(count);
+  ASSERT_SUCCESS(urDeviceGet(platform, UR_DEVICE_TYPE_ALL, count,
+                             devices.data(), nullptr));
+  for (auto device : devices) {
+    ASSERT_NE(nullptr, device);
+  }
 }
 
 TEST_F(urDeviceGetTest, SuccessSubsetOfDevices) {
-    uint32_t count;
-    ASSERT_SUCCESS(
-        urDeviceGet(platform, UR_DEVICE_TYPE_ALL, 0, nullptr, &count));
-    if (count < 2) {
-        GTEST_SKIP();
-    }
-    std::vector<ur_device_handle_t> devices(count - 1);
-    ASSERT_SUCCESS(urDeviceGet(platform, UR_DEVICE_TYPE_ALL, count - 1,
-                               devices.data(), nullptr));
-    for (auto device : devices) {
-        ASSERT_NE(nullptr, device);
-    }
+  uint32_t count;
+  ASSERT_SUCCESS(urDeviceGet(platform, UR_DEVICE_TYPE_ALL, 0, nullptr, &count));
+  if (count < 2) {
+    GTEST_SKIP();
+  }
+  std::vector<ur_device_handle_t> devices(count - 1);
+  ASSERT_SUCCESS(urDeviceGet(platform, UR_DEVICE_TYPE_ALL, count - 1,
+                             devices.data(), nullptr));
+  for (auto device : devices) {
+    ASSERT_NE(nullptr, device);
+  }
 }
 
 struct urDeviceGetTestWithDeviceTypeParam
     : uur::urAllDevicesTest,
       ::testing::WithParamInterface<ur_device_type_t> {
 
-    void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(uur::urAllDevicesTest::SetUp());
-    }
+  void SetUp() override {
+    UUR_RETURN_ON_FATAL_FAILURE(uur::urAllDevicesTest::SetUp());
+  }
 };
 
 INSTANTIATE_TEST_SUITE_P(
@@ -50,58 +48,56 @@ INSTANTIATE_TEST_SUITE_P(
                       UR_DEVICE_TYPE_CPU, UR_DEVICE_TYPE_FPGA,
                       UR_DEVICE_TYPE_MCA, UR_DEVICE_TYPE_VPU),
     [](const ::testing::TestParamInfo<ur_device_type_t> &info) {
-        std::stringstream ss;
-        ss << info.param;
-        return ss.str();
+      std::stringstream ss;
+      ss << info.param;
+      return ss.str();
     });
 
 TEST_P(urDeviceGetTestWithDeviceTypeParam, Success) {
-    ur_device_type_t device_type = GetParam();
-    uint32_t count = 0;
-    ASSERT_SUCCESS(urDeviceGet(platform, device_type, 0, nullptr, &count));
-    ASSERT_GE(devices.size(), count);
+  ur_device_type_t device_type = GetParam();
+  uint32_t count = 0;
+  ASSERT_SUCCESS(urDeviceGet(platform, device_type, 0, nullptr, &count));
+  ASSERT_GE(devices.size(), count);
 
-    if (count > 0) {
-        std::vector<ur_device_handle_t> devices(count);
-        ASSERT_SUCCESS(
-            urDeviceGet(platform, device_type, count, devices.data(), nullptr));
-        for (auto device : devices) {
-            ASSERT_NE(nullptr, device);
-        }
+  if (count > 0) {
+    std::vector<ur_device_handle_t> devices(count);
+    ASSERT_SUCCESS(
+        urDeviceGet(platform, device_type, count, devices.data(), nullptr));
+    for (auto device : devices) {
+      ASSERT_NE(nullptr, device);
     }
+  }
 }
 
 TEST_F(urDeviceGetTest, InvalidNullHandlePlatform) {
-    uint32_t count;
-    ASSERT_EQ_RESULT(
-        UR_RESULT_ERROR_INVALID_NULL_HANDLE,
-        urDeviceGet(nullptr, UR_DEVICE_TYPE_ALL, 0, nullptr, &count));
+  uint32_t count;
+  ASSERT_EQ_RESULT(
+      UR_RESULT_ERROR_INVALID_NULL_HANDLE,
+      urDeviceGet(nullptr, UR_DEVICE_TYPE_ALL, 0, nullptr, &count));
 }
 
 TEST_F(urDeviceGetTest, InvalidEnumerationDevicesType) {
-    uint32_t count;
-    ASSERT_EQ_RESULT(
-        UR_RESULT_ERROR_INVALID_ENUMERATION,
-        urDeviceGet(platform, UR_DEVICE_TYPE_FORCE_UINT32, 0, nullptr, &count));
+  uint32_t count;
+  ASSERT_EQ_RESULT(
+      UR_RESULT_ERROR_INVALID_ENUMERATION,
+      urDeviceGet(platform, UR_DEVICE_TYPE_FORCE_UINT32, 0, nullptr, &count));
 }
 
 TEST_F(urDeviceGetTest, InvalidSizeNumEntries) {
-    uint32_t count = 0;
-    ASSERT_SUCCESS(
-        urDeviceGet(platform, UR_DEVICE_TYPE_ALL, 0, nullptr, &count));
-    ASSERT_NE(count, 0);
-    std::vector<ur_device_handle_t> devices(count);
-    ASSERT_EQ_RESULT(
-        UR_RESULT_ERROR_INVALID_SIZE,
-        urDeviceGet(platform, UR_DEVICE_TYPE_ALL, 0, devices.data(), nullptr));
+  uint32_t count = 0;
+  ASSERT_SUCCESS(urDeviceGet(platform, UR_DEVICE_TYPE_ALL, 0, nullptr, &count));
+  ASSERT_NE(count, 0);
+  std::vector<ur_device_handle_t> devices(count);
+  ASSERT_EQ_RESULT(
+      UR_RESULT_ERROR_INVALID_SIZE,
+      urDeviceGet(platform, UR_DEVICE_TYPE_ALL, 0, devices.data(), nullptr));
 }
 
 TEST_F(urDeviceGetTest, InvalidNullPointerDevices) {
-    uint32_t count = 0;
-    ASSERT_SUCCESS(
-        urDeviceGet(platform, UR_DEVICE_TYPE_ALL, 0, nullptr, &count));
-    ASSERT_NE(count, 0);
-    ASSERT_EQ_RESULT(
-        UR_RESULT_ERROR_INVALID_NULL_POINTER,
-        urDeviceGet(platform, UR_DEVICE_TYPE_ALL, count, nullptr, nullptr));
+  uint32_t count = 0;
+  ASSERT_SUCCESS(urDeviceGet(platform, UR_DEVICE_TYPE_ALL, 0, nullptr, &count));
+  ASSERT_NE(count, 0);
+  ASSERT_EQ_RESULT(
+      UR_RESULT_ERROR_INVALID_NULL_POINTER,
+      urDeviceGet(platform, UR_DEVICE_TYPE_ALL, count, nullptr, nullptr));
 }
