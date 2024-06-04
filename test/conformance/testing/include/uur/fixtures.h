@@ -1116,6 +1116,16 @@ std::string deviceTestWithParamPrinter<BoolTestParam>(
 
 using SamplerCreateParamT =
     std::tuple<bool, ur_sampler_addressing_mode_t, ur_sampler_filter_mode_t>;
+// AAA
+const auto sampler_values = ::testing::Combine(
+    ::testing::Values(false),
+    ::testing::Values(//UR_SAMPLER_ADDRESSING_MODE_NONE,
+                      //UR_SAMPLER_ADDRESSING_MODE_CLAMP_TO_EDGE,
+                      //UR_SAMPLER_ADDRESSING_MODE_CLAMP,
+                      UR_SAMPLER_ADDRESSING_MODE_REPEAT,
+                      UR_SAMPLER_ADDRESSING_MODE_MIRRORED_REPEAT),
+    ::testing::Values(//UR_SAMPLER_FILTER_MODE_NEAREST,
+                      UR_SAMPLER_FILTER_MODE_LINEAR));
 
 template <>
 std::string deviceTestWithParamPrinter<SamplerCreateParamT>(
@@ -1317,6 +1327,37 @@ struct KernelLaunchHelper {
         *out_buffer = mem_handle;
     }
 
+    // Adds a kernel arg representing a sycl buffer constructed with a 1D range.
+    template <size_t W, size_t H>
+    void AddInputFloatImage(void *data, ur_mem_handle_t *out_buffer,
+                            ur_image_channel_type_t channel_type,
+                            ur_image_channel_order_t channel_order) {
+        ur_mem_handle_t mem_handle;
+        ur_image_format_t image_format{channel_order, channel_type};
+        ur_image_desc_t image_desc{
+            UR_STRUCTURE_TYPE_IMAGE_DESC, ///< [in] type of this structure
+            nullptr, ///< [in][optional] pointer to extension-specific structure
+            UR_MEM_TYPE_IMAGE2D, ///< [in] memory object type
+            W,                   ///< [in] image width
+            H,                   ///< [in] image height
+            1,                   ///< [in] image depth
+            1,                   ///< [in] image array size
+            0,                   ///< [in] image row pitch
+            0,                   ///< [in] image slice pitch
+            0,                   ///< [in] number of MIP levels
+            0                    ///< [in] number of samples
+        };
+
+        ASSERT_SUCCESS(urMemImageCreate(
+            context, UR_MEM_FLAG_READ_WRITE | UR_MEM_FLAG_USE_HOST_POINTER,
+            &image_format, &image_desc, data, &mem_handle));
+        ASSERT_SUCCESS(urKernelSetArgMemObj(kernel, current_arg_index, nullptr,
+                                            mem_handle));
+
+        current_arg_index++;
+        *out_buffer = mem_handle;
+    }
+
     template <class T> void AddPodArg(T data) {
         ASSERT_SUCCESS(urKernelSetArgValue(kernel, current_arg_index,
                                            sizeof(data), nullptr, &data));
@@ -1376,6 +1417,16 @@ struct urBaseKernelExecutionTestWithParam : urBaseKernelTestWithParam<T> {
     void AddBuffer1DArg(size_t size, ur_mem_handle_t *out_buffer,
                         size_t *buffer_index = nullptr) {
         helper.AddBuffer1DArg(size, out_buffer, buffer_index);
+        buffer_args.push_back(*out_buffer);
+    }
+
+    // Adds a kernel arg representing a sycl buffer constructed with a W*H range.
+    template <size_t W, size_t H>
+    void AddInputFloatImage(void *data, ur_mem_handle_t *out_buffer,
+                            ur_image_channel_type_t channel_type,
+                            ur_image_channel_order_t channel_order) {
+        helper.AddInputFloatImage<W, H>(data, out_buffer, channel_type,
+                                        channel_order);
         buffer_args.push_back(*out_buffer);
     }
 

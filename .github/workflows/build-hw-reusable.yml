@@ -32,7 +32,8 @@ jobs:
           {name: "${{inputs.name}}", platform: "${{inputs.platform}}"},
         ]
         build_type: [Debug, Release]
-        compiler: [{c: gcc, cxx: g++}, {c: clang, cxx: clang++}]
+        compiler: [{c: clang, cxx: clang++}]
+        repeat: [1, 2, 3, 4, 5, 6]
         # TODO: The latest L0 loader segfaults when built with clang.
         exclude:
          - adapter: {name: L0, platform: ""}

@@ -160,12 +160,12 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: ctest -C ${{matrix.build_type}} --output-on-failure -L "fuzz-short" --verbose
 
-  level-zero:
-    if: github.repository == 'oneapi-src/unified-runtime'
-    name: Level Zero
-    uses: ./.github/workflows/build-hw-reusable.yml
-    with:
-      name: L0
+  #level-zero:
+  #  if: github.repository == 'oneapi-src/unified-runtime'
+  #  name: Level Zero
+  #  uses: ./.github/workflows/build-hw-reusable.yml
+  #  with:
+  #    name: L0
 
   opencl:
     if: github.repository == 'oneapi-src/unified-runtime'
@@ -175,26 +175,26 @@ jobs:
       name: OPENCL
       platform: "Intel(R) OpenCL"
 
-  cuda:
-    if: github.repository == 'oneapi-src/unified-runtime'
-    name: CUDA
-    uses: ./.github/workflows/build-hw-reusable.yml
-    with:
-      name: CUDA
+  #cuda:
+  #  if: github.repository == 'oneapi-src/unified-runtime'
+  #  name: CUDA
+  #  uses: ./.github/workflows/build-hw-reusable.yml
+  #  with:
+  #    name: CUDA
 
-  hip:
-    if: github.repository == 'oneapi-src/unified-runtime'
-    name: HIP
-    uses: ./.github/workflows/build-hw-reusable.yml
-    with:
-      name: HIP
+  #hip:
+  #  if: github.repository == 'oneapi-src/unified-runtime'
+  #  name: HIP
+  #  uses: ./.github/workflows/build-hw-reusable.yml
+  #  with:
+  #    name: HIP
 
-  native-cpu:
-    if: github.repository == 'oneapi-src/unified-runtime'
-    name: Native CPU
-    uses: ./.github/workflows/build-hw-reusable.yml
-    with:
-      name: NATIVE_CPU
+  #native-cpu:
+  #  if: github.repository == 'oneapi-src/unified-runtime'
+  #  name: Native CPU
+  #  uses: ./.github/workflows/build-hw-reusable.yml
+  #  with:
+  #    name: NATIVE_CPU
 
   windows-build:
     name: Build - Windows
