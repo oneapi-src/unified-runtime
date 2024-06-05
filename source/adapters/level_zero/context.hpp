@@ -218,14 +218,10 @@ struct ur_context_handle_t_ : _ur_object {
 
   std::list<ze_event_pool_handle_t> *
   getZeEventPoolCache(enum ur_event_flag_t Flags, ze_device_handle_t ZeDevice) {
-    EventPoolCacheType CacheType;
-
-    calculateCacheIndex(Flags, CacheType);
+    Flags = static_cast<ur_event_flag_t>(Flags & ~MULTIDEVICE);
     if (ZeDevice) {
       auto ZeEventPoolCacheMap =
-          Flags & ENABLE_PROFILER
-              ? &ZeEventPoolCacheDeviceMap[CacheType * 2]
-              : &ZeEventPoolCacheDeviceMap[CacheType * 2 + 1];
+          &ZeEventPoolCacheDeviceMap[static_cast<int>(Flags)];
       if (ZeEventPoolCacheMap->find(ZeDevice) == ZeEventPoolCacheMap->end()) {
         ZeEventPoolCache.emplace_back();
         ZeEventPoolCacheMap->insert(
@@ -233,31 +229,8 @@ struct ur_context_handle_t_ : _ur_object {
       }
       return &ZeEventPoolCache[(*ZeEventPoolCacheMap)[ZeDevice]];
     } else {
-      return Flags & ENABLE_PROFILER ? &ZeEventPoolCache[CacheType * 2]
-                                     : &ZeEventPoolCache[CacheType * 2 + 1];
+      return &ZeEventPoolCache[static_cast<int>(Flags)];
     }
-  }
-
-  ur_result_t calculateCacheIndex(enum ur_event_flag_t Flags,
-                                  EventPoolCacheType &CacheType) {
-    if (Flags & COUNTER_BASED && Flags & HOST_VISIBLE &&
-        !(Flags & USING_IMM_CMDLIST)) {
-      CacheType = HostVisibleCounterBasedRegularCacheType;
-    } else if (Flags & COUNTER_BASED && !(Flags & HOST_VISIBLE) &&
-               !(Flags & USING_IMM_CMDLIST)) {
-      CacheType = HostInvisibleCounterBasedRegularCacheType;
-    } else if (Flags & COUNTER_BASED && Flags & HOST_VISIBLE &&
-               Flags & USING_IMM_CMDLIST) {
-      CacheType = HostVisibleCounterBasedImmediateCacheType;
-    } else if (Flags & COUNTER_BASED && !(Flags & HOST_VISIBLE) &&
-               Flags & USING_IMM_CMDLIST) {
-      CacheType = HostInvisibleCounterBasedImmediateCacheType;
-    } else if (!(Flags & COUNTER_BASED) && Flags & HOST_VISIBLE) {
-      CacheType = HostVisibleCacheType;
-    } else {
-      CacheType = HostInvisibleCacheType;
-    }
-    return UR_RESULT_SUCCESS;
   }
 
   // Decrement number of events living in the pool upon event destroy
