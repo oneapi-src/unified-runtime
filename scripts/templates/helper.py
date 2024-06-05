@@ -769,8 +769,8 @@ def make_etor_lines(namespace, tags, obj, meta=None):
             prologue = "%s,"%(name)
 
         for line in split_line(subt(namespace, tags, item['desc'], True), 70):
-            lines.append("%s%s %s"%(append_ws(prologue, 48), "///<", line))
-            prologue = ""
+            lines.append(" /// %s" % line)
+        lines.append(prologue)
 
     lines += [
         "/// @cond",
@@ -821,8 +821,8 @@ def make_member_lines(namespace, tags, obj, prefix="", meta=None):
         prologue = "%s %s %s;"%(tname, name, array_suffix)
 
         for line in split_line(subt(namespace, tags, item['desc'], True), 70):
-            lines.append("%s%s %s"%(append_ws(prologue, 48), "///<", line))
-            prologue = ""
+            lines.append(" /// %s" % line)
+        lines.append(prologue)
     return lines
 
 """
@@ -870,8 +870,8 @@ def make_param_lines(namespace, tags, obj, decl=False, meta=None, format=["type"
         if "desc" in format:
             desc = item['desc']
             for line in split_line(subt(namespace, tags, desc, True), 70):
-                lines.append("%s///< %s"%(append_ws(prologue, 48), line))
-                prologue = ""
+                lines.append(" /// %s" % line)
+            lines.append(prologue)
         else:
             lines.append(prologue)
 

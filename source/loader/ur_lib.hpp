@@ -2,9 +2,9 @@
  *
  * Copyright (C) 2022-2023 Intel Corporation
  *
- * Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
- * See LICENSE.TXT
- * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+ * Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM
+ * Exceptions. See LICENSE.TXT SPDX-License-Identifier: Apache-2.0 WITH
+ * LLVM-exception
  *
  * @file ur_lib.hpp
  *
@@ -33,60 +33,60 @@
 #include <vector>
 
 struct ur_loader_config_handle_t_ {
-    std::set<std::string> enabledLayers;
-    std::atomic_uint32_t refCount = 1;
+  std::set<std::string> enabledLayers;
+  std::atomic_uint32_t refCount = 1;
 
-    uint32_t incrementReferenceCount() {
-        return refCount.fetch_add(1, std::memory_order_acq_rel) + 1;
-    }
-    uint32_t decrementReferenceCount() {
-        return refCount.fetch_sub(1, std::memory_order_acq_rel) - 1;
-    }
-    uint32_t getReferenceCount() {
-        return refCount.load(std::memory_order_acquire);
-    }
-    std::set<std::string> &getEnabledLayerNames() { return enabledLayers; }
+  uint32_t incrementReferenceCount() {
+    return refCount.fetch_add(1, std::memory_order_acq_rel) + 1;
+  }
+  uint32_t decrementReferenceCount() {
+    return refCount.fetch_sub(1, std::memory_order_acq_rel) - 1;
+  }
+  uint32_t getReferenceCount() {
+    return refCount.load(std::memory_order_acquire);
+  }
+  std::set<std::string> &getEnabledLayerNames() { return enabledLayers; }
 
-    codeloc_data codelocData;
+  codeloc_data codelocData;
 };
 
 namespace ur_lib {
 ///////////////////////////////////////////////////////////////////////////////
 class __urdlllocal context_t {
-  public:
+public:
 #ifdef DYNAMIC_LOAD_LOADER
-    HMODULE loader = nullptr;
+  HMODULE loader = nullptr;
 #endif
 
-    context_t();
-    ~context_t();
+  context_t();
+  ~context_t();
 
-    std::once_flag initOnce;
+  std::once_flag initOnce;
 
-    ur_result_t Init(ur_device_init_flags_t dflags,
-                     ur_loader_config_handle_t hLoaderConfig);
+  ur_result_t Init(ur_device_init_flags_t dflags,
+                   ur_loader_config_handle_t hLoaderConfig);
 
-    ur_result_t urLoaderInit();
-    ur_dditable_t urDdiTable = {};
+  ur_result_t urLoaderInit();
+  ur_dditable_t urDdiTable = {};
 
-    const std::vector<proxy_layer_context_t *> layers = {
-        &ur_validation_layer::context,
+  const std::vector<proxy_layer_context_t *> layers = {
+      &ur_validation_layer::context,
 #if UR_ENABLE_TRACING
-        &ur_tracing_layer::context,
+      &ur_tracing_layer::context,
 #endif
 #if UR_ENABLE_SANITIZER
-        &ur_sanitizer_layer::context
+      &ur_sanitizer_layer::context
 #endif
-    };
-    std::string availableLayers;
-    std::set<std::string> enabledLayerNames;
+  };
+  std::string availableLayers;
+  std::set<std::string> enabledLayerNames;
 
-    codeloc_data codelocData;
+  codeloc_data codelocData;
 
-    bool layerExists(const std::string &layerName) const;
-    void parseEnvEnabledLayers();
-    void initLayers() const;
-    void tearDownLayers() const;
+  bool layerExists(const std::string &layerName) const;
+  void parseEnvEnabledLayers();
+  void initLayers() const;
+  void tearDownLayers() const;
 };
 
 extern context_t *context;

@@ -1,7 +1,7 @@
 // Copyright (C) 2022-2023 Intel Corporation
-// Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
-// See LICENSE.TXT
-// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+// Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM
+// Exceptions. See LICENSE.TXT SPDX-License-Identifier: Apache-2.0 WITH
+// LLVM-exception
 
 #ifndef UR_TEST_CONFORMANCE_ADAPTERS_HIP_FIXTURES_H_INCLUDED
 #define UR_TEST_CONFORMANCE_ADAPTERS_HIP_FIXTURES_H_INCLUDED
@@ -11,20 +11,20 @@
 namespace uur {
 
 struct ResultHip {
-    constexpr ResultHip(hipError_t result) noexcept : value(result) {}
+  constexpr ResultHip(hipError_t result) noexcept : value(result) {}
 
-    inline bool operator==(const ResultHip &rhs) const noexcept {
-        return rhs.value == value;
-    }
+  inline bool operator==(const ResultHip &rhs) const noexcept {
+    return rhs.value == value;
+  }
 
-    hipError_t value;
+  hipError_t value;
 };
 
 } // namespace uur
 
 #ifndef ASSERT_EQ_RESULT_HIP
 #define ASSERT_EQ_RESULT_HIP(EXPECTED, ACTUAL)                                 \
-    ASSERT_EQ(uur::ResultHip(EXPECTED), uur::ResultHip(ACTUAL))
+  ASSERT_EQ(uur::ResultHip(EXPECTED), uur::ResultHip(ACTUAL))
 #endif // ASSERT_EQ_RESULT_HIP
 
 #ifndef ASSERT_SUCCESS_HIP
@@ -33,7 +33,7 @@ struct ResultHip {
 
 #ifndef EXPECT_EQ_RESULT_HIP
 #define EXPECT_EQ_RESULT_HIP(EXPECTED, ACTUAL)                                 \
-    EXPECT_EQ_RESULT_HIP(uur::ResultHip(EXPECTED), uur::ResultHip(ACTUAL))
+  EXPECT_EQ_RESULT_HIP(uur::ResultHip(EXPECTED), uur::ResultHip(ACTUAL))
 #endif // EXPECT_EQ_RESULT_HIP
 
 #ifndef EXPECT_SUCCESS_HIP
