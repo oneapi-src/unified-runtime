@@ -168,11 +168,20 @@ ur_result_t ur_platform_handle_t_::initialize() {
   auto VersionMajor = std::to_string((DriverVersion & 0xFF000000) >> 24);
   auto VersionMinor = std::to_string((DriverVersion & 0x00FF0000) >> 16);
   auto VersionBuild = std::to_string(DriverVersion & 0x0000FFFF);
-  ZeDriverVersion = VersionMajor + "." + VersionMinor + "." + VersionBuild;
 
   ZE2UR_CALL(zeDriverGetApiVersion, (ZeDriver, &ZeApiVersion));
   ZeDriverApiVersion = std::to_string(ZE_MAJOR_VERSION(ZeApiVersion)) + "." +
                        std::to_string(ZE_MINOR_VERSION(ZeApiVersion));
+
+  // Verify that this driver is an Intel Gpu Driver with the above Format
+  if ((((DriverVersion & 0xFF000000) >> 24) != 1) &&
+      !(((DriverVersion & 0x00FF0000) >> 16) <= 3)) {
+    // Driver version will be reported as API_MAJOR.API_MINOR.driverVersion
+    VersionMajor = std::to_string(ZE_MAJOR_VERSION(ZeApiVersion));
+    VersionMinor = std::to_string(ZE_MINOR_VERSION(ZeApiVersion));
+    VersionBuild = std::to_string(ZeDriverProperties.driverVersion);
+  }
+  ZeDriverVersion = VersionMajor + "." + VersionMinor + "." + VersionBuild;
 
   // Cache driver extension properties
   uint32_t Count = 0;
