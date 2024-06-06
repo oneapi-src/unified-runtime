@@ -122,6 +122,15 @@ ur_result_t urPrintCallbackOverrideMode(enum ur_callback_override_mode_t value,
     return str_copy(&ss, buffer, buff_size, out_size);
 }
 
+ur_result_t
+urPrintCallbackProperties(const struct ur_callback_properties_t params,
+                          char *buffer, const size_t buff_size,
+                          size_t *out_size) {
+    std::stringstream ss;
+    ss << params;
+    return str_copy(&ss, buffer, buff_size, out_size);
+}
+
 ur_result_t urPrintCallbackLayerProperties(
     const struct ur_callback_layer_properties_t params, char *buffer,
     const size_t buff_size, size_t *out_size) {
@@ -1943,8 +1952,9 @@ ur_result_t urPrintLoaderConfigSetCodeLocationCallbackParams(
     return str_copy(&ss, buffer, buff_size, out_size);
 }
 
-ur_result_t urPrintLoaderConfigSetFunctionCallbackParams(
-    const struct ur_loader_config_set_function_callback_params_t *params,
+ur_result_t urPrintLoaderConfigSetCallbackLayerPropertiesParams(
+    const struct ur_loader_config_set_callback_layer_properties_params_t
+        *params,
     char *buffer, const size_t buff_size, size_t *out_size) {
     std::stringstream ss;
     ss << params;

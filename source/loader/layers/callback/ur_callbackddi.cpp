@@ -49,6 +49,10 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGet(
         context.apiCallbacks.get_replace_callback("urAdapterGet"));
     if (replaceCallback) {
         result = replaceCallback(NumEntries, phAdapters, pNumAdapters);
+    } else if (context.enableMock) {
+
+        *phAdapters = createDummyHandle<ur_adapter_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnAdapterGet(NumEntries, phAdapters, pNumAdapters);
     }
@@ -91,6 +95,9 @@ __urdlllocal ur_result_t UR_APICALL urAdapterRelease(
         context.apiCallbacks.get_replace_callback("urAdapterRelease"));
     if (replaceCallback) {
         result = replaceCallback(hAdapter);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnAdapterRelease(hAdapter);
     }
@@ -133,6 +140,9 @@ __urdlllocal ur_result_t UR_APICALL urAdapterRetain(
         context.apiCallbacks.get_replace_callback("urAdapterRetain"));
     if (replaceCallback) {
         result = replaceCallback(hAdapter);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnAdapterRetain(hAdapter);
     }
@@ -182,6 +192,9 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGetLastError(
         context.apiCallbacks.get_replace_callback("urAdapterGetLastError"));
     if (replaceCallback) {
         result = replaceCallback(hAdapter, ppMessage, pError);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnAdapterGetLastError(hAdapter, ppMessage, pError);
     }
@@ -236,6 +249,9 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGetInfo(
     if (replaceCallback) {
         result = replaceCallback(hAdapter, propName, propSize, pPropValue,
                                  pPropSizeRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnAdapterGetInfo(hAdapter, propName, propSize, pPropValue,
                                    pPropSizeRet);
@@ -295,6 +311,10 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGet(
     if (replaceCallback) {
         result = replaceCallback(phAdapters, NumAdapters, NumEntries,
                                  phPlatforms, pNumPlatforms);
+    } else if (context.enableMock) {
+
+        *phPlatforms = createDummyHandle<ur_platform_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnGet(phAdapters, NumAdapters, NumEntries, phPlatforms,
                         pNumPlatforms);
@@ -351,6 +371,9 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetInfo(
     if (replaceCallback) {
         result = replaceCallback(hPlatform, propName, propSize, pPropValue,
                                  pPropSizeRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result =
             pfnGetInfo(hPlatform, propName, propSize, pPropValue, pPropSizeRet);
@@ -396,6 +419,9 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetApiVersion(
         context.apiCallbacks.get_replace_callback("urPlatformGetApiVersion"));
     if (replaceCallback) {
         result = replaceCallback(hPlatform, pVersion);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnGetApiVersion(hPlatform, pVersion);
     }
@@ -440,6 +466,10 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetNativeHandle(
         context.apiCallbacks.get_replace_callback("urPlatformGetNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(hPlatform, phNativePlatform);
+    } else if (context.enableMock) {
+
+        *phNativePlatform = createDummyHandle<ur_native_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnGetNativeHandle(hPlatform, phNativePlatform);
     }
@@ -492,6 +522,10 @@ __urdlllocal ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
                 "urPlatformCreateWithNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(hNativePlatform, pProperties, phPlatform);
+    } else if (context.enableMock) {
+
+        *phPlatform = createDummyHandle<ur_platform_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result =
             pfnCreateWithNativeHandle(hNativePlatform, pProperties, phPlatform);
@@ -543,6 +577,9 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetBackendOption(
             "urPlatformGetBackendOption"));
     if (replaceCallback) {
         result = replaceCallback(hPlatform, pFrontendOption, ppPlatformOption);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result =
             pfnGetBackendOption(hPlatform, pFrontendOption, ppPlatformOption);
@@ -600,6 +637,10 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGet(
     if (replaceCallback) {
         result = replaceCallback(hPlatform, DeviceType, NumEntries, phDevices,
                                  pNumDevices);
+    } else if (context.enableMock) {
+
+        *phDevices = createDummyHandle<ur_device_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result =
             pfnGet(hPlatform, DeviceType, NumEntries, phDevices, pNumDevices);
@@ -657,6 +698,9 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetInfo(
     if (replaceCallback) {
         result = replaceCallback(hDevice, propName, propSize, pPropValue,
                                  pPropSizeRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result =
             pfnGetInfo(hDevice, propName, propSize, pPropValue, pPropSizeRet);
@@ -702,6 +746,9 @@ __urdlllocal ur_result_t UR_APICALL urDeviceRetain(
         context.apiCallbacks.get_replace_callback("urDeviceRetain"));
     if (replaceCallback) {
         result = replaceCallback(hDevice);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnRetain(hDevice);
     }
@@ -744,6 +791,9 @@ __urdlllocal ur_result_t UR_APICALL urDeviceRelease(
         context.apiCallbacks.get_replace_callback("urDeviceRelease"));
     if (replaceCallback) {
         result = replaceCallback(hDevice);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnRelease(hDevice);
     }
@@ -798,6 +848,10 @@ __urdlllocal ur_result_t UR_APICALL urDevicePartition(
     if (replaceCallback) {
         result = replaceCallback(hDevice, pProperties, NumDevices, phSubDevices,
                                  pNumDevicesRet);
+    } else if (context.enableMock) {
+
+        *phSubDevices = createDummyHandle<ur_device_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnPartition(hDevice, pProperties, NumDevices, phSubDevices,
                               pNumDevicesRet);
@@ -853,6 +907,9 @@ __urdlllocal ur_result_t UR_APICALL urDeviceSelectBinary(
     if (replaceCallback) {
         result =
             replaceCallback(hDevice, pBinaries, NumBinaries, pSelectedBinary);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result =
             pfnSelectBinary(hDevice, pBinaries, NumBinaries, pSelectedBinary);
@@ -898,6 +955,10 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetNativeHandle(
         context.apiCallbacks.get_replace_callback("urDeviceGetNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(hDevice, phNativeDevice);
+    } else if (context.enableMock) {
+
+        *phNativeDevice = createDummyHandle<ur_native_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnGetNativeHandle(hDevice, phNativeDevice);
     }
@@ -953,6 +1014,10 @@ __urdlllocal ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
     if (replaceCallback) {
         result =
             replaceCallback(hNativeDevice, hPlatform, pProperties, phDevice);
+    } else if (context.enableMock) {
+
+        *phDevice = createDummyHandle<ur_device_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnCreateWithNativeHandle(hNativeDevice, hPlatform,
                                            pProperties, phDevice);
@@ -1006,6 +1071,9 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetGlobalTimestamps(
             "urDeviceGetGlobalTimestamps"));
     if (replaceCallback) {
         result = replaceCallback(hDevice, pDeviceTimestamp, pHostTimestamp);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result =
             pfnGetGlobalTimestamps(hDevice, pDeviceTimestamp, pHostTimestamp);
@@ -1056,6 +1124,10 @@ __urdlllocal ur_result_t UR_APICALL urContextCreate(
     if (replaceCallback) {
         result =
             replaceCallback(DeviceCount, phDevices, pProperties, phContext);
+    } else if (context.enableMock) {
+
+        *phContext = createDummyHandle<ur_context_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnCreate(DeviceCount, phDevices, pProperties, phContext);
     }
@@ -1099,6 +1171,9 @@ __urdlllocal ur_result_t UR_APICALL urContextRetain(
         context.apiCallbacks.get_replace_callback("urContextRetain"));
     if (replaceCallback) {
         result = replaceCallback(hContext);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnRetain(hContext);
     }
@@ -1141,6 +1216,9 @@ __urdlllocal ur_result_t UR_APICALL urContextRelease(
         context.apiCallbacks.get_replace_callback("urContextRelease"));
     if (replaceCallback) {
         result = replaceCallback(hContext);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnRelease(hContext);
     }
@@ -1197,6 +1275,9 @@ __urdlllocal ur_result_t UR_APICALL urContextGetInfo(
     if (replaceCallback) {
         result = replaceCallback(hContext, propName, propSize, pPropValue,
                                  pPropSizeRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result =
             pfnGetInfo(hContext, propName, propSize, pPropValue, pPropSizeRet);
@@ -1243,6 +1324,10 @@ __urdlllocal ur_result_t UR_APICALL urContextGetNativeHandle(
         context.apiCallbacks.get_replace_callback("urContextGetNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(hContext, phNativeContext);
+    } else if (context.enableMock) {
+
+        *phNativeContext = createDummyHandle<ur_native_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnGetNativeHandle(hContext, phNativeContext);
     }
@@ -1300,6 +1385,10 @@ __urdlllocal ur_result_t UR_APICALL urContextCreateWithNativeHandle(
     if (replaceCallback) {
         result = replaceCallback(hNativeContext, numDevices, phDevices,
                                  pProperties, phContext);
+    } else if (context.enableMock) {
+
+        *phContext = createDummyHandle<ur_context_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnCreateWithNativeHandle(hNativeContext, numDevices,
                                            phDevices, pProperties, phContext);
@@ -1353,6 +1442,9 @@ __urdlllocal ur_result_t UR_APICALL urContextSetExtendedDeleter(
             "urContextSetExtendedDeleter"));
     if (replaceCallback) {
         result = replaceCallback(hContext, pfnDeleter, pUserData);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnSetExtendedDeleter(hContext, pfnDeleter, pUserData);
     }
@@ -1403,6 +1495,10 @@ __urdlllocal ur_result_t UR_APICALL urMemImageCreate(
     if (replaceCallback) {
         result = replaceCallback(hContext, flags, pImageFormat, pImageDesc,
                                  pHost, phMem);
+    } else if (context.enableMock) {
+
+        *phMem = createDummyHandle<ur_mem_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnImageCreate(hContext, flags, pImageFormat, pImageDesc,
                                 pHost, phMem);
@@ -1453,6 +1549,10 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreate(
         context.apiCallbacks.get_replace_callback("urMemBufferCreate"));
     if (replaceCallback) {
         result = replaceCallback(hContext, flags, size, pProperties, phBuffer);
+    } else if (context.enableMock) {
+
+        *phBuffer = createDummyHandle<ur_mem_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnBufferCreate(hContext, flags, size, pProperties, phBuffer);
     }
@@ -1495,6 +1595,9 @@ __urdlllocal ur_result_t UR_APICALL urMemRetain(
         context.apiCallbacks.get_replace_callback("urMemRetain"));
     if (replaceCallback) {
         result = replaceCallback(hMem);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnRetain(hMem);
     }
@@ -1537,6 +1640,9 @@ __urdlllocal ur_result_t UR_APICALL urMemRelease(
         context.apiCallbacks.get_replace_callback("urMemRelease"));
     if (replaceCallback) {
         result = replaceCallback(hMem);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnRelease(hMem);
     }
@@ -1588,6 +1694,10 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferPartition(
     if (replaceCallback) {
         result =
             replaceCallback(hBuffer, flags, bufferCreateType, pRegion, phMem);
+    } else if (context.enableMock) {
+
+        *phMem = createDummyHandle<ur_mem_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnBufferPartition(hBuffer, flags, bufferCreateType, pRegion,
                                     phMem);
@@ -1635,6 +1745,10 @@ __urdlllocal ur_result_t UR_APICALL urMemGetNativeHandle(
         context.apiCallbacks.get_replace_callback("urMemGetNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(hMem, hDevice, phNativeMem);
+    } else if (context.enableMock) {
+
+        *phNativeMem = createDummyHandle<ur_native_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnGetNativeHandle(hMem, hDevice, phNativeMem);
     }
@@ -1688,6 +1802,10 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
                 "urMemBufferCreateWithNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(hNativeMem, hContext, pProperties, phMem);
+    } else if (context.enableMock) {
+
+        *phMem = createDummyHandle<ur_mem_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnBufferCreateWithNativeHandle(hNativeMem, hContext,
                                                  pProperties, phMem);
@@ -1749,6 +1867,10 @@ __urdlllocal ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
     if (replaceCallback) {
         result = replaceCallback(hNativeMem, hContext, pImageFormat, pImageDesc,
                                  pProperties, phMem);
+    } else if (context.enableMock) {
+
+        *phMem = createDummyHandle<ur_mem_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnImageCreateWithNativeHandle(
             hNativeMem, hContext, pImageFormat, pImageDesc, pProperties, phMem);
@@ -1809,6 +1931,9 @@ __urdlllocal ur_result_t UR_APICALL urMemGetInfo(
     if (replaceCallback) {
         result = replaceCallback(hMemory, propName, propSize, pPropValue,
                                  pPropSizeRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result =
             pfnGetInfo(hMemory, propName, propSize, pPropValue, pPropSizeRet);
@@ -1866,6 +1991,9 @@ __urdlllocal ur_result_t UR_APICALL urMemImageGetInfo(
     if (replaceCallback) {
         result = replaceCallback(hMemory, propName, propSize, pPropValue,
                                  pPropSizeRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnImageGetInfo(hMemory, propName, propSize, pPropValue,
                                  pPropSizeRet);
@@ -1913,6 +2041,10 @@ __urdlllocal ur_result_t UR_APICALL urSamplerCreate(
         context.apiCallbacks.get_replace_callback("urSamplerCreate"));
     if (replaceCallback) {
         result = replaceCallback(hContext, pDesc, phSampler);
+    } else if (context.enableMock) {
+
+        *phSampler = createDummyHandle<ur_sampler_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnCreate(hContext, pDesc, phSampler);
     }
@@ -1956,6 +2088,9 @@ __urdlllocal ur_result_t UR_APICALL urSamplerRetain(
         context.apiCallbacks.get_replace_callback("urSamplerRetain"));
     if (replaceCallback) {
         result = replaceCallback(hSampler);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnRetain(hSampler);
     }
@@ -1999,6 +2134,9 @@ __urdlllocal ur_result_t UR_APICALL urSamplerRelease(
         context.apiCallbacks.get_replace_callback("urSamplerRelease"));
     if (replaceCallback) {
         result = replaceCallback(hSampler);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnRelease(hSampler);
     }
@@ -2051,6 +2189,9 @@ __urdlllocal ur_result_t UR_APICALL urSamplerGetInfo(
     if (replaceCallback) {
         result = replaceCallback(hSampler, propName, propSize, pPropValue,
                                  pPropSizeRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result =
             pfnGetInfo(hSampler, propName, propSize, pPropValue, pPropSizeRet);
@@ -2097,6 +2238,10 @@ __urdlllocal ur_result_t UR_APICALL urSamplerGetNativeHandle(
         context.apiCallbacks.get_replace_callback("urSamplerGetNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(hSampler, phNativeSampler);
+    } else if (context.enableMock) {
+
+        *phNativeSampler = createDummyHandle<ur_native_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnGetNativeHandle(hSampler, phNativeSampler);
     }
@@ -2152,6 +2297,10 @@ __urdlllocal ur_result_t UR_APICALL urSamplerCreateWithNativeHandle(
     if (replaceCallback) {
         result =
             replaceCallback(hNativeSampler, hContext, pProperties, phSampler);
+    } else if (context.enableMock) {
+
+        *phSampler = createDummyHandle<ur_sampler_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnCreateWithNativeHandle(hNativeSampler, hContext,
                                            pProperties, phSampler);
@@ -2204,6 +2353,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMHostAlloc(
         context.apiCallbacks.get_replace_callback("urUSMHostAlloc"));
     if (replaceCallback) {
         result = replaceCallback(hContext, pUSMDesc, pool, size, ppMem);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnHostAlloc(hContext, pUSMDesc, pool, size, ppMem);
     }
@@ -2255,6 +2407,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMDeviceAlloc(
     if (replaceCallback) {
         result =
             replaceCallback(hContext, hDevice, pUSMDesc, pool, size, ppMem);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnDeviceAlloc(hContext, hDevice, pUSMDesc, pool, size, ppMem);
     }
@@ -2306,6 +2461,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMSharedAlloc(
     if (replaceCallback) {
         result =
             replaceCallback(hContext, hDevice, pUSMDesc, pool, size, ppMem);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnSharedAlloc(hContext, hDevice, pUSMDesc, pool, size, ppMem);
     }
@@ -2349,6 +2507,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMFree(
         context.apiCallbacks.get_replace_callback("urUSMFree"));
     if (replaceCallback) {
         result = replaceCallback(hContext, pMem);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnFree(hContext, pMem);
     }
@@ -2403,6 +2564,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMGetMemAllocInfo(
     if (replaceCallback) {
         result = replaceCallback(hContext, pMem, propName, propSize, pPropValue,
                                  pPropSizeRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnGetMemAllocInfo(hContext, pMem, propName, propSize,
                                     pPropValue, pPropSizeRet);
@@ -2451,6 +2615,10 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolCreate(
         context.apiCallbacks.get_replace_callback("urUSMPoolCreate"));
     if (replaceCallback) {
         result = replaceCallback(hContext, pPoolDesc, ppPool);
+    } else if (context.enableMock) {
+
+        *ppPool = createDummyHandle<ur_usm_pool_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnPoolCreate(hContext, pPoolDesc, ppPool);
     }
@@ -2493,6 +2661,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolRetain(
         context.apiCallbacks.get_replace_callback("urUSMPoolRetain"));
     if (replaceCallback) {
         result = replaceCallback(pPool);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnPoolRetain(pPool);
     }
@@ -2535,6 +2706,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolRelease(
         context.apiCallbacks.get_replace_callback("urUSMPoolRelease"));
     if (replaceCallback) {
         result = replaceCallback(pPool);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnPoolRelease(pPool);
     }
@@ -2586,6 +2760,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolGetInfo(
     if (replaceCallback) {
         result = replaceCallback(hPool, propName, propSize, pPropValue,
                                  pPropSizeRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result =
             pfnPoolGetInfo(hPool, propName, propSize, pPropValue, pPropSizeRet);
@@ -2651,6 +2828,9 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemGranularityGetInfo(
     if (replaceCallback) {
         result = replaceCallback(hContext, hDevice, propName, propSize,
                                  pPropValue, pPropSizeRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnGranularityGetInfo(hContext, hDevice, propName, propSize,
                                        pPropValue, pPropSizeRet);
@@ -2705,6 +2885,9 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemReserve(
         context.apiCallbacks.get_replace_callback("urVirtualMemReserve"));
     if (replaceCallback) {
         result = replaceCallback(hContext, pStart, size, ppStart);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnReserve(hContext, pStart, size, ppStart);
     }
@@ -2750,6 +2933,9 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemFree(
         context.apiCallbacks.get_replace_callback("urVirtualMemFree"));
     if (replaceCallback) {
         result = replaceCallback(hContext, pStart, size);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnFree(hContext, pStart, size);
     }
@@ -2803,6 +2989,9 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemMap(
     if (replaceCallback) {
         result = replaceCallback(hContext, pStart, size, hPhysicalMem, offset,
                                  flags);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnMap(hContext, pStart, size, hPhysicalMem, offset, flags);
     }
@@ -2849,6 +3038,9 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemUnmap(
         context.apiCallbacks.get_replace_callback("urVirtualMemUnmap"));
     if (replaceCallback) {
         result = replaceCallback(hContext, pStart, size);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnUnmap(hContext, pStart, size);
     }
@@ -2896,6 +3088,9 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemSetAccess(
         context.apiCallbacks.get_replace_callback("urVirtualMemSetAccess"));
     if (replaceCallback) {
         result = replaceCallback(hContext, pStart, size, flags);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnSetAccess(hContext, pStart, size, flags);
     }
@@ -2953,6 +3148,9 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemGetInfo(
     if (replaceCallback) {
         result = replaceCallback(hContext, pStart, size, propName, propSize,
                                  pPropValue, pPropSizeRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnGetInfo(hContext, pStart, size, propName, propSize,
                             pPropValue, pPropSizeRet);
@@ -3007,6 +3205,10 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemCreate(
     if (replaceCallback) {
         result = replaceCallback(hContext, hDevice, size, pProperties,
                                  phPhysicalMem);
+    } else if (context.enableMock) {
+
+        *phPhysicalMem = createDummyHandle<ur_physical_mem_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnCreate(hContext, hDevice, size, pProperties, phPhysicalMem);
     }
@@ -3051,6 +3253,9 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemRetain(
         context.apiCallbacks.get_replace_callback("urPhysicalMemRetain"));
     if (replaceCallback) {
         result = replaceCallback(hPhysicalMem);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnRetain(hPhysicalMem);
     }
@@ -3094,6 +3299,9 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemRelease(
         context.apiCallbacks.get_replace_callback("urPhysicalMemRelease"));
     if (replaceCallback) {
         result = replaceCallback(hPhysicalMem);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnRelease(hPhysicalMem);
     }
@@ -3142,6 +3350,10 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithIL(
         context.apiCallbacks.get_replace_callback("urProgramCreateWithIL"));
     if (replaceCallback) {
         result = replaceCallback(hContext, pIL, length, pProperties, phProgram);
+    } else if (context.enableMock) {
+
+        *phProgram = createDummyHandle<ur_program_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnCreateWithIL(hContext, pIL, length, pProperties, phProgram);
     }
@@ -3194,6 +3406,10 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithBinary(
     if (replaceCallback) {
         result = replaceCallback(hContext, hDevice, size, pBinary, pProperties,
                                  phProgram);
+    } else if (context.enableMock) {
+
+        *phProgram = createDummyHandle<ur_program_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnCreateWithBinary(hContext, hDevice, size, pBinary,
                                      pProperties, phProgram);
@@ -3241,6 +3457,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuild(
         context.apiCallbacks.get_replace_callback("urProgramBuild"));
     if (replaceCallback) {
         result = replaceCallback(hContext, hProgram, pOptions);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnBuild(hContext, hProgram, pOptions);
     }
@@ -3287,6 +3506,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramCompile(
         context.apiCallbacks.get_replace_callback("urProgramCompile"));
     if (replaceCallback) {
         result = replaceCallback(hContext, hProgram, pOptions);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnCompile(hContext, hProgram, pOptions);
     }
@@ -3338,6 +3560,10 @@ __urdlllocal ur_result_t UR_APICALL urProgramLink(
     if (replaceCallback) {
         result =
             replaceCallback(hContext, count, phPrograms, pOptions, phProgram);
+    } else if (context.enableMock) {
+
+        *phProgram = createDummyHandle<ur_program_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnLink(hContext, count, phPrograms, pOptions, phProgram);
     }
@@ -3380,6 +3606,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramRetain(
         context.apiCallbacks.get_replace_callback("urProgramRetain"));
     if (replaceCallback) {
         result = replaceCallback(hProgram);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnRetain(hProgram);
     }
@@ -3422,6 +3651,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramRelease(
         context.apiCallbacks.get_replace_callback("urProgramRelease"));
     if (replaceCallback) {
         result = replaceCallback(hProgram);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnRelease(hProgram);
     }
@@ -3478,6 +3710,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetFunctionPointer(
     if (replaceCallback) {
         result = replaceCallback(hDevice, hProgram, pFunctionName,
                                  ppFunctionPointer);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnGetFunctionPointer(hDevice, hProgram, pFunctionName,
                                        ppFunctionPointer);
@@ -3541,6 +3776,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetGlobalVariablePointer(
         result =
             replaceCallback(hDevice, hProgram, pGlobalVariableName,
                             pGlobalVariableSizeRet, ppGlobalVariablePointerRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnGetGlobalVariablePointer(
             hDevice, hProgram, pGlobalVariableName, pGlobalVariableSizeRet,
@@ -3602,6 +3840,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetInfo(
     if (replaceCallback) {
         result = replaceCallback(hProgram, propName, propSize, pPropValue,
                                  pPropSizeRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result =
             pfnGetInfo(hProgram, propName, propSize, pPropValue, pPropSizeRet);
@@ -3661,6 +3902,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetBuildInfo(
     if (replaceCallback) {
         result = replaceCallback(hProgram, hDevice, propName, propSize,
                                  pPropValue, pPropSizeRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnGetBuildInfo(hProgram, hDevice, propName, propSize,
                                  pPropValue, pPropSizeRet);
@@ -3714,6 +3958,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramSetSpecializationConstants(
                 "urProgramSetSpecializationConstants"));
     if (replaceCallback) {
         result = replaceCallback(hProgram, count, pSpecConstants);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnSetSpecializationConstants(hProgram, count, pSpecConstants);
     }
@@ -3760,6 +4007,10 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetNativeHandle(
         context.apiCallbacks.get_replace_callback("urProgramGetNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(hProgram, phNativeProgram);
+    } else if (context.enableMock) {
+
+        *phNativeProgram = createDummyHandle<ur_native_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnGetNativeHandle(hProgram, phNativeProgram);
     }
@@ -3815,6 +4066,10 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithNativeHandle(
     if (replaceCallback) {
         result =
             replaceCallback(hNativeProgram, hContext, pProperties, phProgram);
+    } else if (context.enableMock) {
+
+        *phProgram = createDummyHandle<ur_program_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnCreateWithNativeHandle(hNativeProgram, hContext,
                                            pProperties, phProgram);
@@ -3863,6 +4118,10 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreate(
         context.apiCallbacks.get_replace_callback("urKernelCreate"));
     if (replaceCallback) {
         result = replaceCallback(hProgram, pKernelName, phKernel);
+    } else if (context.enableMock) {
+
+        *phKernel = createDummyHandle<ur_kernel_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnCreate(hProgram, pKernelName, phKernel);
     }
@@ -3913,6 +4172,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgValue(
     if (replaceCallback) {
         result =
             replaceCallback(hKernel, argIndex, argSize, pProperties, pArgValue);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result =
             pfnSetArgValue(hKernel, argIndex, argSize, pProperties, pArgValue);
@@ -3962,6 +4224,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgLocal(
         context.apiCallbacks.get_replace_callback("urKernelSetArgLocal"));
     if (replaceCallback) {
         result = replaceCallback(hKernel, argIndex, argSize, pProperties);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnSetArgLocal(hKernel, argIndex, argSize, pProperties);
     }
@@ -4018,6 +4283,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetInfo(
     if (replaceCallback) {
         result = replaceCallback(hKernel, propName, propSize, pPropValue,
                                  pPropSizeRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result =
             pfnGetInfo(hKernel, propName, propSize, pPropValue, pPropSizeRet);
@@ -4074,6 +4342,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetGroupInfo(
     if (replaceCallback) {
         result = replaceCallback(hKernel, hDevice, propName, propSize,
                                  pPropValue, pPropSizeRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnGetGroupInfo(hKernel, hDevice, propName, propSize,
                                  pPropValue, pPropSizeRet);
@@ -4130,6 +4401,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetSubGroupInfo(
     if (replaceCallback) {
         result = replaceCallback(hKernel, hDevice, propName, propSize,
                                  pPropValue, pPropSizeRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnGetSubGroupInfo(hKernel, hDevice, propName, propSize,
                                     pPropValue, pPropSizeRet);
@@ -4174,6 +4448,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelRetain(
         context.apiCallbacks.get_replace_callback("urKernelRetain"));
     if (replaceCallback) {
         result = replaceCallback(hKernel);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnRetain(hKernel);
     }
@@ -4216,6 +4493,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelRelease(
         context.apiCallbacks.get_replace_callback("urKernelRelease"));
     if (replaceCallback) {
         result = replaceCallback(hKernel);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnRelease(hKernel);
     }
@@ -4264,6 +4544,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgPointer(
         context.apiCallbacks.get_replace_callback("urKernelSetArgPointer"));
     if (replaceCallback) {
         result = replaceCallback(hKernel, argIndex, pProperties, pArgValue);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnSetArgPointer(hKernel, argIndex, pProperties, pArgValue);
     }
@@ -4315,6 +4598,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetExecInfo(
     if (replaceCallback) {
         result = replaceCallback(hKernel, propName, propSize, pProperties,
                                  pPropValue);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnSetExecInfo(hKernel, propName, propSize, pProperties,
                                 pPropValue);
@@ -4363,6 +4649,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgSampler(
         context.apiCallbacks.get_replace_callback("urKernelSetArgSampler"));
     if (replaceCallback) {
         result = replaceCallback(hKernel, argIndex, pProperties, hArgValue);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnSetArgSampler(hKernel, argIndex, pProperties, hArgValue);
     }
@@ -4409,6 +4698,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgMemObj(
         context.apiCallbacks.get_replace_callback("urKernelSetArgMemObj"));
     if (replaceCallback) {
         result = replaceCallback(hKernel, argIndex, pProperties, hArgValue);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnSetArgMemObj(hKernel, argIndex, pProperties, hArgValue);
     }
@@ -4459,6 +4751,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetSpecializationConstants(
                 "urKernelSetSpecializationConstants"));
     if (replaceCallback) {
         result = replaceCallback(hKernel, count, pSpecConstants);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnSetSpecializationConstants(hKernel, count, pSpecConstants);
     }
@@ -4505,6 +4800,10 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetNativeHandle(
         context.apiCallbacks.get_replace_callback("urKernelGetNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(hKernel, phNativeKernel);
+    } else if (context.enableMock) {
+
+        *phNativeKernel = createDummyHandle<ur_native_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnGetNativeHandle(hKernel, phNativeKernel);
     }
@@ -4562,6 +4861,10 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
     if (replaceCallback) {
         result = replaceCallback(hNativeKernel, hContext, hProgram, pProperties,
                                  phKernel);
+    } else if (context.enableMock) {
+
+        *phKernel = createDummyHandle<ur_kernel_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnCreateWithNativeHandle(hNativeKernel, hContext, hProgram,
                                            pProperties, phKernel);
@@ -4617,6 +4920,9 @@ __urdlllocal ur_result_t UR_APICALL urQueueGetInfo(
     if (replaceCallback) {
         result = replaceCallback(hQueue, propName, propSize, pPropValue,
                                  pPropSizeRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result =
             pfnGetInfo(hQueue, propName, propSize, pPropValue, pPropSizeRet);
@@ -4666,6 +4972,10 @@ __urdlllocal ur_result_t UR_APICALL urQueueCreate(
         context.apiCallbacks.get_replace_callback("urQueueCreate"));
     if (replaceCallback) {
         result = replaceCallback(hContext, hDevice, pProperties, phQueue);
+    } else if (context.enableMock) {
+
+        *phQueue = createDummyHandle<ur_queue_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnCreate(hContext, hDevice, pProperties, phQueue);
     }
@@ -4708,6 +5018,9 @@ __urdlllocal ur_result_t UR_APICALL urQueueRetain(
         context.apiCallbacks.get_replace_callback("urQueueRetain"));
     if (replaceCallback) {
         result = replaceCallback(hQueue);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnRetain(hQueue);
     }
@@ -4750,6 +5063,9 @@ __urdlllocal ur_result_t UR_APICALL urQueueRelease(
         context.apiCallbacks.get_replace_callback("urQueueRelease"));
     if (replaceCallback) {
         result = replaceCallback(hQueue);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnRelease(hQueue);
     }
@@ -4796,6 +5112,10 @@ __urdlllocal ur_result_t UR_APICALL urQueueGetNativeHandle(
         context.apiCallbacks.get_replace_callback("urQueueGetNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(hQueue, pDesc, phNativeQueue);
+    } else if (context.enableMock) {
+
+        *phNativeQueue = createDummyHandle<ur_native_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnGetNativeHandle(hQueue, pDesc, phNativeQueue);
     }
@@ -4851,6 +5171,10 @@ __urdlllocal ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
     if (replaceCallback) {
         result = replaceCallback(hNativeQueue, hContext, hDevice, pProperties,
                                  phQueue);
+    } else if (context.enableMock) {
+
+        *phQueue = createDummyHandle<ur_queue_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnCreateWithNativeHandle(hNativeQueue, hContext, hDevice,
                                            pProperties, phQueue);
@@ -4896,6 +5220,9 @@ __urdlllocal ur_result_t UR_APICALL urQueueFinish(
         context.apiCallbacks.get_replace_callback("urQueueFinish"));
     if (replaceCallback) {
         result = replaceCallback(hQueue);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnFinish(hQueue);
     }
@@ -4938,6 +5265,9 @@ __urdlllocal ur_result_t UR_APICALL urQueueFlush(
         context.apiCallbacks.get_replace_callback("urQueueFlush"));
     if (replaceCallback) {
         result = replaceCallback(hQueue);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnFlush(hQueue);
     }
@@ -4988,6 +5318,9 @@ __urdlllocal ur_result_t UR_APICALL urEventGetInfo(
     if (replaceCallback) {
         result = replaceCallback(hEvent, propName, propSize, pPropValue,
                                  pPropSizeRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result =
             pfnGetInfo(hEvent, propName, propSize, pPropValue, pPropSizeRet);
@@ -5043,6 +5376,9 @@ __urdlllocal ur_result_t UR_APICALL urEventGetProfilingInfo(
     if (replaceCallback) {
         result = replaceCallback(hEvent, propName, propSize, pPropValue,
                                  pPropSizeRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnGetProfilingInfo(hEvent, propName, propSize, pPropValue,
                                      pPropSizeRet);
@@ -5090,6 +5426,9 @@ __urdlllocal ur_result_t UR_APICALL urEventWait(
         context.apiCallbacks.get_replace_callback("urEventWait"));
     if (replaceCallback) {
         result = replaceCallback(numEvents, phEventWaitList);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnWait(numEvents, phEventWaitList);
     }
@@ -5132,6 +5471,9 @@ __urdlllocal ur_result_t UR_APICALL urEventRetain(
         context.apiCallbacks.get_replace_callback("urEventRetain"));
     if (replaceCallback) {
         result = replaceCallback(hEvent);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnRetain(hEvent);
     }
@@ -5174,6 +5516,9 @@ __urdlllocal ur_result_t UR_APICALL urEventRelease(
         context.apiCallbacks.get_replace_callback("urEventRelease"));
     if (replaceCallback) {
         result = replaceCallback(hEvent);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnRelease(hEvent);
     }
@@ -5218,6 +5563,10 @@ __urdlllocal ur_result_t UR_APICALL urEventGetNativeHandle(
         context.apiCallbacks.get_replace_callback("urEventGetNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(hEvent, phNativeEvent);
+    } else if (context.enableMock) {
+
+        *phNativeEvent = createDummyHandle<ur_native_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnGetNativeHandle(hEvent, phNativeEvent);
     }
@@ -5270,6 +5619,10 @@ __urdlllocal ur_result_t UR_APICALL urEventCreateWithNativeHandle(
                 "urEventCreateWithNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(hNativeEvent, hContext, pProperties, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnCreateWithNativeHandle(hNativeEvent, hContext, pProperties,
                                            phEvent);
@@ -5318,6 +5671,9 @@ __urdlllocal ur_result_t UR_APICALL urEventSetCallback(
         context.apiCallbacks.get_replace_callback("urEventSetCallback"));
     if (replaceCallback) {
         result = replaceCallback(hEvent, execStatus, pfnNotify, pUserData);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnSetCallback(hEvent, execStatus, pfnNotify, pUserData);
     }
@@ -5390,6 +5746,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunch(
         result = replaceCallback(hQueue, hKernel, workDim, pGlobalWorkOffset,
                                  pGlobalWorkSize, pLocalWorkSize,
                                  numEventsInWaitList, phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnKernelLaunch(hQueue, hKernel, workDim, pGlobalWorkOffset,
                                  pGlobalWorkSize, pLocalWorkSize,
@@ -5448,6 +5808,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWait(
     if (replaceCallback) {
         result = replaceCallback(hQueue, numEventsInWaitList, phEventWaitList,
                                  phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnEventsWait(hQueue, numEventsInWaitList, phEventWaitList,
                                phEvent);
@@ -5509,6 +5873,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
     if (replaceCallback) {
         result = replaceCallback(hQueue, numEventsInWaitList, phEventWaitList,
                                  phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnEventsWaitWithBarrier(hQueue, numEventsInWaitList,
                                           phEventWaitList, phEvent);
@@ -5573,6 +5941,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferRead(
         result =
             replaceCallback(hQueue, hBuffer, blockingRead, offset, size, pDst,
                             numEventsInWaitList, phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result =
             pfnMemBufferRead(hQueue, hBuffer, blockingRead, offset, size, pDst,
@@ -5639,6 +6011,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWrite(
         result =
             replaceCallback(hQueue, hBuffer, blockingWrite, offset, size, pSrc,
                             numEventsInWaitList, phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnMemBufferWrite(hQueue, hBuffer, blockingWrite, offset, size,
                                    pSrc, numEventsInWaitList, phEventWaitList,
@@ -5718,6 +6094,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
             hQueue, hBuffer, blockingRead, bufferOrigin, hostOrigin, region,
             bufferRowPitch, bufferSlicePitch, hostRowPitch, hostSlicePitch,
             pDst, numEventsInWaitList, phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnMemBufferReadRect(
             hQueue, hBuffer, blockingRead, bufferOrigin, hostOrigin, region,
@@ -5805,6 +6185,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
             hQueue, hBuffer, blockingWrite, bufferOrigin, hostOrigin, region,
             bufferRowPitch, bufferSlicePitch, hostRowPitch, hostSlicePitch,
             pSrc, numEventsInWaitList, phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnMemBufferWriteRect(
             hQueue, hBuffer, blockingWrite, bufferOrigin, hostOrigin, region,
@@ -5873,6 +6257,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopy(
         result = replaceCallback(hQueue, hBufferSrc, hBufferDst, srcOffset,
                                  dstOffset, size, numEventsInWaitList,
                                  phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnMemBufferCopy(hQueue, hBufferSrc, hBufferDst, srcOffset,
                                   dstOffset, size, numEventsInWaitList,
@@ -5951,6 +6339,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
                                  dstOrigin, region, srcRowPitch, srcSlicePitch,
                                  dstRowPitch, dstSlicePitch,
                                  numEventsInWaitList, phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnMemBufferCopyRect(
             hQueue, hBufferSrc, hBufferDst, srcOrigin, dstOrigin, region,
@@ -6018,6 +6410,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferFill(
         result = replaceCallback(hQueue, hBuffer, pPattern, patternSize, offset,
                                  size, numEventsInWaitList, phEventWaitList,
                                  phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnMemBufferFill(hQueue, hBuffer, pPattern, patternSize,
                                   offset, size, numEventsInWaitList,
@@ -6088,6 +6484,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageRead(
         result = replaceCallback(hQueue, hImage, blockingRead, origin, region,
                                  rowPitch, slicePitch, pDst,
                                  numEventsInWaitList, phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnMemImageRead(hQueue, hImage, blockingRead, origin, region,
                                  rowPitch, slicePitch, pDst,
@@ -6159,6 +6559,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageWrite(
         result = replaceCallback(hQueue, hImage, blockingWrite, origin, region,
                                  rowPitch, slicePitch, pSrc,
                                  numEventsInWaitList, phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnMemImageWrite(
             hQueue, hImage, blockingWrite, origin, region, rowPitch, slicePitch,
@@ -6231,6 +6635,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageCopy(
         result = replaceCallback(hQueue, hImageSrc, hImageDst, srcOrigin,
                                  dstOrigin, region, numEventsInWaitList,
                                  phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnMemImageCopy(hQueue, hImageSrc, hImageDst, srcOrigin,
                                  dstOrigin, region, numEventsInWaitList,
@@ -6298,6 +6706,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferMap(
         result = replaceCallback(hQueue, hBuffer, blockingMap, mapFlags, offset,
                                  size, numEventsInWaitList, phEventWaitList,
                                  phEvent, ppRetMap);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnMemBufferMap(hQueue, hBuffer, blockingMap, mapFlags, offset,
                                  size, numEventsInWaitList, phEventWaitList,
@@ -6358,6 +6770,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemUnmap(
     if (replaceCallback) {
         result = replaceCallback(hQueue, hMem, pMappedPtr, numEventsInWaitList,
                                  phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnMemUnmap(hQueue, hMem, pMappedPtr, numEventsInWaitList,
                              phEventWaitList, phEvent);
@@ -6421,6 +6837,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill(
     if (replaceCallback) {
         result = replaceCallback(hQueue, pMem, patternSize, pPattern, size,
                                  numEventsInWaitList, phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnUSMFill(hQueue, pMem, patternSize, pPattern, size,
                             numEventsInWaitList, phEventWaitList, phEvent);
@@ -6482,6 +6902,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy(
     if (replaceCallback) {
         result = replaceCallback(hQueue, blocking, pDst, pSrc, size,
                                  numEventsInWaitList, phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnUSMMemcpy(hQueue, blocking, pDst, pSrc, size,
                               numEventsInWaitList, phEventWaitList, phEvent);
@@ -6541,6 +6965,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMPrefetch(
     if (replaceCallback) {
         result = replaceCallback(hQueue, pMem, size, flags, numEventsInWaitList,
                                  phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnUSMPrefetch(hQueue, pMem, size, flags, numEventsInWaitList,
                                 phEventWaitList, phEvent);
@@ -6592,6 +7020,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMAdvise(
         context.apiCallbacks.get_replace_callback("urEnqueueUSMAdvise"));
     if (replaceCallback) {
         result = replaceCallback(hQueue, pMem, size, advice, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnUSMAdvise(hQueue, pMem, size, advice, phEvent);
     }
@@ -6660,6 +7092,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill2D(
         result = replaceCallback(hQueue, pMem, pitch, patternSize, pPattern,
                                  width, height, numEventsInWaitList,
                                  phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result =
             pfnUSMFill2D(hQueue, pMem, pitch, patternSize, pPattern, width,
@@ -6731,6 +7167,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
         result = replaceCallback(hQueue, blocking, pDst, dstPitch, pSrc,
                                  srcPitch, width, height, numEventsInWaitList,
                                  phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnUSMMemcpy2D(hQueue, blocking, pDst, dstPitch, pSrc,
                                 srcPitch, width, height, numEventsInWaitList,
@@ -6804,6 +7244,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
         result = replaceCallback(hQueue, hProgram, name, blockingWrite, count,
                                  offset, pSrc, numEventsInWaitList,
                                  phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnDeviceGlobalVariableWrite(
             hQueue, hProgram, name, blockingWrite, count, offset, pSrc,
@@ -6879,6 +7323,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
         result = replaceCallback(hQueue, hProgram, name, blockingRead, count,
                                  offset, pDst, numEventsInWaitList,
                                  phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnDeviceGlobalVariableRead(
             hQueue, hProgram, name, blockingRead, count, offset, pDst,
@@ -6953,6 +7401,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueReadHostPipe(
         result =
             replaceCallback(hQueue, hProgram, pipe_symbol, blocking, pDst, size,
                             numEventsInWaitList, phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result =
             pfnReadHostPipe(hQueue, hProgram, pipe_symbol, blocking, pDst, size,
@@ -7025,6 +7477,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueWriteHostPipe(
         result =
             replaceCallback(hQueue, hProgram, pipe_symbol, blocking, pSrc, size,
                             numEventsInWaitList, phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnWriteHostPipe(hQueue, hProgram, pipe_symbol, blocking, pSrc,
                                   size, numEventsInWaitList, phEventWaitList,
@@ -7086,6 +7542,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMPitchedAllocExp(
         result =
             replaceCallback(hContext, hDevice, pUSMDesc, pool, widthInBytes,
                             height, elementSizeBytes, ppMem, pResultPitch);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result =
             pfnPitchedAllocExp(hContext, hDevice, pUSMDesc, pool, widthInBytes,
@@ -7140,6 +7599,9 @@ urBindlessImagesUnsampledImageHandleDestroyExp(
                 "urBindlessImagesUnsampledImageHandleDestroyExp"));
     if (replaceCallback) {
         result = replaceCallback(hContext, hDevice, hImage);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnUnsampledImageHandleDestroyExp(hContext, hDevice, hImage);
     }
@@ -7193,6 +7655,9 @@ urBindlessImagesSampledImageHandleDestroyExp(
                 "urBindlessImagesSampledImageHandleDestroyExp"));
     if (replaceCallback) {
         result = replaceCallback(hContext, hDevice, hImage);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnSampledImageHandleDestroyExp(hContext, hDevice, hImage);
     }
@@ -7250,6 +7715,10 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageAllocateExp(
     if (replaceCallback) {
         result = replaceCallback(hContext, hDevice, pImageFormat, pImageDesc,
                                  phImageMem);
+    } else if (context.enableMock) {
+
+        *phImageMem = createDummyHandle<ur_exp_image_mem_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnImageAllocateExp(hContext, hDevice, pImageFormat,
                                      pImageDesc, phImageMem);
@@ -7301,6 +7770,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageFreeExp(
             "urBindlessImagesImageFreeExp"));
     if (replaceCallback) {
         result = replaceCallback(hContext, hDevice, hImageMem);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnImageFreeExp(hContext, hDevice, hImageMem);
     }
@@ -7359,6 +7831,10 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesUnsampledImageCreateExp(
     if (replaceCallback) {
         result = replaceCallback(hContext, hDevice, hImageMem, pImageFormat,
                                  pImageDesc, phImage);
+    } else if (context.enableMock) {
+
+        *phImage = createDummyHandle<ur_exp_image_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnUnsampledImageCreateExp(hContext, hDevice, hImageMem,
                                             pImageFormat, pImageDesc, phImage);
@@ -7421,6 +7897,10 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesSampledImageCreateExp(
     if (replaceCallback) {
         result = replaceCallback(hContext, hDevice, hImageMem, pImageFormat,
                                  pImageDesc, hSampler, phImage);
+    } else if (context.enableMock) {
+
+        *phImage = createDummyHandle<ur_exp_image_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result =
             pfnSampledImageCreateExp(hContext, hDevice, hImageMem, pImageFormat,
@@ -7505,6 +7985,10 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageCopyExp(
                                  imageCopyFlags, srcOffset, dstOffset,
                                  copyExtent, hostExtent, numEventsInWaitList,
                                  phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnImageCopyExp(hQueue, pDst, pSrc, pImageFormat, pImageDesc,
                                  imageCopyFlags, srcOffset, dstOffset,
@@ -7562,6 +8046,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageGetInfoExp(
                 "urBindlessImagesImageGetInfoExp"));
     if (replaceCallback) {
         result = replaceCallback(hImageMem, propName, pPropValue, pPropSizeRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result =
             pfnImageGetInfoExp(hImageMem, propName, pPropValue, pPropSizeRet);
@@ -7620,6 +8107,10 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMipmapGetLevelExp(
     if (replaceCallback) {
         result = replaceCallback(hContext, hDevice, hImageMem, mipmapLevel,
                                  phImageMem);
+    } else if (context.enableMock) {
+
+        *phImageMem = createDummyHandle<ur_exp_image_mem_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnMipmapGetLevelExp(hContext, hDevice, hImageMem, mipmapLevel,
                                       phImageMem);
@@ -7672,6 +8163,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMipmapFreeExp(
                 "urBindlessImagesMipmapFreeExp"));
     if (replaceCallback) {
         result = replaceCallback(hContext, hDevice, hMem);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnMipmapFreeExp(hContext, hDevice, hMem);
     }
@@ -7728,6 +8222,10 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportOpaqueFDExp(
     if (replaceCallback) {
         result = replaceCallback(hContext, hDevice, size, pInteropMemDesc,
                                  phInteropMem);
+    } else if (context.enableMock) {
+
+        *phInteropMem = createDummyHandle<ur_exp_interop_mem_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnImportOpaqueFDExp(hContext, hDevice, size, pInteropMemDesc,
                                       phInteropMem);
@@ -7789,6 +8287,10 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMapExternalArrayExp(
     if (replaceCallback) {
         result = replaceCallback(hContext, hDevice, pImageFormat, pImageDesc,
                                  hInteropMem, phImageMem);
+    } else if (context.enableMock) {
+
+        *phImageMem = createDummyHandle<ur_exp_image_mem_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnMapExternalArrayExp(hContext, hDevice, pImageFormat,
                                         pImageDesc, hInteropMem, phImageMem);
@@ -7843,6 +8345,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesReleaseInteropExp(
                 "urBindlessImagesReleaseInteropExp"));
     if (replaceCallback) {
         result = replaceCallback(hContext, hDevice, hInteropMem);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnReleaseInteropExp(hContext, hDevice, hInteropMem);
     }
@@ -7901,6 +8406,11 @@ urBindlessImagesImportExternalSemaphoreOpaqueFDExp(
     if (replaceCallback) {
         result = replaceCallback(hContext, hDevice, pInteropSemaphoreDesc,
                                  phInteropSemaphore);
+    } else if (context.enableMock) {
+
+        *phInteropSemaphore =
+            createDummyHandle<ur_exp_interop_semaphore_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnImportExternalSemaphoreOpaqueFDExp(
             hContext, hDevice, pInteropSemaphoreDesc, phInteropSemaphore);
@@ -7955,6 +8465,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesDestroyExternalSemaphoreExp(
                 "urBindlessImagesDestroyExternalSemaphoreExp"));
     if (replaceCallback) {
         result = replaceCallback(hContext, hDevice, hInteropSemaphore);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnDestroyExternalSemaphoreExp(hContext, hDevice,
                                                 hInteropSemaphore);
@@ -8019,6 +8532,10 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesWaitExternalSemaphoreExp(
     if (replaceCallback) {
         result = replaceCallback(hQueue, hSemaphore, numEventsInWaitList,
                                  phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnWaitExternalSemaphoreExp(
             hQueue, hSemaphore, numEventsInWaitList, phEventWaitList, phEvent);
@@ -8084,6 +8601,10 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesSignalExternalSemaphoreExp(
     if (replaceCallback) {
         result = replaceCallback(hQueue, hSemaphore, numEventsInWaitList,
                                  phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnSignalExternalSemaphoreExp(
             hQueue, hSemaphore, numEventsInWaitList, phEventWaitList, phEvent);
@@ -8137,6 +8658,10 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferCreateExp(
     if (replaceCallback) {
         result = replaceCallback(hContext, hDevice, pCommandBufferDesc,
                                  phCommandBuffer);
+    } else if (context.enableMock) {
+
+        *phCommandBuffer = createDummyHandle<ur_exp_command_buffer_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnCreateExp(hContext, hDevice, pCommandBufferDesc,
                               phCommandBuffer);
@@ -8182,6 +8707,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferRetainExp(
         context.apiCallbacks.get_replace_callback("urCommandBufferRetainExp"));
     if (replaceCallback) {
         result = replaceCallback(hCommandBuffer);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnRetainExp(hCommandBuffer);
     }
@@ -8225,6 +8753,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseExp(
         context.apiCallbacks.get_replace_callback("urCommandBufferReleaseExp"));
     if (replaceCallback) {
         result = replaceCallback(hCommandBuffer);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnReleaseExp(hCommandBuffer);
     }
@@ -8269,6 +8800,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferFinalizeExp(
             "urCommandBufferFinalizeExp"));
     if (replaceCallback) {
         result = replaceCallback(hCommandBuffer);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnFinalizeExp(hCommandBuffer);
     }
@@ -8340,6 +8874,11 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
                                  pGlobalWorkOffset, pGlobalWorkSize,
                                  pLocalWorkSize, numSyncPointsInWaitList,
                                  pSyncPointWaitList, pSyncPoint, phCommand);
+    } else if (context.enableMock) {
+
+        *phCommand =
+            createDummyHandle<ur_exp_command_buffer_command_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnAppendKernelLaunchExp(
             hCommandBuffer, hKernel, workDim, pGlobalWorkOffset,
@@ -8410,6 +8949,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMMemcpyExp(
         result = replaceCallback(hCommandBuffer, pDst, pSrc, size,
                                  numSyncPointsInWaitList, pSyncPointWaitList,
                                  pSyncPoint);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnAppendUSMMemcpyExp(hCommandBuffer, pDst, pSrc, size,
                                        numSyncPointsInWaitList,
@@ -8480,6 +9022,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMFillExp(
         result = replaceCallback(hCommandBuffer, pMemory, pPattern, patternSize,
                                  size, numSyncPointsInWaitList,
                                  pSyncPointWaitList, pSyncPoint);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnAppendUSMFillExp(hCommandBuffer, pMemory, pPattern,
                                      patternSize, size, numSyncPointsInWaitList,
@@ -8550,6 +9095,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
         result = replaceCallback(hCommandBuffer, hSrcMem, hDstMem, srcOffset,
                                  dstOffset, size, numSyncPointsInWaitList,
                                  pSyncPointWaitList, pSyncPoint);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnAppendMemBufferCopyExp(
             hCommandBuffer, hSrcMem, hDstMem, srcOffset, dstOffset, size,
@@ -8620,6 +9168,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
         result = replaceCallback(hCommandBuffer, hBuffer, offset, size, pSrc,
                                  numSyncPointsInWaitList, pSyncPointWaitList,
                                  pSyncPoint);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnAppendMemBufferWriteExp(hCommandBuffer, hBuffer, offset,
                                             size, pSrc, numSyncPointsInWaitList,
@@ -8689,6 +9240,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
         result = replaceCallback(hCommandBuffer, hBuffer, offset, size, pDst,
                                  numSyncPointsInWaitList, pSyncPointWaitList,
                                  pSyncPoint);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnAppendMemBufferReadExp(hCommandBuffer, hBuffer, offset,
                                            size, pDst, numSyncPointsInWaitList,
@@ -8768,6 +9322,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
             hCommandBuffer, hSrcMem, hDstMem, srcOrigin, dstOrigin, region,
             srcRowPitch, srcSlicePitch, dstRowPitch, dstSlicePitch,
             numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnAppendMemBufferCopyRectExp(
             hCommandBuffer, hSrcMem, hDstMem, srcOrigin, dstOrigin, region,
@@ -8855,6 +9412,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
             hCommandBuffer, hBuffer, bufferOffset, hostOffset, region,
             bufferRowPitch, bufferSlicePitch, hostRowPitch, hostSlicePitch,
             pSrc, numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnAppendMemBufferWriteRectExp(
             hCommandBuffer, hBuffer, bufferOffset, hostOffset, region,
@@ -8940,6 +9500,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
             hCommandBuffer, hBuffer, bufferOffset, hostOffset, region,
             bufferRowPitch, bufferSlicePitch, hostRowPitch, hostSlicePitch,
             pDst, numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnAppendMemBufferReadRectExp(
             hCommandBuffer, hBuffer, bufferOffset, hostOffset, region,
@@ -9013,6 +9576,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
         result = replaceCallback(hCommandBuffer, hBuffer, pPattern, patternSize,
                                  offset, size, numSyncPointsInWaitList,
                                  pSyncPointWaitList, pSyncPoint);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnAppendMemBufferFillExp(
             hCommandBuffer, hBuffer, pPattern, patternSize, offset, size,
@@ -9081,6 +9647,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMPrefetchExp(
         result = replaceCallback(hCommandBuffer, pMemory, size, flags,
                                  numSyncPointsInWaitList, pSyncPointWaitList,
                                  pSyncPoint);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnAppendUSMPrefetchExp(hCommandBuffer, pMemory, size, flags,
                                          numSyncPointsInWaitList,
@@ -9149,6 +9718,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMAdviseExp(
         result = replaceCallback(hCommandBuffer, pMemory, size, advice,
                                  numSyncPointsInWaitList, pSyncPointWaitList,
                                  pSyncPoint);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnAppendUSMAdviseExp(hCommandBuffer, pMemory, size, advice,
                                        numSyncPointsInWaitList,
@@ -9210,6 +9782,10 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
     if (replaceCallback) {
         result = replaceCallback(hCommandBuffer, hQueue, numEventsInWaitList,
                                  phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnEnqueueExp(hCommandBuffer, hQueue, numEventsInWaitList,
                                phEventWaitList, phEvent);
@@ -9260,6 +9836,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferRetainCommandExp(
                 "urCommandBufferRetainCommandExp"));
     if (replaceCallback) {
         result = replaceCallback(hCommand);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnRetainCommandExp(hCommand);
     }
@@ -9310,6 +9889,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseCommandExp(
                 "urCommandBufferReleaseCommandExp"));
     if (replaceCallback) {
         result = replaceCallback(hCommand);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnReleaseCommandExp(hCommand);
     }
@@ -9362,6 +9944,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
                 "urCommandBufferUpdateKernelLaunchExp"));
     if (replaceCallback) {
         result = replaceCallback(hCommand, pUpdateKernelLaunch);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnUpdateKernelLaunchExp(hCommand, pUpdateKernelLaunch);
     }
@@ -9418,6 +10003,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferGetInfoExp(
     if (replaceCallback) {
         result = replaceCallback(hCommandBuffer, propName, propSize, pPropValue,
                                  pPropSizeRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnGetInfoExp(hCommandBuffer, propName, propSize, pPropValue,
                                pPropSizeRet);
@@ -9479,6 +10067,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferCommandGetInfoExp(
     if (replaceCallback) {
         result = replaceCallback(hCommand, propName, propSize, pPropValue,
                                  pPropSizeRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnCommandGetInfoExp(hCommand, propName, propSize, pPropValue,
                                       pPropSizeRet);
@@ -9560,6 +10151,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
         result = replaceCallback(hQueue, hKernel, workDim, pGlobalWorkOffset,
                                  pGlobalWorkSize, pLocalWorkSize,
                                  numEventsInWaitList, phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnCooperativeKernelLaunchExp(
             hQueue, hKernel, workDim, pGlobalWorkOffset, pGlobalWorkSize,
@@ -9622,6 +10217,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
     if (replaceCallback) {
         result = replaceCallback(hKernel, localWorkSize,
                                  dynamicSharedMemorySize, pGroupCountRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnSuggestMaxCooperativeGroupCountExp(
             hKernel, localWorkSize, dynamicSharedMemorySize, pGroupCountRet);
@@ -9693,6 +10291,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
     if (replaceCallback) {
         result = replaceCallback(hQueue, blocking, numEventsInWaitList,
                                  phEventWaitList, phEvent);
+    } else if (context.enableMock) {
+
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnTimestampRecordingExp(hQueue, blocking, numEventsInWaitList,
                                           phEventWaitList, phEvent);
@@ -9743,6 +10345,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuildExp(
         context.apiCallbacks.get_replace_callback("urProgramBuildExp"));
     if (replaceCallback) {
         result = replaceCallback(hProgram, numDevices, phDevices, pOptions);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnBuildExp(hProgram, numDevices, phDevices, pOptions);
     }
@@ -9791,6 +10396,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramCompileExp(
         context.apiCallbacks.get_replace_callback("urProgramCompileExp"));
     if (replaceCallback) {
         result = replaceCallback(hProgram, numDevices, phDevices, pOptions);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnCompileExp(hProgram, numDevices, phDevices, pOptions);
     }
@@ -9845,6 +10453,10 @@ __urdlllocal ur_result_t UR_APICALL urProgramLinkExp(
     if (replaceCallback) {
         result = replaceCallback(hContext, numDevices, phDevices, count,
                                  phPrograms, pOptions, phProgram);
+    } else if (context.enableMock) {
+
+        *phProgram = createDummyHandle<ur_program_handle_t>();
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnLinkExp(hContext, numDevices, phDevices, count, phPrograms,
                             pOptions, phProgram);
@@ -9891,6 +10503,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMImportExp(
         context.apiCallbacks.get_replace_callback("urUSMImportExp"));
     if (replaceCallback) {
         result = replaceCallback(hContext, pMem, size);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnImportExp(hContext, pMem, size);
     }
@@ -9934,6 +10549,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMReleaseExp(
         context.apiCallbacks.get_replace_callback("urUSMReleaseExp"));
     if (replaceCallback) {
         result = replaceCallback(hContext, pMem);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnReleaseExp(hContext, pMem);
     }
@@ -9981,6 +10599,9 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PEnablePeerAccessExp(
             "urUsmP2PEnablePeerAccessExp"));
     if (replaceCallback) {
         result = replaceCallback(commandDevice, peerDevice);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnEnablePeerAccessExp(commandDevice, peerDevice);
     }
@@ -10028,6 +10649,9 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PDisablePeerAccessExp(
             "urUsmP2PDisablePeerAccessExp"));
     if (replaceCallback) {
         result = replaceCallback(commandDevice, peerDevice);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnDisablePeerAccessExp(commandDevice, peerDevice);
     }
@@ -10089,6 +10713,9 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PPeerAccessGetInfoExp(
     if (replaceCallback) {
         result = replaceCallback(commandDevice, peerDevice, propName, propSize,
                                  pPropValue, pPropSizeRet);
+    } else if (context.enableMock) {
+
+        result = UR_RESULT_SUCCESS;
     } else {
         result = pfnPeerAccessGetInfoExp(commandDevice, peerDevice, propName,
                                          propSize, pPropValue, pPropSizeRet);

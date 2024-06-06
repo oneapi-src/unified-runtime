@@ -208,19 +208,14 @@ ur_result_t UR_APICALL urLoaderConfigSetCodeLocationCallback(
 ///         + `NULL == hLoaderConfig`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `NULL == pCallbackLayerProperties`
-///         + `NULL == pCallbackLayerProperties->name`
-///         + `NULL == pCallbackLayerProperties->pCallbackFuncPointer`
-///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_CALLBACK_OVERRIDE_MODE_AFTER < pCallbackLayerProperties->mode`
-ur_result_t UR_APICALL urLoaderConfigSetFunctionCallback(
+ur_result_t UR_APICALL urLoaderConfigSetCallbackLayerProperties(
     ur_loader_config_handle_t
         hLoaderConfig, ///< [in] Handle to config object the layer will be enabled for.
     ur_callback_layer_properties_t *
-        pCallbackLayerProperties ///< [in] Pointer to struct chain with one or more function callback
-                                 ///< definitions.
+        pCallbackLayerProperties ///< [in] Pointer to callback layer properties struct.
     ) try {
-    return ur_lib::urLoaderConfigSetFunctionCallback(hLoaderConfig,
-                                                     pCallbackLayerProperties);
+    return ur_lib::urLoaderConfigSetCallbackLayerProperties(
+        hLoaderConfig, pCallbackLayerProperties);
 } catch (...) {
     return exceptionToResult(std::current_exception());
 }

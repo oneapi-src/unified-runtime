@@ -199,18 +199,18 @@ def main():
             return
 
     # phase 5: prep for publication of html or pdf
-    if args['html'] or args['pdf']:
-        generate_docs.generate_common(docpath, configParser.sections(), args['ver'], args['rev'])
+#    if args['html'] or args['pdf']:
+#        generate_docs.generate_common(docpath, configParser.sections(), args['ver'], args['rev'])
 
     # phase 5: publish documentation
-    if args['html']:
-        generate_docs.generate_html(docpath)
+#    if args['html']:
+#        generate_docs.generate_html(docpath)
 
-    if args['pdf']:
-        generate_docs.generate_pdf(docpath)
+#    if args['pdf']:
+#        generate_docs.generate_pdf(docpath)
 
-    if args['update_spec']:
-        update_spec(args['update_spec'])
+#    if args['update_spec']:
+#        update_spec(args['update_spec'])
 
     print("\nCompleted in %.1f seconds!"%(time.time() - start))
 

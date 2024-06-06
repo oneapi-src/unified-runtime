@@ -583,9 +583,9 @@ etors:
 - name: ENQUEUE_TIMESTAMP_RECORDING_EXP
   desc: Enumerator for $xEnqueueTimestampRecordingExp
   value: '223'
-- name: LOADER_CONFIG_SET_FUNCTION_CALLBACK
-  desc: Enumerator for $xLoaderConfigSetFunctionCallback
-  value: '224'
+- name: LOADER_CONFIG_SET_CALLBACK_LAYER_PROPERTIES
+  desc: Enumerator for $xLoaderConfigSetCallbackLayerProperties
+  value: '225'
 ---
 type: enum
 desc: Defines structure types
@@ -699,3 +699,6 @@ etors:
 - name: CALLBACK_LAYER_PROPERTIES
   desc: $x_callback_layer_properties_t
   value: '36'
+- name: CALLBACK_PROPERTIES
+  desc: $x_callback_properties_t
+  value: '37'

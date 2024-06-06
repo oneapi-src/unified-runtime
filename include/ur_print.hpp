@@ -223,6 +223,7 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_device_init_flag_t val
 inline std::ostream &operator<<(std::ostream &os, enum ur_loader_config_info_t value);
 inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_code_location_t params);
 inline std::ostream &operator<<(std::ostream &os, enum ur_callback_override_mode_t value);
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_callback_properties_t params);
 inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_callback_layer_properties_t params);
 inline std::ostream &operator<<(std::ostream &os, enum ur_adapter_info_t value);
 inline std::ostream &operator<<(std::ostream &os, enum ur_adapter_backend_t value);
@@ -921,8 +922,8 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_function_t value) {
     case UR_FUNCTION_ENQUEUE_TIMESTAMP_RECORDING_EXP:
         os << "UR_FUNCTION_ENQUEUE_TIMESTAMP_RECORDING_EXP";
         break;
-    case UR_FUNCTION_LOADER_CONFIG_SET_FUNCTION_CALLBACK:
-        os << "UR_FUNCTION_LOADER_CONFIG_SET_FUNCTION_CALLBACK";
+    case UR_FUNCTION_LOADER_CONFIG_SET_CALLBACK_LAYER_PROPERTIES:
+        os << "UR_FUNCTION_LOADER_CONFIG_SET_CALLBACK_LAYER_PROPERTIES";
         break;
     default:
         os << "unknown enumerator";
@@ -1043,6 +1044,9 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_structure_type_t value
         break;
     case UR_STRUCTURE_TYPE_CALLBACK_LAYER_PROPERTIES:
         os << "UR_STRUCTURE_TYPE_CALLBACK_LAYER_PROPERTIES";
+        break;
+    case UR_STRUCTURE_TYPE_CALLBACK_PROPERTIES:
+        os << "UR_STRUCTURE_TYPE_CALLBACK_PROPERTIES";
         break;
     case UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_DESC:
         os << "UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_DESC";
@@ -1274,6 +1278,11 @@ inline ur_result_t printStruct(std::ostream &os, const void *ptr) {
 
     case UR_STRUCTURE_TYPE_CALLBACK_LAYER_PROPERTIES: {
         const ur_callback_layer_properties_t *pstruct = (const ur_callback_layer_properties_t *)ptr;
+        printPtr(os, pstruct);
+    } break;
+
+    case UR_STRUCTURE_TYPE_CALLBACK_PROPERTIES: {
+        const ur_callback_properties_t *pstruct = (const ur_callback_properties_t *)ptr;
         printPtr(os, pstruct);
     } break;
 
@@ -1874,11 +1883,11 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_callback_override_mode
     return os;
 }
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the ur_callback_layer_properties_t type
+/// @brief Print operator for the ur_callback_properties_t type
 /// @returns
 ///     std::ostream &
-inline std::ostream &operator<<(std::ostream &os, const struct ur_callback_layer_properties_t params) {
-    os << "(struct ur_callback_layer_properties_t){";
+inline std::ostream &operator<<(std::ostream &os, const struct ur_callback_properties_t params) {
+    os << "(struct ur_callback_properties_t){";
 
     os << ".stype = ";
 
@@ -1906,6 +1915,31 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_callback_layer
 
     ur::details::printPtr(os,
                           (params.pCallbackFuncPointer));
+
+    os << "}";
+    return os;
+}
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_callback_layer_properties_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, const struct ur_callback_layer_properties_t params) {
+    os << "(struct ur_callback_layer_properties_t){";
+
+    os << ".stype = ";
+
+    os << (params.stype);
+
+    os << ", ";
+    os << ".pNext = ";
+
+    ur::details::printStruct(os,
+                             (params.pNext));
+
+    os << ", ";
+    os << ".enableMock = ";
+
+    os << (params.enableMock);
 
     os << "}";
     return os;
@@ -10091,10 +10125,10 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the ur_loader_config_set_function_callback_params_t type
+/// @brief Print operator for the ur_loader_config_set_callback_layer_properties_params_t type
 /// @returns
 ///     std::ostream &
-inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_loader_config_set_function_callback_params_t *params) {
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_loader_config_set_callback_layer_properties_params_t *params) {
 
     os << ".hLoaderConfig = ";
 
@@ -16932,8 +16966,8 @@ inline ur_result_t UR_APICALL printFunctionParams(std::ostream &os, ur_function_
     case UR_FUNCTION_LOADER_CONFIG_SET_CODE_LOCATION_CALLBACK: {
         os << (const struct ur_loader_config_set_code_location_callback_params_t *)params;
     } break;
-    case UR_FUNCTION_LOADER_CONFIG_SET_FUNCTION_CALLBACK: {
-        os << (const struct ur_loader_config_set_function_callback_params_t *)params;
+    case UR_FUNCTION_LOADER_CONFIG_SET_CALLBACK_LAYER_PROPERTIES: {
+        os << (const struct ur_loader_config_set_callback_layer_properties_params_t *)params;
     } break;
     case UR_FUNCTION_PLATFORM_GET: {
         os << (const struct ur_platform_get_params_t *)params;
