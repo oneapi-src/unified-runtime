@@ -63,7 +63,7 @@ namespace ur_callback_layer
                 context.apiCallbacks.get_replace_callback("${func_name}"));
         if(replaceCallback) {
             result = replaceCallback( ${func_params} );
-        } else if (context.enableMock) {
+        } else if (context.apiCallbacks.mockEnabled()) {
         <%
             # We can use the loader epilogue to know when we should be creating mock handles
             epilogue = th.get_loader_epilogue(specs, n, tags, obj, meta)

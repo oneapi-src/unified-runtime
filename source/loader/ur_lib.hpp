@@ -108,7 +108,7 @@ ur_result_t
 urLoaderConfigSetCodeLocationCallback(ur_loader_config_handle_t hLoaderConfig,
                                       ur_code_location_callback_t pfnCodeloc,
                                       void *pUserData);
-ur_result_t urLoaderConfigSetFunctionCallback(
+ur_result_t urLoaderConfigSetCallbackLayerProperties(
     ur_loader_config_handle_t hLoaderConfig,
     ur_callback_layer_properties_t *pCallbackLayerProperties);
 

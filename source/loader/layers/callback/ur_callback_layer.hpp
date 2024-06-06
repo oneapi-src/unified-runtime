@@ -69,8 +69,7 @@ class __urdlllocal context_t : public proxy_layer_context_t {
                      api_callbacks apiCallbacks) override;
     ur_result_t tearDown() override { return UR_RESULT_SUCCESS; }
 
-    api_callbacks apiCallbacks = {};
-    bool enableMock = false;
+    api_callbacks apiCallbacks;
 
   private:
     const std::string name = "UR_LAYER_CALLBACK";

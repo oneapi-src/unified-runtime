@@ -217,7 +217,7 @@ urLoaderConfigSetCodeLocationCallback(ur_loader_config_handle_t hLoaderConfig,
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t urLoaderConfigSetFunctionCallback(
+ur_result_t urLoaderConfigSetCallbackLayerProperties(
     ur_loader_config_handle_t hLoaderConfig,
     ur_callback_layer_properties_t *pCallbackLayerProperties) {
     if (!hLoaderConfig) {
@@ -228,20 +228,17 @@ ur_result_t urLoaderConfigSetFunctionCallback(
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
 
-    if (auto result =
-            hLoaderConfig->apiCallbacks.add_callback(pCallbackLayerProperties);
-        result != UR_RESULT_SUCCESS) {
-        return result;
-    }
+    hLoaderConfig->apiCallbacks =
+        api_callbacks(pCallbackLayerProperties->enableMock);
 
     auto nextProps =
         static_cast<ur_base_properties_t *>(pCallbackLayerProperties->pNext);
     while (nextProps) {
-        if (nextProps->stype != UR_STRUCTURE_TYPE_CALLBACK_LAYER_PROPERTIES) {
+        if (nextProps->stype != UR_STRUCTURE_TYPE_CALLBACK_PROPERTIES) {
             break;
         }
         auto result = hLoaderConfig->apiCallbacks.add_callback(
-            reinterpret_cast<ur_callback_layer_properties_t *>(nextProps));
+            reinterpret_cast<ur_callback_properties_t *>(nextProps));
         if (result != UR_RESULT_SUCCESS) {
             return result;
         }
