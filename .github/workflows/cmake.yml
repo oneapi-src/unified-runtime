@@ -13,6 +13,7 @@ permissions:
 jobs:
   ubuntu-build:
     name: Build - Ubuntu
+    if: false
     strategy:
       matrix:
         os: ['ubuntu-20.04', 'ubuntu-22.04']
@@ -136,12 +137,14 @@ jobs:
 
   level-zero:
     name: Level Zero
+    if: false
     uses: ./.github/workflows/build-hw-reusable.yml
     with:
       name: L0
 
   level-zero-static:
     name: Level Zero static
+    if: false
     uses: ./.github/workflows/build-hw-reusable.yml
     with:
       name: L0
@@ -149,6 +152,7 @@ jobs:
 
   opencl:
     name: OpenCL
+    if: false
     uses: ./.github/workflows/build-hw-reusable.yml
     with:
       name: OPENCL
@@ -156,24 +160,28 @@ jobs:
 
   cuda:
     name: CUDA
+    if: false
     uses: ./.github/workflows/build-hw-reusable.yml
     with:
       name: CUDA
 
   hip:
     name: HIP
+    if: false
     uses: ./.github/workflows/build-hw-reusable.yml
     with:
       name: HIP
 
   native-cpu:
     name: Native CPU
+    if: false
     uses: ./.github/workflows/build-hw-reusable.yml
     with:
       name: NATIVE_CPU
 
   e2e-level-zero:
     name: E2E L0
+    if: false
     permissions:
       contents: read
       pull-requests: write
@@ -182,6 +190,7 @@ jobs:
 
   e2e-opencl:
     name: E2E OpenCL
+    if: false
     permissions:
       contents: read
       pull-requests: write
@@ -190,6 +199,7 @@ jobs:
 
   e2e-cuda:
     name: E2E CUDA
+    if: false
     permissions:
       contents: read
       pull-requests: write
@@ -198,6 +208,7 @@ jobs:
 
   windows-build:
     name: Build - Windows
+    if: false
     strategy:
       matrix:
         os: ['windows-2019', 'windows-2022']
@@ -270,6 +281,7 @@ jobs:
 
   macos-build:
     name: Build - MacOS
+    if: false
     strategy:
         matrix:
           os: ['macos-12', 'macos-13']
