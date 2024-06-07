@@ -133,6 +133,11 @@ auto memoryProviderMakeUnique(Args &&...args) {
     UMF_ASSIGN_OP(ops.ext, T, purge_force, UMF_RESULT_ERROR_UNKNOWN);
     UMF_ASSIGN_OP(ops.ext, T, allocation_merge, UMF_RESULT_ERROR_UNKNOWN);
     UMF_ASSIGN_OP(ops.ext, T, allocation_split, UMF_RESULT_ERROR_UNKNOWN);
+    UMF_ASSIGN_OP(ops.ipc, T, get_ipc_handle_size, UMF_RESULT_ERROR_UNKNOWN);
+    UMF_ASSIGN_OP(ops.ipc, T, get_ipc_handle, UMF_RESULT_ERROR_UNKNOWN);
+    UMF_ASSIGN_OP(ops.ipc, T, put_ipc_handle, UMF_RESULT_ERROR_UNKNOWN);
+    UMF_ASSIGN_OP(ops.ipc, T, open_ipc_handle, UMF_RESULT_ERROR_UNKNOWN);
+    UMF_ASSIGN_OP(ops.ipc, T, close_ipc_handle, UMF_RESULT_ERROR_UNKNOWN);
 
     umf_memory_provider_handle_t hProvider = nullptr;
     auto ret = umfMemoryProviderCreate(&ops, &argsTuple, &hProvider);
