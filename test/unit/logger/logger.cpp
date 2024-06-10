@@ -9,6 +9,7 @@
 
 #include "fixtures.hpp"
 #include "logger/ur_logger_details.hpp"
+#include "ur_api.h"
 
 //////////////////////////////////////////////////////////////////////////////
 TEST_F(DefaultLoggerWithFileSink, DefaultLevelNoOutput) {
@@ -206,4 +207,16 @@ TEST_P(CommonLoggerWithMultipleThreads, StdoutMultithreaded) {
     for (auto &thread : threads) {
         thread.join();
     }
+}
+
+//////////////////////////////////////////////////////////////////////////////
+void printLoggerMessages(const char *msg, [[maybe_unused]] void *userData) {
+    ASSERT_STREQ(msg, "<test>[ERROR]: Test message: success\n");
+}
+
+TEST_F(LoggerWithCallbackSink, PrintLoggerWithCallback) {
+    // Pass a callback function to the logger which will receive any messages sent to the logger
+    logger->setCallbackSinkFunction(printLoggerMessages, nullptr);
+
+    logger->error("Test message: {}", "success");
 }

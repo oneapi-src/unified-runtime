@@ -101,7 +101,6 @@ class Logger {
         if (!sink) {
             return;
         }
-
         if (isLegacySink) {
             sink->log(level, p.message, std::forward<Args>(args)...);
             return;
@@ -109,13 +108,28 @@ class Logger {
         if (level < this->level) {
             return;
         }
-
         sink->log(level, format, std::forward<Args>(args)...);
     }
 
     void setLegacySink(std::unique_ptr<logger::Sink> legacySink) {
         this->isLegacySink = true;
         this->sink = std::move(legacySink);
+    }
+
+    void setCallbackSinkFunction(ur_logger_output_callback_t cb,
+                                 void *pUserData) {
+        logger::Sink *rawBasePtr = this->sink.release();
+        logger::CallbackSink *derivedPtr =
+            dynamic_cast<logger::CallbackSink *>(rawBasePtr);
+
+        if (derivedPtr) {
+            derivedPtr->setCallback(cb, pUserData);
+
+            this->sink.reset(derivedPtr);
+        } else {
+            // output a failure here??
+            this->sink.reset(rawBasePtr);
+        }
     }
 
   private:
