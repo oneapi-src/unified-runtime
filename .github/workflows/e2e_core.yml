@@ -59,6 +59,16 @@ jobs:
       any_changed: ${{ steps.get-changed.outputs.any_changed }}
     steps:
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+    - name: Fetch PR's merge commit
+      if: ${{ github.event_name == 'pull_request_target' }}
+      env:
+        PR_NO: ${{github.event.issue.number}}
+      run: |
+        git fetch -- https://github.com/${{github.repository}} +refs/pull/${PR_NO}/*:refs/remotes/origin/pr/${PR_NO}/*
+        git checkout origin/pr/${PR_NO}/merge
+        git rev-parse origin/pr/${PR_NO}/merge
+
     - name: Get changed files
       id: get-changed
       uses: tj-actions/changed-files@d6babd6899969df1a11d14c368283ea4436bca78 # v44.5.2
@@ -105,6 +115,16 @@ jobs:
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       with:
         path: ur-repo
+
+    - name: Fetch PR's merge commit
+      if: ${{ github.event_name == 'pull_request_target' }}
+      working-directory: ${{github.workspace}}/ur-repo
+      env:
+        PR_NO: ${{github.event.issue.number}}
+      run: |
+        git fetch -- https://github.com/${{github.repository}} +refs/pull/${PR_NO}/*:refs/remotes/origin/pr/${PR_NO}/*
+        git checkout origin/pr/${PR_NO}/merge
+        git rev-parse origin/pr/${PR_NO}/merge
 
     - name: Checkout SYCL
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
