@@ -985,7 +985,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventSetCallback(
 }
 
 ur_result_t urEventReleaseInternal(ur_event_handle_t Event) {
-  if (!Event->CounterBasedEventsEnabled && !Event->RefCount.decrementAndTest())
+  if (!Event->RefCount.decrementAndTest())
     return UR_RESULT_SUCCESS;
 
   if (Event->CommandType == UR_COMMAND_MEM_UNMAP && Event->CommandData) {
