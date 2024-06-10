@@ -28,7 +28,7 @@ public:
     this->ostream = &std::cerr;
   }
 
-  virtual void print([[maybe_unused]] logger::Level level,
+  virtual void print([[maybe_unused]] ur_logger_level_t level,
                      const std::string &msg) override {
     std::cerr << msg << std::endl;
   }
@@ -39,8 +39,8 @@ public:
 // FIXME: Remove the default log level when querying logging info is supported
 // through UR entry points. See #1330.
 ur_adapter_handle_t_::ur_adapter_handle_t_()
-    : logger(
-          logger::get_logger("hip", /*default_log_level*/ logger::Level::ERR)) {
+    : logger(logger::get_logger("hip",
+                                /*default_log_level*/ UR_LOGGER_LEVEL_ERR)) {
 
   if (std::getenv("UR_LOG_HIP") != nullptr)
     return;
@@ -99,6 +99,23 @@ UR_APIEXPORT ur_result_t UR_APICALL urAdapterGetInfo(ur_adapter_handle_t,
   default:
     return UR_RESULT_ERROR_INVALID_ENUMERATION;
   }
+
+  return UR_RESULT_SUCCESS;
+}
+
+UR_APIEXPORT ur_result_t UR_APICALL urSetLoggerCallback(
+    ur_adapter_handle_t, ur_logger_output_callback_t pfnLoggerCallback,
+    void *pUserData, ur_logger_level_t level = UR_LOGGER_LEVEL_QUIET) {
+
+  adapter.logger.setCallbackSink(pfnLoggerCallback, pUserData, level);
+
+  return UR_RESULT_SUCCESS;
+}
+
+UR_APIEXPORT ur_result_t UR_APICALL
+urSetLoggerCallbackLevel(ur_adapter_handle_t, ur_logger_level_t level) {
+
+  adapter.logger.setCallbackLevel(level);
 
   return UR_RESULT_SUCCESS;
 }

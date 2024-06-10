@@ -200,6 +200,81 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGetInfo(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urSetLoggerCallback
+__urdlllocal ur_result_t UR_APICALL urSetLoggerCallback(
+    ur_adapter_handle_t hAdapter, ///< [in] handle of the adapter
+    ur_logger_output_callback_t
+        pfnLoggerCallback, ///< [in] Function pointer to callback from the logger.
+    void *
+        pUserData, ///< [in][out][optional] pointer to data to be passed to callback
+    ur_logger_level_t level ///< [in] logging level
+) {
+    auto pfnSetLoggerCallback =
+        getContext()->urDdiTable.Global.pfnSetLoggerCallback;
+
+    if (nullptr == pfnSetLoggerCallback) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    if (getContext()->enableParameterValidation) {
+        if (NULL == hAdapter) {
+            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
+        }
+
+        if (NULL == pfnLoggerCallback) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (UR_LOGGER_LEVEL_QUIET < level) {
+            return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        }
+    }
+
+    if (getContext()->enableLifetimeValidation &&
+        !getContext()->refCountContext->isReferenceValid(hAdapter)) {
+        getContext()->refCountContext->logInvalidReference(hAdapter);
+    }
+
+    ur_result_t result =
+        pfnSetLoggerCallback(hAdapter, pfnLoggerCallback, pUserData, level);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urSetLoggerCallbackLevel
+__urdlllocal ur_result_t UR_APICALL urSetLoggerCallbackLevel(
+    ur_adapter_handle_t hAdapter, ///< [in] handle of the adapter
+    ur_logger_level_t level       ///< [in] logging level
+) {
+    auto pfnSetLoggerCallbackLevel =
+        getContext()->urDdiTable.Global.pfnSetLoggerCallbackLevel;
+
+    if (nullptr == pfnSetLoggerCallbackLevel) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    if (getContext()->enableParameterValidation) {
+        if (NULL == hAdapter) {
+            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
+        }
+
+        if (UR_LOGGER_LEVEL_QUIET < level) {
+            return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        }
+    }
+
+    if (getContext()->enableLifetimeValidation &&
+        !getContext()->refCountContext->isReferenceValid(hAdapter)) {
+        getContext()->refCountContext->logInvalidReference(hAdapter);
+    }
+
+    ur_result_t result = pfnSetLoggerCallbackLevel(hAdapter, level);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urPlatformGet
 __urdlllocal ur_result_t UR_APICALL urPlatformGet(
     ur_adapter_handle_t *
@@ -9772,6 +9847,13 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetGlobalProcAddrTable(
 
     dditable.pfnAdapterGetInfo = pDdiTable->pfnAdapterGetInfo;
     pDdiTable->pfnAdapterGetInfo = ur_validation_layer::urAdapterGetInfo;
+
+    dditable.pfnSetLoggerCallback = pDdiTable->pfnSetLoggerCallback;
+    pDdiTable->pfnSetLoggerCallback = ur_validation_layer::urSetLoggerCallback;
+
+    dditable.pfnSetLoggerCallbackLevel = pDdiTable->pfnSetLoggerCallbackLevel;
+    pDdiTable->pfnSetLoggerCallbackLevel =
+        ur_validation_layer::urSetLoggerCallbackLevel;
 
     return result;
 }

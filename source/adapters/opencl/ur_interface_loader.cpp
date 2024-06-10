@@ -208,6 +208,8 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetGlobalProcAddrTable(
   pDdiTable->pfnAdapterRetain = urAdapterRetain;
   pDdiTable->pfnAdapterGetLastError = urAdapterGetLastError;
   pDdiTable->pfnAdapterGetInfo = urAdapterGetInfo;
+  pDdiTable->pfnSetLoggerCallback = urSetLoggerCallback;
+  pDdiTable->pfnSetLoggerCallbackLevel = urSetLoggerCallbackLevel;
   return UR_RESULT_SUCCESS;
 }
 

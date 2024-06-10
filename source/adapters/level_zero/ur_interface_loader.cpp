@@ -43,6 +43,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urGetGlobalProcAddrTable(
   pDdiTable->pfnAdapterRetain = ur::level_zero::urAdapterRetain;
   pDdiTable->pfnAdapterGetLastError = ur::level_zero::urAdapterGetLastError;
   pDdiTable->pfnAdapterGetInfo = ur::level_zero::urAdapterGetInfo;
+  pDdiTable->pfnSetLoggerCallback = ur::level_zero::urSetLoggerCallback;
+  pDdiTable->pfnSetLoggerCallbackLevel =
+      ur::level_zero::urSetLoggerCallbackLevel;
 
   return result;
 }

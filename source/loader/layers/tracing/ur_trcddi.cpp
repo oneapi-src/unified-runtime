@@ -196,6 +196,78 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGetInfo(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urSetLoggerCallback
+__urdlllocal ur_result_t UR_APICALL urSetLoggerCallback(
+    ur_adapter_handle_t hAdapter, ///< [in] handle of the adapter
+    ur_logger_output_callback_t
+        pfnLoggerCallback, ///< [in] Function pointer to callback from the logger.
+    void *
+        pUserData, ///< [in][out][optional] pointer to data to be passed to callback
+    ur_logger_level_t level ///< [in] logging level
+) {
+    auto pfnSetLoggerCallback =
+        getContext()->urDdiTable.Global.pfnSetLoggerCallback;
+
+    if (nullptr == pfnSetLoggerCallback) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    ur_set_logger_callback_params_t params = {&hAdapter, &pfnLoggerCallback,
+                                              &pUserData, &level};
+    uint64_t instance = getContext()->notify_begin(
+        UR_FUNCTION_SET_LOGGER_CALLBACK, "urSetLoggerCallback", &params);
+
+    getContext()->logger.info("---> urSetLoggerCallback");
+
+    ur_result_t result =
+        pfnSetLoggerCallback(hAdapter, pfnLoggerCallback, pUserData, level);
+
+    getContext()->notify_end(UR_FUNCTION_SET_LOGGER_CALLBACK,
+                             "urSetLoggerCallback", &params, &result, instance);
+
+    std::ostringstream args_str;
+    ur::extras::printFunctionParams(args_str, UR_FUNCTION_SET_LOGGER_CALLBACK,
+                                    &params);
+    getContext()->logger.info("({}) -> {};\n", args_str.str(), result);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urSetLoggerCallbackLevel
+__urdlllocal ur_result_t UR_APICALL urSetLoggerCallbackLevel(
+    ur_adapter_handle_t hAdapter, ///< [in] handle of the adapter
+    ur_logger_level_t level       ///< [in] logging level
+) {
+    auto pfnSetLoggerCallbackLevel =
+        getContext()->urDdiTable.Global.pfnSetLoggerCallbackLevel;
+
+    if (nullptr == pfnSetLoggerCallbackLevel) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    ur_set_logger_callback_level_params_t params = {&hAdapter, &level};
+    uint64_t instance =
+        getContext()->notify_begin(UR_FUNCTION_SET_LOGGER_CALLBACK_LEVEL,
+                                   "urSetLoggerCallbackLevel", &params);
+
+    getContext()->logger.info("---> urSetLoggerCallbackLevel");
+
+    ur_result_t result = pfnSetLoggerCallbackLevel(hAdapter, level);
+
+    getContext()->notify_end(UR_FUNCTION_SET_LOGGER_CALLBACK_LEVEL,
+                             "urSetLoggerCallbackLevel", &params, &result,
+                             instance);
+
+    std::ostringstream args_str;
+    ur::extras::printFunctionParams(
+        args_str, UR_FUNCTION_SET_LOGGER_CALLBACK_LEVEL, &params);
+    getContext()->logger.info("({}) -> {};\n", args_str.str(), result);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urPlatformGet
 __urdlllocal ur_result_t UR_APICALL urPlatformGet(
     ur_adapter_handle_t *
@@ -8093,6 +8165,13 @@ __urdlllocal ur_result_t UR_APICALL urGetGlobalProcAddrTable(
 
     dditable.pfnAdapterGetInfo = pDdiTable->pfnAdapterGetInfo;
     pDdiTable->pfnAdapterGetInfo = ur_tracing_layer::urAdapterGetInfo;
+
+    dditable.pfnSetLoggerCallback = pDdiTable->pfnSetLoggerCallback;
+    pDdiTable->pfnSetLoggerCallback = ur_tracing_layer::urSetLoggerCallback;
+
+    dditable.pfnSetLoggerCallbackLevel = pDdiTable->pfnSetLoggerCallbackLevel;
+    pDdiTable->pfnSetLoggerCallbackLevel =
+        ur_tracing_layer::urSetLoggerCallbackLevel;
 
     return result;
 }
