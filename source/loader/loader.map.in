@@ -363,6 +363,7 @@
 		urPrintLoaderConfigSetCodeLocationCallbackParams;
 		urPrintLoaderInitParams;
 		urPrintLoaderTearDownParams;
+		urPrintLoggerLevel;
 		urPrintMapFlags;
 		urPrintMemBufferCreateParams;
 		urPrintMemBufferCreateWithNativeHandleParams;
@@ -448,6 +449,8 @@
 		urPrintSamplerNativeProperties;
 		urPrintSamplerReleaseParams;
 		urPrintSamplerRetainParams;
+		urPrintSetLoggerCallbackLevelParams;
+		urPrintSetLoggerCallbackParams;
 		urPrintSpecializationConstantInfo;
 		urPrintStructureType;
 		urPrintUsmAdviceFlags;
@@ -520,6 +523,8 @@
 		urSamplerGetNativeHandle;
 		urSamplerRelease;
 		urSamplerRetain;
+		urSetLoggerCallback;
+		urSetLoggerCallbackLevel;
 		urUSMDeviceAlloc;
 		urUSMFree;
 		urUSMGetMemAllocInfo;

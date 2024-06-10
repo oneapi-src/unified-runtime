@@ -145,6 +145,55 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGetInfo(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urSetLoggerCallback
+__urdlllocal ur_result_t UR_APICALL urSetLoggerCallback(
+    ur_adapter_handle_t hAdapter, ///< [in] handle of the adapter
+    ur_logger_output_callback_t
+        pfnLoggerCallback, ///< [in] Function pointer to callback from the logger.
+    void *
+        pUserData, ///< [in][out][optional] pointer to data to be passed to callback
+    ur_logger_level_t level ///< [in] logging level
+    ) try {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // if the driver has created a custom function, then call it instead of using the generic path
+    auto pfnSetLoggerCallback =
+        d_context.urDdiTable.Global.pfnSetLoggerCallback;
+    if (nullptr != pfnSetLoggerCallback) {
+        result =
+            pfnSetLoggerCallback(hAdapter, pfnLoggerCallback, pUserData, level);
+    } else {
+        // generic implementation
+    }
+
+    return result;
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urSetLoggerCallbackLevel
+__urdlllocal ur_result_t UR_APICALL urSetLoggerCallbackLevel(
+    ur_adapter_handle_t hAdapter, ///< [in] handle of the adapter
+    ur_logger_level_t level       ///< [in] logging level
+    ) try {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // if the driver has created a custom function, then call it instead of using the generic path
+    auto pfnSetLoggerCallbackLevel =
+        d_context.urDdiTable.Global.pfnSetLoggerCallbackLevel;
+    if (nullptr != pfnSetLoggerCallbackLevel) {
+        result = pfnSetLoggerCallbackLevel(hAdapter, level);
+    } else {
+        // generic implementation
+    }
+
+    return result;
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urPlatformGet
 __urdlllocal ur_result_t UR_APICALL urPlatformGet(
     ur_adapter_handle_t *
@@ -5950,6 +5999,10 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetGlobalProcAddrTable(
     pDdiTable->pfnAdapterGetLastError = driver::urAdapterGetLastError;
 
     pDdiTable->pfnAdapterGetInfo = driver::urAdapterGetInfo;
+
+    pDdiTable->pfnSetLoggerCallback = driver::urSetLoggerCallback;
+
+    pDdiTable->pfnSetLoggerCallbackLevel = driver::urSetLoggerCallbackLevel;
 
     return result;
 } catch (...) {

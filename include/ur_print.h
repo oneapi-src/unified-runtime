@@ -115,6 +115,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintAdapterInfo(enum ur_adapter_info_t va
 UR_APIEXPORT ur_result_t UR_APICALL urPrintAdapterBackend(enum ur_adapter_backend_t value, char *buffer, const size_t buff_size, size_t *out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Print ur_logger_level_t enum
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_INVALID_SIZE
+///         - `buff_size < out_size`
+UR_APIEXPORT ur_result_t UR_APICALL urPrintLoggerLevel(enum ur_logger_level_t value, char *buffer, const size_t buff_size, size_t *out_size);
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_platform_info_t enum
 /// @returns
 ///     - ::UR_RESULT_SUCCESS
@@ -1801,6 +1809,22 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintAdapterGetLastErrorParams(const struc
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
 UR_APIEXPORT ur_result_t UR_APICALL urPrintAdapterGetInfoParams(const struct ur_adapter_get_info_params_t *params, char *buffer, const size_t buff_size, size_t *out_size);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print ur_set_logger_callback_params_t struct
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_INVALID_SIZE
+///         - `buff_size < out_size`
+UR_APIEXPORT ur_result_t UR_APICALL urPrintSetLoggerCallbackParams(const struct ur_set_logger_callback_params_t *params, char *buffer, const size_t buff_size, size_t *out_size);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print ur_set_logger_callback_level_params_t struct
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_INVALID_SIZE
+///         - `buff_size < out_size`
+UR_APIEXPORT ur_result_t UR_APICALL urPrintSetLoggerCallbackLevelParams(const struct ur_set_logger_callback_level_params_t *params, char *buffer, const size_t buff_size, size_t *out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_kernel_launch_params_t struct
