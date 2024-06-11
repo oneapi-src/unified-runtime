@@ -75,8 +75,6 @@ jobs:
       contents: read
       pull-requests: write
 
-    # Allow failures, since SYCL tests and API may be not stable
-    continue-on-error: true
     strategy:
       matrix:
         adapter: [
@@ -134,6 +132,8 @@ jobs:
         --cmake-opt=-DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
     - name: Build SYCL
+      # Allow failures, since SYCL tests and API may be not stable
+      continue-on-error: true
       run: cmake --build ${{github.workspace}}/sycl_build -j
 
     - name: Set extra llvm-lit options
@@ -158,6 +158,8 @@ jobs:
         SYCL_PI_TRACE=-1 sycl-ls
 
     - name: Build e2e tests
+      # Allow failures, since SYCL tests and API may be not stable
+      continue-on-error: true
       run: >
         cmake
         -GNinja
@@ -176,6 +178,8 @@ jobs:
 
     - name: Run e2e tests
       id: tests
+      # Allow failures, since SYCL tests and API may be not stable
+      continue-on-error: true
       run: ninja -C build-e2e check-sycl-e2e
 
     # FIXME: Requires pull-request: write permissions but this is only granted
