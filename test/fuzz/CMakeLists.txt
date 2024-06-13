@@ -24,7 +24,7 @@ function(add_fuzz_test name label)
                 NEOReadDebugKeys=1
                 DisableDeepBind=1)
     else()
-        list(APPEND ENV_VARS UR_ADAPTERS_FORCE_LOAD=\"$<TARGET_FILE:ur_adapter_null>\")
+        list(APPEND ENV_VARS UR_ADAPTERS_FORCE_LOAD=\"$<TARGET_FILE:ur_adapter_mock>\")
     endif()
     if(UR_ENABLE_TRACING)
         list(APPEND ENV_VARS
