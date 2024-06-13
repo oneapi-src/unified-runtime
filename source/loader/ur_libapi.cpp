@@ -52,7 +52,7 @@ ur_result_t UR_APICALL urLoaderConfigCreate(
 ///         + `NULL == hLoaderConfig`
 ur_result_t UR_APICALL urLoaderConfigRetain(
     ur_loader_config_handle_t
-        hLoaderConfig ///< [in] loader config handle to retain
+        hLoaderConfig ///< [in][retain] loader config handle to retain
     ) try {
     return ur_lib::urLoaderConfigRetain(hLoaderConfig);
 } catch (...) {
@@ -76,7 +76,8 @@ ur_result_t UR_APICALL urLoaderConfigRetain(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hLoaderConfig`
 ur_result_t UR_APICALL urLoaderConfigRelease(
-    ur_loader_config_handle_t hLoaderConfig ///< [in] config handle to release
+    ur_loader_config_handle_t
+        hLoaderConfig ///< [in][release] config handle to release
     ) try {
     return ur_lib::urLoaderConfigRelease(hLoaderConfig);
 } catch (...) {
@@ -187,6 +188,40 @@ ur_result_t UR_APICALL urLoaderConfigSetCodeLocationCallback(
     ) try {
     return ur_lib::urLoaderConfigSetCodeLocationCallback(hLoaderConfig,
                                                          pfnCodeloc, pUserData);
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Set a callback to be called before, after or instead of a given entry
+///        point
+///
+/// @details
+///     - The callback layer will pass the function's parameter struct (e.g.
+///       **::ur_adapter_get_params_t**) to the ::ur_function_callback_t so
+///       parameters can be accessed and modified.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hLoaderConfig`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pCallbackProperties`
+///         + `NULL == pCallbackProperties->name`
+///         + `NULL == pCallbackProperties->pCallback`
+///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
+///         + `::UR_CALLBACK_OVERRIDE_MODE_AFTER < pCallbackProperties->mode`
+ur_result_t UR_APICALL urLoaderConfigSetMockCallbacks(
+    ur_loader_config_handle_t
+        hLoaderConfig, ///< [in] Handle to config object the layer will be enabled for.
+    ur_mock_callback_properties_t
+        *pCallbackProperties ///< [in] Pointer to callback properties struct.
+    ) try {
+    return ur_lib::urLoaderConfigSetMockCallbacks(hLoaderConfig,
+                                                  pCallbackProperties);
 } catch (...) {
     return exceptionToResult(std::current_exception());
 }
@@ -313,7 +348,7 @@ ur_result_t UR_APICALL urAdapterGet(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hAdapter`
 ur_result_t UR_APICALL urAdapterRelease(
-    ur_adapter_handle_t hAdapter ///< [in] Adapter handle to release
+    ur_adapter_handle_t hAdapter ///< [in][release] Adapter handle to release
     ) try {
     auto pfnAdapterRelease =
         ur_lib::context->urDdiTable.Global.pfnAdapterRelease;
@@ -340,7 +375,7 @@ ur_result_t UR_APICALL urAdapterRelease(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hAdapter`
 ur_result_t UR_APICALL urAdapterRetain(
-    ur_adapter_handle_t hAdapter ///< [in] Adapter handle to retain
+    ur_adapter_handle_t hAdapter ///< [in][retain] Adapter handle to retain
     ) try {
     auto pfnAdapterRetain = ur_lib::context->urDdiTable.Global.pfnAdapterRetain;
     if (nullptr == pfnAdapterRetain) {
@@ -906,7 +941,7 @@ ur_result_t UR_APICALL urDeviceGetInfo(
 ///         + `NULL == hDevice`
 ur_result_t UR_APICALL urDeviceRetain(
     ur_device_handle_t
-        hDevice ///< [in] handle of the device to get a reference of.
+        hDevice ///< [in][retain] handle of the device to get a reference of.
     ) try {
     auto pfnRetain = ur_lib::context->urDdiTable.Device.pfnRetain;
     if (nullptr == pfnRetain) {
@@ -942,7 +977,8 @@ ur_result_t UR_APICALL urDeviceRetain(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hDevice`
 ur_result_t UR_APICALL urDeviceRelease(
-    ur_device_handle_t hDevice ///< [in] handle of the device to release.
+    ur_device_handle_t
+        hDevice ///< [in][release] handle of the device to release.
     ) try {
     auto pfnRelease = ur_lib::context->urDdiTable.Device.pfnRelease;
     if (nullptr == pfnRelease) {
@@ -1246,7 +1282,7 @@ ur_result_t UR_APICALL urContextCreate(
 ///         + `NULL == hContext`
 ur_result_t UR_APICALL urContextRetain(
     ur_context_handle_t
-        hContext ///< [in] handle of the context to get a reference of.
+        hContext ///< [in][retain] handle of the context to get a reference of.
     ) try {
     auto pfnRetain = ur_lib::context->urDdiTable.Context.pfnRetain;
     if (nullptr == pfnRetain) {
@@ -1278,7 +1314,8 @@ ur_result_t UR_APICALL urContextRetain(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ur_result_t UR_APICALL urContextRelease(
-    ur_context_handle_t hContext ///< [in] handle of the context to release.
+    ur_context_handle_t
+        hContext ///< [in][release] handle of the context to release.
     ) try {
     auto pfnRelease = ur_lib::context->urDdiTable.Context.pfnRelease;
     if (nullptr == pfnRelease) {
@@ -1609,7 +1646,8 @@ ur_result_t UR_APICALL urMemBufferCreate(
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
 ur_result_t UR_APICALL urMemRetain(
-    ur_mem_handle_t hMem ///< [in] handle of the memory object to get access
+    ur_mem_handle_t
+        hMem ///< [in][retain] handle of the memory object to get access
     ) try {
     auto pfnRetain = ur_lib::context->urDdiTable.Mem.pfnRetain;
     if (nullptr == pfnRetain) {
@@ -1639,7 +1677,8 @@ ur_result_t UR_APICALL urMemRetain(
 ///     - ::UR_RESULT_ERROR_INVALID_MEM_OBJECT
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ur_result_t UR_APICALL urMemRelease(
-    ur_mem_handle_t hMem ///< [in] handle of the memory object to release
+    ur_mem_handle_t
+        hMem ///< [in][release] handle of the memory object to release
     ) try {
     auto pfnRelease = ur_lib::context->urDdiTable.Mem.pfnRelease;
     if (nullptr == pfnRelease) {
@@ -2005,7 +2044,7 @@ ur_result_t UR_APICALL urSamplerCreate(
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
 ur_result_t UR_APICALL urSamplerRetain(
     ur_sampler_handle_t
-        hSampler ///< [in] handle of the sampler object to get access
+        hSampler ///< [in][retain] handle of the sampler object to get access
     ) try {
     auto pfnRetain = ur_lib::context->urDdiTable.Sampler.pfnRetain;
     if (nullptr == pfnRetain) {
@@ -2037,7 +2076,7 @@ ur_result_t UR_APICALL urSamplerRetain(
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
 ur_result_t UR_APICALL urSamplerRelease(
     ur_sampler_handle_t
-        hSampler ///< [in] handle of the sampler object to release
+        hSampler ///< [in][release] handle of the sampler object to release
     ) try {
     auto pfnRelease = ur_lib::context->urDdiTable.Sampler.pfnRelease;
     if (nullptr == pfnRelease) {
@@ -2474,7 +2513,7 @@ ur_result_t UR_APICALL urUSMPoolCreate(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == pPool`
 ur_result_t UR_APICALL urUSMPoolRetain(
-    ur_usm_pool_handle_t pPool ///< [in] pointer to USM memory pool
+    ur_usm_pool_handle_t pPool ///< [in][retain] pointer to USM memory pool
     ) try {
     auto pfnPoolRetain = ur_lib::context->urDdiTable.USM.pfnPoolRetain;
     if (nullptr == pfnPoolRetain) {
@@ -2504,7 +2543,7 @@ ur_result_t UR_APICALL urUSMPoolRetain(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == pPool`
 ur_result_t UR_APICALL urUSMPoolRelease(
-    ur_usm_pool_handle_t pPool ///< [in] pointer to USM memory pool
+    ur_usm_pool_handle_t pPool ///< [in][release] pointer to USM memory pool
     ) try {
     auto pfnPoolRelease = ur_lib::context->urDdiTable.USM.pfnPoolRelease;
     if (nullptr == pfnPoolRelease) {
@@ -2866,7 +2905,7 @@ ur_result_t UR_APICALL urPhysicalMemCreate(
 ///         + `NULL == hPhysicalMem`
 ur_result_t UR_APICALL urPhysicalMemRetain(
     ur_physical_mem_handle_t
-        hPhysicalMem ///< [in] handle of the physical memory object to retain.
+        hPhysicalMem ///< [in][retain] handle of the physical memory object to retain.
     ) try {
     auto pfnRetain = ur_lib::context->urDdiTable.PhysicalMem.pfnRetain;
     if (nullptr == pfnRetain) {
@@ -2890,7 +2929,7 @@ ur_result_t UR_APICALL urPhysicalMemRetain(
 ///         + `NULL == hPhysicalMem`
 ur_result_t UR_APICALL urPhysicalMemRelease(
     ur_physical_mem_handle_t
-        hPhysicalMem ///< [in] handle of the physical memory object to release.
+        hPhysicalMem ///< [in][release] handle of the physical memory object to release.
     ) try {
     auto pfnRelease = ur_lib::context->urDdiTable.PhysicalMem.pfnRelease;
     if (nullptr == pfnRelease) {
@@ -3162,7 +3201,8 @@ ur_result_t UR_APICALL urProgramLink(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hProgram`
 ur_result_t UR_APICALL urProgramRetain(
-    ur_program_handle_t hProgram ///< [in] handle for the Program to retain
+    ur_program_handle_t
+        hProgram ///< [in][retain] handle for the Program to retain
     ) try {
     auto pfnRetain = ur_lib::context->urDdiTable.Program.pfnRetain;
     if (nullptr == pfnRetain) {
@@ -3195,7 +3235,8 @@ ur_result_t UR_APICALL urProgramRetain(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hProgram`
 ur_result_t UR_APICALL urProgramRelease(
-    ur_program_handle_t hProgram ///< [in] handle for the Program to release
+    ur_program_handle_t
+        hProgram ///< [in][release] handle for the Program to release
     ) try {
     auto pfnRelease = ur_lib::context->urDdiTable.Program.pfnRelease;
     if (nullptr == pfnRelease) {
@@ -3786,7 +3827,7 @@ ur_result_t UR_APICALL urKernelGetSubGroupInfo(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hKernel`
 ur_result_t UR_APICALL urKernelRetain(
-    ur_kernel_handle_t hKernel ///< [in] handle for the Kernel to retain
+    ur_kernel_handle_t hKernel ///< [in][retain] handle for the Kernel to retain
     ) try {
     auto pfnRetain = ur_lib::context->urDdiTable.Kernel.pfnRetain;
     if (nullptr == pfnRetain) {
@@ -3819,7 +3860,8 @@ ur_result_t UR_APICALL urKernelRetain(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hKernel`
 ur_result_t UR_APICALL urKernelRelease(
-    ur_kernel_handle_t hKernel ///< [in] handle for the Kernel to release
+    ur_kernel_handle_t
+        hKernel ///< [in][release] handle for the Kernel to release
     ) try {
     auto pfnRelease = ur_lib::context->urDdiTable.Kernel.pfnRelease;
     if (nullptr == pfnRelease) {
@@ -4283,7 +4325,8 @@ ur_result_t UR_APICALL urQueueCreate(
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
 ur_result_t UR_APICALL urQueueRetain(
-    ur_queue_handle_t hQueue ///< [in] handle of the queue object to get access
+    ur_queue_handle_t
+        hQueue ///< [in][retain] handle of the queue object to get access
     ) try {
     auto pfnRetain = ur_lib::context->urDdiTable.Queue.pfnRetain;
     if (nullptr == pfnRetain) {
@@ -4320,7 +4363,8 @@ ur_result_t UR_APICALL urQueueRetain(
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
 ur_result_t UR_APICALL urQueueRelease(
-    ur_queue_handle_t hQueue ///< [in] handle of the queue object to release
+    ur_queue_handle_t
+        hQueue ///< [in][release] handle of the queue object to release
     ) try {
     auto pfnRelease = ur_lib::context->urDdiTable.Queue.pfnRelease;
     if (nullptr == pfnRelease) {
@@ -4640,7 +4684,7 @@ ur_result_t UR_APICALL urEventWait(
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ur_result_t UR_APICALL urEventRetain(
-    ur_event_handle_t hEvent ///< [in] handle of the event object
+    ur_event_handle_t hEvent ///< [in][retain] handle of the event object
     ) try {
     auto pfnRetain = ur_lib::context->urDdiTable.Event.pfnRetain;
     if (nullptr == pfnRetain) {
@@ -4671,7 +4715,7 @@ ur_result_t UR_APICALL urEventRetain(
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ur_result_t UR_APICALL urEventRelease(
-    ur_event_handle_t hEvent ///< [in] handle of the event object
+    ur_event_handle_t hEvent ///< [in][release] handle of the event object
     ) try {
     auto pfnRelease = ur_lib::context->urDdiTable.Event.pfnRelease;
     if (nullptr == pfnRelease) {
@@ -7054,7 +7098,7 @@ ur_result_t UR_APICALL urBindlessImagesReleaseInteropExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     ur_exp_interop_mem_handle_t
-        hInteropMem ///< [in] handle of interop memory to be freed
+        hInteropMem ///< [in][release] handle of interop memory to be freed
     ) try {
     auto pfnReleaseInteropExp =
         ur_lib::context->urDdiTable.BindlessImagesExp.pfnReleaseInteropExp;
@@ -7291,7 +7335,7 @@ ur_result_t UR_APICALL urCommandBufferCreateExp(
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ur_result_t UR_APICALL urCommandBufferRetainExp(
     ur_exp_command_buffer_handle_t
-        hCommandBuffer ///< [in] Handle of the command-buffer object.
+        hCommandBuffer ///< [in][retain] Handle of the command-buffer object.
     ) try {
     auto pfnRetainExp =
         ur_lib::context->urDdiTable.CommandBufferExp.pfnRetainExp;
@@ -7320,7 +7364,7 @@ ur_result_t UR_APICALL urCommandBufferRetainExp(
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ur_result_t UR_APICALL urCommandBufferReleaseExp(
     ur_exp_command_buffer_handle_t
-        hCommandBuffer ///< [in] Handle of the command-buffer object.
+        hCommandBuffer ///< [in][release] Handle of the command-buffer object.
     ) try {
     auto pfnReleaseExp =
         ur_lib::context->urDdiTable.CommandBufferExp.pfnReleaseExp;
@@ -8120,7 +8164,7 @@ ur_result_t UR_APICALL urCommandBufferRetainCommandExp(
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ur_result_t UR_APICALL urCommandBufferReleaseCommandExp(
     ur_exp_command_buffer_command_handle_t
-        hCommand ///< [in] Handle of the command-buffer command.
+        hCommand ///< [in][release] Handle of the command-buffer command.
     ) try {
     auto pfnReleaseCommandExp =
         ur_lib::context->urDdiTable.CommandBufferExp.pfnReleaseCommandExp;

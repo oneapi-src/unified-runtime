@@ -589,6 +589,9 @@ etors:
 - name: KERNEL_GET_SUGGESTED_LOCAL_WORK_SIZE
   desc: Enumerator for $xKernelGetSuggestedLocalWorkSize
   value: '225'
+- name: LOADER_CONFIG_SET_MOCK_CALLBACKS
+  desc: Enumerator for $xLoaderConfigSetMockCallbacks
+  value: '229'
 ---
 type: enum
 desc: Defines structure types
@@ -699,3 +702,6 @@ etors:
 - name: USM_ALLOC_LOCATION_DESC
   desc: $x_usm_alloc_location_desc_t
   value: '35'
+- name: MOCK_CALLBACK_PROPERTIES
+  desc: $x_mock_callback_properties_t
+  value: '38'

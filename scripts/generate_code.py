@@ -290,6 +290,30 @@ def _mako_tracing_layer_cpp(path, namespace, tags, version, specs, meta):
 """
     generates c/c++ files from the specification documents
 """
+def _mako_mock_layer_cpp(path, namespace, tags, version, specs, meta):
+    dstpath = os.path.join(path, "mock")
+    os.makedirs(dstpath, exist_ok=True)
+
+    template = "mockddi.cpp.mako"
+    fin = os.path.join(templates_dir, template)
+
+    name = "%s_mockddi"%(namespace)
+    filename = "%s.cpp"%(name)
+    fout = os.path.join(dstpath, filename)
+
+    print("Generating %s..."%fout)
+    return util.makoWrite(
+        fin, fout,
+        name=name,
+        ver=version,
+        namespace=namespace,
+        tags=tags,
+        specs=specs,
+        meta=meta)
+
+"""
+    generates c/c++ files from the specification documents
+"""
 def _mako_print_hpp(path, namespace, tags, version, revision, specs, meta):
     template = "print.hpp.mako"
     fin = os.path.join(templates_dir, template)
@@ -416,6 +440,11 @@ def generate_layers(path, section, namespace, tags, version, specs, meta):
     loc = 0
     loc += _mako_tracing_layer_cpp(layer_dstpath, namespace, tags, version, specs, meta)
     print("TRACING Generated %s lines of code.\n"%loc)
+
+    loc = 0
+    loc += _mako_mock_layer_cpp(layer_dstpath, namespace, tags, version, specs, meta)
+    print("MOCK Generated %s lines of code.\n"%loc)
+
 
 """
 Entry-point:

@@ -64,7 +64,8 @@ void context_t::parseEnvEnabledLayers() {
 void context_t::initLayers() const {
     for (auto &l : layers) {
         if (l->isAvailable()) {
-            l->init(&context->urDdiTable, enabledLayerNames, codelocData);
+            l->init(&context->urDdiTable, enabledLayerNames, codelocData,
+                    apiCallbacks);
         }
     }
 }
@@ -93,6 +94,7 @@ __urdlllocal ur_result_t context_t::Init(
 
     if (hLoaderConfig) {
         codelocData = hLoaderConfig->codelocData;
+        apiCallbacks = hLoaderConfig->apiCallbacks;
         enabledLayerNames.merge(hLoaderConfig->getEnabledLayerNames());
     }
 
@@ -212,6 +214,38 @@ urLoaderConfigSetCodeLocationCallback(ur_loader_config_handle_t hLoaderConfig,
     hLoaderConfig->codelocData.codelocCb = pfnCodeloc;
     hLoaderConfig->codelocData.codelocUserdata = pUserData;
 
+    return UR_RESULT_SUCCESS;
+}
+
+ur_result_t urLoaderConfigSetMockCallbacks(
+    ur_loader_config_handle_t hLoaderConfig,
+    ur_mock_callback_properties_t *pCallbackProperties) {
+    if (!hLoaderConfig) {
+        return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
+    }
+
+    if (!pCallbackProperties) {
+        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    auto result = hLoaderConfig->apiCallbacks.add_callback(pCallbackProperties);
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto nextProps =
+        static_cast<ur_base_properties_t *>(pCallbackProperties->pNext);
+    while (nextProps) {
+        if (nextProps->stype != UR_STRUCTURE_TYPE_MOCK_CALLBACK_PROPERTIES) {
+            break;
+        }
+        auto result = hLoaderConfig->apiCallbacks.add_callback(
+            reinterpret_cast<ur_mock_callback_properties_t *>(nextProps));
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+        nextProps = static_cast<ur_base_properties_t *>(nextProps->pNext);
+    }
     return UR_RESULT_SUCCESS;
 }
 

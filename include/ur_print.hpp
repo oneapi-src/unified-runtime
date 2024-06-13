@@ -227,6 +227,8 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
 inline std::ostream &operator<<(std::ostream &os, enum ur_device_init_flag_t value);
 inline std::ostream &operator<<(std::ostream &os, enum ur_loader_config_info_t value);
 inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_code_location_t params);
+inline std::ostream &operator<<(std::ostream &os, enum ur_callback_override_mode_t value);
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_mock_callback_properties_t params);
 inline std::ostream &operator<<(std::ostream &os, enum ur_adapter_info_t value);
 inline std::ostream &operator<<(std::ostream &os, enum ur_adapter_backend_t value);
 inline std::ostream &operator<<(std::ostream &os, enum ur_platform_info_t value);
@@ -932,6 +934,9 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_function_t value) {
     case UR_FUNCTION_KERNEL_GET_SUGGESTED_LOCAL_WORK_SIZE:
         os << "UR_FUNCTION_KERNEL_GET_SUGGESTED_LOCAL_WORK_SIZE";
         break;
+    case UR_FUNCTION_LOADER_CONFIG_SET_MOCK_CALLBACKS:
+        os << "UR_FUNCTION_LOADER_CONFIG_SET_MOCK_CALLBACKS";
+        break;
     default:
         os << "unknown enumerator";
         break;
@@ -1048,6 +1053,9 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_structure_type_t value
         break;
     case UR_STRUCTURE_TYPE_USM_ALLOC_LOCATION_DESC:
         os << "UR_STRUCTURE_TYPE_USM_ALLOC_LOCATION_DESC";
+        break;
+    case UR_STRUCTURE_TYPE_MOCK_CALLBACK_PROPERTIES:
+        os << "UR_STRUCTURE_TYPE_MOCK_CALLBACK_PROPERTIES";
         break;
     case UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_DESC:
         os << "UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_DESC";
@@ -1274,6 +1282,11 @@ inline ur_result_t printStruct(std::ostream &os, const void *ptr) {
 
     case UR_STRUCTURE_TYPE_USM_ALLOC_LOCATION_DESC: {
         const ur_usm_alloc_location_desc_t *pstruct = (const ur_usm_alloc_location_desc_t *)ptr;
+        printPtr(os, pstruct);
+    } break;
+
+    case UR_STRUCTURE_TYPE_MOCK_CALLBACK_PROPERTIES: {
+        const ur_mock_callback_properties_t *pstruct = (const ur_mock_callback_properties_t *)ptr;
         printPtr(os, pstruct);
     } break;
 
@@ -1845,6 +1858,63 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_code_location_
     os << ".columnNumber = ";
 
     os << (params.columnNumber);
+
+    os << "}";
+    return os;
+}
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_callback_override_mode_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, enum ur_callback_override_mode_t value) {
+    switch (value) {
+    case UR_CALLBACK_OVERRIDE_MODE_BEFORE:
+        os << "UR_CALLBACK_OVERRIDE_MODE_BEFORE";
+        break;
+    case UR_CALLBACK_OVERRIDE_MODE_REPLACE:
+        os << "UR_CALLBACK_OVERRIDE_MODE_REPLACE";
+        break;
+    case UR_CALLBACK_OVERRIDE_MODE_AFTER:
+        os << "UR_CALLBACK_OVERRIDE_MODE_AFTER";
+        break;
+    default:
+        os << "unknown enumerator";
+        break;
+    }
+    return os;
+}
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_mock_callback_properties_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, const struct ur_mock_callback_properties_t params) {
+    os << "(struct ur_mock_callback_properties_t){";
+
+    os << ".stype = ";
+
+    os << (params.stype);
+
+    os << ", ";
+    os << ".pNext = ";
+
+    ur::details::printStruct(os,
+                             (params.pNext));
+
+    os << ", ";
+    os << ".name = ";
+
+    ur::details::printPtr(os,
+                          (params.name));
+
+    os << ", ";
+    os << ".mode = ";
+
+    os << (params.mode);
+
+    os << ", ";
+    os << ".pCallback = ";
+
+    os << (params.pCallback);
 
     os << "}";
     return os;
@@ -10102,6 +10172,26 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_loader_config_set_mock_callbacks_params_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_loader_config_set_mock_callbacks_params_t *params) {
+
+    os << ".hLoaderConfig = ";
+
+    ur::details::printPtr(os,
+                          *(params->phLoaderConfig));
+
+    os << ", ";
+    os << ".pCallbackProperties = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppCallbackProperties));
+
+    return os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Print operator for the ur_platform_get_params_t type
 /// @returns
 ///     std::ostream &
@@ -17041,6 +17131,9 @@ inline ur_result_t UR_APICALL printFunctionParams(std::ostream &os, ur_function_
     } break;
     case UR_FUNCTION_LOADER_CONFIG_SET_CODE_LOCATION_CALLBACK: {
         os << (const struct ur_loader_config_set_code_location_callback_params_t *)params;
+    } break;
+    case UR_FUNCTION_LOADER_CONFIG_SET_MOCK_CALLBACKS: {
+        os << (const struct ur_loader_config_set_mock_callbacks_params_t *)params;
     } break;
     case UR_FUNCTION_PLATFORM_GET: {
         os << (const struct ur_platform_get_params_t *)params;

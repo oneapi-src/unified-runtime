@@ -67,7 +67,7 @@ namespace driver
             %elif 'range' in item:
             for( size_t i = ${item['range'][0]}; ( nullptr != ${item['name']} ) && ( i < ${item['range'][1]} ); ++i )
                 ${item['name']}[ i ] = reinterpret_cast<${item['type']}>( d_context.get() );
-            %elif not item['release']:
+            %elif not item['release'] and not item['retain']:
             %if item['optional']:
             if( nullptr != ${item['name']} ) *${item['name']} = reinterpret_cast<${item['type']}>( d_context.get() );
             %else:

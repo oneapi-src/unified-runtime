@@ -111,7 +111,7 @@ namespace ur_tracing_layer
     ${x}_result_t
     context_t::init(ur_dditable_t *dditable,
                     const std::set<std::string> &enabledLayerNames,
-                    codeloc_data codelocData) {
+                    codeloc_data codelocData, api_callbacks) {
         ${x}_result_t result = ${X}_RESULT_SUCCESS;
         
         if(!enabledLayerNames.count(name)) {

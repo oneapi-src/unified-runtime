@@ -1,20 +1,18 @@
 /*
  *
- * Copyright (C) 2023 Intel Corporation
+ * Copyright (C) 2023-2024 Intel Corporation
  *
  * Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
  * See LICENSE.TXT
  * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
  *
- * @file ur_trcddi.cpp
+ * @file ur_mockddi.cpp
  *
  */
+#include "ur_mock_layer.hpp"
 
-#include "ur_tracing_layer.hpp"
-#include <iostream>
-#include <stdio.h>
+namespace ur_mock_layer {
 
-namespace ur_tracing_layer {
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urAdapterGet
 __urdlllocal ur_result_t UR_APICALL urAdapterGet(
@@ -33,23 +31,46 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGet(
     auto pfnAdapterGet = context.urDdiTable.Global.pfnAdapterGet;
 
     if (nullptr == pfnAdapterGet) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_adapter_get_params_t params = {&NumEntries, &phAdapters, &pNumAdapters};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_ADAPTER_GET, "urAdapterGet", &params);
 
-    context.logger.info("---> urAdapterGet");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnAdapterGet(NumEntries, phAdapters, pNumAdapters);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urAdapterGet"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ADAPTER_GET, "urAdapterGet", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urAdapterGet"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_ADAPTER_GET, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        if (pNumAdapters) {
+            *pNumAdapters = 1;
+        }
+        // optional output handle
+        if (phAdapters) {
+            *phAdapters = createDummyHandle<ur_adapter_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urAdapterGet"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -62,24 +83,40 @@ __urdlllocal ur_result_t UR_APICALL urAdapterRelease(
     auto pfnAdapterRelease = context.urDdiTable.Global.pfnAdapterRelease;
 
     if (nullptr == pfnAdapterRelease) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_adapter_release_params_t params = {&hAdapter};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_ADAPTER_RELEASE,
-                                             "urAdapterRelease", &params);
 
-    context.logger.info("---> urAdapterRelease");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnAdapterRelease(hAdapter);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urAdapterRelease"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ADAPTER_RELEASE, "urAdapterRelease", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urAdapterRelease"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_ADAPTER_RELEASE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        releaseDummyHandle(hAdapter);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urAdapterRelease"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -92,24 +129,40 @@ __urdlllocal ur_result_t UR_APICALL urAdapterRetain(
     auto pfnAdapterRetain = context.urDdiTable.Global.pfnAdapterRetain;
 
     if (nullptr == pfnAdapterRetain) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_adapter_retain_params_t params = {&hAdapter};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_ADAPTER_RETAIN,
-                                             "urAdapterRetain", &params);
 
-    context.logger.info("---> urAdapterRetain");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnAdapterRetain(hAdapter);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urAdapterRetain"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ADAPTER_RETAIN, "urAdapterRetain", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urAdapterRetain"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_ADAPTER_RETAIN,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        retainDummyHandle(hAdapter);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urAdapterRetain"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -129,25 +182,40 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGetLastError(
         context.urDdiTable.Global.pfnAdapterGetLastError;
 
     if (nullptr == pfnAdapterGetLastError) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_adapter_get_last_error_params_t params = {&hAdapter, &ppMessage,
                                                  &pError};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_ADAPTER_GET_LAST_ERROR,
-                                             "urAdapterGetLastError", &params);
 
-    context.logger.info("---> urAdapterGetLastError");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnAdapterGetLastError(hAdapter, ppMessage, pError);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urAdapterGetLastError"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ADAPTER_GET_LAST_ERROR,
-                       "urAdapterGetLastError", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urAdapterGetLastError"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_ADAPTER_GET_LAST_ERROR, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urAdapterGetLastError"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -170,26 +238,40 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGetInfo(
     auto pfnAdapterGetInfo = context.urDdiTable.Global.pfnAdapterGetInfo;
 
     if (nullptr == pfnAdapterGetInfo) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_adapter_get_info_params_t params = {&hAdapter, &propName, &propSize,
                                            &pPropValue, &pPropSizeRet};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_ADAPTER_GET_INFO,
-                                             "urAdapterGetInfo", &params);
 
-    context.logger.info("---> urAdapterGetInfo");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnAdapterGetInfo(hAdapter, propName, propSize,
-                                           pPropValue, pPropSizeRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urAdapterGetInfo"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ADAPTER_GET_INFO, "urAdapterGetInfo",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urAdapterGetInfo"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_ADAPTER_GET_INFO,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urAdapterGetInfo"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -215,26 +297,47 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGet(
     auto pfnGet = context.urDdiTable.Platform.pfnGet;
 
     if (nullptr == pfnGet) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_platform_get_params_t params = {&phAdapters, &NumAdapters, &NumEntries,
                                        &phPlatforms, &pNumPlatforms};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_PLATFORM_GET,
-                                             "urPlatformGet", &params);
 
-    context.logger.info("---> urPlatformGet");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnGet(phAdapters, NumAdapters, NumEntries, phPlatforms, pNumPlatforms);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urPlatformGet"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PLATFORM_GET, "urPlatformGet", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urPlatformGet"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_PLATFORM_GET,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        if (pNumPlatforms) {
+            *pNumPlatforms = 1;
+        }
+        // optional output handle
+        if (phPlatforms) {
+            *phPlatforms = createDummyHandle<ur_platform_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urPlatformGet"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -257,26 +360,40 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetInfo(
     auto pfnGetInfo = context.urDdiTable.Platform.pfnGetInfo;
 
     if (nullptr == pfnGetInfo) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_platform_get_info_params_t params = {&hPlatform, &propName, &propSize,
                                             &pPropValue, &pPropSizeRet};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_PLATFORM_GET_INFO,
-                                             "urPlatformGetInfo", &params);
 
-    context.logger.info("---> urPlatformGetInfo");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnGetInfo(hPlatform, propName, propSize, pPropValue, pPropSizeRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urPlatformGetInfo"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PLATFORM_GET_INFO, "urPlatformGetInfo",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urPlatformGetInfo"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_PLATFORM_GET_INFO,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urPlatformGetInfo"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -290,25 +407,39 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetApiVersion(
     auto pfnGetApiVersion = context.urDdiTable.Platform.pfnGetApiVersion;
 
     if (nullptr == pfnGetApiVersion) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_platform_get_api_version_params_t params = {&hPlatform, &pVersion};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_PLATFORM_GET_API_VERSION,
-                             "urPlatformGetApiVersion", &params);
 
-    context.logger.info("---> urPlatformGetApiVersion");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnGetApiVersion(hPlatform, pVersion);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urPlatformGetApiVersion"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PLATFORM_GET_API_VERSION,
-                       "urPlatformGetApiVersion", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urPlatformGetApiVersion"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_PLATFORM_GET_API_VERSION, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urPlatformGetApiVersion"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -323,26 +454,41 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetNativeHandle(
     auto pfnGetNativeHandle = context.urDdiTable.Platform.pfnGetNativeHandle;
 
     if (nullptr == pfnGetNativeHandle) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_platform_get_native_handle_params_t params = {&hPlatform,
                                                      &phNativePlatform};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_PLATFORM_GET_NATIVE_HANDLE,
-                             "urPlatformGetNativeHandle", &params);
 
-    context.logger.info("---> urPlatformGetNativeHandle");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnGetNativeHandle(hPlatform, phNativePlatform);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urPlatformGetNativeHandle"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PLATFORM_GET_NATIVE_HANDLE,
-                       "urPlatformGetNativeHandle", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urPlatformGetNativeHandle"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_PLATFORM_GET_NATIVE_HANDLE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phNativePlatform = reinterpret_cast<ur_native_handle_t>(hPlatform);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urPlatformGetNativeHandle"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -361,28 +507,45 @@ __urdlllocal ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
         context.urDdiTable.Platform.pfnCreateWithNativeHandle;
 
     if (nullptr == pfnCreateWithNativeHandle) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_platform_create_with_native_handle_params_t params = {
         &hNativePlatform, &pProperties, &phPlatform};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_PLATFORM_CREATE_WITH_NATIVE_HANDLE,
-                             "urPlatformCreateWithNativeHandle", &params);
 
-    context.logger.info("---> urPlatformCreateWithNativeHandle");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnCreateWithNativeHandle(hNativePlatform, pProperties, phPlatform);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urPlatformCreateWithNativeHandle"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PLATFORM_CREATE_WITH_NATIVE_HANDLE,
-                       "urPlatformCreateWithNativeHandle", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urPlatformCreateWithNativeHandle"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_PLATFORM_CREATE_WITH_NATIVE_HANDLE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phPlatform = reinterpret_cast<ur_platform_handle_t>(hNativePlatform);
+        retainDummyHandle(*phPlatform);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urPlatformCreateWithNativeHandle"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -400,28 +563,41 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetBackendOption(
     auto pfnGetBackendOption = context.urDdiTable.Platform.pfnGetBackendOption;
 
     if (nullptr == pfnGetBackendOption) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_platform_get_backend_option_params_t params = {
         &hPlatform, &pFrontendOption, &ppPlatformOption};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_PLATFORM_GET_BACKEND_OPTION,
-                             "urPlatformGetBackendOption", &params);
 
-    context.logger.info("---> urPlatformGetBackendOption");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnGetBackendOption(hPlatform, pFrontendOption, ppPlatformOption);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urPlatformGetBackendOption"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PLATFORM_GET_BACKEND_OPTION,
-                       "urPlatformGetBackendOption", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urPlatformGetBackendOption"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_PLATFORM_GET_BACKEND_OPTION, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urPlatformGetBackendOption"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -446,25 +622,47 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGet(
     auto pfnGet = context.urDdiTable.Device.pfnGet;
 
     if (nullptr == pfnGet) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_device_get_params_t params = {&hPlatform, &DeviceType, &NumEntries,
                                      &phDevices, &pNumDevices};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_DEVICE_GET, "urDeviceGet", &params);
 
-    context.logger.info("---> urDeviceGet");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnGet(hPlatform, DeviceType, NumEntries, phDevices, pNumDevices);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urDeviceGet"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_DEVICE_GET, "urDeviceGet", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urDeviceGet"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_DEVICE_GET, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        if (pNumDevices) {
+            *pNumDevices = 1;
+        }
+        // optional output handle
+        if (phDevices) {
+            *phDevices = createDummyHandle<ur_device_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urDeviceGet"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -488,26 +686,40 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetInfo(
     auto pfnGetInfo = context.urDdiTable.Device.pfnGetInfo;
 
     if (nullptr == pfnGetInfo) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_device_get_info_params_t params = {&hDevice, &propName, &propSize,
                                           &pPropValue, &pPropSizeRet};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_DEVICE_GET_INFO,
-                                             "urDeviceGetInfo", &params);
 
-    context.logger.info("---> urDeviceGetInfo");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnGetInfo(hDevice, propName, propSize, pPropValue, pPropSizeRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urDeviceGetInfo"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_DEVICE_GET_INFO, "urDeviceGetInfo", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urDeviceGetInfo"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_DEVICE_GET_INFO,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urDeviceGetInfo"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -521,24 +733,40 @@ __urdlllocal ur_result_t UR_APICALL urDeviceRetain(
     auto pfnRetain = context.urDdiTable.Device.pfnRetain;
 
     if (nullptr == pfnRetain) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_device_retain_params_t params = {&hDevice};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_DEVICE_RETAIN,
-                                             "urDeviceRetain", &params);
 
-    context.logger.info("---> urDeviceRetain");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnRetain(hDevice);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urDeviceRetain"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_DEVICE_RETAIN, "urDeviceRetain", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urDeviceRetain"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_DEVICE_RETAIN,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        retainDummyHandle(hDevice);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urDeviceRetain"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -552,24 +780,40 @@ __urdlllocal ur_result_t UR_APICALL urDeviceRelease(
     auto pfnRelease = context.urDdiTable.Device.pfnRelease;
 
     if (nullptr == pfnRelease) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_device_release_params_t params = {&hDevice};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_DEVICE_RELEASE,
-                                             "urDeviceRelease", &params);
 
-    context.logger.info("---> urDeviceRelease");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnRelease(hDevice);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urDeviceRelease"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_DEVICE_RELEASE, "urDeviceRelease", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urDeviceRelease"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_DEVICE_RELEASE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        releaseDummyHandle(hDevice);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urDeviceRelease"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -592,26 +836,44 @@ __urdlllocal ur_result_t UR_APICALL urDevicePartition(
     auto pfnPartition = context.urDdiTable.Device.pfnPartition;
 
     if (nullptr == pfnPartition) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_device_partition_params_t params = {&hDevice, &pProperties, &NumDevices,
                                            &phSubDevices, &pNumDevicesRet};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_DEVICE_PARTITION,
-                                             "urDevicePartition", &params);
 
-    context.logger.info("---> urDevicePartition");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnPartition(hDevice, pProperties, NumDevices,
-                                      phSubDevices, pNumDevicesRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urDevicePartition"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_DEVICE_PARTITION, "urDevicePartition",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urDevicePartition"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_DEVICE_PARTITION,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phSubDevices) {
+            *phSubDevices = createDummyHandle<ur_device_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urDevicePartition"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -633,26 +895,40 @@ __urdlllocal ur_result_t UR_APICALL urDeviceSelectBinary(
     auto pfnSelectBinary = context.urDdiTable.Device.pfnSelectBinary;
 
     if (nullptr == pfnSelectBinary) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_device_select_binary_params_t params = {&hDevice, &pBinaries,
                                                &NumBinaries, &pSelectedBinary};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_DEVICE_SELECT_BINARY,
-                                             "urDeviceSelectBinary", &params);
 
-    context.logger.info("---> urDeviceSelectBinary");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnSelectBinary(hDevice, pBinaries, NumBinaries, pSelectedBinary);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urDeviceSelectBinary"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_DEVICE_SELECT_BINARY, "urDeviceSelectBinary",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urDeviceSelectBinary"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_DEVICE_SELECT_BINARY,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urDeviceSelectBinary"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -667,25 +943,40 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetNativeHandle(
     auto pfnGetNativeHandle = context.urDdiTable.Device.pfnGetNativeHandle;
 
     if (nullptr == pfnGetNativeHandle) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_device_get_native_handle_params_t params = {&hDevice, &phNativeDevice};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_DEVICE_GET_NATIVE_HANDLE,
-                             "urDeviceGetNativeHandle", &params);
 
-    context.logger.info("---> urDeviceGetNativeHandle");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnGetNativeHandle(hDevice, phNativeDevice);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urDeviceGetNativeHandle"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_DEVICE_GET_NATIVE_HANDLE,
-                       "urDeviceGetNativeHandle", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urDeviceGetNativeHandle"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_DEVICE_GET_NATIVE_HANDLE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phNativeDevice = reinterpret_cast<ur_native_handle_t>(hDevice);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urDeviceGetNativeHandle"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -705,28 +996,45 @@ __urdlllocal ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
         context.urDdiTable.Device.pfnCreateWithNativeHandle;
 
     if (nullptr == pfnCreateWithNativeHandle) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_device_create_with_native_handle_params_t params = {
         &hNativeDevice, &hPlatform, &pProperties, &phDevice};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_DEVICE_CREATE_WITH_NATIVE_HANDLE,
-                             "urDeviceCreateWithNativeHandle", &params);
 
-    context.logger.info("---> urDeviceCreateWithNativeHandle");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnCreateWithNativeHandle(hNativeDevice, hPlatform,
-                                                   pProperties, phDevice);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urDeviceCreateWithNativeHandle"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_DEVICE_CREATE_WITH_NATIVE_HANDLE,
-                       "urDeviceCreateWithNativeHandle", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urDeviceCreateWithNativeHandle"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_DEVICE_CREATE_WITH_NATIVE_HANDLE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phDevice = reinterpret_cast<ur_device_handle_t>(hNativeDevice);
+        retainDummyHandle(*phDevice);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urDeviceCreateWithNativeHandle"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -746,28 +1054,42 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetGlobalTimestamps(
         context.urDdiTable.Device.pfnGetGlobalTimestamps;
 
     if (nullptr == pfnGetGlobalTimestamps) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_device_get_global_timestamps_params_t params = {
         &hDevice, &pDeviceTimestamp, &pHostTimestamp};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_DEVICE_GET_GLOBAL_TIMESTAMPS,
-                             "urDeviceGetGlobalTimestamps", &params);
 
-    context.logger.info("---> urDeviceGetGlobalTimestamps");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnGetGlobalTimestamps(hDevice, pDeviceTimestamp, pHostTimestamp);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urDeviceGetGlobalTimestamps"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_DEVICE_GET_GLOBAL_TIMESTAMPS,
-                       "urDeviceGetGlobalTimestamps", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urDeviceGetGlobalTimestamps"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_DEVICE_GET_GLOBAL_TIMESTAMPS, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urDeviceGetGlobalTimestamps"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -786,26 +1108,41 @@ __urdlllocal ur_result_t UR_APICALL urContextCreate(
     auto pfnCreate = context.urDdiTable.Context.pfnCreate;
 
     if (nullptr == pfnCreate) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_context_create_params_t params = {&DeviceCount, &phDevices, &pProperties,
                                          &phContext};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_CONTEXT_CREATE,
-                                             "urContextCreate", &params);
 
-    context.logger.info("---> urContextCreate");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnCreate(DeviceCount, phDevices, pProperties, phContext);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urContextCreate"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_CONTEXT_CREATE, "urContextCreate", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urContextCreate"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_CONTEXT_CREATE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phContext = createDummyHandle<ur_context_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urContextCreate"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -819,24 +1156,40 @@ __urdlllocal ur_result_t UR_APICALL urContextRetain(
     auto pfnRetain = context.urDdiTable.Context.pfnRetain;
 
     if (nullptr == pfnRetain) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_context_retain_params_t params = {&hContext};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_CONTEXT_RETAIN,
-                                             "urContextRetain", &params);
 
-    context.logger.info("---> urContextRetain");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnRetain(hContext);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urContextRetain"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_CONTEXT_RETAIN, "urContextRetain", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urContextRetain"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_CONTEXT_RETAIN,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        retainDummyHandle(hContext);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urContextRetain"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -850,24 +1203,40 @@ __urdlllocal ur_result_t UR_APICALL urContextRelease(
     auto pfnRelease = context.urDdiTable.Context.pfnRelease;
 
     if (nullptr == pfnRelease) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_context_release_params_t params = {&hContext};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_CONTEXT_RELEASE,
-                                             "urContextRelease", &params);
 
-    context.logger.info("---> urContextRelease");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnRelease(hContext);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urContextRelease"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_CONTEXT_RELEASE, "urContextRelease", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urContextRelease"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_CONTEXT_RELEASE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        releaseDummyHandle(hContext);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urContextRelease"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -892,26 +1261,40 @@ __urdlllocal ur_result_t UR_APICALL urContextGetInfo(
     auto pfnGetInfo = context.urDdiTable.Context.pfnGetInfo;
 
     if (nullptr == pfnGetInfo) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_context_get_info_params_t params = {&hContext, &propName, &propSize,
                                            &pPropValue, &pPropSizeRet};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_CONTEXT_GET_INFO,
-                                             "urContextGetInfo", &params);
 
-    context.logger.info("---> urContextGetInfo");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnGetInfo(hContext, propName, propSize, pPropValue, pPropSizeRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urContextGetInfo"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_CONTEXT_GET_INFO, "urContextGetInfo",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urContextGetInfo"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_CONTEXT_GET_INFO,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urContextGetInfo"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -926,26 +1309,41 @@ __urdlllocal ur_result_t UR_APICALL urContextGetNativeHandle(
     auto pfnGetNativeHandle = context.urDdiTable.Context.pfnGetNativeHandle;
 
     if (nullptr == pfnGetNativeHandle) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_context_get_native_handle_params_t params = {&hContext,
                                                     &phNativeContext};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_CONTEXT_GET_NATIVE_HANDLE,
-                             "urContextGetNativeHandle", &params);
 
-    context.logger.info("---> urContextGetNativeHandle");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnGetNativeHandle(hContext, phNativeContext);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urContextGetNativeHandle"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_CONTEXT_GET_NATIVE_HANDLE,
-                       "urContextGetNativeHandle", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urContextGetNativeHandle"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_CONTEXT_GET_NATIVE_HANDLE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phNativeContext = reinterpret_cast<ur_native_handle_t>(hContext);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urContextGetNativeHandle"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -967,28 +1365,45 @@ __urdlllocal ur_result_t UR_APICALL urContextCreateWithNativeHandle(
         context.urDdiTable.Context.pfnCreateWithNativeHandle;
 
     if (nullptr == pfnCreateWithNativeHandle) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_context_create_with_native_handle_params_t params = {
         &hNativeContext, &numDevices, &phDevices, &pProperties, &phContext};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_CONTEXT_CREATE_WITH_NATIVE_HANDLE,
-                             "urContextCreateWithNativeHandle", &params);
 
-    context.logger.info("---> urContextCreateWithNativeHandle");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnCreateWithNativeHandle(
-        hNativeContext, numDevices, phDevices, pProperties, phContext);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urContextCreateWithNativeHandle"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_CONTEXT_CREATE_WITH_NATIVE_HANDLE,
-                       "urContextCreateWithNativeHandle", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urContextCreateWithNativeHandle"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_CONTEXT_CREATE_WITH_NATIVE_HANDLE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phContext = reinterpret_cast<ur_context_handle_t>(hNativeContext);
+        retainDummyHandle(*phContext);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urContextCreateWithNativeHandle"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1006,27 +1421,42 @@ __urdlllocal ur_result_t UR_APICALL urContextSetExtendedDeleter(
         context.urDdiTable.Context.pfnSetExtendedDeleter;
 
     if (nullptr == pfnSetExtendedDeleter) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_context_set_extended_deleter_params_t params = {&hContext, &pfnDeleter,
                                                        &pUserData};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_CONTEXT_SET_EXTENDED_DELETER,
-                             "urContextSetExtendedDeleter", &params);
 
-    context.logger.info("---> urContextSetExtendedDeleter");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnSetExtendedDeleter(hContext, pfnDeleter, pUserData);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urContextSetExtendedDeleter"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_CONTEXT_SET_EXTENDED_DELETER,
-                       "urContextSetExtendedDeleter", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urContextSetExtendedDeleter"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_CONTEXT_SET_EXTENDED_DELETER, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urContextSetExtendedDeleter"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1045,26 +1475,41 @@ __urdlllocal ur_result_t UR_APICALL urMemImageCreate(
     auto pfnImageCreate = context.urDdiTable.Mem.pfnImageCreate;
 
     if (nullptr == pfnImageCreate) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_mem_image_create_params_t params = {&hContext,   &flags, &pImageFormat,
                                            &pImageDesc, &pHost, &phMem};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_MEM_IMAGE_CREATE,
-                                             "urMemImageCreate", &params);
 
-    context.logger.info("---> urMemImageCreate");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnImageCreate(hContext, flags, pImageFormat, pImageDesc, pHost, phMem);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urMemImageCreate"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_MEM_IMAGE_CREATE, "urMemImageCreate",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urMemImageCreate"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_MEM_IMAGE_CREATE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phMem = createDummyHandle<ur_mem_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urMemImageCreate"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1083,26 +1528,41 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreate(
     auto pfnBufferCreate = context.urDdiTable.Mem.pfnBufferCreate;
 
     if (nullptr == pfnBufferCreate) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_mem_buffer_create_params_t params = {&hContext, &flags, &size,
                                             &pProperties, &phBuffer};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_MEM_BUFFER_CREATE,
-                                             "urMemBufferCreate", &params);
 
-    context.logger.info("---> urMemBufferCreate");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnBufferCreate(hContext, flags, size, pProperties, phBuffer);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urMemBufferCreate"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_MEM_BUFFER_CREATE, "urMemBufferCreate",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urMemBufferCreate"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_MEM_BUFFER_CREATE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phBuffer = createDummyHandle<ur_mem_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urMemBufferCreate"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1116,23 +1576,40 @@ __urdlllocal ur_result_t UR_APICALL urMemRetain(
     auto pfnRetain = context.urDdiTable.Mem.pfnRetain;
 
     if (nullptr == pfnRetain) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_mem_retain_params_t params = {&hMem};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_MEM_RETAIN, "urMemRetain", &params);
 
-    context.logger.info("---> urMemRetain");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnRetain(hMem);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urMemRetain"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_MEM_RETAIN, "urMemRetain", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urMemRetain"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_MEM_RETAIN, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        retainDummyHandle(hMem);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urMemRetain"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1146,23 +1623,40 @@ __urdlllocal ur_result_t UR_APICALL urMemRelease(
     auto pfnRelease = context.urDdiTable.Mem.pfnRelease;
 
     if (nullptr == pfnRelease) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_mem_release_params_t params = {&hMem};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_MEM_RELEASE, "urMemRelease", &params);
 
-    context.logger.info("---> urMemRelease");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnRelease(hMem);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urMemRelease"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_MEM_RELEASE, "urMemRelease", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urMemRelease"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_MEM_RELEASE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        releaseDummyHandle(hMem);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urMemRelease"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1182,26 +1676,41 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferPartition(
     auto pfnBufferPartition = context.urDdiTable.Mem.pfnBufferPartition;
 
     if (nullptr == pfnBufferPartition) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_mem_buffer_partition_params_t params = {
         &hBuffer, &flags, &bufferCreateType, &pRegion, &phMem};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_MEM_BUFFER_PARTITION,
-                                             "urMemBufferPartition", &params);
 
-    context.logger.info("---> urMemBufferPartition");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnBufferPartition(hBuffer, flags, bufferCreateType, pRegion, phMem);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urMemBufferPartition"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_MEM_BUFFER_PARTITION, "urMemBufferPartition",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urMemBufferPartition"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_MEM_BUFFER_PARTITION,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phMem = createDummyHandle<ur_mem_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urMemBufferPartition"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1218,24 +1727,40 @@ __urdlllocal ur_result_t UR_APICALL urMemGetNativeHandle(
     auto pfnGetNativeHandle = context.urDdiTable.Mem.pfnGetNativeHandle;
 
     if (nullptr == pfnGetNativeHandle) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_mem_get_native_handle_params_t params = {&hMem, &hDevice, &phNativeMem};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_MEM_GET_NATIVE_HANDLE,
-                                             "urMemGetNativeHandle", &params);
 
-    context.logger.info("---> urMemGetNativeHandle");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnGetNativeHandle(hMem, hDevice, phNativeMem);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urMemGetNativeHandle"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_MEM_GET_NATIVE_HANDLE,
-                       "urMemGetNativeHandle", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urMemGetNativeHandle"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_MEM_GET_NATIVE_HANDLE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phNativeMem = reinterpret_cast<ur_native_handle_t>(hMem);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urMemGetNativeHandle"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1255,28 +1780,45 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
         context.urDdiTable.Mem.pfnBufferCreateWithNativeHandle;
 
     if (nullptr == pfnBufferCreateWithNativeHandle) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_mem_buffer_create_with_native_handle_params_t params = {
         &hNativeMem, &hContext, &pProperties, &phMem};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_MEM_BUFFER_CREATE_WITH_NATIVE_HANDLE,
-                             "urMemBufferCreateWithNativeHandle", &params);
 
-    context.logger.info("---> urMemBufferCreateWithNativeHandle");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnBufferCreateWithNativeHandle(hNativeMem, hContext,
-                                                         pProperties, phMem);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urMemBufferCreateWithNativeHandle"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_MEM_BUFFER_CREATE_WITH_NATIVE_HANDLE,
-                       "urMemBufferCreateWithNativeHandle", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urMemBufferCreateWithNativeHandle"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_MEM_BUFFER_CREATE_WITH_NATIVE_HANDLE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phMem = reinterpret_cast<ur_mem_handle_t>(hNativeMem);
+        retainDummyHandle(*phMem);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urMemBufferCreateWithNativeHandle"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1299,29 +1841,46 @@ __urdlllocal ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
         context.urDdiTable.Mem.pfnImageCreateWithNativeHandle;
 
     if (nullptr == pfnImageCreateWithNativeHandle) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_mem_image_create_with_native_handle_params_t params = {
         &hNativeMem, &hContext,    &pImageFormat,
         &pImageDesc, &pProperties, &phMem};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_MEM_IMAGE_CREATE_WITH_NATIVE_HANDLE,
-                             "urMemImageCreateWithNativeHandle", &params);
 
-    context.logger.info("---> urMemImageCreateWithNativeHandle");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnImageCreateWithNativeHandle(
-        hNativeMem, hContext, pImageFormat, pImageDesc, pProperties, phMem);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urMemImageCreateWithNativeHandle"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_MEM_IMAGE_CREATE_WITH_NATIVE_HANDLE,
-                       "urMemImageCreateWithNativeHandle", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urMemImageCreateWithNativeHandle"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_MEM_IMAGE_CREATE_WITH_NATIVE_HANDLE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phMem = reinterpret_cast<ur_mem_handle_t>(hNativeMem);
+        retainDummyHandle(*phMem);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urMemImageCreateWithNativeHandle"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1346,26 +1905,40 @@ __urdlllocal ur_result_t UR_APICALL urMemGetInfo(
     auto pfnGetInfo = context.urDdiTable.Mem.pfnGetInfo;
 
     if (nullptr == pfnGetInfo) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_mem_get_info_params_t params = {&hMemory, &propName, &propSize,
                                        &pPropValue, &pPropSizeRet};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_MEM_GET_INFO, "urMemGetInfo", &params);
 
-    context.logger.info("---> urMemGetInfo");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnGetInfo(hMemory, propName, propSize, pPropValue, pPropSizeRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urMemGetInfo"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_MEM_GET_INFO, "urMemGetInfo", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urMemGetInfo"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_MEM_GET_INFO,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urMemGetInfo"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1389,26 +1962,40 @@ __urdlllocal ur_result_t UR_APICALL urMemImageGetInfo(
     auto pfnImageGetInfo = context.urDdiTable.Mem.pfnImageGetInfo;
 
     if (nullptr == pfnImageGetInfo) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_mem_image_get_info_params_t params = {&hMemory, &propName, &propSize,
                                              &pPropValue, &pPropSizeRet};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_MEM_IMAGE_GET_INFO,
-                                             "urMemImageGetInfo", &params);
 
-    context.logger.info("---> urMemImageGetInfo");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnImageGetInfo(hMemory, propName, propSize, pPropValue, pPropSizeRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urMemImageGetInfo"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_MEM_IMAGE_GET_INFO, "urMemImageGetInfo",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urMemImageGetInfo"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_MEM_IMAGE_GET_INFO,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urMemImageGetInfo"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1424,24 +2011,40 @@ __urdlllocal ur_result_t UR_APICALL urSamplerCreate(
     auto pfnCreate = context.urDdiTable.Sampler.pfnCreate;
 
     if (nullptr == pfnCreate) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_sampler_create_params_t params = {&hContext, &pDesc, &phSampler};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_SAMPLER_CREATE,
-                                             "urSamplerCreate", &params);
 
-    context.logger.info("---> urSamplerCreate");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnCreate(hContext, pDesc, phSampler);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urSamplerCreate"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_SAMPLER_CREATE, "urSamplerCreate", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urSamplerCreate"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_SAMPLER_CREATE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phSampler = createDummyHandle<ur_sampler_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urSamplerCreate"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1455,24 +2058,40 @@ __urdlllocal ur_result_t UR_APICALL urSamplerRetain(
     auto pfnRetain = context.urDdiTable.Sampler.pfnRetain;
 
     if (nullptr == pfnRetain) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_sampler_retain_params_t params = {&hSampler};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_SAMPLER_RETAIN,
-                                             "urSamplerRetain", &params);
 
-    context.logger.info("---> urSamplerRetain");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnRetain(hSampler);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urSamplerRetain"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_SAMPLER_RETAIN, "urSamplerRetain", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urSamplerRetain"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_SAMPLER_RETAIN,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        retainDummyHandle(hSampler);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urSamplerRetain"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1486,24 +2105,40 @@ __urdlllocal ur_result_t UR_APICALL urSamplerRelease(
     auto pfnRelease = context.urDdiTable.Sampler.pfnRelease;
 
     if (nullptr == pfnRelease) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_sampler_release_params_t params = {&hSampler};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_SAMPLER_RELEASE,
-                                             "urSamplerRelease", &params);
 
-    context.logger.info("---> urSamplerRelease");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnRelease(hSampler);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urSamplerRelease"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_SAMPLER_RELEASE, "urSamplerRelease", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urSamplerRelease"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_SAMPLER_RELEASE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        releaseDummyHandle(hSampler);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urSamplerRelease"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1524,26 +2159,40 @@ __urdlllocal ur_result_t UR_APICALL urSamplerGetInfo(
     auto pfnGetInfo = context.urDdiTable.Sampler.pfnGetInfo;
 
     if (nullptr == pfnGetInfo) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_sampler_get_info_params_t params = {&hSampler, &propName, &propSize,
                                            &pPropValue, &pPropSizeRet};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_SAMPLER_GET_INFO,
-                                             "urSamplerGetInfo", &params);
 
-    context.logger.info("---> urSamplerGetInfo");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnGetInfo(hSampler, propName, propSize, pPropValue, pPropSizeRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urSamplerGetInfo"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_SAMPLER_GET_INFO, "urSamplerGetInfo",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urSamplerGetInfo"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_SAMPLER_GET_INFO,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urSamplerGetInfo"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1558,26 +2207,41 @@ __urdlllocal ur_result_t UR_APICALL urSamplerGetNativeHandle(
     auto pfnGetNativeHandle = context.urDdiTable.Sampler.pfnGetNativeHandle;
 
     if (nullptr == pfnGetNativeHandle) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_sampler_get_native_handle_params_t params = {&hSampler,
                                                     &phNativeSampler};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_SAMPLER_GET_NATIVE_HANDLE,
-                             "urSamplerGetNativeHandle", &params);
 
-    context.logger.info("---> urSamplerGetNativeHandle");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnGetNativeHandle(hSampler, phNativeSampler);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urSamplerGetNativeHandle"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_SAMPLER_GET_NATIVE_HANDLE,
-                       "urSamplerGetNativeHandle", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urSamplerGetNativeHandle"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_SAMPLER_GET_NATIVE_HANDLE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phNativeSampler = reinterpret_cast<ur_native_handle_t>(hSampler);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urSamplerGetNativeHandle"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1597,28 +2261,45 @@ __urdlllocal ur_result_t UR_APICALL urSamplerCreateWithNativeHandle(
         context.urDdiTable.Sampler.pfnCreateWithNativeHandle;
 
     if (nullptr == pfnCreateWithNativeHandle) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_sampler_create_with_native_handle_params_t params = {
         &hNativeSampler, &hContext, &pProperties, &phSampler};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_SAMPLER_CREATE_WITH_NATIVE_HANDLE,
-                             "urSamplerCreateWithNativeHandle", &params);
 
-    context.logger.info("---> urSamplerCreateWithNativeHandle");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnCreateWithNativeHandle(hNativeSampler, hContext,
-                                                   pProperties, phSampler);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urSamplerCreateWithNativeHandle"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_SAMPLER_CREATE_WITH_NATIVE_HANDLE,
-                       "urSamplerCreateWithNativeHandle", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urSamplerCreateWithNativeHandle"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_SAMPLER_CREATE_WITH_NATIVE_HANDLE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phSampler = reinterpret_cast<ur_sampler_handle_t>(hNativeSampler);
+        retainDummyHandle(*phSampler);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urSamplerCreateWithNativeHandle"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1638,25 +2319,40 @@ __urdlllocal ur_result_t UR_APICALL urUSMHostAlloc(
     auto pfnHostAlloc = context.urDdiTable.USM.pfnHostAlloc;
 
     if (nullptr == pfnHostAlloc) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_usm_host_alloc_params_t params = {&hContext, &pUSMDesc, &pool, &size,
                                          &ppMem};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_USM_HOST_ALLOC,
-                                             "urUSMHostAlloc", &params);
 
-    context.logger.info("---> urUSMHostAlloc");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnHostAlloc(hContext, pUSMDesc, pool, size, ppMem);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urUSMHostAlloc"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_USM_HOST_ALLOC, "urUSMHostAlloc", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urUSMHostAlloc"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_USM_HOST_ALLOC,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urUSMHostAlloc"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1677,26 +2373,40 @@ __urdlllocal ur_result_t UR_APICALL urUSMDeviceAlloc(
     auto pfnDeviceAlloc = context.urDdiTable.USM.pfnDeviceAlloc;
 
     if (nullptr == pfnDeviceAlloc) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_usm_device_alloc_params_t params = {&hContext, &hDevice, &pUSMDesc,
                                            &pool,     &size,    &ppMem};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_USM_DEVICE_ALLOC,
-                                             "urUSMDeviceAlloc", &params);
 
-    context.logger.info("---> urUSMDeviceAlloc");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnDeviceAlloc(hContext, hDevice, pUSMDesc, pool, size, ppMem);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urUSMDeviceAlloc"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_USM_DEVICE_ALLOC, "urUSMDeviceAlloc",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urUSMDeviceAlloc"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_USM_DEVICE_ALLOC,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urUSMDeviceAlloc"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1717,26 +2427,40 @@ __urdlllocal ur_result_t UR_APICALL urUSMSharedAlloc(
     auto pfnSharedAlloc = context.urDdiTable.USM.pfnSharedAlloc;
 
     if (nullptr == pfnSharedAlloc) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_usm_shared_alloc_params_t params = {&hContext, &hDevice, &pUSMDesc,
                                            &pool,     &size,    &ppMem};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_USM_SHARED_ALLOC,
-                                             "urUSMSharedAlloc", &params);
 
-    context.logger.info("---> urUSMSharedAlloc");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnSharedAlloc(hContext, hDevice, pUSMDesc, pool, size, ppMem);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urUSMSharedAlloc"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_USM_SHARED_ALLOC, "urUSMSharedAlloc",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urUSMSharedAlloc"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_USM_SHARED_ALLOC,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urUSMSharedAlloc"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1750,23 +2474,39 @@ __urdlllocal ur_result_t UR_APICALL urUSMFree(
     auto pfnFree = context.urDdiTable.USM.pfnFree;
 
     if (nullptr == pfnFree) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_usm_free_params_t params = {&hContext, &pMem};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_USM_FREE, "urUSMFree", &params);
 
-    context.logger.info("---> urUSMFree");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnFree(hContext, pMem);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urUSMFree"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_USM_FREE, "urUSMFree", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urUSMFree"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_USM_FREE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urUSMFree"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1789,26 +2529,40 @@ __urdlllocal ur_result_t UR_APICALL urUSMGetMemAllocInfo(
     auto pfnGetMemAllocInfo = context.urDdiTable.USM.pfnGetMemAllocInfo;
 
     if (nullptr == pfnGetMemAllocInfo) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_usm_get_mem_alloc_info_params_t params = {
         &hContext, &pMem, &propName, &propSize, &pPropValue, &pPropSizeRet};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_USM_GET_MEM_ALLOC_INFO,
-                                             "urUSMGetMemAllocInfo", &params);
 
-    context.logger.info("---> urUSMGetMemAllocInfo");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnGetMemAllocInfo(hContext, pMem, propName, propSize,
-                                            pPropValue, pPropSizeRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urUSMGetMemAllocInfo"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_USM_GET_MEM_ALLOC_INFO,
-                       "urUSMGetMemAllocInfo", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urUSMGetMemAllocInfo"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_USM_GET_MEM_ALLOC_INFO, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urUSMGetMemAllocInfo"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1825,24 +2579,40 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolCreate(
     auto pfnPoolCreate = context.urDdiTable.USM.pfnPoolCreate;
 
     if (nullptr == pfnPoolCreate) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_usm_pool_create_params_t params = {&hContext, &pPoolDesc, &ppPool};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_USM_POOL_CREATE,
-                                             "urUSMPoolCreate", &params);
 
-    context.logger.info("---> urUSMPoolCreate");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnPoolCreate(hContext, pPoolDesc, ppPool);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urUSMPoolCreate"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_USM_POOL_CREATE, "urUSMPoolCreate", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urUSMPoolCreate"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_USM_POOL_CREATE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *ppPool = createDummyHandle<ur_usm_pool_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urUSMPoolCreate"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1855,24 +2625,40 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolRetain(
     auto pfnPoolRetain = context.urDdiTable.USM.pfnPoolRetain;
 
     if (nullptr == pfnPoolRetain) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_usm_pool_retain_params_t params = {&pPool};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_USM_POOL_RETAIN,
-                                             "urUSMPoolRetain", &params);
 
-    context.logger.info("---> urUSMPoolRetain");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnPoolRetain(pPool);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urUSMPoolRetain"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_USM_POOL_RETAIN, "urUSMPoolRetain", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urUSMPoolRetain"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_USM_POOL_RETAIN,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        retainDummyHandle(pPool);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urUSMPoolRetain"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1885,24 +2671,40 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolRelease(
     auto pfnPoolRelease = context.urDdiTable.USM.pfnPoolRelease;
 
     if (nullptr == pfnPoolRelease) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_usm_pool_release_params_t params = {&pPool};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_USM_POOL_RELEASE,
-                                             "urUSMPoolRelease", &params);
 
-    context.logger.info("---> urUSMPoolRelease");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnPoolRelease(pPool);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urUSMPoolRelease"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_USM_POOL_RELEASE, "urUSMPoolRelease",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urUSMPoolRelease"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_USM_POOL_RELEASE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        releaseDummyHandle(pPool);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urUSMPoolRelease"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1922,26 +2724,40 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolGetInfo(
     auto pfnPoolGetInfo = context.urDdiTable.USM.pfnPoolGetInfo;
 
     if (nullptr == pfnPoolGetInfo) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_usm_pool_get_info_params_t params = {&hPool, &propName, &propSize,
                                             &pPropValue, &pPropSizeRet};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_USM_POOL_GET_INFO,
-                                             "urUSMPoolGetInfo", &params);
 
-    context.logger.info("---> urUSMPoolGetInfo");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnPoolGetInfo(hPool, propName, propSize, pPropValue, pPropSizeRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urUSMPoolGetInfo"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_USM_POOL_GET_INFO, "urUSMPoolGetInfo",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urUSMPoolGetInfo"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_USM_POOL_GET_INFO,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urUSMPoolGetInfo"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -1969,28 +2785,43 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemGranularityGetInfo(
         context.urDdiTable.VirtualMem.pfnGranularityGetInfo;
 
     if (nullptr == pfnGranularityGetInfo) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_virtual_mem_granularity_get_info_params_t params = {
         &hContext, &hDevice, &propName, &propSize, &pPropValue, &pPropSizeRet};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_VIRTUAL_MEM_GRANULARITY_GET_INFO,
-                             "urVirtualMemGranularityGetInfo", &params);
 
-    context.logger.info("---> urVirtualMemGranularityGetInfo");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnGranularityGetInfo(
-        hContext, hDevice, propName, propSize, pPropValue, pPropSizeRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urVirtualMemGranularityGetInfo"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_VIRTUAL_MEM_GRANULARITY_GET_INFO,
-                       "urVirtualMemGranularityGetInfo", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urVirtualMemGranularityGetInfo"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_VIRTUAL_MEM_GRANULARITY_GET_INFO, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urVirtualMemGranularityGetInfo"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2012,25 +2843,40 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemReserve(
     auto pfnReserve = context.urDdiTable.VirtualMem.pfnReserve;
 
     if (nullptr == pfnReserve) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_virtual_mem_reserve_params_t params = {&hContext, &pStart, &size,
                                               &ppStart};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_VIRTUAL_MEM_RESERVE,
-                                             "urVirtualMemReserve", &params);
 
-    context.logger.info("---> urVirtualMemReserve");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnReserve(hContext, pStart, size, ppStart);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urVirtualMemReserve"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_VIRTUAL_MEM_RESERVE, "urVirtualMemReserve",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urVirtualMemReserve"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_VIRTUAL_MEM_RESERVE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urVirtualMemReserve"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2046,24 +2892,39 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemFree(
     auto pfnFree = context.urDdiTable.VirtualMem.pfnFree;
 
     if (nullptr == pfnFree) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_virtual_mem_free_params_t params = {&hContext, &pStart, &size};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_VIRTUAL_MEM_FREE,
-                                             "urVirtualMemFree", &params);
 
-    context.logger.info("---> urVirtualMemFree");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnFree(hContext, pStart, size);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urVirtualMemFree"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_VIRTUAL_MEM_FREE, "urVirtualMemFree",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urVirtualMemFree"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_VIRTUAL_MEM_FREE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urVirtualMemFree"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2085,26 +2946,40 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemMap(
     auto pfnMap = context.urDdiTable.VirtualMem.pfnMap;
 
     if (nullptr == pfnMap) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_virtual_mem_map_params_t params = {&hContext,     &pStart, &size,
                                           &hPhysicalMem, &offset, &flags};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_VIRTUAL_MEM_MAP,
-                                             "urVirtualMemMap", &params);
 
-    context.logger.info("---> urVirtualMemMap");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnMap(hContext, pStart, size, hPhysicalMem, offset, flags);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urVirtualMemMap"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_VIRTUAL_MEM_MAP, "urVirtualMemMap", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urVirtualMemMap"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_VIRTUAL_MEM_MAP,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urVirtualMemMap"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2120,24 +2995,39 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemUnmap(
     auto pfnUnmap = context.urDdiTable.VirtualMem.pfnUnmap;
 
     if (nullptr == pfnUnmap) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_virtual_mem_unmap_params_t params = {&hContext, &pStart, &size};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_VIRTUAL_MEM_UNMAP,
-                                             "urVirtualMemUnmap", &params);
 
-    context.logger.info("---> urVirtualMemUnmap");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnUnmap(hContext, pStart, size);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urVirtualMemUnmap"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_VIRTUAL_MEM_UNMAP, "urVirtualMemUnmap",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urVirtualMemUnmap"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_VIRTUAL_MEM_UNMAP,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urVirtualMemUnmap"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2155,25 +3045,40 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemSetAccess(
     auto pfnSetAccess = context.urDdiTable.VirtualMem.pfnSetAccess;
 
     if (nullptr == pfnSetAccess) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_virtual_mem_set_access_params_t params = {&hContext, &pStart, &size,
                                                  &flags};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_VIRTUAL_MEM_SET_ACCESS,
-                                             "urVirtualMemSetAccess", &params);
 
-    context.logger.info("---> urVirtualMemSetAccess");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnSetAccess(hContext, pStart, size, flags);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urVirtualMemSetAccess"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_VIRTUAL_MEM_SET_ACCESS,
-                       "urVirtualMemSetAccess", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urVirtualMemSetAccess"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_VIRTUAL_MEM_SET_ACCESS, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urVirtualMemSetAccess"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2199,27 +3104,41 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemGetInfo(
     auto pfnGetInfo = context.urDdiTable.VirtualMem.pfnGetInfo;
 
     if (nullptr == pfnGetInfo) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_virtual_mem_get_info_params_t params = {
         &hContext, &pStart,     &size,        &propName,
         &propSize, &pPropValue, &pPropSizeRet};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_VIRTUAL_MEM_GET_INFO,
-                                             "urVirtualMemGetInfo", &params);
 
-    context.logger.info("---> urVirtualMemGetInfo");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnGetInfo(hContext, pStart, size, propName, propSize,
-                                    pPropValue, pPropSizeRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urVirtualMemGetInfo"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_VIRTUAL_MEM_GET_INFO, "urVirtualMemGetInfo",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urVirtualMemGetInfo"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_VIRTUAL_MEM_GET_INFO,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urVirtualMemGetInfo"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2240,26 +3159,41 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemCreate(
     auto pfnCreate = context.urDdiTable.PhysicalMem.pfnCreate;
 
     if (nullptr == pfnCreate) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_physical_mem_create_params_t params = {&hContext, &hDevice, &size,
                                               &pProperties, &phPhysicalMem};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_PHYSICAL_MEM_CREATE,
-                                             "urPhysicalMemCreate", &params);
 
-    context.logger.info("---> urPhysicalMemCreate");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnCreate(hContext, hDevice, size, pProperties, phPhysicalMem);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urPhysicalMemCreate"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PHYSICAL_MEM_CREATE, "urPhysicalMemCreate",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urPhysicalMemCreate"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_PHYSICAL_MEM_CREATE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phPhysicalMem = createDummyHandle<ur_physical_mem_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urPhysicalMemCreate"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2273,24 +3207,40 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemRetain(
     auto pfnRetain = context.urDdiTable.PhysicalMem.pfnRetain;
 
     if (nullptr == pfnRetain) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_physical_mem_retain_params_t params = {&hPhysicalMem};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_PHYSICAL_MEM_RETAIN,
-                                             "urPhysicalMemRetain", &params);
 
-    context.logger.info("---> urPhysicalMemRetain");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnRetain(hPhysicalMem);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urPhysicalMemRetain"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PHYSICAL_MEM_RETAIN, "urPhysicalMemRetain",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urPhysicalMemRetain"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_PHYSICAL_MEM_RETAIN,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        retainDummyHandle(hPhysicalMem);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urPhysicalMemRetain"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2304,24 +3254,40 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemRelease(
     auto pfnRelease = context.urDdiTable.PhysicalMem.pfnRelease;
 
     if (nullptr == pfnRelease) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_physical_mem_release_params_t params = {&hPhysicalMem};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_PHYSICAL_MEM_RELEASE,
-                                             "urPhysicalMemRelease", &params);
 
-    context.logger.info("---> urPhysicalMemRelease");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnRelease(hPhysicalMem);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urPhysicalMemRelease"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PHYSICAL_MEM_RELEASE, "urPhysicalMemRelease",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urPhysicalMemRelease"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_PHYSICAL_MEM_RELEASE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        releaseDummyHandle(hPhysicalMem);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urPhysicalMemRelease"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2340,26 +3306,41 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithIL(
     auto pfnCreateWithIL = context.urDdiTable.Program.pfnCreateWithIL;
 
     if (nullptr == pfnCreateWithIL) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_program_create_with_il_params_t params = {&hContext, &pIL, &length,
                                                  &pProperties, &phProgram};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_PROGRAM_CREATE_WITH_IL,
-                                             "urProgramCreateWithIL", &params);
 
-    context.logger.info("---> urProgramCreateWithIL");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnCreateWithIL(hContext, pIL, length, pProperties, phProgram);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urProgramCreateWithIL"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PROGRAM_CREATE_WITH_IL,
-                       "urProgramCreateWithIL", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urProgramCreateWithIL"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_PROGRAM_CREATE_WITH_IL, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phProgram = createDummyHandle<ur_program_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urProgramCreateWithIL"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2380,27 +3361,41 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithBinary(
     auto pfnCreateWithBinary = context.urDdiTable.Program.pfnCreateWithBinary;
 
     if (nullptr == pfnCreateWithBinary) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_program_create_with_binary_params_t params = {
         &hContext, &hDevice, &size, &pBinary, &pProperties, &phProgram};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_PROGRAM_CREATE_WITH_BINARY,
-                             "urProgramCreateWithBinary", &params);
 
-    context.logger.info("---> urProgramCreateWithBinary");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnCreateWithBinary(hContext, hDevice, size, pBinary,
-                                             pProperties, phProgram);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urProgramCreateWithBinary"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PROGRAM_CREATE_WITH_BINARY,
-                       "urProgramCreateWithBinary", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urProgramCreateWithBinary"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_PROGRAM_CREATE_WITH_BINARY, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phProgram = createDummyHandle<ur_program_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urProgramCreateWithBinary"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2416,24 +3411,39 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuild(
     auto pfnBuild = context.urDdiTable.Program.pfnBuild;
 
     if (nullptr == pfnBuild) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_program_build_params_t params = {&hContext, &hProgram, &pOptions};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_PROGRAM_BUILD,
-                                             "urProgramBuild", &params);
 
-    context.logger.info("---> urProgramBuild");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnBuild(hContext, hProgram, pOptions);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urProgramBuild"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PROGRAM_BUILD, "urProgramBuild", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urProgramBuild"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_PROGRAM_BUILD,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urProgramBuild"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2450,24 +3460,39 @@ __urdlllocal ur_result_t UR_APICALL urProgramCompile(
     auto pfnCompile = context.urDdiTable.Program.pfnCompile;
 
     if (nullptr == pfnCompile) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_program_compile_params_t params = {&hContext, &hProgram, &pOptions};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_PROGRAM_COMPILE,
-                                             "urProgramCompile", &params);
 
-    context.logger.info("---> urProgramCompile");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnCompile(hContext, hProgram, pOptions);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urProgramCompile"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PROGRAM_COMPILE, "urProgramCompile", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urProgramCompile"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_PROGRAM_COMPILE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urProgramCompile"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2487,26 +3512,41 @@ __urdlllocal ur_result_t UR_APICALL urProgramLink(
     auto pfnLink = context.urDdiTable.Program.pfnLink;
 
     if (nullptr == pfnLink) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_program_link_params_t params = {&hContext, &count, &phPrograms,
                                        &pOptions, &phProgram};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_PROGRAM_LINK,
-                                             "urProgramLink", &params);
 
-    context.logger.info("---> urProgramLink");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnLink(hContext, count, phPrograms, pOptions, phProgram);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urProgramLink"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PROGRAM_LINK, "urProgramLink", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urProgramLink"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_PROGRAM_LINK,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phProgram = createDummyHandle<ur_program_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urProgramLink"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2520,24 +3560,40 @@ __urdlllocal ur_result_t UR_APICALL urProgramRetain(
     auto pfnRetain = context.urDdiTable.Program.pfnRetain;
 
     if (nullptr == pfnRetain) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_program_retain_params_t params = {&hProgram};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_PROGRAM_RETAIN,
-                                             "urProgramRetain", &params);
 
-    context.logger.info("---> urProgramRetain");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnRetain(hProgram);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urProgramRetain"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PROGRAM_RETAIN, "urProgramRetain", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urProgramRetain"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_PROGRAM_RETAIN,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        retainDummyHandle(hProgram);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urProgramRetain"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2551,24 +3607,40 @@ __urdlllocal ur_result_t UR_APICALL urProgramRelease(
     auto pfnRelease = context.urDdiTable.Program.pfnRelease;
 
     if (nullptr == pfnRelease) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_program_release_params_t params = {&hProgram};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_PROGRAM_RELEASE,
-                                             "urProgramRelease", &params);
 
-    context.logger.info("---> urProgramRelease");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnRelease(hProgram);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urProgramRelease"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PROGRAM_RELEASE, "urProgramRelease", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urProgramRelease"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_PROGRAM_RELEASE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        releaseDummyHandle(hProgram);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urProgramRelease"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2591,28 +3663,42 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetFunctionPointer(
         context.urDdiTable.Program.pfnGetFunctionPointer;
 
     if (nullptr == pfnGetFunctionPointer) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_program_get_function_pointer_params_t params = {
         &hDevice, &hProgram, &pFunctionName, &ppFunctionPointer};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_PROGRAM_GET_FUNCTION_POINTER,
-                             "urProgramGetFunctionPointer", &params);
 
-    context.logger.info("---> urProgramGetFunctionPointer");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnGetFunctionPointer(hDevice, hProgram, pFunctionName,
-                                               ppFunctionPointer);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urProgramGetFunctionPointer"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PROGRAM_GET_FUNCTION_POINTER,
-                       "urProgramGetFunctionPointer", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urProgramGetFunctionPointer"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_PROGRAM_GET_FUNCTION_POINTER, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urProgramGetFunctionPointer"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2636,30 +3722,44 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetGlobalVariablePointer(
         context.urDdiTable.Program.pfnGetGlobalVariablePointer;
 
     if (nullptr == pfnGetGlobalVariablePointer) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_program_get_global_variable_pointer_params_t params = {
         &hDevice, &hProgram, &pGlobalVariableName, &pGlobalVariableSizeRet,
         &ppGlobalVariablePointerRet};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_PROGRAM_GET_GLOBAL_VARIABLE_POINTER,
-                             "urProgramGetGlobalVariablePointer", &params);
 
-    context.logger.info("---> urProgramGetGlobalVariablePointer");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnGetGlobalVariablePointer(
-        hDevice, hProgram, pGlobalVariableName, pGlobalVariableSizeRet,
-        ppGlobalVariablePointerRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urProgramGetGlobalVariablePointer"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PROGRAM_GET_GLOBAL_VARIABLE_POINTER,
-                       "urProgramGetGlobalVariablePointer", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urProgramGetGlobalVariablePointer"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_PROGRAM_GET_GLOBAL_VARIABLE_POINTER, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urProgramGetGlobalVariablePointer"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2683,26 +3783,40 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetInfo(
     auto pfnGetInfo = context.urDdiTable.Program.pfnGetInfo;
 
     if (nullptr == pfnGetInfo) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_program_get_info_params_t params = {&hProgram, &propName, &propSize,
                                            &pPropValue, &pPropSizeRet};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_PROGRAM_GET_INFO,
-                                             "urProgramGetInfo", &params);
 
-    context.logger.info("---> urProgramGetInfo");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnGetInfo(hProgram, propName, propSize, pPropValue, pPropSizeRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urProgramGetInfo"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PROGRAM_GET_INFO, "urProgramGetInfo",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urProgramGetInfo"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_PROGRAM_GET_INFO,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urProgramGetInfo"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2728,26 +3842,40 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetBuildInfo(
     auto pfnGetBuildInfo = context.urDdiTable.Program.pfnGetBuildInfo;
 
     if (nullptr == pfnGetBuildInfo) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_program_get_build_info_params_t params = {
         &hProgram, &hDevice, &propName, &propSize, &pPropValue, &pPropSizeRet};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_PROGRAM_GET_BUILD_INFO,
-                                             "urProgramGetBuildInfo", &params);
 
-    context.logger.info("---> urProgramGetBuildInfo");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnGetBuildInfo(hProgram, hDevice, propName, propSize,
-                                         pPropValue, pPropSizeRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urProgramGetBuildInfo"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PROGRAM_GET_BUILD_INFO,
-                       "urProgramGetBuildInfo", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urProgramGetBuildInfo"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_PROGRAM_GET_BUILD_INFO, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urProgramGetBuildInfo"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2765,28 +3893,43 @@ __urdlllocal ur_result_t UR_APICALL urProgramSetSpecializationConstants(
         context.urDdiTable.Program.pfnSetSpecializationConstants;
 
     if (nullptr == pfnSetSpecializationConstants) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_program_set_specialization_constants_params_t params = {
         &hProgram, &count, &pSpecConstants};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_PROGRAM_SET_SPECIALIZATION_CONSTANTS,
-                             "urProgramSetSpecializationConstants", &params);
 
-    context.logger.info("---> urProgramSetSpecializationConstants");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnSetSpecializationConstants(hProgram, count, pSpecConstants);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urProgramSetSpecializationConstants"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PROGRAM_SET_SPECIALIZATION_CONSTANTS,
-                       "urProgramSetSpecializationConstants", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urProgramSetSpecializationConstants"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_PROGRAM_SET_SPECIALIZATION_CONSTANTS, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urProgramSetSpecializationConstants"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2801,26 +3944,41 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetNativeHandle(
     auto pfnGetNativeHandle = context.urDdiTable.Program.pfnGetNativeHandle;
 
     if (nullptr == pfnGetNativeHandle) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_program_get_native_handle_params_t params = {&hProgram,
                                                     &phNativeProgram};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_PROGRAM_GET_NATIVE_HANDLE,
-                             "urProgramGetNativeHandle", &params);
 
-    context.logger.info("---> urProgramGetNativeHandle");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnGetNativeHandle(hProgram, phNativeProgram);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urProgramGetNativeHandle"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PROGRAM_GET_NATIVE_HANDLE,
-                       "urProgramGetNativeHandle", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urProgramGetNativeHandle"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_PROGRAM_GET_NATIVE_HANDLE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phNativeProgram = reinterpret_cast<ur_native_handle_t>(hProgram);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urProgramGetNativeHandle"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2840,28 +3998,45 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithNativeHandle(
         context.urDdiTable.Program.pfnCreateWithNativeHandle;
 
     if (nullptr == pfnCreateWithNativeHandle) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_program_create_with_native_handle_params_t params = {
         &hNativeProgram, &hContext, &pProperties, &phProgram};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_PROGRAM_CREATE_WITH_NATIVE_HANDLE,
-                             "urProgramCreateWithNativeHandle", &params);
 
-    context.logger.info("---> urProgramCreateWithNativeHandle");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnCreateWithNativeHandle(hNativeProgram, hContext,
-                                                   pProperties, phProgram);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urProgramCreateWithNativeHandle"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PROGRAM_CREATE_WITH_NATIVE_HANDLE,
-                       "urProgramCreateWithNativeHandle", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urProgramCreateWithNativeHandle"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_PROGRAM_CREATE_WITH_NATIVE_HANDLE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phProgram = reinterpret_cast<ur_program_handle_t>(hNativeProgram);
+        retainDummyHandle(*phProgram);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urProgramCreateWithNativeHandle"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2877,24 +4052,40 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreate(
     auto pfnCreate = context.urDdiTable.Kernel.pfnCreate;
 
     if (nullptr == pfnCreate) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_kernel_create_params_t params = {&hProgram, &pKernelName, &phKernel};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_KERNEL_CREATE,
-                                             "urKernelCreate", &params);
 
-    context.logger.info("---> urKernelCreate");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnCreate(hProgram, pKernelName, phKernel);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urKernelCreate"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_KERNEL_CREATE, "urKernelCreate", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urKernelCreate"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_KERNEL_CREATE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phKernel = createDummyHandle<ur_kernel_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urKernelCreate"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2913,26 +4104,40 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgValue(
     auto pfnSetArgValue = context.urDdiTable.Kernel.pfnSetArgValue;
 
     if (nullptr == pfnSetArgValue) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_kernel_set_arg_value_params_t params = {&hKernel, &argIndex, &argSize,
                                                &pProperties, &pArgValue};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_KERNEL_SET_ARG_VALUE,
-                                             "urKernelSetArgValue", &params);
 
-    context.logger.info("---> urKernelSetArgValue");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnSetArgValue(hKernel, argIndex, argSize, pProperties, pArgValue);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urKernelSetArgValue"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_KERNEL_SET_ARG_VALUE, "urKernelSetArgValue",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urKernelSetArgValue"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_KERNEL_SET_ARG_VALUE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urKernelSetArgValue"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2950,26 +4155,40 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgLocal(
     auto pfnSetArgLocal = context.urDdiTable.Kernel.pfnSetArgLocal;
 
     if (nullptr == pfnSetArgLocal) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_kernel_set_arg_local_params_t params = {&hKernel, &argIndex, &argSize,
                                                &pProperties};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_KERNEL_SET_ARG_LOCAL,
-                                             "urKernelSetArgLocal", &params);
 
-    context.logger.info("---> urKernelSetArgLocal");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnSetArgLocal(hKernel, argIndex, argSize, pProperties);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urKernelSetArgLocal"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_KERNEL_SET_ARG_LOCAL, "urKernelSetArgLocal",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urKernelSetArgLocal"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_KERNEL_SET_ARG_LOCAL,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urKernelSetArgLocal"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -2994,26 +4213,40 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetInfo(
     auto pfnGetInfo = context.urDdiTable.Kernel.pfnGetInfo;
 
     if (nullptr == pfnGetInfo) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_kernel_get_info_params_t params = {&hKernel, &propName, &propSize,
                                           &pPropValue, &pPropSizeRet};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_KERNEL_GET_INFO,
-                                             "urKernelGetInfo", &params);
 
-    context.logger.info("---> urKernelGetInfo");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnGetInfo(hKernel, propName, propSize, pPropValue, pPropSizeRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urKernelGetInfo"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_KERNEL_GET_INFO, "urKernelGetInfo", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urKernelGetInfo"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_KERNEL_GET_INFO,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urKernelGetInfo"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3036,26 +4269,40 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetGroupInfo(
     auto pfnGetGroupInfo = context.urDdiTable.Kernel.pfnGetGroupInfo;
 
     if (nullptr == pfnGetGroupInfo) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_kernel_get_group_info_params_t params = {
         &hKernel, &hDevice, &propName, &propSize, &pPropValue, &pPropSizeRet};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_KERNEL_GET_GROUP_INFO,
-                                             "urKernelGetGroupInfo", &params);
 
-    context.logger.info("---> urKernelGetGroupInfo");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnGetGroupInfo(hKernel, hDevice, propName, propSize,
-                                         pPropValue, pPropSizeRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urKernelGetGroupInfo"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_KERNEL_GET_GROUP_INFO,
-                       "urKernelGetGroupInfo", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urKernelGetGroupInfo"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_KERNEL_GET_GROUP_INFO,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urKernelGetGroupInfo"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3078,27 +4325,40 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetSubGroupInfo(
     auto pfnGetSubGroupInfo = context.urDdiTable.Kernel.pfnGetSubGroupInfo;
 
     if (nullptr == pfnGetSubGroupInfo) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_kernel_get_sub_group_info_params_t params = {
         &hKernel, &hDevice, &propName, &propSize, &pPropValue, &pPropSizeRet};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_KERNEL_GET_SUB_GROUP_INFO,
-                             "urKernelGetSubGroupInfo", &params);
 
-    context.logger.info("---> urKernelGetSubGroupInfo");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnGetSubGroupInfo(hKernel, hDevice, propName,
-                                            propSize, pPropValue, pPropSizeRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urKernelGetSubGroupInfo"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_KERNEL_GET_SUB_GROUP_INFO,
-                       "urKernelGetSubGroupInfo", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urKernelGetSubGroupInfo"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_KERNEL_GET_SUB_GROUP_INFO, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urKernelGetSubGroupInfo"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3111,24 +4371,40 @@ __urdlllocal ur_result_t UR_APICALL urKernelRetain(
     auto pfnRetain = context.urDdiTable.Kernel.pfnRetain;
 
     if (nullptr == pfnRetain) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_kernel_retain_params_t params = {&hKernel};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_KERNEL_RETAIN,
-                                             "urKernelRetain", &params);
 
-    context.logger.info("---> urKernelRetain");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnRetain(hKernel);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urKernelRetain"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_KERNEL_RETAIN, "urKernelRetain", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urKernelRetain"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_KERNEL_RETAIN,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        retainDummyHandle(hKernel);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urKernelRetain"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3142,24 +4418,40 @@ __urdlllocal ur_result_t UR_APICALL urKernelRelease(
     auto pfnRelease = context.urDdiTable.Kernel.pfnRelease;
 
     if (nullptr == pfnRelease) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_kernel_release_params_t params = {&hKernel};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_KERNEL_RELEASE,
-                                             "urKernelRelease", &params);
 
-    context.logger.info("---> urKernelRelease");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnRelease(hKernel);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urKernelRelease"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_KERNEL_RELEASE, "urKernelRelease", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urKernelRelease"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_KERNEL_RELEASE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        releaseDummyHandle(hKernel);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urKernelRelease"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3178,26 +4470,40 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgPointer(
     auto pfnSetArgPointer = context.urDdiTable.Kernel.pfnSetArgPointer;
 
     if (nullptr == pfnSetArgPointer) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_kernel_set_arg_pointer_params_t params = {&hKernel, &argIndex,
                                                  &pProperties, &pArgValue};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_KERNEL_SET_ARG_POINTER,
-                                             "urKernelSetArgPointer", &params);
 
-    context.logger.info("---> urKernelSetArgPointer");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnSetArgPointer(hKernel, argIndex, pProperties, pArgValue);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urKernelSetArgPointer"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_KERNEL_SET_ARG_POINTER,
-                       "urKernelSetArgPointer", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urKernelSetArgPointer"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_KERNEL_SET_ARG_POINTER, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urKernelSetArgPointer"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3217,26 +4523,40 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetExecInfo(
     auto pfnSetExecInfo = context.urDdiTable.Kernel.pfnSetExecInfo;
 
     if (nullptr == pfnSetExecInfo) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_kernel_set_exec_info_params_t params = {&hKernel, &propName, &propSize,
                                                &pProperties, &pPropValue};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_KERNEL_SET_EXEC_INFO,
-                                             "urKernelSetExecInfo", &params);
 
-    context.logger.info("---> urKernelSetExecInfo");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnSetExecInfo(hKernel, propName, propSize, pProperties, pPropValue);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urKernelSetExecInfo"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_KERNEL_SET_EXEC_INFO, "urKernelSetExecInfo",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urKernelSetExecInfo"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_KERNEL_SET_EXEC_INFO,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urKernelSetExecInfo"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3253,26 +4573,40 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgSampler(
     auto pfnSetArgSampler = context.urDdiTable.Kernel.pfnSetArgSampler;
 
     if (nullptr == pfnSetArgSampler) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_kernel_set_arg_sampler_params_t params = {&hKernel, &argIndex,
                                                  &pProperties, &hArgValue};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_KERNEL_SET_ARG_SAMPLER,
-                                             "urKernelSetArgSampler", &params);
 
-    context.logger.info("---> urKernelSetArgSampler");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnSetArgSampler(hKernel, argIndex, pProperties, hArgValue);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urKernelSetArgSampler"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_KERNEL_SET_ARG_SAMPLER,
-                       "urKernelSetArgSampler", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urKernelSetArgSampler"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_KERNEL_SET_ARG_SAMPLER, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urKernelSetArgSampler"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3289,26 +4623,40 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgMemObj(
     auto pfnSetArgMemObj = context.urDdiTable.Kernel.pfnSetArgMemObj;
 
     if (nullptr == pfnSetArgMemObj) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_kernel_set_arg_mem_obj_params_t params = {&hKernel, &argIndex,
                                                  &pProperties, &hArgValue};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_KERNEL_SET_ARG_MEM_OBJ,
-                                             "urKernelSetArgMemObj", &params);
 
-    context.logger.info("---> urKernelSetArgMemObj");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnSetArgMemObj(hKernel, argIndex, pProperties, hArgValue);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urKernelSetArgMemObj"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_KERNEL_SET_ARG_MEM_OBJ,
-                       "urKernelSetArgMemObj", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urKernelSetArgMemObj"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_KERNEL_SET_ARG_MEM_OBJ, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urKernelSetArgMemObj"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3325,28 +4673,43 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetSpecializationConstants(
         context.urDdiTable.Kernel.pfnSetSpecializationConstants;
 
     if (nullptr == pfnSetSpecializationConstants) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_kernel_set_specialization_constants_params_t params = {&hKernel, &count,
                                                               &pSpecConstants};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_KERNEL_SET_SPECIALIZATION_CONSTANTS,
-                             "urKernelSetSpecializationConstants", &params);
 
-    context.logger.info("---> urKernelSetSpecializationConstants");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnSetSpecializationConstants(hKernel, count, pSpecConstants);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urKernelSetSpecializationConstants"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_KERNEL_SET_SPECIALIZATION_CONSTANTS,
-                       "urKernelSetSpecializationConstants", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urKernelSetSpecializationConstants"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_KERNEL_SET_SPECIALIZATION_CONSTANTS, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urKernelSetSpecializationConstants"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3361,25 +4724,40 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetNativeHandle(
     auto pfnGetNativeHandle = context.urDdiTable.Kernel.pfnGetNativeHandle;
 
     if (nullptr == pfnGetNativeHandle) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_kernel_get_native_handle_params_t params = {&hKernel, &phNativeKernel};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_KERNEL_GET_NATIVE_HANDLE,
-                             "urKernelGetNativeHandle", &params);
 
-    context.logger.info("---> urKernelGetNativeHandle");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnGetNativeHandle(hKernel, phNativeKernel);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urKernelGetNativeHandle"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_KERNEL_GET_NATIVE_HANDLE,
-                       "urKernelGetNativeHandle", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urKernelGetNativeHandle"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_KERNEL_GET_NATIVE_HANDLE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phNativeKernel = reinterpret_cast<ur_native_handle_t>(hKernel);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urKernelGetNativeHandle"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3401,28 +4779,45 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
         context.urDdiTable.Kernel.pfnCreateWithNativeHandle;
 
     if (nullptr == pfnCreateWithNativeHandle) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_kernel_create_with_native_handle_params_t params = {
         &hNativeKernel, &hContext, &hProgram, &pProperties, &phKernel};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_KERNEL_CREATE_WITH_NATIVE_HANDLE,
-                             "urKernelCreateWithNativeHandle", &params);
 
-    context.logger.info("---> urKernelCreateWithNativeHandle");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnCreateWithNativeHandle(
-        hNativeKernel, hContext, hProgram, pProperties, phKernel);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urKernelCreateWithNativeHandle"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_KERNEL_CREATE_WITH_NATIVE_HANDLE,
-                       "urKernelCreateWithNativeHandle", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urKernelCreateWithNativeHandle"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_KERNEL_CREATE_WITH_NATIVE_HANDLE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phKernel = reinterpret_cast<ur_kernel_handle_t>(hNativeKernel);
+        retainDummyHandle(*phKernel);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urKernelCreateWithNativeHandle"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3450,30 +4845,44 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetSuggestedLocalWorkSize(
         context.urDdiTable.Kernel.pfnGetSuggestedLocalWorkSize;
 
     if (nullptr == pfnGetSuggestedLocalWorkSize) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_kernel_get_suggested_local_work_size_params_t params = {
         &hKernel,           &hQueue,          &numWorkDim,
         &pGlobalWorkOffset, &pGlobalWorkSize, &pSuggestedLocalWorkSize};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_KERNEL_GET_SUGGESTED_LOCAL_WORK_SIZE,
-                             "urKernelGetSuggestedLocalWorkSize", &params);
 
-    context.logger.info("---> urKernelGetSuggestedLocalWorkSize");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnGetSuggestedLocalWorkSize(
-        hKernel, hQueue, numWorkDim, pGlobalWorkOffset, pGlobalWorkSize,
-        pSuggestedLocalWorkSize);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urKernelGetSuggestedLocalWorkSize"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_KERNEL_GET_SUGGESTED_LOCAL_WORK_SIZE,
-                       "urKernelGetSuggestedLocalWorkSize", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urKernelGetSuggestedLocalWorkSize"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_KERNEL_GET_SUGGESTED_LOCAL_WORK_SIZE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urKernelGetSuggestedLocalWorkSize"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3494,26 +4903,40 @@ __urdlllocal ur_result_t UR_APICALL urQueueGetInfo(
     auto pfnGetInfo = context.urDdiTable.Queue.pfnGetInfo;
 
     if (nullptr == pfnGetInfo) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_queue_get_info_params_t params = {&hQueue, &propName, &propSize,
                                          &pPropValue, &pPropSizeRet};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_QUEUE_GET_INFO,
-                                             "urQueueGetInfo", &params);
 
-    context.logger.info("---> urQueueGetInfo");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnGetInfo(hQueue, propName, propSize, pPropValue, pPropSizeRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urQueueGetInfo"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_QUEUE_GET_INFO, "urQueueGetInfo", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urQueueGetInfo"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_QUEUE_GET_INFO,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urQueueGetInfo"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3531,25 +4954,41 @@ __urdlllocal ur_result_t UR_APICALL urQueueCreate(
     auto pfnCreate = context.urDdiTable.Queue.pfnCreate;
 
     if (nullptr == pfnCreate) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_queue_create_params_t params = {&hContext, &hDevice, &pProperties,
                                        &phQueue};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_QUEUE_CREATE,
-                                             "urQueueCreate", &params);
 
-    context.logger.info("---> urQueueCreate");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnCreate(hContext, hDevice, pProperties, phQueue);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urQueueCreate"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_QUEUE_CREATE, "urQueueCreate", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urQueueCreate"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_QUEUE_CREATE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phQueue = createDummyHandle<ur_queue_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urQueueCreate"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3563,24 +5002,40 @@ __urdlllocal ur_result_t UR_APICALL urQueueRetain(
     auto pfnRetain = context.urDdiTable.Queue.pfnRetain;
 
     if (nullptr == pfnRetain) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_queue_retain_params_t params = {&hQueue};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_QUEUE_RETAIN,
-                                             "urQueueRetain", &params);
 
-    context.logger.info("---> urQueueRetain");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnRetain(hQueue);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urQueueRetain"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_QUEUE_RETAIN, "urQueueRetain", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urQueueRetain"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_QUEUE_RETAIN,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        retainDummyHandle(hQueue);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urQueueRetain"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3594,24 +5049,40 @@ __urdlllocal ur_result_t UR_APICALL urQueueRelease(
     auto pfnRelease = context.urDdiTable.Queue.pfnRelease;
 
     if (nullptr == pfnRelease) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_queue_release_params_t params = {&hQueue};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_QUEUE_RELEASE,
-                                             "urQueueRelease", &params);
 
-    context.logger.info("---> urQueueRelease");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnRelease(hQueue);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urQueueRelease"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_QUEUE_RELEASE, "urQueueRelease", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urQueueRelease"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_QUEUE_RELEASE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        releaseDummyHandle(hQueue);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urQueueRelease"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3628,25 +5099,41 @@ __urdlllocal ur_result_t UR_APICALL urQueueGetNativeHandle(
     auto pfnGetNativeHandle = context.urDdiTable.Queue.pfnGetNativeHandle;
 
     if (nullptr == pfnGetNativeHandle) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_queue_get_native_handle_params_t params = {&hQueue, &pDesc,
                                                   &phNativeQueue};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_QUEUE_GET_NATIVE_HANDLE, "urQueueGetNativeHandle", &params);
 
-    context.logger.info("---> urQueueGetNativeHandle");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnGetNativeHandle(hQueue, pDesc, phNativeQueue);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urQueueGetNativeHandle"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_QUEUE_GET_NATIVE_HANDLE,
-                       "urQueueGetNativeHandle", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urQueueGetNativeHandle"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_QUEUE_GET_NATIVE_HANDLE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phNativeQueue = reinterpret_cast<ur_native_handle_t>(hQueue);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urQueueGetNativeHandle"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3667,28 +5154,45 @@ __urdlllocal ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
         context.urDdiTable.Queue.pfnCreateWithNativeHandle;
 
     if (nullptr == pfnCreateWithNativeHandle) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_queue_create_with_native_handle_params_t params = {
         &hNativeQueue, &hContext, &hDevice, &pProperties, &phQueue};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_QUEUE_CREATE_WITH_NATIVE_HANDLE,
-                             "urQueueCreateWithNativeHandle", &params);
 
-    context.logger.info("---> urQueueCreateWithNativeHandle");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnCreateWithNativeHandle(
-        hNativeQueue, hContext, hDevice, pProperties, phQueue);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urQueueCreateWithNativeHandle"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_QUEUE_CREATE_WITH_NATIVE_HANDLE,
-                       "urQueueCreateWithNativeHandle", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urQueueCreateWithNativeHandle"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_QUEUE_CREATE_WITH_NATIVE_HANDLE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phQueue = reinterpret_cast<ur_queue_handle_t>(hNativeQueue);
+        retainDummyHandle(*phQueue);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urQueueCreateWithNativeHandle"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3701,24 +5205,39 @@ __urdlllocal ur_result_t UR_APICALL urQueueFinish(
     auto pfnFinish = context.urDdiTable.Queue.pfnFinish;
 
     if (nullptr == pfnFinish) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_queue_finish_params_t params = {&hQueue};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_QUEUE_FINISH,
-                                             "urQueueFinish", &params);
 
-    context.logger.info("---> urQueueFinish");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnFinish(hQueue);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urQueueFinish"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_QUEUE_FINISH, "urQueueFinish", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urQueueFinish"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_QUEUE_FINISH,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urQueueFinish"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3731,23 +5250,39 @@ __urdlllocal ur_result_t UR_APICALL urQueueFlush(
     auto pfnFlush = context.urDdiTable.Queue.pfnFlush;
 
     if (nullptr == pfnFlush) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_queue_flush_params_t params = {&hQueue};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_QUEUE_FLUSH, "urQueueFlush", &params);
 
-    context.logger.info("---> urQueueFlush");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnFlush(hQueue);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urQueueFlush"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_QUEUE_FLUSH, "urQueueFlush", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urQueueFlush"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_QUEUE_FLUSH, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urQueueFlush"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3766,26 +5301,40 @@ __urdlllocal ur_result_t UR_APICALL urEventGetInfo(
     auto pfnGetInfo = context.urDdiTable.Event.pfnGetInfo;
 
     if (nullptr == pfnGetInfo) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_event_get_info_params_t params = {&hEvent, &propName, &propSize,
                                          &pPropValue, &pPropSizeRet};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_EVENT_GET_INFO,
-                                             "urEventGetInfo", &params);
 
-    context.logger.info("---> urEventGetInfo");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnGetInfo(hEvent, propName, propSize, pPropValue, pPropSizeRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEventGetInfo"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_EVENT_GET_INFO, "urEventGetInfo", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEventGetInfo"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_EVENT_GET_INFO,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEventGetInfo"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3807,27 +5356,40 @@ __urdlllocal ur_result_t UR_APICALL urEventGetProfilingInfo(
     auto pfnGetProfilingInfo = context.urDdiTable.Event.pfnGetProfilingInfo;
 
     if (nullptr == pfnGetProfilingInfo) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_event_get_profiling_info_params_t params = {
         &hEvent, &propName, &propSize, &pPropValue, &pPropSizeRet};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_EVENT_GET_PROFILING_INFO,
-                             "urEventGetProfilingInfo", &params);
 
-    context.logger.info("---> urEventGetProfilingInfo");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnGetProfilingInfo(hEvent, propName, propSize,
-                                             pPropValue, pPropSizeRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEventGetProfilingInfo"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_EVENT_GET_PROFILING_INFO,
-                       "urEventGetProfilingInfo", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEventGetProfilingInfo"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_EVENT_GET_PROFILING_INFO, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEventGetProfilingInfo"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3843,23 +5405,39 @@ __urdlllocal ur_result_t UR_APICALL urEventWait(
     auto pfnWait = context.urDdiTable.Event.pfnWait;
 
     if (nullptr == pfnWait) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_event_wait_params_t params = {&numEvents, &phEventWaitList};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_EVENT_WAIT, "urEventWait", &params);
 
-    context.logger.info("---> urEventWait");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnWait(numEvents, phEventWaitList);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEventWait"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_EVENT_WAIT, "urEventWait", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEventWait"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_EVENT_WAIT, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEventWait"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3872,24 +5450,40 @@ __urdlllocal ur_result_t UR_APICALL urEventRetain(
     auto pfnRetain = context.urDdiTable.Event.pfnRetain;
 
     if (nullptr == pfnRetain) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_event_retain_params_t params = {&hEvent};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_EVENT_RETAIN,
-                                             "urEventRetain", &params);
 
-    context.logger.info("---> urEventRetain");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnRetain(hEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEventRetain"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_EVENT_RETAIN, "urEventRetain", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEventRetain"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_EVENT_RETAIN,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        retainDummyHandle(hEvent);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEventRetain"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3902,24 +5496,40 @@ __urdlllocal ur_result_t UR_APICALL urEventRelease(
     auto pfnRelease = context.urDdiTable.Event.pfnRelease;
 
     if (nullptr == pfnRelease) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_event_release_params_t params = {&hEvent};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_EVENT_RELEASE,
-                                             "urEventRelease", &params);
 
-    context.logger.info("---> urEventRelease");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnRelease(hEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEventRelease"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_EVENT_RELEASE, "urEventRelease", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEventRelease"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_EVENT_RELEASE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        releaseDummyHandle(hEvent);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEventRelease"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3934,24 +5544,40 @@ __urdlllocal ur_result_t UR_APICALL urEventGetNativeHandle(
     auto pfnGetNativeHandle = context.urDdiTable.Event.pfnGetNativeHandle;
 
     if (nullptr == pfnGetNativeHandle) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_event_get_native_handle_params_t params = {&hEvent, &phNativeEvent};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_EVENT_GET_NATIVE_HANDLE, "urEventGetNativeHandle", &params);
 
-    context.logger.info("---> urEventGetNativeHandle");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnGetNativeHandle(hEvent, phNativeEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEventGetNativeHandle"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_EVENT_GET_NATIVE_HANDLE,
-                       "urEventGetNativeHandle", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEventGetNativeHandle"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_EVENT_GET_NATIVE_HANDLE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phNativeEvent = reinterpret_cast<ur_native_handle_t>(hEvent);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEventGetNativeHandle"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -3971,28 +5597,45 @@ __urdlllocal ur_result_t UR_APICALL urEventCreateWithNativeHandle(
         context.urDdiTable.Event.pfnCreateWithNativeHandle;
 
     if (nullptr == pfnCreateWithNativeHandle) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_event_create_with_native_handle_params_t params = {
         &hNativeEvent, &hContext, &pProperties, &phEvent};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_EVENT_CREATE_WITH_NATIVE_HANDLE,
-                             "urEventCreateWithNativeHandle", &params);
 
-    context.logger.info("---> urEventCreateWithNativeHandle");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnCreateWithNativeHandle(hNativeEvent, hContext, pProperties, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urEventCreateWithNativeHandle"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_EVENT_CREATE_WITH_NATIVE_HANDLE,
-                       "urEventCreateWithNativeHandle", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urEventCreateWithNativeHandle"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_EVENT_CREATE_WITH_NATIVE_HANDLE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phEvent = reinterpret_cast<ur_event_handle_t>(hNativeEvent);
+        retainDummyHandle(*phEvent);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urEventCreateWithNativeHandle"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -4009,26 +5652,40 @@ __urdlllocal ur_result_t UR_APICALL urEventSetCallback(
     auto pfnSetCallback = context.urDdiTable.Event.pfnSetCallback;
 
     if (nullptr == pfnSetCallback) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_event_set_callback_params_t params = {&hEvent, &execStatus, &pfnNotify,
                                              &pUserData};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_EVENT_SET_CALLBACK,
-                                             "urEventSetCallback", &params);
 
-    context.logger.info("---> urEventSetCallback");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnSetCallback(hEvent, execStatus, pfnNotify, pUserData);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEventSetCallback"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_EVENT_SET_CALLBACK, "urEventSetCallback",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEventSetCallback"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_EVENT_SET_CALLBACK,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEventSetCallback"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -4067,7 +5724,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunch(
     auto pfnKernelLaunch = context.urDdiTable.Enqueue.pfnKernelLaunch;
 
     if (nullptr == pfnKernelLaunch) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_kernel_launch_params_t params = {&hQueue,
@@ -4079,22 +5736,39 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunch(
                                                 &numEventsInWaitList,
                                                 &phEventWaitList,
                                                 &phEvent};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_ENQUEUE_KERNEL_LAUNCH,
-                                             "urEnqueueKernelLaunch", &params);
 
-    context.logger.info("---> urEnqueueKernelLaunch");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnKernelLaunch(
-        hQueue, hKernel, workDim, pGlobalWorkOffset, pGlobalWorkSize,
-        pLocalWorkSize, numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEnqueueKernelLaunch"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_KERNEL_LAUNCH,
-                       "urEnqueueKernelLaunch", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEnqueueKernelLaunch"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_ENQUEUE_KERNEL_LAUNCH,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEnqueueKernelLaunch"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -4117,26 +5791,44 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWait(
     auto pfnEventsWait = context.urDdiTable.Enqueue.pfnEventsWait;
 
     if (nullptr == pfnEventsWait) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_events_wait_params_t params = {&hQueue, &numEventsInWaitList,
                                               &phEventWaitList, &phEvent};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_ENQUEUE_EVENTS_WAIT,
-                                             "urEnqueueEventsWait", &params);
 
-    context.logger.info("---> urEnqueueEventsWait");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnEventsWait(hQueue, numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEnqueueEventsWait"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_EVENTS_WAIT, "urEnqueueEventsWait",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEnqueueEventsWait"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_ENQUEUE_EVENTS_WAIT,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEnqueueEventsWait"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -4160,28 +5852,47 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
         context.urDdiTable.Enqueue.pfnEventsWaitWithBarrier;
 
     if (nullptr == pfnEventsWaitWithBarrier) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_events_wait_with_barrier_params_t params = {
         &hQueue, &numEventsInWaitList, &phEventWaitList, &phEvent};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_ENQUEUE_EVENTS_WAIT_WITH_BARRIER,
-                             "urEnqueueEventsWaitWithBarrier", &params);
 
-    context.logger.info("---> urEnqueueEventsWaitWithBarrier");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnEventsWaitWithBarrier(hQueue, numEventsInWaitList,
-                                                  phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urEnqueueEventsWaitWithBarrier"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_EVENTS_WAIT_WITH_BARRIER,
-                       "urEnqueueEventsWaitWithBarrier", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urEnqueueEventsWaitWithBarrier"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_ENQUEUE_EVENTS_WAIT_WITH_BARRIER, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urEnqueueEventsWaitWithBarrier"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -4209,29 +5920,46 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferRead(
     auto pfnMemBufferRead = context.urDdiTable.Enqueue.pfnMemBufferRead;
 
     if (nullptr == pfnMemBufferRead) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_mem_buffer_read_params_t params = {
         &hQueue, &hBuffer, &blockingRead,        &offset,
         &size,   &pDst,    &numEventsInWaitList, &phEventWaitList,
         &phEvent};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_ENQUEUE_MEM_BUFFER_READ, "urEnqueueMemBufferRead", &params);
 
-    context.logger.info("---> urEnqueueMemBufferRead");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnMemBufferRead(hQueue, hBuffer, blockingRead, offset, size, pDst,
-                         numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEnqueueMemBufferRead"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_MEM_BUFFER_READ,
-                       "urEnqueueMemBufferRead", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEnqueueMemBufferRead"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_ENQUEUE_MEM_BUFFER_READ, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEnqueueMemBufferRead"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -4261,30 +5989,46 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWrite(
     auto pfnMemBufferWrite = context.urDdiTable.Enqueue.pfnMemBufferWrite;
 
     if (nullptr == pfnMemBufferWrite) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_mem_buffer_write_params_t params = {
         &hQueue, &hBuffer, &blockingWrite,       &offset,
         &size,   &pSrc,    &numEventsInWaitList, &phEventWaitList,
         &phEvent};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_ENQUEUE_MEM_BUFFER_WRITE,
-                             "urEnqueueMemBufferWrite", &params);
 
-    context.logger.info("---> urEnqueueMemBufferWrite");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnMemBufferWrite(hQueue, hBuffer, blockingWrite, offset, size, pSrc,
-                          numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEnqueueMemBufferWrite"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_MEM_BUFFER_WRITE,
-                       "urEnqueueMemBufferWrite", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEnqueueMemBufferWrite"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_ENQUEUE_MEM_BUFFER_WRITE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEnqueueMemBufferWrite"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -4324,7 +6068,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
     auto pfnMemBufferReadRect = context.urDdiTable.Enqueue.pfnMemBufferReadRect;
 
     if (nullptr == pfnMemBufferReadRect) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_mem_buffer_read_rect_params_t params = {&hQueue,
@@ -4341,25 +6085,40 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
                                                        &numEventsInWaitList,
                                                        &phEventWaitList,
                                                        &phEvent};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_ENQUEUE_MEM_BUFFER_READ_RECT,
-                             "urEnqueueMemBufferReadRect", &params);
 
-    context.logger.info("---> urEnqueueMemBufferReadRect");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnMemBufferReadRect(
-        hQueue, hBuffer, blockingRead, bufferOrigin, hostOrigin, region,
-        bufferRowPitch, bufferSlicePitch, hostRowPitch, hostSlicePitch, pDst,
-        numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEnqueueMemBufferReadRect"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_MEM_BUFFER_READ_RECT,
-                       "urEnqueueMemBufferReadRect", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urEnqueueMemBufferReadRect"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_ENQUEUE_MEM_BUFFER_READ_RECT, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEnqueueMemBufferReadRect"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -4403,7 +6162,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
         context.urDdiTable.Enqueue.pfnMemBufferWriteRect;
 
     if (nullptr == pfnMemBufferWriteRect) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_mem_buffer_write_rect_params_t params = {&hQueue,
@@ -4420,25 +6179,41 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
                                                         &numEventsInWaitList,
                                                         &phEventWaitList,
                                                         &phEvent};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_ENQUEUE_MEM_BUFFER_WRITE_RECT,
-                             "urEnqueueMemBufferWriteRect", &params);
 
-    context.logger.info("---> urEnqueueMemBufferWriteRect");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnMemBufferWriteRect(
-        hQueue, hBuffer, blockingWrite, bufferOrigin, hostOrigin, region,
-        bufferRowPitch, bufferSlicePitch, hostRowPitch, hostSlicePitch, pSrc,
-        numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urEnqueueMemBufferWriteRect"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_MEM_BUFFER_WRITE_RECT,
-                       "urEnqueueMemBufferWriteRect", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urEnqueueMemBufferWriteRect"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_ENQUEUE_MEM_BUFFER_WRITE_RECT, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEnqueueMemBufferWriteRect"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -4467,28 +6242,45 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopy(
     auto pfnMemBufferCopy = context.urDdiTable.Enqueue.pfnMemBufferCopy;
 
     if (nullptr == pfnMemBufferCopy) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_mem_buffer_copy_params_t params = {
         &hQueue, &hBufferSrc,          &hBufferDst,      &srcOffset, &dstOffset,
         &size,   &numEventsInWaitList, &phEventWaitList, &phEvent};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_ENQUEUE_MEM_BUFFER_COPY, "urEnqueueMemBufferCopy", &params);
 
-    context.logger.info("---> urEnqueueMemBufferCopy");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnMemBufferCopy(hQueue, hBufferSrc, hBufferDst, srcOffset, dstOffset,
-                         size, numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEnqueueMemBufferCopy"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_MEM_BUFFER_COPY,
-                       "urEnqueueMemBufferCopy", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEnqueueMemBufferCopy"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_ENQUEUE_MEM_BUFFER_COPY, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEnqueueMemBufferCopy"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -4526,7 +6318,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
     auto pfnMemBufferCopyRect = context.urDdiTable.Enqueue.pfnMemBufferCopyRect;
 
     if (nullptr == pfnMemBufferCopyRect) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_mem_buffer_copy_rect_params_t params = {
@@ -4534,25 +6326,40 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
         &dstOrigin,   &region,        &srcRowPitch,         &srcSlicePitch,
         &dstRowPitch, &dstSlicePitch, &numEventsInWaitList, &phEventWaitList,
         &phEvent};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_ENQUEUE_MEM_BUFFER_COPY_RECT,
-                             "urEnqueueMemBufferCopyRect", &params);
 
-    context.logger.info("---> urEnqueueMemBufferCopyRect");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnMemBufferCopyRect(
-        hQueue, hBufferSrc, hBufferDst, srcOrigin, dstOrigin, region,
-        srcRowPitch, srcSlicePitch, dstRowPitch, dstSlicePitch,
-        numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEnqueueMemBufferCopyRect"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_MEM_BUFFER_COPY_RECT,
-                       "urEnqueueMemBufferCopyRect", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urEnqueueMemBufferCopyRect"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_ENQUEUE_MEM_BUFFER_COPY_RECT, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEnqueueMemBufferCopyRect"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -4580,7 +6387,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferFill(
     auto pfnMemBufferFill = context.urDdiTable.Enqueue.pfnMemBufferFill;
 
     if (nullptr == pfnMemBufferFill) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_mem_buffer_fill_params_t params = {&hQueue,
@@ -4592,22 +6399,39 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferFill(
                                                   &numEventsInWaitList,
                                                   &phEventWaitList,
                                                   &phEvent};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_ENQUEUE_MEM_BUFFER_FILL, "urEnqueueMemBufferFill", &params);
 
-    context.logger.info("---> urEnqueueMemBufferFill");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnMemBufferFill(hQueue, hBuffer, pPattern, patternSize, offset, size,
-                         numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEnqueueMemBufferFill"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_MEM_BUFFER_FILL,
-                       "urEnqueueMemBufferFill", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEnqueueMemBufferFill"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_ENQUEUE_MEM_BUFFER_FILL, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEnqueueMemBufferFill"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -4640,7 +6464,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageRead(
     auto pfnMemImageRead = context.urDdiTable.Enqueue.pfnMemImageRead;
 
     if (nullptr == pfnMemImageRead) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_mem_image_read_params_t params = {
@@ -4648,22 +6472,39 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageRead(
         &origin,          &region, &rowPitch,
         &slicePitch,      &pDst,   &numEventsInWaitList,
         &phEventWaitList, &phEvent};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_ENQUEUE_MEM_IMAGE_READ,
-                                             "urEnqueueMemImageRead", &params);
 
-    context.logger.info("---> urEnqueueMemImageRead");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnMemImageRead(
-        hQueue, hImage, blockingRead, origin, region, rowPitch, slicePitch,
-        pDst, numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEnqueueMemImageRead"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_MEM_IMAGE_READ,
-                       "urEnqueueMemImageRead", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEnqueueMemImageRead"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_ENQUEUE_MEM_IMAGE_READ, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEnqueueMemImageRead"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -4697,7 +6538,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageWrite(
     auto pfnMemImageWrite = context.urDdiTable.Enqueue.pfnMemImageWrite;
 
     if (nullptr == pfnMemImageWrite) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_mem_image_write_params_t params = {
@@ -4705,22 +6546,39 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageWrite(
         &origin,          &region, &rowPitch,
         &slicePitch,      &pSrc,   &numEventsInWaitList,
         &phEventWaitList, &phEvent};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_ENQUEUE_MEM_IMAGE_WRITE, "urEnqueueMemImageWrite", &params);
 
-    context.logger.info("---> urEnqueueMemImageWrite");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnMemImageWrite(
-        hQueue, hImage, blockingWrite, origin, region, rowPitch, slicePitch,
-        pSrc, numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEnqueueMemImageWrite"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_MEM_IMAGE_WRITE,
-                       "urEnqueueMemImageWrite", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEnqueueMemImageWrite"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_ENQUEUE_MEM_IMAGE_WRITE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEnqueueMemImageWrite"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -4755,28 +6613,45 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageCopy(
     auto pfnMemImageCopy = context.urDdiTable.Enqueue.pfnMemImageCopy;
 
     if (nullptr == pfnMemImageCopy) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_mem_image_copy_params_t params = {
         &hQueue, &hImageSrc,           &hImageDst,       &srcOrigin, &dstOrigin,
         &region, &numEventsInWaitList, &phEventWaitList, &phEvent};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_ENQUEUE_MEM_IMAGE_COPY,
-                                             "urEnqueueMemImageCopy", &params);
 
-    context.logger.info("---> urEnqueueMemImageCopy");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnMemImageCopy(hQueue, hImageSrc, hImageDst, srcOrigin, dstOrigin,
-                        region, numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEnqueueMemImageCopy"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_MEM_IMAGE_COPY,
-                       "urEnqueueMemImageCopy", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEnqueueMemImageCopy"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_ENQUEUE_MEM_IMAGE_COPY, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEnqueueMemImageCopy"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -4806,29 +6681,46 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferMap(
     auto pfnMemBufferMap = context.urDdiTable.Enqueue.pfnMemBufferMap;
 
     if (nullptr == pfnMemBufferMap) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_mem_buffer_map_params_t params = {
         &hQueue,  &hBuffer, &blockingMap,         &mapFlags,
         &offset,  &size,    &numEventsInWaitList, &phEventWaitList,
         &phEvent, &ppRetMap};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_ENQUEUE_MEM_BUFFER_MAP,
-                                             "urEnqueueMemBufferMap", &params);
 
-    context.logger.info("---> urEnqueueMemBufferMap");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnMemBufferMap(hQueue, hBuffer, blockingMap, mapFlags,
-                                         offset, size, numEventsInWaitList,
-                                         phEventWaitList, phEvent, ppRetMap);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEnqueueMemBufferMap"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_MEM_BUFFER_MAP,
-                       "urEnqueueMemBufferMap", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEnqueueMemBufferMap"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_ENQUEUE_MEM_BUFFER_MAP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEnqueueMemBufferMap"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -4853,28 +6745,45 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemUnmap(
     auto pfnMemUnmap = context.urDdiTable.Enqueue.pfnMemUnmap;
 
     if (nullptr == pfnMemUnmap) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_mem_unmap_params_t params = {
         &hQueue,          &hMem,   &pMappedPtr, &numEventsInWaitList,
         &phEventWaitList, &phEvent};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_ENQUEUE_MEM_UNMAP,
-                                             "urEnqueueMemUnmap", &params);
 
-    context.logger.info("---> urEnqueueMemUnmap");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnMemUnmap(hQueue, hMem, pMappedPtr, numEventsInWaitList,
-                    phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEnqueueMemUnmap"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_MEM_UNMAP, "urEnqueueMemUnmap",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEnqueueMemUnmap"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_ENQUEUE_MEM_UNMAP,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEnqueueMemUnmap"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -4904,29 +6813,46 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill(
     auto pfnUSMFill = context.urDdiTable.Enqueue.pfnUSMFill;
 
     if (nullptr == pfnUSMFill) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_usm_fill_params_t params = {
         &hQueue,          &pMem,   &patternSize,
         &pPattern,        &size,   &numEventsInWaitList,
         &phEventWaitList, &phEvent};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_ENQUEUE_USM_FILL,
-                                             "urEnqueueUSMFill", &params);
 
-    context.logger.info("---> urEnqueueUSMFill");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnUSMFill(hQueue, pMem, patternSize, pPattern, size,
-                   numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEnqueueUSMFill"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_USM_FILL, "urEnqueueUSMFill",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEnqueueUSMFill"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_ENQUEUE_USM_FILL,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEnqueueUSMFill"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -4954,28 +6880,45 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy(
     auto pfnUSMMemcpy = context.urDdiTable.Enqueue.pfnUSMMemcpy;
 
     if (nullptr == pfnUSMMemcpy) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_usm_memcpy_params_t params = {
         &hQueue,          &blocking, &pDst, &pSrc, &size, &numEventsInWaitList,
         &phEventWaitList, &phEvent};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_ENQUEUE_USM_MEMCPY,
-                                             "urEnqueueUSMMemcpy", &params);
 
-    context.logger.info("---> urEnqueueUSMMemcpy");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnUSMMemcpy(hQueue, blocking, pDst, pSrc, size, numEventsInWaitList,
-                     phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEnqueueUSMMemcpy"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_USM_MEMCPY, "urEnqueueUSMMemcpy",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEnqueueUSMMemcpy"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_ENQUEUE_USM_MEMCPY,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEnqueueUSMMemcpy"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -5001,28 +6944,45 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMPrefetch(
     auto pfnUSMPrefetch = context.urDdiTable.Enqueue.pfnUSMPrefetch;
 
     if (nullptr == pfnUSMPrefetch) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_usm_prefetch_params_t params = {
         &hQueue,          &pMem,   &size, &flags, &numEventsInWaitList,
         &phEventWaitList, &phEvent};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_ENQUEUE_USM_PREFETCH,
-                                             "urEnqueueUSMPrefetch", &params);
 
-    context.logger.info("---> urEnqueueUSMPrefetch");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnUSMPrefetch(hQueue, pMem, size, flags, numEventsInWaitList,
-                       phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEnqueueUSMPrefetch"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_USM_PREFETCH, "urEnqueueUSMPrefetch",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEnqueueUSMPrefetch"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_ENQUEUE_USM_PREFETCH,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEnqueueUSMPrefetch"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -5042,25 +7002,44 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMAdvise(
     auto pfnUSMAdvise = context.urDdiTable.Enqueue.pfnUSMAdvise;
 
     if (nullptr == pfnUSMAdvise) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_usm_advise_params_t params = {&hQueue, &pMem, &size, &advice,
                                              &phEvent};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_ENQUEUE_USM_ADVISE,
-                                             "urEnqueueUSMAdvise", &params);
 
-    context.logger.info("---> urEnqueueUSMAdvise");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnUSMAdvise(hQueue, pMem, size, advice, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEnqueueUSMAdvise"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_USM_ADVISE, "urEnqueueUSMAdvise",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEnqueueUSMAdvise"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_ENQUEUE_USM_ADVISE,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEnqueueUSMAdvise"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -5095,29 +7074,46 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill2D(
     auto pfnUSMFill2D = context.urDdiTable.Enqueue.pfnUSMFill2D;
 
     if (nullptr == pfnUSMFill2D) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_usm_fill_2d_params_t params = {
         &hQueue,          &pMem,   &pitch,  &patternSize,
         &pPattern,        &width,  &height, &numEventsInWaitList,
         &phEventWaitList, &phEvent};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_ENQUEUE_USM_FILL_2D,
-                                             "urEnqueueUSMFill2D", &params);
 
-    context.logger.info("---> urEnqueueUSMFill2D");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnUSMFill2D(hQueue, pMem, pitch, patternSize, pPattern, width, height,
-                     numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEnqueueUSMFill2D"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_USM_FILL_2D, "urEnqueueUSMFill2D",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEnqueueUSMFill2D"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_ENQUEUE_USM_FILL_2D,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEnqueueUSMFill2D"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -5151,7 +7147,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
     auto pfnUSMMemcpy2D = context.urDdiTable.Enqueue.pfnUSMMemcpy2D;
 
     if (nullptr == pfnUSMMemcpy2D) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_usm_memcpy_2d_params_t params = {
@@ -5159,22 +7155,39 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
         &dstPitch,        &pSrc,     &srcPitch,
         &width,           &height,   &numEventsInWaitList,
         &phEventWaitList, &phEvent};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_ENQUEUE_USM_MEMCPY_2D,
-                                             "urEnqueueUSMMemcpy2D", &params);
 
-    context.logger.info("---> urEnqueueUSMMemcpy2D");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnUSMMemcpy2D(hQueue, blocking, pDst, dstPitch, pSrc, srcPitch, width,
-                       height, numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEnqueueUSMMemcpy2D"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_USM_MEMCPY_2D,
-                       "urEnqueueUSMMemcpy2D", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEnqueueUSMMemcpy2D"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_ENQUEUE_USM_MEMCPY_2D,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEnqueueUSMMemcpy2D"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -5206,31 +7219,49 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
         context.urDdiTable.Enqueue.pfnDeviceGlobalVariableWrite;
 
     if (nullptr == pfnDeviceGlobalVariableWrite) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_device_global_variable_write_params_t params = {
         &hQueue,          &hProgram, &name, &blockingWrite,
         &count,           &offset,   &pSrc, &numEventsInWaitList,
         &phEventWaitList, &phEvent};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_ENQUEUE_DEVICE_GLOBAL_VARIABLE_WRITE,
-                             "urEnqueueDeviceGlobalVariableWrite", &params);
 
-    context.logger.info("---> urEnqueueDeviceGlobalVariableWrite");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnDeviceGlobalVariableWrite(
-        hQueue, hProgram, name, blockingWrite, count, offset, pSrc,
-        numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urEnqueueDeviceGlobalVariableWrite"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_DEVICE_GLOBAL_VARIABLE_WRITE,
-                       "urEnqueueDeviceGlobalVariableWrite", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urEnqueueDeviceGlobalVariableWrite"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_ENQUEUE_DEVICE_GLOBAL_VARIABLE_WRITE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urEnqueueDeviceGlobalVariableWrite"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -5262,31 +7293,49 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
         context.urDdiTable.Enqueue.pfnDeviceGlobalVariableRead;
 
     if (nullptr == pfnDeviceGlobalVariableRead) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_device_global_variable_read_params_t params = {
         &hQueue,          &hProgram, &name, &blockingRead,
         &count,           &offset,   &pDst, &numEventsInWaitList,
         &phEventWaitList, &phEvent};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_ENQUEUE_DEVICE_GLOBAL_VARIABLE_READ,
-                             "urEnqueueDeviceGlobalVariableRead", &params);
 
-    context.logger.info("---> urEnqueueDeviceGlobalVariableRead");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnDeviceGlobalVariableRead(
-        hQueue, hProgram, name, blockingRead, count, offset, pDst,
-        numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urEnqueueDeviceGlobalVariableRead"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_DEVICE_GLOBAL_VARIABLE_READ,
-                       "urEnqueueDeviceGlobalVariableRead", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urEnqueueDeviceGlobalVariableRead"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_ENQUEUE_DEVICE_GLOBAL_VARIABLE_READ, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urEnqueueDeviceGlobalVariableRead"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -5321,29 +7370,46 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueReadHostPipe(
     auto pfnReadHostPipe = context.urDdiTable.Enqueue.pfnReadHostPipe;
 
     if (nullptr == pfnReadHostPipe) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_read_host_pipe_params_t params = {
         &hQueue, &hProgram, &pipe_symbol,         &blocking,
         &pDst,   &size,     &numEventsInWaitList, &phEventWaitList,
         &phEvent};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_ENQUEUE_READ_HOST_PIPE,
-                                             "urEnqueueReadHostPipe", &params);
 
-    context.logger.info("---> urEnqueueReadHostPipe");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnReadHostPipe(hQueue, hProgram, pipe_symbol, blocking, pDst, size,
-                        numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEnqueueReadHostPipe"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_READ_HOST_PIPE,
-                       "urEnqueueReadHostPipe", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEnqueueReadHostPipe"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_ENQUEUE_READ_HOST_PIPE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEnqueueReadHostPipe"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -5378,29 +7444,46 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueWriteHostPipe(
     auto pfnWriteHostPipe = context.urDdiTable.Enqueue.pfnWriteHostPipe;
 
     if (nullptr == pfnWriteHostPipe) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_write_host_pipe_params_t params = {
         &hQueue, &hProgram, &pipe_symbol,         &blocking,
         &pSrc,   &size,     &numEventsInWaitList, &phEventWaitList,
         &phEvent};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_ENQUEUE_WRITE_HOST_PIPE, "urEnqueueWriteHostPipe", &params);
 
-    context.logger.info("---> urEnqueueWriteHostPipe");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnWriteHostPipe(hQueue, hProgram, pipe_symbol, blocking, pSrc, size,
-                         numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urEnqueueWriteHostPipe"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_WRITE_HOST_PIPE,
-                       "urEnqueueWriteHostPipe", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urEnqueueWriteHostPipe"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_ENQUEUE_WRITE_HOST_PIPE, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urEnqueueWriteHostPipe"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -5425,28 +7508,41 @@ __urdlllocal ur_result_t UR_APICALL urUSMPitchedAllocExp(
     auto pfnPitchedAllocExp = context.urDdiTable.USMExp.pfnPitchedAllocExp;
 
     if (nullptr == pfnPitchedAllocExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_usm_pitched_alloc_exp_params_t params = {
         &hContext, &hDevice,          &pUSMDesc, &pool,        &widthInBytes,
         &height,   &elementSizeBytes, &ppMem,    &pResultPitch};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_USM_PITCHED_ALLOC_EXP,
-                                             "urUSMPitchedAllocExp", &params);
 
-    context.logger.info("---> urUSMPitchedAllocExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnPitchedAllocExp(hContext, hDevice, pUSMDesc, pool, widthInBytes,
-                           height, elementSizeBytes, ppMem, pResultPitch);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urUSMPitchedAllocExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_USM_PITCHED_ALLOC_EXP,
-                       "urUSMPitchedAllocExp", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urUSMPitchedAllocExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_USM_PITCHED_ALLOC_EXP,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urUSMPitchedAllocExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -5464,31 +7560,43 @@ urBindlessImagesUnsampledImageHandleDestroyExp(
         context.urDdiTable.BindlessImagesExp.pfnUnsampledImageHandleDestroyExp;
 
     if (nullptr == pfnUnsampledImageHandleDestroyExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_bindless_images_unsampled_image_handle_destroy_exp_params_t params = {
         &hContext, &hDevice, &hImage};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_BINDLESS_IMAGES_UNSAMPLED_IMAGE_HANDLE_DESTROY_EXP,
-        "urBindlessImagesUnsampledImageHandleDestroyExp", &params);
 
-    context.logger.info("---> urBindlessImagesUnsampledImageHandleDestroyExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnUnsampledImageHandleDestroyExp(hContext, hDevice, hImage);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urBindlessImagesUnsampledImageHandleDestroyExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(
-        UR_FUNCTION_BINDLESS_IMAGES_UNSAMPLED_IMAGE_HANDLE_DESTROY_EXP,
-        "urBindlessImagesUnsampledImageHandleDestroyExp", &params, &result,
-        instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urBindlessImagesUnsampledImageHandleDestroyExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str,
-        UR_FUNCTION_BINDLESS_IMAGES_UNSAMPLED_IMAGE_HANDLE_DESTROY_EXP,
-        &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urBindlessImagesUnsampledImageHandleDestroyExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -5506,30 +7614,43 @@ urBindlessImagesSampledImageHandleDestroyExp(
         context.urDdiTable.BindlessImagesExp.pfnSampledImageHandleDestroyExp;
 
     if (nullptr == pfnSampledImageHandleDestroyExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_bindless_images_sampled_image_handle_destroy_exp_params_t params = {
         &hContext, &hDevice, &hImage};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_BINDLESS_IMAGES_SAMPLED_IMAGE_HANDLE_DESTROY_EXP,
-        "urBindlessImagesSampledImageHandleDestroyExp", &params);
 
-    context.logger.info("---> urBindlessImagesSampledImageHandleDestroyExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnSampledImageHandleDestroyExp(hContext, hDevice, hImage);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urBindlessImagesSampledImageHandleDestroyExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(
-        UR_FUNCTION_BINDLESS_IMAGES_SAMPLED_IMAGE_HANDLE_DESTROY_EXP,
-        "urBindlessImagesSampledImageHandleDestroyExp", &params, &result,
-        instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urBindlessImagesSampledImageHandleDestroyExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_BINDLESS_IMAGES_SAMPLED_IMAGE_HANDLE_DESTROY_EXP,
-        &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urBindlessImagesSampledImageHandleDestroyExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -5549,28 +7670,44 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageAllocateExp(
         context.urDdiTable.BindlessImagesExp.pfnImageAllocateExp;
 
     if (nullptr == pfnImageAllocateExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_bindless_images_image_allocate_exp_params_t params = {
         &hContext, &hDevice, &pImageFormat, &pImageDesc, &phImageMem};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_BINDLESS_IMAGES_IMAGE_ALLOCATE_EXP,
-                             "urBindlessImagesImageAllocateExp", &params);
 
-    context.logger.info("---> urBindlessImagesImageAllocateExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnImageAllocateExp(hContext, hDevice, pImageFormat,
-                                             pImageDesc, phImageMem);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urBindlessImagesImageAllocateExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_BINDLESS_IMAGES_IMAGE_ALLOCATE_EXP,
-                       "urBindlessImagesImageAllocateExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urBindlessImagesImageAllocateExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_BINDLESS_IMAGES_IMAGE_ALLOCATE_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phImageMem = createDummyHandle<ur_exp_image_mem_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urBindlessImagesImageAllocateExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -5586,27 +7723,43 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageFreeExp(
     auto pfnImageFreeExp = context.urDdiTable.BindlessImagesExp.pfnImageFreeExp;
 
     if (nullptr == pfnImageFreeExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_bindless_images_image_free_exp_params_t params = {&hContext, &hDevice,
                                                          &hImageMem};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_BINDLESS_IMAGES_IMAGE_FREE_EXP,
-                             "urBindlessImagesImageFreeExp", &params);
 
-    context.logger.info("---> urBindlessImagesImageFreeExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnImageFreeExp(hContext, hDevice, hImageMem);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urBindlessImagesImageFreeExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_BINDLESS_IMAGES_IMAGE_FREE_EXP,
-                       "urBindlessImagesImageFreeExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urBindlessImagesImageFreeExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_BINDLESS_IMAGES_IMAGE_FREE_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urBindlessImagesImageFreeExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -5628,29 +7781,44 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesUnsampledImageCreateExp(
         context.urDdiTable.BindlessImagesExp.pfnUnsampledImageCreateExp;
 
     if (nullptr == pfnUnsampledImageCreateExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_bindless_images_unsampled_image_create_exp_params_t params = {
         &hContext, &hDevice, &hImageMem, &pImageFormat, &pImageDesc, &phImage};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_BINDLESS_IMAGES_UNSAMPLED_IMAGE_CREATE_EXP,
-        "urBindlessImagesUnsampledImageCreateExp", &params);
 
-    context.logger.info("---> urBindlessImagesUnsampledImageCreateExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnUnsampledImageCreateExp(
-        hContext, hDevice, hImageMem, pImageFormat, pImageDesc, phImage);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urBindlessImagesUnsampledImageCreateExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_BINDLESS_IMAGES_UNSAMPLED_IMAGE_CREATE_EXP,
-                       "urBindlessImagesUnsampledImageCreateExp", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urBindlessImagesUnsampledImageCreateExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_BINDLESS_IMAGES_UNSAMPLED_IMAGE_CREATE_EXP,
-        &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phImage = createDummyHandle<ur_exp_image_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urBindlessImagesUnsampledImageCreateExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -5673,31 +7841,45 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesSampledImageCreateExp(
         context.urDdiTable.BindlessImagesExp.pfnSampledImageCreateExp;
 
     if (nullptr == pfnSampledImageCreateExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_bindless_images_sampled_image_create_exp_params_t params = {
         &hContext,   &hDevice,  &hImageMem, &pImageFormat,
         &pImageDesc, &hSampler, &phImage};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_BINDLESS_IMAGES_SAMPLED_IMAGE_CREATE_EXP,
-        "urBindlessImagesSampledImageCreateExp", &params);
 
-    context.logger.info("---> urBindlessImagesSampledImageCreateExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnSampledImageCreateExp(hContext, hDevice, hImageMem, pImageFormat,
-                                 pImageDesc, hSampler, phImage);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urBindlessImagesSampledImageCreateExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_BINDLESS_IMAGES_SAMPLED_IMAGE_CREATE_EXP,
-                       "urBindlessImagesSampledImageCreateExp", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urBindlessImagesSampledImageCreateExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_BINDLESS_IMAGES_SAMPLED_IMAGE_CREATE_EXP,
-        &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phImage = createDummyHandle<ur_exp_image_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urBindlessImagesSampledImageCreateExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -5739,7 +7921,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageCopyExp(
     auto pfnImageCopyExp = context.urDdiTable.BindlessImagesExp.pfnImageCopyExp;
 
     if (nullptr == pfnImageCopyExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_bindless_images_image_copy_exp_params_t params = {&hQueue,
@@ -5755,25 +7937,42 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageCopyExp(
                                                          &numEventsInWaitList,
                                                          &phEventWaitList,
                                                          &phEvent};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_BINDLESS_IMAGES_IMAGE_COPY_EXP,
-                             "urBindlessImagesImageCopyExp", &params);
 
-    context.logger.info("---> urBindlessImagesImageCopyExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnImageCopyExp(
-        hQueue, pDst, pSrc, pImageFormat, pImageDesc, imageCopyFlags, srcOffset,
-        dstOffset, copyExtent, hostExtent, numEventsInWaitList, phEventWaitList,
-        phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urBindlessImagesImageCopyExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_BINDLESS_IMAGES_IMAGE_COPY_EXP,
-                       "urBindlessImagesImageCopyExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urBindlessImagesImageCopyExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_BINDLESS_IMAGES_IMAGE_COPY_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urBindlessImagesImageCopyExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -5790,28 +7989,43 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageGetInfoExp(
         context.urDdiTable.BindlessImagesExp.pfnImageGetInfoExp;
 
     if (nullptr == pfnImageGetInfoExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_bindless_images_image_get_info_exp_params_t params = {
         &hImageMem, &propName, &pPropValue, &pPropSizeRet};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_BINDLESS_IMAGES_IMAGE_GET_INFO_EXP,
-                             "urBindlessImagesImageGetInfoExp", &params);
 
-    context.logger.info("---> urBindlessImagesImageGetInfoExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnImageGetInfoExp(hImageMem, propName, pPropValue, pPropSizeRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urBindlessImagesImageGetInfoExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_BINDLESS_IMAGES_IMAGE_GET_INFO_EXP,
-                       "urBindlessImagesImageGetInfoExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urBindlessImagesImageGetInfoExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_BINDLESS_IMAGES_IMAGE_GET_INFO_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urBindlessImagesImageGetInfoExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -5831,28 +8045,44 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMipmapGetLevelExp(
         context.urDdiTable.BindlessImagesExp.pfnMipmapGetLevelExp;
 
     if (nullptr == pfnMipmapGetLevelExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_bindless_images_mipmap_get_level_exp_params_t params = {
         &hContext, &hDevice, &hImageMem, &mipmapLevel, &phImageMem};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_BINDLESS_IMAGES_MIPMAP_GET_LEVEL_EXP,
-                             "urBindlessImagesMipmapGetLevelExp", &params);
 
-    context.logger.info("---> urBindlessImagesMipmapGetLevelExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnMipmapGetLevelExp(hContext, hDevice, hImageMem,
-                                              mipmapLevel, phImageMem);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urBindlessImagesMipmapGetLevelExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_BINDLESS_IMAGES_MIPMAP_GET_LEVEL_EXP,
-                       "urBindlessImagesMipmapGetLevelExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urBindlessImagesMipmapGetLevelExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_BINDLESS_IMAGES_MIPMAP_GET_LEVEL_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phImageMem = createDummyHandle<ur_exp_image_mem_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urBindlessImagesMipmapGetLevelExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -5868,27 +8098,43 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMipmapFreeExp(
         context.urDdiTable.BindlessImagesExp.pfnMipmapFreeExp;
 
     if (nullptr == pfnMipmapFreeExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_bindless_images_mipmap_free_exp_params_t params = {&hContext, &hDevice,
                                                           &hMem};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_BINDLESS_IMAGES_MIPMAP_FREE_EXP,
-                             "urBindlessImagesMipmapFreeExp", &params);
 
-    context.logger.info("---> urBindlessImagesMipmapFreeExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnMipmapFreeExp(hContext, hDevice, hMem);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urBindlessImagesMipmapFreeExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_BINDLESS_IMAGES_MIPMAP_FREE_EXP,
-                       "urBindlessImagesMipmapFreeExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urBindlessImagesMipmapFreeExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_BINDLESS_IMAGES_MIPMAP_FREE_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urBindlessImagesMipmapFreeExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -5908,28 +8154,44 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportOpaqueFDExp(
         context.urDdiTable.BindlessImagesExp.pfnImportOpaqueFDExp;
 
     if (nullptr == pfnImportOpaqueFDExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_bindless_images_import_opaque_fd_exp_params_t params = {
         &hContext, &hDevice, &size, &pInteropMemDesc, &phInteropMem};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_BINDLESS_IMAGES_IMPORT_OPAQUE_FD_EXP,
-                             "urBindlessImagesImportOpaqueFDExp", &params);
 
-    context.logger.info("---> urBindlessImagesImportOpaqueFDExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnImportOpaqueFDExp(hContext, hDevice, size,
-                                              pInteropMemDesc, phInteropMem);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urBindlessImagesImportOpaqueFDExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_BINDLESS_IMAGES_IMPORT_OPAQUE_FD_EXP,
-                       "urBindlessImagesImportOpaqueFDExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urBindlessImagesImportOpaqueFDExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_BINDLESS_IMAGES_IMPORT_OPAQUE_FD_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phInteropMem = createDummyHandle<ur_exp_interop_mem_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urBindlessImagesImportOpaqueFDExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -5951,29 +8213,45 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMapExternalArrayExp(
         context.urDdiTable.BindlessImagesExp.pfnMapExternalArrayExp;
 
     if (nullptr == pfnMapExternalArrayExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_bindless_images_map_external_array_exp_params_t params = {
         &hContext,   &hDevice,     &pImageFormat,
         &pImageDesc, &hInteropMem, &phImageMem};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_BINDLESS_IMAGES_MAP_EXTERNAL_ARRAY_EXP,
-                             "urBindlessImagesMapExternalArrayExp", &params);
 
-    context.logger.info("---> urBindlessImagesMapExternalArrayExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnMapExternalArrayExp(
-        hContext, hDevice, pImageFormat, pImageDesc, hInteropMem, phImageMem);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urBindlessImagesMapExternalArrayExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_BINDLESS_IMAGES_MAP_EXTERNAL_ARRAY_EXP,
-                       "urBindlessImagesMapExternalArrayExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urBindlessImagesMapExternalArrayExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_BINDLESS_IMAGES_MAP_EXTERNAL_ARRAY_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phImageMem = createDummyHandle<ur_exp_image_mem_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urBindlessImagesMapExternalArrayExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -5990,27 +8268,44 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesReleaseInteropExp(
         context.urDdiTable.BindlessImagesExp.pfnReleaseInteropExp;
 
     if (nullptr == pfnReleaseInteropExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_bindless_images_release_interop_exp_params_t params = {
         &hContext, &hDevice, &hInteropMem};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_BINDLESS_IMAGES_RELEASE_INTEROP_EXP,
-                             "urBindlessImagesReleaseInteropExp", &params);
 
-    context.logger.info("---> urBindlessImagesReleaseInteropExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnReleaseInteropExp(hContext, hDevice, hInteropMem);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urBindlessImagesReleaseInteropExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_BINDLESS_IMAGES_RELEASE_INTEROP_EXP,
-                       "urBindlessImagesReleaseInteropExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urBindlessImagesReleaseInteropExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_BINDLESS_IMAGES_RELEASE_INTEROP_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        releaseDummyHandle(hInteropMem);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urBindlessImagesReleaseInteropExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -6031,32 +8326,45 @@ urBindlessImagesImportExternalSemaphoreOpaqueFDExp(
             .pfnImportExternalSemaphoreOpaqueFDExp;
 
     if (nullptr == pfnImportExternalSemaphoreOpaqueFDExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_bindless_images_import_external_semaphore_opaque_fd_exp_params_t params =
         {&hContext, &hDevice, &pInteropSemaphoreDesc, &phInteropSemaphore};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_BINDLESS_IMAGES_IMPORT_EXTERNAL_SEMAPHORE_OPAQUE_FD_EXP,
-        "urBindlessImagesImportExternalSemaphoreOpaqueFDExp", &params);
 
-    context.logger.info(
-        "---> urBindlessImagesImportExternalSemaphoreOpaqueFDExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnImportExternalSemaphoreOpaqueFDExp(
-        hContext, hDevice, pInteropSemaphoreDesc, phInteropSemaphore);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urBindlessImagesImportExternalSemaphoreOpaqueFDExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(
-        UR_FUNCTION_BINDLESS_IMAGES_IMPORT_EXTERNAL_SEMAPHORE_OPAQUE_FD_EXP,
-        "urBindlessImagesImportExternalSemaphoreOpaqueFDExp", &params, &result,
-        instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urBindlessImagesImportExternalSemaphoreOpaqueFDExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str,
-        UR_FUNCTION_BINDLESS_IMAGES_IMPORT_EXTERNAL_SEMAPHORE_OPAQUE_FD_EXP,
-        &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phInteropSemaphore =
+            createDummyHandle<ur_exp_interop_semaphore_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urBindlessImagesImportExternalSemaphoreOpaqueFDExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -6073,30 +8381,43 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesDestroyExternalSemaphoreExp(
         context.urDdiTable.BindlessImagesExp.pfnDestroyExternalSemaphoreExp;
 
     if (nullptr == pfnDestroyExternalSemaphoreExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_bindless_images_destroy_external_semaphore_exp_params_t params = {
         &hContext, &hDevice, &hInteropSemaphore};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_BINDLESS_IMAGES_DESTROY_EXTERNAL_SEMAPHORE_EXP,
-        "urBindlessImagesDestroyExternalSemaphoreExp", &params);
 
-    context.logger.info("---> urBindlessImagesDestroyExternalSemaphoreExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnDestroyExternalSemaphoreExp(hContext, hDevice, hInteropSemaphore);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urBindlessImagesDestroyExternalSemaphoreExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(
-        UR_FUNCTION_BINDLESS_IMAGES_DESTROY_EXTERNAL_SEMAPHORE_EXP,
-        "urBindlessImagesDestroyExternalSemaphoreExp", &params, &result,
-        instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urBindlessImagesDestroyExternalSemaphoreExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_BINDLESS_IMAGES_DESTROY_EXTERNAL_SEMAPHORE_EXP,
-        &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urBindlessImagesDestroyExternalSemaphoreExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -6122,29 +8443,47 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesWaitExternalSemaphoreExp(
         context.urDdiTable.BindlessImagesExp.pfnWaitExternalSemaphoreExp;
 
     if (nullptr == pfnWaitExternalSemaphoreExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_bindless_images_wait_external_semaphore_exp_params_t params = {
         &hQueue, &hSemaphore, &numEventsInWaitList, &phEventWaitList, &phEvent};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_BINDLESS_IMAGES_WAIT_EXTERNAL_SEMAPHORE_EXP,
-        "urBindlessImagesWaitExternalSemaphoreExp", &params);
 
-    context.logger.info("---> urBindlessImagesWaitExternalSemaphoreExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnWaitExternalSemaphoreExp(
-        hQueue, hSemaphore, numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urBindlessImagesWaitExternalSemaphoreExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_BINDLESS_IMAGES_WAIT_EXTERNAL_SEMAPHORE_EXP,
-                       "urBindlessImagesWaitExternalSemaphoreExp", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urBindlessImagesWaitExternalSemaphoreExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_BINDLESS_IMAGES_WAIT_EXTERNAL_SEMAPHORE_EXP,
-        &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urBindlessImagesWaitExternalSemaphoreExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -6170,30 +8509,47 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesSignalExternalSemaphoreExp(
         context.urDdiTable.BindlessImagesExp.pfnSignalExternalSemaphoreExp;
 
     if (nullptr == pfnSignalExternalSemaphoreExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_bindless_images_signal_external_semaphore_exp_params_t params = {
         &hQueue, &hSemaphore, &numEventsInWaitList, &phEventWaitList, &phEvent};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_BINDLESS_IMAGES_SIGNAL_EXTERNAL_SEMAPHORE_EXP,
-        "urBindlessImagesSignalExternalSemaphoreExp", &params);
 
-    context.logger.info("---> urBindlessImagesSignalExternalSemaphoreExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnSignalExternalSemaphoreExp(
-        hQueue, hSemaphore, numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urBindlessImagesSignalExternalSemaphoreExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(
-        UR_FUNCTION_BINDLESS_IMAGES_SIGNAL_EXTERNAL_SEMAPHORE_EXP,
-        "urBindlessImagesSignalExternalSemaphoreExp", &params, &result,
-        instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urBindlessImagesSignalExternalSemaphoreExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_BINDLESS_IMAGES_SIGNAL_EXTERNAL_SEMAPHORE_EXP,
-        &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urBindlessImagesSignalExternalSemaphoreExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -6211,27 +8567,41 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferCreateExp(
     auto pfnCreateExp = context.urDdiTable.CommandBufferExp.pfnCreateExp;
 
     if (nullptr == pfnCreateExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_command_buffer_create_exp_params_t params = {
         &hContext, &hDevice, &pCommandBufferDesc, &phCommandBuffer};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_COMMAND_BUFFER_CREATE_EXP,
-                             "urCommandBufferCreateExp", &params);
 
-    context.logger.info("---> urCommandBufferCreateExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnCreateExp(hContext, hDevice, pCommandBufferDesc, phCommandBuffer);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urCommandBufferCreateExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_COMMAND_BUFFER_CREATE_EXP,
-                       "urCommandBufferCreateExp", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urCommandBufferCreateExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_CREATE_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phCommandBuffer = createDummyHandle<ur_exp_command_buffer_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urCommandBufferCreateExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -6245,25 +8615,40 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferRetainExp(
     auto pfnRetainExp = context.urDdiTable.CommandBufferExp.pfnRetainExp;
 
     if (nullptr == pfnRetainExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_command_buffer_retain_exp_params_t params = {&hCommandBuffer};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_COMMAND_BUFFER_RETAIN_EXP,
-                             "urCommandBufferRetainExp", &params);
 
-    context.logger.info("---> urCommandBufferRetainExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnRetainExp(hCommandBuffer);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urCommandBufferRetainExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_COMMAND_BUFFER_RETAIN_EXP,
-                       "urCommandBufferRetainExp", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urCommandBufferRetainExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_RETAIN_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        retainDummyHandle(hCommandBuffer);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urCommandBufferRetainExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -6277,25 +8662,40 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseExp(
     auto pfnReleaseExp = context.urDdiTable.CommandBufferExp.pfnReleaseExp;
 
     if (nullptr == pfnReleaseExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_command_buffer_release_exp_params_t params = {&hCommandBuffer};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_COMMAND_BUFFER_RELEASE_EXP,
-                             "urCommandBufferReleaseExp", &params);
 
-    context.logger.info("---> urCommandBufferReleaseExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnReleaseExp(hCommandBuffer);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urCommandBufferReleaseExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_COMMAND_BUFFER_RELEASE_EXP,
-                       "urCommandBufferReleaseExp", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urCommandBufferReleaseExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_RELEASE_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        releaseDummyHandle(hCommandBuffer);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urCommandBufferReleaseExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -6309,26 +8709,40 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferFinalizeExp(
     auto pfnFinalizeExp = context.urDdiTable.CommandBufferExp.pfnFinalizeExp;
 
     if (nullptr == pfnFinalizeExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_command_buffer_finalize_exp_params_t params = {&hCommandBuffer};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_COMMAND_BUFFER_FINALIZE_EXP,
-                             "urCommandBufferFinalizeExp", &params);
 
-    context.logger.info("---> urCommandBufferFinalizeExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnFinalizeExp(hCommandBuffer);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urCommandBufferFinalizeExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_COMMAND_BUFFER_FINALIZE_EXP,
-                       "urCommandBufferFinalizeExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urCommandBufferFinalizeExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_FINALIZE_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urCommandBufferFinalizeExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -6360,7 +8774,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
         context.urDdiTable.CommandBufferExp.pfnAppendKernelLaunchExp;
 
     if (nullptr == pfnAppendKernelLaunchExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_command_buffer_append_kernel_launch_exp_params_t params = {
@@ -6374,25 +8788,43 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
         &pSyncPointWaitList,
         &pSyncPoint,
         &phCommand};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_COMMAND_BUFFER_APPEND_KERNEL_LAUNCH_EXP,
-        "urCommandBufferAppendKernelLaunchExp", &params);
 
-    context.logger.info("---> urCommandBufferAppendKernelLaunchExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnAppendKernelLaunchExp(
-        hCommandBuffer, hKernel, workDim, pGlobalWorkOffset, pGlobalWorkSize,
-        pLocalWorkSize, numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint,
-        phCommand);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urCommandBufferAppendKernelLaunchExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_COMMAND_BUFFER_APPEND_KERNEL_LAUNCH_EXP,
-                       "urCommandBufferAppendKernelLaunchExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urCommandBufferAppendKernelLaunchExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_APPEND_KERNEL_LAUNCH_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phCommand) {
+            *phCommand =
+                createDummyHandle<ur_exp_command_buffer_command_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urCommandBufferAppendKernelLaunchExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -6417,30 +8849,44 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMMemcpyExp(
         context.urDdiTable.CommandBufferExp.pfnAppendUSMMemcpyExp;
 
     if (nullptr == pfnAppendUSMMemcpyExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_command_buffer_append_usm_memcpy_exp_params_t params = {
         &hCommandBuffer,     &pDst,      &pSrc, &size, &numSyncPointsInWaitList,
         &pSyncPointWaitList, &pSyncPoint};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_MEMCPY_EXP,
-                             "urCommandBufferAppendUSMMemcpyExp", &params);
 
-    context.logger.info("---> urCommandBufferAppendUSMMemcpyExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnAppendUSMMemcpyExp(hCommandBuffer, pDst, pSrc, size,
-                                               numSyncPointsInWaitList,
-                                               pSyncPointWaitList, pSyncPoint);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urCommandBufferAppendUSMMemcpyExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_MEMCPY_EXP,
-                       "urCommandBufferAppendUSMMemcpyExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urCommandBufferAppendUSMMemcpyExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_MEMCPY_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urCommandBufferAppendUSMMemcpyExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -6467,31 +8913,45 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMFillExp(
         context.urDdiTable.CommandBufferExp.pfnAppendUSMFillExp;
 
     if (nullptr == pfnAppendUSMFillExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_command_buffer_append_usm_fill_exp_params_t params = {
         &hCommandBuffer,     &pMemory,   &pPattern,
         &patternSize,        &size,      &numSyncPointsInWaitList,
         &pSyncPointWaitList, &pSyncPoint};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_FILL_EXP,
-                             "urCommandBufferAppendUSMFillExp", &params);
 
-    context.logger.info("---> urCommandBufferAppendUSMFillExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnAppendUSMFillExp(
-        hCommandBuffer, pMemory, pPattern, patternSize, size,
-        numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urCommandBufferAppendUSMFillExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_FILL_EXP,
-                       "urCommandBufferAppendUSMFillExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urCommandBufferAppendUSMFillExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_FILL_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urCommandBufferAppendUSMFillExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -6518,7 +8978,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
         context.urDdiTable.CommandBufferExp.pfnAppendMemBufferCopyExp;
 
     if (nullptr == pfnAppendMemBufferCopyExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_command_buffer_append_mem_buffer_copy_exp_params_t params = {
@@ -6531,25 +8991,38 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
         &numSyncPointsInWaitList,
         &pSyncPointWaitList,
         &pSyncPoint};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_COPY_EXP,
-        "urCommandBufferAppendMemBufferCopyExp", &params);
 
-    context.logger.info("---> urCommandBufferAppendMemBufferCopyExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnAppendMemBufferCopyExp(
-        hCommandBuffer, hSrcMem, hDstMem, srcOffset, dstOffset, size,
-        numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urCommandBufferAppendMemBufferCopyExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_COPY_EXP,
-                       "urCommandBufferAppendMemBufferCopyExp", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urCommandBufferAppendMemBufferCopyExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_COPY_EXP,
-        &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urCommandBufferAppendMemBufferCopyExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -6576,7 +9049,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
         context.urDdiTable.CommandBufferExp.pfnAppendMemBufferWriteExp;
 
     if (nullptr == pfnAppendMemBufferWriteExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_command_buffer_append_mem_buffer_write_exp_params_t params = {
@@ -6588,25 +9061,38 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
         &numSyncPointsInWaitList,
         &pSyncPointWaitList,
         &pSyncPoint};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_WRITE_EXP,
-        "urCommandBufferAppendMemBufferWriteExp", &params);
 
-    context.logger.info("---> urCommandBufferAppendMemBufferWriteExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnAppendMemBufferWriteExp(
-        hCommandBuffer, hBuffer, offset, size, pSrc, numSyncPointsInWaitList,
-        pSyncPointWaitList, pSyncPoint);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urCommandBufferAppendMemBufferWriteExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_WRITE_EXP,
-                       "urCommandBufferAppendMemBufferWriteExp", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urCommandBufferAppendMemBufferWriteExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_WRITE_EXP,
-        &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urCommandBufferAppendMemBufferWriteExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -6632,7 +9118,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
         context.urDdiTable.CommandBufferExp.pfnAppendMemBufferReadExp;
 
     if (nullptr == pfnAppendMemBufferReadExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_command_buffer_append_mem_buffer_read_exp_params_t params = {
@@ -6644,25 +9130,38 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
         &numSyncPointsInWaitList,
         &pSyncPointWaitList,
         &pSyncPoint};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_READ_EXP,
-        "urCommandBufferAppendMemBufferReadExp", &params);
 
-    context.logger.info("---> urCommandBufferAppendMemBufferReadExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnAppendMemBufferReadExp(
-        hCommandBuffer, hBuffer, offset, size, pDst, numSyncPointsInWaitList,
-        pSyncPointWaitList, pSyncPoint);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urCommandBufferAppendMemBufferReadExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_READ_EXP,
-                       "urCommandBufferAppendMemBufferReadExp", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urCommandBufferAppendMemBufferReadExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_READ_EXP,
-        &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urCommandBufferAppendMemBufferReadExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -6696,7 +9195,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
         context.urDdiTable.CommandBufferExp.pfnAppendMemBufferCopyRectExp;
 
     if (nullptr == pfnAppendMemBufferCopyRectExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_command_buffer_append_mem_buffer_copy_rect_exp_params_t params = {
@@ -6713,27 +9212,38 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
         &numSyncPointsInWaitList,
         &pSyncPointWaitList,
         &pSyncPoint};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_COPY_RECT_EXP,
-        "urCommandBufferAppendMemBufferCopyRectExp", &params);
 
-    context.logger.info("---> urCommandBufferAppendMemBufferCopyRectExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnAppendMemBufferCopyRectExp(
-        hCommandBuffer, hSrcMem, hDstMem, srcOrigin, dstOrigin, region,
-        srcRowPitch, srcSlicePitch, dstRowPitch, dstSlicePitch,
-        numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urCommandBufferAppendMemBufferCopyRectExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(
-        UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_COPY_RECT_EXP,
-        "urCommandBufferAppendMemBufferCopyRectExp", &params, &result,
-        instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urCommandBufferAppendMemBufferCopyRectExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_COPY_RECT_EXP,
-        &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urCommandBufferAppendMemBufferCopyRectExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -6773,7 +9283,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
         context.urDdiTable.CommandBufferExp.pfnAppendMemBufferWriteRectExp;
 
     if (nullptr == pfnAppendMemBufferWriteRectExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_command_buffer_append_mem_buffer_write_rect_exp_params_t params = {
@@ -6790,27 +9300,38 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
         &numSyncPointsInWaitList,
         &pSyncPointWaitList,
         &pSyncPoint};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_WRITE_RECT_EXP,
-        "urCommandBufferAppendMemBufferWriteRectExp", &params);
 
-    context.logger.info("---> urCommandBufferAppendMemBufferWriteRectExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnAppendMemBufferWriteRectExp(
-        hCommandBuffer, hBuffer, bufferOffset, hostOffset, region,
-        bufferRowPitch, bufferSlicePitch, hostRowPitch, hostSlicePitch, pSrc,
-        numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urCommandBufferAppendMemBufferWriteRectExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(
-        UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_WRITE_RECT_EXP,
-        "urCommandBufferAppendMemBufferWriteRectExp", &params, &result,
-        instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urCommandBufferAppendMemBufferWriteRectExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_WRITE_RECT_EXP,
-        &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urCommandBufferAppendMemBufferWriteRectExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -6848,7 +9369,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
         context.urDdiTable.CommandBufferExp.pfnAppendMemBufferReadRectExp;
 
     if (nullptr == pfnAppendMemBufferReadRectExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_command_buffer_append_mem_buffer_read_rect_exp_params_t params = {
@@ -6865,27 +9386,38 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
         &numSyncPointsInWaitList,
         &pSyncPointWaitList,
         &pSyncPoint};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_READ_RECT_EXP,
-        "urCommandBufferAppendMemBufferReadRectExp", &params);
 
-    context.logger.info("---> urCommandBufferAppendMemBufferReadRectExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnAppendMemBufferReadRectExp(
-        hCommandBuffer, hBuffer, bufferOffset, hostOffset, region,
-        bufferRowPitch, bufferSlicePitch, hostRowPitch, hostSlicePitch, pDst,
-        numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urCommandBufferAppendMemBufferReadRectExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(
-        UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_READ_RECT_EXP,
-        "urCommandBufferAppendMemBufferReadRectExp", &params, &result,
-        instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urCommandBufferAppendMemBufferReadRectExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_READ_RECT_EXP,
-        &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urCommandBufferAppendMemBufferReadRectExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -6913,7 +9445,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
         context.urDdiTable.CommandBufferExp.pfnAppendMemBufferFillExp;
 
     if (nullptr == pfnAppendMemBufferFillExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_command_buffer_append_mem_buffer_fill_exp_params_t params = {
@@ -6926,25 +9458,38 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
         &numSyncPointsInWaitList,
         &pSyncPointWaitList,
         &pSyncPoint};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_FILL_EXP,
-        "urCommandBufferAppendMemBufferFillExp", &params);
 
-    context.logger.info("---> urCommandBufferAppendMemBufferFillExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnAppendMemBufferFillExp(
-        hCommandBuffer, hBuffer, pPattern, patternSize, offset, size,
-        numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urCommandBufferAppendMemBufferFillExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_FILL_EXP,
-                       "urCommandBufferAppendMemBufferFillExp", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urCommandBufferAppendMemBufferFillExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_FILL_EXP,
-        &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urCommandBufferAppendMemBufferFillExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -6969,7 +9514,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMPrefetchExp(
         context.urDdiTable.CommandBufferExp.pfnAppendUSMPrefetchExp;
 
     if (nullptr == pfnAppendUSMPrefetchExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_command_buffer_append_usm_prefetch_exp_params_t params = {
@@ -6980,24 +9525,38 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMPrefetchExp(
         &numSyncPointsInWaitList,
         &pSyncPointWaitList,
         &pSyncPoint};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_PREFETCH_EXP,
-                             "urCommandBufferAppendUSMPrefetchExp", &params);
 
-    context.logger.info("---> urCommandBufferAppendUSMPrefetchExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnAppendUSMPrefetchExp(
-        hCommandBuffer, pMemory, size, flags, numSyncPointsInWaitList,
-        pSyncPointWaitList, pSyncPoint);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urCommandBufferAppendUSMPrefetchExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_PREFETCH_EXP,
-                       "urCommandBufferAppendUSMPrefetchExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urCommandBufferAppendUSMPrefetchExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_PREFETCH_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urCommandBufferAppendUSMPrefetchExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -7022,7 +9581,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMAdviseExp(
         context.urDdiTable.CommandBufferExp.pfnAppendUSMAdviseExp;
 
     if (nullptr == pfnAppendUSMAdviseExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_command_buffer_append_usm_advise_exp_params_t params = {
@@ -7033,24 +9592,38 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMAdviseExp(
         &numSyncPointsInWaitList,
         &pSyncPointWaitList,
         &pSyncPoint};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_ADVISE_EXP,
-                             "urCommandBufferAppendUSMAdviseExp", &params);
 
-    context.logger.info("---> urCommandBufferAppendUSMAdviseExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnAppendUSMAdviseExp(hCommandBuffer, pMemory, size,
-                                               advice, numSyncPointsInWaitList,
-                                               pSyncPointWaitList, pSyncPoint);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urCommandBufferAppendUSMAdviseExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_ADVISE_EXP,
-                       "urCommandBufferAppendUSMAdviseExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urCommandBufferAppendUSMAdviseExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_ADVISE_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urCommandBufferAppendUSMAdviseExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -7074,28 +9647,45 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
     auto pfnEnqueueExp = context.urDdiTable.CommandBufferExp.pfnEnqueueExp;
 
     if (nullptr == pfnEnqueueExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_command_buffer_enqueue_exp_params_t params = {
         &hCommandBuffer, &hQueue, &numEventsInWaitList, &phEventWaitList,
         &phEvent};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_COMMAND_BUFFER_ENQUEUE_EXP,
-                             "urCommandBufferEnqueueExp", &params);
 
-    context.logger.info("---> urCommandBufferEnqueueExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnEnqueueExp(
-        hCommandBuffer, hQueue, numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urCommandBufferEnqueueExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_COMMAND_BUFFER_ENQUEUE_EXP,
-                       "urCommandBufferEnqueueExp", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urCommandBufferEnqueueExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_ENQUEUE_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urCommandBufferEnqueueExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -7110,26 +9700,42 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferRetainCommandExp(
         context.urDdiTable.CommandBufferExp.pfnRetainCommandExp;
 
     if (nullptr == pfnRetainCommandExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_command_buffer_retain_command_exp_params_t params = {&hCommand};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_COMMAND_BUFFER_RETAIN_COMMAND_EXP,
-                             "urCommandBufferRetainCommandExp", &params);
 
-    context.logger.info("---> urCommandBufferRetainCommandExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnRetainCommandExp(hCommand);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urCommandBufferRetainCommandExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_COMMAND_BUFFER_RETAIN_COMMAND_EXP,
-                       "urCommandBufferRetainCommandExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urCommandBufferRetainCommandExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_RETAIN_COMMAND_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urCommandBufferRetainCommandExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -7144,26 +9750,43 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseCommandExp(
         context.urDdiTable.CommandBufferExp.pfnReleaseCommandExp;
 
     if (nullptr == pfnReleaseCommandExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_command_buffer_release_command_exp_params_t params = {&hCommand};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_COMMAND_BUFFER_RELEASE_COMMAND_EXP,
-                             "urCommandBufferReleaseCommandExp", &params);
 
-    context.logger.info("---> urCommandBufferReleaseCommandExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnReleaseCommandExp(hCommand);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urCommandBufferReleaseCommandExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_COMMAND_BUFFER_RELEASE_COMMAND_EXP,
-                       "urCommandBufferReleaseCommandExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urCommandBufferReleaseCommandExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_RELEASE_COMMAND_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        releaseDummyHandle(hCommand);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urCommandBufferReleaseCommandExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -7180,28 +9803,43 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
         context.urDdiTable.CommandBufferExp.pfnUpdateKernelLaunchExp;
 
     if (nullptr == pfnUpdateKernelLaunchExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_command_buffer_update_kernel_launch_exp_params_t params = {
         &hCommand, &pUpdateKernelLaunch};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_COMMAND_BUFFER_UPDATE_KERNEL_LAUNCH_EXP,
-        "urCommandBufferUpdateKernelLaunchExp", &params);
 
-    context.logger.info("---> urCommandBufferUpdateKernelLaunchExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnUpdateKernelLaunchExp(hCommand, pUpdateKernelLaunch);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urCommandBufferUpdateKernelLaunchExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_COMMAND_BUFFER_UPDATE_KERNEL_LAUNCH_EXP,
-                       "urCommandBufferUpdateKernelLaunchExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urCommandBufferUpdateKernelLaunchExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_UPDATE_KERNEL_LAUNCH_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urCommandBufferUpdateKernelLaunchExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -7224,27 +9862,40 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferGetInfoExp(
     auto pfnGetInfoExp = context.urDdiTable.CommandBufferExp.pfnGetInfoExp;
 
     if (nullptr == pfnGetInfoExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_command_buffer_get_info_exp_params_t params = {
         &hCommandBuffer, &propName, &propSize, &pPropValue, &pPropSizeRet};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_COMMAND_BUFFER_GET_INFO_EXP,
-                             "urCommandBufferGetInfoExp", &params);
 
-    context.logger.info("---> urCommandBufferGetInfoExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnGetInfoExp(hCommandBuffer, propName, propSize,
-                                       pPropValue, pPropSizeRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urCommandBufferGetInfoExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_COMMAND_BUFFER_GET_INFO_EXP,
-                       "urCommandBufferGetInfoExp", &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urCommandBufferGetInfoExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_GET_INFO_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urCommandBufferGetInfoExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -7268,28 +9919,43 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferCommandGetInfoExp(
         context.urDdiTable.CommandBufferExp.pfnCommandGetInfoExp;
 
     if (nullptr == pfnCommandGetInfoExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_command_buffer_command_get_info_exp_params_t params = {
         &hCommand, &propName, &propSize, &pPropValue, &pPropSizeRet};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_COMMAND_BUFFER_COMMAND_GET_INFO_EXP,
-                             "urCommandBufferCommandGetInfoExp", &params);
 
-    context.logger.info("---> urCommandBufferCommandGetInfoExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnCommandGetInfoExp(hCommand, propName, propSize,
-                                              pPropValue, pPropSizeRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urCommandBufferCommandGetInfoExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_COMMAND_BUFFER_COMMAND_GET_INFO_EXP,
-                       "urCommandBufferCommandGetInfoExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urCommandBufferCommandGetInfoExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_COMMAND_GET_INFO_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urCommandBufferCommandGetInfoExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -7329,7 +9995,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
         context.urDdiTable.EnqueueExp.pfnCooperativeKernelLaunchExp;
 
     if (nullptr == pfnCooperativeKernelLaunchExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_cooperative_kernel_launch_exp_params_t params = {
@@ -7342,24 +10008,42 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
         &numEventsInWaitList,
         &phEventWaitList,
         &phEvent};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_ENQUEUE_COOPERATIVE_KERNEL_LAUNCH_EXP,
-                             "urEnqueueCooperativeKernelLaunchExp", &params);
 
-    context.logger.info("---> urEnqueueCooperativeKernelLaunchExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnCooperativeKernelLaunchExp(
-        hQueue, hKernel, workDim, pGlobalWorkOffset, pGlobalWorkSize,
-        pLocalWorkSize, numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urEnqueueCooperativeKernelLaunchExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_COOPERATIVE_KERNEL_LAUNCH_EXP,
-                       "urEnqueueCooperativeKernelLaunchExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urEnqueueCooperativeKernelLaunchExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_ENQUEUE_COOPERATIVE_KERNEL_LAUNCH_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        // optional output handle
+        if (phEvent) {
+            *phEvent = createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urEnqueueCooperativeKernelLaunchExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -7380,30 +10064,43 @@ __urdlllocal ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
         context.urDdiTable.KernelExp.pfnSuggestMaxCooperativeGroupCountExp;
 
     if (nullptr == pfnSuggestMaxCooperativeGroupCountExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_kernel_suggest_max_cooperative_group_count_exp_params_t params = {
         &hKernel, &localWorkSize, &dynamicSharedMemorySize, &pGroupCountRet};
-    uint64_t instance = context.notify_begin(
-        UR_FUNCTION_KERNEL_SUGGEST_MAX_COOPERATIVE_GROUP_COUNT_EXP,
-        "urKernelSuggestMaxCooperativeGroupCountExp", &params);
 
-    context.logger.info("---> urKernelSuggestMaxCooperativeGroupCountExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnSuggestMaxCooperativeGroupCountExp(
-        hKernel, localWorkSize, dynamicSharedMemorySize, pGroupCountRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urKernelSuggestMaxCooperativeGroupCountExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(
-        UR_FUNCTION_KERNEL_SUGGEST_MAX_COOPERATIVE_GROUP_COUNT_EXP,
-        "urKernelSuggestMaxCooperativeGroupCountExp", &params, &result,
-        instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urKernelSuggestMaxCooperativeGroupCountExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_KERNEL_SUGGEST_MAX_COOPERATIVE_GROUP_COUNT_EXP,
-        &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urKernelSuggestMaxCooperativeGroupCountExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -7435,28 +10132,44 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
         context.urDdiTable.EnqueueExp.pfnTimestampRecordingExp;
 
     if (nullptr == pfnTimestampRecordingExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_timestamp_recording_exp_params_t params = {
         &hQueue, &blocking, &numEventsInWaitList, &phEventWaitList, &phEvent};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_ENQUEUE_TIMESTAMP_RECORDING_EXP,
-                             "urEnqueueTimestampRecordingExp", &params);
 
-    context.logger.info("---> urEnqueueTimestampRecordingExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnTimestampRecordingExp(
-        hQueue, blocking, numEventsInWaitList, phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urEnqueueTimestampRecordingExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_TIMESTAMP_RECORDING_EXP,
-                       "urEnqueueTimestampRecordingExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urEnqueueTimestampRecordingExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_ENQUEUE_TIMESTAMP_RECORDING_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phEvent = createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urEnqueueTimestampRecordingExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -7495,7 +10208,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
         context.urDdiTable.EnqueueExp.pfnKernelLaunchCustomExp;
 
     if (nullptr == pfnKernelLaunchCustomExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_enqueue_kernel_launch_custom_exp_params_t params = {
@@ -7504,25 +10217,38 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
         &pLocalWorkSize,  &numPropsInLaunchPropList,
         &launchPropList,  &numEventsInWaitList,
         &phEventWaitList, &phEvent};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_ENQUEUE_KERNEL_LAUNCH_CUSTOM_EXP,
-                             "urEnqueueKernelLaunchCustomExp", &params);
 
-    context.logger.info("---> urEnqueueKernelLaunchCustomExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnKernelLaunchCustomExp(
-        hQueue, hKernel, workDim, pGlobalWorkSize, pLocalWorkSize,
-        numPropsInLaunchPropList, launchPropList, numEventsInWaitList,
-        phEventWaitList, phEvent);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urEnqueueKernelLaunchCustomExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_ENQUEUE_KERNEL_LAUNCH_CUSTOM_EXP,
-                       "urEnqueueKernelLaunchCustomExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urEnqueueKernelLaunchCustomExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_ENQUEUE_KERNEL_LAUNCH_CUSTOM_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urEnqueueKernelLaunchCustomExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -7540,25 +10266,40 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuildExp(
     auto pfnBuildExp = context.urDdiTable.ProgramExp.pfnBuildExp;
 
     if (nullptr == pfnBuildExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_program_build_exp_params_t params = {&hProgram, &numDevices, &phDevices,
                                             &pOptions};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_PROGRAM_BUILD_EXP,
-                                             "urProgramBuildExp", &params);
 
-    context.logger.info("---> urProgramBuildExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnBuildExp(hProgram, numDevices, phDevices, pOptions);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urProgramBuildExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PROGRAM_BUILD_EXP, "urProgramBuildExp",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urProgramBuildExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_PROGRAM_BUILD_EXP,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urProgramBuildExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -7577,26 +10318,40 @@ __urdlllocal ur_result_t UR_APICALL urProgramCompileExp(
     auto pfnCompileExp = context.urDdiTable.ProgramExp.pfnCompileExp;
 
     if (nullptr == pfnCompileExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_program_compile_exp_params_t params = {&hProgram, &numDevices,
                                               &phDevices, &pOptions};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_PROGRAM_COMPILE_EXP,
-                                             "urProgramCompileExp", &params);
 
-    context.logger.info("---> urProgramCompileExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnCompileExp(hProgram, numDevices, phDevices, pOptions);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urProgramCompileExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PROGRAM_COMPILE_EXP, "urProgramCompileExp",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urProgramCompileExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_PROGRAM_COMPILE_EXP,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urProgramCompileExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -7619,27 +10374,42 @@ __urdlllocal ur_result_t UR_APICALL urProgramLinkExp(
     auto pfnLinkExp = context.urDdiTable.ProgramExp.pfnLinkExp;
 
     if (nullptr == pfnLinkExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_program_link_exp_params_t params = {&hContext, &numDevices, &phDevices,
                                            &count,    &phPrograms, &pOptions,
                                            &phProgram};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_PROGRAM_LINK_EXP,
-                                             "urProgramLinkExp", &params);
 
-    context.logger.info("---> urProgramLinkExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnLinkExp(hContext, numDevices, phDevices, count,
-                                    phPrograms, pOptions, phProgram);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urProgramLinkExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_PROGRAM_LINK_EXP, "urProgramLinkExp",
-                       &params, &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urProgramLinkExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_PROGRAM_LINK_EXP,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        *phProgram = createDummyHandle<ur_program_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urProgramLinkExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -7654,24 +10424,39 @@ __urdlllocal ur_result_t UR_APICALL urUSMImportExp(
     auto pfnImportExp = context.urDdiTable.USMExp.pfnImportExp;
 
     if (nullptr == pfnImportExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_usm_import_exp_params_t params = {&hContext, &pMem, &size};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_USM_IMPORT_EXP,
-                                             "urUSMImportExp", &params);
 
-    context.logger.info("---> urUSMImportExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnImportExp(hContext, pMem, size);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urUSMImportExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_USM_IMPORT_EXP, "urUSMImportExp", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urUSMImportExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_USM_IMPORT_EXP,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urUSMImportExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -7685,24 +10470,39 @@ __urdlllocal ur_result_t UR_APICALL urUSMReleaseExp(
     auto pfnReleaseExp = context.urDdiTable.USMExp.pfnReleaseExp;
 
     if (nullptr == pfnReleaseExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_usm_release_exp_params_t params = {&hContext, &pMem};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_USM_RELEASE_EXP,
-                                             "urUSMReleaseExp", &params);
 
-    context.logger.info("---> urUSMReleaseExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnReleaseExp(hContext, pMem);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback("urUSMReleaseExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_USM_RELEASE_EXP, "urUSMReleaseExp", &params,
-                       &result, instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback("urUSMReleaseExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_USM_RELEASE_EXP,
-                                    &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urUSMReleaseExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -7718,27 +10518,42 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PEnablePeerAccessExp(
         context.urDdiTable.UsmP2PExp.pfnEnablePeerAccessExp;
 
     if (nullptr == pfnEnablePeerAccessExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_usm_p2p_enable_peer_access_exp_params_t params = {&commandDevice,
                                                          &peerDevice};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_USM_P2P_ENABLE_PEER_ACCESS_EXP,
-                             "urUsmP2PEnablePeerAccessExp", &params);
 
-    context.logger.info("---> urUsmP2PEnablePeerAccessExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnEnablePeerAccessExp(commandDevice, peerDevice);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urUsmP2PEnablePeerAccessExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_USM_P2P_ENABLE_PEER_ACCESS_EXP,
-                       "urUsmP2PEnablePeerAccessExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urUsmP2PEnablePeerAccessExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_USM_P2P_ENABLE_PEER_ACCESS_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback("urUsmP2PEnablePeerAccessExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -7754,27 +10569,43 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PDisablePeerAccessExp(
         context.urDdiTable.UsmP2PExp.pfnDisablePeerAccessExp;
 
     if (nullptr == pfnDisablePeerAccessExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_usm_p2p_disable_peer_access_exp_params_t params = {&commandDevice,
                                                           &peerDevice};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_USM_P2P_DISABLE_PEER_ACCESS_EXP,
-                             "urUsmP2PDisablePeerAccessExp", &params);
 
-    context.logger.info("---> urUsmP2PDisablePeerAccessExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result = pfnDisablePeerAccessExp(commandDevice, peerDevice);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urUsmP2PDisablePeerAccessExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_USM_P2P_DISABLE_PEER_ACCESS_EXP,
-                       "urUsmP2PDisablePeerAccessExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urUsmP2PDisablePeerAccessExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_USM_P2P_DISABLE_PEER_ACCESS_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urUsmP2PDisablePeerAccessExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -7801,30 +10632,44 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PPeerAccessGetInfoExp(
         context.urDdiTable.UsmP2PExp.pfnPeerAccessGetInfoExp;
 
     if (nullptr == pfnPeerAccessGetInfoExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
     ur_usm_p2p_peer_access_get_info_exp_params_t params = {
         &commandDevice, &peerDevice, &propName,
         &propSize,      &pPropValue, &pPropSizeRet};
-    uint64_t instance =
-        context.notify_begin(UR_FUNCTION_USM_P2P_PEER_ACCESS_GET_INFO_EXP,
-                             "urUsmP2PPeerAccessGetInfoExp", &params);
 
-    context.logger.info("---> urUsmP2PPeerAccessGetInfoExp");
+    ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_result_t result =
-        pfnPeerAccessGetInfoExp(commandDevice, peerDevice, propName, propSize,
-                                pPropValue, pPropSizeRet);
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_before_callback(
+            "urUsmP2PPeerAccessGetInfoExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
 
-    context.notify_end(UR_FUNCTION_USM_P2P_PEER_ACCESS_GET_INFO_EXP,
-                       "urUsmP2PPeerAccessGetInfoExp", &params, &result,
-                       instance);
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_replace_callback(
+            "urUsmP2PPeerAccessGetInfoExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
 
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_USM_P2P_PEER_ACCESS_GET_INFO_EXP, &params);
-    context.logger.info("({}) -> {};\n", args_str.str(), result);
+        result = UR_RESULT_SUCCESS;
+    }
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        context.apiCallbacks.get_after_callback(
+            "urUsmP2PPeerAccessGetInfoExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
 
     return result;
 }
@@ -7837,20 +10682,20 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PPeerAccessGetInfoExp(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetGlobalProcAddrTable(
+UR_DLLEXPORT ur_result_t UR_APICALL urGetGlobalProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_global_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
 ) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.Global;
+    auto &dditable = ur_mock_layer::context.urDdiTable.Global;
 
     if (nullptr == pDdiTable) {
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+    if (UR_MAJOR_VERSION(ur_mock_layer::context.version) !=
             UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+        UR_MINOR_VERSION(ur_mock_layer::context.version) >
             UR_MINOR_VERSION(version)) {
         return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
     }
@@ -7858,22 +10703,23 @@ __urdlllocal ur_result_t UR_APICALL urGetGlobalProcAddrTable(
     ur_result_t result = UR_RESULT_SUCCESS;
 
     dditable.pfnAdapterGet = pDdiTable->pfnAdapterGet;
-    pDdiTable->pfnAdapterGet = ur_tracing_layer::urAdapterGet;
+    pDdiTable->pfnAdapterGet = ur_mock_layer::urAdapterGet;
 
     dditable.pfnAdapterRelease = pDdiTable->pfnAdapterRelease;
-    pDdiTable->pfnAdapterRelease = ur_tracing_layer::urAdapterRelease;
+    pDdiTable->pfnAdapterRelease = ur_mock_layer::urAdapterRelease;
 
     dditable.pfnAdapterRetain = pDdiTable->pfnAdapterRetain;
-    pDdiTable->pfnAdapterRetain = ur_tracing_layer::urAdapterRetain;
+    pDdiTable->pfnAdapterRetain = ur_mock_layer::urAdapterRetain;
 
     dditable.pfnAdapterGetLastError = pDdiTable->pfnAdapterGetLastError;
-    pDdiTable->pfnAdapterGetLastError = ur_tracing_layer::urAdapterGetLastError;
+    pDdiTable->pfnAdapterGetLastError = ur_mock_layer::urAdapterGetLastError;
 
     dditable.pfnAdapterGetInfo = pDdiTable->pfnAdapterGetInfo;
-    pDdiTable->pfnAdapterGetInfo = ur_tracing_layer::urAdapterGetInfo;
+    pDdiTable->pfnAdapterGetInfo = ur_mock_layer::urAdapterGetInfo;
 
     return result;
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's BindlessImagesExp table
 ///        with current process' addresses
@@ -7882,20 +10728,20 @@ __urdlllocal ur_result_t UR_APICALL urGetGlobalProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetBindlessImagesExpProcAddrTable(
+UR_DLLEXPORT ur_result_t UR_APICALL urGetBindlessImagesExpProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_bindless_images_exp_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
 ) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.BindlessImagesExp;
+    auto &dditable = ur_mock_layer::context.urDdiTable.BindlessImagesExp;
 
     if (nullptr == pDdiTable) {
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+    if (UR_MAJOR_VERSION(ur_mock_layer::context.version) !=
             UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+        UR_MINOR_VERSION(ur_mock_layer::context.version) >
             UR_MINOR_VERSION(version)) {
         return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
     }
@@ -7905,77 +10751,77 @@ __urdlllocal ur_result_t UR_APICALL urGetBindlessImagesExpProcAddrTable(
     dditable.pfnUnsampledImageHandleDestroyExp =
         pDdiTable->pfnUnsampledImageHandleDestroyExp;
     pDdiTable->pfnUnsampledImageHandleDestroyExp =
-        ur_tracing_layer::urBindlessImagesUnsampledImageHandleDestroyExp;
+        ur_mock_layer::urBindlessImagesUnsampledImageHandleDestroyExp;
 
     dditable.pfnSampledImageHandleDestroyExp =
         pDdiTable->pfnSampledImageHandleDestroyExp;
     pDdiTable->pfnSampledImageHandleDestroyExp =
-        ur_tracing_layer::urBindlessImagesSampledImageHandleDestroyExp;
+        ur_mock_layer::urBindlessImagesSampledImageHandleDestroyExp;
 
     dditable.pfnImageAllocateExp = pDdiTable->pfnImageAllocateExp;
     pDdiTable->pfnImageAllocateExp =
-        ur_tracing_layer::urBindlessImagesImageAllocateExp;
+        ur_mock_layer::urBindlessImagesImageAllocateExp;
 
     dditable.pfnImageFreeExp = pDdiTable->pfnImageFreeExp;
-    pDdiTable->pfnImageFreeExp = ur_tracing_layer::urBindlessImagesImageFreeExp;
+    pDdiTable->pfnImageFreeExp = ur_mock_layer::urBindlessImagesImageFreeExp;
 
     dditable.pfnUnsampledImageCreateExp = pDdiTable->pfnUnsampledImageCreateExp;
     pDdiTable->pfnUnsampledImageCreateExp =
-        ur_tracing_layer::urBindlessImagesUnsampledImageCreateExp;
+        ur_mock_layer::urBindlessImagesUnsampledImageCreateExp;
 
     dditable.pfnSampledImageCreateExp = pDdiTable->pfnSampledImageCreateExp;
     pDdiTable->pfnSampledImageCreateExp =
-        ur_tracing_layer::urBindlessImagesSampledImageCreateExp;
+        ur_mock_layer::urBindlessImagesSampledImageCreateExp;
 
     dditable.pfnImageCopyExp = pDdiTable->pfnImageCopyExp;
-    pDdiTable->pfnImageCopyExp = ur_tracing_layer::urBindlessImagesImageCopyExp;
+    pDdiTable->pfnImageCopyExp = ur_mock_layer::urBindlessImagesImageCopyExp;
 
     dditable.pfnImageGetInfoExp = pDdiTable->pfnImageGetInfoExp;
     pDdiTable->pfnImageGetInfoExp =
-        ur_tracing_layer::urBindlessImagesImageGetInfoExp;
+        ur_mock_layer::urBindlessImagesImageGetInfoExp;
 
     dditable.pfnMipmapGetLevelExp = pDdiTable->pfnMipmapGetLevelExp;
     pDdiTable->pfnMipmapGetLevelExp =
-        ur_tracing_layer::urBindlessImagesMipmapGetLevelExp;
+        ur_mock_layer::urBindlessImagesMipmapGetLevelExp;
 
     dditable.pfnMipmapFreeExp = pDdiTable->pfnMipmapFreeExp;
-    pDdiTable->pfnMipmapFreeExp =
-        ur_tracing_layer::urBindlessImagesMipmapFreeExp;
+    pDdiTable->pfnMipmapFreeExp = ur_mock_layer::urBindlessImagesMipmapFreeExp;
 
     dditable.pfnImportOpaqueFDExp = pDdiTable->pfnImportOpaqueFDExp;
     pDdiTable->pfnImportOpaqueFDExp =
-        ur_tracing_layer::urBindlessImagesImportOpaqueFDExp;
+        ur_mock_layer::urBindlessImagesImportOpaqueFDExp;
 
     dditable.pfnMapExternalArrayExp = pDdiTable->pfnMapExternalArrayExp;
     pDdiTable->pfnMapExternalArrayExp =
-        ur_tracing_layer::urBindlessImagesMapExternalArrayExp;
+        ur_mock_layer::urBindlessImagesMapExternalArrayExp;
 
     dditable.pfnReleaseInteropExp = pDdiTable->pfnReleaseInteropExp;
     pDdiTable->pfnReleaseInteropExp =
-        ur_tracing_layer::urBindlessImagesReleaseInteropExp;
+        ur_mock_layer::urBindlessImagesReleaseInteropExp;
 
     dditable.pfnImportExternalSemaphoreOpaqueFDExp =
         pDdiTable->pfnImportExternalSemaphoreOpaqueFDExp;
     pDdiTable->pfnImportExternalSemaphoreOpaqueFDExp =
-        ur_tracing_layer::urBindlessImagesImportExternalSemaphoreOpaqueFDExp;
+        ur_mock_layer::urBindlessImagesImportExternalSemaphoreOpaqueFDExp;
 
     dditable.pfnDestroyExternalSemaphoreExp =
         pDdiTable->pfnDestroyExternalSemaphoreExp;
     pDdiTable->pfnDestroyExternalSemaphoreExp =
-        ur_tracing_layer::urBindlessImagesDestroyExternalSemaphoreExp;
+        ur_mock_layer::urBindlessImagesDestroyExternalSemaphoreExp;
 
     dditable.pfnWaitExternalSemaphoreExp =
         pDdiTable->pfnWaitExternalSemaphoreExp;
     pDdiTable->pfnWaitExternalSemaphoreExp =
-        ur_tracing_layer::urBindlessImagesWaitExternalSemaphoreExp;
+        ur_mock_layer::urBindlessImagesWaitExternalSemaphoreExp;
 
     dditable.pfnSignalExternalSemaphoreExp =
         pDdiTable->pfnSignalExternalSemaphoreExp;
     pDdiTable->pfnSignalExternalSemaphoreExp =
-        ur_tracing_layer::urBindlessImagesSignalExternalSemaphoreExp;
+        ur_mock_layer::urBindlessImagesSignalExternalSemaphoreExp;
 
     return result;
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's CommandBufferExp table
 ///        with current process' addresses
@@ -7984,20 +10830,20 @@ __urdlllocal ur_result_t UR_APICALL urGetBindlessImagesExpProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
+UR_DLLEXPORT ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_command_buffer_exp_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
 ) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.CommandBufferExp;
+    auto &dditable = ur_mock_layer::context.urDdiTable.CommandBufferExp;
 
     if (nullptr == pDdiTable) {
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+    if (UR_MAJOR_VERSION(ur_mock_layer::context.version) !=
             UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+        UR_MINOR_VERSION(ur_mock_layer::context.version) >
             UR_MINOR_VERSION(version)) {
         return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
     }
@@ -8005,92 +10851,93 @@ __urdlllocal ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
     ur_result_t result = UR_RESULT_SUCCESS;
 
     dditable.pfnCreateExp = pDdiTable->pfnCreateExp;
-    pDdiTable->pfnCreateExp = ur_tracing_layer::urCommandBufferCreateExp;
+    pDdiTable->pfnCreateExp = ur_mock_layer::urCommandBufferCreateExp;
 
     dditable.pfnRetainExp = pDdiTable->pfnRetainExp;
-    pDdiTable->pfnRetainExp = ur_tracing_layer::urCommandBufferRetainExp;
+    pDdiTable->pfnRetainExp = ur_mock_layer::urCommandBufferRetainExp;
 
     dditable.pfnReleaseExp = pDdiTable->pfnReleaseExp;
-    pDdiTable->pfnReleaseExp = ur_tracing_layer::urCommandBufferReleaseExp;
+    pDdiTable->pfnReleaseExp = ur_mock_layer::urCommandBufferReleaseExp;
 
     dditable.pfnFinalizeExp = pDdiTable->pfnFinalizeExp;
-    pDdiTable->pfnFinalizeExp = ur_tracing_layer::urCommandBufferFinalizeExp;
+    pDdiTable->pfnFinalizeExp = ur_mock_layer::urCommandBufferFinalizeExp;
 
     dditable.pfnAppendKernelLaunchExp = pDdiTable->pfnAppendKernelLaunchExp;
     pDdiTable->pfnAppendKernelLaunchExp =
-        ur_tracing_layer::urCommandBufferAppendKernelLaunchExp;
+        ur_mock_layer::urCommandBufferAppendKernelLaunchExp;
 
     dditable.pfnAppendUSMMemcpyExp = pDdiTable->pfnAppendUSMMemcpyExp;
     pDdiTable->pfnAppendUSMMemcpyExp =
-        ur_tracing_layer::urCommandBufferAppendUSMMemcpyExp;
+        ur_mock_layer::urCommandBufferAppendUSMMemcpyExp;
 
     dditable.pfnAppendUSMFillExp = pDdiTable->pfnAppendUSMFillExp;
     pDdiTable->pfnAppendUSMFillExp =
-        ur_tracing_layer::urCommandBufferAppendUSMFillExp;
+        ur_mock_layer::urCommandBufferAppendUSMFillExp;
 
     dditable.pfnAppendMemBufferCopyExp = pDdiTable->pfnAppendMemBufferCopyExp;
     pDdiTable->pfnAppendMemBufferCopyExp =
-        ur_tracing_layer::urCommandBufferAppendMemBufferCopyExp;
+        ur_mock_layer::urCommandBufferAppendMemBufferCopyExp;
 
     dditable.pfnAppendMemBufferWriteExp = pDdiTable->pfnAppendMemBufferWriteExp;
     pDdiTable->pfnAppendMemBufferWriteExp =
-        ur_tracing_layer::urCommandBufferAppendMemBufferWriteExp;
+        ur_mock_layer::urCommandBufferAppendMemBufferWriteExp;
 
     dditable.pfnAppendMemBufferReadExp = pDdiTable->pfnAppendMemBufferReadExp;
     pDdiTable->pfnAppendMemBufferReadExp =
-        ur_tracing_layer::urCommandBufferAppendMemBufferReadExp;
+        ur_mock_layer::urCommandBufferAppendMemBufferReadExp;
 
     dditable.pfnAppendMemBufferCopyRectExp =
         pDdiTable->pfnAppendMemBufferCopyRectExp;
     pDdiTable->pfnAppendMemBufferCopyRectExp =
-        ur_tracing_layer::urCommandBufferAppendMemBufferCopyRectExp;
+        ur_mock_layer::urCommandBufferAppendMemBufferCopyRectExp;
 
     dditable.pfnAppendMemBufferWriteRectExp =
         pDdiTable->pfnAppendMemBufferWriteRectExp;
     pDdiTable->pfnAppendMemBufferWriteRectExp =
-        ur_tracing_layer::urCommandBufferAppendMemBufferWriteRectExp;
+        ur_mock_layer::urCommandBufferAppendMemBufferWriteRectExp;
 
     dditable.pfnAppendMemBufferReadRectExp =
         pDdiTable->pfnAppendMemBufferReadRectExp;
     pDdiTable->pfnAppendMemBufferReadRectExp =
-        ur_tracing_layer::urCommandBufferAppendMemBufferReadRectExp;
+        ur_mock_layer::urCommandBufferAppendMemBufferReadRectExp;
 
     dditable.pfnAppendMemBufferFillExp = pDdiTable->pfnAppendMemBufferFillExp;
     pDdiTable->pfnAppendMemBufferFillExp =
-        ur_tracing_layer::urCommandBufferAppendMemBufferFillExp;
+        ur_mock_layer::urCommandBufferAppendMemBufferFillExp;
 
     dditable.pfnAppendUSMPrefetchExp = pDdiTable->pfnAppendUSMPrefetchExp;
     pDdiTable->pfnAppendUSMPrefetchExp =
-        ur_tracing_layer::urCommandBufferAppendUSMPrefetchExp;
+        ur_mock_layer::urCommandBufferAppendUSMPrefetchExp;
 
     dditable.pfnAppendUSMAdviseExp = pDdiTable->pfnAppendUSMAdviseExp;
     pDdiTable->pfnAppendUSMAdviseExp =
-        ur_tracing_layer::urCommandBufferAppendUSMAdviseExp;
+        ur_mock_layer::urCommandBufferAppendUSMAdviseExp;
 
     dditable.pfnEnqueueExp = pDdiTable->pfnEnqueueExp;
-    pDdiTable->pfnEnqueueExp = ur_tracing_layer::urCommandBufferEnqueueExp;
+    pDdiTable->pfnEnqueueExp = ur_mock_layer::urCommandBufferEnqueueExp;
 
     dditable.pfnRetainCommandExp = pDdiTable->pfnRetainCommandExp;
     pDdiTable->pfnRetainCommandExp =
-        ur_tracing_layer::urCommandBufferRetainCommandExp;
+        ur_mock_layer::urCommandBufferRetainCommandExp;
 
     dditable.pfnReleaseCommandExp = pDdiTable->pfnReleaseCommandExp;
     pDdiTable->pfnReleaseCommandExp =
-        ur_tracing_layer::urCommandBufferReleaseCommandExp;
+        ur_mock_layer::urCommandBufferReleaseCommandExp;
 
     dditable.pfnUpdateKernelLaunchExp = pDdiTable->pfnUpdateKernelLaunchExp;
     pDdiTable->pfnUpdateKernelLaunchExp =
-        ur_tracing_layer::urCommandBufferUpdateKernelLaunchExp;
+        ur_mock_layer::urCommandBufferUpdateKernelLaunchExp;
 
     dditable.pfnGetInfoExp = pDdiTable->pfnGetInfoExp;
-    pDdiTable->pfnGetInfoExp = ur_tracing_layer::urCommandBufferGetInfoExp;
+    pDdiTable->pfnGetInfoExp = ur_mock_layer::urCommandBufferGetInfoExp;
 
     dditable.pfnCommandGetInfoExp = pDdiTable->pfnCommandGetInfoExp;
     pDdiTable->pfnCommandGetInfoExp =
-        ur_tracing_layer::urCommandBufferCommandGetInfoExp;
+        ur_mock_layer::urCommandBufferCommandGetInfoExp;
 
     return result;
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's Context table
 ///        with current process' addresses
@@ -8099,20 +10946,20 @@ __urdlllocal ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetContextProcAddrTable(
+UR_DLLEXPORT ur_result_t UR_APICALL urGetContextProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_context_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
 ) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.Context;
+    auto &dditable = ur_mock_layer::context.urDdiTable.Context;
 
     if (nullptr == pDdiTable) {
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+    if (UR_MAJOR_VERSION(ur_mock_layer::context.version) !=
             UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+        UR_MINOR_VERSION(ur_mock_layer::context.version) >
             UR_MINOR_VERSION(version)) {
         return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
     }
@@ -8120,30 +10967,31 @@ __urdlllocal ur_result_t UR_APICALL urGetContextProcAddrTable(
     ur_result_t result = UR_RESULT_SUCCESS;
 
     dditable.pfnCreate = pDdiTable->pfnCreate;
-    pDdiTable->pfnCreate = ur_tracing_layer::urContextCreate;
+    pDdiTable->pfnCreate = ur_mock_layer::urContextCreate;
 
     dditable.pfnRetain = pDdiTable->pfnRetain;
-    pDdiTable->pfnRetain = ur_tracing_layer::urContextRetain;
+    pDdiTable->pfnRetain = ur_mock_layer::urContextRetain;
 
     dditable.pfnRelease = pDdiTable->pfnRelease;
-    pDdiTable->pfnRelease = ur_tracing_layer::urContextRelease;
+    pDdiTable->pfnRelease = ur_mock_layer::urContextRelease;
 
     dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
-    pDdiTable->pfnGetInfo = ur_tracing_layer::urContextGetInfo;
+    pDdiTable->pfnGetInfo = ur_mock_layer::urContextGetInfo;
 
     dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
-    pDdiTable->pfnGetNativeHandle = ur_tracing_layer::urContextGetNativeHandle;
+    pDdiTable->pfnGetNativeHandle = ur_mock_layer::urContextGetNativeHandle;
 
     dditable.pfnCreateWithNativeHandle = pDdiTable->pfnCreateWithNativeHandle;
     pDdiTable->pfnCreateWithNativeHandle =
-        ur_tracing_layer::urContextCreateWithNativeHandle;
+        ur_mock_layer::urContextCreateWithNativeHandle;
 
     dditable.pfnSetExtendedDeleter = pDdiTable->pfnSetExtendedDeleter;
     pDdiTable->pfnSetExtendedDeleter =
-        ur_tracing_layer::urContextSetExtendedDeleter;
+        ur_mock_layer::urContextSetExtendedDeleter;
 
     return result;
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's Enqueue table
 ///        with current process' addresses
@@ -8152,20 +11000,20 @@ __urdlllocal ur_result_t UR_APICALL urGetContextProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetEnqueueProcAddrTable(
+UR_DLLEXPORT ur_result_t UR_APICALL urGetEnqueueProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_enqueue_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
 ) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.Enqueue;
+    auto &dditable = ur_mock_layer::context.urDdiTable.Enqueue;
 
     if (nullptr == pDdiTable) {
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+    if (UR_MAJOR_VERSION(ur_mock_layer::context.version) !=
             UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+        UR_MINOR_VERSION(ur_mock_layer::context.version) >
             UR_MINOR_VERSION(version)) {
         return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
     }
@@ -8173,90 +11021,89 @@ __urdlllocal ur_result_t UR_APICALL urGetEnqueueProcAddrTable(
     ur_result_t result = UR_RESULT_SUCCESS;
 
     dditable.pfnKernelLaunch = pDdiTable->pfnKernelLaunch;
-    pDdiTable->pfnKernelLaunch = ur_tracing_layer::urEnqueueKernelLaunch;
+    pDdiTable->pfnKernelLaunch = ur_mock_layer::urEnqueueKernelLaunch;
 
     dditable.pfnEventsWait = pDdiTable->pfnEventsWait;
-    pDdiTable->pfnEventsWait = ur_tracing_layer::urEnqueueEventsWait;
+    pDdiTable->pfnEventsWait = ur_mock_layer::urEnqueueEventsWait;
 
     dditable.pfnEventsWaitWithBarrier = pDdiTable->pfnEventsWaitWithBarrier;
     pDdiTable->pfnEventsWaitWithBarrier =
-        ur_tracing_layer::urEnqueueEventsWaitWithBarrier;
+        ur_mock_layer::urEnqueueEventsWaitWithBarrier;
 
     dditable.pfnMemBufferRead = pDdiTable->pfnMemBufferRead;
-    pDdiTable->pfnMemBufferRead = ur_tracing_layer::urEnqueueMemBufferRead;
+    pDdiTable->pfnMemBufferRead = ur_mock_layer::urEnqueueMemBufferRead;
 
     dditable.pfnMemBufferWrite = pDdiTable->pfnMemBufferWrite;
-    pDdiTable->pfnMemBufferWrite = ur_tracing_layer::urEnqueueMemBufferWrite;
+    pDdiTable->pfnMemBufferWrite = ur_mock_layer::urEnqueueMemBufferWrite;
 
     dditable.pfnMemBufferReadRect = pDdiTable->pfnMemBufferReadRect;
-    pDdiTable->pfnMemBufferReadRect =
-        ur_tracing_layer::urEnqueueMemBufferReadRect;
+    pDdiTable->pfnMemBufferReadRect = ur_mock_layer::urEnqueueMemBufferReadRect;
 
     dditable.pfnMemBufferWriteRect = pDdiTable->pfnMemBufferWriteRect;
     pDdiTable->pfnMemBufferWriteRect =
-        ur_tracing_layer::urEnqueueMemBufferWriteRect;
+        ur_mock_layer::urEnqueueMemBufferWriteRect;
 
     dditable.pfnMemBufferCopy = pDdiTable->pfnMemBufferCopy;
-    pDdiTable->pfnMemBufferCopy = ur_tracing_layer::urEnqueueMemBufferCopy;
+    pDdiTable->pfnMemBufferCopy = ur_mock_layer::urEnqueueMemBufferCopy;
 
     dditable.pfnMemBufferCopyRect = pDdiTable->pfnMemBufferCopyRect;
-    pDdiTable->pfnMemBufferCopyRect =
-        ur_tracing_layer::urEnqueueMemBufferCopyRect;
+    pDdiTable->pfnMemBufferCopyRect = ur_mock_layer::urEnqueueMemBufferCopyRect;
 
     dditable.pfnMemBufferFill = pDdiTable->pfnMemBufferFill;
-    pDdiTable->pfnMemBufferFill = ur_tracing_layer::urEnqueueMemBufferFill;
+    pDdiTable->pfnMemBufferFill = ur_mock_layer::urEnqueueMemBufferFill;
 
     dditable.pfnMemImageRead = pDdiTable->pfnMemImageRead;
-    pDdiTable->pfnMemImageRead = ur_tracing_layer::urEnqueueMemImageRead;
+    pDdiTable->pfnMemImageRead = ur_mock_layer::urEnqueueMemImageRead;
 
     dditable.pfnMemImageWrite = pDdiTable->pfnMemImageWrite;
-    pDdiTable->pfnMemImageWrite = ur_tracing_layer::urEnqueueMemImageWrite;
+    pDdiTable->pfnMemImageWrite = ur_mock_layer::urEnqueueMemImageWrite;
 
     dditable.pfnMemImageCopy = pDdiTable->pfnMemImageCopy;
-    pDdiTable->pfnMemImageCopy = ur_tracing_layer::urEnqueueMemImageCopy;
+    pDdiTable->pfnMemImageCopy = ur_mock_layer::urEnqueueMemImageCopy;
 
     dditable.pfnMemBufferMap = pDdiTable->pfnMemBufferMap;
-    pDdiTable->pfnMemBufferMap = ur_tracing_layer::urEnqueueMemBufferMap;
+    pDdiTable->pfnMemBufferMap = ur_mock_layer::urEnqueueMemBufferMap;
 
     dditable.pfnMemUnmap = pDdiTable->pfnMemUnmap;
-    pDdiTable->pfnMemUnmap = ur_tracing_layer::urEnqueueMemUnmap;
+    pDdiTable->pfnMemUnmap = ur_mock_layer::urEnqueueMemUnmap;
 
     dditable.pfnUSMFill = pDdiTable->pfnUSMFill;
-    pDdiTable->pfnUSMFill = ur_tracing_layer::urEnqueueUSMFill;
+    pDdiTable->pfnUSMFill = ur_mock_layer::urEnqueueUSMFill;
 
     dditable.pfnUSMMemcpy = pDdiTable->pfnUSMMemcpy;
-    pDdiTable->pfnUSMMemcpy = ur_tracing_layer::urEnqueueUSMMemcpy;
+    pDdiTable->pfnUSMMemcpy = ur_mock_layer::urEnqueueUSMMemcpy;
 
     dditable.pfnUSMPrefetch = pDdiTable->pfnUSMPrefetch;
-    pDdiTable->pfnUSMPrefetch = ur_tracing_layer::urEnqueueUSMPrefetch;
+    pDdiTable->pfnUSMPrefetch = ur_mock_layer::urEnqueueUSMPrefetch;
 
     dditable.pfnUSMAdvise = pDdiTable->pfnUSMAdvise;
-    pDdiTable->pfnUSMAdvise = ur_tracing_layer::urEnqueueUSMAdvise;
+    pDdiTable->pfnUSMAdvise = ur_mock_layer::urEnqueueUSMAdvise;
 
     dditable.pfnUSMFill2D = pDdiTable->pfnUSMFill2D;
-    pDdiTable->pfnUSMFill2D = ur_tracing_layer::urEnqueueUSMFill2D;
+    pDdiTable->pfnUSMFill2D = ur_mock_layer::urEnqueueUSMFill2D;
 
     dditable.pfnUSMMemcpy2D = pDdiTable->pfnUSMMemcpy2D;
-    pDdiTable->pfnUSMMemcpy2D = ur_tracing_layer::urEnqueueUSMMemcpy2D;
+    pDdiTable->pfnUSMMemcpy2D = ur_mock_layer::urEnqueueUSMMemcpy2D;
 
     dditable.pfnDeviceGlobalVariableWrite =
         pDdiTable->pfnDeviceGlobalVariableWrite;
     pDdiTable->pfnDeviceGlobalVariableWrite =
-        ur_tracing_layer::urEnqueueDeviceGlobalVariableWrite;
+        ur_mock_layer::urEnqueueDeviceGlobalVariableWrite;
 
     dditable.pfnDeviceGlobalVariableRead =
         pDdiTable->pfnDeviceGlobalVariableRead;
     pDdiTable->pfnDeviceGlobalVariableRead =
-        ur_tracing_layer::urEnqueueDeviceGlobalVariableRead;
+        ur_mock_layer::urEnqueueDeviceGlobalVariableRead;
 
     dditable.pfnReadHostPipe = pDdiTable->pfnReadHostPipe;
-    pDdiTable->pfnReadHostPipe = ur_tracing_layer::urEnqueueReadHostPipe;
+    pDdiTable->pfnReadHostPipe = ur_mock_layer::urEnqueueReadHostPipe;
 
     dditable.pfnWriteHostPipe = pDdiTable->pfnWriteHostPipe;
-    pDdiTable->pfnWriteHostPipe = ur_tracing_layer::urEnqueueWriteHostPipe;
+    pDdiTable->pfnWriteHostPipe = ur_mock_layer::urEnqueueWriteHostPipe;
 
     return result;
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's EnqueueExp table
 ///        with current process' addresses
@@ -8265,20 +11112,20 @@ __urdlllocal ur_result_t UR_APICALL urGetEnqueueProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetEnqueueExpProcAddrTable(
+UR_DLLEXPORT ur_result_t UR_APICALL urGetEnqueueExpProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_enqueue_exp_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
 ) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.EnqueueExp;
+    auto &dditable = ur_mock_layer::context.urDdiTable.EnqueueExp;
 
     if (nullptr == pDdiTable) {
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+    if (UR_MAJOR_VERSION(ur_mock_layer::context.version) !=
             UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+        UR_MINOR_VERSION(ur_mock_layer::context.version) >
             UR_MINOR_VERSION(version)) {
         return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
     }
@@ -8287,19 +11134,20 @@ __urdlllocal ur_result_t UR_APICALL urGetEnqueueExpProcAddrTable(
 
     dditable.pfnKernelLaunchCustomExp = pDdiTable->pfnKernelLaunchCustomExp;
     pDdiTable->pfnKernelLaunchCustomExp =
-        ur_tracing_layer::urEnqueueKernelLaunchCustomExp;
+        ur_mock_layer::urEnqueueKernelLaunchCustomExp;
 
     dditable.pfnCooperativeKernelLaunchExp =
         pDdiTable->pfnCooperativeKernelLaunchExp;
     pDdiTable->pfnCooperativeKernelLaunchExp =
-        ur_tracing_layer::urEnqueueCooperativeKernelLaunchExp;
+        ur_mock_layer::urEnqueueCooperativeKernelLaunchExp;
 
     dditable.pfnTimestampRecordingExp = pDdiTable->pfnTimestampRecordingExp;
     pDdiTable->pfnTimestampRecordingExp =
-        ur_tracing_layer::urEnqueueTimestampRecordingExp;
+        ur_mock_layer::urEnqueueTimestampRecordingExp;
 
     return result;
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's Event table
 ///        with current process' addresses
@@ -8308,20 +11156,20 @@ __urdlllocal ur_result_t UR_APICALL urGetEnqueueExpProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetEventProcAddrTable(
+UR_DLLEXPORT ur_result_t UR_APICALL urGetEventProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_event_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
 ) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.Event;
+    auto &dditable = ur_mock_layer::context.urDdiTable.Event;
 
     if (nullptr == pDdiTable) {
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+    if (UR_MAJOR_VERSION(ur_mock_layer::context.version) !=
             UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+        UR_MINOR_VERSION(ur_mock_layer::context.version) >
             UR_MINOR_VERSION(version)) {
         return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
     }
@@ -8329,32 +11177,33 @@ __urdlllocal ur_result_t UR_APICALL urGetEventProcAddrTable(
     ur_result_t result = UR_RESULT_SUCCESS;
 
     dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
-    pDdiTable->pfnGetInfo = ur_tracing_layer::urEventGetInfo;
+    pDdiTable->pfnGetInfo = ur_mock_layer::urEventGetInfo;
 
     dditable.pfnGetProfilingInfo = pDdiTable->pfnGetProfilingInfo;
-    pDdiTable->pfnGetProfilingInfo = ur_tracing_layer::urEventGetProfilingInfo;
+    pDdiTable->pfnGetProfilingInfo = ur_mock_layer::urEventGetProfilingInfo;
 
     dditable.pfnWait = pDdiTable->pfnWait;
-    pDdiTable->pfnWait = ur_tracing_layer::urEventWait;
+    pDdiTable->pfnWait = ur_mock_layer::urEventWait;
 
     dditable.pfnRetain = pDdiTable->pfnRetain;
-    pDdiTable->pfnRetain = ur_tracing_layer::urEventRetain;
+    pDdiTable->pfnRetain = ur_mock_layer::urEventRetain;
 
     dditable.pfnRelease = pDdiTable->pfnRelease;
-    pDdiTable->pfnRelease = ur_tracing_layer::urEventRelease;
+    pDdiTable->pfnRelease = ur_mock_layer::urEventRelease;
 
     dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
-    pDdiTable->pfnGetNativeHandle = ur_tracing_layer::urEventGetNativeHandle;
+    pDdiTable->pfnGetNativeHandle = ur_mock_layer::urEventGetNativeHandle;
 
     dditable.pfnCreateWithNativeHandle = pDdiTable->pfnCreateWithNativeHandle;
     pDdiTable->pfnCreateWithNativeHandle =
-        ur_tracing_layer::urEventCreateWithNativeHandle;
+        ur_mock_layer::urEventCreateWithNativeHandle;
 
     dditable.pfnSetCallback = pDdiTable->pfnSetCallback;
-    pDdiTable->pfnSetCallback = ur_tracing_layer::urEventSetCallback;
+    pDdiTable->pfnSetCallback = ur_mock_layer::urEventSetCallback;
 
     return result;
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's Kernel table
 ///        with current process' addresses
@@ -8363,20 +11212,20 @@ __urdlllocal ur_result_t UR_APICALL urGetEventProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetKernelProcAddrTable(
+UR_DLLEXPORT ur_result_t UR_APICALL urGetKernelProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_kernel_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
 ) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.Kernel;
+    auto &dditable = ur_mock_layer::context.urDdiTable.Kernel;
 
     if (nullptr == pDdiTable) {
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+    if (UR_MAJOR_VERSION(ur_mock_layer::context.version) !=
             UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+        UR_MINOR_VERSION(ur_mock_layer::context.version) >
             UR_MINOR_VERSION(version)) {
         return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
     }
@@ -8384,60 +11233,61 @@ __urdlllocal ur_result_t UR_APICALL urGetKernelProcAddrTable(
     ur_result_t result = UR_RESULT_SUCCESS;
 
     dditable.pfnCreate = pDdiTable->pfnCreate;
-    pDdiTable->pfnCreate = ur_tracing_layer::urKernelCreate;
+    pDdiTable->pfnCreate = ur_mock_layer::urKernelCreate;
 
     dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
-    pDdiTable->pfnGetInfo = ur_tracing_layer::urKernelGetInfo;
+    pDdiTable->pfnGetInfo = ur_mock_layer::urKernelGetInfo;
 
     dditable.pfnGetGroupInfo = pDdiTable->pfnGetGroupInfo;
-    pDdiTable->pfnGetGroupInfo = ur_tracing_layer::urKernelGetGroupInfo;
+    pDdiTable->pfnGetGroupInfo = ur_mock_layer::urKernelGetGroupInfo;
 
     dditable.pfnGetSubGroupInfo = pDdiTable->pfnGetSubGroupInfo;
-    pDdiTable->pfnGetSubGroupInfo = ur_tracing_layer::urKernelGetSubGroupInfo;
+    pDdiTable->pfnGetSubGroupInfo = ur_mock_layer::urKernelGetSubGroupInfo;
 
     dditable.pfnRetain = pDdiTable->pfnRetain;
-    pDdiTable->pfnRetain = ur_tracing_layer::urKernelRetain;
+    pDdiTable->pfnRetain = ur_mock_layer::urKernelRetain;
 
     dditable.pfnRelease = pDdiTable->pfnRelease;
-    pDdiTable->pfnRelease = ur_tracing_layer::urKernelRelease;
+    pDdiTable->pfnRelease = ur_mock_layer::urKernelRelease;
 
     dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
-    pDdiTable->pfnGetNativeHandle = ur_tracing_layer::urKernelGetNativeHandle;
+    pDdiTable->pfnGetNativeHandle = ur_mock_layer::urKernelGetNativeHandle;
 
     dditable.pfnCreateWithNativeHandle = pDdiTable->pfnCreateWithNativeHandle;
     pDdiTable->pfnCreateWithNativeHandle =
-        ur_tracing_layer::urKernelCreateWithNativeHandle;
+        ur_mock_layer::urKernelCreateWithNativeHandle;
 
     dditable.pfnGetSuggestedLocalWorkSize =
         pDdiTable->pfnGetSuggestedLocalWorkSize;
     pDdiTable->pfnGetSuggestedLocalWorkSize =
-        ur_tracing_layer::urKernelGetSuggestedLocalWorkSize;
+        ur_mock_layer::urKernelGetSuggestedLocalWorkSize;
 
     dditable.pfnSetArgValue = pDdiTable->pfnSetArgValue;
-    pDdiTable->pfnSetArgValue = ur_tracing_layer::urKernelSetArgValue;
+    pDdiTable->pfnSetArgValue = ur_mock_layer::urKernelSetArgValue;
 
     dditable.pfnSetArgLocal = pDdiTable->pfnSetArgLocal;
-    pDdiTable->pfnSetArgLocal = ur_tracing_layer::urKernelSetArgLocal;
+    pDdiTable->pfnSetArgLocal = ur_mock_layer::urKernelSetArgLocal;
 
     dditable.pfnSetArgPointer = pDdiTable->pfnSetArgPointer;
-    pDdiTable->pfnSetArgPointer = ur_tracing_layer::urKernelSetArgPointer;
+    pDdiTable->pfnSetArgPointer = ur_mock_layer::urKernelSetArgPointer;
 
     dditable.pfnSetExecInfo = pDdiTable->pfnSetExecInfo;
-    pDdiTable->pfnSetExecInfo = ur_tracing_layer::urKernelSetExecInfo;
+    pDdiTable->pfnSetExecInfo = ur_mock_layer::urKernelSetExecInfo;
 
     dditable.pfnSetArgSampler = pDdiTable->pfnSetArgSampler;
-    pDdiTable->pfnSetArgSampler = ur_tracing_layer::urKernelSetArgSampler;
+    pDdiTable->pfnSetArgSampler = ur_mock_layer::urKernelSetArgSampler;
 
     dditable.pfnSetArgMemObj = pDdiTable->pfnSetArgMemObj;
-    pDdiTable->pfnSetArgMemObj = ur_tracing_layer::urKernelSetArgMemObj;
+    pDdiTable->pfnSetArgMemObj = ur_mock_layer::urKernelSetArgMemObj;
 
     dditable.pfnSetSpecializationConstants =
         pDdiTable->pfnSetSpecializationConstants;
     pDdiTable->pfnSetSpecializationConstants =
-        ur_tracing_layer::urKernelSetSpecializationConstants;
+        ur_mock_layer::urKernelSetSpecializationConstants;
 
     return result;
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's KernelExp table
 ///        with current process' addresses
@@ -8446,20 +11296,20 @@ __urdlllocal ur_result_t UR_APICALL urGetKernelProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetKernelExpProcAddrTable(
+UR_DLLEXPORT ur_result_t UR_APICALL urGetKernelExpProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_kernel_exp_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
 ) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.KernelExp;
+    auto &dditable = ur_mock_layer::context.urDdiTable.KernelExp;
 
     if (nullptr == pDdiTable) {
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+    if (UR_MAJOR_VERSION(ur_mock_layer::context.version) !=
             UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+        UR_MINOR_VERSION(ur_mock_layer::context.version) >
             UR_MINOR_VERSION(version)) {
         return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
     }
@@ -8469,10 +11319,11 @@ __urdlllocal ur_result_t UR_APICALL urGetKernelExpProcAddrTable(
     dditable.pfnSuggestMaxCooperativeGroupCountExp =
         pDdiTable->pfnSuggestMaxCooperativeGroupCountExp;
     pDdiTable->pfnSuggestMaxCooperativeGroupCountExp =
-        ur_tracing_layer::urKernelSuggestMaxCooperativeGroupCountExp;
+        ur_mock_layer::urKernelSuggestMaxCooperativeGroupCountExp;
 
     return result;
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's Mem table
 ///        with current process' addresses
@@ -8481,20 +11332,20 @@ __urdlllocal ur_result_t UR_APICALL urGetKernelExpProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetMemProcAddrTable(
+UR_DLLEXPORT ur_result_t UR_APICALL urGetMemProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_mem_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
 ) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.Mem;
+    auto &dditable = ur_mock_layer::context.urDdiTable.Mem;
 
     if (nullptr == pDdiTable) {
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+    if (UR_MAJOR_VERSION(ur_mock_layer::context.version) !=
             UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+        UR_MINOR_VERSION(ur_mock_layer::context.version) >
             UR_MINOR_VERSION(version)) {
         return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
     }
@@ -8502,41 +11353,42 @@ __urdlllocal ur_result_t UR_APICALL urGetMemProcAddrTable(
     ur_result_t result = UR_RESULT_SUCCESS;
 
     dditable.pfnImageCreate = pDdiTable->pfnImageCreate;
-    pDdiTable->pfnImageCreate = ur_tracing_layer::urMemImageCreate;
+    pDdiTable->pfnImageCreate = ur_mock_layer::urMemImageCreate;
 
     dditable.pfnBufferCreate = pDdiTable->pfnBufferCreate;
-    pDdiTable->pfnBufferCreate = ur_tracing_layer::urMemBufferCreate;
+    pDdiTable->pfnBufferCreate = ur_mock_layer::urMemBufferCreate;
 
     dditable.pfnRetain = pDdiTable->pfnRetain;
-    pDdiTable->pfnRetain = ur_tracing_layer::urMemRetain;
+    pDdiTable->pfnRetain = ur_mock_layer::urMemRetain;
 
     dditable.pfnRelease = pDdiTable->pfnRelease;
-    pDdiTable->pfnRelease = ur_tracing_layer::urMemRelease;
+    pDdiTable->pfnRelease = ur_mock_layer::urMemRelease;
 
     dditable.pfnBufferPartition = pDdiTable->pfnBufferPartition;
-    pDdiTable->pfnBufferPartition = ur_tracing_layer::urMemBufferPartition;
+    pDdiTable->pfnBufferPartition = ur_mock_layer::urMemBufferPartition;
 
     dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
-    pDdiTable->pfnGetNativeHandle = ur_tracing_layer::urMemGetNativeHandle;
+    pDdiTable->pfnGetNativeHandle = ur_mock_layer::urMemGetNativeHandle;
 
     dditable.pfnBufferCreateWithNativeHandle =
         pDdiTable->pfnBufferCreateWithNativeHandle;
     pDdiTable->pfnBufferCreateWithNativeHandle =
-        ur_tracing_layer::urMemBufferCreateWithNativeHandle;
+        ur_mock_layer::urMemBufferCreateWithNativeHandle;
 
     dditable.pfnImageCreateWithNativeHandle =
         pDdiTable->pfnImageCreateWithNativeHandle;
     pDdiTable->pfnImageCreateWithNativeHandle =
-        ur_tracing_layer::urMemImageCreateWithNativeHandle;
+        ur_mock_layer::urMemImageCreateWithNativeHandle;
 
     dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
-    pDdiTable->pfnGetInfo = ur_tracing_layer::urMemGetInfo;
+    pDdiTable->pfnGetInfo = ur_mock_layer::urMemGetInfo;
 
     dditable.pfnImageGetInfo = pDdiTable->pfnImageGetInfo;
-    pDdiTable->pfnImageGetInfo = ur_tracing_layer::urMemImageGetInfo;
+    pDdiTable->pfnImageGetInfo = ur_mock_layer::urMemImageGetInfo;
 
     return result;
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's PhysicalMem table
 ///        with current process' addresses
@@ -8545,20 +11397,20 @@ __urdlllocal ur_result_t UR_APICALL urGetMemProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetPhysicalMemProcAddrTable(
+UR_DLLEXPORT ur_result_t UR_APICALL urGetPhysicalMemProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_physical_mem_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
 ) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.PhysicalMem;
+    auto &dditable = ur_mock_layer::context.urDdiTable.PhysicalMem;
 
     if (nullptr == pDdiTable) {
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+    if (UR_MAJOR_VERSION(ur_mock_layer::context.version) !=
             UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+        UR_MINOR_VERSION(ur_mock_layer::context.version) >
             UR_MINOR_VERSION(version)) {
         return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
     }
@@ -8566,16 +11418,17 @@ __urdlllocal ur_result_t UR_APICALL urGetPhysicalMemProcAddrTable(
     ur_result_t result = UR_RESULT_SUCCESS;
 
     dditable.pfnCreate = pDdiTable->pfnCreate;
-    pDdiTable->pfnCreate = ur_tracing_layer::urPhysicalMemCreate;
+    pDdiTable->pfnCreate = ur_mock_layer::urPhysicalMemCreate;
 
     dditable.pfnRetain = pDdiTable->pfnRetain;
-    pDdiTable->pfnRetain = ur_tracing_layer::urPhysicalMemRetain;
+    pDdiTable->pfnRetain = ur_mock_layer::urPhysicalMemRetain;
 
     dditable.pfnRelease = pDdiTable->pfnRelease;
-    pDdiTable->pfnRelease = ur_tracing_layer::urPhysicalMemRelease;
+    pDdiTable->pfnRelease = ur_mock_layer::urPhysicalMemRelease;
 
     return result;
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's Platform table
 ///        with current process' addresses
@@ -8584,20 +11437,20 @@ __urdlllocal ur_result_t UR_APICALL urGetPhysicalMemProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetPlatformProcAddrTable(
+UR_DLLEXPORT ur_result_t UR_APICALL urGetPlatformProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_platform_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
 ) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.Platform;
+    auto &dditable = ur_mock_layer::context.urDdiTable.Platform;
 
     if (nullptr == pDdiTable) {
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+    if (UR_MAJOR_VERSION(ur_mock_layer::context.version) !=
             UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+        UR_MINOR_VERSION(ur_mock_layer::context.version) >
             UR_MINOR_VERSION(version)) {
         return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
     }
@@ -8605,27 +11458,27 @@ __urdlllocal ur_result_t UR_APICALL urGetPlatformProcAddrTable(
     ur_result_t result = UR_RESULT_SUCCESS;
 
     dditable.pfnGet = pDdiTable->pfnGet;
-    pDdiTable->pfnGet = ur_tracing_layer::urPlatformGet;
+    pDdiTable->pfnGet = ur_mock_layer::urPlatformGet;
 
     dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
-    pDdiTable->pfnGetInfo = ur_tracing_layer::urPlatformGetInfo;
+    pDdiTable->pfnGetInfo = ur_mock_layer::urPlatformGetInfo;
 
     dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
-    pDdiTable->pfnGetNativeHandle = ur_tracing_layer::urPlatformGetNativeHandle;
+    pDdiTable->pfnGetNativeHandle = ur_mock_layer::urPlatformGetNativeHandle;
 
     dditable.pfnCreateWithNativeHandle = pDdiTable->pfnCreateWithNativeHandle;
     pDdiTable->pfnCreateWithNativeHandle =
-        ur_tracing_layer::urPlatformCreateWithNativeHandle;
+        ur_mock_layer::urPlatformCreateWithNativeHandle;
 
     dditable.pfnGetApiVersion = pDdiTable->pfnGetApiVersion;
-    pDdiTable->pfnGetApiVersion = ur_tracing_layer::urPlatformGetApiVersion;
+    pDdiTable->pfnGetApiVersion = ur_mock_layer::urPlatformGetApiVersion;
 
     dditable.pfnGetBackendOption = pDdiTable->pfnGetBackendOption;
-    pDdiTable->pfnGetBackendOption =
-        ur_tracing_layer::urPlatformGetBackendOption;
+    pDdiTable->pfnGetBackendOption = ur_mock_layer::urPlatformGetBackendOption;
 
     return result;
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's Program table
 ///        with current process' addresses
@@ -8634,20 +11487,20 @@ __urdlllocal ur_result_t UR_APICALL urGetPlatformProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetProgramProcAddrTable(
+UR_DLLEXPORT ur_result_t UR_APICALL urGetProgramProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_program_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
 ) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.Program;
+    auto &dditable = ur_mock_layer::context.urDdiTable.Program;
 
     if (nullptr == pDdiTable) {
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+    if (UR_MAJOR_VERSION(ur_mock_layer::context.version) !=
             UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+        UR_MINOR_VERSION(ur_mock_layer::context.version) >
             UR_MINOR_VERSION(version)) {
         return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
     }
@@ -8655,56 +11508,56 @@ __urdlllocal ur_result_t UR_APICALL urGetProgramProcAddrTable(
     ur_result_t result = UR_RESULT_SUCCESS;
 
     dditable.pfnCreateWithIL = pDdiTable->pfnCreateWithIL;
-    pDdiTable->pfnCreateWithIL = ur_tracing_layer::urProgramCreateWithIL;
+    pDdiTable->pfnCreateWithIL = ur_mock_layer::urProgramCreateWithIL;
 
     dditable.pfnCreateWithBinary = pDdiTable->pfnCreateWithBinary;
-    pDdiTable->pfnCreateWithBinary =
-        ur_tracing_layer::urProgramCreateWithBinary;
+    pDdiTable->pfnCreateWithBinary = ur_mock_layer::urProgramCreateWithBinary;
 
     dditable.pfnBuild = pDdiTable->pfnBuild;
-    pDdiTable->pfnBuild = ur_tracing_layer::urProgramBuild;
+    pDdiTable->pfnBuild = ur_mock_layer::urProgramBuild;
 
     dditable.pfnCompile = pDdiTable->pfnCompile;
-    pDdiTable->pfnCompile = ur_tracing_layer::urProgramCompile;
+    pDdiTable->pfnCompile = ur_mock_layer::urProgramCompile;
 
     dditable.pfnLink = pDdiTable->pfnLink;
-    pDdiTable->pfnLink = ur_tracing_layer::urProgramLink;
+    pDdiTable->pfnLink = ur_mock_layer::urProgramLink;
 
     dditable.pfnRetain = pDdiTable->pfnRetain;
-    pDdiTable->pfnRetain = ur_tracing_layer::urProgramRetain;
+    pDdiTable->pfnRetain = ur_mock_layer::urProgramRetain;
 
     dditable.pfnRelease = pDdiTable->pfnRelease;
-    pDdiTable->pfnRelease = ur_tracing_layer::urProgramRelease;
+    pDdiTable->pfnRelease = ur_mock_layer::urProgramRelease;
 
     dditable.pfnGetFunctionPointer = pDdiTable->pfnGetFunctionPointer;
     pDdiTable->pfnGetFunctionPointer =
-        ur_tracing_layer::urProgramGetFunctionPointer;
+        ur_mock_layer::urProgramGetFunctionPointer;
 
     dditable.pfnGetGlobalVariablePointer =
         pDdiTable->pfnGetGlobalVariablePointer;
     pDdiTable->pfnGetGlobalVariablePointer =
-        ur_tracing_layer::urProgramGetGlobalVariablePointer;
+        ur_mock_layer::urProgramGetGlobalVariablePointer;
 
     dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
-    pDdiTable->pfnGetInfo = ur_tracing_layer::urProgramGetInfo;
+    pDdiTable->pfnGetInfo = ur_mock_layer::urProgramGetInfo;
 
     dditable.pfnGetBuildInfo = pDdiTable->pfnGetBuildInfo;
-    pDdiTable->pfnGetBuildInfo = ur_tracing_layer::urProgramGetBuildInfo;
+    pDdiTable->pfnGetBuildInfo = ur_mock_layer::urProgramGetBuildInfo;
 
     dditable.pfnSetSpecializationConstants =
         pDdiTable->pfnSetSpecializationConstants;
     pDdiTable->pfnSetSpecializationConstants =
-        ur_tracing_layer::urProgramSetSpecializationConstants;
+        ur_mock_layer::urProgramSetSpecializationConstants;
 
     dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
-    pDdiTable->pfnGetNativeHandle = ur_tracing_layer::urProgramGetNativeHandle;
+    pDdiTable->pfnGetNativeHandle = ur_mock_layer::urProgramGetNativeHandle;
 
     dditable.pfnCreateWithNativeHandle = pDdiTable->pfnCreateWithNativeHandle;
     pDdiTable->pfnCreateWithNativeHandle =
-        ur_tracing_layer::urProgramCreateWithNativeHandle;
+        ur_mock_layer::urProgramCreateWithNativeHandle;
 
     return result;
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's ProgramExp table
 ///        with current process' addresses
@@ -8713,20 +11566,20 @@ __urdlllocal ur_result_t UR_APICALL urGetProgramProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetProgramExpProcAddrTable(
+UR_DLLEXPORT ur_result_t UR_APICALL urGetProgramExpProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_program_exp_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
 ) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.ProgramExp;
+    auto &dditable = ur_mock_layer::context.urDdiTable.ProgramExp;
 
     if (nullptr == pDdiTable) {
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+    if (UR_MAJOR_VERSION(ur_mock_layer::context.version) !=
             UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+        UR_MINOR_VERSION(ur_mock_layer::context.version) >
             UR_MINOR_VERSION(version)) {
         return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
     }
@@ -8734,16 +11587,17 @@ __urdlllocal ur_result_t UR_APICALL urGetProgramExpProcAddrTable(
     ur_result_t result = UR_RESULT_SUCCESS;
 
     dditable.pfnBuildExp = pDdiTable->pfnBuildExp;
-    pDdiTable->pfnBuildExp = ur_tracing_layer::urProgramBuildExp;
+    pDdiTable->pfnBuildExp = ur_mock_layer::urProgramBuildExp;
 
     dditable.pfnCompileExp = pDdiTable->pfnCompileExp;
-    pDdiTable->pfnCompileExp = ur_tracing_layer::urProgramCompileExp;
+    pDdiTable->pfnCompileExp = ur_mock_layer::urProgramCompileExp;
 
     dditable.pfnLinkExp = pDdiTable->pfnLinkExp;
-    pDdiTable->pfnLinkExp = ur_tracing_layer::urProgramLinkExp;
+    pDdiTable->pfnLinkExp = ur_mock_layer::urProgramLinkExp;
 
     return result;
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's Queue table
 ///        with current process' addresses
@@ -8752,20 +11606,20 @@ __urdlllocal ur_result_t UR_APICALL urGetProgramExpProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetQueueProcAddrTable(
+UR_DLLEXPORT ur_result_t UR_APICALL urGetQueueProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_queue_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
 ) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.Queue;
+    auto &dditable = ur_mock_layer::context.urDdiTable.Queue;
 
     if (nullptr == pDdiTable) {
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+    if (UR_MAJOR_VERSION(ur_mock_layer::context.version) !=
             UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+        UR_MINOR_VERSION(ur_mock_layer::context.version) >
             UR_MINOR_VERSION(version)) {
         return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
     }
@@ -8773,32 +11627,33 @@ __urdlllocal ur_result_t UR_APICALL urGetQueueProcAddrTable(
     ur_result_t result = UR_RESULT_SUCCESS;
 
     dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
-    pDdiTable->pfnGetInfo = ur_tracing_layer::urQueueGetInfo;
+    pDdiTable->pfnGetInfo = ur_mock_layer::urQueueGetInfo;
 
     dditable.pfnCreate = pDdiTable->pfnCreate;
-    pDdiTable->pfnCreate = ur_tracing_layer::urQueueCreate;
+    pDdiTable->pfnCreate = ur_mock_layer::urQueueCreate;
 
     dditable.pfnRetain = pDdiTable->pfnRetain;
-    pDdiTable->pfnRetain = ur_tracing_layer::urQueueRetain;
+    pDdiTable->pfnRetain = ur_mock_layer::urQueueRetain;
 
     dditable.pfnRelease = pDdiTable->pfnRelease;
-    pDdiTable->pfnRelease = ur_tracing_layer::urQueueRelease;
+    pDdiTable->pfnRelease = ur_mock_layer::urQueueRelease;
 
     dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
-    pDdiTable->pfnGetNativeHandle = ur_tracing_layer::urQueueGetNativeHandle;
+    pDdiTable->pfnGetNativeHandle = ur_mock_layer::urQueueGetNativeHandle;
 
     dditable.pfnCreateWithNativeHandle = pDdiTable->pfnCreateWithNativeHandle;
     pDdiTable->pfnCreateWithNativeHandle =
-        ur_tracing_layer::urQueueCreateWithNativeHandle;
+        ur_mock_layer::urQueueCreateWithNativeHandle;
 
     dditable.pfnFinish = pDdiTable->pfnFinish;
-    pDdiTable->pfnFinish = ur_tracing_layer::urQueueFinish;
+    pDdiTable->pfnFinish = ur_mock_layer::urQueueFinish;
 
     dditable.pfnFlush = pDdiTable->pfnFlush;
-    pDdiTable->pfnFlush = ur_tracing_layer::urQueueFlush;
+    pDdiTable->pfnFlush = ur_mock_layer::urQueueFlush;
 
     return result;
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's Sampler table
 ///        with current process' addresses
@@ -8807,20 +11662,20 @@ __urdlllocal ur_result_t UR_APICALL urGetQueueProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetSamplerProcAddrTable(
+UR_DLLEXPORT ur_result_t UR_APICALL urGetSamplerProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_sampler_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
 ) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.Sampler;
+    auto &dditable = ur_mock_layer::context.urDdiTable.Sampler;
 
     if (nullptr == pDdiTable) {
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+    if (UR_MAJOR_VERSION(ur_mock_layer::context.version) !=
             UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+        UR_MINOR_VERSION(ur_mock_layer::context.version) >
             UR_MINOR_VERSION(version)) {
         return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
     }
@@ -8828,26 +11683,27 @@ __urdlllocal ur_result_t UR_APICALL urGetSamplerProcAddrTable(
     ur_result_t result = UR_RESULT_SUCCESS;
 
     dditable.pfnCreate = pDdiTable->pfnCreate;
-    pDdiTable->pfnCreate = ur_tracing_layer::urSamplerCreate;
+    pDdiTable->pfnCreate = ur_mock_layer::urSamplerCreate;
 
     dditable.pfnRetain = pDdiTable->pfnRetain;
-    pDdiTable->pfnRetain = ur_tracing_layer::urSamplerRetain;
+    pDdiTable->pfnRetain = ur_mock_layer::urSamplerRetain;
 
     dditable.pfnRelease = pDdiTable->pfnRelease;
-    pDdiTable->pfnRelease = ur_tracing_layer::urSamplerRelease;
+    pDdiTable->pfnRelease = ur_mock_layer::urSamplerRelease;
 
     dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
-    pDdiTable->pfnGetInfo = ur_tracing_layer::urSamplerGetInfo;
+    pDdiTable->pfnGetInfo = ur_mock_layer::urSamplerGetInfo;
 
     dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
-    pDdiTable->pfnGetNativeHandle = ur_tracing_layer::urSamplerGetNativeHandle;
+    pDdiTable->pfnGetNativeHandle = ur_mock_layer::urSamplerGetNativeHandle;
 
     dditable.pfnCreateWithNativeHandle = pDdiTable->pfnCreateWithNativeHandle;
     pDdiTable->pfnCreateWithNativeHandle =
-        ur_tracing_layer::urSamplerCreateWithNativeHandle;
+        ur_mock_layer::urSamplerCreateWithNativeHandle;
 
     return result;
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's USM table
 ///        with current process' addresses
@@ -8856,20 +11712,20 @@ __urdlllocal ur_result_t UR_APICALL urGetSamplerProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetUSMProcAddrTable(
+UR_DLLEXPORT ur_result_t UR_APICALL urGetUSMProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_usm_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
 ) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.USM;
+    auto &dditable = ur_mock_layer::context.urDdiTable.USM;
 
     if (nullptr == pDdiTable) {
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+    if (UR_MAJOR_VERSION(ur_mock_layer::context.version) !=
             UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+        UR_MINOR_VERSION(ur_mock_layer::context.version) >
             UR_MINOR_VERSION(version)) {
         return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
     }
@@ -8877,34 +11733,35 @@ __urdlllocal ur_result_t UR_APICALL urGetUSMProcAddrTable(
     ur_result_t result = UR_RESULT_SUCCESS;
 
     dditable.pfnHostAlloc = pDdiTable->pfnHostAlloc;
-    pDdiTable->pfnHostAlloc = ur_tracing_layer::urUSMHostAlloc;
+    pDdiTable->pfnHostAlloc = ur_mock_layer::urUSMHostAlloc;
 
     dditable.pfnDeviceAlloc = pDdiTable->pfnDeviceAlloc;
-    pDdiTable->pfnDeviceAlloc = ur_tracing_layer::urUSMDeviceAlloc;
+    pDdiTable->pfnDeviceAlloc = ur_mock_layer::urUSMDeviceAlloc;
 
     dditable.pfnSharedAlloc = pDdiTable->pfnSharedAlloc;
-    pDdiTable->pfnSharedAlloc = ur_tracing_layer::urUSMSharedAlloc;
+    pDdiTable->pfnSharedAlloc = ur_mock_layer::urUSMSharedAlloc;
 
     dditable.pfnFree = pDdiTable->pfnFree;
-    pDdiTable->pfnFree = ur_tracing_layer::urUSMFree;
+    pDdiTable->pfnFree = ur_mock_layer::urUSMFree;
 
     dditable.pfnGetMemAllocInfo = pDdiTable->pfnGetMemAllocInfo;
-    pDdiTable->pfnGetMemAllocInfo = ur_tracing_layer::urUSMGetMemAllocInfo;
+    pDdiTable->pfnGetMemAllocInfo = ur_mock_layer::urUSMGetMemAllocInfo;
 
     dditable.pfnPoolCreate = pDdiTable->pfnPoolCreate;
-    pDdiTable->pfnPoolCreate = ur_tracing_layer::urUSMPoolCreate;
+    pDdiTable->pfnPoolCreate = ur_mock_layer::urUSMPoolCreate;
 
     dditable.pfnPoolRetain = pDdiTable->pfnPoolRetain;
-    pDdiTable->pfnPoolRetain = ur_tracing_layer::urUSMPoolRetain;
+    pDdiTable->pfnPoolRetain = ur_mock_layer::urUSMPoolRetain;
 
     dditable.pfnPoolRelease = pDdiTable->pfnPoolRelease;
-    pDdiTable->pfnPoolRelease = ur_tracing_layer::urUSMPoolRelease;
+    pDdiTable->pfnPoolRelease = ur_mock_layer::urUSMPoolRelease;
 
     dditable.pfnPoolGetInfo = pDdiTable->pfnPoolGetInfo;
-    pDdiTable->pfnPoolGetInfo = ur_tracing_layer::urUSMPoolGetInfo;
+    pDdiTable->pfnPoolGetInfo = ur_mock_layer::urUSMPoolGetInfo;
 
     return result;
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's USMExp table
 ///        with current process' addresses
@@ -8913,20 +11770,20 @@ __urdlllocal ur_result_t UR_APICALL urGetUSMProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetUSMExpProcAddrTable(
+UR_DLLEXPORT ur_result_t UR_APICALL urGetUSMExpProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_usm_exp_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
 ) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.USMExp;
+    auto &dditable = ur_mock_layer::context.urDdiTable.USMExp;
 
     if (nullptr == pDdiTable) {
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+    if (UR_MAJOR_VERSION(ur_mock_layer::context.version) !=
             UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+        UR_MINOR_VERSION(ur_mock_layer::context.version) >
             UR_MINOR_VERSION(version)) {
         return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
     }
@@ -8934,16 +11791,17 @@ __urdlllocal ur_result_t UR_APICALL urGetUSMExpProcAddrTable(
     ur_result_t result = UR_RESULT_SUCCESS;
 
     dditable.pfnPitchedAllocExp = pDdiTable->pfnPitchedAllocExp;
-    pDdiTable->pfnPitchedAllocExp = ur_tracing_layer::urUSMPitchedAllocExp;
+    pDdiTable->pfnPitchedAllocExp = ur_mock_layer::urUSMPitchedAllocExp;
 
     dditable.pfnImportExp = pDdiTable->pfnImportExp;
-    pDdiTable->pfnImportExp = ur_tracing_layer::urUSMImportExp;
+    pDdiTable->pfnImportExp = ur_mock_layer::urUSMImportExp;
 
     dditable.pfnReleaseExp = pDdiTable->pfnReleaseExp;
-    pDdiTable->pfnReleaseExp = ur_tracing_layer::urUSMReleaseExp;
+    pDdiTable->pfnReleaseExp = ur_mock_layer::urUSMReleaseExp;
 
     return result;
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's UsmP2PExp table
 ///        with current process' addresses
@@ -8952,20 +11810,20 @@ __urdlllocal ur_result_t UR_APICALL urGetUSMExpProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetUsmP2PExpProcAddrTable(
+UR_DLLEXPORT ur_result_t UR_APICALL urGetUsmP2PExpProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_usm_p2p_exp_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
 ) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.UsmP2PExp;
+    auto &dditable = ur_mock_layer::context.urDdiTable.UsmP2PExp;
 
     if (nullptr == pDdiTable) {
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+    if (UR_MAJOR_VERSION(ur_mock_layer::context.version) !=
             UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+        UR_MINOR_VERSION(ur_mock_layer::context.version) >
             UR_MINOR_VERSION(version)) {
         return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
     }
@@ -8974,18 +11832,19 @@ __urdlllocal ur_result_t UR_APICALL urGetUsmP2PExpProcAddrTable(
 
     dditable.pfnEnablePeerAccessExp = pDdiTable->pfnEnablePeerAccessExp;
     pDdiTable->pfnEnablePeerAccessExp =
-        ur_tracing_layer::urUsmP2PEnablePeerAccessExp;
+        ur_mock_layer::urUsmP2PEnablePeerAccessExp;
 
     dditable.pfnDisablePeerAccessExp = pDdiTable->pfnDisablePeerAccessExp;
     pDdiTable->pfnDisablePeerAccessExp =
-        ur_tracing_layer::urUsmP2PDisablePeerAccessExp;
+        ur_mock_layer::urUsmP2PDisablePeerAccessExp;
 
     dditable.pfnPeerAccessGetInfoExp = pDdiTable->pfnPeerAccessGetInfoExp;
     pDdiTable->pfnPeerAccessGetInfoExp =
-        ur_tracing_layer::urUsmP2PPeerAccessGetInfoExp;
+        ur_mock_layer::urUsmP2PPeerAccessGetInfoExp;
 
     return result;
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's VirtualMem table
 ///        with current process' addresses
@@ -8994,20 +11853,20 @@ __urdlllocal ur_result_t UR_APICALL urGetUsmP2PExpProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetVirtualMemProcAddrTable(
+UR_DLLEXPORT ur_result_t UR_APICALL urGetVirtualMemProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_virtual_mem_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
 ) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.VirtualMem;
+    auto &dditable = ur_mock_layer::context.urDdiTable.VirtualMem;
 
     if (nullptr == pDdiTable) {
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+    if (UR_MAJOR_VERSION(ur_mock_layer::context.version) !=
             UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+        UR_MINOR_VERSION(ur_mock_layer::context.version) >
             UR_MINOR_VERSION(version)) {
         return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
     }
@@ -9016,28 +11875,29 @@ __urdlllocal ur_result_t UR_APICALL urGetVirtualMemProcAddrTable(
 
     dditable.pfnGranularityGetInfo = pDdiTable->pfnGranularityGetInfo;
     pDdiTable->pfnGranularityGetInfo =
-        ur_tracing_layer::urVirtualMemGranularityGetInfo;
+        ur_mock_layer::urVirtualMemGranularityGetInfo;
 
     dditable.pfnReserve = pDdiTable->pfnReserve;
-    pDdiTable->pfnReserve = ur_tracing_layer::urVirtualMemReserve;
+    pDdiTable->pfnReserve = ur_mock_layer::urVirtualMemReserve;
 
     dditable.pfnFree = pDdiTable->pfnFree;
-    pDdiTable->pfnFree = ur_tracing_layer::urVirtualMemFree;
+    pDdiTable->pfnFree = ur_mock_layer::urVirtualMemFree;
 
     dditable.pfnMap = pDdiTable->pfnMap;
-    pDdiTable->pfnMap = ur_tracing_layer::urVirtualMemMap;
+    pDdiTable->pfnMap = ur_mock_layer::urVirtualMemMap;
 
     dditable.pfnUnmap = pDdiTable->pfnUnmap;
-    pDdiTable->pfnUnmap = ur_tracing_layer::urVirtualMemUnmap;
+    pDdiTable->pfnUnmap = ur_mock_layer::urVirtualMemUnmap;
 
     dditable.pfnSetAccess = pDdiTable->pfnSetAccess;
-    pDdiTable->pfnSetAccess = ur_tracing_layer::urVirtualMemSetAccess;
+    pDdiTable->pfnSetAccess = ur_mock_layer::urVirtualMemSetAccess;
 
     dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
-    pDdiTable->pfnGetInfo = ur_tracing_layer::urVirtualMemGetInfo;
+    pDdiTable->pfnGetInfo = ur_mock_layer::urVirtualMemGetInfo;
 
     return result;
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's Device table
 ///        with current process' addresses
@@ -9046,20 +11906,20 @@ __urdlllocal ur_result_t UR_APICALL urGetVirtualMemProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetDeviceProcAddrTable(
+UR_DLLEXPORT ur_result_t UR_APICALL urGetDeviceProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_device_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
 ) {
-    auto &dditable = ur_tracing_layer::context.urDdiTable.Device;
+    auto &dditable = ur_mock_layer::context.urDdiTable.Device;
 
     if (nullptr == pDdiTable) {
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
 
-    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+    if (UR_MAJOR_VERSION(ur_mock_layer::context.version) !=
             UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+        UR_MINOR_VERSION(ur_mock_layer::context.version) >
             UR_MINOR_VERSION(version)) {
         return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
     }
@@ -9067,157 +11927,154 @@ __urdlllocal ur_result_t UR_APICALL urGetDeviceProcAddrTable(
     ur_result_t result = UR_RESULT_SUCCESS;
 
     dditable.pfnGet = pDdiTable->pfnGet;
-    pDdiTable->pfnGet = ur_tracing_layer::urDeviceGet;
+    pDdiTable->pfnGet = ur_mock_layer::urDeviceGet;
 
     dditable.pfnGetInfo = pDdiTable->pfnGetInfo;
-    pDdiTable->pfnGetInfo = ur_tracing_layer::urDeviceGetInfo;
+    pDdiTable->pfnGetInfo = ur_mock_layer::urDeviceGetInfo;
 
     dditable.pfnRetain = pDdiTable->pfnRetain;
-    pDdiTable->pfnRetain = ur_tracing_layer::urDeviceRetain;
+    pDdiTable->pfnRetain = ur_mock_layer::urDeviceRetain;
 
     dditable.pfnRelease = pDdiTable->pfnRelease;
-    pDdiTable->pfnRelease = ur_tracing_layer::urDeviceRelease;
+    pDdiTable->pfnRelease = ur_mock_layer::urDeviceRelease;
 
     dditable.pfnPartition = pDdiTable->pfnPartition;
-    pDdiTable->pfnPartition = ur_tracing_layer::urDevicePartition;
+    pDdiTable->pfnPartition = ur_mock_layer::urDevicePartition;
 
     dditable.pfnSelectBinary = pDdiTable->pfnSelectBinary;
-    pDdiTable->pfnSelectBinary = ur_tracing_layer::urDeviceSelectBinary;
+    pDdiTable->pfnSelectBinary = ur_mock_layer::urDeviceSelectBinary;
 
     dditable.pfnGetNativeHandle = pDdiTable->pfnGetNativeHandle;
-    pDdiTable->pfnGetNativeHandle = ur_tracing_layer::urDeviceGetNativeHandle;
+    pDdiTable->pfnGetNativeHandle = ur_mock_layer::urDeviceGetNativeHandle;
 
     dditable.pfnCreateWithNativeHandle = pDdiTable->pfnCreateWithNativeHandle;
     pDdiTable->pfnCreateWithNativeHandle =
-        ur_tracing_layer::urDeviceCreateWithNativeHandle;
+        ur_mock_layer::urDeviceCreateWithNativeHandle;
 
     dditable.pfnGetGlobalTimestamps = pDdiTable->pfnGetGlobalTimestamps;
     pDdiTable->pfnGetGlobalTimestamps =
-        ur_tracing_layer::urDeviceGetGlobalTimestamps;
+        ur_mock_layer::urDeviceGetGlobalTimestamps;
 
     return result;
 }
 
 ur_result_t context_t::init(ur_dditable_t *dditable,
                             const std::set<std::string> &enabledLayerNames,
-                            codeloc_data codelocData, api_callbacks) {
+                            codeloc_data, api_callbacks apiCallbacks) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
     if (!enabledLayerNames.count(name)) {
         return result;
     }
 
-    // Recreate the logger in case env variables have been modified between
-    // program launch and the call to `urLoaderInit`
-    logger = logger::create_logger("tracing", true, true);
-
-    ur_tracing_layer::context.codelocData = codelocData;
+    ur_mock_layer::context.apiCallbacks = apiCallbacks;
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetGlobalProcAddrTable(
-            UR_API_VERSION_CURRENT, &dditable->Global);
+        result = ur_mock_layer::urGetGlobalProcAddrTable(UR_API_VERSION_CURRENT,
+                                                         &dditable->Global);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetBindlessImagesExpProcAddrTable(
+        result = ur_mock_layer::urGetBindlessImagesExpProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->BindlessImagesExp);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetCommandBufferExpProcAddrTable(
+        result = ur_mock_layer::urGetCommandBufferExpProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->CommandBufferExp);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetContextProcAddrTable(
+        result = ur_mock_layer::urGetContextProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->Context);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetEnqueueProcAddrTable(
+        result = ur_mock_layer::urGetEnqueueProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->Enqueue);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetEnqueueExpProcAddrTable(
+        result = ur_mock_layer::urGetEnqueueExpProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->EnqueueExp);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetEventProcAddrTable(
-            UR_API_VERSION_CURRENT, &dditable->Event);
+        result = ur_mock_layer::urGetEventProcAddrTable(UR_API_VERSION_CURRENT,
+                                                        &dditable->Event);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetKernelProcAddrTable(
-            UR_API_VERSION_CURRENT, &dditable->Kernel);
+        result = ur_mock_layer::urGetKernelProcAddrTable(UR_API_VERSION_CURRENT,
+                                                         &dditable->Kernel);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetKernelExpProcAddrTable(
+        result = ur_mock_layer::urGetKernelExpProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->KernelExp);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetMemProcAddrTable(UR_API_VERSION_CURRENT,
-                                                         &dditable->Mem);
+        result = ur_mock_layer::urGetMemProcAddrTable(UR_API_VERSION_CURRENT,
+                                                      &dditable->Mem);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetPhysicalMemProcAddrTable(
+        result = ur_mock_layer::urGetPhysicalMemProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->PhysicalMem);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetPlatformProcAddrTable(
+        result = ur_mock_layer::urGetPlatformProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->Platform);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetProgramProcAddrTable(
+        result = ur_mock_layer::urGetProgramProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->Program);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetProgramExpProcAddrTable(
+        result = ur_mock_layer::urGetProgramExpProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->ProgramExp);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetQueueProcAddrTable(
-            UR_API_VERSION_CURRENT, &dditable->Queue);
+        result = ur_mock_layer::urGetQueueProcAddrTable(UR_API_VERSION_CURRENT,
+                                                        &dditable->Queue);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetSamplerProcAddrTable(
+        result = ur_mock_layer::urGetSamplerProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->Sampler);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetUSMProcAddrTable(UR_API_VERSION_CURRENT,
-                                                         &dditable->USM);
+        result = ur_mock_layer::urGetUSMProcAddrTable(UR_API_VERSION_CURRENT,
+                                                      &dditable->USM);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetUSMExpProcAddrTable(
-            UR_API_VERSION_CURRENT, &dditable->USMExp);
+        result = ur_mock_layer::urGetUSMExpProcAddrTable(UR_API_VERSION_CURRENT,
+                                                         &dditable->USMExp);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetUsmP2PExpProcAddrTable(
+        result = ur_mock_layer::urGetUsmP2PExpProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->UsmP2PExp);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetVirtualMemProcAddrTable(
+        result = ur_mock_layer::urGetVirtualMemProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->VirtualMem);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetDeviceProcAddrTable(
-            UR_API_VERSION_CURRENT, &dditable->Device);
+        result = ur_mock_layer::urGetDeviceProcAddrTable(UR_API_VERSION_CURRENT,
+                                                         &dditable->Device);
     }
 
     return result;
 }
-} /* namespace ur_tracing_layer */
+
+} // namespace ur_mock_layer

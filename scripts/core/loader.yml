@@ -52,7 +52,7 @@ details:
 params:
     - type: $x_loader_config_handle_t
       name: hLoaderConfig
-      desc: "[in] loader config handle to retain"
+      desc: "[in][retain] loader config handle to retain"
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Release config handle."
@@ -67,7 +67,7 @@ details:
 params:
     - type: $x_loader_config_handle_t
       name: hLoaderConfig
-      desc: "[in] config handle to release"
+      desc: "[in][release] config handle to release"
 --- #--------------------------------------------------------------------------
 type: enum
 desc: "Supported loader info"
@@ -186,6 +186,59 @@ params:
     - type: void*
       name: pUserData
       desc: "[in][out][optional] pointer to data to be passed to callback."
+--- #--------------------------------------------------------------------------
+type: enum
+desc: "Callback override mode"
+class: $xLoaderConfig
+name: $x_callback_override_mode_t
+etors:
+    - name: BEFORE
+      desc: "Invoke callback before function."
+    - name: REPLACE
+      desc: "Invoke callback instead of function."
+    - name: AFTER
+      desc: "Invoke callback after function."
+--- #--------------------------------------------------------------------------
+type: fptr_typedef
+desc: "Callback to replace or instrument generic mock functionality in the mock layer."
+name: $x_mock_callback_t
+return: $x_result_t
+params:
+    - type: void*
+      name: pParams
+      desc: "[in][out] Pointer to the appropriate param struct for the function"
+--- #--------------------------------------------------------------------------
+type: struct
+desc: "Callback properties"
+class: $xLoaderConfig
+name: $x_mock_callback_properties_t
+base: $x_base_properties_t
+members:
+    - type: const char*
+      name: name
+      desc: "[in] Full name of the function to associate callback with."
+    - type: $x_callback_override_mode_t
+      name: mode
+      desc: "[in] Override mode for this callback."
+    - type: $x_mock_callback_t
+      name: pCallback
+      desc: "[in] Callback function pointer."
+--- #--------------------------------------------------------------------------
+type: function
+desc: "Set a callback to be called before, after or instead of a given entry point"
+details:
+    - "The callback layer will pass the function's parameter struct (e.g. **$x_adapter_get_params_t**) to the $x_function_callback_t so parameters can be accessed and modified."
+class: $xLoaderConfig
+loader_only: True
+name: "SetMockCallbacks"
+decl: static
+params:
+    - type: $x_loader_config_handle_t
+      name: hLoaderConfig
+      desc: "[in] Handle to config object the layer will be enabled for."
+    - type: $x_mock_callback_properties_t*
+      name: pCallbackProperties
+      desc: "[in] Pointer to callback properties struct."
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Initialize the $OneApi loader"

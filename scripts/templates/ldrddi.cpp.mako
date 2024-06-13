@@ -279,6 +279,8 @@ namespace ur_loader
         %if item['release']:
         // release loader handle
         ${item['factory']}.release( ${item['name']} );
+        %elif item['retain']:
+        // TODO: do we need to ref count the loader handles?
         %elif not '_native_object_' in item['obj'] or th.make_func_name(n, tags, obj) == 'urPlatformCreateWithNativeHandle':
         try
         {

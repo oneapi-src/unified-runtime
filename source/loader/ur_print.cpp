@@ -114,6 +114,23 @@ ur_result_t urPrintCodeLocation(const struct ur_code_location_t params,
     return str_copy(&ss, buffer, buff_size, out_size);
 }
 
+ur_result_t urPrintCallbackOverrideMode(enum ur_callback_override_mode_t value,
+                                        char *buffer, const size_t buff_size,
+                                        size_t *out_size) {
+    std::stringstream ss;
+    ss << value;
+    return str_copy(&ss, buffer, buff_size, out_size);
+}
+
+ur_result_t
+urPrintMockCallbackProperties(const struct ur_mock_callback_properties_t params,
+                              char *buffer, const size_t buff_size,
+                              size_t *out_size) {
+    std::stringstream ss;
+    ss << params;
+    return str_copy(&ss, buffer, buff_size, out_size);
+}
+
 ur_result_t urPrintAdapterInfo(enum ur_adapter_info_t value, char *buffer,
                                const size_t buff_size, size_t *out_size) {
     std::stringstream ss;
@@ -1954,6 +1971,14 @@ ur_result_t urPrintLoaderConfigEnableLayerParams(
 
 ur_result_t urPrintLoaderConfigSetCodeLocationCallbackParams(
     const struct ur_loader_config_set_code_location_callback_params_t *params,
+    char *buffer, const size_t buff_size, size_t *out_size) {
+    std::stringstream ss;
+    ss << params;
+    return str_copy(&ss, buffer, buff_size, out_size);
+}
+
+ur_result_t urPrintLoaderConfigSetMockCallbacksParams(
+    const struct ur_loader_config_set_mock_callbacks_params_t *params,
     char *buffer, const size_t buff_size, size_t *out_size) {
     std::stringstream ss;
     ss << params;

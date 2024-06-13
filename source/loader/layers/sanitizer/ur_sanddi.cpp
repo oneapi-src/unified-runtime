@@ -1507,7 +1507,8 @@ __urdlllocal ur_result_t UR_APICALL urGetUSMProcAddrTable(
 
 ur_result_t context_t::init(ur_dditable_t *dditable,
                             const std::set<std::string> &enabledLayerNames,
-                            [[maybe_unused]] codeloc_data codelocData) {
+                            [[maybe_unused]] codeloc_data codelocData,
+                            [[maybe_unused]] api_callbacks apiCallbacks) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
     if (enabledLayerNames.count("UR_LAYER_ASAN")) {

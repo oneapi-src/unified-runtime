@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 add_subdirectory(validation)
+add_subdirectory(mock)
 
 if(UR_ENABLE_TRACING)
     add_subdirectory(tracing)

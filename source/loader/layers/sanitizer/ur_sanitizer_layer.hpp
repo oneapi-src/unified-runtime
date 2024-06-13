@@ -46,7 +46,8 @@ class __urdlllocal context_t : public proxy_layer_context_t {
     }
     ur_result_t init(ur_dditable_t *dditable,
                      const std::set<std::string> &enabledLayerNames,
-                     codeloc_data codelocData) override;
+                     codeloc_data codelocData,
+                     api_callbacks apiCallbacks) override;
 
     ur_result_t tearDown() override;
 };

@@ -141,6 +141,7 @@
 		urLoaderConfigRelease;
 		urLoaderConfigRetain;
 		urLoaderConfigSetCodeLocationCallback;
+		urLoaderConfigSetMockCallbacks;
 		urLoaderInit;
 		urLoaderTearDown;
 		urMemBufferCreate;
@@ -194,6 +195,7 @@
 		urPrintBufferCreateType;
 		urPrintBufferProperties;
 		urPrintBufferRegion;
+		urPrintCallbackOverrideMode;
 		urPrintCodeLocation;
 		urPrintCommand;
 		urPrintCommandBufferAppendKernelLaunchExpParams;
@@ -355,6 +357,7 @@
 		urPrintLoaderConfigReleaseParams;
 		urPrintLoaderConfigRetainParams;
 		urPrintLoaderConfigSetCodeLocationCallbackParams;
+		urPrintLoaderConfigSetMockCallbacksParams;
 		urPrintLoaderInitParams;
 		urPrintLoaderTearDownParams;
 		urPrintMapFlags;
@@ -374,6 +377,7 @@
 		urPrintMemType;
 		urPrintMemoryOrderCapabilityFlags;
 		urPrintMemoryScopeCapabilityFlags;
+		urPrintMockCallbackProperties;
 		urPrintPhysicalMemCreateParams;
 		urPrintPhysicalMemFlags;
 		urPrintPhysicalMemProperties;

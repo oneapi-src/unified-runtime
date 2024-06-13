@@ -85,7 +85,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGet(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urAdapterRelease
 __urdlllocal ur_result_t UR_APICALL urAdapterRelease(
-    ur_adapter_handle_t hAdapter ///< [in] Adapter handle to release
+    ur_adapter_handle_t hAdapter ///< [in][release] Adapter handle to release
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -102,13 +102,20 @@ __urdlllocal ur_result_t UR_APICALL urAdapterRelease(
     // forward to device-platform
     result = pfnAdapterRelease(hAdapter);
 
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // release loader handle
+    ur_adapter_factory.release(hAdapter);
+
     return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urAdapterRetain
 __urdlllocal ur_result_t UR_APICALL urAdapterRetain(
-    ur_adapter_handle_t hAdapter ///< [in] Adapter handle to retain
+    ur_adapter_handle_t hAdapter ///< [in][retain] Adapter handle to retain
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -124,6 +131,12 @@ __urdlllocal ur_result_t UR_APICALL urAdapterRetain(
 
     // forward to device-platform
     result = pfnAdapterRetain(hAdapter);
+
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // TODO: do we need to ref count the loader handles?
 
     return result;
 }
@@ -589,7 +602,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetInfo(
 /// @brief Intercept function for urDeviceRetain
 __urdlllocal ur_result_t UR_APICALL urDeviceRetain(
     ur_device_handle_t
-        hDevice ///< [in] handle of the device to get a reference of.
+        hDevice ///< [in][retain] handle of the device to get a reference of.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -606,13 +619,20 @@ __urdlllocal ur_result_t UR_APICALL urDeviceRetain(
     // forward to device-platform
     result = pfnRetain(hDevice);
 
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // TODO: do we need to ref count the loader handles?
+
     return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urDeviceRelease
 __urdlllocal ur_result_t UR_APICALL urDeviceRelease(
-    ur_device_handle_t hDevice ///< [in] handle of the device to release.
+    ur_device_handle_t
+        hDevice ///< [in][release] handle of the device to release.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -628,6 +648,13 @@ __urdlllocal ur_result_t UR_APICALL urDeviceRelease(
 
     // forward to device-platform
     result = pfnRelease(hDevice);
+
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // release loader handle
+    ur_device_factory.release(hDevice);
 
     return result;
 }
@@ -865,7 +892,7 @@ __urdlllocal ur_result_t UR_APICALL urContextCreate(
 /// @brief Intercept function for urContextRetain
 __urdlllocal ur_result_t UR_APICALL urContextRetain(
     ur_context_handle_t
-        hContext ///< [in] handle of the context to get a reference of.
+        hContext ///< [in][retain] handle of the context to get a reference of.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -882,13 +909,20 @@ __urdlllocal ur_result_t UR_APICALL urContextRetain(
     // forward to device-platform
     result = pfnRetain(hContext);
 
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // TODO: do we need to ref count the loader handles?
+
     return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urContextRelease
 __urdlllocal ur_result_t UR_APICALL urContextRelease(
-    ur_context_handle_t hContext ///< [in] handle of the context to release.
+    ur_context_handle_t
+        hContext ///< [in][release] handle of the context to release.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -904,6 +938,13 @@ __urdlllocal ur_result_t UR_APICALL urContextRelease(
 
     // forward to device-platform
     result = pfnRelease(hContext);
+
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // release loader handle
+    ur_context_factory.release(hContext);
 
     return result;
 }
@@ -1169,7 +1210,8 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreate(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urMemRetain
 __urdlllocal ur_result_t UR_APICALL urMemRetain(
-    ur_mem_handle_t hMem ///< [in] handle of the memory object to get access
+    ur_mem_handle_t
+        hMem ///< [in][retain] handle of the memory object to get access
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -1186,13 +1228,20 @@ __urdlllocal ur_result_t UR_APICALL urMemRetain(
     // forward to device-platform
     result = pfnRetain(hMem);
 
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // TODO: do we need to ref count the loader handles?
+
     return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urMemRelease
 __urdlllocal ur_result_t UR_APICALL urMemRelease(
-    ur_mem_handle_t hMem ///< [in] handle of the memory object to release
+    ur_mem_handle_t
+        hMem ///< [in][release] handle of the memory object to release
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -1208,6 +1257,13 @@ __urdlllocal ur_result_t UR_APICALL urMemRelease(
 
     // forward to device-platform
     result = pfnRelease(hMem);
+
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // release loader handle
+    ur_mem_factory.release(hMem);
 
     return result;
 }
@@ -1523,7 +1579,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerCreate(
 /// @brief Intercept function for urSamplerRetain
 __urdlllocal ur_result_t UR_APICALL urSamplerRetain(
     ur_sampler_handle_t
-        hSampler ///< [in] handle of the sampler object to get access
+        hSampler ///< [in][retain] handle of the sampler object to get access
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -1540,6 +1596,12 @@ __urdlllocal ur_result_t UR_APICALL urSamplerRetain(
     // forward to device-platform
     result = pfnRetain(hSampler);
 
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // TODO: do we need to ref count the loader handles?
+
     return result;
 }
 
@@ -1547,7 +1609,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerRetain(
 /// @brief Intercept function for urSamplerRelease
 __urdlllocal ur_result_t UR_APICALL urSamplerRelease(
     ur_sampler_handle_t
-        hSampler ///< [in] handle of the sampler object to release
+        hSampler ///< [in][release] handle of the sampler object to release
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -1563,6 +1625,13 @@ __urdlllocal ur_result_t UR_APICALL urSamplerRelease(
 
     // forward to device-platform
     result = pfnRelease(hSampler);
+
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // release loader handle
+    ur_sampler_factory.release(hSampler);
 
     return result;
 }
@@ -1958,7 +2027,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolCreate(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMPoolRetain
 __urdlllocal ur_result_t UR_APICALL urUSMPoolRetain(
-    ur_usm_pool_handle_t pPool ///< [in] pointer to USM memory pool
+    ur_usm_pool_handle_t pPool ///< [in][retain] pointer to USM memory pool
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -1975,13 +2044,19 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolRetain(
     // forward to device-platform
     result = pfnPoolRetain(pPool);
 
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // TODO: do we need to ref count the loader handles?
+
     return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMPoolRelease
 __urdlllocal ur_result_t UR_APICALL urUSMPoolRelease(
-    ur_usm_pool_handle_t pPool ///< [in] pointer to USM memory pool
+    ur_usm_pool_handle_t pPool ///< [in][release] pointer to USM memory pool
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -1997,6 +2072,13 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolRelease(
 
     // forward to device-platform
     result = pfnPoolRelease(pPool);
+
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // release loader handle
+    ur_usm_pool_factory.release(pPool);
 
     return result;
 }
@@ -2343,7 +2425,7 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemCreate(
 /// @brief Intercept function for urPhysicalMemRetain
 __urdlllocal ur_result_t UR_APICALL urPhysicalMemRetain(
     ur_physical_mem_handle_t
-        hPhysicalMem ///< [in] handle of the physical memory object to retain.
+        hPhysicalMem ///< [in][retain] handle of the physical memory object to retain.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -2362,6 +2444,12 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemRetain(
     // forward to device-platform
     result = pfnRetain(hPhysicalMem);
 
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // TODO: do we need to ref count the loader handles?
+
     return result;
 }
 
@@ -2369,7 +2457,7 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemRetain(
 /// @brief Intercept function for urPhysicalMemRelease
 __urdlllocal ur_result_t UR_APICALL urPhysicalMemRelease(
     ur_physical_mem_handle_t
-        hPhysicalMem ///< [in] handle of the physical memory object to release.
+        hPhysicalMem ///< [in][release] handle of the physical memory object to release.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -2387,6 +2475,13 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemRelease(
 
     // forward to device-platform
     result = pfnRelease(hPhysicalMem);
+
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // release loader handle
+    ur_physical_mem_factory.release(hPhysicalMem);
 
     return result;
 }
@@ -2591,7 +2686,8 @@ __urdlllocal ur_result_t UR_APICALL urProgramLink(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramRetain
 __urdlllocal ur_result_t UR_APICALL urProgramRetain(
-    ur_program_handle_t hProgram ///< [in] handle for the Program to retain
+    ur_program_handle_t
+        hProgram ///< [in][retain] handle for the Program to retain
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -2608,13 +2704,20 @@ __urdlllocal ur_result_t UR_APICALL urProgramRetain(
     // forward to device-platform
     result = pfnRetain(hProgram);
 
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // TODO: do we need to ref count the loader handles?
+
     return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramRelease
 __urdlllocal ur_result_t UR_APICALL urProgramRelease(
-    ur_program_handle_t hProgram ///< [in] handle for the Program to release
+    ur_program_handle_t
+        hProgram ///< [in][release] handle for the Program to release
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -2630,6 +2733,13 @@ __urdlllocal ur_result_t UR_APICALL urProgramRelease(
 
     // forward to device-platform
     result = pfnRelease(hProgram);
+
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // release loader handle
+    ur_program_factory.release(hProgram);
 
     return result;
 }
@@ -3180,7 +3290,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetSubGroupInfo(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelRetain
 __urdlllocal ur_result_t UR_APICALL urKernelRetain(
-    ur_kernel_handle_t hKernel ///< [in] handle for the Kernel to retain
+    ur_kernel_handle_t hKernel ///< [in][retain] handle for the Kernel to retain
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -3197,13 +3307,20 @@ __urdlllocal ur_result_t UR_APICALL urKernelRetain(
     // forward to device-platform
     result = pfnRetain(hKernel);
 
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // TODO: do we need to ref count the loader handles?
+
     return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelRelease
 __urdlllocal ur_result_t UR_APICALL urKernelRelease(
-    ur_kernel_handle_t hKernel ///< [in] handle for the Kernel to release
+    ur_kernel_handle_t
+        hKernel ///< [in][release] handle for the Kernel to release
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -3219,6 +3336,13 @@ __urdlllocal ur_result_t UR_APICALL urKernelRelease(
 
     // forward to device-platform
     result = pfnRelease(hKernel);
+
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // release loader handle
+    ur_kernel_factory.release(hKernel);
 
     return result;
 }
@@ -3625,7 +3749,8 @@ __urdlllocal ur_result_t UR_APICALL urQueueCreate(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urQueueRetain
 __urdlllocal ur_result_t UR_APICALL urQueueRetain(
-    ur_queue_handle_t hQueue ///< [in] handle of the queue object to get access
+    ur_queue_handle_t
+        hQueue ///< [in][retain] handle of the queue object to get access
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -3642,13 +3767,20 @@ __urdlllocal ur_result_t UR_APICALL urQueueRetain(
     // forward to device-platform
     result = pfnRetain(hQueue);
 
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // TODO: do we need to ref count the loader handles?
+
     return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urQueueRelease
 __urdlllocal ur_result_t UR_APICALL urQueueRelease(
-    ur_queue_handle_t hQueue ///< [in] handle of the queue object to release
+    ur_queue_handle_t
+        hQueue ///< [in][release] handle of the queue object to release
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -3664,6 +3796,13 @@ __urdlllocal ur_result_t UR_APICALL urQueueRelease(
 
     // forward to device-platform
     result = pfnRelease(hQueue);
+
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // release loader handle
+    ur_queue_factory.release(hQueue);
 
     return result;
 }
@@ -3932,7 +4071,7 @@ __urdlllocal ur_result_t UR_APICALL urEventWait(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEventRetain
 __urdlllocal ur_result_t UR_APICALL urEventRetain(
-    ur_event_handle_t hEvent ///< [in] handle of the event object
+    ur_event_handle_t hEvent ///< [in][retain] handle of the event object
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -3949,13 +4088,19 @@ __urdlllocal ur_result_t UR_APICALL urEventRetain(
     // forward to device-platform
     result = pfnRetain(hEvent);
 
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // TODO: do we need to ref count the loader handles?
+
     return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEventRelease
 __urdlllocal ur_result_t UR_APICALL urEventRelease(
-    ur_event_handle_t hEvent ///< [in] handle of the event object
+    ur_event_handle_t hEvent ///< [in][release] handle of the event object
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -3971,6 +4116,13 @@ __urdlllocal ur_result_t UR_APICALL urEventRelease(
 
     // forward to device-platform
     result = pfnRelease(hEvent);
+
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // release loader handle
+    ur_event_factory.release(hEvent);
 
     return result;
 }
@@ -6349,7 +6501,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesReleaseInteropExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     ur_exp_interop_mem_handle_t
-        hInteropMem ///< [in] handle of interop memory to be freed
+        hInteropMem ///< [in][release] handle of interop memory to be freed
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -6373,6 +6525,13 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesReleaseInteropExp(
 
     // forward to device-platform
     result = pfnReleaseInteropExp(hContext, hDevice, hInteropMem);
+
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // release loader handle
+    ur_exp_interop_mem_factory.release(hInteropMem);
 
     return result;
 }
@@ -6640,7 +6799,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferCreateExp(
 /// @brief Intercept function for urCommandBufferRetainExp
 __urdlllocal ur_result_t UR_APICALL urCommandBufferRetainExp(
     ur_exp_command_buffer_handle_t
-        hCommandBuffer ///< [in] Handle of the command-buffer object.
+        hCommandBuffer ///< [in][retain] Handle of the command-buffer object.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -6661,6 +6820,12 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferRetainExp(
     // forward to device-platform
     result = pfnRetainExp(hCommandBuffer);
 
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // TODO: do we need to ref count the loader handles?
+
     return result;
 }
 
@@ -6668,7 +6833,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferRetainExp(
 /// @brief Intercept function for urCommandBufferReleaseExp
 __urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseExp(
     ur_exp_command_buffer_handle_t
-        hCommandBuffer ///< [in] Handle of the command-buffer object.
+        hCommandBuffer ///< [in][release] Handle of the command-buffer object.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -6688,6 +6853,13 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseExp(
 
     // forward to device-platform
     result = pfnReleaseExp(hCommandBuffer);
+
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // release loader handle
+    ur_exp_command_buffer_factory.release(hCommandBuffer);
 
     return result;
 }
@@ -7413,7 +7585,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferRetainCommandExp(
 /// @brief Intercept function for urCommandBufferReleaseCommandExp
 __urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseCommandExp(
     ur_exp_command_buffer_command_handle_t
-        hCommand ///< [in] Handle of the command-buffer command.
+        hCommand ///< [in][release] Handle of the command-buffer command.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -7434,6 +7606,13 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseCommandExp(
 
     // forward to device-platform
     result = pfnReleaseCommandExp(hCommand);
+
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    // release loader handle
+    ur_exp_command_buffer_command_factory.release(hCommand);
 
     return result;
 }
