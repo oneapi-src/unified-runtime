@@ -263,6 +263,8 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetNativeHandle(
 __urdlllocal ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
     ur_native_handle_t
         hNativePlatform, ///< [in][nocheck] the native handle of the platform.
+    ur_adapter_handle_t
+        hAdapter, ///< [in] handle of the adapter associated with the native backend.
     const ur_platform_native_properties_t *
         pProperties, ///< [in][optional] pointer to native platform properties struct.
     ur_platform_handle_t *
@@ -274,8 +276,8 @@ __urdlllocal ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
     auto pfnCreateWithNativeHandle =
         d_context.urDdiTable.Platform.pfnCreateWithNativeHandle;
     if (nullptr != pfnCreateWithNativeHandle) {
-        result =
-            pfnCreateWithNativeHandle(hNativePlatform, pProperties, phPlatform);
+        result = pfnCreateWithNativeHandle(hNativePlatform, hAdapter,
+                                           pProperties, phPlatform);
     } else {
         // generic implementation
         *phPlatform = reinterpret_cast<ur_platform_handle_t>(d_context.get());
@@ -2609,6 +2611,43 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
     } else {
         // generic implementation
         *phKernel = reinterpret_cast<ur_kernel_handle_t>(d_context.get());
+    }
+
+    return result;
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urKernelGetSuggestedLocalWorkSize
+__urdlllocal ur_result_t UR_APICALL urKernelGetSuggestedLocalWorkSize(
+    ur_kernel_handle_t hKernel, ///< [in] handle of the kernel
+    ur_queue_handle_t hQueue,   ///< [in] handle of the queue object
+    uint32_t
+        numWorkDim, ///< [in] number of dimensions, from 1 to 3, to specify the global
+                    ///< and work-group work-items
+    const size_t *
+        pGlobalWorkOffset, ///< [in] pointer to an array of numWorkDim unsigned values that specify
+    ///< the offset used to calculate the global ID of a work-item
+    const size_t *
+        pGlobalWorkSize, ///< [in] pointer to an array of numWorkDim unsigned values that specify
+    ///< the number of global work-items in workDim that will execute the
+    ///< kernel function
+    size_t *
+        pSuggestedLocalWorkSize ///< [out] pointer to an array of numWorkDim unsigned values that specify
+    ///< suggested local work size that will contain the result of the query
+    ) try {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // if the driver has created a custom function, then call it instead of using the generic path
+    auto pfnGetSuggestedLocalWorkSize =
+        d_context.urDdiTable.Kernel.pfnGetSuggestedLocalWorkSize;
+    if (nullptr != pfnGetSuggestedLocalWorkSize) {
+        result = pfnGetSuggestedLocalWorkSize(
+            hKernel, hQueue, numWorkDim, pGlobalWorkOffset, pGlobalWorkSize,
+            pSuggestedLocalWorkSize);
+    } else {
+        // generic implementation
     }
 
     return result;
@@ -6247,6 +6286,9 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetKernelProcAddrTable(
 
     pDdiTable->pfnCreateWithNativeHandle =
         driver::urKernelCreateWithNativeHandle;
+
+    pDdiTable->pfnGetSuggestedLocalWorkSize =
+        driver::urKernelGetSuggestedLocalWorkSize;
 
     pDdiTable->pfnSetArgValue = driver::urKernelSetArgValue;
 

@@ -49,6 +49,7 @@ typedef ur_result_t(UR_APICALL *ur_pfnPlatformGetNativeHandle_t)(
 /// @brief Function-pointer for urPlatformCreateWithNativeHandle
 typedef ur_result_t(UR_APICALL *ur_pfnPlatformCreateWithNativeHandle_t)(
     ur_native_handle_t,
+    ur_adapter_handle_t,
     const ur_platform_native_properties_t *,
     ur_platform_handle_t *);
 
@@ -536,6 +537,16 @@ typedef ur_result_t(UR_APICALL *ur_pfnKernelCreateWithNativeHandle_t)(
     ur_kernel_handle_t *);
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for urKernelGetSuggestedLocalWorkSize
+typedef ur_result_t(UR_APICALL *ur_pfnKernelGetSuggestedLocalWorkSize_t)(
+    ur_kernel_handle_t,
+    ur_queue_handle_t,
+    uint32_t,
+    const size_t *,
+    const size_t *,
+    size_t *);
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Function-pointer for urKernelSetArgValue
 typedef ur_result_t(UR_APICALL *ur_pfnKernelSetArgValue_t)(
     ur_kernel_handle_t,
@@ -603,6 +614,7 @@ typedef struct ur_kernel_dditable_t {
     ur_pfnKernelRelease_t pfnRelease;
     ur_pfnKernelGetNativeHandle_t pfnGetNativeHandle;
     ur_pfnKernelCreateWithNativeHandle_t pfnCreateWithNativeHandle;
+    ur_pfnKernelGetSuggestedLocalWorkSize_t pfnGetSuggestedLocalWorkSize;
     ur_pfnKernelSetArgValue_t pfnSetArgValue;
     ur_pfnKernelSetArgLocal_t pfnSetArgLocal;
     ur_pfnKernelSetArgPointer_t pfnSetArgPointer;

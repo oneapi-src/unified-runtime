@@ -352,6 +352,8 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetNativeHandle(
 __urdlllocal ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
     ur_native_handle_t
         hNativePlatform, ///< [in][nocheck] the native handle of the platform.
+    ur_adapter_handle_t
+        hAdapter, ///< [in] handle of the adapter associated with the native backend.
     const ur_platform_native_properties_t *
         pProperties, ///< [in][optional] pointer to native platform properties struct.
     ur_platform_handle_t *
@@ -365,15 +367,15 @@ __urdlllocal ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
     }
 
     ur_platform_create_with_native_handle_params_t params = {
-        &hNativePlatform, &pProperties, &phPlatform};
+        &hNativePlatform, &hAdapter, &pProperties, &phPlatform};
     uint64_t instance =
         context.notify_begin(UR_FUNCTION_PLATFORM_CREATE_WITH_NATIVE_HANDLE,
                              "urPlatformCreateWithNativeHandle", &params);
 
     context.logger.info("---> urPlatformCreateWithNativeHandle");
 
-    ur_result_t result =
-        pfnCreateWithNativeHandle(hNativePlatform, pProperties, phPlatform);
+    ur_result_t result = pfnCreateWithNativeHandle(hNativePlatform, hAdapter,
+                                                   pProperties, phPlatform);
 
     context.notify_end(UR_FUNCTION_PLATFORM_CREATE_WITH_NATIVE_HANDLE,
                        "urPlatformCreateWithNativeHandle", &params, &result,
@@ -3415,6 +3417,57 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
     std::ostringstream args_str;
     ur::extras::printFunctionParams(
         args_str, UR_FUNCTION_KERNEL_CREATE_WITH_NATIVE_HANDLE, &params);
+    context.logger.info("({}) -> {};\n", args_str.str(), result);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urKernelGetSuggestedLocalWorkSize
+__urdlllocal ur_result_t UR_APICALL urKernelGetSuggestedLocalWorkSize(
+    ur_kernel_handle_t hKernel, ///< [in] handle of the kernel
+    ur_queue_handle_t hQueue,   ///< [in] handle of the queue object
+    uint32_t
+        numWorkDim, ///< [in] number of dimensions, from 1 to 3, to specify the global
+                    ///< and work-group work-items
+    const size_t *
+        pGlobalWorkOffset, ///< [in] pointer to an array of numWorkDim unsigned values that specify
+    ///< the offset used to calculate the global ID of a work-item
+    const size_t *
+        pGlobalWorkSize, ///< [in] pointer to an array of numWorkDim unsigned values that specify
+    ///< the number of global work-items in workDim that will execute the
+    ///< kernel function
+    size_t *
+        pSuggestedLocalWorkSize ///< [out] pointer to an array of numWorkDim unsigned values that specify
+    ///< suggested local work size that will contain the result of the query
+) {
+    auto pfnGetSuggestedLocalWorkSize =
+        context.urDdiTable.Kernel.pfnGetSuggestedLocalWorkSize;
+
+    if (nullptr == pfnGetSuggestedLocalWorkSize) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    ur_kernel_get_suggested_local_work_size_params_t params = {
+        &hKernel,           &hQueue,          &numWorkDim,
+        &pGlobalWorkOffset, &pGlobalWorkSize, &pSuggestedLocalWorkSize};
+    uint64_t instance =
+        context.notify_begin(UR_FUNCTION_KERNEL_GET_SUGGESTED_LOCAL_WORK_SIZE,
+                             "urKernelGetSuggestedLocalWorkSize", &params);
+
+    context.logger.info("---> urKernelGetSuggestedLocalWorkSize");
+
+    ur_result_t result = pfnGetSuggestedLocalWorkSize(
+        hKernel, hQueue, numWorkDim, pGlobalWorkOffset, pGlobalWorkSize,
+        pSuggestedLocalWorkSize);
+
+    context.notify_end(UR_FUNCTION_KERNEL_GET_SUGGESTED_LOCAL_WORK_SIZE,
+                       "urKernelGetSuggestedLocalWorkSize", &params, &result,
+                       instance);
+
+    std::ostringstream args_str;
+    ur::extras::printFunctionParams(
+        args_str, UR_FUNCTION_KERNEL_GET_SUGGESTED_LOCAL_WORK_SIZE, &params);
     context.logger.info("({}) -> {};\n", args_str.str(), result);
 
     return result;
@@ -8347,6 +8400,11 @@ __urdlllocal ur_result_t UR_APICALL urGetKernelProcAddrTable(
     dditable.pfnCreateWithNativeHandle = pDdiTable->pfnCreateWithNativeHandle;
     pDdiTable->pfnCreateWithNativeHandle =
         ur_tracing_layer::urKernelCreateWithNativeHandle;
+
+    dditable.pfnGetSuggestedLocalWorkSize =
+        pDdiTable->pfnGetSuggestedLocalWorkSize;
+    pDdiTable->pfnGetSuggestedLocalWorkSize =
+        ur_tracing_layer::urKernelGetSuggestedLocalWorkSize;
 
     dditable.pfnSetArgValue = pDdiTable->pfnSetArgValue;
     pDdiTable->pfnSetArgValue = ur_tracing_layer::urKernelSetArgValue;

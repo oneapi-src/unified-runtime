@@ -22,7 +22,6 @@ ur_event_factory_t ur_event_factory;
 ur_program_factory_t ur_program_factory;
 ur_kernel_factory_t ur_kernel_factory;
 ur_queue_factory_t ur_queue_factory;
-ur_native_factory_t ur_native_factory;
 ur_sampler_factory_t ur_sampler_factory;
 ur_mem_factory_t ur_mem_factory;
 ur_physical_mem_factory_t ur_physical_mem_factory;
@@ -364,6 +363,8 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetNativeHandle(
 __urdlllocal ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
     ur_native_handle_t
         hNativePlatform, ///< [in][nocheck] the native handle of the platform.
+    ur_adapter_handle_t
+        hAdapter, ///< [in] handle of the adapter associated with the native backend.
     const ur_platform_native_properties_t *
         pProperties, ///< [in][optional] pointer to native platform properties struct.
     ur_platform_handle_t *
@@ -372,8 +373,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
     ur_result_t result = UR_RESULT_SUCCESS;
 
     // extract platform's function pointer table
-    auto dditable =
-        reinterpret_cast<ur_native_object_t *>(hNativePlatform)->dditable;
+    auto dditable = reinterpret_cast<ur_adapter_object_t *>(hAdapter)->dditable;
     auto pfnCreateWithNativeHandle =
         dditable->ur.Platform.pfnCreateWithNativeHandle;
     if (nullptr == pfnCreateWithNativeHandle) {
@@ -381,12 +381,11 @@ __urdlllocal ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
     }
 
     // convert loader handle to platform handle
-    hNativePlatform =
-        reinterpret_cast<ur_native_object_t *>(hNativePlatform)->handle;
+    hAdapter = reinterpret_cast<ur_adapter_object_t *>(hAdapter)->handle;
 
     // forward to device-platform
-    result =
-        pfnCreateWithNativeHandle(hNativePlatform, pProperties, phPlatform);
+    result = pfnCreateWithNativeHandle(hNativePlatform, hAdapter, pProperties,
+                                       phPlatform);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -3445,6 +3444,49 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
     } catch (std::bad_alloc &) {
         result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
     }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urKernelGetSuggestedLocalWorkSize
+__urdlllocal ur_result_t UR_APICALL urKernelGetSuggestedLocalWorkSize(
+    ur_kernel_handle_t hKernel, ///< [in] handle of the kernel
+    ur_queue_handle_t hQueue,   ///< [in] handle of the queue object
+    uint32_t
+        numWorkDim, ///< [in] number of dimensions, from 1 to 3, to specify the global
+                    ///< and work-group work-items
+    const size_t *
+        pGlobalWorkOffset, ///< [in] pointer to an array of numWorkDim unsigned values that specify
+    ///< the offset used to calculate the global ID of a work-item
+    const size_t *
+        pGlobalWorkSize, ///< [in] pointer to an array of numWorkDim unsigned values that specify
+    ///< the number of global work-items in workDim that will execute the
+    ///< kernel function
+    size_t *
+        pSuggestedLocalWorkSize ///< [out] pointer to an array of numWorkDim unsigned values that specify
+    ///< suggested local work size that will contain the result of the query
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // extract platform's function pointer table
+    auto dditable = reinterpret_cast<ur_kernel_object_t *>(hKernel)->dditable;
+    auto pfnGetSuggestedLocalWorkSize =
+        dditable->ur.Kernel.pfnGetSuggestedLocalWorkSize;
+    if (nullptr == pfnGetSuggestedLocalWorkSize) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    hKernel = reinterpret_cast<ur_kernel_object_t *>(hKernel)->handle;
+
+    // convert loader handle to platform handle
+    hQueue = reinterpret_cast<ur_queue_object_t *>(hQueue)->handle;
+
+    // forward to device-platform
+    result = pfnGetSuggestedLocalWorkSize(hKernel, hQueue, numWorkDim,
+                                          pGlobalWorkOffset, pGlobalWorkSize,
+                                          pSuggestedLocalWorkSize);
 
     return result;
 }
@@ -8599,6 +8641,8 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetKernelProcAddrTable(
             pDdiTable->pfnGetNativeHandle = ur_loader::urKernelGetNativeHandle;
             pDdiTable->pfnCreateWithNativeHandle =
                 ur_loader::urKernelCreateWithNativeHandle;
+            pDdiTable->pfnGetSuggestedLocalWorkSize =
+                ur_loader::urKernelGetSuggestedLocalWorkSize;
             pDdiTable->pfnSetArgValue = ur_loader::urKernelSetArgValue;
             pDdiTable->pfnSetArgLocal = ur_loader::urKernelSetArgLocal;
             pDdiTable->pfnSetArgPointer = ur_loader::urKernelSetArgPointer;
