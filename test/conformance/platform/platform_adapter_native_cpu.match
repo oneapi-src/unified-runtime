@@ -1,4 +1,3 @@
-urPlatformCreateWithNativeHandleTest.InvalidNullPointerPlatform
 urPlatfromGetBackendOptionTest.InvalidValueFrontendOption
 urPlatfromGetBackendOptionTestWithParam.Success/_O0
 urPlatfromGetBackendOptionTestWithParam.Success/_O1
