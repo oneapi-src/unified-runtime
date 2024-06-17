@@ -629,6 +629,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
     launch_config.attrs = &launch_attribute[0];
     launch_config.numAttrs = numPropsInLaunchPropList;
 
+    UR_CHECK_ERROR(cuFuncSetAttribute(
+        CuFunc, cudaFuncAttributeNonPortableClusterSizeAllowed, 1));
+
     UR_CHECK_ERROR(cuLaunchKernelEx(&launch_config, CuFunc,
                                     const_cast<void **>(ArgIndices.data()),
                                     nullptr));
