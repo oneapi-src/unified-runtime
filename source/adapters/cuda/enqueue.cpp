@@ -543,12 +543,21 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
 
       launch_attribute[i].id = CU_LAUNCH_ATTRIBUTE_CLUSTER_DIMENSION;
       // Note that cuda orders from right to left wrt SYCL dimensional order.
-      launch_attribute[i].value.clusterDim.x =
-          launchPropList[i].value.clusterDim[2];
-      launch_attribute[i].value.clusterDim.y =
-          launchPropList[i].value.clusterDim[1];
-      launch_attribute[i].value.clusterDim.z =
-          launchPropList[i].value.clusterDim[0];
+      if (workDim == 3) {
+        launch_attribute[i].value.clusterDim.x =
+            launchPropList[i].value.clusterDim[2];
+        launch_attribute[i].value.clusterDim.y =
+            launchPropList[i].value.clusterDim[1];
+        launch_attribute[i].value.clusterDim.z =
+            launchPropList[i].value.clusterDim[0];
+      } else if (WorkDim == 2) {
+        launch_attribute[i].value.clusterDim.x =
+            launchPropList[i].value.clusterDim[0];
+        launch_attribute[i].value.clusterDim.y =
+            launchPropList[i].value.clusterDim[1];
+        launch_attribute[i].value.clusterDim.z =
+            launchPropList[i].value.clusterDim[2];
+      }
       break;
     }
     case UR_EXP_LAUNCH_PROPERTY_ID_COOPERATIVE: {
