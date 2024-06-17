@@ -104,6 +104,9 @@ ur_result_t
 urLoaderConfigSetCodeLocationCallback(ur_loader_config_handle_t hLoaderConfig,
                                       ur_code_location_callback_t pfnCodeloc,
                                       void *pUserData);
+ur_result_t
+urLoaderConfigSetLoggerCallback(ur_logger_output_callback_t pfnLoggerCallback,
+                                void *pUserData);
 
 ur_result_t urDeviceGetSelected(ur_platform_handle_t hPlatform,
                                 ur_device_type_t DeviceType,

@@ -7,10 +7,12 @@
 #define UR_SINKS_HPP 1
 
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <mutex>
 #include <sstream>
 
+#include "ur_api.h"
 #include "ur_filesystem_resolved.hpp"
 #include "ur_level.hpp"
 #include "ur_print.hpp"
@@ -195,6 +197,37 @@ class FileSink : public Sink {
     std::ofstream ofstream;
 };
 
+class CallbackSink : public Sink {
+  public:
+    CallbackSink(std::string logger_name, bool skip_prefix = false,
+                 bool skip_linebreak = false)
+        : Sink(std::move(logger_name), skip_prefix, skip_linebreak) {}
+
+    CallbackSink(std::string logger_name, Level flush_lvl, bool skip_prefix,
+                 bool skip_linebreak)
+        : CallbackSink(std::move(logger_name), skip_prefix, skip_linebreak) {
+        this->flush_level = flush_lvl;
+    }
+
+    ~CallbackSink() = default;
+
+    void setCallback(ur_logger_output_callback_t cb, void *pUserData) {
+        callback = cb;
+        userData = pUserData;
+    }
+
+  private:
+    ur_logger_output_callback_t callback;
+    void* userData;
+
+    virtual void print([[maybe_unused]] logger::Level level,
+                       const std::string &msg) {
+        if (level >= flush_level) {
+            callback(msg.c_str(), userData);
+        }
+    }
+};
+
 inline std::unique_ptr<Sink> sink_from_str(std::string logger_name,
                                            std::string name,
                                            filesystem::path file_path = "",
@@ -209,6 +242,9 @@ inline std::unique_ptr<Sink> sink_from_str(std::string logger_name,
     } else if (name == "file" && !file_path.empty()) {
         return std::make_unique<logger::FileSink>(logger_name, file_path,
                                                   skip_prefix, skip_linebreak);
+    } else if (name == "callback" && !file_path.empty()) {
+        return std::make_unique<logger::CallbackSink>(logger_name, skip_prefix,
+                                                      skip_linebreak);
     }
 
     throw std::invalid_argument(

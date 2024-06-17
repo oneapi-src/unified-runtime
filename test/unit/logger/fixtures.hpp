@@ -96,4 +96,15 @@ class DefaultLoggerWithFileSink : public UniquePtrLoggerWithFilesink {
     }
 };
 
+class LoggerWithCallbackSink : public LoggerCommonSetup {
+  protected:
+    std::unique_ptr<logger::Logger> logger;
+
+    void SetUp() override {
+        logger = std::make_unique<logger::Logger>(
+            logger::Level::WARN,
+            std::make_unique<logger::CallbackSink>(logger_name));
+    }
+};
+
 #endif // UR_UNIT_LOGGER_TEST_FIXTURES_HPP

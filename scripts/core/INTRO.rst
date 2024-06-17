@@ -202,12 +202,12 @@ By default, no messages are printed.
 
 By default, there is a guarantee that *error* messages are flushed immediately. One can change this behavior to flush on lower-level messages.
 
-Loggers redirect messages to *stdout*, *stderr*, or a file (default: *stderr*).
+Loggers redirect messages to *stdout*, *stderr*, a file or a user configurable callback function (default: *stderr*).
 
 All of these logging options can be set with **UR_LOG_LOADER** and **UR_LOG_NULL** environment variables described in the **Environment Variables** section below.
 Both of these environment variables have the same syntax for setting logger options:
 
-  "[level:debug|info|warning|error];[flush:<debug|info|warning|error>];[output:stdout|stderr|file,<path>]"
+  "[level:debug|info|warning|error];[flush:<debug|info|warning|error>];[output:stdout|stderr|file,<path>|callback]"
 
   * level - a log level, meaning that only messages from this level and above are printed,
             possible values, from the lowest level to the highest one: *debug*, *info*, *warning*, *error*,

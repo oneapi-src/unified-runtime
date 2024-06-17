@@ -141,6 +141,7 @@
 		urLoaderConfigRelease;
 		urLoaderConfigRetain;
 		urLoaderConfigSetCodeLocationCallback;
+		urLoaderConfigSetLoggerCallback;
 		urLoaderInit;
 		urLoaderTearDown;
 		urMemBufferCreate;
@@ -355,6 +356,7 @@
 		urPrintLoaderConfigReleaseParams;
 		urPrintLoaderConfigRetainParams;
 		urPrintLoaderConfigSetCodeLocationCallbackParams;
+		urPrintLoaderConfigSetLoggerCallbackParams;
 		urPrintLoaderInitParams;
 		urPrintLoaderTearDownParams;
 		urPrintMapFlags;

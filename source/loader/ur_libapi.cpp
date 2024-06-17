@@ -253,6 +253,29 @@ ur_result_t UR_APICALL urLoaderTearDown(void) try {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Set a callback function for use by the logger to retrieve logging
+///        output.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pfnLoggerCallback`
+ur_result_t UR_APICALL urLoaderConfigSetLoggerCallback(
+    ur_logger_output_callback_t
+        pfnLoggerCallback, ///< [in] Function pointer to callback from the logger.
+    void *
+        pUserData ///< [in][out][optional] pointer to data to be passed to callback
+    ) try {
+    return ur_lib::urLoaderConfigSetLoggerCallback(pfnLoggerCallback,
+                                                   pUserData);
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Retrieves all available adapters
 ///
 /// @details

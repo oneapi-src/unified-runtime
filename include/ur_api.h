@@ -225,6 +225,7 @@ typedef enum ur_function_t {
     UR_FUNCTION_ENQUEUE_TIMESTAMP_RECORDING_EXP = 223,                         ///< Enumerator for ::urEnqueueTimestampRecordingExp
     UR_FUNCTION_ENQUEUE_KERNEL_LAUNCH_CUSTOM_EXP = 224,                        ///< Enumerator for ::urEnqueueKernelLaunchCustomExp
     UR_FUNCTION_KERNEL_GET_SUGGESTED_LOCAL_WORK_SIZE = 225,                    ///< Enumerator for ::urKernelGetSuggestedLocalWorkSize
+    UR_FUNCTION_LOADER_CONFIG_SET_LOGGER_CALLBACK = 226,                       ///< Enumerator for ::urLoaderConfigSetLoggerCallback
     /// @cond
     UR_FUNCTION_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -783,6 +784,30 @@ urLoaderInit(
 UR_APIEXPORT ur_result_t UR_APICALL
 urLoaderTearDown(
     void);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Callback function to retrieve output from the logger.
+typedef void (*ur_logger_output_callback_t)(
+    const char *pLoggerMsg, ///< [in][out] pointer to data to be passed to callback
+    void *pUserData         ///< [in][out] pointer to data to be passed to callback
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Set a callback function for use by the logger to retrieve logging
+///        output.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pfnLoggerCallback`
+UR_APIEXPORT ur_result_t UR_APICALL
+urLoaderConfigSetLoggerCallback(
+    ur_logger_output_callback_t pfnLoggerCallback, ///< [in] Function pointer to callback from the logger.
+    void *pUserData                                ///< [in][out][optional] pointer to data to be passed to callback
+);
 
 #if !defined(__GNUC__)
 #pragma endregion
@@ -9518,6 +9543,15 @@ typedef struct ur_loader_config_set_code_location_callback_params_t {
     ur_code_location_callback_t *ppfnCodeloc;
     void **ppUserData;
 } ur_loader_config_set_code_location_callback_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urLoaderConfigSetLoggerCallback
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_loader_config_set_logger_callback_params_t {
+    ur_logger_output_callback_t *ppfnLoggerCallback;
+    void **ppUserData;
+} ur_loader_config_set_logger_callback_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urPlatformGet
