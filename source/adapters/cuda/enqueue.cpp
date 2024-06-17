@@ -550,7 +550,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
             launchPropList[i].value.clusterDim[1];
         launch_attribute[i].value.clusterDim.z =
             launchPropList[i].value.clusterDim[0];
-      } else if (WorkDim == 2) {
+      } else if (workDim == 2) {
         launch_attribute[i].value.clusterDim.x =
             launchPropList[i].value.clusterDim[1];
         launch_attribute[i].value.clusterDim.y =
@@ -650,7 +650,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
 
     if (has_property_cluster_launch) {
       UR_CHECK_ERROR(cuFuncSetAttribute(
-          CuFunc, cudaFuncAttributeNonPortableClusterSizeAllowed, 1));
+          CuFunc, CU_FUNC_ATTRIBUTE_NON_PORTABLE_CLUSTER_SIZE_ALLOWED, 1));
     }
 
     UR_CHECK_ERROR(cuLaunchKernelEx(&launch_config, CuFunc,
