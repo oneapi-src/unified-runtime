@@ -872,8 +872,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventRetain(
 UR_APIEXPORT ur_result_t UR_APICALL urEventRelease(
     ur_event_handle_t Event ///< [in] handle of the event object
 ) {
-  Event->RefCountExternal--;
-  if (Event->CounterBasedEventsEnabled && Event->RefCountExternal == 0) {
+  if (Event->CounterBasedEventsEnabled && --Event->RefCountExternal == 0) {
     Event->Context->addEventToContextCache(Event);
   } else {
     UR_CALL(urEventReleaseInternal(Event));
