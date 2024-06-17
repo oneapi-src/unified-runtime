@@ -530,7 +530,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
   }
 
   std::vector<CUlaunchAttribute> launch_attribute(numPropsInLaunchPropList);
+  bool has_property_cluster_launch = false;
+
   for (uint32_t i = 0; i < numPropsInLaunchPropList; i++) {
+    has_property_cluster_launch = true;
+
     switch (launchPropList[i].id) {
     case UR_EXP_LAUNCH_PROPERTY_ID_IGNORE: {
       launch_attribute[i].id = CU_LAUNCH_ATTRIBUTE_IGNORE;
@@ -629,8 +633,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
     launch_config.attrs = &launch_attribute[0];
     launch_config.numAttrs = numPropsInLaunchPropList;
 
-    UR_CHECK_ERROR(cuFuncSetAttribute(
-        CuFunc, cudaFuncAttributeNonPortableClusterSizeAllowed, 1));
+    if (has_property_cluster_launch) {
+      UR_CHECK_ERROR(cuFuncSetAttribute(
+          CuFunc, cudaFuncAttributeNonPortableClusterSizeAllowed, 1));
+    }
 
     UR_CHECK_ERROR(cuLaunchKernelEx(&launch_config, CuFunc,
                                     const_cast<void **>(ArgIndices.data()),
