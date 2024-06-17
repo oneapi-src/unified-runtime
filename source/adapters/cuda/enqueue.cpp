@@ -530,7 +530,20 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
   }
 
   std::vector<CUlaunchAttribute> launch_attribute(numPropsInLaunchPropList);
-  bool has_property_cluster_launch = false;
+
+  // Early exit for zero size kernel
+  if (*pGlobalWorkSize == 0) {
+    return urEnqueueEventsWaitWithBarrier(hQueue, numEventsInWaitList,
+                                          phEventWaitList, phEvent);
+  }
+
+  // Set the number of threads per block to the number of threads per warp
+  // by default unless user has provided a better number
+  size_t ThreadsPerBlock[3] = {32u, 1u, 1u};
+  size_t BlocksPerGrid[3] = {1u, 1u, 1u};
+
+  uint32_t LocalSize = hKernel->getLocalSize();
+  CUfunction CuFunc = hKernel->get();
 
   for (uint32_t i = 0; i < numPropsInLaunchPropList; i++) {
     switch (launchPropList[i].id) {
@@ -539,7 +552,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
       break;
     }
     case UR_EXP_LAUNCH_PROPERTY_ID_CLUSTER_DIMENSION: {
-      has_property_cluster_launch = true;
+      UR_CHECK_ERROR(cuFuncSetAttribute(
+          CuFunc, CU_FUNC_ATTRIBUTE_NON_PORTABLE_CLUSTER_SIZE_ALLOWED, 1));
 
       launch_attribute[i].id = CU_LAUNCH_ATTRIBUTE_CLUSTER_DIMENSION;
       // Note that cuda orders from right to left wrt SYCL dimensional order.
@@ -578,20 +592,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
     }
     }
   }
-
-  // Early exit for zero size kernel
-  if (*pGlobalWorkSize == 0) {
-    return urEnqueueEventsWaitWithBarrier(hQueue, numEventsInWaitList,
-                                          phEventWaitList, phEvent);
-  }
-
-  // Set the number of threads per block to the number of threads per warp
-  // by default unless user has provided a better number
-  size_t ThreadsPerBlock[3] = {32u, 1u, 1u};
-  size_t BlocksPerGrid[3] = {1u, 1u, 1u};
-
-  uint32_t LocalSize = hKernel->getLocalSize();
-  CUfunction CuFunc = hKernel->get();
 
   // This might return UR_RESULT_ERROR_ADAPTER_SPECIFIC, which cannot be handled
   // using the standard UR_CHECK_ERROR
@@ -647,11 +647,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
     launch_config.hStream = CuStream;
     launch_config.attrs = &launch_attribute[0];
     launch_config.numAttrs = numPropsInLaunchPropList;
-
-    if (has_property_cluster_launch) {
-      UR_CHECK_ERROR(cuFuncSetAttribute(
-          CuFunc, CU_FUNC_ATTRIBUTE_NON_PORTABLE_CLUSTER_SIZE_ALLOWED, 1));
-    }
 
     UR_CHECK_ERROR(cuLaunchKernelEx(&launch_config, CuFunc,
                                     const_cast<void **>(ArgIndices.data()),
