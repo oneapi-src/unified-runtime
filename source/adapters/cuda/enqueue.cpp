@@ -552,6 +552,13 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
             launchPropList[i].value.clusterDim[0];
       } else if (WorkDim == 2) {
         launch_attribute[i].value.clusterDim.x =
+            launchPropList[i].value.clusterDim[1];
+        launch_attribute[i].value.clusterDim.y =
+            launchPropList[i].value.clusterDim[0];
+        launch_attribute[i].value.clusterDim.z =
+            launchPropList[i].value.clusterDim[2];
+      } else {
+        launch_attribute[i].value.clusterDim.x =
             launchPropList[i].value.clusterDim[0];
         launch_attribute[i].value.clusterDim.y =
             launchPropList[i].value.clusterDim[1];
