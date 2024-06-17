@@ -533,14 +533,13 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
   bool has_property_cluster_launch = false;
 
   for (uint32_t i = 0; i < numPropsInLaunchPropList; i++) {
-    has_property_cluster_launch = true;
-
     switch (launchPropList[i].id) {
     case UR_EXP_LAUNCH_PROPERTY_ID_IGNORE: {
       launch_attribute[i].id = CU_LAUNCH_ATTRIBUTE_IGNORE;
       break;
     }
     case UR_EXP_LAUNCH_PROPERTY_ID_CLUSTER_DIMENSION: {
+      has_property_cluster_launch = true;
 
       launch_attribute[i].id = CU_LAUNCH_ATTRIBUTE_CLUSTER_DIMENSION;
       // Note that cuda orders from right to left wrt SYCL dimensional order.
