@@ -68,9 +68,9 @@ TEST(Mock, DefaultBehavior) {
     ASSERT_NE(platform, nullptr);
     ASSERT_NE(device, nullptr);
 
-    ASSERT_NE(static_cast<void*>(adapter), static_cast<void*>(platform));
-    ASSERT_NE(static_cast<void*>(adapter), static_cast<void*>(device));
-    ASSERT_NE(static_cast<void*>(platform), static_cast<void*>(device));
+    ASSERT_NE(static_cast<void *>(adapter), static_cast<void *>(platform));
+    ASSERT_NE(static_cast<void *>(adapter), static_cast<void *>(device));
+    ASSERT_NE(static_cast<void *>(platform), static_cast<void *>(device));
 
     ASSERT_EQ(urDeviceRelease(device), UR_RESULT_SUCCESS);
 }

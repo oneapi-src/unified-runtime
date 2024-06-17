@@ -778,7 +778,7 @@ typedef struct ur_mock_callback_properties_t {
 ///
 /// @details
 ///     - The callback layer will pass the function's parameter struct (e.g.
-///       **::ur_adapter_get_params_t**) to the ::ur_function_callback_t so
+///       **::ur_adapter_get_params_t**) to the ::ur_mock_callback_t so
 ///       parameters can be accessed and modified.
 ///
 /// @returns

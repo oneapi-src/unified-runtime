@@ -227,7 +227,7 @@ members:
 type: function
 desc: "Set a callback to be called before, after or instead of a given entry point"
 details:
-    - "The callback layer will pass the function's parameter struct (e.g. **$x_adapter_get_params_t**) to the $x_function_callback_t so parameters can be accessed and modified."
+    - "The callback layer will pass the function's parameter struct (e.g. **$x_adapter_get_params_t**) to the $x_mock_callback_t so parameters can be accessed and modified."
 class: $xLoaderConfig
 loader_only: True
 name: "SetMockCallbacks"
