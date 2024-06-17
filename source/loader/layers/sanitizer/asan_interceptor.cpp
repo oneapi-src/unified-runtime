@@ -810,16 +810,26 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
             return URes;
         };
 
+        auto LocalMemoryUsage =
+            GetKernelLocalMemorySize(Kernel, DeviceInfo->Handle);
+        auto PrivateMemoryUsage =
+            GetKernelPrivateMemorySize(Kernel, DeviceInfo->Handle);
+
+        context.logger.info("Kernel {} (LocalMemory={}, PrivateMemory={})",
+                            (void *)Kernel, LocalMemoryUsage,
+                            PrivateMemoryUsage);
+
         // Write shadow memory offset for local memory
         if (cl_DetectLocals) {
             // CPU needn't this
             if (DeviceInfo->Type == DeviceType::GPU_PVC) {
-                size_t LocalMemorySize = GetLocalMemorySize(DeviceInfo->Handle);
+                size_t LocalMemorySize =
+                    GetDeviceLocalMemorySize(DeviceInfo->Handle);
                 size_t LocalShadowMemorySize =
                     (NumWG * LocalMemorySize) >> ASAN_SHADOW_SCALE;
 
                 context.logger.debug(
-                    "LocalMemoryInfo(WorkGroup={}, LocalMemorySize={}, "
+                    "LocalMemory(WorkGroup={}, LocalMemorySize={}, "
                     "LocalShadowMemorySize={})",
                     NumWG, LocalMemorySize, LocalShadowMemorySize);
 
@@ -845,7 +855,7 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
                 size_t PrivateShadowMemorySize =
                     (NumWG * ASAN_PRIVATE_SIZE) >> ASAN_SHADOW_SCALE;
 
-                context.logger.debug("PrivateMemoryInfo(WorkGroup={}, "
+                context.logger.debug("PrivateMemory(WorkGroup={}, "
                                      "PrivateShadowMemorySize={})",
                                      NumWG, PrivateShadowMemorySize);
 

@@ -81,7 +81,7 @@ ur_program_handle_t GetProgram(ur_kernel_handle_t Kernel) {
     return Program;
 }
 
-size_t GetLocalMemorySize(ur_device_handle_t Device) {
+size_t GetDeviceLocalMemorySize(ur_device_handle_t Device) {
     size_t LocalMemorySize{};
     [[maybe_unused]] auto Result = context.urDdiTable.Device.pfnGetInfo(
         Device, UR_DEVICE_INFO_LOCAL_MEM_SIZE, sizeof(LocalMemorySize),
@@ -155,6 +155,26 @@ size_t GetKernelNumArgs(ur_kernel_handle_t Kernel) {
         Kernel, UR_KERNEL_INFO_NUM_ARGS, sizeof(NumArgs), &NumArgs, nullptr);
     assert(Res == UR_RESULT_SUCCESS);
     return NumArgs;
+}
+
+size_t GetKernelLocalMemorySize(ur_kernel_handle_t Kernel,
+                                ur_device_handle_t Device) {
+    size_t Size = 0;
+    [[maybe_unused]] auto Res = context.urDdiTable.Kernel.pfnGetGroupInfo(
+        Kernel, Device, UR_KERNEL_GROUP_INFO_LOCAL_MEM_SIZE, sizeof(size_t),
+        &Size, nullptr);
+    assert(Res == UR_RESULT_SUCCESS);
+    return Size;
+}
+
+size_t GetKernelPrivateMemorySize(ur_kernel_handle_t Kernel,
+                                  ur_device_handle_t Device) {
+    size_t Size = 0;
+    [[maybe_unused]] auto Res = context.urDdiTable.Kernel.pfnGetGroupInfo(
+        Kernel, Device, UR_KERNEL_GROUP_INFO_PRIVATE_MEM_SIZE, sizeof(size_t),
+        &Size, nullptr);
+    assert(Res == UR_RESULT_SUCCESS);
+    return Size;
 }
 
 size_t GetVirtualMemGranularity(ur_context_handle_t Context,
