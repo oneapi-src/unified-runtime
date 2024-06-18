@@ -222,7 +222,7 @@ urLoaderConfigSetLoggerCallback(ur_logger_output_callback_t pfnLoggerCallback,
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
 
-    logger::get_logger().setCallbackSinkFunction(pfnLoggerCallback, pUserData);
+    logger::get_logger().setSinkCallback(pfnLoggerCallback, pUserData);
 
     return UR_RESULT_SUCCESS;
 }

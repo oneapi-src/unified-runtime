@@ -216,7 +216,7 @@ void printLoggerMessages(const char *msg, [[maybe_unused]] void *userData) {
 
 TEST_F(LoggerWithCallbackSink, PrintLoggerWithCallback) {
     // Pass a callback function to the logger which will receive any messages sent to the logger
-    logger->setCallbackSinkFunction(printLoggerMessages, nullptr);
+    logger->setSinkCallback(printLoggerMessages, nullptr);
 
     logger->error("Test message: {}", "success");
 }
