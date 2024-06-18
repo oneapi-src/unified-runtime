@@ -218,7 +218,7 @@ class CallbackSink : public Sink {
 
   private:
     ur_logger_output_callback_t callback;
-    void* userData;
+    void *userData;
 
     virtual void print([[maybe_unused]] logger::Level level,
                        const std::string &msg) {

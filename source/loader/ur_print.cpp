@@ -1079,6 +1079,14 @@ urPrintAdapterGetInfoParams(const struct ur_adapter_get_info_params_t *params,
     return str_copy(&ss, buffer, buff_size, out_size);
 }
 
+ur_result_t urPrintSetLoggerCallbackParams(
+    const struct ur_set_logger_callback_params_t *params, char *buffer,
+    const size_t buff_size, size_t *out_size) {
+    std::stringstream ss;
+    ss << params;
+    return str_copy(&ss, buffer, buff_size, out_size);
+}
+
 ur_result_t urPrintBindlessImagesUnsampledImageHandleDestroyExpParams(
     const struct ur_bindless_images_unsampled_image_handle_destroy_exp_params_t
         *params,
@@ -1954,14 +1962,6 @@ ur_result_t urPrintLoaderConfigEnableLayerParams(
 
 ur_result_t urPrintLoaderConfigSetCodeLocationCallbackParams(
     const struct ur_loader_config_set_code_location_callback_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size) {
-    std::stringstream ss;
-    ss << params;
-    return str_copy(&ss, buffer, buff_size, out_size);
-}
-
-ur_result_t urPrintLoaderConfigSetLoggerCallbackParams(
-    const struct ur_loader_config_set_logger_callback_params_t *params,
     char *buffer, const size_t buff_size, size_t *out_size) {
     std::stringstream ss;
     ss << params;

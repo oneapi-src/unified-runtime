@@ -230,27 +230,6 @@ ur_result_t UR_APICALL urLoaderTearDown(void) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Set a callback function for use by the logger to retrieve logging
-///        output.
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_UNINITIALIZED
-///     - ::UR_RESULT_ERROR_DEVICE_LOST
-///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///         + `NULL == pfnLoggerCallback`
-ur_result_t UR_APICALL urLoaderConfigSetLoggerCallback(
-    ur_logger_output_callback_t
-        pfnLoggerCallback, ///< [in] Function pointer to callback from the logger.
-    void *
-        pUserData ///< [in][out][optional] pointer to data to be passed to callback
-) {
-    ur_result_t result = UR_RESULT_SUCCESS;
-    return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Retrieves all available adapters
 ///
 /// @details
@@ -425,6 +404,30 @@ ur_result_t UR_APICALL urAdapterGetInfo(
     ///< returned and pPropValue is not used.
     size_t *
         pPropSizeRet ///< [out][optional] pointer to the actual number of bytes being queried by pPropValue.
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Set a callback function for use by the logger to retrieve logging
+///        output.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hAdapter`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pfnLoggerCallback`
+ur_result_t UR_APICALL urSetLoggerCallback(
+    ur_adapter_handle_t hAdapter, ///< [in] handle of the adapter
+    ur_logger_output_callback_t
+        pfnLoggerCallback, ///< [in] Function pointer to callback from the logger.
+    void *
+        pUserData ///< [in][out][optional] pointer to data to be passed to callback
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
     return result;

@@ -589,9 +589,9 @@ etors:
 - name: KERNEL_GET_SUGGESTED_LOCAL_WORK_SIZE
   desc: Enumerator for $xKernelGetSuggestedLocalWorkSize
   value: '225'
-- name: LOADER_CONFIG_SET_LOGGER_CALLBACK
-  desc: Enumerator for $xLoaderConfigSetLoggerCallback
-  value: '226'
+- name: SET_LOGGER_CALLBACK
+  desc: Enumerator for $xSetLoggerCallback
+  value: '227'
 ---
 type: enum
 desc: Defines structure types

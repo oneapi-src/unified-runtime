@@ -116,8 +116,7 @@ class Logger {
         this->sink = std::move(legacySink);
     }
 
-    void setSinkCallback(ur_logger_output_callback_t cb,
-                                 void *pUserData) {
+    void setSinkCallback(ur_logger_output_callback_t cb, void *pUserData) {
         logger::Sink *rawBasePtr = this->sink.release();
         logger::CallbackSink *derivedPtr =
             dynamic_cast<logger::CallbackSink *>(rawBasePtr);

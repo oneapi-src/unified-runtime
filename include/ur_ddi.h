@@ -1037,6 +1037,13 @@ typedef ur_result_t(UR_APICALL *ur_pfnAdapterGetInfo_t)(
     size_t *);
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for urSetLoggerCallback
+typedef ur_result_t(UR_APICALL *ur_pfnSetLoggerCallback_t)(
+    ur_adapter_handle_t,
+    ur_logger_output_callback_t,
+    void *);
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Table of Global functions pointers
 typedef struct ur_global_dditable_t {
     ur_pfnAdapterGet_t pfnAdapterGet;
@@ -1044,6 +1051,7 @@ typedef struct ur_global_dditable_t {
     ur_pfnAdapterRetain_t pfnAdapterRetain;
     ur_pfnAdapterGetLastError_t pfnAdapterGetLastError;
     ur_pfnAdapterGetInfo_t pfnAdapterGetInfo;
+    ur_pfnSetLoggerCallback_t pfnSetLoggerCallback;
 } ur_global_dditable_t;
 
 ///////////////////////////////////////////////////////////////////////////////

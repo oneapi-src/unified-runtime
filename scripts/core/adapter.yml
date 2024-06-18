@@ -200,3 +200,31 @@ etors:
     - name: NATIVE_CPU
       value: "5"
       desc: "The backend is Native CPU"
+--- #--------------------------------------------------------------------------
+type: fptr_typedef
+desc: "Callback function to retrieve output from the logger."
+name: $x_logger_output_callback_t
+return: "void"
+params:
+    - type: const char*
+      name: pLoggerMsg
+      desc: "[in][out] pointer to data to be passed to callback"
+    - type: void*
+      name: pUserData
+      desc: "[in][out] pointer to data to be passed to callback"
+--- #--------------------------------------------------------------------------
+type: function
+desc: "Set a callback function for use by the logger to retrieve logging output."
+class: $x
+name: SetLoggerCallback
+decl: static
+params:
+    - type: $x_adapter_handle_t
+      name: hAdapter
+      desc: "[in] handle of the adapter"
+    - type: $x_logger_output_callback_t
+      name: pfnLoggerCallback
+      desc: "[in] Function pointer to callback from the logger."
+    - type: void*
+      name: pUserData
+      desc: "[in][out][optional] pointer to data to be passed to callback"

@@ -192,6 +192,33 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGetInfo(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urSetLoggerCallback
+__urdlllocal ur_result_t UR_APICALL urSetLoggerCallback(
+    ur_adapter_handle_t hAdapter, ///< [in] handle of the adapter
+    ur_logger_output_callback_t
+        pfnLoggerCallback, ///< [in] Function pointer to callback from the logger.
+    void *
+        pUserData ///< [in][out][optional] pointer to data to be passed to callback
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // extract platform's function pointer table
+    auto dditable = reinterpret_cast<ur_adapter_object_t *>(hAdapter)->dditable;
+    auto pfnSetLoggerCallback = dditable->ur.Global.pfnSetLoggerCallback;
+    if (nullptr == pfnSetLoggerCallback) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    hAdapter = reinterpret_cast<ur_adapter_object_t *>(hAdapter)->handle;
+
+    // forward to device-platform
+    result = pfnSetLoggerCallback(hAdapter, pfnLoggerCallback, pUserData);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urPlatformGet
 __urdlllocal ur_result_t UR_APICALL urPlatformGet(
     ur_adapter_handle_t *
@@ -8135,6 +8162,7 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetGlobalProcAddrTable(
             pDdiTable->pfnAdapterGetLastError =
                 ur_loader::urAdapterGetLastError;
             pDdiTable->pfnAdapterGetInfo = ur_loader::urAdapterGetInfo;
+            pDdiTable->pfnSetLoggerCallback = ur_loader::urSetLoggerCallback;
         } else {
             // return pointers directly to platform's DDIs
             *pDdiTable =

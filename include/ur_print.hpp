@@ -932,8 +932,8 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_function_t value) {
     case UR_FUNCTION_KERNEL_GET_SUGGESTED_LOCAL_WORK_SIZE:
         os << "UR_FUNCTION_KERNEL_GET_SUGGESTED_LOCAL_WORK_SIZE";
         break;
-    case UR_FUNCTION_LOADER_CONFIG_SET_LOGGER_CALLBACK:
-        os << "UR_FUNCTION_LOADER_CONFIG_SET_LOGGER_CALLBACK";
+    case UR_FUNCTION_SET_LOGGER_CALLBACK:
+        os << "UR_FUNCTION_SET_LOGGER_CALLBACK";
         break;
     default:
         os << "unknown enumerator";
@@ -10105,26 +10105,6 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the ur_loader_config_set_logger_callback_params_t type
-/// @returns
-///     std::ostream &
-inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_loader_config_set_logger_callback_params_t *params) {
-
-    os << ".pfnLoggerCallback = ";
-
-    os << reinterpret_cast<void *>(
-        *(params->ppfnLoggerCallback));
-
-    os << ", ";
-    os << ".pUserData = ";
-
-    ur::details::printPtr(os,
-                          *(params->ppUserData));
-
-    return os;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Print operator for the ur_platform_get_params_t type
 /// @returns
 ///     std::ostream &
@@ -12592,6 +12572,32 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
 
     ur::details::printPtr(os,
                           *(params->ppPropSizeRet));
+
+    return os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_set_logger_callback_params_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_set_logger_callback_params_t *params) {
+
+    os << ".hAdapter = ";
+
+    ur::details::printPtr(os,
+                          *(params->phAdapter));
+
+    os << ", ";
+    os << ".pfnLoggerCallback = ";
+
+    os << reinterpret_cast<void *>(
+        *(params->ppfnLoggerCallback));
+
+    os << ", ";
+    os << ".pUserData = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppUserData));
 
     return os;
 }
@@ -17065,9 +17071,6 @@ inline ur_result_t UR_APICALL printFunctionParams(std::ostream &os, ur_function_
     case UR_FUNCTION_LOADER_CONFIG_SET_CODE_LOCATION_CALLBACK: {
         os << (const struct ur_loader_config_set_code_location_callback_params_t *)params;
     } break;
-    case UR_FUNCTION_LOADER_CONFIG_SET_LOGGER_CALLBACK: {
-        os << (const struct ur_loader_config_set_logger_callback_params_t *)params;
-    } break;
     case UR_FUNCTION_PLATFORM_GET: {
         os << (const struct ur_platform_get_params_t *)params;
     } break;
@@ -17328,6 +17331,9 @@ inline ur_result_t UR_APICALL printFunctionParams(std::ostream &os, ur_function_
     } break;
     case UR_FUNCTION_ADAPTER_GET_INFO: {
         os << (const struct ur_adapter_get_info_params_t *)params;
+    } break;
+    case UR_FUNCTION_SET_LOGGER_CALLBACK: {
+        os << (const struct ur_set_logger_callback_params_t *)params;
     } break;
     case UR_FUNCTION_ENQUEUE_KERNEL_LAUNCH: {
         os << (const struct ur_enqueue_kernel_launch_params_t *)params;

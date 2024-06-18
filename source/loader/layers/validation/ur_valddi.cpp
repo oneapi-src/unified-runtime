@@ -199,6 +199,42 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGetInfo(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urSetLoggerCallback
+__urdlllocal ur_result_t UR_APICALL urSetLoggerCallback(
+    ur_adapter_handle_t hAdapter, ///< [in] handle of the adapter
+    ur_logger_output_callback_t
+        pfnLoggerCallback, ///< [in] Function pointer to callback from the logger.
+    void *
+        pUserData ///< [in][out][optional] pointer to data to be passed to callback
+) {
+    auto pfnSetLoggerCallback = context.urDdiTable.Global.pfnSetLoggerCallback;
+
+    if (nullptr == pfnSetLoggerCallback) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    if (context.enableParameterValidation) {
+        if (NULL == hAdapter) {
+            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
+        }
+
+        if (NULL == pfnLoggerCallback) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+    }
+
+    if (context.enableLifetimeValidation &&
+        !refCountContext.isReferenceValid(hAdapter)) {
+        refCountContext.logInvalidReference(hAdapter);
+    }
+
+    ur_result_t result =
+        pfnSetLoggerCallback(hAdapter, pfnLoggerCallback, pUserData);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urPlatformGet
 __urdlllocal ur_result_t UR_APICALL urPlatformGet(
     ur_adapter_handle_t *
@@ -9521,6 +9557,9 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetGlobalProcAddrTable(
 
     dditable.pfnAdapterGetInfo = pDdiTable->pfnAdapterGetInfo;
     pDdiTable->pfnAdapterGetInfo = ur_validation_layer::urAdapterGetInfo;
+
+    dditable.pfnSetLoggerCallback = pDdiTable->pfnSetLoggerCallback;
+    pDdiTable->pfnSetLoggerCallback = ur_validation_layer::urSetLoggerCallback;
 
     return result;
 }
