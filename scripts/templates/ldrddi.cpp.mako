@@ -51,6 +51,12 @@ namespace ur_loader
         add_local = False
     %>
 
+        %if re.match(r"\w+SetLoggerCallback$", th.make_func_name(n, tags, obj)):
+ 
+        ur_loader::urSetLoggerCallback(${obj['params'][0]['name']}, ${obj['params'][1]['name']}, ${obj['params'][2]['name']});
+
+        %endif
+
         %if re.match(r"\w+AdapterGet$", th.make_func_name(n, tags, obj)):
         
         size_t adapterIndex = 0;

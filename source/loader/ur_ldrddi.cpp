@@ -202,6 +202,8 @@ __urdlllocal ur_result_t UR_APICALL urSetLoggerCallback(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    ur_loader::urSetLoggerCallback(hAdapter, pfnLoggerCallback, pUserData);
+
     // extract platform's function pointer table
     auto dditable = reinterpret_cast<ur_adapter_object_t *>(hAdapter)->dditable;
     auto pfnSetLoggerCallback = dditable->ur.Global.pfnSetLoggerCallback;

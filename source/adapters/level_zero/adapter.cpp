@@ -333,3 +333,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urAdapterGetInfo(ur_adapter_handle_t,
 
   return UR_RESULT_SUCCESS;
 }
+
+UR_APIEXPORT ur_result_t UR_APICALL urSetLoggerCallback(
+    ur_adapter_handle_t, ur_logger_output_callback_t pfnLoggerCallback,
+    void *pUserData) {
+
+  if (GlobalAdapter) {
+    GlobalAdapter->log.setSinkCallback(pfnLoggerCallback, pUserData);
+  }
+
+  return UR_RESULT_SUCCESS;
+}
