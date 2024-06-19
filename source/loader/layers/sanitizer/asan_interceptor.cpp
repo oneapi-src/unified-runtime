@@ -765,10 +765,6 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
         EnqueueWriteGlobal(kSPIR_DeviceType, &DeviceInfo->Type,
                            sizeof(DeviceInfo->Type));
 
-        if (DeviceInfo->Type == DeviceType::CPU) {
-            break;
-        }
-
         if (LaunchInfo.LocalWorkSize.empty()) {
             LaunchInfo.LocalWorkSize.resize(3);
             // FIXME: This is W/A until urKernelSuggestGroupSize is added
