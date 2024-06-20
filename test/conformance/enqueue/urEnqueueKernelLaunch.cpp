@@ -497,31 +497,42 @@ TEST_P(urEnqueueKernelLaunchUSMLinkedList, Success) {
     }
 
     // Build linked list with USM allocations
+    printf("alloc head\n");
     ASSERT_SUCCESS(urUSMSharedAlloc(context, device, nullptr, pool,
                                     sizeof(Node),
                                     reinterpret_cast<void **>(&list_head)));
+    printf("alloc head -> success (%p)\n", (void *)list_head);
     ASSERT_NE(list_head, nullptr);
     Node *list_cur = list_head;
     for (int i = 0; i < num_nodes; i++) {
+        printf("loop iter %d\n", i);
         list_cur->num = i * 2;
         if (i < num_nodes - 1) {
+            printf("alloc next\n");
             ASSERT_SUCCESS(
                 urUSMSharedAlloc(context, device, nullptr, pool, sizeof(Node),
                                  reinterpret_cast<void **>(&list_cur->next)));
+            printf("alloc next -> success (%p)\n", (void*)list_cur->next);
             ASSERT_NE(list_cur->next, nullptr);
         } else {
             list_cur->next = nullptr;
         }
+        printf("update next %p -> %p\n", (void *)list_cur, (void *)list_cur->next);
         list_cur = list_cur->next;
     }
+    printf("loop done\n");
 
     // Run kernel which will iterate the list and modify the values
+    printf("set arg\n");
     ASSERT_SUCCESS(urKernelSetArgPointer(kernel, 0, nullptr, &list_head));
+    printf("enqueue kernel\n");
     ASSERT_SUCCESS(urEnqueueKernelLaunch(queue, kernel, 1, &global_offset,
                                          &global_size, nullptr, 0, nullptr,
                                          nullptr));
+    printf("queue finish\n");
     ASSERT_SUCCESS(urQueueFinish(queue));
 
+    printf("verify\n");
     // Verify values
     list_cur = list_head;
     for (int i = 0; i < num_nodes; i++) {
