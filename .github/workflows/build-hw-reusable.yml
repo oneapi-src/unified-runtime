@@ -71,7 +71,7 @@ jobs:
     - name: Build
       # This is so that device binaries can find the sycl runtime library
       run: |
-        ${{ matrix.adapter.name == 'HIP' && 'ls /opt/rocm/amdgcn/bitcode' || '' }}
+        ${{ matrix.adapter.name == 'HIP' && 'ls /opt/rocm/**' || '' }}
         cmake --build ${{github.workspace}}/build -j $(nproc) -v
 
     - name: Test adapter specific
