@@ -81,7 +81,8 @@ struct LaunchInfo {
 
     DeviceSanitizerReport SanitizerReport[ASAN_MAX_NUM_REPORTS];
 };
-constexpr unsigned ASAN_SHADOW_SCALE = 3;
+
+constexpr unsigned ASAN_SHADOW_SCALE = 4;
 constexpr unsigned ASAN_SHADOW_GRANULARITY = 1ULL << ASAN_SHADOW_SCALE;
 
 // These magic values are written to shadow for better error
