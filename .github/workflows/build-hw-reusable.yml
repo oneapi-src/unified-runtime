@@ -70,7 +70,7 @@ jobs:
 
     - name: Build
       # This is so that device binaries can find the sycl runtime library
-      run: cmake --build ${{github.workspace}}/build -j $(nproc)
+      run: cmake -v --build ${{github.workspace}}/build -j $(nproc)
 
     - name: Test adapter specific
       working-directory: ${{github.workspace}}/build
