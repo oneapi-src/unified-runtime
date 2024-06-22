@@ -151,15 +151,27 @@ ur_result_t USMDeviceAllocImpl(void **ResultPtr, ur_context_handle_t hContext,
   return UR_RESULT_SUCCESS;
 }
 
-ur_result_t USMSharedAllocImpl(void **ResultPtr, ur_context_handle_t hContext,
-                               ur_device_handle_t Device,
+ur_result_t USMSharedAllocImpl(void **ResultPtr, ur_context_handle_t Context,
+                               ur_device_handle_t CommandDevice,
                                ur_usm_host_mem_flags_t,
                                ur_usm_device_mem_flags_t, size_t Size,
                                uint32_t Alignment) {
   try {
-    ScopedContext Active(Device);
+    ScopedContext Active(CommandDevice);
     UR_CHECK_ERROR(cuMemAllocManaged((CUdeviceptr *)ResultPtr, Size,
                                      CU_MEM_ATTACH_GLOBAL));
+    if (getAttribute(CommandDevice,
+                     CU_DEVICE_ATTRIBUTE_CONCURRENT_MANAGED_ACCESS)) {
+      UR_CHECK_ERROR(cuMemAdvise((CUdeviceptr)*ResultPtr, Size,
+                                 CU_MEM_ADVISE_SET_ACCESSED_BY,
+                                 CommandDevice->get()));
+    }
+    for (const auto &Dev : Context->getDevices()) {
+      if (getAttribute(Dev, CU_DEVICE_ATTRIBUTE_CONCURRENT_MANAGED_ACCESS)) {
+        UR_CHECK_ERROR(cuMemAdvise((CUdeviceptr)*ResultPtr, Size,
+                                   CU_MEM_ADVISE_SET_ACCESSED_BY, Dev->get()));
+      }
+    }
   } catch (ur_result_t Err) {
     return Err;
   }
@@ -168,7 +180,7 @@ ur_result_t USMSharedAllocImpl(void **ResultPtr, ur_context_handle_t hContext,
       (Alignment == 0 ||
        reinterpret_cast<std::uintptr_t>(*ResultPtr) % Alignment == 0);
   if (!validAlignment) {
-    urUSMFree(hContext, *ResultPtr);
+    urUSMFree(Context, *ResultPtr);
     return UR_RESULT_ERROR_INVALID_VALUE;
   }
   return UR_RESULT_SUCCESS;
