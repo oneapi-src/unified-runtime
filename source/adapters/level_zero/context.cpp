@@ -470,7 +470,7 @@ static const uint32_t MaxNumEventsPerPool = [] {
 }();
 
 ur_result_t ur_context_handle_t_::getFreeSlotInExistingOrNewPool(
-    ze_event_pool_handle_t &Pool, size_t &Index, enum ur_event_flag_t Flags,
+    ze_event_pool_handle_t &Pool, size_t &Index, ur_event_flags_t Flags,
     ur_device_handle_t Device) {
   // Lock while updating event pool machinery.
   std::scoped_lock<ur_mutex> Lock(ZeEventPoolCacheMutex);
@@ -552,7 +552,7 @@ ur_result_t ur_context_handle_t_::getFreeSlotInExistingOrNewPool(
 }
 
 ur_event_handle_t
-ur_context_handle_t_::getEventFromContextCache(enum ur_event_flag_t Flags,
+ur_context_handle_t_::getEventFromContextCache(ur_event_flags_t Flags,
                                                ur_device_handle_t Device) {
   std::scoped_lock<ur_mutex> Lock(EventCacheMutex);
   auto Cache = getEventCache(Flags, Device);
@@ -578,7 +578,7 @@ void ur_context_handle_t_::addEventToContextCache(ur_event_handle_t Event) {
     Device = Event->UrQueue->Device;
   }
 
-  enum ur_event_flag_t Flags = static_cast<enum ur_event_flag_t>(
+  ur_event_flags_t Flags = static_cast<ur_event_flags_t>(
       Event->isHostVisible()            ? HOST_VISIBLE
       : 0 | Event->isProfilingEnabled() ? ENABLE_PROFILER
                                         : 0);
@@ -605,7 +605,7 @@ ur_context_handle_t_::decrementUnreleasedEventsInPool(ur_event_handle_t Event) {
     ZeDevice = Event->UrQueue->Device->ZeDevice;
   }
 
-  enum ur_event_flag_t Flags = static_cast<enum ur_event_flag_t>(
+  ur_event_flags_t Flags = static_cast<ur_event_flags_t>(
       Event->isHostVisible()                 ? HOST_VISIBLE
       : 0 | Event->isProfilingEnabled()      ? ENABLE_PROFILER
       : 0 | Event->CounterBasedEventsEnabled ? COUNTER_BASED
