@@ -10,6 +10,7 @@
 #pragma once
 
 #include <atomic>
+#include <loader/ze_loader.h>
 #include <mutex>
 #include <optional>
 #include <ur/ur.hpp>

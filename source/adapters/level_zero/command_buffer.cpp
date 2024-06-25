@@ -17,10 +17,12 @@ https://github.com/intel/llvm/blob/sycl/sycl/doc/design/CommandGraph.md#level-ze
 ur_exp_command_buffer_handle_t_::ur_exp_command_buffer_handle_t_(
     ur_context_handle_t Context, ur_device_handle_t Device,
     ze_command_list_handle_t CommandList,
+    ze_command_list_handle_t CommandListTranslated,
     ze_command_list_handle_t CommandListResetEvents,
     ZeStruct<ze_command_list_desc_t> ZeDesc,
     const ur_exp_command_buffer_desc_t *Desc)
     : Context(Context), Device(Device), ZeCommandList(CommandList),
+      ZeComputeCommandListTranslated(CommandListTranslated),
       ZeCommandListResetEvents(CommandListResetEvents),
       ZeCommandListDesc(ZeDesc), ZeFencesList(), QueueProperties(),
       SyncPoints(), NextSyncPoint(0),
@@ -420,10 +422,15 @@ urCommandBufferCreateExp(ur_context_handle_t Context, ur_device_handle_t Device,
   // command-buffers, then reusing them.
   ZE2UR_CALL(zeCommandListCreate, (Context->ZeContext, Device->ZeDevice,
                                    &ZeCommandListDesc, &ZeCommandList));
+
+  ze_command_list_handle_t ZeCommandListTranslated = nullptr;
+  ZE2UR_CALL(zelLoaderTranslateHandle, (ZEL_HANDLE_COMMAND_LIST, ZeCommandList,
+                                        (void **)&ZeCommandListTranslated));
+
   try {
     *CommandBuffer = new ur_exp_command_buffer_handle_t_(
-        Context, Device, ZeCommandList, ZeCommandListResetEvents,
-        ZeCommandListDesc, CommandBufferDesc);
+        Context, Device, ZeCommandList, ZeCommandListTranslated,
+        ZeCommandListResetEvents, ZeCommandListDesc, CommandBufferDesc);
   } catch (const std::bad_alloc &) {
     return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   } catch (...) {
@@ -587,9 +594,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
     auto Plt = CommandBuffer->Context->getPlatform();
     UR_ASSERT(Plt->ZeMutableCmdListExt.Supported,
               UR_RESULT_ERROR_UNSUPPORTED_FEATURE);
-    ZE2UR_CALL(
-        Plt->ZeMutableCmdListExt.zexCommandListGetNextCommandIdExp,
-        (CommandBuffer->ZeCommandList, &ZeMutableCommandDesc, &CommandId));
+    ZE2UR_CALL(Plt->ZeMutableCmdListExt.zexCommandListGetNextCommandIdExp,
+               (CommandBuffer->ZeComputeCommandListTranslated,
+                &ZeMutableCommandDesc, &CommandId));
   }
   try {
     if (Command)
@@ -1296,8 +1303,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
   auto Plt = Command->CommandBuffer->Context->getPlatform();
   UR_ASSERT(Plt->ZeMutableCmdListExt.Supported,
             UR_RESULT_ERROR_UNSUPPORTED_FEATURE);
-  ZE2UR_CALL(Plt->ZeMutableCmdListExt.zexCommandListUpdateMutableCommandsExp,
-             (CommandBuffer->ZeCommandList, &MutableCommandDesc));
+  ZE2UR_CALL(
+      Plt->ZeMutableCmdListExt.zexCommandListUpdateMutableCommandsExp,
+      (CommandBuffer->ZeComputeCommandListTranslated, &MutableCommandDesc));
   ZE2UR_CALL(zeCommandListClose, (CommandBuffer->ZeCommandList));
 
   return UR_RESULT_SUCCESS;
