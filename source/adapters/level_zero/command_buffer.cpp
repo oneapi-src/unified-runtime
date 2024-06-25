@@ -19,29 +19,6 @@ https://github.com/intel/llvm/blob/sycl/sycl/doc/design/CommandGraph.md#level-ze
 #define DEBUG_LOG(VAR) logger::debug(#VAR " {}", VAR);
 
 namespace {
-/// Checks the version of the level-zero driver.
-/// @param Context Execution context
-/// @param VersionMajor Major verion number to compare to.
-/// @param VersionMinor Minor verion number to compare to.
-/// @param VersionBuild Build verion number to compare to.
-/// @return true is the version of the driver is higher than or equal to the
-/// compared version
-bool IsDriverVersionNewerOrSimilar(ur_context_handle_t Context,
-                                   uint32_t VersionMajor, uint32_t VersionMinor,
-                                   uint32_t VersionBuild) {
-  ZeStruct<ze_driver_properties_t> ZeDriverProperties;
-  ZE2UR_CALL(zeDriverGetProperties,
-             (Context->getPlatform()->ZeDriver, &ZeDriverProperties));
-  uint32_t DriverVersion = ZeDriverProperties.driverVersion;
-  auto DriverVersionMajor = (DriverVersion & 0xFF000000) >> 24;
-  auto DriverVersionMinor = (DriverVersion & 0x00FF0000) >> 16;
-  auto DriverVersionBuild = DriverVersion & 0x0000FFFF;
-
-  return ((DriverVersionMajor >= VersionMajor) &&
-          (DriverVersionMinor >= VersionMinor) &&
-          (DriverVersionBuild >= VersionBuild));
-}
-
 // Default to using compute engine for fill operation, but allow to
 // override this with an environment variable.
 bool PreferCopyEngineForFill = [] {
@@ -542,7 +519,8 @@ urCommandBufferCreateExp(ur_context_handle_t Context, ur_device_handle_t Device,
                          const ur_exp_command_buffer_desc_t *CommandBufferDesc,
                          ur_exp_command_buffer_handle_t *CommandBuffer) {
   // In-order command-lists are not available in old driver version.
-  bool CompatibleDriver = IsDriverVersionNewerOrSimilar(Context, 1, 3, 28454);
+  bool CompatibleDriver = IsDriverVersionNewerOrSimilar(
+      Context->getPlatform()->ZeDriver, 1, 3, 28454);
   const bool IsInOrder =
       CompatibleDriver
           ? (CommandBufferDesc ? CommandBufferDesc->isInOrder : false)
