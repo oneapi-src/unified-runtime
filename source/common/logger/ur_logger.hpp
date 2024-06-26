@@ -15,7 +15,8 @@
 namespace logger {
 
 Logger create_logger(std::string logger_name, bool skip_prefix = false,
-                     bool skip_linebreak = false);
+                     bool skip_linebreak = false,
+                     logger::Level level = logger::Level::QUIET);
 
 inline Logger &get_logger(std::string name = "common") {
     static Logger logger = create_logger(std::move(name));
@@ -107,14 +108,12 @@ template <typename T> inline std::string toHex(T t) {
 ///                            to be printed immediately as they occur
 ///             - output: stderr
 inline Logger create_logger(std::string logger_name, bool skip_prefix,
-                            bool skip_linebreak) {
+                            bool skip_linebreak, logger::Level level) {
     std::transform(logger_name.begin(), logger_name.end(), logger_name.begin(),
                    ::toupper);
     std::stringstream env_var_name;
-    const auto default_level = logger::Level::QUIET;
     const auto default_flush_level = logger::Level::ERR;
     const std::string default_output = "stderr";
-    auto level = default_level;
     auto flush_level = default_flush_level;
     std::unique_ptr<logger::Sink> sink;
 
