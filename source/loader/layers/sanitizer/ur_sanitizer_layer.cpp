@@ -19,7 +19,10 @@ context_t context;
 ///////////////////////////////////////////////////////////////////////////////
 context_t::context_t()
     : logger(logger::create_logger("sanitizer")),
-      interceptor(std::make_unique<SanitizerInterceptor>()) {}
+      interceptor(std::make_unique<SanitizerInterceptor>()) {
+    // Print out warning messages by default
+    logger.setLevel(logger::Level::WARN);
+}
 
 bool context_t::isAvailable() const { return true; }
 
