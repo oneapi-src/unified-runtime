@@ -19,7 +19,7 @@ ManagedQueue::ManagedQueue(ur_context_handle_t Context,
                            ur_device_handle_t Device) {
     [[maybe_unused]] auto Result =
         context.urDdiTable.Queue.pfnCreate(Context, Device, nullptr, &Handle);
-    assert(Result == UR_RESULT_SUCCESS);
+    assert(Result == UR_RESULT_SUCCESS && "Failed to create ManagedQueue");
     context.logger.debug(">>> ManagedQueue {}", (void *)Handle);
 }
 
@@ -29,11 +29,11 @@ ManagedQueue::~ManagedQueue() {
     [[maybe_unused]] ur_result_t Result;
     Result = context.urDdiTable.Queue.pfnFinish(Handle);
     if (Result != UR_RESULT_SUCCESS) {
-        context.logger.error("Failed to finish ManagedQueue: {}", Result);
+        context.logger.warning("Failed to finish ManagedQueue: {}", Result);
     }
-    assert(Result == UR_RESULT_SUCCESS);
+    assert(Result == UR_RESULT_SUCCESS && "Failed to finish ManagedQueue");
     Result = context.urDdiTable.Queue.pfnRelease(Handle);
-    assert(Result == UR_RESULT_SUCCESS);
+    assert(Result == UR_RESULT_SUCCESS && "Failed to release ManagedQueue");
 }
 
 ur_context_handle_t GetContext(ur_queue_handle_t Queue) {
