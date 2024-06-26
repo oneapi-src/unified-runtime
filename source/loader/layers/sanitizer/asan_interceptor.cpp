@@ -792,7 +792,8 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
             // Initialize shadow memory
             URes = urEnqueueUSMSet(Queue, Allocated, 0, Size);
             if (URes != UR_RESULT_SUCCESS) {
-                auto URes = context.urDdiTable.USM.pfnFree(Context, Allocated);
+                [[maybe_unused]] auto URes =
+                    context.urDdiTable.USM.pfnFree(Context, Allocated);
                 assert(URes == UR_RESULT_SUCCESS &&
                        "urUSMFree failed at allocating shadow memory");
                 Allocated = nullptr;
