@@ -69,7 +69,7 @@ struct LocalArgsInfo {
 
 struct LaunchInfo {
     uintptr_t PrivateShadowOffset = 0;
-    uintptr_t PrivateShadowOffsetEnd = 0;
+    // uintptr_t PrivateShadowOffsetEnd = 0;
 
     uintptr_t LocalShadowOffset = 0;
     uintptr_t LocalShadowOffsetEnd = 0;
