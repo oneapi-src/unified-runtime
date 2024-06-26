@@ -112,6 +112,8 @@ add_ur_adapter(${TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/program.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/queue.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/sampler.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/v2/context.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/v2/command_list_cache.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ur_level_zero.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/common.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/context.cpp
@@ -129,6 +131,8 @@ add_ur_adapter(${TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/sampler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/image.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../../ur/ur.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/v2/context.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/v2/command_list_cache.cpp
 )
 
 if(NOT WIN32)
