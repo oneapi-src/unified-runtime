@@ -29,7 +29,7 @@ ManagedQueue::~ManagedQueue() {
     [[maybe_unused]] ur_result_t Result;
     Result = context.urDdiTable.Queue.pfnFinish(Handle);
     if (Result != UR_RESULT_SUCCESS) {
-        context.logger.warning("Failed to finish ManagedQueue: {}", Result);
+        context.logger.error("Failed to finish ManagedQueue: {}", Result);
     }
     assert(Result == UR_RESULT_SUCCESS && "Failed to finish ManagedQueue");
     Result = context.urDdiTable.Queue.pfnRelease(Handle);
