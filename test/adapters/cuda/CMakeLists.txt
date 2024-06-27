@@ -15,6 +15,7 @@ add_adapter_test(cuda
         urEventCreateWithNativeHandle.cpp
         kernel_tests.cpp
         memory_tests.cpp
+        event_tests.cpp
     ENVIRONMENT
         "UR_ADAPTERS_FORCE_LOAD=\"$<TARGET_FILE:ur_adapter_cuda>\""
 )
