@@ -143,7 +143,12 @@ ur_result_t enqueueMemSetShadow(ur_context_handle_t Context,
 
 } // namespace
 
-SanitizerInterceptor::SanitizerInterceptor() {}
+SanitizerInterceptor::SanitizerInterceptor() {
+    if (Options().MaxQuarantineSizeMB) {
+        m_Quarantine = std::make_unique<Quarantine>(
+            static_cast<uint64_t>(Options().MaxQuarantineSizeMB) * 1024 * 1024);
+    }
+}
 
 SanitizerInterceptor::~SanitizerInterceptor() {
     DestroyShadowMemoryOnCPU();
