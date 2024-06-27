@@ -709,6 +709,7 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
 
         if (LaunchInfo.LocalWorkSize.empty()) {
             LaunchInfo.LocalWorkSize.resize(LaunchInfo.WorkDim);
+            // FIXME: This is W/A until urKernelSuggestGroupSize is added
             for (size_t Dim = 0; Dim < LaunchInfo.WorkDim; ++Dim) {
                 LaunchInfo.LocalWorkSize[Dim] = 1;
             }
