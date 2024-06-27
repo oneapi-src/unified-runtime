@@ -709,9 +709,18 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
 
         if (LaunchInfo.LocalWorkSize.empty()) {
             LaunchInfo.LocalWorkSize.resize(LaunchInfo.WorkDim);
-            // FIXME: This is W/A until urKernelSuggestGroupSize is added
-            for (size_t Dim = 0; Dim < LaunchInfo.WorkDim; ++Dim) {
-                LaunchInfo.LocalWorkSize[Dim] = 1;
+            auto URes = context.urDdiTable.Kernel.pfnGetSuggestedLocalWorkSize(
+                Kernel, Queue, LaunchInfo.WorkDim, LaunchInfo.GlobalWorkOffset,
+                LaunchInfo.GlobalWorkSize, LaunchInfo.LocalWorkSize.data());
+            if (URes != UR_RESULT_SUCCESS) {
+                if (URes != UR_RESULT_ERROR_UNSUPPORTED_FEATURE) {
+                    return URes;
+                }
+                // If urKernelGetSuggestedLocalWorkSize is not supported by driver, we fallback
+                // to inefficient implementation
+                for (size_t Dim = 0; Dim < LaunchInfo.WorkDim; ++Dim) {
+                    LaunchInfo.LocalWorkSize[Dim] = 1;
+                }
             }
         }
 
