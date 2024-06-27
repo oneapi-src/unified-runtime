@@ -704,9 +704,9 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
 
         if (LaunchInfo.LocalWorkSize.empty()) {
             LaunchInfo.LocalWorkSize.resize(LaunchInfo.WorkDim);
-            UR_CALL(context.urDdiTable.Kernel.pfnGetSuggestedLocalWorkSize(
-                Kernel, Queue, LaunchInfo.WorkDim, LaunchInfo.GlobalWorkOffset,
-                LaunchInfo.GlobalWorkSize, LaunchInfo.LocalWorkSize.data()));
+            for (size_t Dim = 0; Dim < LaunchInfo.WorkDim; ++Dim) {
+                LaunchInfo.LocalWorkSize[Dim] = 1;
+            }
         }
 
         const size_t *LocalWorkSize = LaunchInfo.LocalWorkSize.data();
