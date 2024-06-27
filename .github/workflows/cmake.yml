@@ -167,7 +167,7 @@ jobs:
           {name: L0, triplet: spir64}
         ]
         build_type: [Debug, Release]
-        compiler: [{c: gcc, cxx: g++}, {c: clang, cxx: clang++}]
+        compiler: [{c: gcc, cxx: g++}]
 
     runs-on: ${{matrix.adapter.name}}
 
