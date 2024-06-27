@@ -12,6 +12,7 @@
  */
 
 #include "asan_interceptor.hpp"
+#include "asan_options.hpp"
 #include "asan_quarantine.hpp"
 #include "asan_report.hpp"
 #include "asan_shadow_setup.hpp"
@@ -142,74 +143,7 @@ ur_result_t enqueueMemSetShadow(ur_context_handle_t Context,
 
 } // namespace
 
-SanitizerInterceptor::SanitizerInterceptor() {
-    auto Options = getenv_to_map("UR_LAYER_ASAN_OPTIONS");
-    if (!Options.has_value()) {
-        return;
-    }
-
-    auto KV = Options->find("debug");
-    if (KV != Options->end()) {
-        auto Value = KV->second.front();
-        cl_Debug = Value == "1" || Value == "true" ? 1 : 0;
-    }
-
-    KV = Options->find("redzone");
-    if (KV != Options->end()) {
-        auto Value = KV->second.front();
-        try {
-            cl_MinRZSize = std::stoul(Value);
-            if (cl_MinRZSize < 16) {
-                cl_MinRZSize = 16;
-                context.logger.warning("Trying to set redzone size to a value "
-                                       "less than 16 is ignored");
-            }
-        } catch (...) {
-            die("<SANITIZER>[ERROR]: \"redzone\" should be an integer");
-        }
-    }
-    KV = Options->find("max_redzone");
-    if (KV != Options->end()) {
-        auto Value = KV->second.front();
-        try {
-            cl_MaxRZSize = std::stoul(Value);
-            if (cl_MaxRZSize > 2048) {
-                cl_MaxRZSize = 2048;
-                context.logger.warning("Trying to set max redzone size to a "
-                                       "value greater than 2048 is ignored");
-            }
-        } catch (...) {
-            die("<SANITIZER>[ERROR]: \"max_redzone\" should be an integer");
-        }
-    }
-
-    KV = Options->find("quarantine_size_mb");
-    if (KV != Options->end()) {
-        auto Value = KV->second.front();
-        try {
-            cl_MaxQuarantineSizeMB = std::stoul(Value);
-        } catch (...) {
-            die("<SANITIZER>[ERROR]: \"cl_MaxQuarantineSizeMB\" should be an "
-                "integer");
-        }
-    }
-    if (cl_MaxQuarantineSizeMB) {
-        m_Quarantine =
-            std::make_unique<Quarantine>(cl_MaxQuarantineSizeMB * 1024 * 1024);
-    }
-
-    KV = Options->find("detect_locals");
-    if (KV != Options->end()) {
-        auto Value = KV->second.front();
-        cl_DetectLocals = Value == "1" || Value == "true" ? true : false;
-    }
-
-    KV = Options->find("detect_privates");
-    if (KV != Options->end()) {
-        auto Value = KV->second.front();
-        cl_DetectPrivates = Value == "1" || Value == "true" ? true : false;
-    }
-}
+SanitizerInterceptor::SanitizerInterceptor() {}
 
 SanitizerInterceptor::~SanitizerInterceptor() {
     DestroyShadowMemoryOnCPU();
@@ -247,7 +181,7 @@ ur_result_t SanitizerInterceptor::allocateMemory(
         Alignment = MinAlignment;
     }
 
-    uptr RZLog = ComputeRZLog(Size, cl_MinRZSize, cl_MaxRZSize);
+    uptr RZLog = ComputeRZLog(Size, Options().MinRZSize, Options().MaxRZSize);
     uptr RZSize = RZLog2Size(RZLog);
     uptr RoundedSize = RoundUpTo(Size, Alignment);
     uptr NeededSize = RoundedSize + RZSize * 2;
@@ -752,7 +686,9 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
         };
 
         // Write debug
-        EnqueueWriteGlobal(kSPIR_AsanDebug, &cl_Debug, sizeof(cl_Debug));
+        // We use "uint64_t" here because EnqueueWriteGlobal will fail when it's "uint32_t"
+        uint64_t Debug = Options().Debug ? 1 : 0;
+        EnqueueWriteGlobal(kSPIR_AsanDebug, &Debug, sizeof(Debug));
 
         // Write shadow memory offset for global memory
         EnqueueWriteGlobal(kSPIR_AsanShadowMemoryGlobalStart,
@@ -812,7 +748,7 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
                             PrivateMemoryUsage);
 
         // Write shadow memory offset for local memory
-        if (cl_DetectLocals) {
+        if (Options().DetectLocals) {
             // CPU needn't this
             if (DeviceInfo->Type == DeviceType::GPU_PVC) {
                 const size_t LocalMemorySize =
@@ -851,7 +787,7 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
         }
 
         // Write shadow memory offset for private memory
-        if (cl_DetectPrivates) {
+        if (Options().DetectPrivates) {
             if (DeviceInfo->Type == DeviceType::CPU) {
                 LaunchInfo.Data->PrivateShadowOffset = DeviceInfo->ShadowOffset;
             } else if (DeviceInfo->Type == DeviceType::GPU_PVC) {
@@ -897,7 +833,12 @@ SanitizerInterceptor::findAllocInfoByAddress(uptr Address) {
     if (It == m_AllocationMap.begin()) {
         return std::optional<AllocationIterator>{};
     }
-    return --It;
+    --It;
+    // Make sure we got the right AllocInfo
+    assert(Address >= It->second->AllocBegin &&
+           Address < It->second->AllocBegin + It->second->AllocSize &&
+           "Wrong AllocInfo for the address");
+    return It;
 }
 
 ur_result_t USMLaunchInfo::initialize() {
