@@ -28,7 +28,6 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   ur_exp_command_buffer_handle_t_(
       ur_context_handle_t Context, ur_device_handle_t Device,
       ze_command_list_handle_t CommandList,
-      ze_command_list_handle_t CommandListTranslated,
       ze_command_list_handle_t CommandListResetEvents,
       ze_command_list_handle_t CopyCommandList, ur_event_handle_t SignalEvent,
       ur_event_handle_t WaitEvent, ur_event_handle_t AllResetEvent,
@@ -71,9 +70,6 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   ur_device_handle_t Device;
   // Level Zero command list handle
   ze_command_list_handle_t ZeComputeCommandList;
-  // Given a multi driver scenario, the driver handle must be translated to the
-  // internal driver handle to allow calls to driver experimental apis.
-  ze_command_list_handle_t ZeComputeCommandListTranslated;
   // Level Zero command list handle
   ze_command_list_handle_t ZeCommandListResetEvents;
   // Level Zero Copy command list handle

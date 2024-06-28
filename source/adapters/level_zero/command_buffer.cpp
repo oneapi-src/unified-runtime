@@ -431,13 +431,11 @@ ur_result_t enqueueCommandBufferFillHelper(
 ur_exp_command_buffer_handle_t_::ur_exp_command_buffer_handle_t_(
     ur_context_handle_t Context, ur_device_handle_t Device,
     ze_command_list_handle_t CommandList,
-    ze_command_list_handle_t CommandListTranslated,
     ze_command_list_handle_t CommandListResetEvents,
     ze_command_list_handle_t CopyCommandList, ur_event_handle_t SignalEvent,
     ur_event_handle_t WaitEvent, ur_event_handle_t AllResetEvent,
     const ur_exp_command_buffer_desc_t *Desc, const bool IsInOrderCmdList)
     : Context(Context), Device(Device), ZeComputeCommandList(CommandList),
-      ZeComputeCommandListTranslated(CommandListTranslated),
       ZeCommandListResetEvents(CommandListResetEvents),
       ZeCopyCommandList(CopyCommandList), SignalEvent(SignalEvent),
       WaitEvent(WaitEvent), AllResetEvent(AllResetEvent), ZeFencesMap(),
@@ -702,11 +700,16 @@ urCommandBufferCreateExp(ur_context_handle_t Context, ur_device_handle_t Device,
              (ZEL_HANDLE_COMMAND_LIST, ZeComputeCommandList,
               (void **)&ZeComputeCommandListTranslated));
 
+  ze_command_list_handle_t ZeCopyCommandListTranslated = nullptr;
+  ZE2UR_CALL(zelLoaderTranslateHandle,
+             (ZEL_HANDLE_COMMAND_LIST, ZeCopyCommandList,
+              (void **)&ZeCopyCommandListTranslated));
+
   try {
     *CommandBuffer = new ur_exp_command_buffer_handle_t_(
-        Context, Device, ZeComputeCommandList, ZeComputeCommandListTranslated,
-        ZeCommandListResetEvents, ZeCopyCommandList, SignalEvent, WaitEvent,
-        AllResetEvent, CommandBufferDesc, IsInOrder);
+        Context, Device, ZeComputeCommandListTranslated,
+        ZeCommandListResetEvents, ZeCopyCommandListTranslated, SignalEvent,
+        WaitEvent, AllResetEvent, CommandBufferDesc, IsInOrder);
   } catch (const std::bad_alloc &) {
     return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   } catch (...) {
@@ -862,9 +865,9 @@ createCommandHandle(ur_exp_command_buffer_handle_t CommandBuffer,
                                ZE_MUTABLE_COMMAND_EXP_FLAG_GLOBAL_OFFSET;
 
   auto Platform = CommandBuffer->Context->getPlatform();
-  ZE2UR_CALL(Platform->ZeMutableCmdListExt.zexCommandListGetNextCommandIdExp,
-             (CommandBuffer->ZeComputeCommandListTranslated,
-              &ZeMutableCommandDesc, &CommandId));
+  ZE2UR_CALL(
+      Platform->ZeMutableCmdListExt.zexCommandListGetNextCommandIdExp,
+      (CommandBuffer->ZeComputeCommandList, &ZeMutableCommandDesc, &CommandId));
   DEBUG_LOG(CommandId);
 
   try {
@@ -1754,7 +1757,7 @@ ur_result_t updateKernelCommand(
   auto Platform = CommandBuffer->Context->getPlatform();
   ZE2UR_CALL(
       Platform->ZeMutableCmdListExt.zexCommandListUpdateMutableCommandsExp,
-      (CommandBuffer->ZeComputeCommandListTranslated, &MutableCommandDesc));
+      (CommandBuffer->ZeComputeCommandList, &MutableCommandDesc));
 
   return UR_RESULT_SUCCESS;
 }
