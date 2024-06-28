@@ -661,6 +661,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueRelease(
           struct l0_command_list_cache_info ListInfo;
           ListInfo.ZeQueueDesc = it->second.ZeQueueDesc;
           ListInfo.InOrderList = it->second.IsInOrderList;
+          ListInfo.IsImmediate = it->second.IsImmediate;
           ZeCommandListCache.push_back({it->first, ListInfo});
         } else {
           // A non-reusable comamnd list that came from a make_queue call is
@@ -741,7 +742,8 @@ void ur_queue_handle_legacy_t_::ur_queue_group_t::setImmCmdList(
           .insert(std::pair<ze_command_list_handle_t, ur_command_list_info_t>{
               ZeCommandList,
               ur_command_list_info_t(nullptr, true, false, nullptr, ZeQueueDesc,
-                                     queue->useCompletionBatching(), false)})
+                                     queue->useCompletionBatching(), false,
+                                     false, true)})
           .first);
 }
 
@@ -2084,6 +2086,7 @@ ur_result_t ur_queue_handle_legacy_t_::resetCommandList(
     struct l0_command_list_cache_info ListInfo;
     ListInfo.ZeQueueDesc = CommandList->second.ZeQueueDesc;
     ListInfo.InOrderList = CommandList->second.IsInOrderList;
+    ListInfo.IsImmediate = CommandList->second.IsImmediate;
     ZeCommandListCache.push_back({CommandList->first, ListInfo});
   }
 
@@ -2434,9 +2437,9 @@ ur_queue_handle_legacy_t_::ur_queue_group_t::getImmCmdList() {
       Queue->CommandListMap
           .insert(std::pair<ze_command_list_handle_t, ur_command_list_info_t>{
               ZeCommandList,
-              ur_command_list_info_t(nullptr, true, false, nullptr,
-                                     ZeCommandQueueDesc,
-                                     Queue->useCompletionBatching())})
+              ur_command_list_info_t(
+                  nullptr, true, false, nullptr, ZeCommandQueueDesc,
+                  Queue->useCompletionBatching(), true, false, true)})
           .first;
 
   return ImmCmdLists[Index];
