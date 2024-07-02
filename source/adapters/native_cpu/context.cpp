@@ -16,6 +16,7 @@
 
 #include "common.hpp"
 #include "context.hpp"
+using namespace native_cpu;
 
 UR_APIEXPORT ur_result_t UR_APICALL urContextCreate(
     [[maybe_unused]] uint32_t DeviceCount, const ur_device_handle_t *phDevices,
