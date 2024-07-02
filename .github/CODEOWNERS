@@ -3,6 +3,8 @@
 # Level Zero adapter
 source/adapters/level_zero      @oneapi-src/unified-runtime-level-zero-write
 test/adapters/level_zero        @oneapi-src/unified-runtime-level-zero-write
+source/adapters/level_zero/v2   @oneapi-src/unified-runtime-level-zero-v2-write
+test/adapters/level_zero/v2   @oneapi-src/unified-runtime-level-zero-v2-write
 
 # CUDA and HIP adapters
 source/adapters/cuda            @oneapi-src/unified-runtime-cuda-write
