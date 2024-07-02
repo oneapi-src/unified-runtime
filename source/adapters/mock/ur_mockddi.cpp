@@ -33,7 +33,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGet(
     ur_adapter_get_params_t params = {&NumEntries, &phAdapters, &pNumAdapters};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urAdapterGet"));
+        mock::getCallbacks().get_before_callback("urAdapterGet"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -42,7 +42,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGet(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urAdapterGet"));
+        mock::getCallbacks().get_replace_callback("urAdapterGet"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -62,7 +62,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGet(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urAdapterGet"));
+        mock::getCallbacks().get_after_callback("urAdapterGet"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -82,7 +82,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterRelease(
     ur_adapter_release_params_t params = {&hAdapter};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urAdapterRelease"));
+        mock::getCallbacks().get_before_callback("urAdapterRelease"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -91,7 +91,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterRelease(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urAdapterRelease"));
+        mock::getCallbacks().get_replace_callback("urAdapterRelease"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -105,7 +105,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterRelease(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urAdapterRelease"));
+        mock::getCallbacks().get_after_callback("urAdapterRelease"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -125,7 +125,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterRetain(
     ur_adapter_retain_params_t params = {&hAdapter};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urAdapterRetain"));
+        mock::getCallbacks().get_before_callback("urAdapterRetain"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -134,7 +134,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterRetain(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urAdapterRetain"));
+        mock::getCallbacks().get_replace_callback("urAdapterRetain"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -148,7 +148,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterRetain(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urAdapterRetain"));
+        mock::getCallbacks().get_after_callback("urAdapterRetain"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -175,7 +175,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGetLastError(
                                                  &pError};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urAdapterGetLastError"));
+        mock::getCallbacks().get_before_callback("urAdapterGetLastError"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -184,7 +184,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGetLastError(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urAdapterGetLastError"));
+        mock::getCallbacks().get_replace_callback("urAdapterGetLastError"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -197,7 +197,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGetLastError(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urAdapterGetLastError"));
+        mock::getCallbacks().get_after_callback("urAdapterGetLastError"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -228,7 +228,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGetInfo(
                                            &pPropValue, &pPropSizeRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urAdapterGetInfo"));
+        mock::getCallbacks().get_before_callback("urAdapterGetInfo"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -237,7 +237,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGetInfo(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urAdapterGetInfo"));
+        mock::getCallbacks().get_replace_callback("urAdapterGetInfo"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -250,7 +250,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGetInfo(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urAdapterGetInfo"));
+        mock::getCallbacks().get_after_callback("urAdapterGetInfo"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -284,7 +284,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGet(
                                        &phPlatforms, &pNumPlatforms};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urPlatformGet"));
+        mock::getCallbacks().get_before_callback("urPlatformGet"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -293,7 +293,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGet(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urPlatformGet"));
+        mock::getCallbacks().get_replace_callback("urPlatformGet"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -313,7 +313,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGet(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urPlatformGet"));
+        mock::getCallbacks().get_after_callback("urPlatformGet"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -344,7 +344,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetInfo(
                                             &pPropValue, &pPropSizeRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urPlatformGetInfo"));
+        mock::getCallbacks().get_before_callback("urPlatformGetInfo"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -353,7 +353,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetInfo(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urPlatformGetInfo"));
+        mock::getCallbacks().get_replace_callback("urPlatformGetInfo"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -366,7 +366,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetInfo(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urPlatformGetInfo"));
+        mock::getCallbacks().get_after_callback("urPlatformGetInfo"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -387,7 +387,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetApiVersion(
     ur_platform_get_api_version_params_t params = {&hPlatform, &pVersion};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urPlatformGetApiVersion"));
+        mock::getCallbacks().get_before_callback("urPlatformGetApiVersion"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -396,7 +396,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetApiVersion(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urPlatformGetApiVersion"));
+        mock::getCallbacks().get_replace_callback("urPlatformGetApiVersion"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -409,7 +409,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetApiVersion(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urPlatformGetApiVersion"));
+        mock::getCallbacks().get_after_callback("urPlatformGetApiVersion"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -432,7 +432,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetNativeHandle(
                                                      &phNativePlatform};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urPlatformGetNativeHandle"));
+        mock::getCallbacks().get_before_callback("urPlatformGetNativeHandle"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -441,7 +441,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetNativeHandle(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urPlatformGetNativeHandle"));
+        mock::getCallbacks().get_replace_callback("urPlatformGetNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -455,7 +455,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetNativeHandle(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urPlatformGetNativeHandle"));
+        mock::getCallbacks().get_after_callback("urPlatformGetNativeHandle"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -483,7 +483,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
         &hNativePlatform, &hAdapter, &pProperties, &phPlatform};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urPlatformCreateWithNativeHandle"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -493,7 +493,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urPlatformCreateWithNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -509,7 +509,8 @@ __urdlllocal ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urPlatformCreateWithNativeHandle"));
+        mock::getCallbacks().get_after_callback(
+            "urPlatformCreateWithNativeHandle"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -535,7 +536,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetBackendOption(
         &hPlatform, &pFrontendOption, &ppPlatformOption};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urPlatformGetBackendOption"));
+        mock::getCallbacks().get_before_callback("urPlatformGetBackendOption"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -544,7 +545,8 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetBackendOption(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urPlatformGetBackendOption"));
+        mock::getCallbacks().get_replace_callback(
+            "urPlatformGetBackendOption"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -557,7 +559,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetBackendOption(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urPlatformGetBackendOption"));
+        mock::getCallbacks().get_after_callback("urPlatformGetBackendOption"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -590,7 +592,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGet(
                                      &phDevices, &pNumDevices};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urDeviceGet"));
+        mock::getCallbacks().get_before_callback("urDeviceGet"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -599,7 +601,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGet(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urDeviceGet"));
+        mock::getCallbacks().get_replace_callback("urDeviceGet"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -619,7 +621,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGet(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urDeviceGet"));
+        mock::getCallbacks().get_after_callback("urDeviceGet"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -651,7 +653,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetInfo(
                                           &pPropValue, &pPropSizeRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urDeviceGetInfo"));
+        mock::getCallbacks().get_before_callback("urDeviceGetInfo"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -660,7 +662,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetInfo(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urDeviceGetInfo"));
+        mock::getCallbacks().get_replace_callback("urDeviceGetInfo"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -673,7 +675,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetInfo(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urDeviceGetInfo"));
+        mock::getCallbacks().get_after_callback("urDeviceGetInfo"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -694,7 +696,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceRetain(
     ur_device_retain_params_t params = {&hDevice};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urDeviceRetain"));
+        mock::getCallbacks().get_before_callback("urDeviceRetain"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -703,7 +705,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceRetain(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urDeviceRetain"));
+        mock::getCallbacks().get_replace_callback("urDeviceRetain"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -717,7 +719,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceRetain(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urDeviceRetain"));
+        mock::getCallbacks().get_after_callback("urDeviceRetain"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -738,7 +740,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceRelease(
     ur_device_release_params_t params = {&hDevice};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urDeviceRelease"));
+        mock::getCallbacks().get_before_callback("urDeviceRelease"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -747,7 +749,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceRelease(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urDeviceRelease"));
+        mock::getCallbacks().get_replace_callback("urDeviceRelease"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -761,7 +763,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceRelease(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urDeviceRelease"));
+        mock::getCallbacks().get_after_callback("urDeviceRelease"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -792,7 +794,7 @@ __urdlllocal ur_result_t UR_APICALL urDevicePartition(
                                            &phSubDevices, &pNumDevicesRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urDevicePartition"));
+        mock::getCallbacks().get_before_callback("urDevicePartition"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -801,7 +803,7 @@ __urdlllocal ur_result_t UR_APICALL urDevicePartition(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urDevicePartition"));
+        mock::getCallbacks().get_replace_callback("urDevicePartition"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -818,7 +820,7 @@ __urdlllocal ur_result_t UR_APICALL urDevicePartition(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urDevicePartition"));
+        mock::getCallbacks().get_after_callback("urDevicePartition"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -848,7 +850,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceSelectBinary(
                                                &NumBinaries, &pSelectedBinary};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urDeviceSelectBinary"));
+        mock::getCallbacks().get_before_callback("urDeviceSelectBinary"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -857,7 +859,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceSelectBinary(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urDeviceSelectBinary"));
+        mock::getCallbacks().get_replace_callback("urDeviceSelectBinary"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -870,7 +872,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceSelectBinary(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urDeviceSelectBinary"));
+        mock::getCallbacks().get_after_callback("urDeviceSelectBinary"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -892,7 +894,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetNativeHandle(
     ur_device_get_native_handle_params_t params = {&hDevice, &phNativeDevice};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urDeviceGetNativeHandle"));
+        mock::getCallbacks().get_before_callback("urDeviceGetNativeHandle"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -901,7 +903,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetNativeHandle(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urDeviceGetNativeHandle"));
+        mock::getCallbacks().get_replace_callback("urDeviceGetNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -915,7 +917,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetNativeHandle(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urDeviceGetNativeHandle"));
+        mock::getCallbacks().get_after_callback("urDeviceGetNativeHandle"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -942,7 +944,8 @@ __urdlllocal ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
         &hNativeDevice, &hPlatform, &pProperties, &phDevice};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urDeviceCreateWithNativeHandle"));
+        mock::getCallbacks().get_before_callback(
+            "urDeviceCreateWithNativeHandle"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -951,7 +954,8 @@ __urdlllocal ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urDeviceCreateWithNativeHandle"));
+        mock::getCallbacks().get_replace_callback(
+            "urDeviceCreateWithNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -966,7 +970,8 @@ __urdlllocal ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urDeviceCreateWithNativeHandle"));
+        mock::getCallbacks().get_after_callback(
+            "urDeviceCreateWithNativeHandle"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -993,7 +998,8 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetGlobalTimestamps(
         &hDevice, &pDeviceTimestamp, &pHostTimestamp};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urDeviceGetGlobalTimestamps"));
+        mock::getCallbacks().get_before_callback(
+            "urDeviceGetGlobalTimestamps"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -1002,7 +1008,8 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetGlobalTimestamps(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urDeviceGetGlobalTimestamps"));
+        mock::getCallbacks().get_replace_callback(
+            "urDeviceGetGlobalTimestamps"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -1015,7 +1022,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetGlobalTimestamps(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urDeviceGetGlobalTimestamps"));
+        mock::getCallbacks().get_after_callback("urDeviceGetGlobalTimestamps"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -1042,7 +1049,7 @@ __urdlllocal ur_result_t UR_APICALL urContextCreate(
                                          &phContext};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urContextCreate"));
+        mock::getCallbacks().get_before_callback("urContextCreate"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -1051,7 +1058,7 @@ __urdlllocal ur_result_t UR_APICALL urContextCreate(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urContextCreate"));
+        mock::getCallbacks().get_replace_callback("urContextCreate"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -1065,7 +1072,7 @@ __urdlllocal ur_result_t UR_APICALL urContextCreate(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urContextCreate"));
+        mock::getCallbacks().get_after_callback("urContextCreate"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -1086,7 +1093,7 @@ __urdlllocal ur_result_t UR_APICALL urContextRetain(
     ur_context_retain_params_t params = {&hContext};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urContextRetain"));
+        mock::getCallbacks().get_before_callback("urContextRetain"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -1095,7 +1102,7 @@ __urdlllocal ur_result_t UR_APICALL urContextRetain(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urContextRetain"));
+        mock::getCallbacks().get_replace_callback("urContextRetain"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -1109,7 +1116,7 @@ __urdlllocal ur_result_t UR_APICALL urContextRetain(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urContextRetain"));
+        mock::getCallbacks().get_after_callback("urContextRetain"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -1130,7 +1137,7 @@ __urdlllocal ur_result_t UR_APICALL urContextRelease(
     ur_context_release_params_t params = {&hContext};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urContextRelease"));
+        mock::getCallbacks().get_before_callback("urContextRelease"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -1139,7 +1146,7 @@ __urdlllocal ur_result_t UR_APICALL urContextRelease(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urContextRelease"));
+        mock::getCallbacks().get_replace_callback("urContextRelease"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -1153,7 +1160,7 @@ __urdlllocal ur_result_t UR_APICALL urContextRelease(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urContextRelease"));
+        mock::getCallbacks().get_after_callback("urContextRelease"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -1186,7 +1193,7 @@ __urdlllocal ur_result_t UR_APICALL urContextGetInfo(
                                            &pPropValue, &pPropSizeRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urContextGetInfo"));
+        mock::getCallbacks().get_before_callback("urContextGetInfo"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -1195,7 +1202,7 @@ __urdlllocal ur_result_t UR_APICALL urContextGetInfo(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urContextGetInfo"));
+        mock::getCallbacks().get_replace_callback("urContextGetInfo"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -1208,7 +1215,7 @@ __urdlllocal ur_result_t UR_APICALL urContextGetInfo(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urContextGetInfo"));
+        mock::getCallbacks().get_after_callback("urContextGetInfo"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -1231,7 +1238,7 @@ __urdlllocal ur_result_t UR_APICALL urContextGetNativeHandle(
                                                     &phNativeContext};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urContextGetNativeHandle"));
+        mock::getCallbacks().get_before_callback("urContextGetNativeHandle"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -1240,7 +1247,7 @@ __urdlllocal ur_result_t UR_APICALL urContextGetNativeHandle(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urContextGetNativeHandle"));
+        mock::getCallbacks().get_replace_callback("urContextGetNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -1254,7 +1261,7 @@ __urdlllocal ur_result_t UR_APICALL urContextGetNativeHandle(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urContextGetNativeHandle"));
+        mock::getCallbacks().get_after_callback("urContextGetNativeHandle"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -1283,7 +1290,8 @@ __urdlllocal ur_result_t UR_APICALL urContextCreateWithNativeHandle(
         &hNativeContext, &numDevices, &phDevices, &pProperties, &phContext};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urContextCreateWithNativeHandle"));
+        mock::getCallbacks().get_before_callback(
+            "urContextCreateWithNativeHandle"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -1292,7 +1300,7 @@ __urdlllocal ur_result_t UR_APICALL urContextCreateWithNativeHandle(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urContextCreateWithNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -1308,7 +1316,8 @@ __urdlllocal ur_result_t UR_APICALL urContextCreateWithNativeHandle(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urContextCreateWithNativeHandle"));
+        mock::getCallbacks().get_after_callback(
+            "urContextCreateWithNativeHandle"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -1333,7 +1342,8 @@ __urdlllocal ur_result_t UR_APICALL urContextSetExtendedDeleter(
                                                        &pUserData};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urContextSetExtendedDeleter"));
+        mock::getCallbacks().get_before_callback(
+            "urContextSetExtendedDeleter"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -1342,7 +1352,8 @@ __urdlllocal ur_result_t UR_APICALL urContextSetExtendedDeleter(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urContextSetExtendedDeleter"));
+        mock::getCallbacks().get_replace_callback(
+            "urContextSetExtendedDeleter"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -1355,7 +1366,7 @@ __urdlllocal ur_result_t UR_APICALL urContextSetExtendedDeleter(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urContextSetExtendedDeleter"));
+        mock::getCallbacks().get_after_callback("urContextSetExtendedDeleter"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -1382,7 +1393,7 @@ __urdlllocal ur_result_t UR_APICALL urMemImageCreate(
                                            &pImageDesc, &pHost, &phMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urMemImageCreate"));
+        mock::getCallbacks().get_before_callback("urMemImageCreate"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -1391,7 +1402,7 @@ __urdlllocal ur_result_t UR_APICALL urMemImageCreate(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urMemImageCreate"));
+        mock::getCallbacks().get_replace_callback("urMemImageCreate"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -1405,7 +1416,7 @@ __urdlllocal ur_result_t UR_APICALL urMemImageCreate(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urMemImageCreate"));
+        mock::getCallbacks().get_after_callback("urMemImageCreate"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -1432,7 +1443,7 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreate(
                                             &pProperties, &phBuffer};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urMemBufferCreate"));
+        mock::getCallbacks().get_before_callback("urMemBufferCreate"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -1441,7 +1452,7 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreate(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urMemBufferCreate"));
+        mock::getCallbacks().get_replace_callback("urMemBufferCreate"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -1461,7 +1472,7 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreate(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urMemBufferCreate"));
+        mock::getCallbacks().get_after_callback("urMemBufferCreate"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -1482,7 +1493,7 @@ __urdlllocal ur_result_t UR_APICALL urMemRetain(
     ur_mem_retain_params_t params = {&hMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urMemRetain"));
+        mock::getCallbacks().get_before_callback("urMemRetain"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -1491,7 +1502,7 @@ __urdlllocal ur_result_t UR_APICALL urMemRetain(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urMemRetain"));
+        mock::getCallbacks().get_replace_callback("urMemRetain"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -1505,7 +1516,7 @@ __urdlllocal ur_result_t UR_APICALL urMemRetain(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urMemRetain"));
+        mock::getCallbacks().get_after_callback("urMemRetain"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -1526,7 +1537,7 @@ __urdlllocal ur_result_t UR_APICALL urMemRelease(
     ur_mem_release_params_t params = {&hMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urMemRelease"));
+        mock::getCallbacks().get_before_callback("urMemRelease"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -1535,7 +1546,7 @@ __urdlllocal ur_result_t UR_APICALL urMemRelease(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urMemRelease"));
+        mock::getCallbacks().get_replace_callback("urMemRelease"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -1549,7 +1560,7 @@ __urdlllocal ur_result_t UR_APICALL urMemRelease(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urMemRelease"));
+        mock::getCallbacks().get_after_callback("urMemRelease"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -1577,7 +1588,7 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferPartition(
         &hBuffer, &flags, &bufferCreateType, &pRegion, &phMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urMemBufferPartition"));
+        mock::getCallbacks().get_before_callback("urMemBufferPartition"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -1586,7 +1597,7 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferPartition(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urMemBufferPartition"));
+        mock::getCallbacks().get_replace_callback("urMemBufferPartition"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -1600,7 +1611,7 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferPartition(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urMemBufferPartition"));
+        mock::getCallbacks().get_after_callback("urMemBufferPartition"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -1625,7 +1636,7 @@ __urdlllocal ur_result_t UR_APICALL urMemGetNativeHandle(
     ur_mem_get_native_handle_params_t params = {&hMem, &hDevice, &phNativeMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urMemGetNativeHandle"));
+        mock::getCallbacks().get_before_callback("urMemGetNativeHandle"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -1634,7 +1645,7 @@ __urdlllocal ur_result_t UR_APICALL urMemGetNativeHandle(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urMemGetNativeHandle"));
+        mock::getCallbacks().get_replace_callback("urMemGetNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -1648,7 +1659,7 @@ __urdlllocal ur_result_t UR_APICALL urMemGetNativeHandle(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urMemGetNativeHandle"));
+        mock::getCallbacks().get_after_callback("urMemGetNativeHandle"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -1675,7 +1686,7 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
         &hNativeMem, &hContext, &pProperties, &phMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urMemBufferCreateWithNativeHandle"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -1685,7 +1696,7 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urMemBufferCreateWithNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -1700,8 +1711,8 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urMemBufferCreateWithNativeHandle"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -1733,7 +1744,7 @@ __urdlllocal ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
         &pImageDesc, &pProperties, &phMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urMemImageCreateWithNativeHandle"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -1743,7 +1754,7 @@ __urdlllocal ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urMemImageCreateWithNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -1759,7 +1770,8 @@ __urdlllocal ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urMemImageCreateWithNativeHandle"));
+        mock::getCallbacks().get_after_callback(
+            "urMemImageCreateWithNativeHandle"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -1792,7 +1804,7 @@ __urdlllocal ur_result_t UR_APICALL urMemGetInfo(
                                        &pPropValue, &pPropSizeRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urMemGetInfo"));
+        mock::getCallbacks().get_before_callback("urMemGetInfo"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -1801,7 +1813,7 @@ __urdlllocal ur_result_t UR_APICALL urMemGetInfo(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urMemGetInfo"));
+        mock::getCallbacks().get_replace_callback("urMemGetInfo"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -1814,7 +1826,7 @@ __urdlllocal ur_result_t UR_APICALL urMemGetInfo(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urMemGetInfo"));
+        mock::getCallbacks().get_after_callback("urMemGetInfo"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -1846,7 +1858,7 @@ __urdlllocal ur_result_t UR_APICALL urMemImageGetInfo(
                                              &pPropValue, &pPropSizeRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urMemImageGetInfo"));
+        mock::getCallbacks().get_before_callback("urMemImageGetInfo"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -1855,7 +1867,7 @@ __urdlllocal ur_result_t UR_APICALL urMemImageGetInfo(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urMemImageGetInfo"));
+        mock::getCallbacks().get_replace_callback("urMemImageGetInfo"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -1868,7 +1880,7 @@ __urdlllocal ur_result_t UR_APICALL urMemImageGetInfo(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urMemImageGetInfo"));
+        mock::getCallbacks().get_after_callback("urMemImageGetInfo"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -1891,7 +1903,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerCreate(
     ur_sampler_create_params_t params = {&hContext, &pDesc, &phSampler};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urSamplerCreate"));
+        mock::getCallbacks().get_before_callback("urSamplerCreate"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -1900,7 +1912,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerCreate(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urSamplerCreate"));
+        mock::getCallbacks().get_replace_callback("urSamplerCreate"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -1914,7 +1926,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerCreate(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urSamplerCreate"));
+        mock::getCallbacks().get_after_callback("urSamplerCreate"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -1935,7 +1947,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerRetain(
     ur_sampler_retain_params_t params = {&hSampler};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urSamplerRetain"));
+        mock::getCallbacks().get_before_callback("urSamplerRetain"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -1944,7 +1956,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerRetain(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urSamplerRetain"));
+        mock::getCallbacks().get_replace_callback("urSamplerRetain"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -1958,7 +1970,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerRetain(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urSamplerRetain"));
+        mock::getCallbacks().get_after_callback("urSamplerRetain"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -1979,7 +1991,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerRelease(
     ur_sampler_release_params_t params = {&hSampler};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urSamplerRelease"));
+        mock::getCallbacks().get_before_callback("urSamplerRelease"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -1988,7 +2000,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerRelease(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urSamplerRelease"));
+        mock::getCallbacks().get_replace_callback("urSamplerRelease"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -2002,7 +2014,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerRelease(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urSamplerRelease"));
+        mock::getCallbacks().get_after_callback("urSamplerRelease"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -2031,7 +2043,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerGetInfo(
                                            &pPropValue, &pPropSizeRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urSamplerGetInfo"));
+        mock::getCallbacks().get_before_callback("urSamplerGetInfo"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -2040,7 +2052,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerGetInfo(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urSamplerGetInfo"));
+        mock::getCallbacks().get_replace_callback("urSamplerGetInfo"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -2053,7 +2065,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerGetInfo(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urSamplerGetInfo"));
+        mock::getCallbacks().get_after_callback("urSamplerGetInfo"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -2076,7 +2088,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerGetNativeHandle(
                                                     &phNativeSampler};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urSamplerGetNativeHandle"));
+        mock::getCallbacks().get_before_callback("urSamplerGetNativeHandle"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -2085,7 +2097,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerGetNativeHandle(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urSamplerGetNativeHandle"));
+        mock::getCallbacks().get_replace_callback("urSamplerGetNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -2099,7 +2111,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerGetNativeHandle(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urSamplerGetNativeHandle"));
+        mock::getCallbacks().get_after_callback("urSamplerGetNativeHandle"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -2126,7 +2138,8 @@ __urdlllocal ur_result_t UR_APICALL urSamplerCreateWithNativeHandle(
         &hNativeSampler, &hContext, &pProperties, &phSampler};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urSamplerCreateWithNativeHandle"));
+        mock::getCallbacks().get_before_callback(
+            "urSamplerCreateWithNativeHandle"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -2135,7 +2148,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerCreateWithNativeHandle(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urSamplerCreateWithNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -2151,7 +2164,8 @@ __urdlllocal ur_result_t UR_APICALL urSamplerCreateWithNativeHandle(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urSamplerCreateWithNativeHandle"));
+        mock::getCallbacks().get_after_callback(
+            "urSamplerCreateWithNativeHandle"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -2179,7 +2193,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMHostAlloc(
                                          &ppMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urUSMHostAlloc"));
+        mock::getCallbacks().get_before_callback("urUSMHostAlloc"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -2188,7 +2202,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMHostAlloc(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urUSMHostAlloc"));
+        mock::getCallbacks().get_replace_callback("urUSMHostAlloc"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -2202,7 +2216,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMHostAlloc(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urUSMHostAlloc"));
+        mock::getCallbacks().get_after_callback("urUSMHostAlloc"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -2231,7 +2245,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMDeviceAlloc(
                                            &pool,     &size,    &ppMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urUSMDeviceAlloc"));
+        mock::getCallbacks().get_before_callback("urUSMDeviceAlloc"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -2240,7 +2254,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMDeviceAlloc(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urUSMDeviceAlloc"));
+        mock::getCallbacks().get_replace_callback("urUSMDeviceAlloc"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -2254,7 +2268,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMDeviceAlloc(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urUSMDeviceAlloc"));
+        mock::getCallbacks().get_after_callback("urUSMDeviceAlloc"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -2283,7 +2297,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMSharedAlloc(
                                            &pool,     &size,    &ppMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urUSMSharedAlloc"));
+        mock::getCallbacks().get_before_callback("urUSMSharedAlloc"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -2292,7 +2306,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMSharedAlloc(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urUSMSharedAlloc"));
+        mock::getCallbacks().get_replace_callback("urUSMSharedAlloc"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -2306,7 +2320,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMSharedAlloc(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urUSMSharedAlloc"));
+        mock::getCallbacks().get_after_callback("urUSMSharedAlloc"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -2327,7 +2341,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMFree(
     ur_usm_free_params_t params = {&hContext, &pMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urUSMFree"));
+        mock::getCallbacks().get_before_callback("urUSMFree"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -2336,7 +2350,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMFree(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urUSMFree"));
+        mock::getCallbacks().get_replace_callback("urUSMFree"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -2349,7 +2363,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMFree(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urUSMFree"));
+        mock::getCallbacks().get_after_callback("urUSMFree"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -2380,7 +2394,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMGetMemAllocInfo(
         &hContext, &pMem, &propName, &propSize, &pPropValue, &pPropSizeRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urUSMGetMemAllocInfo"));
+        mock::getCallbacks().get_before_callback("urUSMGetMemAllocInfo"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -2389,7 +2403,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMGetMemAllocInfo(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urUSMGetMemAllocInfo"));
+        mock::getCallbacks().get_replace_callback("urUSMGetMemAllocInfo"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -2402,7 +2416,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMGetMemAllocInfo(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urUSMGetMemAllocInfo"));
+        mock::getCallbacks().get_after_callback("urUSMGetMemAllocInfo"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -2426,7 +2440,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolCreate(
     ur_usm_pool_create_params_t params = {&hContext, &pPoolDesc, &ppPool};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urUSMPoolCreate"));
+        mock::getCallbacks().get_before_callback("urUSMPoolCreate"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -2435,7 +2449,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolCreate(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urUSMPoolCreate"));
+        mock::getCallbacks().get_replace_callback("urUSMPoolCreate"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -2449,7 +2463,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolCreate(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urUSMPoolCreate"));
+        mock::getCallbacks().get_after_callback("urUSMPoolCreate"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -2469,7 +2483,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolRetain(
     ur_usm_pool_retain_params_t params = {&pPool};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urUSMPoolRetain"));
+        mock::getCallbacks().get_before_callback("urUSMPoolRetain"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -2478,7 +2492,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolRetain(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urUSMPoolRetain"));
+        mock::getCallbacks().get_replace_callback("urUSMPoolRetain"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -2492,7 +2506,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolRetain(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urUSMPoolRetain"));
+        mock::getCallbacks().get_after_callback("urUSMPoolRetain"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -2512,7 +2526,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolRelease(
     ur_usm_pool_release_params_t params = {&pPool};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urUSMPoolRelease"));
+        mock::getCallbacks().get_before_callback("urUSMPoolRelease"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -2521,7 +2535,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolRelease(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urUSMPoolRelease"));
+        mock::getCallbacks().get_replace_callback("urUSMPoolRelease"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -2535,7 +2549,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolRelease(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urUSMPoolRelease"));
+        mock::getCallbacks().get_after_callback("urUSMPoolRelease"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -2563,7 +2577,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolGetInfo(
                                             &pPropValue, &pPropSizeRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urUSMPoolGetInfo"));
+        mock::getCallbacks().get_before_callback("urUSMPoolGetInfo"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -2572,7 +2586,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolGetInfo(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urUSMPoolGetInfo"));
+        mock::getCallbacks().get_replace_callback("urUSMPoolGetInfo"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -2585,7 +2599,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolGetInfo(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urUSMPoolGetInfo"));
+        mock::getCallbacks().get_after_callback("urUSMPoolGetInfo"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -2620,7 +2634,8 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemGranularityGetInfo(
         &hContext, &hDevice, &propName, &propSize, &pPropValue, &pPropSizeRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urVirtualMemGranularityGetInfo"));
+        mock::getCallbacks().get_before_callback(
+            "urVirtualMemGranularityGetInfo"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -2629,7 +2644,8 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemGranularityGetInfo(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urVirtualMemGranularityGetInfo"));
+        mock::getCallbacks().get_replace_callback(
+            "urVirtualMemGranularityGetInfo"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -2642,7 +2658,8 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemGranularityGetInfo(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urVirtualMemGranularityGetInfo"));
+        mock::getCallbacks().get_after_callback(
+            "urVirtualMemGranularityGetInfo"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -2672,7 +2689,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemReserve(
                                               &ppStart};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urVirtualMemReserve"));
+        mock::getCallbacks().get_before_callback("urVirtualMemReserve"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -2681,7 +2698,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemReserve(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urVirtualMemReserve"));
+        mock::getCallbacks().get_replace_callback("urVirtualMemReserve"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -2694,7 +2711,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemReserve(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urVirtualMemReserve"));
+        mock::getCallbacks().get_after_callback("urVirtualMemReserve"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -2717,7 +2734,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemFree(
     ur_virtual_mem_free_params_t params = {&hContext, &pStart, &size};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urVirtualMemFree"));
+        mock::getCallbacks().get_before_callback("urVirtualMemFree"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -2726,7 +2743,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemFree(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urVirtualMemFree"));
+        mock::getCallbacks().get_replace_callback("urVirtualMemFree"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -2739,7 +2756,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemFree(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urVirtualMemFree"));
+        mock::getCallbacks().get_after_callback("urVirtualMemFree"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -2769,7 +2786,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemMap(
                                           &hPhysicalMem, &offset, &flags};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urVirtualMemMap"));
+        mock::getCallbacks().get_before_callback("urVirtualMemMap"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -2778,7 +2795,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemMap(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urVirtualMemMap"));
+        mock::getCallbacks().get_replace_callback("urVirtualMemMap"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -2791,7 +2808,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemMap(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urVirtualMemMap"));
+        mock::getCallbacks().get_after_callback("urVirtualMemMap"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -2814,7 +2831,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemUnmap(
     ur_virtual_mem_unmap_params_t params = {&hContext, &pStart, &size};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urVirtualMemUnmap"));
+        mock::getCallbacks().get_before_callback("urVirtualMemUnmap"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -2823,7 +2840,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemUnmap(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urVirtualMemUnmap"));
+        mock::getCallbacks().get_replace_callback("urVirtualMemUnmap"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -2836,7 +2853,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemUnmap(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urVirtualMemUnmap"));
+        mock::getCallbacks().get_after_callback("urVirtualMemUnmap"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -2862,7 +2879,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemSetAccess(
                                                  &flags};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urVirtualMemSetAccess"));
+        mock::getCallbacks().get_before_callback("urVirtualMemSetAccess"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -2871,7 +2888,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemSetAccess(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urVirtualMemSetAccess"));
+        mock::getCallbacks().get_replace_callback("urVirtualMemSetAccess"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -2884,7 +2901,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemSetAccess(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urVirtualMemSetAccess"));
+        mock::getCallbacks().get_after_callback("urVirtualMemSetAccess"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -2919,7 +2936,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemGetInfo(
         &propSize, &pPropValue, &pPropSizeRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urVirtualMemGetInfo"));
+        mock::getCallbacks().get_before_callback("urVirtualMemGetInfo"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -2928,7 +2945,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemGetInfo(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urVirtualMemGetInfo"));
+        mock::getCallbacks().get_replace_callback("urVirtualMemGetInfo"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -2941,7 +2958,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemGetInfo(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urVirtualMemGetInfo"));
+        mock::getCallbacks().get_after_callback("urVirtualMemGetInfo"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -2970,7 +2987,7 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemCreate(
                                               &pProperties, &phPhysicalMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urPhysicalMemCreate"));
+        mock::getCallbacks().get_before_callback("urPhysicalMemCreate"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -2979,7 +2996,7 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemCreate(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urPhysicalMemCreate"));
+        mock::getCallbacks().get_replace_callback("urPhysicalMemCreate"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -2993,7 +3010,7 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemCreate(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urPhysicalMemCreate"));
+        mock::getCallbacks().get_after_callback("urPhysicalMemCreate"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -3014,7 +3031,7 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemRetain(
     ur_physical_mem_retain_params_t params = {&hPhysicalMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urPhysicalMemRetain"));
+        mock::getCallbacks().get_before_callback("urPhysicalMemRetain"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -3023,7 +3040,7 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemRetain(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urPhysicalMemRetain"));
+        mock::getCallbacks().get_replace_callback("urPhysicalMemRetain"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -3037,7 +3054,7 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemRetain(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urPhysicalMemRetain"));
+        mock::getCallbacks().get_after_callback("urPhysicalMemRetain"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -3058,7 +3075,7 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemRelease(
     ur_physical_mem_release_params_t params = {&hPhysicalMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urPhysicalMemRelease"));
+        mock::getCallbacks().get_before_callback("urPhysicalMemRelease"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -3067,7 +3084,7 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemRelease(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urPhysicalMemRelease"));
+        mock::getCallbacks().get_replace_callback("urPhysicalMemRelease"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -3081,7 +3098,7 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemRelease(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urPhysicalMemRelease"));
+        mock::getCallbacks().get_after_callback("urPhysicalMemRelease"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -3108,7 +3125,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithIL(
                                                  &pProperties, &phProgram};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urProgramCreateWithIL"));
+        mock::getCallbacks().get_before_callback("urProgramCreateWithIL"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -3117,7 +3134,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithIL(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urProgramCreateWithIL"));
+        mock::getCallbacks().get_replace_callback("urProgramCreateWithIL"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -3131,7 +3148,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithIL(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urProgramCreateWithIL"));
+        mock::getCallbacks().get_after_callback("urProgramCreateWithIL"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -3160,7 +3177,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithBinary(
         &hContext, &hDevice, &size, &pBinary, &pProperties, &phProgram};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urProgramCreateWithBinary"));
+        mock::getCallbacks().get_before_callback("urProgramCreateWithBinary"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -3169,7 +3186,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithBinary(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urProgramCreateWithBinary"));
+        mock::getCallbacks().get_replace_callback("urProgramCreateWithBinary"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -3183,7 +3200,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithBinary(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urProgramCreateWithBinary"));
+        mock::getCallbacks().get_after_callback("urProgramCreateWithBinary"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -3206,7 +3223,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuild(
     ur_program_build_params_t params = {&hContext, &hProgram, &pOptions};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urProgramBuild"));
+        mock::getCallbacks().get_before_callback("urProgramBuild"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -3215,7 +3232,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuild(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urProgramBuild"));
+        mock::getCallbacks().get_replace_callback("urProgramBuild"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -3228,7 +3245,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuild(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urProgramBuild"));
+        mock::getCallbacks().get_after_callback("urProgramBuild"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -3252,7 +3269,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCompile(
     ur_program_compile_params_t params = {&hContext, &hProgram, &pOptions};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urProgramCompile"));
+        mock::getCallbacks().get_before_callback("urProgramCompile"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -3261,7 +3278,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCompile(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urProgramCompile"));
+        mock::getCallbacks().get_replace_callback("urProgramCompile"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -3274,7 +3291,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCompile(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urProgramCompile"));
+        mock::getCallbacks().get_after_callback("urProgramCompile"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -3302,7 +3319,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramLink(
                                        &pOptions, &phProgram};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urProgramLink"));
+        mock::getCallbacks().get_before_callback("urProgramLink"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -3311,7 +3328,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramLink(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urProgramLink"));
+        mock::getCallbacks().get_replace_callback("urProgramLink"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -3325,7 +3342,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramLink(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urProgramLink"));
+        mock::getCallbacks().get_after_callback("urProgramLink"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -3346,7 +3363,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramRetain(
     ur_program_retain_params_t params = {&hProgram};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urProgramRetain"));
+        mock::getCallbacks().get_before_callback("urProgramRetain"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -3355,7 +3372,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramRetain(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urProgramRetain"));
+        mock::getCallbacks().get_replace_callback("urProgramRetain"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -3369,7 +3386,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramRetain(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urProgramRetain"));
+        mock::getCallbacks().get_after_callback("urProgramRetain"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -3390,7 +3407,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramRelease(
     ur_program_release_params_t params = {&hProgram};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urProgramRelease"));
+        mock::getCallbacks().get_before_callback("urProgramRelease"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -3399,7 +3416,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramRelease(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urProgramRelease"));
+        mock::getCallbacks().get_replace_callback("urProgramRelease"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -3413,7 +3430,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramRelease(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urProgramRelease"));
+        mock::getCallbacks().get_after_callback("urProgramRelease"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -3443,7 +3460,8 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetFunctionPointer(
         &hDevice, &hProgram, &pFunctionName, &ppFunctionPointer};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urProgramGetFunctionPointer"));
+        mock::getCallbacks().get_before_callback(
+            "urProgramGetFunctionPointer"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -3452,7 +3470,8 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetFunctionPointer(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urProgramGetFunctionPointer"));
+        mock::getCallbacks().get_replace_callback(
+            "urProgramGetFunctionPointer"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -3465,7 +3484,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetFunctionPointer(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urProgramGetFunctionPointer"));
+        mock::getCallbacks().get_after_callback("urProgramGetFunctionPointer"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -3497,7 +3516,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetGlobalVariablePointer(
         &ppGlobalVariablePointerRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urProgramGetGlobalVariablePointer"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -3507,7 +3526,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetGlobalVariablePointer(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urProgramGetGlobalVariablePointer"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -3520,8 +3539,8 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetGlobalVariablePointer(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urProgramGetGlobalVariablePointer"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -3554,7 +3573,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetInfo(
                                            &pPropValue, &pPropSizeRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urProgramGetInfo"));
+        mock::getCallbacks().get_before_callback("urProgramGetInfo"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -3563,7 +3582,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetInfo(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urProgramGetInfo"));
+        mock::getCallbacks().get_replace_callback("urProgramGetInfo"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -3576,7 +3595,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetInfo(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urProgramGetInfo"));
+        mock::getCallbacks().get_after_callback("urProgramGetInfo"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -3610,7 +3629,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetBuildInfo(
         &hProgram, &hDevice, &propName, &propSize, &pPropValue, &pPropSizeRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urProgramGetBuildInfo"));
+        mock::getCallbacks().get_before_callback("urProgramGetBuildInfo"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -3619,7 +3638,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetBuildInfo(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urProgramGetBuildInfo"));
+        mock::getCallbacks().get_replace_callback("urProgramGetBuildInfo"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -3632,7 +3651,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetBuildInfo(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urProgramGetBuildInfo"));
+        mock::getCallbacks().get_after_callback("urProgramGetBuildInfo"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -3657,7 +3676,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramSetSpecializationConstants(
         &hProgram, &count, &pSpecConstants};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urProgramSetSpecializationConstants"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -3667,7 +3686,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramSetSpecializationConstants(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urProgramSetSpecializationConstants"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -3680,8 +3699,8 @@ __urdlllocal ur_result_t UR_APICALL urProgramSetSpecializationConstants(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urProgramSetSpecializationConstants"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -3705,7 +3724,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetNativeHandle(
                                                     &phNativeProgram};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urProgramGetNativeHandle"));
+        mock::getCallbacks().get_before_callback("urProgramGetNativeHandle"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -3714,7 +3733,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetNativeHandle(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urProgramGetNativeHandle"));
+        mock::getCallbacks().get_replace_callback("urProgramGetNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -3728,7 +3747,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetNativeHandle(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urProgramGetNativeHandle"));
+        mock::getCallbacks().get_after_callback("urProgramGetNativeHandle"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -3755,7 +3774,8 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithNativeHandle(
         &hNativeProgram, &hContext, &pProperties, &phProgram};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urProgramCreateWithNativeHandle"));
+        mock::getCallbacks().get_before_callback(
+            "urProgramCreateWithNativeHandle"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -3764,7 +3784,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithNativeHandle(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urProgramCreateWithNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -3780,7 +3800,8 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithNativeHandle(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urProgramCreateWithNativeHandle"));
+        mock::getCallbacks().get_after_callback(
+            "urProgramCreateWithNativeHandle"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -3803,7 +3824,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreate(
     ur_kernel_create_params_t params = {&hProgram, &pKernelName, &phKernel};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urKernelCreate"));
+        mock::getCallbacks().get_before_callback("urKernelCreate"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -3812,7 +3833,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreate(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urKernelCreate"));
+        mock::getCallbacks().get_replace_callback("urKernelCreate"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -3826,7 +3847,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreate(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urKernelCreate"));
+        mock::getCallbacks().get_after_callback("urKernelCreate"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -3853,7 +3874,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgValue(
                                                &pProperties, &pArgValue};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urKernelSetArgValue"));
+        mock::getCallbacks().get_before_callback("urKernelSetArgValue"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -3862,7 +3883,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgValue(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urKernelSetArgValue"));
+        mock::getCallbacks().get_replace_callback("urKernelSetArgValue"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -3875,7 +3896,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgValue(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urKernelSetArgValue"));
+        mock::getCallbacks().get_after_callback("urKernelSetArgValue"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -3901,7 +3922,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgLocal(
                                                &pProperties};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urKernelSetArgLocal"));
+        mock::getCallbacks().get_before_callback("urKernelSetArgLocal"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -3910,7 +3931,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgLocal(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urKernelSetArgLocal"));
+        mock::getCallbacks().get_replace_callback("urKernelSetArgLocal"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -3923,7 +3944,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgLocal(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urKernelSetArgLocal"));
+        mock::getCallbacks().get_after_callback("urKernelSetArgLocal"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -3956,7 +3977,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetInfo(
                                           &pPropValue, &pPropSizeRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urKernelGetInfo"));
+        mock::getCallbacks().get_before_callback("urKernelGetInfo"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -3965,7 +3986,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetInfo(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urKernelGetInfo"));
+        mock::getCallbacks().get_replace_callback("urKernelGetInfo"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -3978,7 +3999,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetInfo(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urKernelGetInfo"));
+        mock::getCallbacks().get_after_callback("urKernelGetInfo"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -4009,7 +4030,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetGroupInfo(
         &hKernel, &hDevice, &propName, &propSize, &pPropValue, &pPropSizeRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urKernelGetGroupInfo"));
+        mock::getCallbacks().get_before_callback("urKernelGetGroupInfo"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -4018,7 +4039,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetGroupInfo(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urKernelGetGroupInfo"));
+        mock::getCallbacks().get_replace_callback("urKernelGetGroupInfo"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -4031,7 +4052,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetGroupInfo(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urKernelGetGroupInfo"));
+        mock::getCallbacks().get_after_callback("urKernelGetGroupInfo"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -4062,7 +4083,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetSubGroupInfo(
         &hKernel, &hDevice, &propName, &propSize, &pPropValue, &pPropSizeRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urKernelGetSubGroupInfo"));
+        mock::getCallbacks().get_before_callback("urKernelGetSubGroupInfo"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -4071,7 +4092,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetSubGroupInfo(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urKernelGetSubGroupInfo"));
+        mock::getCallbacks().get_replace_callback("urKernelGetSubGroupInfo"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -4084,7 +4105,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetSubGroupInfo(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urKernelGetSubGroupInfo"));
+        mock::getCallbacks().get_after_callback("urKernelGetSubGroupInfo"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -4104,7 +4125,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelRetain(
     ur_kernel_retain_params_t params = {&hKernel};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urKernelRetain"));
+        mock::getCallbacks().get_before_callback("urKernelRetain"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -4113,7 +4134,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelRetain(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urKernelRetain"));
+        mock::getCallbacks().get_replace_callback("urKernelRetain"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -4127,7 +4148,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelRetain(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urKernelRetain"));
+        mock::getCallbacks().get_after_callback("urKernelRetain"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -4148,7 +4169,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelRelease(
     ur_kernel_release_params_t params = {&hKernel};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urKernelRelease"));
+        mock::getCallbacks().get_before_callback("urKernelRelease"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -4157,7 +4178,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelRelease(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urKernelRelease"));
+        mock::getCallbacks().get_replace_callback("urKernelRelease"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -4171,7 +4192,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelRelease(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urKernelRelease"));
+        mock::getCallbacks().get_after_callback("urKernelRelease"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -4198,7 +4219,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgPointer(
                                                  &pProperties, &pArgValue};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urKernelSetArgPointer"));
+        mock::getCallbacks().get_before_callback("urKernelSetArgPointer"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -4207,7 +4228,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgPointer(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urKernelSetArgPointer"));
+        mock::getCallbacks().get_replace_callback("urKernelSetArgPointer"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -4220,7 +4241,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgPointer(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urKernelSetArgPointer"));
+        mock::getCallbacks().get_after_callback("urKernelSetArgPointer"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -4248,7 +4269,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetExecInfo(
                                                &pProperties, &pPropValue};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urKernelSetExecInfo"));
+        mock::getCallbacks().get_before_callback("urKernelSetExecInfo"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -4257,7 +4278,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetExecInfo(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urKernelSetExecInfo"));
+        mock::getCallbacks().get_replace_callback("urKernelSetExecInfo"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -4270,7 +4291,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetExecInfo(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urKernelSetExecInfo"));
+        mock::getCallbacks().get_after_callback("urKernelSetExecInfo"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -4295,7 +4316,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgSampler(
                                                  &pProperties, &hArgValue};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urKernelSetArgSampler"));
+        mock::getCallbacks().get_before_callback("urKernelSetArgSampler"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -4304,7 +4325,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgSampler(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urKernelSetArgSampler"));
+        mock::getCallbacks().get_replace_callback("urKernelSetArgSampler"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -4317,7 +4338,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgSampler(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urKernelSetArgSampler"));
+        mock::getCallbacks().get_after_callback("urKernelSetArgSampler"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -4342,7 +4363,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgMemObj(
                                                  &pProperties, &hArgValue};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urKernelSetArgMemObj"));
+        mock::getCallbacks().get_before_callback("urKernelSetArgMemObj"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -4351,7 +4372,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgMemObj(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urKernelSetArgMemObj"));
+        mock::getCallbacks().get_replace_callback("urKernelSetArgMemObj"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -4364,7 +4385,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgMemObj(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urKernelSetArgMemObj"));
+        mock::getCallbacks().get_after_callback("urKernelSetArgMemObj"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -4388,7 +4409,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetSpecializationConstants(
                                                               &pSpecConstants};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urKernelSetSpecializationConstants"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -4398,7 +4419,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetSpecializationConstants(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urKernelSetSpecializationConstants"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -4411,8 +4432,8 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetSpecializationConstants(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urKernelSetSpecializationConstants"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -4435,7 +4456,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetNativeHandle(
     ur_kernel_get_native_handle_params_t params = {&hKernel, &phNativeKernel};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urKernelGetNativeHandle"));
+        mock::getCallbacks().get_before_callback("urKernelGetNativeHandle"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -4444,7 +4465,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetNativeHandle(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urKernelGetNativeHandle"));
+        mock::getCallbacks().get_replace_callback("urKernelGetNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -4458,7 +4479,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetNativeHandle(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urKernelGetNativeHandle"));
+        mock::getCallbacks().get_after_callback("urKernelGetNativeHandle"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -4487,7 +4508,8 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
         &hNativeKernel, &hContext, &hProgram, &pProperties, &phKernel};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urKernelCreateWithNativeHandle"));
+        mock::getCallbacks().get_before_callback(
+            "urKernelCreateWithNativeHandle"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -4496,7 +4518,8 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urKernelCreateWithNativeHandle"));
+        mock::getCallbacks().get_replace_callback(
+            "urKernelCreateWithNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -4511,7 +4534,8 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urKernelCreateWithNativeHandle"));
+        mock::getCallbacks().get_after_callback(
+            "urKernelCreateWithNativeHandle"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -4547,7 +4571,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetSuggestedLocalWorkSize(
         &pGlobalWorkOffset, &pGlobalWorkSize, &pSuggestedLocalWorkSize};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urKernelGetSuggestedLocalWorkSize"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -4557,7 +4581,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetSuggestedLocalWorkSize(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urKernelGetSuggestedLocalWorkSize"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -4570,8 +4594,8 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetSuggestedLocalWorkSize(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urKernelGetSuggestedLocalWorkSize"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -4601,7 +4625,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueGetInfo(
                                          &pPropValue, &pPropSizeRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urQueueGetInfo"));
+        mock::getCallbacks().get_before_callback("urQueueGetInfo"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -4610,7 +4634,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueGetInfo(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urQueueGetInfo"));
+        mock::getCallbacks().get_replace_callback("urQueueGetInfo"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -4623,7 +4647,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueGetInfo(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urQueueGetInfo"));
+        mock::getCallbacks().get_after_callback("urQueueGetInfo"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -4649,7 +4673,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueCreate(
                                        &phQueue};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urQueueCreate"));
+        mock::getCallbacks().get_before_callback("urQueueCreate"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -4658,7 +4682,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueCreate(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urQueueCreate"));
+        mock::getCallbacks().get_replace_callback("urQueueCreate"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -4672,7 +4696,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueCreate(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urQueueCreate"));
+        mock::getCallbacks().get_after_callback("urQueueCreate"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -4693,7 +4717,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueRetain(
     ur_queue_retain_params_t params = {&hQueue};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urQueueRetain"));
+        mock::getCallbacks().get_before_callback("urQueueRetain"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -4702,7 +4726,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueRetain(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urQueueRetain"));
+        mock::getCallbacks().get_replace_callback("urQueueRetain"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -4716,7 +4740,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueRetain(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urQueueRetain"));
+        mock::getCallbacks().get_after_callback("urQueueRetain"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -4737,7 +4761,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueRelease(
     ur_queue_release_params_t params = {&hQueue};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urQueueRelease"));
+        mock::getCallbacks().get_before_callback("urQueueRelease"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -4746,7 +4770,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueRelease(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urQueueRelease"));
+        mock::getCallbacks().get_replace_callback("urQueueRelease"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -4760,7 +4784,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueRelease(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urQueueRelease"));
+        mock::getCallbacks().get_after_callback("urQueueRelease"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -4785,7 +4809,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueGetNativeHandle(
                                                   &phNativeQueue};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urQueueGetNativeHandle"));
+        mock::getCallbacks().get_before_callback("urQueueGetNativeHandle"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -4794,7 +4818,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueGetNativeHandle(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urQueueGetNativeHandle"));
+        mock::getCallbacks().get_replace_callback("urQueueGetNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -4808,7 +4832,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueGetNativeHandle(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urQueueGetNativeHandle"));
+        mock::getCallbacks().get_after_callback("urQueueGetNativeHandle"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -4836,7 +4860,8 @@ __urdlllocal ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
         &hNativeQueue, &hContext, &hDevice, &pProperties, &phQueue};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urQueueCreateWithNativeHandle"));
+        mock::getCallbacks().get_before_callback(
+            "urQueueCreateWithNativeHandle"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -4845,7 +4870,8 @@ __urdlllocal ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urQueueCreateWithNativeHandle"));
+        mock::getCallbacks().get_replace_callback(
+            "urQueueCreateWithNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -4860,7 +4886,8 @@ __urdlllocal ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urQueueCreateWithNativeHandle"));
+        mock::getCallbacks().get_after_callback(
+            "urQueueCreateWithNativeHandle"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -4880,7 +4907,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueFinish(
     ur_queue_finish_params_t params = {&hQueue};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urQueueFinish"));
+        mock::getCallbacks().get_before_callback("urQueueFinish"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -4889,7 +4916,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueFinish(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urQueueFinish"));
+        mock::getCallbacks().get_replace_callback("urQueueFinish"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -4902,7 +4929,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueFinish(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urQueueFinish"));
+        mock::getCallbacks().get_after_callback("urQueueFinish"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -4922,7 +4949,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueFlush(
     ur_queue_flush_params_t params = {&hQueue};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urQueueFlush"));
+        mock::getCallbacks().get_before_callback("urQueueFlush"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -4931,7 +4958,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueFlush(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urQueueFlush"));
+        mock::getCallbacks().get_replace_callback("urQueueFlush"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -4944,7 +4971,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueFlush(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urQueueFlush"));
+        mock::getCallbacks().get_after_callback("urQueueFlush"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -4971,7 +4998,7 @@ __urdlllocal ur_result_t UR_APICALL urEventGetInfo(
                                          &pPropValue, &pPropSizeRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEventGetInfo"));
+        mock::getCallbacks().get_before_callback("urEventGetInfo"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -4980,7 +5007,7 @@ __urdlllocal ur_result_t UR_APICALL urEventGetInfo(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEventGetInfo"));
+        mock::getCallbacks().get_replace_callback("urEventGetInfo"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -4993,7 +5020,7 @@ __urdlllocal ur_result_t UR_APICALL urEventGetInfo(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEventGetInfo"));
+        mock::getCallbacks().get_after_callback("urEventGetInfo"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -5023,7 +5050,7 @@ __urdlllocal ur_result_t UR_APICALL urEventGetProfilingInfo(
         &hEvent, &propName, &propSize, &pPropValue, &pPropSizeRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEventGetProfilingInfo"));
+        mock::getCallbacks().get_before_callback("urEventGetProfilingInfo"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -5032,7 +5059,7 @@ __urdlllocal ur_result_t UR_APICALL urEventGetProfilingInfo(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEventGetProfilingInfo"));
+        mock::getCallbacks().get_replace_callback("urEventGetProfilingInfo"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -5045,7 +5072,7 @@ __urdlllocal ur_result_t UR_APICALL urEventGetProfilingInfo(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEventGetProfilingInfo"));
+        mock::getCallbacks().get_after_callback("urEventGetProfilingInfo"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -5068,7 +5095,7 @@ __urdlllocal ur_result_t UR_APICALL urEventWait(
     ur_event_wait_params_t params = {&numEvents, &phEventWaitList};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEventWait"));
+        mock::getCallbacks().get_before_callback("urEventWait"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -5077,7 +5104,7 @@ __urdlllocal ur_result_t UR_APICALL urEventWait(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEventWait"));
+        mock::getCallbacks().get_replace_callback("urEventWait"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -5090,7 +5117,7 @@ __urdlllocal ur_result_t UR_APICALL urEventWait(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEventWait"));
+        mock::getCallbacks().get_after_callback("urEventWait"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -5110,7 +5137,7 @@ __urdlllocal ur_result_t UR_APICALL urEventRetain(
     ur_event_retain_params_t params = {&hEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEventRetain"));
+        mock::getCallbacks().get_before_callback("urEventRetain"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -5119,7 +5146,7 @@ __urdlllocal ur_result_t UR_APICALL urEventRetain(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEventRetain"));
+        mock::getCallbacks().get_replace_callback("urEventRetain"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -5133,7 +5160,7 @@ __urdlllocal ur_result_t UR_APICALL urEventRetain(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEventRetain"));
+        mock::getCallbacks().get_after_callback("urEventRetain"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -5153,7 +5180,7 @@ __urdlllocal ur_result_t UR_APICALL urEventRelease(
     ur_event_release_params_t params = {&hEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEventRelease"));
+        mock::getCallbacks().get_before_callback("urEventRelease"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -5162,7 +5189,7 @@ __urdlllocal ur_result_t UR_APICALL urEventRelease(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEventRelease"));
+        mock::getCallbacks().get_replace_callback("urEventRelease"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -5176,7 +5203,7 @@ __urdlllocal ur_result_t UR_APICALL urEventRelease(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEventRelease"));
+        mock::getCallbacks().get_after_callback("urEventRelease"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -5198,7 +5225,7 @@ __urdlllocal ur_result_t UR_APICALL urEventGetNativeHandle(
     ur_event_get_native_handle_params_t params = {&hEvent, &phNativeEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEventGetNativeHandle"));
+        mock::getCallbacks().get_before_callback("urEventGetNativeHandle"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -5207,7 +5234,7 @@ __urdlllocal ur_result_t UR_APICALL urEventGetNativeHandle(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEventGetNativeHandle"));
+        mock::getCallbacks().get_replace_callback("urEventGetNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -5221,7 +5248,7 @@ __urdlllocal ur_result_t UR_APICALL urEventGetNativeHandle(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEventGetNativeHandle"));
+        mock::getCallbacks().get_after_callback("urEventGetNativeHandle"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -5248,7 +5275,8 @@ __urdlllocal ur_result_t UR_APICALL urEventCreateWithNativeHandle(
         &hNativeEvent, &hContext, &pProperties, &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEventCreateWithNativeHandle"));
+        mock::getCallbacks().get_before_callback(
+            "urEventCreateWithNativeHandle"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -5257,7 +5285,8 @@ __urdlllocal ur_result_t UR_APICALL urEventCreateWithNativeHandle(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEventCreateWithNativeHandle"));
+        mock::getCallbacks().get_replace_callback(
+            "urEventCreateWithNativeHandle"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -5272,7 +5301,8 @@ __urdlllocal ur_result_t UR_APICALL urEventCreateWithNativeHandle(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEventCreateWithNativeHandle"));
+        mock::getCallbacks().get_after_callback(
+            "urEventCreateWithNativeHandle"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -5297,7 +5327,7 @@ __urdlllocal ur_result_t UR_APICALL urEventSetCallback(
                                              &pUserData};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEventSetCallback"));
+        mock::getCallbacks().get_before_callback("urEventSetCallback"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -5306,7 +5336,7 @@ __urdlllocal ur_result_t UR_APICALL urEventSetCallback(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEventSetCallback"));
+        mock::getCallbacks().get_replace_callback("urEventSetCallback"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -5319,7 +5349,7 @@ __urdlllocal ur_result_t UR_APICALL urEventSetCallback(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEventSetCallback"));
+        mock::getCallbacks().get_after_callback("urEventSetCallback"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -5373,7 +5403,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunch(
                                                 &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueKernelLaunch"));
+        mock::getCallbacks().get_before_callback("urEnqueueKernelLaunch"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -5382,7 +5412,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunch(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueKernelLaunch"));
+        mock::getCallbacks().get_replace_callback("urEnqueueKernelLaunch"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -5399,7 +5429,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunch(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueKernelLaunch"));
+        mock::getCallbacks().get_after_callback("urEnqueueKernelLaunch"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -5430,7 +5460,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWait(
                                               &phEventWaitList, &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueEventsWait"));
+        mock::getCallbacks().get_before_callback("urEnqueueEventsWait"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -5439,7 +5469,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWait(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueEventsWait"));
+        mock::getCallbacks().get_replace_callback("urEnqueueEventsWait"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -5456,7 +5486,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWait(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueEventsWait"));
+        mock::getCallbacks().get_after_callback("urEnqueueEventsWait"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -5487,7 +5517,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
         &hQueue, &numEventsInWaitList, &phEventWaitList, &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueEventsWaitWithBarrier"));
+        mock::getCallbacks().get_before_callback(
+            "urEnqueueEventsWaitWithBarrier"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -5496,7 +5527,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueEventsWaitWithBarrier"));
+        mock::getCallbacks().get_replace_callback(
+            "urEnqueueEventsWaitWithBarrier"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -5513,7 +5545,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueEventsWaitWithBarrier"));
+        mock::getCallbacks().get_after_callback(
+            "urEnqueueEventsWaitWithBarrier"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -5551,7 +5584,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferRead(
         &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueMemBufferRead"));
+        mock::getCallbacks().get_before_callback("urEnqueueMemBufferRead"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -5560,7 +5593,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferRead(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueMemBufferRead"));
+        mock::getCallbacks().get_replace_callback("urEnqueueMemBufferRead"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -5577,7 +5610,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferRead(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueMemBufferRead"));
+        mock::getCallbacks().get_after_callback("urEnqueueMemBufferRead"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -5617,7 +5650,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWrite(
         &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueMemBufferWrite"));
+        mock::getCallbacks().get_before_callback("urEnqueueMemBufferWrite"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -5626,7 +5659,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWrite(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueMemBufferWrite"));
+        mock::getCallbacks().get_replace_callback("urEnqueueMemBufferWrite"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -5643,7 +5676,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWrite(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueMemBufferWrite"));
+        mock::getCallbacks().get_after_callback("urEnqueueMemBufferWrite"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -5703,7 +5736,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
                                                        &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueMemBufferReadRect"));
+        mock::getCallbacks().get_before_callback("urEnqueueMemBufferReadRect"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -5712,7 +5745,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueMemBufferReadRect"));
+        mock::getCallbacks().get_replace_callback(
+            "urEnqueueMemBufferReadRect"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -5729,7 +5763,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueMemBufferReadRect"));
+        mock::getCallbacks().get_after_callback("urEnqueueMemBufferReadRect"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -5792,7 +5826,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
                                                         &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueMemBufferWriteRect"));
+        mock::getCallbacks().get_before_callback(
+            "urEnqueueMemBufferWriteRect"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -5801,7 +5836,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueMemBufferWriteRect"));
+        mock::getCallbacks().get_replace_callback(
+            "urEnqueueMemBufferWriteRect"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -5818,7 +5854,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueMemBufferWriteRect"));
+        mock::getCallbacks().get_after_callback("urEnqueueMemBufferWriteRect"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -5856,7 +5892,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopy(
         &size,   &numEventsInWaitList, &phEventWaitList, &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueMemBufferCopy"));
+        mock::getCallbacks().get_before_callback("urEnqueueMemBufferCopy"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -5865,7 +5901,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopy(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueMemBufferCopy"));
+        mock::getCallbacks().get_replace_callback("urEnqueueMemBufferCopy"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -5882,7 +5918,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopy(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueMemBufferCopy"));
+        mock::getCallbacks().get_after_callback("urEnqueueMemBufferCopy"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -5931,7 +5967,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
         &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueMemBufferCopyRect"));
+        mock::getCallbacks().get_before_callback("urEnqueueMemBufferCopyRect"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -5940,7 +5976,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueMemBufferCopyRect"));
+        mock::getCallbacks().get_replace_callback(
+            "urEnqueueMemBufferCopyRect"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -5957,7 +5994,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueMemBufferCopyRect"));
+        mock::getCallbacks().get_after_callback("urEnqueueMemBufferCopyRect"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -6000,7 +6037,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferFill(
                                                   &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueMemBufferFill"));
+        mock::getCallbacks().get_before_callback("urEnqueueMemBufferFill"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -6009,7 +6046,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferFill(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueMemBufferFill"));
+        mock::getCallbacks().get_replace_callback("urEnqueueMemBufferFill"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -6026,7 +6063,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferFill(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueMemBufferFill"));
+        mock::getCallbacks().get_after_callback("urEnqueueMemBufferFill"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -6070,7 +6107,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageRead(
         &phEventWaitList, &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueMemImageRead"));
+        mock::getCallbacks().get_before_callback("urEnqueueMemImageRead"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -6079,7 +6116,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageRead(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueMemImageRead"));
+        mock::getCallbacks().get_replace_callback("urEnqueueMemImageRead"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -6096,7 +6133,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageRead(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueMemImageRead"));
+        mock::getCallbacks().get_after_callback("urEnqueueMemImageRead"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -6141,7 +6178,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageWrite(
         &phEventWaitList, &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueMemImageWrite"));
+        mock::getCallbacks().get_before_callback("urEnqueueMemImageWrite"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -6150,7 +6187,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageWrite(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueMemImageWrite"));
+        mock::getCallbacks().get_replace_callback("urEnqueueMemImageWrite"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -6167,7 +6204,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageWrite(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueMemImageWrite"));
+        mock::getCallbacks().get_after_callback("urEnqueueMemImageWrite"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -6211,7 +6248,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageCopy(
         &region, &numEventsInWaitList, &phEventWaitList, &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueMemImageCopy"));
+        mock::getCallbacks().get_before_callback("urEnqueueMemImageCopy"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -6220,7 +6257,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageCopy(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueMemImageCopy"));
+        mock::getCallbacks().get_replace_callback("urEnqueueMemImageCopy"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -6237,7 +6274,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageCopy(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueMemImageCopy"));
+        mock::getCallbacks().get_after_callback("urEnqueueMemImageCopy"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -6277,7 +6314,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferMap(
         &phEvent, &ppRetMap};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueMemBufferMap"));
+        mock::getCallbacks().get_before_callback("urEnqueueMemBufferMap"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -6286,7 +6323,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferMap(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueMemBufferMap"));
+        mock::getCallbacks().get_replace_callback("urEnqueueMemBufferMap"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -6306,7 +6343,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferMap(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueMemBufferMap"));
+        mock::getCallbacks().get_after_callback("urEnqueueMemBufferMap"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -6340,7 +6377,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemUnmap(
         &phEventWaitList, &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueMemUnmap"));
+        mock::getCallbacks().get_before_callback("urEnqueueMemUnmap"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -6349,7 +6386,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemUnmap(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueMemUnmap"));
+        mock::getCallbacks().get_replace_callback("urEnqueueMemUnmap"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -6366,7 +6403,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemUnmap(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueMemUnmap"));
+        mock::getCallbacks().get_after_callback("urEnqueueMemUnmap"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -6406,7 +6443,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill(
         &phEventWaitList, &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueUSMFill"));
+        mock::getCallbacks().get_before_callback("urEnqueueUSMFill"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -6415,7 +6452,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueUSMFill"));
+        mock::getCallbacks().get_replace_callback("urEnqueueUSMFill"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -6432,7 +6469,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueUSMFill"));
+        mock::getCallbacks().get_after_callback("urEnqueueUSMFill"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -6469,7 +6506,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy(
         &phEventWaitList, &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueUSMMemcpy"));
+        mock::getCallbacks().get_before_callback("urEnqueueUSMMemcpy"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -6478,7 +6515,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueUSMMemcpy"));
+        mock::getCallbacks().get_replace_callback("urEnqueueUSMMemcpy"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -6495,7 +6532,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueUSMMemcpy"));
+        mock::getCallbacks().get_after_callback("urEnqueueUSMMemcpy"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -6530,7 +6567,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMPrefetch(
         &phEventWaitList, &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueUSMPrefetch"));
+        mock::getCallbacks().get_before_callback("urEnqueueUSMPrefetch"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -6539,7 +6576,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMPrefetch(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueUSMPrefetch"));
+        mock::getCallbacks().get_replace_callback("urEnqueueUSMPrefetch"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -6556,7 +6593,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMPrefetch(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueUSMPrefetch"));
+        mock::getCallbacks().get_after_callback("urEnqueueUSMPrefetch"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -6584,7 +6621,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMAdvise(
                                              &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueUSMAdvise"));
+        mock::getCallbacks().get_before_callback("urEnqueueUSMAdvise"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -6593,7 +6630,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMAdvise(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueUSMAdvise"));
+        mock::getCallbacks().get_replace_callback("urEnqueueUSMAdvise"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -6610,7 +6647,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMAdvise(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueUSMAdvise"));
+        mock::getCallbacks().get_after_callback("urEnqueueUSMAdvise"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -6655,7 +6692,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill2D(
         &phEventWaitList, &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueUSMFill2D"));
+        mock::getCallbacks().get_before_callback("urEnqueueUSMFill2D"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -6664,7 +6701,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill2D(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueUSMFill2D"));
+        mock::getCallbacks().get_replace_callback("urEnqueueUSMFill2D"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -6681,7 +6718,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill2D(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueUSMFill2D"));
+        mock::getCallbacks().get_after_callback("urEnqueueUSMFill2D"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -6726,7 +6763,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
         &phEventWaitList, &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueUSMMemcpy2D"));
+        mock::getCallbacks().get_before_callback("urEnqueueUSMMemcpy2D"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -6735,7 +6772,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueUSMMemcpy2D"));
+        mock::getCallbacks().get_replace_callback("urEnqueueUSMMemcpy2D"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -6752,7 +6789,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueUSMMemcpy2D"));
+        mock::getCallbacks().get_after_callback("urEnqueueUSMMemcpy2D"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -6793,7 +6830,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
         &phEventWaitList, &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urEnqueueDeviceGlobalVariableWrite"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -6803,7 +6840,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urEnqueueDeviceGlobalVariableWrite"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -6820,8 +6857,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urEnqueueDeviceGlobalVariableWrite"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -6863,7 +6900,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
         &phEventWaitList, &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urEnqueueDeviceGlobalVariableRead"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -6873,7 +6910,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urEnqueueDeviceGlobalVariableRead"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -6890,8 +6927,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urEnqueueDeviceGlobalVariableRead"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -6937,7 +6974,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueReadHostPipe(
         &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueReadHostPipe"));
+        mock::getCallbacks().get_before_callback("urEnqueueReadHostPipe"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -6946,7 +6983,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueReadHostPipe(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueReadHostPipe"));
+        mock::getCallbacks().get_replace_callback("urEnqueueReadHostPipe"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -6963,7 +7000,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueReadHostPipe(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueReadHostPipe"));
+        mock::getCallbacks().get_after_callback("urEnqueueReadHostPipe"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -7008,7 +7045,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueWriteHostPipe(
         &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueWriteHostPipe"));
+        mock::getCallbacks().get_before_callback("urEnqueueWriteHostPipe"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -7017,7 +7054,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueWriteHostPipe(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueWriteHostPipe"));
+        mock::getCallbacks().get_replace_callback("urEnqueueWriteHostPipe"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -7034,7 +7071,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueWriteHostPipe(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueWriteHostPipe"));
+        mock::getCallbacks().get_after_callback("urEnqueueWriteHostPipe"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -7068,7 +7105,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMPitchedAllocExp(
         &height,   &elementSizeBytes, &ppMem,    &pResultPitch};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urUSMPitchedAllocExp"));
+        mock::getCallbacks().get_before_callback("urUSMPitchedAllocExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -7077,7 +7114,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMPitchedAllocExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urUSMPitchedAllocExp"));
+        mock::getCallbacks().get_replace_callback("urUSMPitchedAllocExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -7091,7 +7128,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMPitchedAllocExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urUSMPitchedAllocExp"));
+        mock::getCallbacks().get_after_callback("urUSMPitchedAllocExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -7116,7 +7153,7 @@ urBindlessImagesUnsampledImageHandleDestroyExp(
         &hContext, &hDevice, &hImage};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urBindlessImagesUnsampledImageHandleDestroyExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -7126,7 +7163,7 @@ urBindlessImagesUnsampledImageHandleDestroyExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urBindlessImagesUnsampledImageHandleDestroyExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -7139,8 +7176,8 @@ urBindlessImagesUnsampledImageHandleDestroyExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urBindlessImagesUnsampledImageHandleDestroyExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -7166,7 +7203,7 @@ urBindlessImagesSampledImageHandleDestroyExp(
         &hContext, &hDevice, &hImage};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urBindlessImagesSampledImageHandleDestroyExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -7176,7 +7213,7 @@ urBindlessImagesSampledImageHandleDestroyExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urBindlessImagesSampledImageHandleDestroyExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -7189,8 +7226,8 @@ urBindlessImagesSampledImageHandleDestroyExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urBindlessImagesSampledImageHandleDestroyExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -7218,7 +7255,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageAllocateExp(
         &hContext, &hDevice, &pImageFormat, &pImageDesc, &phImageMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urBindlessImagesImageAllocateExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -7228,7 +7265,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageAllocateExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urBindlessImagesImageAllocateExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -7243,7 +7280,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageAllocateExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urBindlessImagesImageAllocateExp"));
+        mock::getCallbacks().get_after_callback(
+            "urBindlessImagesImageAllocateExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -7267,7 +7305,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageFreeExp(
                                                          &hImageMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urBindlessImagesImageFreeExp"));
+        mock::getCallbacks().get_before_callback(
+            "urBindlessImagesImageFreeExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -7276,7 +7315,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageFreeExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urBindlessImagesImageFreeExp"));
+        mock::getCallbacks().get_replace_callback(
+            "urBindlessImagesImageFreeExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -7289,7 +7329,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageFreeExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urBindlessImagesImageFreeExp"));
+        mock::getCallbacks().get_after_callback(
+            "urBindlessImagesImageFreeExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -7318,7 +7359,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesUnsampledImageCreateExp(
         &hContext, &hDevice, &hImageMem, &pImageFormat, &pImageDesc, &phImage};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urBindlessImagesUnsampledImageCreateExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -7328,7 +7369,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesUnsampledImageCreateExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urBindlessImagesUnsampledImageCreateExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -7342,8 +7383,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesUnsampledImageCreateExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urBindlessImagesUnsampledImageCreateExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -7375,7 +7416,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesSampledImageCreateExp(
         &pImageDesc, &hSampler, &phImage};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urBindlessImagesSampledImageCreateExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -7385,7 +7426,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesSampledImageCreateExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urBindlessImagesSampledImageCreateExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -7399,8 +7440,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesSampledImageCreateExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urBindlessImagesSampledImageCreateExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -7462,7 +7503,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageCopyExp(
                                                          &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urBindlessImagesImageCopyExp"));
+        mock::getCallbacks().get_before_callback(
+            "urBindlessImagesImageCopyExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -7471,7 +7513,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageCopyExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urBindlessImagesImageCopyExp"));
+        mock::getCallbacks().get_replace_callback(
+            "urBindlessImagesImageCopyExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -7488,7 +7531,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageCopyExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urBindlessImagesImageCopyExp"));
+        mock::getCallbacks().get_after_callback(
+            "urBindlessImagesImageCopyExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -7512,7 +7556,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageGetInfoExp(
         &hImageMem, &propName, &pPropValue, &pPropSizeRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urBindlessImagesImageGetInfoExp"));
+        mock::getCallbacks().get_before_callback(
+            "urBindlessImagesImageGetInfoExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -7521,7 +7566,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageGetInfoExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urBindlessImagesImageGetInfoExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -7535,7 +7580,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageGetInfoExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urBindlessImagesImageGetInfoExp"));
+        mock::getCallbacks().get_after_callback(
+            "urBindlessImagesImageGetInfoExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -7562,7 +7608,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMipmapGetLevelExp(
         &hContext, &hDevice, &hImageMem, &mipmapLevel, &phImageMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urBindlessImagesMipmapGetLevelExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -7572,7 +7618,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMipmapGetLevelExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urBindlessImagesMipmapGetLevelExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -7586,8 +7632,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMipmapGetLevelExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urBindlessImagesMipmapGetLevelExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -7611,7 +7657,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMipmapFreeExp(
                                                           &hMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urBindlessImagesMipmapFreeExp"));
+        mock::getCallbacks().get_before_callback(
+            "urBindlessImagesMipmapFreeExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -7620,7 +7667,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMipmapFreeExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urBindlessImagesMipmapFreeExp"));
+        mock::getCallbacks().get_replace_callback(
+            "urBindlessImagesMipmapFreeExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -7633,7 +7681,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMipmapFreeExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urBindlessImagesMipmapFreeExp"));
+        mock::getCallbacks().get_after_callback(
+            "urBindlessImagesMipmapFreeExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -7663,7 +7712,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportExternalMemoryExp(
         &memHandleType, &pInteropMemDesc, &phInteropMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urBindlessImagesImportExternalMemoryExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -7673,7 +7722,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportExternalMemoryExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urBindlessImagesImportExternalMemoryExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -7687,8 +7736,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportExternalMemoryExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urBindlessImagesImportExternalMemoryExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -7719,7 +7768,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMapExternalArrayExp(
         &pImageDesc, &hInteropMem, &phImageMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urBindlessImagesMapExternalArrayExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -7729,7 +7778,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMapExternalArrayExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urBindlessImagesMapExternalArrayExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -7743,8 +7792,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMapExternalArrayExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urBindlessImagesMapExternalArrayExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -7769,7 +7818,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesReleaseInteropExp(
         &hContext, &hDevice, &hInteropMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urBindlessImagesReleaseInteropExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -7779,7 +7828,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesReleaseInteropExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urBindlessImagesReleaseInteropExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -7793,8 +7842,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesReleaseInteropExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urBindlessImagesReleaseInteropExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -7824,7 +7873,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportExternalSemaphoreExp(
         &phInteropSemaphore};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urBindlessImagesImportExternalSemaphoreExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -7834,7 +7883,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportExternalSemaphoreExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urBindlessImagesImportExternalSemaphoreExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -7849,8 +7898,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportExternalSemaphoreExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urBindlessImagesImportExternalSemaphoreExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -7875,7 +7924,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesDestroyExternalSemaphoreExp(
         &hContext, &hDevice, &hInteropSemaphore};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urBindlessImagesDestroyExternalSemaphoreExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -7885,7 +7934,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesDestroyExternalSemaphoreExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urBindlessImagesDestroyExternalSemaphoreExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -7898,8 +7947,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesDestroyExternalSemaphoreExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urBindlessImagesDestroyExternalSemaphoreExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -7941,7 +7990,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesWaitExternalSemaphoreExp(
         &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urBindlessImagesWaitExternalSemaphoreExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -7951,7 +8000,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesWaitExternalSemaphoreExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urBindlessImagesWaitExternalSemaphoreExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -7968,8 +8017,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesWaitExternalSemaphoreExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urBindlessImagesWaitExternalSemaphoreExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -8011,7 +8060,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesSignalExternalSemaphoreExp(
         &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urBindlessImagesSignalExternalSemaphoreExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -8021,7 +8070,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesSignalExternalSemaphoreExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urBindlessImagesSignalExternalSemaphoreExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -8038,8 +8087,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesSignalExternalSemaphoreExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urBindlessImagesSignalExternalSemaphoreExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -8066,7 +8115,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferCreateExp(
         &hContext, &hDevice, &pCommandBufferDesc, &phCommandBuffer};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urCommandBufferCreateExp"));
+        mock::getCallbacks().get_before_callback("urCommandBufferCreateExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -8075,7 +8124,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferCreateExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urCommandBufferCreateExp"));
+        mock::getCallbacks().get_replace_callback("urCommandBufferCreateExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -8090,7 +8139,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferCreateExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urCommandBufferCreateExp"));
+        mock::getCallbacks().get_after_callback("urCommandBufferCreateExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -8111,7 +8160,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferRetainExp(
     ur_command_buffer_retain_exp_params_t params = {&hCommandBuffer};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urCommandBufferRetainExp"));
+        mock::getCallbacks().get_before_callback("urCommandBufferRetainExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -8120,7 +8169,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferRetainExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urCommandBufferRetainExp"));
+        mock::getCallbacks().get_replace_callback("urCommandBufferRetainExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -8134,7 +8183,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferRetainExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urCommandBufferRetainExp"));
+        mock::getCallbacks().get_after_callback("urCommandBufferRetainExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -8155,7 +8204,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseExp(
     ur_command_buffer_release_exp_params_t params = {&hCommandBuffer};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urCommandBufferReleaseExp"));
+        mock::getCallbacks().get_before_callback("urCommandBufferReleaseExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -8164,7 +8213,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urCommandBufferReleaseExp"));
+        mock::getCallbacks().get_replace_callback("urCommandBufferReleaseExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -8178,7 +8227,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urCommandBufferReleaseExp"));
+        mock::getCallbacks().get_after_callback("urCommandBufferReleaseExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -8199,7 +8248,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferFinalizeExp(
     ur_command_buffer_finalize_exp_params_t params = {&hCommandBuffer};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urCommandBufferFinalizeExp"));
+        mock::getCallbacks().get_before_callback("urCommandBufferFinalizeExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -8208,7 +8257,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferFinalizeExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urCommandBufferFinalizeExp"));
+        mock::getCallbacks().get_replace_callback(
+            "urCommandBufferFinalizeExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -8221,7 +8271,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferFinalizeExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urCommandBufferFinalizeExp"));
+        mock::getCallbacks().get_after_callback("urCommandBufferFinalizeExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -8269,7 +8319,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
         &phCommand};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urCommandBufferAppendKernelLaunchExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -8279,7 +8329,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urCommandBufferAppendKernelLaunchExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -8297,8 +8347,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urCommandBufferAppendKernelLaunchExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -8332,7 +8382,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMMemcpyExp(
         &pSyncPointWaitList, &pSyncPoint};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urCommandBufferAppendUSMMemcpyExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -8342,7 +8392,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMMemcpyExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urCommandBufferAppendUSMMemcpyExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -8355,8 +8405,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMMemcpyExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urCommandBufferAppendUSMMemcpyExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -8393,7 +8443,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMFillExp(
         &pSyncPointWaitList, &pSyncPoint};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urCommandBufferAppendUSMFillExp"));
+        mock::getCallbacks().get_before_callback(
+            "urCommandBufferAppendUSMFillExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -8402,7 +8453,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMFillExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urCommandBufferAppendUSMFillExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -8416,7 +8467,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMFillExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urCommandBufferAppendUSMFillExp"));
+        mock::getCallbacks().get_after_callback(
+            "urCommandBufferAppendUSMFillExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -8458,7 +8510,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
         &pSyncPoint};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urCommandBufferAppendMemBufferCopyExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -8468,7 +8520,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urCommandBufferAppendMemBufferCopyExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -8481,8 +8533,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urCommandBufferAppendMemBufferCopyExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -8524,7 +8576,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
         &pSyncPoint};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urCommandBufferAppendMemBufferWriteExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -8534,7 +8586,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urCommandBufferAppendMemBufferWriteExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -8547,8 +8599,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urCommandBufferAppendMemBufferWriteExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -8589,7 +8641,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
         &pSyncPoint};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urCommandBufferAppendMemBufferReadExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -8599,7 +8651,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urCommandBufferAppendMemBufferReadExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -8612,8 +8664,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urCommandBufferAppendMemBufferReadExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -8667,7 +8719,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
         &pSyncPoint};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urCommandBufferAppendMemBufferCopyRectExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -8677,7 +8729,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urCommandBufferAppendMemBufferCopyRectExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -8690,8 +8742,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urCommandBufferAppendMemBufferCopyRectExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -8751,7 +8803,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
         &pSyncPoint};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urCommandBufferAppendMemBufferWriteRectExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -8761,7 +8813,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urCommandBufferAppendMemBufferWriteRectExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -8774,8 +8826,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urCommandBufferAppendMemBufferWriteRectExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -8833,7 +8885,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
         &pSyncPoint};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urCommandBufferAppendMemBufferReadRectExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -8843,7 +8895,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urCommandBufferAppendMemBufferReadRectExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -8856,8 +8908,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urCommandBufferAppendMemBufferReadRectExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -8901,7 +8953,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
         &pSyncPoint};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urCommandBufferAppendMemBufferFillExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -8911,7 +8963,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urCommandBufferAppendMemBufferFillExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -8924,8 +8976,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urCommandBufferAppendMemBufferFillExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -8964,7 +9016,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMPrefetchExp(
         &pSyncPoint};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urCommandBufferAppendUSMPrefetchExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -8974,7 +9026,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMPrefetchExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urCommandBufferAppendUSMPrefetchExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -8987,8 +9039,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMPrefetchExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urCommandBufferAppendUSMPrefetchExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -9027,7 +9079,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMAdviseExp(
         &pSyncPoint};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urCommandBufferAppendUSMAdviseExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -9037,7 +9089,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMAdviseExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urCommandBufferAppendUSMAdviseExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -9050,8 +9102,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMAdviseExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urCommandBufferAppendUSMAdviseExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -9085,7 +9137,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
         &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urCommandBufferEnqueueExp"));
+        mock::getCallbacks().get_before_callback("urCommandBufferEnqueueExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -9094,7 +9146,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urCommandBufferEnqueueExp"));
+        mock::getCallbacks().get_replace_callback("urCommandBufferEnqueueExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -9111,7 +9163,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urCommandBufferEnqueueExp"));
+        mock::getCallbacks().get_after_callback("urCommandBufferEnqueueExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -9132,7 +9184,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferRetainCommandExp(
     ur_command_buffer_retain_command_exp_params_t params = {&hCommand};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urCommandBufferRetainCommandExp"));
+        mock::getCallbacks().get_before_callback(
+            "urCommandBufferRetainCommandExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -9141,7 +9194,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferRetainCommandExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urCommandBufferRetainCommandExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -9156,7 +9209,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferRetainCommandExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urCommandBufferRetainCommandExp"));
+        mock::getCallbacks().get_after_callback(
+            "urCommandBufferRetainCommandExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -9177,7 +9231,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseCommandExp(
     ur_command_buffer_release_command_exp_params_t params = {&hCommand};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urCommandBufferReleaseCommandExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -9187,7 +9241,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseCommandExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urCommandBufferReleaseCommandExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -9202,7 +9256,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseCommandExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urCommandBufferReleaseCommandExp"));
+        mock::getCallbacks().get_after_callback(
+            "urCommandBufferReleaseCommandExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -9226,7 +9281,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
         &hCommand, &pUpdateKernelLaunch};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urCommandBufferUpdateKernelLaunchExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -9236,7 +9291,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urCommandBufferUpdateKernelLaunchExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -9249,8 +9304,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urCommandBufferUpdateKernelLaunchExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -9282,7 +9337,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferGetInfoExp(
         &hCommandBuffer, &propName, &propSize, &pPropValue, &pPropSizeRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urCommandBufferGetInfoExp"));
+        mock::getCallbacks().get_before_callback("urCommandBufferGetInfoExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -9291,7 +9346,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferGetInfoExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urCommandBufferGetInfoExp"));
+        mock::getCallbacks().get_replace_callback("urCommandBufferGetInfoExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -9304,7 +9359,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferGetInfoExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urCommandBufferGetInfoExp"));
+        mock::getCallbacks().get_after_callback("urCommandBufferGetInfoExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -9335,7 +9390,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferCommandGetInfoExp(
         &hCommand, &propName, &propSize, &pPropValue, &pPropSizeRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urCommandBufferCommandGetInfoExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -9345,7 +9400,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferCommandGetInfoExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urCommandBufferCommandGetInfoExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -9359,7 +9414,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferCommandGetInfoExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urCommandBufferCommandGetInfoExp"));
+        mock::getCallbacks().get_after_callback(
+            "urCommandBufferCommandGetInfoExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -9414,7 +9470,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
         &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urEnqueueCooperativeKernelLaunchExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -9424,7 +9480,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urEnqueueCooperativeKernelLaunchExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -9441,8 +9497,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urEnqueueCooperativeKernelLaunchExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -9471,7 +9527,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
         &hKernel, &localWorkSize, &dynamicSharedMemorySize, &pGroupCountRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback(
+        mock::getCallbacks().get_before_callback(
             "urKernelSuggestMaxCooperativeGroupCountExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
@@ -9481,7 +9537,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback(
+        mock::getCallbacks().get_replace_callback(
             "urKernelSuggestMaxCooperativeGroupCountExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
@@ -9494,8 +9550,8 @@ __urdlllocal ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
         return result;
     }
 
-    auto afterCallback =
-        reinterpret_cast<ur_mock_callback_t>(mock::callbacks.get_after_callback(
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
             "urKernelSuggestMaxCooperativeGroupCountExp"));
     if (afterCallback) {
         return afterCallback(&params);
@@ -9535,7 +9591,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
         &hQueue, &blocking, &numEventsInWaitList, &phEventWaitList, &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueTimestampRecordingExp"));
+        mock::getCallbacks().get_before_callback(
+            "urEnqueueTimestampRecordingExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -9544,7 +9601,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueTimestampRecordingExp"));
+        mock::getCallbacks().get_replace_callback(
+            "urEnqueueTimestampRecordingExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -9558,7 +9616,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueTimestampRecordingExp"));
+        mock::getCallbacks().get_after_callback(
+            "urEnqueueTimestampRecordingExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -9608,7 +9667,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
         &phEventWaitList, &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueKernelLaunchCustomExp"));
+        mock::getCallbacks().get_before_callback(
+            "urEnqueueKernelLaunchCustomExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -9617,7 +9677,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueKernelLaunchCustomExp"));
+        mock::getCallbacks().get_replace_callback(
+            "urEnqueueKernelLaunchCustomExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -9630,7 +9691,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueKernelLaunchCustomExp"));
+        mock::getCallbacks().get_after_callback(
+            "urEnqueueKernelLaunchCustomExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -9656,7 +9718,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuildExp(
                                             &pOptions};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urProgramBuildExp"));
+        mock::getCallbacks().get_before_callback("urProgramBuildExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -9665,7 +9727,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuildExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urProgramBuildExp"));
+        mock::getCallbacks().get_replace_callback("urProgramBuildExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -9678,7 +9740,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuildExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urProgramBuildExp"));
+        mock::getCallbacks().get_after_callback("urProgramBuildExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -9705,7 +9767,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCompileExp(
                                               &phDevices, &pOptions};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urProgramCompileExp"));
+        mock::getCallbacks().get_before_callback("urProgramCompileExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -9714,7 +9776,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCompileExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urProgramCompileExp"));
+        mock::getCallbacks().get_replace_callback("urProgramCompileExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -9727,7 +9789,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCompileExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urProgramCompileExp"));
+        mock::getCallbacks().get_after_callback("urProgramCompileExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -9759,7 +9821,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramLinkExp(
                                            &phProgram};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urProgramLinkExp"));
+        mock::getCallbacks().get_before_callback("urProgramLinkExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -9768,7 +9830,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramLinkExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urProgramLinkExp"));
+        mock::getCallbacks().get_replace_callback("urProgramLinkExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -9782,7 +9844,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramLinkExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urProgramLinkExp"));
+        mock::getCallbacks().get_after_callback("urProgramLinkExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -9804,7 +9866,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMImportExp(
     ur_usm_import_exp_params_t params = {&hContext, &pMem, &size};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urUSMImportExp"));
+        mock::getCallbacks().get_before_callback("urUSMImportExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -9813,7 +9875,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMImportExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urUSMImportExp"));
+        mock::getCallbacks().get_replace_callback("urUSMImportExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -9826,7 +9888,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMImportExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urUSMImportExp"));
+        mock::getCallbacks().get_after_callback("urUSMImportExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -9847,7 +9909,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMReleaseExp(
     ur_usm_release_exp_params_t params = {&hContext, &pMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urUSMReleaseExp"));
+        mock::getCallbacks().get_before_callback("urUSMReleaseExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -9856,7 +9918,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMReleaseExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urUSMReleaseExp"));
+        mock::getCallbacks().get_replace_callback("urUSMReleaseExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -9869,7 +9931,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMReleaseExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urUSMReleaseExp"));
+        mock::getCallbacks().get_after_callback("urUSMReleaseExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -9892,7 +9954,8 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PEnablePeerAccessExp(
                                                          &peerDevice};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urUsmP2PEnablePeerAccessExp"));
+        mock::getCallbacks().get_before_callback(
+            "urUsmP2PEnablePeerAccessExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -9901,7 +9964,8 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PEnablePeerAccessExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urUsmP2PEnablePeerAccessExp"));
+        mock::getCallbacks().get_replace_callback(
+            "urUsmP2PEnablePeerAccessExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -9914,7 +9978,7 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PEnablePeerAccessExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urUsmP2PEnablePeerAccessExp"));
+        mock::getCallbacks().get_after_callback("urUsmP2PEnablePeerAccessExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -9937,7 +10001,8 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PDisablePeerAccessExp(
                                                           &peerDevice};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urUsmP2PDisablePeerAccessExp"));
+        mock::getCallbacks().get_before_callback(
+            "urUsmP2PDisablePeerAccessExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -9946,7 +10011,8 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PDisablePeerAccessExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urUsmP2PDisablePeerAccessExp"));
+        mock::getCallbacks().get_replace_callback(
+            "urUsmP2PDisablePeerAccessExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -9959,7 +10025,8 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PDisablePeerAccessExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urUsmP2PDisablePeerAccessExp"));
+        mock::getCallbacks().get_after_callback(
+            "urUsmP2PDisablePeerAccessExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -9994,7 +10061,8 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PPeerAccessGetInfoExp(
         &propSize,      &pPropValue, &pPropSizeRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urUsmP2PPeerAccessGetInfoExp"));
+        mock::getCallbacks().get_before_callback(
+            "urUsmP2PPeerAccessGetInfoExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -10003,7 +10071,8 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PPeerAccessGetInfoExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urUsmP2PPeerAccessGetInfoExp"));
+        mock::getCallbacks().get_replace_callback(
+            "urUsmP2PPeerAccessGetInfoExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -10016,7 +10085,8 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PPeerAccessGetInfoExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urUsmP2PPeerAccessGetInfoExp"));
+        mock::getCallbacks().get_after_callback(
+            "urUsmP2PPeerAccessGetInfoExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -10064,7 +10134,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueNativeCommandExp(
                                                      &phEvent};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_before_callback("urEnqueueNativeCommandExp"));
+        mock::getCallbacks().get_before_callback("urEnqueueNativeCommandExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -10073,7 +10143,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueNativeCommandExp(
     }
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_replace_callback("urEnqueueNativeCommandExp"));
+        mock::getCallbacks().get_replace_callback("urEnqueueNativeCommandExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
@@ -10087,7 +10157,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueNativeCommandExp(
     }
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-        mock::callbacks.get_after_callback("urEnqueueNativeCommandExp"));
+        mock::getCallbacks().get_after_callback("urEnqueueNativeCommandExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
