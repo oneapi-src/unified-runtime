@@ -109,8 +109,8 @@ jobs:
     - name: Checkout SYCL
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       with:
-        repository: intel/llvm
-        ref: refs/heads/sycl
+        repository: igchor/llvm
+        ref: refs/heads/ur_dynamic_umf
         path: sycl-repo
 
     - name: Set CUDA env vars
