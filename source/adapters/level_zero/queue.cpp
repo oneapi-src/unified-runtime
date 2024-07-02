@@ -1550,8 +1550,9 @@ ur_result_t ur_queue_handle_legacy_t_::active_barriers::clear() {
 
 void ur_queue_handle_legacy_t_::clearEndTimeRecordings() {
   uint64_t ZeTimerResolution = Device->ZeDeviceProperties->timerResolution;
+  auto ValidBits = Device->ZeDeviceProperties->kernelTimestampValidBits;
   const uint64_t TimestampMaxValue =
-      ((1ULL << Device->ZeDeviceProperties->kernelTimestampValidBits) - 1ULL);
+      ((ValidBits >= 64 ? 0 : (1ULL << ValidBits)) - 1ULL);
 
   for (auto Entry : EndTimeRecordings) {
     auto &Event = Entry.first;

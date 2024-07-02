@@ -1549,8 +1549,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetGlobalTimestamps(
 ) {
   const uint64_t &ZeTimerResolution =
       Device->ZeDeviceProperties->timerResolution;
+  auto ValidBits = Device->ZeDeviceProperties->kernelTimestampValidBits;
   const uint64_t TimestampMaxCount =
-      ((1ULL << Device->ZeDeviceProperties->kernelTimestampValidBits) - 1ULL);
+      ((ValidBits >= 64 ? 0 : (1ULL << ValidBits)) - 1ULL);
   uint64_t DeviceClockCount, Dummy;
 
   ZE2UR_CALL(zeDeviceGetGlobalTimestamps,
