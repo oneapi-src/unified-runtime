@@ -115,6 +115,7 @@ EXPORTS
 	urGetProgramProcAddrTable
 	urGetQueueProcAddrTable
 	urGetSamplerProcAddrTable
+	urGetTensorMapExpProcAddrTable
 	urGetUSMExpProcAddrTable
 	urGetUSMProcAddrTable
 	urGetUsmP2PExpProcAddrTable
@@ -319,6 +320,11 @@ EXPORTS
 	urPrintExpSamplerCubemapFilterMode
 	urPrintExpSamplerCubemapProperties
 	urPrintExpSamplerMipProperties
+	urPrintExpTensorMapDataTypeFlags
+	urPrintExpTensorMapInterleaveFlags
+	urPrintExpTensorMapL2PromotionFlags
+	urPrintExpTensorMapOobFillFlags
+	urPrintExpTensorMapSwizzleFlags
 	urPrintExpWin32Handle
 	urPrintFunction
 	urPrintFunctionParams
@@ -453,6 +459,8 @@ EXPORTS
 	urPrintSamplerRetainParams
 	urPrintSpecializationConstantInfo
 	urPrintStructureType
+	urPrintTensorMapEncodeIm_2ColExpParams
+	urPrintTensorMapEncodeTiledExpParams
 	urPrintUsmAdviceFlags
 	urPrintUsmAllocInfo
 	urPrintUsmAllocLocationDesc
@@ -523,6 +531,8 @@ EXPORTS
 	urSamplerGetNativeHandle
 	urSamplerRelease
 	urSamplerRetain
+	urTensorMapEncodeIm2ColExp
+	urTensorMapEncodeTiledExp
 	urUSMDeviceAlloc
 	urUSMFree
 	urUSMGetMemAllocInfo
