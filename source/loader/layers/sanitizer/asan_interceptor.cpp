@@ -153,6 +153,13 @@ SanitizerInterceptor::SanitizerInterceptor() {
 SanitizerInterceptor::~SanitizerInterceptor() {
     DestroyShadowMemoryOnCPU();
     DestroyShadowMemoryOnPVC();
+
+    if (!m_AllocationMap.empty()) {
+        for (const auto &[_, AI] : m_AllocationMap) {
+            ReportMemoryLeak(AI);
+        }
+        exit(1);
+    }
 }
 
 /// The memory chunk allocated from the underlying allocator looks like this:
