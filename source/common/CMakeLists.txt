@@ -4,9 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 add_ur_library(ur_common STATIC
-    umf_helpers.hpp
-    umf_pools/disjoint_pool_config_parser.cpp
-    ur_pool_manager.hpp
     ur_util.cpp
     ur_util.hpp
     $<$<PLATFORM_ID:Windows>:windows/ur_lib_loader.cpp>
@@ -25,8 +22,8 @@ if (NOT DEFINED UMF_REPO)
 endif()
 
 if (NOT DEFINED UMF_TAG)
-    # Merge pull request #119 from ldorau/Fix_arena_extent_split_and_arena_extent_merge
-    set(UMF_TAG 9bf7a0dc4dff76844e10edbb5c6e9d917536ef6d)
+    # Merge pull request #495 from lukaszstolarczuk/sudo-remove-test
+    set(UMF_TAG 0660c56b2f443f9797d8b3f9ade44d78b7d219e6)
 endif()
 
 message(STATUS "Will fetch Unified Memory Framework from ${UMF_REPO}")
@@ -37,21 +34,17 @@ FetchContent_Declare(unified-memory-framework
     GIT_TAG           ${UMF_TAG}
 )
 
-if(UR_BUILD_TESTS)
-    set(UMF_BUILD_TESTS ON CACHE INTERNAL "Build UMF tests")
-else()
-    set(UMF_BUILD_TESTS OFF CACHE INTERNAL "Build UMF tests")
-endif()
+
+set(UMF_BUILD_TESTS OFF CACHE INTERNAL "Build UMF tests")
+# TODO: L0 provider not ready yet
+set(UMF_BUILD_LEVEL_ZERO_PROVIDER OFF CACHE INTERNAL "Build Level Zero Provider")
+set(UMF_BUILD_SHARED_LIBRARY ${UMF_BUILD_SHARED_LIBRARY} CACHE INTERNAL "Build UMF shared library")
 set(UMF_BUILD_LIBUMF_POOL_DISJOINT ON CACHE INTERNAL "Build Disjoint Pool")
-set(UMF_BUILD_OS_MEMORY_PROVIDER OFF CACHE INTERNAL "Build OS Provider")
 
 FetchContent_MakeAvailable(unified-memory-framework)
 FetchContent_GetProperties(unified-memory-framework)
 
 target_link_libraries(ur_common PUBLIC
-    unified-memory-framework::umf
-    unified-memory-framework::headers
-    unified-memory-framework::disjoint_pool
     ${CMAKE_DL_LIBS}
     ${PROJECT_NAME}::headers
 )
@@ -62,3 +55,18 @@ if (UNIX)
     find_package(Threads REQUIRED)
     target_link_libraries(ur_common PUBLIC Threads::Threads)
 endif()
+
+add_library(ur_umf INTERFACE)
+target_sources(ur_umf INTERFACE
+    umf_helpers.hpp
+    umf_pools/disjoint_pool_config_parser.cpp
+    ur_pool_manager.hpp
+)
+
+add_library(${PROJECT_NAME}::umf ALIAS ur_umf)
+
+target_link_libraries(ur_umf INTERFACE
+    umf::umf
+    umf::headers
+    umf::disjoint_pool
+)
