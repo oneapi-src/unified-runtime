@@ -3,16 +3,14 @@
 // See LICENSE.TXT
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-#include "fixtures.h"
+#include "uur/fixtures.h"
 #include <cstring>
 
 struct urPlatformGetInfoTest
-    : uur::platform::urPlatformTest,
+    : uur::urPlatformTest,
       ::testing::WithParamInterface<ur_platform_info_t> {
 
-    void SetUp() {
-        UUR_RETURN_ON_FATAL_FAILURE(uur::platform::urPlatformTest::SetUp());
-    }
+    void SetUp() { UUR_RETURN_ON_FATAL_FAILURE(uur::urPlatformTest::SetUp()); }
 };
 
 INSTANTIATE_TEST_SUITE_P(

@@ -3,9 +3,9 @@
 // See LICENSE.TXT
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-#include "fixtures.h"
+#include "uur/fixtures.h"
 
-using urPlatformGetNativeHandleTest = uur::platform::urPlatformsTest;
+using urPlatformGetNativeHandleTest = uur::urPlatformsTest;
 
 TEST_F(urPlatformGetNativeHandleTest, Success) {
     for (auto platform : platforms) {

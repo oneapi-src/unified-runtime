@@ -9,126 +9,14 @@
 #include "ur_api.h"
 #include <uur/checks.h>
 #include <uur/environment.h>
+#include <uur/fixtures/device.h>
+#include <uur/fixtures/helpers.h>
+#include <uur/fixtures/platform.h>
 #include <uur/utils.h>
 
 #include <random>
 
-#define UUR_RETURN_ON_FATAL_FAILURE(...)                                       \
-    __VA_ARGS__;                                                               \
-    if (this->HasFatalFailure() || this->IsSkipped()) {                        \
-        return;                                                                \
-    }                                                                          \
-    (void)0
-
-#define UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(ret)                                 \
-    auto status = ret;                                                         \
-    if (status == UR_RESULT_ERROR_UNSUPPORTED_FEATURE) {                       \
-        GTEST_SKIP();                                                          \
-    } else {                                                                   \
-        ASSERT_EQ(status, UR_RESULT_SUCCESS);                                  \
-    }
-
 namespace uur {
-
-struct urPlatformTest : ::testing::Test {
-    void SetUp() override {
-        platform = uur::PlatformEnvironment::instance->platform;
-    }
-
-    ur_platform_handle_t platform = nullptr;
-};
-
-inline std::pair<bool, std::vector<ur_device_handle_t>>
-GetDevices(ur_platform_handle_t platform) {
-    uint32_t count = 0;
-    if (urDeviceGet(platform, UR_DEVICE_TYPE_ALL, 0, nullptr, &count)) {
-        return {false, {}};
-    }
-    if (count == 0) {
-        return {false, {}};
-    }
-    std::vector<ur_device_handle_t> devices(count);
-    if (urDeviceGet(platform, UR_DEVICE_TYPE_ALL, count, devices.data(),
-                    nullptr)) {
-        return {false, {}};
-    }
-    return {true, devices};
-}
-
-inline bool hasDevicePartitionSupport(ur_device_handle_t device,
-                                      const ur_device_partition_t property) {
-    std::vector<ur_device_partition_t> properties;
-    uur::GetDevicePartitionProperties(device, properties);
-    return std::find(properties.begin(), properties.end(), property) !=
-           properties.end();
-}
-
-struct urAllDevicesTest : urPlatformTest {
-    void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(urPlatformTest::SetUp());
-        auto devicesPair = GetDevices(platform);
-        if (!devicesPair.first) {
-            FAIL() << "Failed to get devices";
-        }
-        devices = std::move(devicesPair.second);
-    }
-
-    void TearDown() override {
-        for (auto &device : devices) {
-            EXPECT_SUCCESS(urDeviceRelease(device));
-        }
-        UUR_RETURN_ON_FATAL_FAILURE(urPlatformTest::TearDown());
-    }
-
-    std::vector<ur_device_handle_t> devices;
-};
-
-struct urDeviceTest : urPlatformTest,
-                      ::testing::WithParamInterface<ur_device_handle_t> {
-    void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(urPlatformTest::SetUp());
-        device = GetParam();
-    }
-
-    void TearDown() override {
-        EXPECT_SUCCESS(urDeviceRelease(device));
-        UUR_RETURN_ON_FATAL_FAILURE(urPlatformTest::TearDown());
-    }
-
-    ur_device_handle_t device;
-};
-} // namespace uur
-
-#define UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(FIXTURE)                           \
-    INSTANTIATE_TEST_SUITE_P(                                                  \
-        , FIXTURE,                                                             \
-        ::testing::ValuesIn(uur::DevicesEnvironment::instance->devices),       \
-        [](const ::testing::TestParamInfo<ur_device_handle_t> &info) {         \
-            return uur::GetPlatformAndDeviceName(info.param);                  \
-        })
-
-#define UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(FIXTURE)                           \
-    INSTANTIATE_TEST_SUITE_P(                                                  \
-        , FIXTURE,                                                             \
-        ::testing::ValuesIn(uur::KernelsEnvironment::instance->devices),       \
-        [](const ::testing::TestParamInfo<ur_device_handle_t> &info) {         \
-            return uur::GetPlatformAndDeviceName(info.param);                  \
-        })
-
-namespace uur {
-
-template <class T>
-struct urDeviceTestWithParam
-    : urPlatformTest,
-      ::testing::WithParamInterface<std::tuple<ur_device_handle_t, T>> {
-    void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(urPlatformTest::SetUp());
-        device = std::get<0>(this->GetParam());
-    }
-    // TODO - I don't like the confusion with GetParam();
-    const T &getParam() const { return std::get<1>(this->GetParam()); }
-    ur_device_handle_t device;
-};
 
 struct urContextTest : urDeviceTest {
     void SetUp() override {

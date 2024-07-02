@@ -20,7 +20,7 @@ struct PlatformEnvironment : ::testing::Environment {
         unsigned long platforms_count = 0;
     };
 
-    PlatformEnvironment(int argc, char **argv);
+    PlatformEnvironment(int argc, char **argv, const std::string);
     virtual ~PlatformEnvironment() override = default;
 
     virtual void SetUp() override;
@@ -31,6 +31,8 @@ struct PlatformEnvironment : ::testing::Environment {
     PlatformOptions platform_options;
     std::vector<ur_adapter_handle_t> adapters{};
     ur_platform_handle_t platform = nullptr;
+    std::vector<ur_platform_handle_t> platforms;
+    ur_loader_config_handle_t loader_config;
     std::string error;
     static PlatformEnvironment *instance;
 };

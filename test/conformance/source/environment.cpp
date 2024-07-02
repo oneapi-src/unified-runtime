@@ -59,14 +59,15 @@ std::ostream &operator<<(std::ostream &out,
     return out;
 }
 
-uur::PlatformEnvironment::PlatformEnvironment(int argc, char **argv)
+uur::PlatformEnvironment::PlatformEnvironment(int argc, char **argv,
+                                              const std::string test_name)
     : platform_options{parsePlatformOptions(argc, argv)} {
     instance = this;
 
-    ur_loader_config_handle_t config;
-    if (urLoaderConfigCreate(&config) == UR_RESULT_SUCCESS) {
-        if (urLoaderConfigEnableLayer(config, "UR_LAYER_FULL_VALIDATION")) {
-            urLoaderConfigRelease(config);
+    if (urLoaderConfigCreate(&loader_config) == UR_RESULT_SUCCESS) {
+        if (urLoaderConfigEnableLayer(loader_config,
+                                      "UR_LAYER_FULL_VALIDATION")) {
+            urLoaderConfigRelease(loader_config);
             error = "Failed to enable validation layer";
             return;
         }
@@ -76,8 +77,7 @@ uur::PlatformEnvironment::PlatformEnvironment(int argc, char **argv)
     }
 
     ur_device_init_flags_t device_flags = 0;
-    auto initResult = urLoaderInit(device_flags, config);
-    auto configReleaseResult = urLoaderConfigRelease(config);
+    auto initResult = urLoaderInit(device_flags, loader_config);
     switch (initResult) {
     case UR_RESULT_SUCCESS:
         break;
@@ -86,11 +86,6 @@ uur::PlatformEnvironment::PlatformEnvironment(int argc, char **argv)
         return;
     default:
         error = "urLoaderInit() failed";
-        return;
-    }
-
-    if (configReleaseResult) {
-        error = "Failed to destroy loader config handle";
         return;
     }
 
@@ -109,58 +104,62 @@ uur::PlatformEnvironment::PlatformEnvironment(int argc, char **argv)
         error = "Failed to find any platforms.";
         return;
     }
-
-    std::vector<ur_platform_handle_t> platforms(count);
+    platforms.resize(count);
     if (urPlatformGet(adapters.data(), adapter_count, count, platforms.data(),
                       nullptr)) {
         error = "urPlatformGet failed to get platforms.";
         return;
     }
 
-    if (platform_options.platform_name.empty()) {
+    if (test_name != "platform") {
+        if (platform_options.platform_name.empty()) {
 
-        if (platforms.size() == 1 || platform_options.platforms_count == 1) {
-            platform = platforms[0];
+            if (platforms.size() == 1 ||
+                platform_options.platforms_count == 1) {
+                platform = platforms[0];
+            } else {
+                std::stringstream ss_error;
+                ss_error << "Select a single platform from below using the "
+                            "--platform=NAME "
+                            "command-line option:"
+                         << platforms << std::endl
+                         << "or set --platforms_count=1.";
+                error = ss_error.str();
+                return;
+            }
         } else {
-            std::stringstream ss_error;
-            ss_error << "Select a single platform from below using the "
-                        "--platform=NAME "
-                        "command-line option:"
-                     << platforms << std::endl
-                     << "or set --platforms_count=1.";
-            error = ss_error.str();
-            return;
+            for (auto candidate : platforms) {
+                size_t size;
+                if (urPlatformGetInfo(candidate, UR_PLATFORM_INFO_NAME, 0,
+                                      nullptr, &size)) {
+                    error = "urPlatformGetInfoFailed";
+                    return;
+                }
+                std::vector<char> platform_name(size);
+                if (urPlatformGetInfo(candidate, UR_PLATFORM_INFO_NAME, size,
+                                      platform_name.data(), nullptr)) {
+                    error = "urPlatformGetInfo() failed";
+                    return;
+                }
+                if (platform_options.platform_name == platform_name.data()) {
+                    platform = candidate;
+                    break;
+                }
+            }
+            if (!platform) {
+                std::stringstream ss_error;
+                ss_error << "Platform \"" << platform_options.platform_name
+                         << "\" not found. Select a single platform from below "
+                            "using the "
+                            "--platform=NAME command-line options:"
+                         << platforms << std::endl
+                         << "or set --platforms_count=1.";
+                error = ss_error.str();
+                return;
+            }
         }
     } else {
-        for (auto candidate : platforms) {
-            size_t size;
-            if (urPlatformGetInfo(candidate, UR_PLATFORM_INFO_NAME, 0, nullptr,
-                                  &size)) {
-                error = "urPlatformGetInfoFailed";
-                return;
-            }
-            std::vector<char> platform_name(size);
-            if (urPlatformGetInfo(candidate, UR_PLATFORM_INFO_NAME, size,
-                                  platform_name.data(), nullptr)) {
-                error = "urPlatformGetInfo() failed";
-                return;
-            }
-            if (platform_options.platform_name == platform_name.data()) {
-                platform = candidate;
-                break;
-            }
-        }
-        if (!platform) {
-            std::stringstream ss_error;
-            ss_error << "Platform \"" << platform_options.platform_name
-                     << "\" not found. Select a single platform from below "
-                        "using the "
-                        "--platform=NAME command-line options:"
-                     << platforms << std::endl
-                     << "or set --platforms_count=1.";
-            error = ss_error.str();
-            return;
-        }
+        platform = platforms[0];
     }
 }
 
@@ -180,6 +179,11 @@ void uur::PlatformEnvironment::TearDown() {
     }
     for (auto adapter : adapters) {
         urAdapterRelease(adapter);
+    }
+    auto configReleaseResult = urLoaderConfigRelease(loader_config);
+    if (configReleaseResult) {
+        error = "Failed to destroy loader config handle";
+        return;
     }
     if (urLoaderTearDown()) {
         FAIL() << "urLoaderTearDown() failed";
@@ -240,7 +244,7 @@ DevicesEnvironment::parseDeviceOptions(int argc, char **argv) {
 DevicesEnvironment *DevicesEnvironment::instance = nullptr;
 
 DevicesEnvironment::DevicesEnvironment(int argc, char **argv)
-    : PlatformEnvironment(argc, argv),
+    : PlatformEnvironment(argc, argv, ""),
       device_options(parseDeviceOptions(argc, argv)) {
     instance = this;
     if (!error.empty()) {
