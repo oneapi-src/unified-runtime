@@ -74,11 +74,11 @@ macro(add_device_binary SOURCE_FILE)
         if(${TRIPLE} MATCHES "amd")
             set(AMD_TARGET_BACKEND -Xsycl-target-backend=${TRIPLE})
             set(AMD_OFFLOAD_ARCH  --offload-arch=${AMD_ARCH})
-            set(AMD_NOGPULIB -nogpulib)
+            set(AMD_ROCM_PATH --rocm-path=${UR_HIP_ROCM_DIR})
         else()
             set(AMD_TARGET_BACKEND)
             set(AMD_OFFLOAD_ARCH)
-            set(AMD_NOGPULIB)
+            set(AMD_ROCM_PATH)
         endif()
         # images are not yet supported in sycl on AMD
         if(${TRIPLE} MATCHES "amd" AND ${KERNEL_NAME} MATCHES "image_copy")
@@ -93,16 +93,9 @@ macro(add_device_binary SOURCE_FILE)
             continue()
         endif()
 
-        # HIP doesn't seem to provide the symbol
-        # `_ZTSZZ4mainENKUlRN4sycl3_V17handlerEE_clES2_E11FixedSgSize` which
-        # causes a build failure here
-        if(${TRIPLE} MATCHES "amd" AND ${KERNEL_NAME} MATCHES "subgroup")
-            continue()
-        endif()
-
         add_custom_command(OUTPUT "${BIN_PATH}"
             COMMAND ${UR_DPCXX} -fsycl -fsycl-targets=${TRIPLE} -fsycl-device-code-split=off 
-            ${AMD_TARGET_BACKEND} ${AMD_OFFLOAD_ARCH} ${AMD_NOGPULIB}
+            ${AMD_TARGET_BACKEND} ${AMD_OFFLOAD_ARCH} ${AMD_ROCM_PATH}
             ${DPCXX_BUILD_FLAGS_LIST} ${SOURCE_FILE} -o ${EXE_PATH}
 
             COMMAND ${CMAKE_COMMAND} -E env ${EXTRA_ENV} ${UR_DEVICE_CODE_EXTRACTOR} --stem="${TRIPLE}.bin" ${EXE_PATH}
