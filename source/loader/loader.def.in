@@ -308,6 +308,8 @@ EXPORTS
 	urPrintExpExternalSemaphoreType
 	urPrintExpFileDescriptor
 	urPrintExpImageCopyFlags
+	urPrintExpImageCopyRegion
+	urPrintExpImageCopySubresource
 	urPrintExpInteropMemDesc
 	urPrintExpInteropSemaphoreDesc
 	urPrintExpLaunchProperty

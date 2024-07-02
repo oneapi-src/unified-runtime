@@ -158,6 +158,8 @@ Types
 * ${x}_exp_win32_handle_t
 * ${x}_exp_sampler_addr_modes_t
 * ${x}_exp_sampler_cubemap_properties_t
+* ${x}_exp_image_copy_region_t
+* ${x}_exp_image_copy_subresource_t
 
 Functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -237,6 +239,8 @@ Changelog
 |          ||  - ${X}_EXP_EXTERNAL_MEM_TYPE_WIN32_NT_DX12_RESOURCE       |
 |          ||  - ${X}_EXP_EXTERNAL_SEMAPHORE_TYPE_WIN32_NT_DX12_FENCE    |
 +------------------------------------------------------------------------+
+| 14.0     | Added structures for supporting copying.                    |
++----------+-------------------------------------------------------------+
 
 Contributors
 --------------------------------------------------------------------------------
