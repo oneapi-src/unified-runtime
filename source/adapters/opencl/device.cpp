@@ -17,6 +17,7 @@ ur_result_t cl_adapter::getDeviceVersion(cl_device_id Dev,
                                          oclv::OpenCLVersion &Version) {
 
   size_t DevVerSize = 0;
+
   CL_RETURN_ON_FAILURE(
       clGetDeviceInfo(Dev, CL_DEVICE_VERSION, 0, nullptr, &DevVerSize));
 
