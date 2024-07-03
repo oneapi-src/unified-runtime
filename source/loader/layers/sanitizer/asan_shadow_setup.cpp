@@ -2,9 +2,9 @@
  *
  * Copyright (C) 2024 Intel Corporation
  *
- * Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
- * See LICENSE.TXT
- * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+ * Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM
+ * Exceptions. See LICENSE.TXT SPDX-License-Identifier: Apache-2.0 WITH
+ * LLVM-exception
  *
  * @file asan_shadow_setup.cpp
  *
@@ -24,28 +24,28 @@ uptr SHADOW_END;
 bool IsShadowMemInited = false;
 
 ur_result_t SetupShadowMemory(uptr &ShadowBegin, uptr &ShadowEnd) {
-    static ur_result_t Result = []() {
-        SHADOW_BEGIN = MmapNoReserve(0, SHADOW_SIZE);
-        if (SHADOW_BEGIN == 0) {
-            return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
-        }
-        SHADOW_END = SHADOW_BEGIN + SHADOW_SIZE;
-        IsShadowMemInited = true;
-        return UR_RESULT_SUCCESS;
-    }();
-    ShadowBegin = SHADOW_BEGIN;
-    ShadowEnd = SHADOW_END;
-    return Result;
+  static ur_result_t Result = []() {
+    SHADOW_BEGIN = MmapNoReserve(0, SHADOW_SIZE);
+    if (SHADOW_BEGIN == 0) {
+      return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
+    }
+    SHADOW_END = SHADOW_BEGIN + SHADOW_SIZE;
+    IsShadowMemInited = true;
+    return UR_RESULT_SUCCESS;
+  }();
+  ShadowBegin = SHADOW_BEGIN;
+  ShadowEnd = SHADOW_END;
+  return Result;
 }
 
 ur_result_t DestroyShadowMemory() {
-    if (!IsShadowMemInited) {
-        return UR_RESULT_SUCCESS;
-    }
-    if (!Munmap(SHADOW_BEGIN, SHADOW_SIZE)) {
-        return UR_RESULT_ERROR_UNKNOWN;
-    }
+  if (!IsShadowMemInited) {
     return UR_RESULT_SUCCESS;
+  }
+  if (!Munmap(SHADOW_BEGIN, SHADOW_SIZE)) {
+    return UR_RESULT_ERROR_UNKNOWN;
+  }
+  return UR_RESULT_SUCCESS;
 }
 
 } // namespace cpu
@@ -63,50 +63,51 @@ ur_context_handle_t ShadowContext;
 
 ur_result_t SetupShadowMemory(ur_context_handle_t Context, uptr &ShadowBegin,
                               uptr &ShadowEnd) {
-    // Currently, Level-Zero doesn't create independent VAs for each contexts, if we reserve
-    // shadow memory for each contexts, this will cause out-of-resource error when user uses
-    // multiple contexts. Therefore, we just create one shadow memory here.
-    static ur_result_t Result = [&Context]() {
-        // TODO: Protect Bad Zone
-        auto Result = context.urDdiTable.VirtualMem.pfnReserve(
-            Context, nullptr, SHADOW_SIZE, (void **)&LOW_SHADOW_BEGIN);
-        if (Result == UR_RESULT_SUCCESS) {
-            HIGH_SHADOW_END = LOW_SHADOW_BEGIN + SHADOW_SIZE;
-            // Retain the context which reserves shadow memory
-            ShadowContext = Context;
-            context.urDdiTable.Context.pfnRetain(Context);
-        }
-        return Result;
-    }();
-    ShadowBegin = LOW_SHADOW_BEGIN;
-    ShadowEnd = HIGH_SHADOW_END;
+  // Currently, Level-Zero doesn't create independent VAs for each contexts, if
+  // we reserve shadow memory for each contexts, this will cause out-of-resource
+  // error when user uses multiple contexts. Therefore, we just create one
+  // shadow memory here.
+  static ur_result_t Result = [&Context]() {
+    // TODO: Protect Bad Zone
+    auto Result = context.urDdiTable.VirtualMem.pfnReserve(
+        Context, nullptr, SHADOW_SIZE, (void **)&LOW_SHADOW_BEGIN);
+    if (Result == UR_RESULT_SUCCESS) {
+      HIGH_SHADOW_END = LOW_SHADOW_BEGIN + SHADOW_SIZE;
+      // Retain the context which reserves shadow memory
+      ShadowContext = Context;
+      context.urDdiTable.Context.pfnRetain(Context);
+    }
     return Result;
+  }();
+  ShadowBegin = LOW_SHADOW_BEGIN;
+  ShadowEnd = HIGH_SHADOW_END;
+  return Result;
 }
 
 ur_result_t DestroyShadowMemory() {
-    static ur_result_t Result = []() {
-        if (!ShadowContext) {
-            return UR_RESULT_SUCCESS;
-        }
-        auto Result = context.urDdiTable.VirtualMem.pfnFree(
-            ShadowContext, (const void *)LOW_SHADOW_BEGIN, SHADOW_SIZE);
-        context.urDdiTable.Context.pfnRelease(ShadowContext);
-        return Result;
-    }();
+  static ur_result_t Result = []() {
+    if (!ShadowContext) {
+      return UR_RESULT_SUCCESS;
+    }
+    auto Result = context.urDdiTable.VirtualMem.pfnFree(
+        ShadowContext, (const void *)LOW_SHADOW_BEGIN, SHADOW_SIZE);
+    context.urDdiTable.Context.pfnRelease(ShadowContext);
     return Result;
+  }();
+  return Result;
 }
 
 } // namespace pvc
 
 ur_result_t SetupShadowMemoryOnCPU(uptr &ShadowBegin, uptr &ShadowEnd) {
-    return cpu::SetupShadowMemory(ShadowBegin, ShadowEnd);
+  return cpu::SetupShadowMemory(ShadowBegin, ShadowEnd);
 }
 
 ur_result_t DestroyShadowMemoryOnCPU() { return cpu::DestroyShadowMemory(); }
 
 ur_result_t SetupShadowMemoryOnPVC(ur_context_handle_t Context,
                                    uptr &ShadowBegin, uptr &ShadowEnd) {
-    return pvc::SetupShadowMemory(Context, ShadowBegin, ShadowEnd);
+  return pvc::SetupShadowMemory(Context, ShadowBegin, ShadowEnd);
 }
 
 ur_result_t DestroyShadowMemoryOnPVC() { return pvc::DestroyShadowMemory(); }

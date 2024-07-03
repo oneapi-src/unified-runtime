@@ -1,7 +1,7 @@
 //===--- disjoint_pool_config_parser.hpp -configuration for USM memory pool-==//
 //
-// Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
-// See https://llvm.org/LICENSE.txt for license information.
+// Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM
+// Exceptions. See https://llvm.org/LICENSE.txt for license information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
@@ -20,12 +20,12 @@ enum DisjointPoolMemType { Host, Device, Shared, SharedReadOnly, All };
 
 // Stores configuration for all instances of USM allocator
 class DisjointPoolAllConfigs {
-  public:
-    size_t EnableBuffers = 1;
-    std::shared_ptr<umf_disjoint_pool_shared_limits_t> limits;
-    umf_disjoint_pool_params_t Configs[DisjointPoolMemType::All];
+public:
+  size_t EnableBuffers = 1;
+  std::shared_ptr<umf_disjoint_pool_shared_limits_t> limits;
+  umf_disjoint_pool_params_t Configs[DisjointPoolMemType::All];
 
-    DisjointPoolAllConfigs(int trace = 0);
+  DisjointPoolAllConfigs(int trace = 0);
 };
 
 // Parse optional config parameters of this form:

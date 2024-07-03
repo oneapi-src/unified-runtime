@@ -1,7 +1,7 @@
 // Copyright (C) 2022-2023 Intel Corporation
-// Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
-// See LICENSE.TXT
-// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+// Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM
+// Exceptions. See LICENSE.TXT SPDX-License-Identifier: Apache-2.0 WITH
+// LLVM-exception
 
 #include <array>
 #include <map>
@@ -120,9 +120,9 @@ static std::unordered_map<ur_device_info_t, size_t> device_info_size_map = {
 struct urDeviceGetInfoTest : uur::urAllDevicesTest,
                              ::testing::WithParamInterface<ur_device_info_t> {
 
-    void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(uur::urAllDevicesTest::SetUp());
-    }
+  void SetUp() override {
+    UUR_RETURN_ON_FATAL_FAILURE(uur::urAllDevicesTest::SetUp());
+  }
 };
 
 INSTANTIATE_TEST_SUITE_P(
@@ -238,130 +238,126 @@ INSTANTIATE_TEST_SUITE_P(
         UR_DEVICE_INFO_VIRTUAL_MEMORY_SUPPORT                  //
         ),
     [](const ::testing::TestParamInfo<ur_device_info_t> &info) {
-        std::stringstream ss;
-        ss << info.param;
-        return ss.str();
+      std::stringstream ss;
+      ss << info.param;
+      return ss.str();
     });
 
 struct urDeviceGetInfoSingleTest : uur::urAllDevicesTest {
-    void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(uur::urAllDevicesTest::SetUp());
-    }
+  void SetUp() override {
+    UUR_RETURN_ON_FATAL_FAILURE(uur::urAllDevicesTest::SetUp());
+  }
 };
 
 bool doesReturnArray(ur_device_info_t info_type) {
-    if (info_type == UR_DEVICE_INFO_SUPPORTED_PARTITIONS ||
-        info_type == UR_DEVICE_INFO_PARTITION_TYPE) {
-        return true;
-    }
-    return false;
+  if (info_type == UR_DEVICE_INFO_SUPPORTED_PARTITIONS ||
+      info_type == UR_DEVICE_INFO_PARTITION_TYPE) {
+    return true;
+  }
+  return false;
 }
 
 TEST_P(urDeviceGetInfoTest, Success) {
-    ur_device_info_t info_type = GetParam();
-    for (auto device : devices) {
-        size_t size = 0;
-        ur_result_t result =
-            urDeviceGetInfo(device, info_type, 0, nullptr, &size);
+  ur_device_info_t info_type = GetParam();
+  for (auto device : devices) {
+    size_t size = 0;
+    ur_result_t result = urDeviceGetInfo(device, info_type, 0, nullptr, &size);
 
-        if (result == UR_RESULT_SUCCESS) {
-            if (doesReturnArray(info_type) && size == 0) {
-                return;
-            }
-            ASSERT_NE(size, 0);
+    if (result == UR_RESULT_SUCCESS) {
+      if (doesReturnArray(info_type) && size == 0) {
+        return;
+      }
+      ASSERT_NE(size, 0);
 
-            if (const auto expected_size = device_info_size_map.find(info_type);
-                expected_size != device_info_size_map.end()) {
-                ASSERT_EQ(expected_size->second, size);
-            }
+      if (const auto expected_size = device_info_size_map.find(info_type);
+          expected_size != device_info_size_map.end()) {
+        ASSERT_EQ(expected_size->second, size);
+      }
 
-            std::vector<char> info_data(size);
-            ASSERT_SUCCESS(urDeviceGetInfo(device, info_type, size,
-                                           info_data.data(), nullptr));
+      std::vector<char> info_data(size);
+      ASSERT_SUCCESS(
+          urDeviceGetInfo(device, info_type, size, info_data.data(), nullptr));
 
-            if (info_type == UR_DEVICE_INFO_PLATFORM) {
-                auto returned_platform =
-                    reinterpret_cast<ur_platform_handle_t *>(info_data.data());
-                ASSERT_EQ(*returned_platform, platform);
-            }
+      if (info_type == UR_DEVICE_INFO_PLATFORM) {
+        auto returned_platform =
+            reinterpret_cast<ur_platform_handle_t *>(info_data.data());
+        ASSERT_EQ(*returned_platform, platform);
+      }
 
-        } else {
-            ASSERT_EQ_RESULT(result, UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION);
-        }
+    } else {
+      ASSERT_EQ_RESULT(result, UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION);
     }
+  }
 }
 
 TEST_F(urDeviceGetInfoSingleTest, InvalidNullHandleDevice) {
-    ur_device_type_t device_type;
-    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_HANDLE,
-                     urDeviceGetInfo(nullptr, UR_DEVICE_INFO_TYPE,
-                                     sizeof(ur_device_type_t), &device_type,
-                                     nullptr));
+  ur_device_type_t device_type;
+  ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_HANDLE,
+                   urDeviceGetInfo(nullptr, UR_DEVICE_INFO_TYPE,
+                                   sizeof(ur_device_type_t), &device_type,
+                                   nullptr));
 }
 
 TEST_F(urDeviceGetInfoSingleTest, InvalidEnumerationInfoType) {
-    for (auto device : devices) {
-        ur_device_type_t device_type;
-        ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_ENUMERATION,
-                         urDeviceGetInfo(device, UR_DEVICE_INFO_FORCE_UINT32,
-                                         sizeof(ur_device_type_t), &device_type,
-                                         nullptr));
-    }
+  for (auto device : devices) {
+    ur_device_type_t device_type;
+    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_ENUMERATION,
+                     urDeviceGetInfo(device, UR_DEVICE_INFO_FORCE_UINT32,
+                                     sizeof(ur_device_type_t), &device_type,
+                                     nullptr));
+  }
 }
 
 TEST_F(urDeviceGetInfoSingleTest, InvalidSizePropSize) {
-    for (auto device : devices) {
-        ur_device_type_t device_type;
-        ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
-                         urDeviceGetInfo(device, UR_DEVICE_INFO_TYPE, 0,
-                                         &device_type, nullptr));
-    }
+  for (auto device : devices) {
+    ur_device_type_t device_type;
+    ASSERT_EQ_RESULT(
+        UR_RESULT_ERROR_INVALID_SIZE,
+        urDeviceGetInfo(device, UR_DEVICE_INFO_TYPE, 0, &device_type, nullptr));
+  }
 }
 
 TEST_F(urDeviceGetInfoSingleTest, InvalidSizePropSizeSmall) {
-    for (auto device : devices) {
-        ur_device_type_t device_type;
-        ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
-                         urDeviceGetInfo(device, UR_DEVICE_INFO_TYPE,
-                                         sizeof(device_type) - 1, &device_type,
-                                         nullptr));
-    }
+  for (auto device : devices) {
+    ur_device_type_t device_type;
+    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
+                     urDeviceGetInfo(device, UR_DEVICE_INFO_TYPE,
+                                     sizeof(device_type) - 1, &device_type,
+                                     nullptr));
+  }
 }
 
 TEST_F(urDeviceGetInfoSingleTest, InvalidNullPointerPropValue) {
-    for (auto device : devices) {
-        ur_device_type_t device_type;
-        ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_POINTER,
-                         urDeviceGetInfo(device, UR_DEVICE_INFO_TYPE,
-                                         sizeof(device_type), nullptr,
-                                         nullptr));
-    }
+  for (auto device : devices) {
+    ur_device_type_t device_type;
+    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_POINTER,
+                     urDeviceGetInfo(device, UR_DEVICE_INFO_TYPE,
+                                     sizeof(device_type), nullptr, nullptr));
+  }
 }
 
 TEST_F(urDeviceGetInfoSingleTest, InvalidNullPointerPropSizeRet) {
-    for (auto device : devices) {
-        ASSERT_EQ_RESULT(
-            UR_RESULT_ERROR_INVALID_NULL_POINTER,
-            urDeviceGetInfo(device, UR_DEVICE_INFO_TYPE, 0, nullptr, nullptr));
-    }
+  for (auto device : devices) {
+    ASSERT_EQ_RESULT(
+        UR_RESULT_ERROR_INVALID_NULL_POINTER,
+        urDeviceGetInfo(device, UR_DEVICE_INFO_TYPE, 0, nullptr, nullptr));
+  }
 }
 
 TEST_F(urDeviceGetInfoSingleTest, MaxWorkGroupSizeIsNonzero) {
-    for (auto device : devices) {
-        size_t max_global_size;
+  for (auto device : devices) {
+    size_t max_global_size;
 
-        ASSERT_SUCCESS(
-            urDeviceGetInfo(device, UR_DEVICE_INFO_MAX_WORK_GROUP_SIZE,
-                            sizeof(size_t), &max_global_size, nullptr));
-        ASSERT_NE(max_global_size, 0);
+    ASSERT_SUCCESS(urDeviceGetInfo(device, UR_DEVICE_INFO_MAX_WORK_GROUP_SIZE,
+                                   sizeof(size_t), &max_global_size, nullptr));
+    ASSERT_NE(max_global_size, 0);
 
-        std::array<size_t, 3> max_work_group_sizes;
-        ASSERT_SUCCESS(urDeviceGetInfo(device,
-                                       UR_DEVICE_INFO_MAX_WORK_GROUPS_3D,
-                                       sizeof(max_work_group_sizes),
-                                       max_work_group_sizes.data(), nullptr));
-        for (size_t i = 0; i < 3; i++) {
-            ASSERT_NE(max_work_group_sizes[i], 0);
-        }
+    std::array<size_t, 3> max_work_group_sizes;
+    ASSERT_SUCCESS(urDeviceGetInfo(device, UR_DEVICE_INFO_MAX_WORK_GROUPS_3D,
+                                   sizeof(max_work_group_sizes),
+                                   max_work_group_sizes.data(), nullptr));
+    for (size_t i = 0; i < 3; i++) {
+      ASSERT_NE(max_work_group_sizes[i], 0);
     }
+  }
 }

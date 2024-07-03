@@ -1,7 +1,7 @@
 // Copyright (C) 2022-2023 Intel Corporation
-// Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
-// See LICENSE.TXT
-// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+// Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM
+// Exceptions. See LICENSE.TXT SPDX-License-Identifier: Apache-2.0 WITH
+// LLVM-exception
 
 #ifndef UR_CONFORMANCE_INCLUDE_ENVIRONMENT_H_INCLUDED
 #define UR_CONFORMANCE_INCLUDE_ENVIRONMENT_H_INCLUDED
@@ -15,87 +15,87 @@ namespace uur {
 
 struct PlatformEnvironment : ::testing::Environment {
 
-    struct PlatformOptions {
-        std::string platform_name;
-        unsigned long platforms_count = 0;
-    };
+  struct PlatformOptions {
+    std::string platform_name;
+    unsigned long platforms_count = 0;
+  };
 
-    PlatformEnvironment(int argc, char **argv);
-    virtual ~PlatformEnvironment() override = default;
+  PlatformEnvironment(int argc, char **argv);
+  virtual ~PlatformEnvironment() override = default;
 
-    virtual void SetUp() override;
-    virtual void TearDown() override;
+  virtual void SetUp() override;
+  virtual void TearDown() override;
 
-    PlatformOptions parsePlatformOptions(int argc, char **argv);
+  PlatformOptions parsePlatformOptions(int argc, char **argv);
 
-    PlatformOptions platform_options;
-    std::vector<ur_adapter_handle_t> adapters{};
-    ur_platform_handle_t platform = nullptr;
-    std::string error;
-    static PlatformEnvironment *instance;
+  PlatformOptions platform_options;
+  std::vector<ur_adapter_handle_t> adapters{};
+  ur_platform_handle_t platform = nullptr;
+  std::string error;
+  static PlatformEnvironment *instance;
 };
 
 struct DevicesEnvironment : PlatformEnvironment {
 
-    struct DeviceOptions {
-        std::string device_name;
-        unsigned long devices_count = 0;
-    };
+  struct DeviceOptions {
+    std::string device_name;
+    unsigned long devices_count = 0;
+  };
 
-    DevicesEnvironment(int argc, char **argv);
-    virtual ~DevicesEnvironment() override = default;
+  DevicesEnvironment(int argc, char **argv);
+  virtual ~DevicesEnvironment() override = default;
 
-    virtual void SetUp() override;
-    virtual void TearDown() override;
+  virtual void SetUp() override;
+  virtual void TearDown() override;
 
-    DeviceOptions parseDeviceOptions(int argc, char **argv);
+  DeviceOptions parseDeviceOptions(int argc, char **argv);
 
-    inline const std::vector<ur_device_handle_t> &GetDevices() const {
-        return devices;
-    }
+  inline const std::vector<ur_device_handle_t> &GetDevices() const {
+    return devices;
+  }
 
-    DeviceOptions device_options;
-    std::vector<ur_device_handle_t> devices;
-    ur_device_handle_t device = nullptr;
-    static DevicesEnvironment *instance;
+  DeviceOptions device_options;
+  std::vector<ur_device_handle_t> devices;
+  ur_device_handle_t device = nullptr;
+  static DevicesEnvironment *instance;
 };
 
 struct KernelsEnvironment : DevicesEnvironment {
-    struct KernelOptions {
-        std::string kernel_directory;
-    };
+  struct KernelOptions {
+    std::string kernel_directory;
+  };
 
-    KernelsEnvironment(int argc, char **argv,
-                       const std::string &kernels_default_dir);
-    virtual ~KernelsEnvironment() override = default;
+  KernelsEnvironment(int argc, char **argv,
+                     const std::string &kernels_default_dir);
+  virtual ~KernelsEnvironment() override = default;
 
-    virtual void SetUp() override;
-    virtual void TearDown() override;
+  virtual void SetUp() override;
+  virtual void TearDown() override;
 
-    void LoadSource(const std::string &kernel_name,
-                    std::shared_ptr<std::vector<char>> &binary_out);
+  void LoadSource(const std::string &kernel_name,
+                  std::shared_ptr<std::vector<char>> &binary_out);
 
-    ur_result_t CreateProgram(ur_platform_handle_t hPlatform,
-                              ur_context_handle_t hContext,
-                              ur_device_handle_t hDevice,
-                              const std::vector<char> &binary,
-                              const ur_program_properties_t *properties,
-                              ur_program_handle_t *phProgram);
+  ur_result_t CreateProgram(ur_platform_handle_t hPlatform,
+                            ur_context_handle_t hContext,
+                            ur_device_handle_t hDevice,
+                            const std::vector<char> &binary,
+                            const ur_program_properties_t *properties,
+                            ur_program_handle_t *phProgram);
 
-    std::vector<std::string> GetEntryPointNames(std::string program);
+  std::vector<std::string> GetEntryPointNames(std::string program);
 
-    static KernelsEnvironment *instance;
+  static KernelsEnvironment *instance;
 
-  private:
-    KernelOptions parseKernelOptions(int argc, char **argv,
-                                     const std::string &kernels_default_dir);
-    std::string getKernelSourcePath(const std::string &kernel_name);
-    std::string getTargetName();
+private:
+  KernelOptions parseKernelOptions(int argc, char **argv,
+                                   const std::string &kernels_default_dir);
+  std::string getKernelSourcePath(const std::string &kernel_name);
+  std::string getTargetName();
 
-    KernelOptions kernel_options;
-    // mapping between kernels (full_path + kernel_name) and their saved source.
-    std::unordered_map<std::string, std::shared_ptr<std::vector<char>>>
-        cached_kernels;
+  KernelOptions kernel_options;
+  // mapping between kernels (full_path + kernel_name) and their saved source.
+  std::unordered_map<std::string, std::shared_ptr<std::vector<char>>>
+      cached_kernels;
 };
 
 } // namespace uur
