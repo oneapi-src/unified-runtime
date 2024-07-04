@@ -9637,7 +9637,7 @@ __urdlllocal ur_result_t UR_APICALL urTensorMapEncodeIm2ColExp(
                    ///< the TensorRank dimensions.
     const uint64_t *
         GlobalStrides, ///< [in] Array containing stride size (in bytes) along each of the
-                       ///< tensorRank - 1 dimensions.
+                       ///< TensorRank - 1 dimensions.
     const int *
         PixelBoxLowerCorner, ///< [in] Array containing DHW dimensions of lower box corner.
     const int *
@@ -9645,7 +9645,7 @@ __urdlllocal ur_result_t UR_APICALL urTensorMapEncodeIm2ColExp(
     uint32_t ChannelsPerPixel, ///< [in] Number of channels per pixel.
     uint32_t PixelsPerColumn,  ///< [in] Number of pixels per column.
     const uint32_t *
-        ElementStrides, ///< [in] Array containing traversal stride in each of the tensorRank
+        ElementStrides, ///< [in] Array containing traversal stride in each of the TensorRank
                         ///< dimensions.
     ur_exp_tensor_map_interleave_flags_t
         Interleave, ///< [in] Type of interleaved layout the tensor addresses
@@ -9654,8 +9654,8 @@ __urdlllocal ur_result_t UR_APICALL urTensorMapEncodeIm2ColExp(
     ur_exp_tensor_map_l2_promotion_flags_t
         L2Promotion, ///< [in] L2 promotion size.
     ur_exp_tensor_map_oob_fill_flags_t
-        OobFill, ///< [in] Indicate whether zero or special NaN constant will be used to
-                 ///< fill out-of-bound elements.
+        OobFill, ///< [in] Indicates whether zero or special NaN constant will be used to
+                 ///< fill out-of-bounds elements.
     ur_exp_tensor_map_handle_t
         *hTensorMap ///< [out] Handle of the tensor map object.
 ) {
@@ -9718,6 +9718,10 @@ __urdlllocal ur_result_t UR_APICALL urTensorMapEncodeIm2ColExp(
         if (UR_EXP_TENSOR_MAP_OOB_FILL_FLAGS_MASK & OobFill) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
+
+        if (TensorRank < 3) {
+            return UR_RESULT_ERROR_INVALID_ARGUMENT;
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -9748,13 +9752,13 @@ __urdlllocal ur_result_t UR_APICALL urTensorMapEncodeTiledExp(
                    ///< the TensorRank dimensions.
     const uint64_t *
         GlobalStrides, ///< [in] Array containing stride size (in bytes) along each of the
-                       ///< tensorRank - 1 dimensions.
+                       ///< TensorRank - 1 dimensions.
     const uint32_t *
         BoxDim, ///< [in] Array containing traversal box size (number of elments) along
-    ///< each of the tensorRank dimensions. Specifies how many elements to be
+    ///< each of the TensorRank dimensions. Specifies how many elements to be
     ///< traversed along each tensor dimension.
     const uint32_t *
-        ElementStrides, ///< [in] Array containing traversal stride in each of the tensorRank
+        ElementStrides, ///< [in] Array containing traversal stride in each of the TensorRank
                         ///< dimensions.
     ur_exp_tensor_map_interleave_flags_t
         Interleave, ///< [in] Type of interleaved layout the tensor addresses
@@ -9763,8 +9767,8 @@ __urdlllocal ur_result_t UR_APICALL urTensorMapEncodeTiledExp(
     ur_exp_tensor_map_l2_promotion_flags_t
         L2Promotion, ///< [in] L2 promotion size.
     ur_exp_tensor_map_oob_fill_flags_t
-        OobFill, ///< [in] Indicate whether zero or special NaN constant will be used to
-                 ///< fill out-of-bound elements.
+        OobFill, ///< [in] Indicates whether zero or special NaN constant will be used to
+                 ///< fill out-of-bounds elements.
     ur_exp_tensor_map_handle_t
         *hTensorMap ///< [out] Handle of the tensor map object.
 ) {
@@ -9822,6 +9826,10 @@ __urdlllocal ur_result_t UR_APICALL urTensorMapEncodeTiledExp(
 
         if (UR_EXP_TENSOR_MAP_OOB_FILL_FLAGS_MASK & OobFill) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        }
+
+        if (TensorRank < 3) {
+            return UR_RESULT_ERROR_INVALID_ARGUMENT;
         }
     }
 
