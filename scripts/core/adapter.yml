@@ -203,7 +203,7 @@ etors:
 --- #--------------------------------------------------------------------------
 type: enum
 desc: "Minimum level of messages to be processed by the logger."
-class: $x
+class: $xAdapter
 name: $x_logger_level_t
 etors:
     - name: DEBUG
@@ -224,6 +224,7 @@ etors:
 --- #--------------------------------------------------------------------------
 type: fptr_typedef
 desc: "Callback function to retrieve output from the logger."
+class: $xAdapter
 name: $x_logger_output_callback_t
 return: "void"
 params:
@@ -243,7 +244,7 @@ desc: |
       Set a callback function for use by the logger to retrieve logging output.
       It is a requirement that the callback function is thread safe and the
       creator of the function will be responsible for this.
-class: $x
+class: $xAdapter
 name: SetLoggerCallback
 decl: static
 params:
@@ -263,7 +264,7 @@ params:
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Set the minimum logging level for the logger Callback function."
-class: $x
+class: $xAdapter
 name: SetLoggerCallbackLevel
 decl: static
 params:
