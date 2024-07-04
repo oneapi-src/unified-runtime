@@ -18,6 +18,7 @@
 #include "image.hpp"
 #include "logger/ur_logger.hpp"
 #include "queue.hpp"
+#include "ur_interface_loader.hpp"
 #include "ur_level_zero.hpp"
 
 // Default to using compute engine for fill operation, but allow to
@@ -302,7 +303,7 @@ static ur_result_t ZeHostMemAllocHelper(void **ResultPtr,
     // indirect access, that is why explicitly retain context to be sure
     // that it is released after all memory allocations in this context are
     // released.
-    UR_CALL(urContextRetain(UrContext));
+    UR_CALL(ur::level_zero::urContextRetain(UrContext));
   }
 
   ZeStruct<ze_host_mem_alloc_desc_t> ZeDesc;
@@ -951,10 +952,10 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueMemBufferMap(
   if (Buffer->OnHost) {
     // Wait on incoming events before doing the copy
     if (NumEventsInWaitList > 0)
-      UR_CALL(urEventWait(NumEventsInWaitList, EventWaitList));
+      UR_CALL(ur::level_zero::urEventWait(NumEventsInWaitList, EventWaitList));
 
     if (Queue->isInOrderQueue())
-      UR_CALL(urQueueFinish(Queue));
+      UR_CALL(ur::level_zero::urQueueFinish(Queue));
 
     // Lock automatically releases when this goes out of scope.
     std::scoped_lock<ur_shared_mutex> Guard(Buffer->Mutex);
@@ -1107,10 +1108,10 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueMemUnmap(
   if (Buffer->OnHost) {
     // Wait on incoming events before doing the copy
     if (NumEventsInWaitList > 0)
-      UR_CALL(urEventWait(NumEventsInWaitList, EventWaitList));
+      UR_CALL(ur::level_zero::urEventWait(NumEventsInWaitList, EventWaitList));
 
     if (Queue->isInOrderQueue())
-      UR_CALL(urQueueFinish(Queue));
+      UR_CALL(ur::level_zero::urQueueFinish(Queue));
 
     char *ZeHandleDst;
     UR_CALL(Buffer->getZeHandle(ZeHandleDst, ur_mem_handle_t_::write_only,
@@ -1475,7 +1476,9 @@ static ur_result_t ur2zeImageDesc(const ur_image_format_t *ImageFormat,
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreate(
+namespace ur::level_zero {
+
+ur_result_t urMemImageCreate(
     ur_context_handle_t Context, ///< [in] handle of the context object
     ur_mem_flags_t Flags, ///< [in] allocation and usage information flags
     const ur_image_format_t
@@ -1524,7 +1527,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreate(
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
+ur_result_t urMemImageCreateWithNativeHandle(
     ur_native_handle_t NativeMem, ///< [in] the native handle to the memory.
     ur_context_handle_t Context,  ///< [in] handle of the context object.
     [[maybe_unused]] const ur_image_format_t
@@ -1552,7 +1555,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
+ur_result_t urMemBufferCreate(
     ur_context_handle_t Context, ///< [in] handle of the context object
     ur_mem_flags_t Flags, ///< [in] allocation and usage information flags
     size_t Size, ///< [in] size in bytes of the memory object to be allocated
@@ -1646,14 +1649,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urMemRetain(
+ur_result_t urMemRetain(
     ur_mem_handle_t Mem ///< [in] handle of the memory object to get access
 ) {
   Mem->RefCount.increment();
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urMemRelease(
+ur_result_t urMemRelease(
     ur_mem_handle_t Mem ///< [in] handle of the memory object to release
 ) {
   if (!Mem->RefCount.decrementAndTest())
@@ -1679,7 +1682,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemRelease(
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urMemBufferPartition(
+ur_result_t urMemBufferPartition(
     ur_mem_handle_t
         Buffer,           ///< [in] handle of the buffer object to allocate from
     ur_mem_flags_t Flags, ///< [in] allocation and usage information flags
@@ -1715,7 +1718,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferPartition(
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urMemGetNativeHandle(
+ur_result_t urMemGetNativeHandle(
     ur_mem_handle_t Mem, ///< [in] handle of the mem.
     ur_device_handle_t,  ///< [in] handle of the device.
     ur_native_handle_t
@@ -1729,7 +1732,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemGetNativeHandle(
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
+ur_result_t urMemBufferCreateWithNativeHandle(
     ur_native_handle_t NativeMem, ///< [in] the native handle to the memory.
     ur_context_handle_t Context,  ///< [in] handle of the context object.
     const ur_mem_native_properties_t
@@ -1796,7 +1799,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
     ContextsLock.lock();
     // Retain context to be sure that it is released after all memory
     // allocations in this context are released.
-    UR_CALL(urContextRetain(Context));
+    UR_CALL(ur::level_zero::urContextRetain(Context));
 
     Context->MemAllocs.emplace(std::piecewise_construct,
                                std::forward_as_tuple(Ptr),
@@ -1832,7 +1835,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urMemGetInfo(
+ur_result_t urMemGetInfo(
     ur_mem_handle_t Memory, ///< [in] handle to the memory object being queried.
     ur_mem_info_t MemInfoType, ///< [in] type of the info to retrieve.
     size_t PropSize, ///< [in] the number of bytes of memory pointed to by
@@ -1868,7 +1871,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemGetInfo(
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urMemImageGetInfo(
+ur_result_t urMemImageGetInfo(
     ur_mem_handle_t Memory, ///< [in] handle to the image object being queried.
     ur_image_info_t ImgInfoType, ///< [in] type of image info to retrieve.
     size_t PropSize, ///< [in] the number of bytes of memory pointer to by
@@ -1890,6 +1893,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageGetInfo(
                 "{} function not implemented!", __FUNCTION__);
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
+} // namespace ur::level_zero
 
 // If indirect access tracking is enabled then performs reference counting,
 // otherwise just calls zeMemAllocDevice.
@@ -1910,7 +1914,7 @@ static ur_result_t ZeDeviceMemAllocHelper(void **ResultPtr,
     // indirect access, that is why explicitly retain context to be sure
     // that it is released after all memory allocations in this context are
     // released.
-    UR_CALL(urContextRetain(Context));
+    UR_CALL(ur::level_zero::urContextRetain(Context));
   }
 
   ze_device_mem_alloc_desc_t ZeDesc = {};
@@ -1970,8 +1974,9 @@ ur_result_t _ur_buffer::getZeHandle(char *&ZeHandle, access_mode_t AccessMode,
         ur_usm_desc_t USMDesc{};
         USMDesc.align = getAlignment();
         ur_usm_pool_handle_t Pool{};
-        UR_CALL(urUSMHostAlloc(UrContext, &USMDesc, Pool, Size,
-                               reinterpret_cast<void **>(&ZeHandle)));
+        UR_CALL(ur::level_zero::urUSMHostAlloc(
+            UrContext, &USMDesc, Pool, Size,
+            reinterpret_cast<void **>(&ZeHandle)));
       } else {
         HostAllocation.ReleaseAction = allocation_t::free_native;
         UR_CALL(ZeHostMemAllocHelper(reinterpret_cast<void **>(&ZeHandle),
@@ -2029,8 +2034,9 @@ ur_result_t _ur_buffer::getZeHandle(char *&ZeHandle, access_mode_t AccessMode,
         ur_usm_desc_t USMDesc{};
         USMDesc.align = getAlignment();
         ur_usm_pool_handle_t Pool{};
-        UR_CALL(urUSMDeviceAlloc(UrContext, Device, &USMDesc, Pool, Size,
-                                 reinterpret_cast<void **>(&ZeHandle)));
+        UR_CALL(ur::level_zero::urUSMDeviceAlloc(
+            UrContext, Device, &USMDesc, Pool, Size,
+            reinterpret_cast<void **>(&ZeHandle)));
       } else {
         Allocation.ReleaseAction = allocation_t::free_native;
         UR_CALL(ZeDeviceMemAllocHelper(reinterpret_cast<void **>(&ZeHandle),
@@ -2093,8 +2099,8 @@ ur_result_t _ur_buffer::getZeHandle(char *&ZeHandle, access_mode_t AccessMode,
             ur_usm_desc_t USMDesc{};
             USMDesc.align = getAlignment();
             ur_usm_pool_handle_t Pool{};
-            UR_CALL(
-                urUSMHostAlloc(UrContext, &USMDesc, Pool, Size, &ZeHandleHost));
+            UR_CALL(ur::level_zero::urUSMHostAlloc(UrContext, &USMDesc, Pool,
+                                                   Size, &ZeHandleHost));
           } else {
             HostAllocation.ReleaseAction = allocation_t::free_native;
             UR_CALL(ZeHostMemAllocHelper(&ZeHandleHost, UrContext, Size));

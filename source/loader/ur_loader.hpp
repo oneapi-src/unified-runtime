@@ -31,6 +31,8 @@ using platform_vector_t = std::vector<platform_t>;
 
 class context_t : public AtomicSingleton<context_t> {
   public:
+    context_t();
+
     ur_api_version_t version = UR_API_VERSION_CURRENT;
 
     platform_vector_t platforms;

@@ -41,6 +41,7 @@ class AdapterRegistry {
                 }
 
                 if (exists) {
+                    forceLoaded = true;
                     adaptersLoadPaths.emplace_back(
                         std::vector{std::move(path)});
                 } else {
@@ -91,6 +92,8 @@ class AdapterRegistry {
     bool empty() const noexcept { return adaptersLoadPaths.size() == 0; }
 
     size_t size() const noexcept { return adaptersLoadPaths.size(); }
+
+    bool adaptersForceLoaded() { return forceLoaded; }
 
     std::vector<std::vector<fs::path>>::const_iterator begin() const noexcept {
         return adaptersLoadPaths.begin();
@@ -182,6 +185,8 @@ class AdapterRegistry {
             adaptersLoadPaths.emplace_back(loadPaths);
         }
     }
+
+    bool forceLoaded = false;
 
   public:
     void enableMock() {

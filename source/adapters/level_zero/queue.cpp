@@ -19,7 +19,7 @@
 #include "common.hpp"
 #include "event.hpp"
 #include "queue.hpp"
-#include "ur_api.h"
+#include "ur_interface_loader.hpp"
 #include "ur_level_zero.hpp"
 #include "ur_util.hpp"
 #include "ze_api.h"
@@ -469,7 +469,9 @@ static bool doEagerInit = [] {
   return EagerInit ? std::atoi(EagerInit) != 0 : false;
 }();
 
-UR_APIEXPORT ur_result_t UR_APICALL urQueueCreate(
+namespace ur::level_zero {
+
+ur_result_t urQueueCreate(
     ur_context_handle_t Context, ///< [in] handle of the context object
     ur_device_handle_t Device,   ///< [in] handle of the device object
     const ur_queue_properties_t
@@ -583,6 +585,100 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreate(
 
   return UR_RESULT_SUCCESS;
 }
+
+ur_result_t urQueueCreateWithNativeHandle(
+    ur_native_handle_t NativeQueue, ///< [in] the native handle of the queue.
+    ur_context_handle_t Context,    ///< [in] handle of the context object
+    ur_device_handle_t Device,      ///
+    const ur_queue_native_properties_t *NativeProperties, ///
+    ur_queue_handle_t
+        *RetQueue ///< [out] pointer to the handle of the queue object created.
+) {
+  bool OwnNativeHandle = false;
+  ur_queue_flags_t Flags{};
+  int32_t NativeHandleDesc{};
+
+  if (NativeProperties) {
+    OwnNativeHandle = NativeProperties->isNativeHandleOwned;
+    void *pNext = NativeProperties->pNext;
+    while (pNext) {
+      const ur_base_properties_t *extendedProperties =
+          reinterpret_cast<const ur_base_properties_t *>(pNext);
+      if (extendedProperties->stype == UR_STRUCTURE_TYPE_QUEUE_PROPERTIES) {
+        const ur_queue_properties_t *UrProperties =
+            reinterpret_cast<const ur_queue_properties_t *>(extendedProperties);
+        Flags = UrProperties->flags;
+      } else if (extendedProperties->stype ==
+                 UR_STRUCTURE_TYPE_QUEUE_NATIVE_DESC) {
+        const ur_queue_native_desc_t *UrNativeDesc =
+            reinterpret_cast<const ur_queue_native_desc_t *>(
+                extendedProperties);
+        if (UrNativeDesc->pNativeData)
+          NativeHandleDesc =
+              *(reinterpret_cast<int32_t *>((UrNativeDesc->pNativeData)));
+      }
+      pNext = extendedProperties->pNext;
+    }
+  }
+
+  // Get the device handle from first device in the platform
+  // Maybe this is not completely correct.
+  uint32_t NumEntries = 1;
+  ur_platform_handle_t Platform{};
+  ur_adapter_handle_t AdapterHandle = GlobalAdapter;
+  UR_CALL(ur::level_zero::urPlatformGet(&AdapterHandle, 1, NumEntries,
+                                        &Platform, nullptr));
+
+  ur_device_handle_t UrDevice = Device;
+  if (UrDevice == nullptr) {
+    UR_CALL(ur::level_zero::urDeviceGet(Platform, UR_DEVICE_TYPE_GPU,
+                                        NumEntries, &UrDevice, nullptr));
+  }
+
+  // The NativeHandleDesc has value if if the native handle is an immediate
+  // command list.
+  if (NativeHandleDesc == 1) {
+    std::vector<ze_command_queue_handle_t> ComputeQueues{nullptr};
+    std::vector<ze_command_queue_handle_t> CopyQueues;
+
+    try {
+      ur_queue_handle_t_ *Queue = new ur_queue_handle_legacy_t_(
+          ComputeQueues, CopyQueues, Context, UrDevice, OwnNativeHandle, Flags);
+      *RetQueue = reinterpret_cast<ur_queue_handle_t>(Queue);
+    } catch (const std::bad_alloc &) {
+      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+    } catch (...) {
+      return UR_RESULT_ERROR_UNKNOWN;
+    }
+    auto &InitialGroup =
+        Legacy(*RetQueue)->ComputeQueueGroupsByTID.begin()->second;
+    InitialGroup.setImmCmdList(Legacy(*RetQueue),
+                               ur_cast<ze_command_list_handle_t>(NativeQueue));
+  } else {
+    auto ZeQueue = ur_cast<ze_command_queue_handle_t>(NativeQueue);
+    // Assume this is the "0" index queue in the compute command-group.
+    std::vector<ze_command_queue_handle_t> ZeQueues{ZeQueue};
+
+    // TODO: see what we can do to correctly initialize PI queue for
+    // compute vs. copy Level-Zero queue. Currently we will send
+    // all commands to the "ZeQueue".
+    std::vector<ze_command_queue_handle_t> ZeroCopyQueues;
+
+    try {
+      ur_queue_handle_t_ *Queue = new ur_queue_handle_legacy_t_(
+          ZeQueues, ZeroCopyQueues, Context, UrDevice, OwnNativeHandle, Flags);
+      *RetQueue = reinterpret_cast<ur_queue_handle_t>(Queue);
+    } catch (const std::bad_alloc &) {
+      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+    } catch (...) {
+      return UR_RESULT_ERROR_UNKNOWN;
+    }
+  }
+  Legacy(*RetQueue)->UsingImmCmdLists = (NativeHandleDesc == 1);
+
+  return UR_RESULT_SUCCESS;
+}
+} // namespace ur::level_zero
 
 ur_result_t ur_queue_handle_legacy_t_::queueRetain() {
   auto Queue = this;
@@ -760,98 +856,6 @@ void ur_queue_handle_legacy_t_::ur_queue_group_t::setImmCmdList(
                                      queue->useCompletionBatching(), false,
                                      false, true)})
           .first);
-}
-
-UR_APIEXPORT ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
-    ur_native_handle_t NativeQueue, ///< [in] the native handle of the queue.
-    ur_context_handle_t Context,    ///< [in] handle of the context object
-    ur_device_handle_t Device,      ///
-    const ur_queue_native_properties_t *NativeProperties, ///
-    ur_queue_handle_t
-        *RetQueue ///< [out] pointer to the handle of the queue object created.
-) {
-  bool OwnNativeHandle = false;
-  ur_queue_flags_t Flags{};
-  int32_t NativeHandleDesc{};
-
-  if (NativeProperties) {
-    OwnNativeHandle = NativeProperties->isNativeHandleOwned;
-    void *pNext = NativeProperties->pNext;
-    while (pNext) {
-      const ur_base_properties_t *extendedProperties =
-          reinterpret_cast<const ur_base_properties_t *>(pNext);
-      if (extendedProperties->stype == UR_STRUCTURE_TYPE_QUEUE_PROPERTIES) {
-        const ur_queue_properties_t *UrProperties =
-            reinterpret_cast<const ur_queue_properties_t *>(extendedProperties);
-        Flags = UrProperties->flags;
-      } else if (extendedProperties->stype ==
-                 UR_STRUCTURE_TYPE_QUEUE_NATIVE_DESC) {
-        const ur_queue_native_desc_t *UrNativeDesc =
-            reinterpret_cast<const ur_queue_native_desc_t *>(
-                extendedProperties);
-        if (UrNativeDesc->pNativeData)
-          NativeHandleDesc =
-              *(reinterpret_cast<int32_t *>((UrNativeDesc->pNativeData)));
-      }
-      pNext = extendedProperties->pNext;
-    }
-  }
-
-  // Get the device handle from first device in the platform
-  // Maybe this is not completely correct.
-  uint32_t NumEntries = 1;
-  ur_platform_handle_t Platform{};
-  ur_adapter_handle_t AdapterHandle = GlobalAdapter;
-  UR_CALL(urPlatformGet(&AdapterHandle, 1, NumEntries, &Platform, nullptr));
-
-  ur_device_handle_t UrDevice = Device;
-  if (UrDevice == nullptr) {
-    UR_CALL(urDeviceGet(Platform, UR_DEVICE_TYPE_GPU, NumEntries, &UrDevice,
-                        nullptr));
-  }
-
-  // The NativeHandleDesc has value if if the native handle is an immediate
-  // command list.
-  if (NativeHandleDesc == 1) {
-    std::vector<ze_command_queue_handle_t> ComputeQueues{nullptr};
-    std::vector<ze_command_queue_handle_t> CopyQueues;
-
-    try {
-      ur_queue_handle_t_ *Queue = new ur_queue_handle_legacy_t_(
-          ComputeQueues, CopyQueues, Context, UrDevice, OwnNativeHandle, Flags);
-      *RetQueue = reinterpret_cast<ur_queue_handle_t>(Queue);
-    } catch (const std::bad_alloc &) {
-      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-    } catch (...) {
-      return UR_RESULT_ERROR_UNKNOWN;
-    }
-    auto &InitialGroup =
-        Legacy(*RetQueue)->ComputeQueueGroupsByTID.begin()->second;
-    InitialGroup.setImmCmdList(Legacy(*RetQueue),
-                               ur_cast<ze_command_list_handle_t>(NativeQueue));
-  } else {
-    auto ZeQueue = ur_cast<ze_command_queue_handle_t>(NativeQueue);
-    // Assume this is the "0" index queue in the compute command-group.
-    std::vector<ze_command_queue_handle_t> ZeQueues{ZeQueue};
-
-    // TODO: see what we can do to correctly initialize PI queue for
-    // compute vs. copy Level-Zero queue. Currently we will send
-    // all commands to the "ZeQueue".
-    std::vector<ze_command_queue_handle_t> ZeroCopyQueues;
-
-    try {
-      ur_queue_handle_t_ *Queue = new ur_queue_handle_legacy_t_(
-          ZeQueues, ZeroCopyQueues, Context, UrDevice, OwnNativeHandle, Flags);
-      *RetQueue = reinterpret_cast<ur_queue_handle_t>(Queue);
-    } catch (const std::bad_alloc &) {
-      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-    } catch (...) {
-      return UR_RESULT_ERROR_UNKNOWN;
-    }
-  }
-  Legacy(*RetQueue)->UsingImmCmdLists = (NativeHandleDesc == 1);
-
-  return UR_RESULT_SUCCESS;
 }
 
 ur_result_t ur_queue_handle_legacy_t_::queueFinish() {
@@ -1925,7 +1929,7 @@ ur_result_t createEventAndAssociateQueue(ur_queue_handle_legacy_t Queue,
   // event will not be waited/released by SYCL RT, so it must be destroyed by
   // EventRelease in resetCommandList.
   if (!IsInternal)
-    UR_CALL(urEventRetain(*Event));
+    UR_CALL(ur::level_zero::urEventRetain(*Event));
 
   return UR_RESULT_SUCCESS;
 }
