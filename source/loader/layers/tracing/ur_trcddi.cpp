@@ -195,70 +195,73 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGetInfo(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urSetLoggerCallback
-__urdlllocal ur_result_t UR_APICALL urSetLoggerCallback(
+/// @brief Intercept function for urAdapterSetLoggerCallback
+__urdlllocal ur_result_t UR_APICALL urAdapterSetLoggerCallback(
     ur_adapter_handle_t hAdapter, ///< [in] handle of the adapter
-    ur_logger_output_callback_t
+    ur_logger_callback_t
         pfnLoggerCallback, ///< [in] Function pointer to callback from the logger.
     void *
         pUserData, ///< [in][out][optional] pointer to data to be passed to callback
     ur_logger_level_t level ///< [in] logging level
 ) {
-    auto pfnSetLoggerCallback = context.urDdiTable.Global.pfnSetLoggerCallback;
+    auto pfnSetLoggerCallback = context.urDdiTable.Adapter.pfnSetLoggerCallback;
 
     if (nullptr == pfnSetLoggerCallback) {
         return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
     }
 
-    ur_set_logger_callback_params_t params = {&hAdapter, &pfnLoggerCallback,
-                                              &pUserData, &level};
-    uint64_t instance = context.notify_begin(UR_FUNCTION_SET_LOGGER_CALLBACK,
-                                             "urSetLoggerCallback", &params);
+    ur_adapter_set_logger_callback_params_t params = {
+        &hAdapter, &pfnLoggerCallback, &pUserData, &level};
+    uint64_t instance =
+        context.notify_begin(UR_FUNCTION_ADAPTER_SET_LOGGER_CALLBACK,
+                             "urAdapterSetLoggerCallback", &params);
 
-    context.logger.info("---> urSetLoggerCallback");
+    context.logger.info("---> urAdapterSetLoggerCallback");
 
     ur_result_t result =
         pfnSetLoggerCallback(hAdapter, pfnLoggerCallback, pUserData, level);
 
-    context.notify_end(UR_FUNCTION_SET_LOGGER_CALLBACK, "urSetLoggerCallback",
-                       &params, &result, instance);
+    context.notify_end(UR_FUNCTION_ADAPTER_SET_LOGGER_CALLBACK,
+                       "urAdapterSetLoggerCallback", &params, &result,
+                       instance);
 
     std::ostringstream args_str;
-    ur::extras::printFunctionParams(args_str, UR_FUNCTION_SET_LOGGER_CALLBACK,
-                                    &params);
+    ur::extras::printFunctionParams(
+        args_str, UR_FUNCTION_ADAPTER_SET_LOGGER_CALLBACK, &params);
     context.logger.info("({}) -> {};\n", args_str.str(), result);
 
     return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urSetLoggerCallbackLevel
-__urdlllocal ur_result_t UR_APICALL urSetLoggerCallbackLevel(
+/// @brief Intercept function for urAdapterSetLoggerCallbackLevel
+__urdlllocal ur_result_t UR_APICALL urAdapterSetLoggerCallbackLevel(
     ur_adapter_handle_t hAdapter, ///< [in] handle of the adapter
     ur_logger_level_t level       ///< [in] logging level
 ) {
     auto pfnSetLoggerCallbackLevel =
-        context.urDdiTable.Global.pfnSetLoggerCallbackLevel;
+        context.urDdiTable.Adapter.pfnSetLoggerCallbackLevel;
 
     if (nullptr == pfnSetLoggerCallbackLevel) {
         return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
     }
 
-    ur_set_logger_callback_level_params_t params = {&hAdapter, &level};
+    ur_adapter_set_logger_callback_level_params_t params = {&hAdapter, &level};
     uint64_t instance =
-        context.notify_begin(UR_FUNCTION_SET_LOGGER_CALLBACK_LEVEL,
-                             "urSetLoggerCallbackLevel", &params);
+        context.notify_begin(UR_FUNCTION_ADAPTER_SET_LOGGER_CALLBACK_LEVEL,
+                             "urAdapterSetLoggerCallbackLevel", &params);
 
-    context.logger.info("---> urSetLoggerCallbackLevel");
+    context.logger.info("---> urAdapterSetLoggerCallbackLevel");
 
     ur_result_t result = pfnSetLoggerCallbackLevel(hAdapter, level);
 
-    context.notify_end(UR_FUNCTION_SET_LOGGER_CALLBACK_LEVEL,
-                       "urSetLoggerCallbackLevel", &params, &result, instance);
+    context.notify_end(UR_FUNCTION_ADAPTER_SET_LOGGER_CALLBACK_LEVEL,
+                       "urAdapterSetLoggerCallbackLevel", &params, &result,
+                       instance);
 
     std::ostringstream args_str;
     ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_SET_LOGGER_CALLBACK_LEVEL, &params);
+        args_str, UR_FUNCTION_ADAPTER_SET_LOGGER_CALLBACK_LEVEL, &params);
     context.logger.info("({}) -> {};\n", args_str.str(), result);
 
     return result;
@@ -8027,12 +8030,43 @@ __urdlllocal ur_result_t UR_APICALL urGetGlobalProcAddrTable(
     dditable.pfnAdapterGetInfo = pDdiTable->pfnAdapterGetInfo;
     pDdiTable->pfnAdapterGetInfo = ur_tracing_layer::urAdapterGetInfo;
 
+    return result;
+}
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Exported function for filling application's Adapter table
+///        with current process' addresses
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+__urdlllocal ur_result_t UR_APICALL urGetAdapterProcAddrTable(
+    ur_api_version_t version, ///< [in] API version requested
+    ur_adapter_dditable_t
+        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
+) {
+    auto &dditable = ur_tracing_layer::context.urDdiTable.Adapter;
+
+    if (nullptr == pDdiTable) {
+        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    if (UR_MAJOR_VERSION(ur_tracing_layer::context.version) !=
+            UR_MAJOR_VERSION(version) ||
+        UR_MINOR_VERSION(ur_tracing_layer::context.version) >
+            UR_MINOR_VERSION(version)) {
+        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+    }
+
+    ur_result_t result = UR_RESULT_SUCCESS;
+
     dditable.pfnSetLoggerCallback = pDdiTable->pfnSetLoggerCallback;
-    pDdiTable->pfnSetLoggerCallback = ur_tracing_layer::urSetLoggerCallback;
+    pDdiTable->pfnSetLoggerCallback =
+        ur_tracing_layer::urAdapterSetLoggerCallback;
 
     dditable.pfnSetLoggerCallbackLevel = pDdiTable->pfnSetLoggerCallbackLevel;
     pDdiTable->pfnSetLoggerCallbackLevel =
-        ur_tracing_layer::urSetLoggerCallbackLevel;
+        ur_tracing_layer::urAdapterSetLoggerCallbackLevel;
 
     return result;
 }
@@ -9282,6 +9316,11 @@ ur_result_t context_t::init(ur_dditable_t *dditable,
     if (UR_RESULT_SUCCESS == result) {
         result = ur_tracing_layer::urGetGlobalProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->Global);
+    }
+
+    if (UR_RESULT_SUCCESS == result) {
+        result = ur_tracing_layer::urGetAdapterProcAddrTable(
+            UR_API_VERSION_CURRENT, &dditable->Adapter);
     }
 
     if (UR_RESULT_SUCCESS == result) {

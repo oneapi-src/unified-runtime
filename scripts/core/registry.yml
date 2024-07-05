@@ -592,11 +592,11 @@ etors:
 - name: ENQUEUE_NATIVE_COMMAND_EXP
   desc: Enumerator for $xEnqueueNativeCommandExp
   value: '228'
-- name: SET_LOGGER_CALLBACK
-  desc: Enumerator for $xSetLoggerCallback
+- name: ADAPTER_SET_LOGGER_CALLBACK
+  desc: Enumerator for $xAdapterSetLoggerCallback
   value: '229'
-- name: SET_LOGGER_CALLBACK_LEVEL
-  desc: Enumerator for $xSetLoggerCallbackLevel
+- name: ADAPTER_SET_LOGGER_CALLBACK_LEVEL
+  desc: Enumerator for $xAdapterSetLoggerCallbackLevel
   value: '230'
 ---
 type: enum

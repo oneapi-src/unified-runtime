@@ -1119,17 +1119,17 @@ urPrintAdapterGetInfoParams(const struct ur_adapter_get_info_params_t *params,
     return str_copy(&ss, buffer, buff_size, out_size);
 }
 
-ur_result_t urPrintSetLoggerCallbackParams(
-    const struct ur_set_logger_callback_params_t *params, char *buffer,
+ur_result_t urPrintAdapterSetLoggerCallbackParams(
+    const struct ur_adapter_set_logger_callback_params_t *params, char *buffer,
     const size_t buff_size, size_t *out_size) {
     std::stringstream ss;
     ss << params;
     return str_copy(&ss, buffer, buff_size, out_size);
 }
 
-ur_result_t urPrintSetLoggerCallbackLevelParams(
-    const struct ur_set_logger_callback_level_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size) {
+ur_result_t urPrintAdapterSetLoggerCallbackLevelParams(
+    const struct ur_adapter_set_logger_callback_level_params_t *params,
+    char *buffer, const size_t buff_size, size_t *out_size) {
     std::stringstream ss;
     ss << params;
     return str_copy(&ss, buffer, buff_size, out_size);

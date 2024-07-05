@@ -191,10 +191,10 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGetInfo(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urSetLoggerCallback
-__urdlllocal ur_result_t UR_APICALL urSetLoggerCallback(
+/// @brief Intercept function for urAdapterSetLoggerCallback
+__urdlllocal ur_result_t UR_APICALL urAdapterSetLoggerCallback(
     ur_adapter_handle_t hAdapter, ///< [in] handle of the adapter
-    ur_logger_output_callback_t
+    ur_logger_callback_t
         pfnLoggerCallback, ///< [in] Function pointer to callback from the logger.
     void *
         pUserData, ///< [in][out][optional] pointer to data to be passed to callback
@@ -204,7 +204,7 @@ __urdlllocal ur_result_t UR_APICALL urSetLoggerCallback(
 
     // extract platform's function pointer table
     auto dditable = reinterpret_cast<ur_adapter_object_t *>(hAdapter)->dditable;
-    auto pfnSetLoggerCallback = dditable->ur.Global.pfnSetLoggerCallback;
+    auto pfnSetLoggerCallback = dditable->ur.Adapter.pfnSetLoggerCallback;
     if (nullptr == pfnSetLoggerCallback) {
         return UR_RESULT_ERROR_UNINITIALIZED;
     }
@@ -220,8 +220,8 @@ __urdlllocal ur_result_t UR_APICALL urSetLoggerCallback(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urSetLoggerCallbackLevel
-__urdlllocal ur_result_t UR_APICALL urSetLoggerCallbackLevel(
+/// @brief Intercept function for urAdapterSetLoggerCallbackLevel
+__urdlllocal ur_result_t UR_APICALL urAdapterSetLoggerCallbackLevel(
     ur_adapter_handle_t hAdapter, ///< [in] handle of the adapter
     ur_logger_level_t level       ///< [in] logging level
 ) {
@@ -230,7 +230,7 @@ __urdlllocal ur_result_t UR_APICALL urSetLoggerCallbackLevel(
     // extract platform's function pointer table
     auto dditable = reinterpret_cast<ur_adapter_object_t *>(hAdapter)->dditable;
     auto pfnSetLoggerCallbackLevel =
-        dditable->ur.Global.pfnSetLoggerCallbackLevel;
+        dditable->ur.Adapter.pfnSetLoggerCallbackLevel;
     if (nullptr == pfnSetLoggerCallbackLevel) {
         return UR_RESULT_ERROR_UNINITIALIZED;
     }
@@ -8286,13 +8286,66 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetGlobalProcAddrTable(
             pDdiTable->pfnAdapterGetLastError =
                 ur_loader::urAdapterGetLastError;
             pDdiTable->pfnAdapterGetInfo = ur_loader::urAdapterGetInfo;
-            pDdiTable->pfnSetLoggerCallback = ur_loader::urSetLoggerCallback;
-            pDdiTable->pfnSetLoggerCallbackLevel =
-                ur_loader::urSetLoggerCallbackLevel;
         } else {
             // return pointers directly to platform's DDIs
             *pDdiTable =
                 ur_loader::context->platforms.front().dditable.ur.Global;
+        }
+    }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Exported function for filling application's Adapter table
+///        with current process' addresses
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+UR_DLLEXPORT ur_result_t UR_APICALL urGetAdapterProcAddrTable(
+    ur_api_version_t version, ///< [in] API version requested
+    ur_adapter_dditable_t
+        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
+) {
+    if (nullptr == pDdiTable) {
+        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    if (ur_loader::context->version < version) {
+        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+    }
+
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // Load the device-platform DDI tables
+    for (auto &platform : ur_loader::context->platforms) {
+        if (platform.initStatus != UR_RESULT_SUCCESS) {
+            continue;
+        }
+        auto getTable = reinterpret_cast<ur_pfnGetAdapterProcAddrTable_t>(
+            ur_loader::LibLoader::getFunctionPtr(platform.handle.get(),
+                                                 "urGetAdapterProcAddrTable"));
+        if (!getTable) {
+            continue;
+        }
+        platform.initStatus = getTable(version, &platform.dditable.ur.Adapter);
+    }
+
+    if (UR_RESULT_SUCCESS == result) {
+        if (ur_loader::context->platforms.size() != 1 ||
+            ur_loader::context->forceIntercept) {
+            // return pointers to loader's DDIs
+            pDdiTable->pfnSetLoggerCallback =
+                ur_loader::urAdapterSetLoggerCallback;
+            pDdiTable->pfnSetLoggerCallbackLevel =
+                ur_loader::urAdapterSetLoggerCallbackLevel;
+        } else {
+            // return pointers directly to platform's DDIs
+            *pDdiTable =
+                ur_loader::context->platforms.front().dditable.ur.Adapter;
         }
     }
 
