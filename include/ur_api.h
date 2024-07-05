@@ -226,10 +226,10 @@ typedef enum ur_function_t {
     UR_FUNCTION_BINDLESS_IMAGES_IMPORT_EXTERNAL_SEMAPHORE_EXP = 227,      ///< Enumerator for ::urBindlessImagesImportExternalSemaphoreExp
     UR_FUNCTION_ENQUEUE_NATIVE_COMMAND_EXP = 228,                         ///< Enumerator for ::urEnqueueNativeCommandExp
     UR_FUNCTION_LOADER_CONFIG_SET_MOCKING_ENABLED = 229,                  ///< Enumerator for ::urLoaderConfigSetMockingEnabled
-    UR_FUNCTION_BINDLESS_IMAGES_RELEASE_EXTERNAL_MEMORY_EXP = 230,        ///< Enumerator for ::urBindlessImagesReleaseExternalMemoryExp
-    UR_FUNCTION_BINDLESS_IMAGES_MAP_EXTERNAL_LINEAR_MEMORY_EXP = 231,     ///< Enumerator for ::urBindlessImagesMapExternalLinearMemoryExp
-    UR_FUNCTION_SET_LOGGER_CALLBACK = 232,                                ///< Enumerator for ::urSetLoggerCallback
-    UR_FUNCTION_SET_LOGGER_CALLBACK_LEVEL = 233,                          ///< Enumerator for ::urSetLoggerCallbackLevel
+    UR_FUNCTION_ADAPTER_SET_LOGGER_CALLBACK = 230,                        ///< Enumerator for ::urAdapterSetLoggerCallback
+    UR_FUNCTION_ADAPTER_SET_LOGGER_CALLBACK_LEVEL = 231,                  ///< Enumerator for ::urAdapterSetLoggerCallbackLevel
+    UR_FUNCTION_BINDLESS_IMAGES_MAP_EXTERNAL_LINEAR_MEMORY_EXP = 232,     ///< Enumerator for ::urBindlessImagesMapExternalLinearMemoryExp
+    UR_FUNCTION_BINDLESS_IMAGES_RELEASE_EXTERNAL_MEMORY_EXP = 233,        ///< Enumerator for ::urBindlessImagesReleaseExternalMemoryExp
     /// @cond
     UR_FUNCTION_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -1031,7 +1031,7 @@ typedef enum ur_logger_level_t {
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Callback function to retrieve output from the logger.
-typedef void (*ur_logger_output_callback_t)(
+typedef void (*ur_logger_callback_t)(
     ur_logger_level_t level, ///< [out] Minimum level of messages to be processed by the logger.
     const char *pLoggerMsg,  ///< [in][out] pointer to data to be passed to callback
     void *pUserData          ///< [in][out] pointer to data to be passed to callback
@@ -1054,11 +1054,11 @@ typedef void (*ur_logger_output_callback_t)(
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
 ///         + `::UR_LOGGER_LEVEL_QUIET < level`
 UR_APIEXPORT ur_result_t UR_APICALL
-urSetLoggerCallback(
-    ur_adapter_handle_t hAdapter,                  ///< [in] handle of the adapter
-    ur_logger_output_callback_t pfnLoggerCallback, ///< [in] Function pointer to callback from the logger.
-    void *pUserData,                               ///< [in][out][optional] pointer to data to be passed to callback
-    ur_logger_level_t level                        ///< [in] logging level
+urAdapterSetLoggerCallback(
+    ur_adapter_handle_t hAdapter,           ///< [in] handle of the adapter
+    ur_logger_callback_t pfnLoggerCallback, ///< [in] Function pointer to callback from the logger.
+    void *pUserData,                        ///< [in][out][optional] pointer to data to be passed to callback
+    ur_logger_level_t level                 ///< [in] logging level
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1074,7 +1074,7 @@ urSetLoggerCallback(
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
 ///         + `::UR_LOGGER_LEVEL_QUIET < level`
 UR_APIEXPORT ur_result_t UR_APICALL
-urSetLoggerCallbackLevel(
+urAdapterSetLoggerCallbackLevel(
     ur_adapter_handle_t hAdapter, ///< [in] handle of the adapter
     ur_logger_level_t level       ///< [in] logging level
 );
@@ -9808,6 +9808,26 @@ typedef struct ur_loader_config_set_mocking_enabled_params_t {
 } ur_loader_config_set_mocking_enabled_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urAdapterSetLoggerCallback
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_adapter_set_logger_callback_params_t {
+    ur_adapter_handle_t *phAdapter;
+    ur_logger_callback_t *ppfnLoggerCallback;
+    void **ppUserData;
+    ur_logger_level_t *plevel;
+} ur_adapter_set_logger_callback_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urAdapterSetLoggerCallbackLevel
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_adapter_set_logger_callback_level_params_t {
+    ur_adapter_handle_t *phAdapter;
+    ur_logger_level_t *plevel;
+} ur_adapter_set_logger_callback_level_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urPlatformGet
 /// @details Each entry is a pointer to the parameter passed to the function;
 ///     allowing the callback the ability to modify the parameter's value
@@ -10716,26 +10736,6 @@ typedef struct ur_adapter_get_info_params_t {
     void **ppPropValue;
     size_t **ppPropSizeRet;
 } ur_adapter_get_info_params_t;
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function parameters for urSetLoggerCallback
-/// @details Each entry is a pointer to the parameter passed to the function;
-///     allowing the callback the ability to modify the parameter's value
-typedef struct ur_set_logger_callback_params_t {
-    ur_adapter_handle_t *phAdapter;
-    ur_logger_output_callback_t *ppfnLoggerCallback;
-    void **ppUserData;
-    ur_logger_level_t *plevel;
-} ur_set_logger_callback_params_t;
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function parameters for urSetLoggerCallbackLevel
-/// @details Each entry is a pointer to the parameter passed to the function;
-///     allowing the callback the ability to modify the parameter's value
-typedef struct ur_set_logger_callback_level_params_t {
-    ur_adapter_handle_t *phAdapter;
-    ur_logger_level_t *plevel;
-} ur_set_logger_callback_level_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urEnqueueKernelLaunch

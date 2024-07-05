@@ -229,13 +229,13 @@ class CallbackSink : public Sink {
 
     ~CallbackSink() = default;
 
-    void setCallback(ur_logger_output_callback_t cb, void *pUserData) {
+    void setCallback(ur_logger_callback_t cb, void *pUserData) {
         callback = cb;
         userData = pUserData;
     }
 
   private:
-    ur_logger_output_callback_t callback;
+    ur_logger_callback_t callback;
     void *userData;
 
     virtual void print(ur_logger_level_t level,

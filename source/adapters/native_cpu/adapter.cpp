@@ -64,8 +64,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urAdapterGetInfo(ur_adapter_handle_t,
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urSetLoggerCallback(
-    ur_adapter_handle_t, ur_logger_output_callback_t pfnLoggerCallback,
+UR_APIEXPORT ur_result_t UR_APICALL urAdapterSetLoggerCallback(
+    ur_adapter_handle_t, ur_logger_callback_t pfnLoggerCallback,
     void *pUserData, ur_logger_level_t level = UR_LOGGER_LEVEL_QUIET) {
 
   Adapter.logger.setCallbackSink(pfnLoggerCallback, pUserData, level);
@@ -74,7 +74,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urSetLoggerCallback(
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
-urSetLoggerCallbackLevel(ur_adapter_handle_t, ur_logger_level_t level) {
+urAdapterSetLoggerCallbackLevel(ur_adapter_handle_t, ur_logger_level_t level) {
 
   Adapter.logger.setCallbackLevel(level);
 

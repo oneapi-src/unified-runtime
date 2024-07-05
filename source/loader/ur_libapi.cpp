@@ -502,16 +502,16 @@ ur_result_t UR_APICALL urAdapterGetInfo(
 ///         + `NULL == pfnLoggerCallback`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
 ///         + `::UR_LOGGER_LEVEL_QUIET < level`
-ur_result_t UR_APICALL urSetLoggerCallback(
+ur_result_t UR_APICALL urAdapterSetLoggerCallback(
     ur_adapter_handle_t hAdapter, ///< [in] handle of the adapter
-    ur_logger_output_callback_t
+    ur_logger_callback_t
         pfnLoggerCallback, ///< [in] Function pointer to callback from the logger.
     void *
         pUserData, ///< [in][out][optional] pointer to data to be passed to callback
     ur_logger_level_t level ///< [in] logging level
     ) try {
     auto pfnSetLoggerCallback =
-        ur_lib::getContext()->urDdiTable.Global.pfnSetLoggerCallback;
+        ur_lib::getContext()->urDdiTable.Adapter.pfnSetLoggerCallback;
     if (nullptr == pfnSetLoggerCallback) {
         return UR_RESULT_ERROR_UNINITIALIZED;
     }
@@ -533,12 +533,12 @@ ur_result_t UR_APICALL urSetLoggerCallback(
 ///         + `NULL == hAdapter`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
 ///         + `::UR_LOGGER_LEVEL_QUIET < level`
-ur_result_t UR_APICALL urSetLoggerCallbackLevel(
+ur_result_t UR_APICALL urAdapterSetLoggerCallbackLevel(
     ur_adapter_handle_t hAdapter, ///< [in] handle of the adapter
     ur_logger_level_t level       ///< [in] logging level
     ) try {
     auto pfnSetLoggerCallbackLevel =
-        ur_lib::getContext()->urDdiTable.Global.pfnSetLoggerCallbackLevel;
+        ur_lib::getContext()->urDdiTable.Adapter.pfnSetLoggerCallbackLevel;
     if (nullptr == pfnSetLoggerCallbackLevel) {
         return UR_RESULT_ERROR_UNINITIALIZED;
     }

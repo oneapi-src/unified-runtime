@@ -224,8 +224,7 @@ etors:
 --- #--------------------------------------------------------------------------
 type: fptr_typedef
 desc: "Callback function to retrieve output from the logger."
-class: $xAdapter
-name: $x_logger_output_callback_t
+name: $x_logger_callback_t
 return: "void"
 params:
     - type: $x_logger_level_t
@@ -251,7 +250,7 @@ params:
     - type: $x_adapter_handle_t
       name: hAdapter
       desc: "[in] handle of the adapter"
-    - type: $x_logger_output_callback_t
+    - type: $x_logger_callback_t
       name: pfnLoggerCallback
       desc: "[in] Function pointer to callback from the logger."
     - type: void*

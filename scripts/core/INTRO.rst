@@ -234,7 +234,7 @@ An example of an environment variable for setting up the null adapter library wi
 
 Logging callback
 ^^^^^^^^^^^^^^^^^^^^^
-An API is available to configure the logging callback function :ref:`urSetLoggerCallback`. Additionally, the logging level can be set using :ref:`urSetLoggerCallbackLevel`.
+An API is available to configure the logging callback function :ref:`urAdapterSetLoggerCallback`. Additionally, the logging level can be set using :ref:`urAdapterSetLoggerCallbackLevel`.
 
 Adapter Discovery
 ---------------------
