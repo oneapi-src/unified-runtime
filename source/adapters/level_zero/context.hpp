@@ -323,7 +323,8 @@ private:
                           : &EventCachesDeviceMap[HostVisibleRegularCacheType];
         if (EventCachesMap->find(Device) == EventCachesMap->end()) {
           EventCaches.emplace_back();
-          EventCaches.insert(std::make_pair(Device, EventCaches.size() - 1));
+          EventCachesMap->insert(
+              std::make_pair(Device, EventCaches.size() - 1));
         }
         return &EventCaches[(*EventCachesMap)[Device]];
       } else {
@@ -338,7 +339,8 @@ private:
                 : &EventCachesDeviceMap[HostInvisibleRegularCacheType];
         if (EventCachesMap->find(Device) == EventCachesMap->end()) {
           EventCaches.emplace_back();
-          EventCaches.insert(std::make_pair(Device, EventCaches.size() - 1));
+          EventCachesMap->insert(
+              std::make_pair(Device, EventCaches.size() - 1));
         }
         return &EventCaches[(*EventCachesMap)[Device]];
       } else {
@@ -355,7 +357,8 @@ private:
             &EventCachesDeviceMap[CounterBasedImmediateCacheType];
         if (EventCachesMap->find(Device) == EventCachesMap->end()) {
           EventCaches.emplace_back();
-          EventCaches.insert(std::make_pair(Device, EventCaches.size() - 1));
+          EventCachesMap->insert(
+              std::make_pair(Device, EventCaches.size() - 1));
         }
         return &EventCaches[(*EventCachesMap)[Device]];
       } else {
@@ -367,7 +370,8 @@ private:
             &EventCachesDeviceMap[CounterBasedRegularCacheType];
         if (EventCachesMap->find(Device) == EventCachesMap->end()) {
           EventCaches.emplace_back();
-          EventCaches.insert(std::make_pair(Device, EventCaches.size() - 1));
+          EventCachesMap->insert(
+              std::make_pair(Device, EventCaches.size() - 1));
         }
         return &EventCaches[(*EventCachesMap)[Device]];
       } else {
