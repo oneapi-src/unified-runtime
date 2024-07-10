@@ -4277,6 +4277,11 @@ urProgramCompile(
 ///       in `phProgram` will contain a binary of the
 ///       ::UR_PROGRAM_BINARY_TYPE_EXECUTABLE type for each device in
 ///       `hContext`.
+///     - If a non-success code is returned and `phProgram` is not `nullptr`, it
+///       will contain an unspecified program or `nullptr`. Implementations may
+///       use the build log of this program (accessible via
+///       ::urProgramGetBuildInfo) to provide an error log for the linking
+///       failure.
 ///
 /// @remarks
 ///   _Analogues_
@@ -6894,7 +6899,6 @@ urEnqueueMemUnmap(
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         + `patternSize == 0 || size == 0`
 ///         + `patternSize > size`
-///         + `(patternSize & (patternSize - 1)) != 0`
 ///         + `size % patternSize != 0`
 ///         + If `size` is higher than the allocation size of `ptr`
 ///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
@@ -7665,6 +7669,7 @@ urBindlessImagesImageFreeExp(
 ///         + `pImageDesc && UR_MEM_TYPE_IMAGE1D_ARRAY < pImageDesc->type`
 ///     - ::UR_RESULT_ERROR_INVALID_IMAGE_SIZE
 ///     - ::UR_RESULT_ERROR_INVALID_OPERATION
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 UR_APIEXPORT ur_result_t UR_APICALL
 urBindlessImagesUnsampledImageCreateExp(
     ur_context_handle_t hContext,          ///< [in] handle of the context object
@@ -7703,6 +7708,7 @@ urBindlessImagesUnsampledImageCreateExp(
 ///     - ::UR_RESULT_ERROR_INVALID_IMAGE_SIZE
 ///     - ::UR_RESULT_ERROR_INVALID_SAMPLER
 ///     - ::UR_RESULT_ERROR_INVALID_OPERATION
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 UR_APIEXPORT ur_result_t UR_APICALL
 urBindlessImagesSampledImageCreateExp(
     ur_context_handle_t hContext,          ///< [in] handle of the context object
@@ -8386,7 +8392,6 @@ urCommandBufferAppendUSMMemcpyExp(
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         + `patternSize == 0 || size == 0`
 ///         + `patternSize > size`
-///         + `(patternSize & (patternSize - 1)) != 0`
 ///         + `size % patternSize != 0`
 ///         + If `size` is higher than the allocation size of `ptr`
 ///     - ::UR_RESULT_ERROR_INVALID_MEM_OBJECT
@@ -9276,6 +9281,11 @@ urProgramCompileExp(
 ///       in `phProgram` will contain a binary of the
 ///       ::UR_PROGRAM_BINARY_TYPE_EXECUTABLE type for each device in
 ///       `phDevices`.
+///     - If a non-success code is returned and `phProgram` is not `nullptr`, it
+///       will contain an unspecified program or `nullptr`. Implementations may
+///       use the build log of this program (accessible via
+///       ::urProgramGetBuildInfo) to provide an error log for the linking
+///       failure.
 ///
 /// @remarks
 ///   _Analogues_
