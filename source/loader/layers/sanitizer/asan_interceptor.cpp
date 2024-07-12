@@ -16,6 +16,7 @@
 #include "asan_quarantine.hpp"
 #include "asan_report.hpp"
 #include "asan_shadow_setup.hpp"
+#include "asan_statistics.hpp"
 #include "stacktrace.hpp"
 #include "ur_sanitizer_utils.hpp"
 
@@ -95,6 +96,7 @@ ur_result_t enqueueMemSetShadow(ur_context_handle_t Context,
                         context.logger.error("urPhysicalMemCreate(): {}", URes);
                         return URes;
                     }
+                    add_shadow(PageSize);
                 }
 
                 context.logger.debug("urVirtualMemMap: {} ~ {}",
@@ -236,6 +238,7 @@ ur_result_t SanitizerInterceptor::allocateMemory(
                                                     {}});
 
     AI->print();
+    add_memory(NeededSize, NeededSize - Size);
 
     // For updating shadow memory
     if (Device) { // Device/Shared USM
@@ -303,6 +306,11 @@ ur_result_t SanitizerInterceptor::releaseMemory(ur_context_handle_t Context,
         context.logger.debug("Free: {}", (void *)AllocInfo->AllocBegin);
         std::scoped_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
         m_AllocationMap.erase(AllocInfoIt);
+
+        del_memory(AllocInfo->AllocSize,
+                   AllocInfo->AllocSize -
+                       (AllocInfo->UserEnd - AllocInfo->UserBegin));
+
         return context.urDdiTable.USM.pfnFree(Context,
                                               (void *)(AllocInfo->AllocBegin));
     }
@@ -314,6 +322,11 @@ ur_result_t SanitizerInterceptor::releaseMemory(ur_context_handle_t Context,
             context.logger.info("Quarantine Free: {}",
                                 (void *)It->second->AllocBegin);
             m_AllocationMap.erase(It);
+
+            del_memory(It->second->AllocSize,
+                       It->second->AllocSize -
+                           (It->second->UserEnd - It->second->UserBegin));
+
             UR_CALL(context.urDdiTable.USM.pfnFree(
                 Context, (void *)(It->second->AllocBegin)));
         }
