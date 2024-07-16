@@ -27,11 +27,6 @@ struct AsanOptions {
     AsanOptions(AsanOptions &other) = delete;
     void operator=(const AsanOptions &) = delete;
 
-    static AsanOptions &getInstance(logger::Logger &logger) {
-        static AsanOptions instance(logger);
-        return instance;
-    }
-
     bool Debug = false;
     uint64_t MinRZSize = 16;
     uint64_t MaxRZSize = 2048;
@@ -39,7 +34,6 @@ struct AsanOptions {
     bool DetectLocals = true;
     bool DetectPrivates = true;
 
-  private:
     AsanOptions(logger::Logger &logger) {
         auto OptionsEnvMap = getenv_to_map("UR_LAYER_ASAN_OPTIONS");
         if (!OptionsEnvMap.has_value()) {
@@ -117,8 +111,9 @@ struct AsanOptions {
                 MinRZSize = std::stoul(Value);
                 if (MinRZSize < 16) {
                     MinRZSize = 16;
-                    logger.warning("Trying to set redzone size to a "
-                                   "value less than 16 is ignored");
+                    getContext()->logger.warning(
+                        "Trying to set redzone size to a "
+                        "value less than 16 is ignored");
                 }
             } catch (...) {
                 die("<SANITIZER>[ERROR]: \"redzone\" should be an integer");
@@ -132,18 +127,23 @@ struct AsanOptions {
                 MaxRZSize = std::stoul(Value);
                 if (MaxRZSize > 2048) {
                     MaxRZSize = 2048;
-                    logger.warning("Trying to set max redzone size to a "
-                                   "value greater than 2048 is ignored");
+                    getContext()->logger.warning(
+                        "Trying to set max redzone size to a "
+                        "value greater than 2048 is ignored");
                 }
             } catch (...) {
                 die("<SANITIZER>[ERROR]: \"max_redzone\" should be an integer");
             }
         }
+
+        logger.debug("AsanOptions result:");
+        logger.debug("AsanOptions.Debug={}", Debug);
+        logger.debug("AsanOptions.MinRZSize={}", MinRZSize);
+        logger.debug("AsanOptions.MaxRZSize={}", MaxRZSize);
+        logger.debug("AsanOptions.MaxQuarantineSizeMB={}", MaxQuarantineSizeMB);
+        logger.debug("AsanOptions.DetectLocals={}", DetectLocals);
+        logger.debug("AsanOptions.DetectPrivates={}", DetectPrivates);
     }
 };
-
-inline const AsanOptions &Options(logger::Logger &logger) {
-    return AsanOptions::getInstance(logger);
-}
 
 } // namespace ur_sanitizer_layer

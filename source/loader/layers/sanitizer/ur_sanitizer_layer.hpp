@@ -35,6 +35,7 @@ class __urdlllocal context_t : public proxy_layer_context_t,
   public:
     ur_dditable_t urDdiTable = {};
     logger::Logger logger;
+    AsanOptions options;
     std::unique_ptr<SanitizerInterceptor> interceptor;
     SanitizerType enabledType = SanitizerType::None;
 

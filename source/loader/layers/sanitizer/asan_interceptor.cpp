@@ -146,12 +146,13 @@ ur_result_t enqueueMemSetShadow(ur_context_handle_t Context,
 
 } // namespace
 
-SanitizerInterceptor::SanitizerInterceptor(logger::Logger &logger)
-    : logger(logger) {
-    if (Options(logger).MaxQuarantineSizeMB) {
+// Context is not ready because this constructor is part of the context
+// initialization, so we pass AsanOptions to this constructor and this
+// constructor alone.
+SanitizerInterceptor::SanitizerInterceptor(AsanOptions &Options) {
+    if (Options.MaxQuarantineSizeMB) {
         m_Quarantine = std::make_unique<Quarantine>(
-            static_cast<uint64_t>(Options(logger).MaxQuarantineSizeMB) * 1024 *
-            1024);
+            static_cast<uint64_t>(Options.MaxQuarantineSizeMB) * 1024 * 1024);
     }
 }
 
@@ -191,8 +192,8 @@ ur_result_t SanitizerInterceptor::allocateMemory(
         Alignment = MinAlignment;
     }
 
-    uptr RZLog = ComputeRZLog(Size, Options(logger).MinRZSize,
-                              Options(logger).MaxRZSize);
+    uptr RZLog = ComputeRZLog(Size, getContext()->options.MinRZSize,
+                              getContext()->options.MaxRZSize);
     uptr RZSize = RZLog2Size(RZLog);
     uptr RoundedSize = RoundUpTo(Size, Alignment);
     uptr NeededSize = RoundedSize + RZSize * 2;
@@ -709,7 +710,7 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
 
         // Write debug
         // We use "uint64_t" here because EnqueueWriteGlobal will fail when it's "uint32_t"
-        uint64_t Debug = Options(logger).Debug ? 1 : 0;
+        uint64_t Debug = getContext()->options.Debug ? 1 : 0;
         EnqueueWriteGlobal(kSPIR_AsanDebug, &Debug, sizeof(Debug));
 
         // Write shadow memory offset for global memory
@@ -782,7 +783,7 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
             LocalMemoryUsage, PrivateMemoryUsage);
 
         // Write shadow memory offset for local memory
-        if (Options(logger).DetectLocals) {
+        if (getContext()->options.DetectLocals) {
             // CPU needn't this
             if (DeviceInfo->Type == DeviceType::GPU_PVC) {
                 const size_t LocalMemorySize =
@@ -821,7 +822,7 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
         }
 
         // Write shadow memory offset for private memory
-        if (Options(logger).DetectPrivates) {
+        if (getContext()->options.DetectPrivates) {
             if (DeviceInfo->Type == DeviceType::CPU) {
                 LaunchInfo.Data->PrivateShadowOffset = DeviceInfo->ShadowOffset;
             } else if (DeviceInfo->Type == DeviceType::GPU_PVC) {
