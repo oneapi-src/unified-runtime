@@ -12,10 +12,10 @@
 
 #pragma once
 
+#include "asan_options.hpp"
 #include "logger/ur_logger.hpp"
 #include "ur/ur.hpp"
 #include "ur_proxy_layer.hpp"
-#include "asan_options.hpp"
 
 #define SANITIZER_COMP_NAME "sanitizer layer"
 
