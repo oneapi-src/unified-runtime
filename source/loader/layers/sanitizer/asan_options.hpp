@@ -111,9 +111,8 @@ struct AsanOptions {
                 MinRZSize = std::stoul(Value);
                 if (MinRZSize < 16) {
                     MinRZSize = 16;
-                    getContext()->logger.warning(
-                        "Trying to set redzone size to a "
-                        "value less than 16 is ignored");
+                    logger.warning("Trying to set redzone size to a "
+                                   "value less than 16 is ignored");
                 }
             } catch (...) {
                 die("<SANITIZER>[ERROR]: \"redzone\" should be an integer");
@@ -127,9 +126,8 @@ struct AsanOptions {
                 MaxRZSize = std::stoul(Value);
                 if (MaxRZSize > 2048) {
                     MaxRZSize = 2048;
-                    getContext()->logger.warning(
-                        "Trying to set max redzone size to a "
-                        "value greater than 2048 is ignored");
+                    logger.warning("Trying to set max redzone size to a "
+                                   "value greater than 2048 is ignored");
                 }
             } catch (...) {
                 die("<SANITIZER>[ERROR]: \"max_redzone\" should be an integer");
