@@ -13,12 +13,31 @@
 #pragma once
 
 #include "common.hpp"
+#include <atomic>
 
 namespace ur_sanitizer_layer {
 
-void add_memory(size_t malloced, size_t redzone);
-void del_memory(size_t malloced, size_t redzone);
+struct AsanStats {
+    std::atomic<uptr> usm_mallocs;
+    std::atomic<uptr> usm_malloced;
+    std::atomic<uptr> usm_malloced_redzones;
 
-void add_shadow(size_t shadow);
+    std::atomic<uptr> usm_frees;
+    std::atomic<uptr> usm_freed;
+    std::atomic<uptr> usm_real_frees;
+    std::atomic<uptr> usm_really_freed;
+
+    std::atomic<uptr> shadow_reserved;
+    std::atomic<uptr> shadow_mmaps;
+    std::atomic<uptr> shadow_mmaped;
+    std::atomic<uptr> shadow_malloced;
+    std::atomic<uptr> shadow_freed;
+
+    // AsanStats();
+
+    void Print(); // Prints formatted stats to stderr.
+    void Clear();
+    void MergeFrom(const AsanStats *stats);
+};
 
 } // namespace ur_sanitizer_layer
