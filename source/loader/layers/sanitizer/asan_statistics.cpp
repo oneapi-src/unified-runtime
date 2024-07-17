@@ -16,44 +16,6 @@
 
 namespace ur_sanitizer_layer {
 
-std::atomic<size_t> MallocedSize;
-std::atomic<size_t> RedZoneSize;
-std::atomic<size_t> ShadowMemorySize;
-double overhead = 0;
-
-void print_result() {
-    if (MallocedSize + ShadowMemorySize == 0) {
-        std::cout << "Stats: " << overhead << "," << MallocedSize << ","
-                  << RedZoneSize << "," << ShadowMemorySize << "";
-        return;
-    }
-
-    auto new_overhead = (RedZoneSize + ShadowMemorySize) /
-                        (double)(MallocedSize + ShadowMemorySize);
-    if (new_overhead > overhead) {
-        overhead = new_overhead;
-        std::cout << "Stats: " << overhead * 100 << "% |" << MallocedSize << ","
-                  << RedZoneSize << "," << ShadowMemorySize << "";
-    }
-}
-
-void add_memory(size_t malloced, size_t redzone) {
-    MallocedSize += malloced;
-    RedZoneSize += redzone;
-    print_result();
-}
-
-void del_memory(size_t malloced, size_t redzone) {
-    MallocedSize -= malloced;
-    RedZoneSize -= redzone;
-    // print_result();
-}
-
-void add_shadow(size_t shadow) {
-    ShadowMemorySize += shadow;
-    print_result();
-}
-
 void AsanStats::Print() {
     getContext()->logger.always(
         "Stats: {}M malloced ({}M for red zones) by {} calls",

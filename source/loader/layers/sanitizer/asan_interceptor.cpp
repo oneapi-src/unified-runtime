@@ -18,7 +18,6 @@
 #include "asan_shadow_setup.hpp"
 #include "asan_statistics.hpp"
 #include "stacktrace.hpp"
-#include "ur_sanitizer_layer.hpp"
 #include "ur_sanitizer_utils.hpp"
 
 namespace ur_sanitizer_layer {
