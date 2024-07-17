@@ -15,6 +15,8 @@
 #include "asan_allocator.hpp"
 #include "asan_buffer.hpp"
 #include "asan_libdevice.hpp"
+#include "asan_options.hpp"
+#include "asan_statistics.hpp"
 #include "common.hpp"
 #include "ur_sanitizer_layer.hpp"
 
@@ -114,11 +116,7 @@ struct ContextInfo {
         assert(Result == UR_RESULT_SUCCESS);
     }
 
-    ~ContextInfo() {
-        [[maybe_unused]] auto Result =
-            getContext()->urDdiTable.Context.pfnRelease(Handle);
-        assert(Result == UR_RESULT_SUCCESS);
-    }
+    ~ContextInfo();
 
     void insertAllocInfo(const std::vector<ur_device_handle_t> &Devices,
                          std::shared_ptr<AllocInfo> &AI) {
@@ -221,6 +219,9 @@ class SanitizerInterceptor {
         return m_KernelMap[Kernel];
     }
 
+    const AsanOptions &getOptions() { return m_Options; }
+    AsanStats& getStats() { return m_Stats; }
+
   private:
     ur_result_t updateShadowMemory(std::shared_ptr<ContextInfo> &ContextInfo,
                                    std::shared_ptr<DeviceInfo> &DeviceInfo,
@@ -231,7 +232,7 @@ class SanitizerInterceptor {
                                  std::shared_ptr<AllocInfo> &AI);
 
     /// Initialize Global Variables & Kernel Name at first Launch
-    ur_result_t prepareLaunch(ur_context_handle_t Context,
+    ur_result_t prepareLaunch(std::shared_ptr<ContextInfo> &ContextInfo,
                               std::shared_ptr<DeviceInfo> &DeviceInfo,
                               ur_queue_handle_t Queue,
                               ur_kernel_handle_t Kernel,
@@ -261,7 +262,9 @@ class SanitizerInterceptor {
     ur_shared_mutex m_AllocationMapMutex;
 
     std::unique_ptr<Quarantine> m_Quarantine;
-    logger::Logger &logger;
+
+    AsanOptions m_Options;
+    AsanStats m_Stats;
 };
 
 } // namespace ur_sanitizer_layer

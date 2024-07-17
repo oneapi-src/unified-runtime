@@ -27,10 +27,10 @@ struct AsanOptions {
     AsanOptions(AsanOptions &other) = delete;
     void operator=(const AsanOptions &) = delete;
 
-    static AsanOptions &getInstance(logger::Logger &logger) {
-        static AsanOptions instance(logger);
-        return instance;
-    }
+    // static AsanOptions &getInstance(logger::Logger &logger) {
+    //     static AsanOptions instance(logger);
+    //     return instance;
+    // }
 
     bool Debug = false;
     uint64_t MinRZSize = 16;
@@ -38,9 +38,9 @@ struct AsanOptions {
     uint32_t MaxQuarantineSizeMB = 0;
     bool DetectLocals = true;
     bool DetectPrivates = true;
+    bool PrintStats = false;
 
-  private:
-    AsanOptions(logger::Logger &logger) {
+    explicit AsanOptions(logger::Logger &logger) {
         auto OptionsEnvMap = getenv_to_map("UR_LAYER_ASAN_OPTIONS");
         if (!OptionsEnvMap.has_value()) {
             return;
@@ -93,6 +93,7 @@ struct AsanOptions {
         SetBoolOption("debug", Debug);
         SetBoolOption("detect_locals", DetectLocals);
         SetBoolOption("detect_privates", DetectPrivates);
+        SetBoolOption("print_stats", PrintStats);
 
         auto KV = OptionsEnvMap->find("quarantine_size_mb");
         if (KV != OptionsEnvMap->end()) {
@@ -142,8 +143,8 @@ struct AsanOptions {
     }
 };
 
-inline const AsanOptions &Options(logger::Logger &logger) {
-    return AsanOptions::getInstance(logger);
-}
+// inline const AsanOptions &Options(logger::Logger &logger) {
+//     return AsanOptions::getInstance(logger);
+// }
 
 } // namespace ur_sanitizer_layer
