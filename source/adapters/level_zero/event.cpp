@@ -20,6 +20,9 @@
 #include "logger/ur_logger.hpp"
 #include "ur_level_zero.hpp"
 
+#include "v2/event.hpp"
+#include "v2/queue_factory.hpp"
+
 void printZeEventList(const _ur_ze_event_list_t &UrZeEventList) {
   if (UrL0Debug & UR_L0_DEBUG_BASIC) {
     std::stringstream ss;
@@ -862,6 +865,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventWait(
 UR_APIEXPORT ur_result_t UR_APICALL urEventRetain(
     ur_event_handle_t Event ///< [in] handle of the event object
 ) {
+  // TODO: make proper abstraction
+  if (v2::shouldUseQueueV2(nullptr, 0)) {
+    return reinterpret_cast<v2::ur_event_handle_t>(Event)->retain();
+  }
+
   Event->RefCountExternal++;
   Event->RefCount.increment();
 
@@ -871,6 +879,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventRetain(
 UR_APIEXPORT ur_result_t UR_APICALL urEventRelease(
     ur_event_handle_t Event ///< [in] handle of the event object
 ) {
+  // TODO: make proper abstraction
+  if (v2::shouldUseQueueV2(nullptr, 0)) {
+    return reinterpret_cast<v2::ur_event_handle_t>(Event)->release();
+  }
+
   Event->RefCountExternal--;
   UR_CALL(urEventReleaseInternal(Event));
 

@@ -118,6 +118,10 @@ add_ur_adapter(${TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/v2/queue_factory.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/v2/context.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/v2/command_list_cache.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/v2/event_provider_normal.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/v2/event_pool_cache.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/v2/event_pool.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/v2/event.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/v2/latency_tracker.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ur_level_zero.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/common.cpp
@@ -141,6 +145,10 @@ add_ur_adapter(${TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/v2/queue_immediate_in_order.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/v2/context.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/v2/command_list_cache.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/v2/event_provider_normal.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/v2/event_pool_cache.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/v2/event_pool.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/v2/event.cpp
 )
 
 if(NOT WIN32)

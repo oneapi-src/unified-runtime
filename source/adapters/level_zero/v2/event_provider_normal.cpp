@@ -50,28 +50,18 @@ provider_pool::provider_pool(ur_context_handle_t context,
   }
 }
 
-event_borrowed provider_pool::allocate() {
+raii::cache_borrowed_event provider_pool::allocate() {
   if (freelist.empty()) {
     return nullptr;
   }
   auto e = std::move(freelist.back());
   freelist.pop_back();
-  return event_borrowed(e.release(), [this](ze_event_handle_t handle) {
-    freelist.push_back(handle);
-  });
+  return raii::cache_borrowed_event(
+      e.release(),
+      [this](ze_event_handle_t handle) { freelist.push_back(handle); });
 }
 
 size_t provider_pool::nfree() const { return freelist.size(); }
-
-provider_normal::provider_normal(ur_context_handle_t context,
-                                 ur_device_handle_t device, event_type etype,
-                                 queue_type qtype)
-    : producedType(etype), queueType(qtype), urContext(context),
-      urDevice(device) {
-  urDeviceRetain(device);
-}
-
-provider_normal::~provider_normal() { urDeviceRelease(urDevice); }
 
 std::unique_ptr<provider_pool> provider_normal::createProviderPool() {
   return std::make_unique<provider_pool>(urContext, urDevice, producedType,
@@ -79,7 +69,10 @@ std::unique_ptr<provider_pool> provider_normal::createProviderPool() {
 }
 
 event_allocation provider_normal::allocate() {
+  rolling_latency_tracker tracker(allocateLatency);
+
   if (pools.empty()) {
+    rolling_latency_tracker tracker(poolCreateLatency);
     pools.emplace_back(createProviderPool());
   }
 
@@ -91,6 +84,7 @@ event_allocation provider_normal::allocate() {
     }
   }
 
+  rolling_latency_tracker trackerSlowPath(slowPathLatency);
   std::sort(pools.begin(), pools.end(), [](auto &a, auto &b) {
     return a->nfree() < b->nfree(); // asceding
   });

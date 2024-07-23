@@ -11,6 +11,7 @@
 
 #include <stack>
 
+#include "../common.hpp"
 #include <ur/ur.hpp>
 #include <ur_api.h>
 #include <ze_api.h>
@@ -19,16 +20,27 @@
 
 namespace v2 {
 
-class ur_event {
-public:
-  void attachZeHandle(event_allocation);
-  event_borrowed detachZeHandle();
+class event_pool;
 
-  ze_event_handle_t getZeEvent();
+class ur_event_handle_t_;
+using ur_event_handle_t = ur_event_handle_t_ *;
+
+class ur_event_handle_t_ : _ur_object {
+public:
+  ur_event_handle_t_(event_pool *pool);
+
+  void attachZeHandle(event_allocation);
+  raii::cache_borrowed_event detachZeHandle();
+
+  ze_event_handle_t getZeEvent() const;
+
+  ur_result_t retain();
+  ur_result_t release();
 
 private:
   event_type type;
-  event_borrowed zeEvent;
+  event_pool *pool;
+  raii::cache_borrowed_event zeEvent;
 };
 
 } // namespace v2

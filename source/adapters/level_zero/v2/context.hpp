@@ -13,6 +13,7 @@
 #include "command_list_cache.hpp"
 
 #include "../context.hpp"
+#include "event_pool_cache.hpp"
 
 namespace v2 {
 
@@ -24,6 +25,7 @@ struct ur_context_handle_t_ : public ::ur_context_handle_t_ {
                        const ur_device_handle_t *phDevices, bool ownZeContext);
 
   command_list_cache_t commandListCache;
+  event_pool_cache eventPoolCache;
 };
 
 } // namespace v2

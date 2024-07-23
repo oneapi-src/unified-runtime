@@ -119,6 +119,9 @@ int main(int argc, char *argv[]) {
                 std::chrono::duration<double, std::micro>(timer.get()).count();
             samples.push_back(us);
         }
+
+        events.clear();
+        events.resize(numKernels);
     }
 
     std::string testCase =
