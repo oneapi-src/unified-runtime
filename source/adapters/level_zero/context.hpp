@@ -214,6 +214,15 @@ struct ur_context_handle_t_ : _ur_object {
   // Add ur_event_handle_t to cache.
   void addEventToContextCache(ur_event_handle_t);
 
+  enum EventCacheType {
+    HostVisibleProfilingCacheType,
+    HostVisibleRegularCacheType,
+    HostInvisibleProfilingCacheType,
+    HostInvisibleRegularCacheType,
+    CounterBasedImmediateCacheType,
+    CounterBasedRegularCacheType
+  };
+
   enum ZeEventPoolCacheType {
     HostVisibleCacheType,
     HostInvisibleCacheType,
@@ -223,14 +232,6 @@ struct ur_context_handle_t_ : _ur_object {
     HostInvisibleCounterBasedImmediateCacheType
   };
 
-  enum EventCacheType {
-    HostVisibleProfilingCacheType,
-    HostVisibleRegularCacheType,
-    HostInvisibleProfilingCacheType,
-    HostInvisibleRegularCacheType,
-    CounterBasedImmediateCacheType,
-    CounterBasedRegularCacheType
-  };
 
   std::list<ze_event_pool_handle_t> *
   getZeEventPoolCache(bool HostVisible, bool WithProfiling,
