@@ -21,7 +21,7 @@ ur_event_handle_t_ *event_pool::allocate() {
     auto start = events.size();
     auto end = start + EVENTS_BURST;
     for (; start < end; ++start) {
-      events.emplace_back(this);
+      events.emplace_back(provider->allocate(), this);
       freelist.push_back(&events.at(start));
     }
   }
@@ -29,17 +29,12 @@ ur_event_handle_t_ *event_pool::allocate() {
   auto event = freelist.back();
   freelist.pop_back();
 
-  auto ZeEvent = provider->allocate();
-  event->attachZeHandle(std::move(ZeEvent));
-
   return event;
 }
 
 void event_pool::free(ur_event_handle_t_ *event) {
   rolling_latency_tracker tracker(freeLatency);
-
-  auto _ = event->detachZeHandle();
-
+  event->reset();
   freelist.push_back(event);
 }
 

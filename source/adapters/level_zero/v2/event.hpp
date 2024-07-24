@@ -27,11 +27,9 @@ using ur_event_handle_t = ur_event_handle_t_ *;
 
 class ur_event_handle_t_ : _ur_object {
 public:
-  ur_event_handle_t_(event_pool *pool);
+  ur_event_handle_t_(event_allocation eventAllocation, event_pool *pool);
 
-  void attachZeHandle(event_allocation);
-  raii::cache_borrowed_event detachZeHandle();
-
+  void reset();
   ze_event_handle_t getZeEvent() const;
 
   ur_result_t retain();
@@ -39,8 +37,8 @@ public:
 
 private:
   event_type type;
-  event_pool *pool;
   raii::cache_borrowed_event zeEvent;
+  event_pool *pool;
 };
 
 } // namespace v2

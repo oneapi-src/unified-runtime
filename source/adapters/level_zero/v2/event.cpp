@@ -14,23 +14,17 @@
 
 namespace v2 {
 
-ur_event_handle_t_::ur_event_handle_t_(event_pool *pool) : pool(pool) {}
+ur_event_handle_t_::ur_event_handle_t_(event_allocation eventAllocation,
+                                       event_pool *pool)
+    : type(eventAllocation.type), zeEvent(std::move(eventAllocation.borrow)),
+      pool(pool) {}
 
-void ur_event_handle_t_::attachZeHandle(event_allocation event) {
-  type = event.type;
-  zeEvent = std::move(event.borrow);
-}
-
-raii::cache_borrowed_event ur_event_handle_t_::detachZeHandle() {
+void ur_event_handle_t_::reset() {
   // consider make an abstraction for regular/counter based
   // events if there's more of this type of conditions
   if (type == event_type::EVENT_REGULAR) {
     zeEventHostReset(zeEvent.get());
   }
-  auto e = std::move(zeEvent);
-  zeEvent = nullptr;
-
-  return e;
 }
 
 ze_event_handle_t ur_event_handle_t_::getZeEvent() const {
