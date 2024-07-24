@@ -7418,7 +7418,7 @@ ur_result_t UR_APICALL urCommandBufferRetainExp(
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ur_result_t UR_APICALL urCommandBufferReleaseExp(
     ur_exp_command_buffer_handle_t
-        hCommandBuffer ///< [in][release] Handle of the command-buffer object.
+        &hCommandBuffer ///< [in][release] Handle of the command-buffer object.
     ) try {
     auto pfnReleaseExp =
         ur_lib::getContext()->urDdiTable.CommandBufferExp.pfnReleaseExp;

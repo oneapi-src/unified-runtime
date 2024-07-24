@@ -699,11 +699,12 @@ urCommandBufferRetainExp(ur_exp_command_buffer_handle_t CommandBuffer) {
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
-urCommandBufferReleaseExp(ur_exp_command_buffer_handle_t CommandBuffer) {
+urCommandBufferReleaseExp(ur_exp_command_buffer_handle_t &CommandBuffer) {
   if (!CommandBuffer->RefCount.decrementAndTest())
     return UR_RESULT_SUCCESS;
 
   delete CommandBuffer;
+  CommandBuffer = nullptr;
   return UR_RESULT_SUCCESS;
 }
 

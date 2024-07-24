@@ -23,12 +23,13 @@
 
 namespace {
 ur_result_t
-commandBufferReleaseInternal(ur_exp_command_buffer_handle_t CommandBuffer) {
+commandBufferReleaseInternal(ur_exp_command_buffer_handle_t &CommandBuffer) {
   if (CommandBuffer->decrementInternalReferenceCount() != 0) {
     return UR_RESULT_SUCCESS;
   }
 
   delete CommandBuffer;
+  CommandBuffer = nullptr;
   return UR_RESULT_SUCCESS;
 }
 
@@ -303,7 +304,7 @@ urCommandBufferRetainExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
-urCommandBufferReleaseExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
+urCommandBufferReleaseExp(ur_exp_command_buffer_handle_t &hCommandBuffer) {
   if (hCommandBuffer->decrementExternalReferenceCount() == 0) {
     // External ref count has reached zero, internal release of created
     // commands.

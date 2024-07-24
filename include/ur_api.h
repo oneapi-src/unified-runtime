@@ -8314,7 +8314,7 @@ urCommandBufferRetainExp(
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 UR_APIEXPORT ur_result_t UR_APICALL
 urCommandBufferReleaseExp(
-    ur_exp_command_buffer_handle_t hCommandBuffer ///< [in][release] Handle of the command-buffer object.
+    ur_exp_command_buffer_handle_t &hCommandBuffer ///< [in][release] Handle of the command-buffer object.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
