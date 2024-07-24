@@ -17,6 +17,7 @@
 #include <ze_api.h>
 
 #include "../common.hpp"
+#include "latency_tracker.hpp"
 
 namespace v2 {
 namespace raii {
@@ -81,5 +82,8 @@ private:
                       raii::ze_command_list_t cmdList);
   raii::ze_command_list_t
   createCommandList(const command_list_descriptor_t &desc);
+
+  rolling_stats immediateGetLatencyTracker;
+  rolling_stats regularGetLatencyTracker;
 };
 } // namespace v2

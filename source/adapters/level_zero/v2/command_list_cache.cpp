@@ -41,7 +41,10 @@ inline size_t command_list_descriptor_hash_t::operator()(
 }
 
 command_list_cache_t::command_list_cache_t(ze_context_handle_t ZeContext)
-    : ZeContext{ZeContext} {}
+    : ZeContext{ZeContext},
+      immediateGetLatencyTracker(
+          "command_list_cache_t::getImmediateCommandList"),
+      regularGetLatencyTracker("command_list_cache_t::getRegularCommandList") {}
 
 raii::ze_command_list_t
 command_list_cache_t::createCommandList(const command_list_descriptor_t &desc) {
@@ -81,6 +84,8 @@ command_list_cache_t::getImmediateCommandList(
     ze_device_handle_t ZeDevice, bool IsInOrder, uint32_t Ordinal,
     ze_command_queue_mode_t Mode, ze_command_queue_priority_t Priority,
     std::optional<uint32_t> Index) {
+  rolling_latency_tracker tracker(immediateGetLatencyTracker);
+
   immediate_command_list_descriptor_t Desc;
   Desc.ZeDevice = ZeDevice;
   Desc.Ordinal = Ordinal;
@@ -100,6 +105,8 @@ command_list_cache_t::getImmediateCommandList(
 raii::cache_borrowed_command_list_t
 command_list_cache_t::getRegularCommandList(ze_device_handle_t ZeDevice,
                                             bool IsInOrder, uint32_t Ordinal) {
+  rolling_latency_tracker tracker(regularGetLatencyTracker);
+
   regular_command_list_descriptor_t Desc;
   Desc.ZeDevice = ZeDevice;
   Desc.IsInOrder = IsInOrder;
