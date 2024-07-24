@@ -60,8 +60,9 @@ struct ur_ze_external_memory_data {
 struct ur_device_handle_t_ : _ur_object {
   ur_device_handle_t_(ze_device_handle_t Device, ur_platform_handle_t Plt,
                       ur_device_handle_t ParentDevice = nullptr)
-      : ZeDevice{Device}, Platform{Plt}, RootDevice{ParentDevice},
-        ZeDeviceProperties{}, ZeDeviceComputeProperties{} {
+      : ZeDevice{Device}, ZesDevice{nullptr}, Platform{Plt},
+        RootDevice{ParentDevice}, ZeDeviceProperties{},
+        ZeDeviceComputeProperties{} {
     // NOTE: one must additionally call initialize() to complete
     // UR device creation.
   }
@@ -121,6 +122,12 @@ struct ur_device_handle_t_ : _ur_object {
   // change. Therefore it can be accessed without holding a lock on this
   // _ur_device_handle_t.
   const ze_device_handle_t ZeDevice;
+
+  // Level Zero SysMan device handle.
+  // This field is only set at _ur_device_handle_t creation time, and cannot
+  // change. Therefore it can be accessed without holding a lock on this
+  // _ur_device_handle_t.
+  zes_device_handle_t ZesDevice;
 
   // Keep the subdevices that are partitioned from this ur_device_handle_t for
   // reuse The order of sub-devices in this vector is repeated from the
