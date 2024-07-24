@@ -1,4 +1,4 @@
-# Copyright (C) 2023 Intel Corporation
+# Copyright (C) 2023-2024 Intel Corporation
 # Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
 # See LICENSE.TXT
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
@@ -28,16 +28,22 @@ function(add_cppformat name)
     if(${ARGC} EQUAL 0)
         return()
     else()
-        add_custom_target(cppformat-${name}
-            COMMAND ${CLANG_FORMAT}
-                --style=file
-                --i
-                ${ARGN}
-            COMMENT "Format CXX source files"
-            )
+        # Split args into 2 parts (in Windows the list is probably too long)
+        list(SUBLIST ARGN 0 250 selected_files)
+        add_custom_target(cppformat-${name}-1
+            COMMAND ${CLANG_FORMAT} --style=file --i ${selected_files}
+            COMMENT "Format CXX source files (pt 1)"
+        )
+
+        list(SUBLIST ARGN 251 -1 selected_files)
+        add_custom_target(cppformat-${name}-2
+            COMMAND ${CLANG_FORMAT} --style=file --i ${selected_files}
+            COMMENT "Format CXX source files (pt 2)"
+        )
     endif()
 
-    add_dependencies(cppformat cppformat-${name})
+    add_dependencies(cppformat cppformat-${name}-1)
+    add_dependencies(cppformat cppformat-${name}-2)
 endfunction()
 
 include(CheckCXXCompilerFlag)
