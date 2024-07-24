@@ -304,14 +304,30 @@ ur_result_t ur_platform_handle_t_::populateDeviceCacheIfNeeded() {
 
   uint32_t ZeDeviceCount = 0;
   ZE2UR_CALL(zeDeviceGet, (ZeDriver, &ZeDeviceCount, nullptr));
+  uint32_t ZesDeviceCount = 0;
+  if (ZesDriver) {
+    ZE2UR_CALL(zesDeviceGet, (ZesDriver, &ZesDeviceCount, nullptr));
+  }
 
   try {
     std::vector<ze_device_handle_t> ZeDevices(ZeDeviceCount);
     ZE2UR_CALL(zeDeviceGet, (ZeDriver, &ZeDeviceCount, ZeDevices.data()));
+    std::vector<zes_device_handle_t> ZesDevices(ZesDeviceCount);
+    if (ZesDeviceCount > 0) {
+      ZE2UR_CALL(zesDeviceGet, (ZesDriver, &ZesDeviceCount, ZesDevices.data()));
+    }
 
     for (uint32_t I = 0; I < ZeDeviceCount; ++I) {
+      zes_device_handle_t zesDeviceHandle = nullptr;
+      // If the number of ZE Devices is greater than the number of ZES Devices,
+      // then a null sysman device is associated. The index of the ZE and ZES
+      // devices should match.
+      if (I < ZesDevices.size()) {
+        zesDeviceHandle = ZesDevices[I];
+      }
       std::unique_ptr<ur_device_handle_t_> Device(
           new ur_device_handle_t_(ZeDevices[I], (ur_platform_handle_t)this));
+      Device->ZesDevice = zesDeviceHandle;
       UR_CALL(Device->initialize());
 
       // Additionally we need to cache all sub-devices too, such that they
@@ -331,6 +347,7 @@ ur_result_t ur_platform_handle_t_::populateDeviceCacheIfNeeded() {
         std::unique_ptr<ur_device_handle_t_> UrSubDevice(
             new ur_device_handle_t_(ZeSubdevices[I], (ur_platform_handle_t)this,
                                     Device.get()));
+        UrSubDevice->ZesDevice = zesDeviceHandle;
         auto Result = UrSubDevice->initialize();
         if (Result != UR_RESULT_SUCCESS) {
           delete[] ZeSubdevices;
@@ -379,6 +396,7 @@ ur_result_t ur_platform_handle_t_::populateDeviceCacheIfNeeded() {
                   new ur_device_handle_t_(ZeSubdevices[I],
                                           (ur_platform_handle_t)this,
                                           UrSubDevice.get()));
+              URSubSubDevice->ZesDevice = UrSubDevice->ZesDevice;
               UR_CALL(URSubSubDevice->initialize(Ordinals[J], K));
 
               // save pointers to sub-sub-devices for quick retrieval in the
@@ -419,6 +437,7 @@ ur_result_t ur_platform_handle_t_::populateDeviceCacheIfNeeded() {
                          }) == URDevicesCache.end()) {
           std::unique_ptr<ur_device_handle_t_> UrRootDevice(
               new ur_device_handle_t_(RootDevice, (ur_platform_handle_t)this));
+          UrRootDevice->ZesDevice = Device->ZesDevice;
           UR_CALL(UrRootDevice->initialize());
           URDevicesCache.push_back(std::move(UrRootDevice));
         }

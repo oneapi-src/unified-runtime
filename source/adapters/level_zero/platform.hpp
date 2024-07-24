@@ -19,13 +19,18 @@ typedef size_t DeviceId;
 
 struct ur_platform_handle_t_ : public _ur_platform {
   ur_platform_handle_t_(ze_driver_handle_t Driver)
-      : ZeDriver{Driver}, ZeApiVersion{ZE_API_VERSION_CURRENT} {}
+      : ZeDriver{Driver}, ZesDriver{nullptr}, ZeApiVersion{
+                                                  ZE_API_VERSION_CURRENT} {}
   // Performs initialization of a newly constructed PI platform.
   ur_result_t initialize();
 
   // Level Zero lacks the notion of a platform, but there is a driver, which is
   // a pretty good fit to keep here.
   ze_driver_handle_t ZeDriver;
+
+  // Level Zero Sysman Driver Handle. This handle is only used for accessing
+  // Sysman features are accessed thru this driver handle.
+  zes_driver_handle_t ZesDriver;
 
   // Given a multi driver scenario, the driver handle must be translated to the
   // internal driver handle to allow calls to driver experimental apis.

@@ -35,19 +35,41 @@ public:
   ~ur_legacy_sink() = default;
 };
 
-ur_result_t initPlatforms(PlatformVec &platforms) noexcept try {
+ur_result_t initPlatforms(PlatformVec &platforms,
+                          ze_result_t ZesResult) noexcept try {
   uint32_t ZeDriverCount = 0;
   ZE2UR_CALL(zeDriverGet, (&ZeDriverCount, nullptr));
   if (ZeDriverCount == 0) {
     return UR_RESULT_SUCCESS;
   }
 
+  uint32_t ZesDriverCount = 0;
+  ze_result_t zesDriverGetResult = ZE_RESULT_ERROR_UNINITIALIZED;
+  if (ZesResult == ZE_RESULT_SUCCESS) {
+    zesDriverGetResult =
+        ZE_CALL_NOCHECK(zesDriverGet, (&ZesDriverCount, nullptr));
+  }
+
   std::vector<ze_driver_handle_t> ZeDrivers;
   ZeDrivers.resize(ZeDriverCount);
 
+  std::vector<zes_driver_handle_t> ZesDrivers;
+  ZesDrivers.resize(ZesDriverCount);
+
   ZE2UR_CALL(zeDriverGet, (&ZeDriverCount, ZeDrivers.data()));
+  if (zesDriverGetResult == ZE_RESULT_SUCCESS && ZesDriverCount > 0) {
+    ZE_CALL_NOCHECK(zesDriverGet, (&ZesDriverCount, ZesDrivers.data()));
+  }
   for (uint32_t I = 0; I < ZeDriverCount; ++I) {
+    zes_driver_handle_t zesDriverHandle = nullptr;
+    // If the number of ZE Drivers is greater than the number of ZES Drivers,
+    // then a null sysman driver is associated. The index of the ZE and ZES
+    // driver should match.
+    if (I < ZesDrivers.size()) {
+      zesDriverHandle = ZesDrivers[I];
+    }
     auto platform = std::make_unique<ur_platform_handle_t_>(ZeDrivers[I]);
+    platform->ZesDriver = zesDriverHandle;
     UR_CALL(platform->initialize());
 
     // Save a copy in the cache for future uses.
@@ -107,6 +129,8 @@ ur_adapter_handle_t_::ur_adapter_handle_t_()
       // it's only called once.
       GlobalAdapter->ZeResult =
           ZE_CALL_NOCHECK(zeInit, (ZE_INIT_FLAG_GPU_ONLY));
+
+      GlobalAdapter->ZesResult = ZE_CALL_NOCHECK(zesInit, (0));
     }
     assert(GlobalAdapter->ZeResult !=
            std::nullopt); // verify that level-zero is initialized
@@ -124,7 +148,7 @@ ur_adapter_handle_t_::ur_adapter_handle_t_()
       return;
     }
 
-    ur_result_t err = initPlatforms(platforms);
+    ur_result_t err = initPlatforms(platforms, *GlobalAdapter->ZesResult);
     if (err == UR_RESULT_SUCCESS) {
       result = std::move(platforms);
     } else {
