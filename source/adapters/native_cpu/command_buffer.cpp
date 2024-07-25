@@ -33,7 +33,7 @@ urCommandBufferRetainExp(ur_exp_command_buffer_handle_t) {
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
-urCommandBufferReleaseExp(ur_exp_command_buffer_handle_t) {
+urCommandBufferReleaseExp(ur_exp_command_buffer_handle_t &) {
   detail::ur::die("Experimental Command-buffer feature is not "
                   "implemented for the NativeCPU adapter.");
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
