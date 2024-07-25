@@ -1904,7 +1904,7 @@ typedef ur_result_t(UR_APICALL *ur_pfnCommandBufferRetainExp_t)(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function-pointer for urCommandBufferReleaseExp
 typedef ur_result_t(UR_APICALL *ur_pfnCommandBufferReleaseExp_t)(
-    ur_exp_command_buffer_handle_t);
+    ur_exp_command_buffer_handle_t&);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function-pointer for urCommandBufferFinalizeExp

@@ -8198,7 +8198,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferRetainExp(
 /// @brief Intercept function for urCommandBufferReleaseExp
 __urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseExp(
     ur_exp_command_buffer_handle_t
-        hCommandBuffer ///< [in][release] Handle of the command-buffer object.
+        &hCommandBuffer ///< [in][release] Handle of the command-buffer object.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
