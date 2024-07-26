@@ -134,6 +134,7 @@ add_ur_adapter(${TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/queue_api.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/queue.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/sampler.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tensor_map.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/image.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../../ur/ur.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/v2/queue_immediate_in_order.cpp
