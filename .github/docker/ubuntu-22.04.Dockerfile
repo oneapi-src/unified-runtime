@@ -32,8 +32,7 @@ ARG BASE_DEPS="\
 ARG UR_DEPS="\
 	doxygen \
 	python3 \
-	python3-pip \
-	libhwloc-dev"
+	python3-pip"
 
 # Unified Runtime's dependencies (installed via pip)
 ARG UR_PYTHON_DEPS="\

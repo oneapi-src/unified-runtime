@@ -96,7 +96,6 @@ target_include_directories(${TARGET_NAME} PRIVATE
 target_link_libraries(${TARGET_NAME} PRIVATE
     ${PROJECT_NAME}::headers
     ${PROJECT_NAME}::common
-    ${PROJECT_NAME}::umf
     Threads::Threads
     ${OpenCLICDLoaderLibrary}
 )
