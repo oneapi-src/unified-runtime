@@ -11,12 +11,15 @@ from .base import Benchmark
 from .result import Result
 from .options import options
 
+## TODO: create a generic ComputeBenchmarks class that specific scenarios can inherit
 class APIOverheadSYCL(Benchmark):
-    def __init__(self, directory):
+    def __init__(self, ioq, directory):
+        self.ioq = ioq
         super().__init__(directory)
 
     def name(self):
-        return "api_overhead_benchmark_sycl, mean execution time per 10 kernels"
+        order = "in order" if self.ioq else "out of order"
+        return f"api_overhead_benchmark_sycl {order}, mean execution time per 10 kernels"
 
     def unit(self):
         return "μs"
@@ -39,11 +42,11 @@ class APIOverheadSYCL(Benchmark):
         run(f"cmake --build {build_path} -j", add_sycl=True)
         self.benchmark_bin = f"{build_path}/bin/api_overhead_benchmark_sycl"
 
-    def run_internal(self, ioq, env_vars):
+    def run(self, env_vars) -> Result:
         command = [
             f"{self.benchmark_bin}",
             "--test=SubmitKernel",
-            f"--Ioq={ioq}",
+            f"--Ioq={self.ioq}",
             "--DiscardEvents=0",
             "--MeasureCompletion=0",
             "--iterations=100000",
@@ -56,13 +59,6 @@ class APIOverheadSYCL(Benchmark):
         result = self.run_bench(command, env_vars)
         (label, mean) = self.parse_output(result)
         return Result(label=label, value=mean, command=command, env=env_vars, stdout=result)
-
-    def run(self, env_vars) -> list[Result]:
-        results = []
-        for ioq in [0, 1]:
-            results.append(self.run_internal(ioq, env_vars))
-
-        return results
 
     def parse_output(self, output):
         csv_file = io.StringIO(output)

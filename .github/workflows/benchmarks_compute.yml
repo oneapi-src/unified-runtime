@@ -34,6 +34,11 @@ on:
         type: string
         required: false
         default: ''
+      sycl_commit:
+        description: 'intel/llvm commit'
+        type: string
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -110,6 +115,13 @@ jobs:
         path: sycl-repo
         fetch-depth: 1
         fetch-tags: false
+
+    - name: Fetch specific SYCL commit
+      if: inputs.sycl_commit != ''
+      working-directory: ./sycl-repo
+      run: |
+        git fetch --depth=1 origin ${{ inputs.sycl_commit }}
+        git checkout ${{ inputs.sycl_commit }}
 
     - name: Set CUDA env vars
       if: matrix.adapter.str_name == 'cuda'

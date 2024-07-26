@@ -5,6 +5,8 @@ class Options:
     sycl: str = ""
     rebuild: bool = True
     benchmark_cwd: str = "INVALID"
+    timeout: float = 600
+    iterations: int = 5
 
 options = Options()
 

@@ -5,6 +5,7 @@
 
 import collections
 from benches.base import Result
+import math
 
 # Function to generate the mermaid bar chart script
 def generate_mermaid_script(chart_data: dict[str, list[Result]]):
@@ -84,28 +85,28 @@ def generate_markdown_details(results: list[Result]):
     return "\n".join(markdown_sections)
 
 def generate_summary(chart_data: dict[str, list[Result]]) -> str:
-    # Calculate the mean value of "This PR" for each benchmark
-    this_pr_means = {}
+    # Calculate the geometric mean value of "This PR" for each benchmark
+    this_pr_geomeans = {}
     for res in chart_data["This PR"]:
-        if res.name not in this_pr_means:
-            this_pr_means[res.name] = []
-        this_pr_means[res.name].append(res.value)
-    for bname in this_pr_means:
-        this_pr_means[bname] = sum(this_pr_means[bname]) / len(this_pr_means[bname])
+        if res.name not in this_pr_geomeans:
+            this_pr_geomeans[res.name] = []
+        this_pr_geomeans[res.name].append(res.value)
+    for bname in this_pr_geomeans:
+        product = math.prod(this_pr_geomeans[bname])
+        this_pr_geomeans[bname] = product ** (1 / len(this_pr_geomeans[bname]))
 
-    # Calculate the percentage for each entry relative to "This PR"
+    # Calculate the percentage for each entry relative to "This PR" using geometric mean
     summary_data = {"This PR": 100}
     for entry_name, results in chart_data.items():
         if entry_name == "This PR":
             continue
-        entry_sum = 0
-        for res in results:
-            if res.name in this_pr_means:
-                percentage = (res.value / this_pr_means[res.name]) * 100
-                entry_sum += percentage
-
-        entry_average = entry_sum / len(results) if results else 0
-        summary_data[entry_name] = entry_average
+        entry_product = math.prod([res.value for res in results if res.name in this_pr_geomeans])
+        entry_geomean = entry_product ** (1 / len(results)) if results else 0
+        if entry_geomean and this_pr_geomeans.get(results[0].name):
+            percentage = (entry_geomean / this_pr_geomeans[results[0].name]) * 100
+        else:
+            percentage = 0
+        summary_data[entry_name] = percentage
 
     markdown_table = "| Name | Result % |\n| --- | --- |\n"
     for entry_name, percentage in summary_data.items():

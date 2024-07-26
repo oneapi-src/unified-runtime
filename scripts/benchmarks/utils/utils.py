@@ -28,9 +28,7 @@ def run(command, env_vars={}, cwd=None, add_sycl=False):
             env['LD_LIBRARY_PATH'] = sycl_lib_path + os.pathsep + env.get('LD_LIBRARY_PATH', '')
 
         env.update(env_vars)
-        result = subprocess.run(command, cwd=cwd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env) # nosec B603
-        print(result.stdout.decode())
-        print(result.stderr.decode())
+        result = subprocess.run(command, cwd=cwd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, timeout=options.timeout) # nosec B603
         return result
     except subprocess.CalledProcessError as e:
         print(e.stdout.decode())

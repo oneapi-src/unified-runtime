@@ -61,7 +61,7 @@ class Benchmark:
     def setup(self):
         raise NotImplementedError()
 
-    def run(self, env_vars):
+    def run(self, env_vars) -> Result:
         raise NotImplementedError()
 
     def teardown(self):
