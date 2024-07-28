@@ -26,7 +26,6 @@ if(LLVM_FOUND AND PkgConfig_FOUND AND LLVMSPIRVLib_FOUND)
     target_include_directories(${TARGET_NAME} PRIVATE ${LLVM_INCLUDE_DIRS})
     target_compile_definitions(${TARGET_NAME} PRIVATE ${LLVM_DEFINITIONS})
     target_link_libraries(${TARGET_NAME}
-    PRIVATE
             ${CMAKE_DL_LIBS}
             ${PROJECT_NAME}::headers
             ${PROJECT_NAME}::loader
