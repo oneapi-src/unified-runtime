@@ -23,6 +23,10 @@ find_package(Python3 COMPONENTS Interpreter REQUIRED)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
+# set_target_properties(main-static PROPERTIES
+#   LINK_SEARCH_START_STATIC ON
+#   LINK_SEARCH_END_STATIC ON
+# )
 
 # Build Options
 option(UR_BUILD_EXAMPLES "Build example applications." ON)
