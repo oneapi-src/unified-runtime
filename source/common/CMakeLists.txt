@@ -23,8 +23,8 @@ if (NOT DEFINED UMF_REPO)
 endif()
 
 if (NOT DEFINED UMF_TAG)
-    # Merge pull request #637 from kswiecicki/fix-dpool-poison-macro
-    set(UMF_TAG 1c34aae4c804e133c1273f30b1d6441ebb766f2f)
+    # Merge pull request #639 from kswiecicki/umf-compile-options-win
+    set(UMF_TAG bb07950f9804783cdc69951b90c2d7bd68c226f3)
 endif()
 
 message(STATUS "Will fetch Unified Memory Framework from ${UMF_REPO}")
