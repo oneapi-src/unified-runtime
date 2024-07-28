@@ -25,7 +25,7 @@ if(LLVM_FOUND AND PkgConfig_FOUND AND LLVMSPIRVLib_FOUND)
     target_include_directories(${TARGET_NAME} PRIVATE ${LLVM_INCLUDE_DIRS})
     target_compile_definitions(${TARGET_NAME} PRIVATE ${LLVM_DEFINITIONS})
     target_link_libraries(${TARGET_NAME}
-    PRIVATE
+
             ${CMAKE_CURRENT_SOURCE_DIR}/lib_function.a 
             ${CMAKE_CURRENT_SOURCE_DIR}/lib_helpers.a
             ${CMAKE_CURRENT_SOURCE_DIR}/lib_IRBuilder.a
