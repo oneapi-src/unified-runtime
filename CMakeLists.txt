@@ -255,6 +255,7 @@ add_subdirectory(${THIRD_PARTY_DIR})
 
 # A header only library to specify include directories in transitive
 # dependencies.
+add_library(ur_headers STATIC ${CMAKE_CURRENT_SOURCE_DIR})
 add_library(ur_headers INTERFACE)
 # Alias target to support FetchContent.
 add_library(${PROJECT_NAME}::headers ALIAS ur_headers)
