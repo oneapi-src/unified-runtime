@@ -20,11 +20,6 @@ if(LLVM_FOUND AND PkgConfig_FOUND AND LLVMSPIRVLib_FOUND)
     add_ur_executable(${TARGET_NAME}
         ${CMAKE_CURRENT_SOURCE_DIR}/codegen.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/helpers.cpp
-        ${CMAKE_DL_LIBS}
-        ${PROJECT_NAME}::headers
-        ${PROJECT_NAME}::loader
-        LLVM
-        PkgConfig::LLVMSPIRVLib
     )
 
     target_include_directories(${TARGET_NAME} PRIVATE ${LLVM_INCLUDE_DIRS})
