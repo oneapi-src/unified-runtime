@@ -768,8 +768,10 @@ ur_result_t ur_queue_handle_legacy_t_::bindlessImagesImageCopyExp(
     [[maybe_unused]] ur_exp_image_copy_region_t *pCopyRegion,
     [[maybe_unused]] ur_exp_image_copy_flags_t imageCopyFlags,
     [[maybe_unused]] uint32_t numEventsInWaitList,
-    [[maybe_unused]] const ur_event_handle_t *phEventWaitList,
-    [[maybe_unused]] ur_event_handle_t *phEvent) {
+    [[maybe_unused]] const ur_event_handle_t *phUrEventWaitList,
+    [[maybe_unused]] ur_event_handle_t *phUrEvent) {
+  auto phEventWaitList = Legacy(phUrEventWaitList);
+  auto phEvent = Legacy(phUrEvent);
   auto hQueue = this;
   std::scoped_lock<ur_shared_mutex> Lock(hQueue->Mutex);
 
@@ -804,9 +806,9 @@ ur_result_t ur_queue_handle_legacy_t_::bindlessImagesImageCopyExp(
       OkToBatch));
 
   ze_event_handle_t ZeEvent = nullptr;
-  ur_event_handle_t InternalEvent;
+  ur_event_handle_legacy_t InternalEvent;
   bool IsInternal = phEvent == nullptr;
-  ur_event_handle_t *Event = phEvent ? phEvent : &InternalEvent;
+  ur_event_handle_legacy_t *Event = phEvent ? phEvent : &InternalEvent;
   UR_CALL(createEventAndAssociateQueue(hQueue, Event, UR_COMMAND_MEM_IMAGE_COPY,
                                        CommandList, IsInternal,
                                        /*IsMultiDevice*/ false));

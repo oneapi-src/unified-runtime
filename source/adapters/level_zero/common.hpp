@@ -512,4 +512,21 @@ extern thread_local int32_t ErrorAdapterNativeCode;
                                       ur_result_t ErrorCode,
                                       int32_t AdapterErrorCode);
 
+// Get specific implementation of UR type from the handle
+template <typename UrType, typename UrHandle> UrType GetImpl(UrHandle Handle) {
+  if (!Handle)
+    return nullptr;
+  auto *H = dynamic_cast<UrType>(Handle);
+  if (!H) {
+    if constexpr (std::is_same_v<UrHandle, ur_queue_handle_t>) {
+      throw UR_RESULT_ERROR_INVALID_QUEUE;
+    } else if constexpr (std::is_same_v<UrHandle, ur_event_handle_t>) {
+      throw UR_RESULT_ERROR_INVALID_EVENT;
+    } else {
+      throw UR_RESULT_ERROR_UNKNOWN;
+    }
+  }
+  return H;
+}
+
 #define L0_DRIVER_INORDER_MIN_VERSION 29534

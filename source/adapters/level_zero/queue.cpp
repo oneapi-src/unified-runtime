@@ -120,14 +120,14 @@ ur_result_t ur_completion_batch::seal(ur_queue_handle_legacy_t queue,
   return UR_RESULT_SUCCESS;
 }
 
-void ur_completion_batches::append(ur_event_handle_t event) {
+void ur_completion_batches::append(ur_event_handle_legacy_t event) {
   active->append();
   event->completionBatch = active;
 }
 
 void ur_completion_batches::moveCompletedEvents(
-    ur_completion_batch_it it, std::vector<ur_event_handle_t> &events,
-    std::vector<ur_event_handle_t> &EventListToCleanup) {
+    ur_completion_batch_it it, std::vector<ur_event_handle_legacy_t> &events,
+    std::vector<ur_event_handle_legacy_t> &EventListToCleanup) {
   // This works by tagging all events belonging to a batch, and then removing
   // all events in a vector with the tag (iterator) of the active batch.
   // This could be optimized to remove a specific range of entries if we had a
@@ -148,8 +148,8 @@ void ur_completion_batches::moveCompletedEvents(
 }
 
 ur_result_t ur_completion_batches::cleanup(
-    std::vector<ur_event_handle_t> &events,
-    std::vector<ur_event_handle_t> &EventListToCleanup) {
+    std::vector<ur_event_handle_legacy_t> &events,
+    std::vector<ur_event_handle_legacy_t> &EventListToCleanup) {
   bool cleaned = false;
   while (!sealed.empty()) {
     auto oldest_sealed = sealed.front();
@@ -190,8 +190,8 @@ ur_completion_batches::ur_completion_batches() {
 
 ur_result_t ur_completion_batches::tryCleanup(
     ur_queue_handle_legacy_t queue, ze_command_list_handle_t cmdlist,
-    std::vector<ur_event_handle_t> &events,
-    std::vector<ur_event_handle_t> &EventListToCleanup) {
+    std::vector<ur_event_handle_legacy_t> &events,
+    std::vector<ur_event_handle_legacy_t> &EventListToCleanup) {
   cleanup(events, EventListToCleanup);
 
   if (active->isFull()) {
@@ -231,17 +231,18 @@ void ur_completion_batches::forceReset() {
 /// the call, in case of in-order queue it allows to cleanup all preceding
 /// events.
 /// @return PI_SUCCESS if successful, PI error code otherwise.
-ur_result_t CleanupEventsInImmCmdLists(ur_queue_handle_legacy_t UrQueue,
-                                       bool QueueLocked, bool QueueSynced,
-                                       ur_event_handle_t CompletedEvent) {
+ur_result_t
+CleanupEventsInImmCmdLists(ur_queue_handle_legacy_t UrQueue, bool QueueLocked,
+                           bool QueueSynced,
+                           ur_event_handle_legacy_t CompletedEvent) {
   // Handle only immediate command lists here.
   if (!UrQueue || !UrQueue->UsingImmCmdLists)
     return UR_RESULT_SUCCESS;
 
-  ur_event_handle_t_ *UrCompletedEvent =
-      reinterpret_cast<ur_event_handle_t_ *>(CompletedEvent);
+  ur_event_handle_legacy_t_ *UrCompletedEvent =
+      reinterpret_cast<ur_event_handle_legacy_t_ *>(CompletedEvent);
 
-  std::vector<ur_event_handle_t> EventListToCleanup;
+  std::vector<ur_event_handle_legacy_t> EventListToCleanup;
   {
     std::unique_lock<ur_shared_mutex> QueueLock(UrQueue->Mutex,
                                                 std::defer_lock);
@@ -252,7 +253,7 @@ ur_result_t CleanupEventsInImmCmdLists(ur_queue_handle_legacy_t UrQueue,
     // commands so we can't do full cleanup.
     if (QueueLocked &&
         (QueueSynced || (UrQueue->isInOrderQueue() &&
-                         (reinterpret_cast<ur_event_handle_t>(
+                         (reinterpret_cast<ur_event_handle_legacy_t>(
                               UrCompletedEvent) == UrQueue->LastCommandEvent ||
                           !UrQueue->LastCommandEvent)))) {
       UrQueue->LastCommandEvent = nullptr;
@@ -317,7 +318,7 @@ ur_result_t resetCommandLists(ur_queue_handle_legacy_t Queue) {
   // nested locks, because event cleanup requires event to be locked. Nested
   // locks are hard to control and can cause deadlocks if mutexes are locked in
   // different order.
-  std::vector<ur_event_handle_t> EventListToCleanup;
+  std::vector<ur_event_handle_legacy_t> EventListToCleanup;
 
   // We check for command lists that have been already signalled, but have not
   // been added to the available list yet. Each command list has a fence
@@ -556,7 +557,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreate(
           for (int I = 0; I < 10; ++I) {
             UR_CALL(Q->createCommandList(UseCopyEngine, CommandList));
             // Immediately return them to the cache of available command-lists.
-            std::vector<ur_event_handle_t> EventsUnused;
+            std::vector<ur_event_handle_legacy_t> EventsUnused;
             UR_CALL(Q->resetCommandList(CommandList, true /* MakeAvailable */,
                                         EventsUnused));
           }
@@ -598,7 +599,7 @@ ur_result_t ur_queue_handle_legacy_t_::queueRetain() {
 ur_result_t ur_queue_handle_legacy_t_::queueRelease() {
   auto Queue = this;
 
-  std::vector<ur_event_handle_t> EventListToCleanup;
+  std::vector<ur_event_handle_legacy_t> EventListToCleanup;
   {
     std::scoped_lock<ur_shared_mutex> Lock(Queue->Mutex);
 
@@ -692,7 +693,8 @@ ur_result_t ur_queue_handle_legacy_t_::queueRelease() {
     UR_CALL(CleanupCompletedEvent(Event));
     // This event was removed from the command list, so decrement ref count
     // (it was incremented when they were added to the command list).
-    UR_CALL(urEventReleaseInternal(reinterpret_cast<ur_event_handle_t>(Event)));
+    UR_CALL(urEventReleaseInternal(
+        reinterpret_cast<ur_event_handle_legacy_t>(Event)));
   }
   UR_CALL(urQueueReleaseInternal(Queue));
   return UR_RESULT_SUCCESS;
@@ -1351,11 +1353,11 @@ ur_result_t ur_queue_handle_legacy_t_::executeCommandList(
       auto Result = std::find_if(
           CommandList->second.EventList.begin(),
           CommandList->second.EventList.end(),
-          [](ur_event_handle_t E) { return E->hasExternalRefs(); });
+          [](ur_event_handle_legacy_t E) { return E->hasExternalRefs(); });
       if (Result != CommandList->second.EventList.end()) {
         // Create a "proxy" host-visible event.
         //
-        ur_event_handle_t HostVisibleEvent;
+        ur_event_handle_legacy_t HostVisibleEvent;
         auto Res = createEventAndAssociateQueue(
             reinterpret_cast<ur_queue_handle_legacy_t>(this), &HostVisibleEvent,
             UR_EXT_COMMAND_TYPE_USER, CommandList,
@@ -1374,7 +1376,7 @@ ur_result_t ur_queue_handle_legacy_t_::executeCommandList(
 
           if (!Event->HostVisibleEvent) {
             Event->HostVisibleEvent =
-                reinterpret_cast<ur_event_handle_t>(HostVisibleEvent);
+                reinterpret_cast<ur_event_handle_legacy_t>(HostVisibleEvent);
             HostVisibleEvent->RefCount.increment();
           }
         }
@@ -1461,7 +1463,7 @@ ur_result_t ur_queue_handle_legacy_t_::executeCommandList(
       this->Healthy = false;
       // Reset Command List and erase the Fence forcing the user to resubmit
       // their commands.
-      std::vector<ur_event_handle_t> EventListToCleanup;
+      std::vector<ur_event_handle_legacy_t> EventListToCleanup;
       resetCommandList(CommandList, true, EventListToCleanup, false);
       CleanupEventListFromResetCmdList(EventListToCleanup,
                                        true /* QueueLocked */);
@@ -1495,12 +1497,12 @@ ur_result_t ur_queue_handle_legacy_t_::resetDiscardedEvent(
                  (CommandList->first, LastCommandEvent->ZeEvent));
     }
 
-    // Create new ur_event_handle_t but with the same ze_event_handle_t. We are
-    // going to use this ur_event_handle_t for the next command with discarded
-    // event.
-    ur_event_handle_t_ *UREvent;
+    // Create new ur_event_handle_legacy_t but with the same ze_event_handle_t.
+    // We are going to use this ur_event_handle_legacy_t for the next command
+    // with discarded event.
+    ur_event_handle_legacy_t_ *UREvent;
     try {
-      UREvent = new ur_event_handle_t_(
+      UREvent = new ur_event_handle_legacy_t_(
           LastCommandEvent->ZeEvent, LastCommandEvent->ZeEventPool,
           reinterpret_cast<ur_context_handle_t>(Context),
           UR_EXT_COMMAND_TYPE_USER, true);
@@ -1511,16 +1513,18 @@ ur_result_t ur_queue_handle_legacy_t_::resetDiscardedEvent(
     }
 
     if (LastCommandEvent->isHostVisible())
-      UREvent->HostVisibleEvent = reinterpret_cast<ur_event_handle_t>(UREvent);
+      UREvent->HostVisibleEvent =
+          reinterpret_cast<ur_event_handle_legacy_t>(UREvent);
 
-    UR_CALL(addEventToQueueCache(reinterpret_cast<ur_event_handle_t>(UREvent)));
+    UR_CALL(addEventToQueueCache(
+        reinterpret_cast<ur_event_handle_legacy_t>(UREvent)));
   }
 
   return UR_RESULT_SUCCESS;
 }
 
-ur_result_t
-ur_queue_handle_legacy_t_::addEventToQueueCache(ur_event_handle_t Event) {
+ur_result_t ur_queue_handle_legacy_t_::addEventToQueueCache(
+    ur_event_handle_legacy_t Event) {
   if (!Event->IsMultiDevice) {
     auto EventCachesMap = Event->isHostVisible() ? &EventCachesDeviceMap[0]
                                                  : &EventCachesDeviceMap[1];
@@ -1536,7 +1540,8 @@ ur_queue_handle_legacy_t_::addEventToQueueCache(ur_event_handle_t Event) {
   return UR_RESULT_SUCCESS;
 }
 
-void ur_queue_handle_legacy_t_::active_barriers::add(ur_event_handle_t &Event) {
+void ur_queue_handle_legacy_t_::active_barriers::add(
+    ur_event_handle_legacy_t &Event) {
   Event->RefCount.increment();
   Events.push_back(Event);
 }
@@ -1649,7 +1654,8 @@ bool ur_queue_handle_legacy_t_::isInOrderQueue() const {
 // Helper function to perform the necessary cleanup of the events from reset cmd
 // list.
 ur_result_t CleanupEventListFromResetCmdList(
-    std::vector<ur_event_handle_t> &EventListToCleanup, bool QueueLocked) {
+    std::vector<ur_event_handle_legacy_t> &EventListToCleanup,
+    bool QueueLocked) {
   for (auto &Event : EventListToCleanup) {
     // We don't need to synchronize the events since the fence associated with
     // the command list was synchronized.
@@ -1765,10 +1771,10 @@ ur_result_t ur_queue_handle_legacy_t_::synchronize() {
   return UR_RESULT_SUCCESS;
 }
 
-ur_event_handle_t
+ur_event_handle_legacy_t
 ur_queue_handle_legacy_t_::getEventFromQueueCache(bool IsMultiDevice,
                                                   bool HostVisible) {
-  std::list<ur_event_handle_t> *Cache;
+  std::list<ur_event_handle_legacy_t> *Cache;
 
   if (!IsMultiDevice) {
     auto Device = this->Device;
@@ -1790,7 +1796,7 @@ ur_queue_handle_legacy_t_::getEventFromQueueCache(bool IsMultiDevice,
   // If there are two events then return an event from the beginning of the list
   // since event of the last command is added to the end of the list.
   auto It = Cache->begin();
-  ur_event_handle_t RetEvent = *It;
+  ur_event_handle_legacy_t RetEvent = *It;
   Cache->erase(It);
   return RetEvent;
 }
@@ -1801,7 +1807,7 @@ ur_queue_handle_legacy_t_::getEventFromQueueCache(bool IsMultiDevice,
 // this batch.
 bool eventCanBeBatched(ur_queue_handle_legacy_t Queue, bool UseCopyEngine,
                        uint32_t NumEventsInWaitList,
-                       const ur_event_handle_t *EventWaitList) {
+                       const ur_event_handle_legacy_t *EventWaitList) {
   auto &CommandBatch =
       UseCopyEngine ? Queue->CopyCommandBatch : Queue->ComputeCommandBatch;
   // First see if there is an command-list open for batching commands
@@ -1830,9 +1836,10 @@ bool eventCanBeBatched(ur_queue_handle_legacy_t Queue, bool UseCopyEngine,
 // a command list batch. The signal event will be appended at the end of the
 // batch to be signalled at the end of the command list.
 ur_result_t setSignalEvent(ur_queue_handle_legacy_t Queue, bool UseCopyEngine,
-                           ze_event_handle_t *ZeEvent, ur_event_handle_t *Event,
+                           ze_event_handle_t *ZeEvent,
+                           ur_event_handle_legacy_t *Event,
                            uint32_t NumEventsInWaitList,
-                           const ur_event_handle_t *EventWaitList,
+                           const ur_event_handle_legacy_t *EventWaitList,
                            ze_command_queue_handle_t ZeQueue) {
   if (!UrL0OutOfOrderIntegratedSignalEvent && Queue->Device->isIntegrated() &&
       eventCanBeBatched(Queue, UseCopyEngine, NumEventsInWaitList,
@@ -1847,11 +1854,11 @@ ur_result_t setSignalEvent(ur_queue_handle_legacy_t Queue, bool UseCopyEngine,
   return UR_RESULT_SUCCESS;
 }
 
-// This helper function creates a ur_event_handle_t and associate a
+// This helper function creates a ur_event_handle_legacy_t and associate a
 // ur_queue_handle_t. Note that the caller of this function must have acquired
 // lock on the Queue that is passed in.
 // \param Queue ur_queue_handle_t to associate with a new event.
-// \param Event a pointer to hold the newly created ur_event_handle_t
+// \param Event a pointer to hold the newly created ur_event_handle_legacy_t
 // \param CommandType various command type determined by the caller
 // \param CommandList is the command list where the event is added
 // \param IsInternal tells if the event is internal, i.e. visible in the L0
@@ -1861,7 +1868,7 @@ ur_result_t setSignalEvent(ur_queue_handle_legacy_t Queue, bool UseCopyEngine,
 // \param HostVisible tells if the event must be created in the
 //        host-visible pool. If not set then this function will decide.
 ur_result_t createEventAndAssociateQueue(ur_queue_handle_legacy_t Queue,
-                                         ur_event_handle_t *Event,
+                                         ur_event_handle_legacy_t *Event,
                                          ur_command_t CommandType,
                                          ur_command_list_ptr_t CommandList,
                                          bool IsInternal, bool IsMultiDevice,
@@ -1888,9 +1895,9 @@ ur_result_t createEventAndAssociateQueue(ur_queue_handle_legacy_t Queue,
   (*Event)->IsMultiDevice = IsMultiDevice;
   (*Event)->CommandList = CommandList;
   // Discarded event doesn't own ze_event, it is used by multiple
-  // ur_event_handle_t objects. We destroy corresponding ze_event by releasing
-  // events from the events cache at queue destruction. Event in the cache owns
-  // the Level Zero event.
+  // ur_event_handle_legacy_t objects. We destroy corresponding ze_event by
+  // releasing events from the events cache at queue destruction. Event in the
+  // cache owns the Level Zero event.
   if (IsInternal)
     (*Event)->OwnNativeHandle = false;
 
@@ -1901,8 +1908,8 @@ ur_result_t createEventAndAssociateQueue(ur_queue_handle_legacy_t Queue,
   }
 
   // We need to increment the reference counter here to avoid ur_queue_handle_t
-  // being released before the associated ur_event_handle_t is released because
-  // urEventRelease requires access to the associated ur_queue_handle_t.
+  // being released before the associated ur_event_handle_legacy_t is released
+  // because urEventRelease requires access to the associated ur_queue_handle_t.
   // In urEventRelease, the reference counter of the Queue is decremented
   // to release it.
   Queue->RefCount.increment();
@@ -1958,7 +1965,7 @@ ur_queue_handle_legacy_t_::signalEventFromCmdListIfLastEventDiscarded(
   // participating in the discarded events reset/reuse logic, but
   // with no host-visibility since it is not going to be waited
   // from the host.
-  ur_event_handle_t Event;
+  ur_event_handle_legacy_t Event;
   UR_CALL(createEventAndAssociateQueue(
       reinterpret_cast<ur_queue_handle_legacy_t>(this), &Event,
       UR_EXT_COMMAND_TYPE_USER, CommandList,
@@ -1988,7 +1995,8 @@ ur_result_t ur_queue_handle_legacy_t_::executeOpenCommandList(bool IsCopy) {
 
 ur_result_t ur_queue_handle_legacy_t_::resetCommandList(
     ur_command_list_ptr_t CommandList, bool MakeAvailable,
-    std::vector<ur_event_handle_t> &EventListToCleanup, bool CheckStatus) {
+    std::vector<ur_event_handle_legacy_t> &EventListToCleanup,
+    bool CheckStatus) {
   bool UseCopyEngine = CommandList->second.isCopy(this);
 
   // Immediate commandlists do not have an associated fence.
@@ -2016,7 +2024,7 @@ ur_result_t ur_queue_handle_legacy_t_::resetCommandList(
   } else if (!isDiscardEvents()) {
     // If events in the queue are discarded then we can't check their status.
     // Helper for checking of event completion
-    auto EventCompleted = [](ur_event_handle_t Event) -> bool {
+    auto EventCompleted = [](ur_event_handle_legacy_t Event) -> bool {
       std::scoped_lock<ur_shared_mutex> EventLock(Event->Mutex);
       ze_result_t ZeResult =
           Event->Completed
@@ -2096,15 +2104,15 @@ bool ur_command_list_info_t::isCopy(ur_queue_handle_legacy_t Queue) const {
              .ZeOrdinal;
 }
 
-void ur_command_list_info_t::append(ur_event_handle_t Event) {
+void ur_command_list_info_t::append(ur_event_handle_legacy_t Event) {
   if (completions) {
     completions->append(Event);
   }
   EventList.push_back(Event);
 }
 
-ur_command_list_ptr_t
-ur_queue_handle_legacy_t_::eventOpenCommandList(ur_event_handle_t Event) {
+ur_command_list_ptr_t ur_queue_handle_legacy_t_::eventOpenCommandList(
+    ur_event_handle_legacy_t Event) {
   using IsCopy = bool;
 
   if (UsingImmCmdLists) {
@@ -2306,7 +2314,7 @@ ur_queue_handle_legacy_t_::insertActiveBarriers(ur_command_list_ptr_t &CmdList,
     ActiveBarriers.add(Event);
   }
 
-  ur_event_handle_t Event = nullptr;
+  ur_event_handle_legacy_t Event = nullptr;
   if (auto Res = createEventAndAssociateQueue(
           reinterpret_cast<ur_queue_handle_legacy_t>(this), &Event,
           UR_EXT_COMMAND_TYPE_USER, CmdList,

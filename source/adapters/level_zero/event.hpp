@@ -27,11 +27,14 @@
 #include "common.hpp"
 #include "queue.hpp"
 
+struct ur_event_handle_legacy_t_;
+using ur_event_handle_legacy_t = ur_event_handle_legacy_t_ *;
+
 extern "C" {
-ur_result_t urEventReleaseInternal(ur_event_handle_t Event);
+ur_result_t urEventReleaseInternal(ur_event_handle_legacy_t Event);
 ur_result_t EventCreate(ur_context_handle_t Context,
                         ur_queue_handle_legacy_t Queue, bool IsMultiDevice,
-                        bool HostVisible, ur_event_handle_t *RetEvent,
+                        bool HostVisible, ur_event_handle_legacy_t *RetEvent,
                         bool CounterBasedEventEnabled = false,
                         bool ForceDisableProfiling = false);
 } // extern "C"
@@ -71,7 +74,7 @@ struct _ur_ze_event_list_t {
   ze_event_handle_t *ZeEventList = {nullptr};
 
   // List of ur_events for this event list.
-  ur_event_handle_t *UrEventList = {nullptr};
+  ur_event_handle_legacy_t *UrEventList = {nullptr};
 
   // length of both the lists.  The actual allocation of these lists
   // may be longer than this length.  This length is the actual number
@@ -79,7 +82,7 @@ struct _ur_ze_event_list_t {
   uint32_t Length = {0};
 
   // Initialize this using the array of events in EventList, and retain
-  // all the ur_event_handle_t in the created data structure.
+  // all the ur_event_handle_legacy_t in the created data structure.
   // CurQueue is the ur_queue_handle_t that the command with this event wait
   // list is going to be added to.  That is needed to flush command
   // batches for wait events that are in other queues.
@@ -87,16 +90,15 @@ struct _ur_ze_event_list_t {
   // event wait-list is for) is going to go to copy or compute
   // queue. This is used to properly submit the dependent open
   // command-lists.
-  ur_result_t createAndRetainUrZeEventList(uint32_t EventListLength,
-                                           const ur_event_handle_t *EventList,
-                                           ur_queue_handle_legacy_t CurQueue,
-                                           bool UseCopyEngine);
+  ur_result_t createAndRetainUrZeEventList(
+      uint32_t EventListLength, const ur_event_handle_legacy_t *EventList,
+      ur_queue_handle_legacy_t CurQueue, bool UseCopyEngine);
 
   // Add all the events in this object's UrEventList to the end
   // of the list EventsToBeReleased. Destroy ur_ze_event_list_t data
   // structure fields making it look empty.
   ur_result_t collectEventsForReleaseAndDestroyUrZeEventList(
-      std::list<ur_event_handle_t> &EventsToBeReleased);
+      std::list<ur_event_handle_legacy_t> &EventsToBeReleased);
 
   // Had to create custom assignment operator because the mutex is
   // not assignment copyable. Just field by field copy of the other
@@ -122,15 +124,24 @@ struct _ur_ze_event_list_t {
 
 void printZeEventList(const _ur_ze_event_list_t &PiZeEventList);
 
-struct ur_event_handle_t_ : _ur_object {
-  ur_event_handle_t_(ze_event_handle_t ZeEvent,
-                     ze_event_pool_handle_t ZeEventPool,
-                     ur_context_handle_t Context, ur_command_t CommandType,
-                     bool OwnZeEvent)
+struct ur_event_handle_t_ {
+  virtual ~ur_event_handle_t_() {}
+  virtual ur_result_t retain() = 0;
+  virtual ur_result_t release() = 0;
+};
+
+struct ur_event_handle_legacy_t_ : _ur_object, public ur_event_handle_t_ {
+  ur_event_handle_legacy_t_(ze_event_handle_t ZeEvent,
+                            ze_event_pool_handle_t ZeEventPool,
+                            ur_context_handle_t Context,
+                            ur_command_t CommandType, bool OwnZeEvent)
       : ZeEvent{ZeEvent}, ZeEventPool{ZeEventPool}, Context{Context},
         CommandType{CommandType}, CommandData{nullptr} {
     OwnNativeHandle = OwnZeEvent;
   }
+
+  ur_result_t retain() override;
+  ur_result_t release() override;
 
   // Level Zero event handle.
   ze_event_handle_t ZeEvent;
@@ -148,11 +159,11 @@ struct ur_event_handle_t_ : _ur_object {
   // The HostVisibleEvent is a reference counted PI event and can be used more
   // than by just this one event, depending on the mode (see EventsScope).
   //
-  ur_event_handle_t HostVisibleEvent = {nullptr};
+  ur_event_handle_legacy_t HostVisibleEvent = {nullptr};
   bool isHostVisible() const {
     return this ==
-           const_cast<const ur_event_handle_t_ *>(
-               reinterpret_cast<ur_event_handle_t_ *>(HostVisibleEvent));
+           const_cast<const ur_event_handle_legacy_t_ *>(
+               reinterpret_cast<ur_event_handle_legacy_t_ *>(HostVisibleEvent));
   }
 
   // Provide direct access to Context, instead of going via queue.
@@ -168,7 +179,7 @@ struct ur_event_handle_t_ : _ur_object {
   // Opaque data to hold any data needed for CommandType.
   void *CommandData;
 
-  // Command list associated with the ur_event_handle_t
+  // Command list associated with the ur_event_handle_legacy_t
   std::optional<ur_command_list_ptr_t> CommandList;
 
   // List of events that were in the wait list of the command that will
@@ -233,7 +244,7 @@ struct ur_event_handle_t_ : _ur_object {
 
   bool hasExternalRefs() { return RefCountExternal != 0; }
 
-  // Reset ur_event_handle_t object.
+  // Reset ur_event_handle_legacy_t object.
   ur_result_t reset();
 
   // Tells if this event is with profiling capabilities.
@@ -252,6 +263,23 @@ struct ur_event_handle_t_ : _ur_object {
   // Keeps track of whether we are using Counter-based Events.
   bool CounterBasedEventsEnabled = false;
 };
+
+// Get legacy implementation for event
+static inline ur_event_handle_legacy_t Legacy(ur_event_handle_t Event) {
+  return GetImpl<ur_event_handle_legacy_t>(Event);
+}
+// Get legacy implementation for event wait list
+static inline const ur_event_handle_legacy_t *
+Legacy(const ur_event_handle_t *Events) {
+  if (Events) {
+    // check if cast succeeds
+    GetImpl<ur_event_handle_legacy_t>(*Events);
+  }
+  return reinterpret_cast<const ur_event_handle_legacy_t *>(Events);
+}
+static inline ur_event_handle_legacy_t *Legacy(ur_event_handle_t *Event) {
+  return reinterpret_cast<ur_event_handle_legacy_t *>(Event);
+}
 
 // Helper function to implement zeHostSynchronize.
 // The behavior is to avoid infinite wait during host sync under ZE_DEBUG.
@@ -273,7 +301,7 @@ template <> ze_result_t zeHostSynchronize(ze_command_queue_handle_t Handle);
 // the event, updates the last command event in the queue and cleans up all dep
 // events of the event.
 // If the caller locks queue mutex then it must pass 'true' to QueueLocked.
-ur_result_t CleanupCompletedEvent(ur_event_handle_t Event,
+ur_result_t CleanupCompletedEvent(ur_event_handle_legacy_t Event,
                                   bool QueueLocked = false,
                                   bool SetEventCompleted = false);
 

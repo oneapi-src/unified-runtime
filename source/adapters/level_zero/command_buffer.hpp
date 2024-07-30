@@ -35,7 +35,7 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
       const ur_exp_command_buffer_desc_t *Desc, const bool IsInOrderCmdList);
 
   void registerSyncPoint(ur_exp_command_buffer_sync_point_t SyncPoint,
-                         ur_event_handle_t Event);
+                         ur_event_handle_legacy_t Event);
 
   ur_exp_command_buffer_sync_point_t getNextSyncPoint() const {
     return NextSyncPoint;
@@ -82,13 +82,13 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   ze_command_list_handle_t ZeCopyCommandList;
   // Event which will signals the most recent execution of the command-buffer
   // has finished
-  ur_event_handle_t SignalEvent = nullptr;
+  ur_event_handle_legacy_t SignalEvent = nullptr;
   // Event which a command-buffer waits on until the wait-list dependencies
   // passed to a command-buffer enqueue have been satisfied.
-  ur_event_handle_t WaitEvent = nullptr;
+  ur_event_handle_legacy_t WaitEvent = nullptr;
   // Event which a command-buffer waits on until the main command-list event
   // have been reset.
-  ur_event_handle_t AllResetEvent = nullptr;
+  ur_event_handle_legacy_t AllResetEvent = nullptr;
   // This flag is must be set to false if at least one copy command has been
   // added to `ZeCopyCommandList`
   bool MCopyCommandListEmpty = true;
@@ -100,7 +100,8 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   // itself.
   ze_fence_handle_t ZeActiveFence;
   // Map of sync_points to ur_events
-  std::unordered_map<ur_exp_command_buffer_sync_point_t, ur_event_handle_t>
+  std::unordered_map<ur_exp_command_buffer_sync_point_t,
+                     ur_event_handle_legacy_t>
       SyncPoints;
   // Next sync_point value (may need to consider ways to reuse values if 32-bits
   // is not enough)

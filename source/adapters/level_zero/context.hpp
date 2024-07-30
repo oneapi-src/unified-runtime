@@ -170,7 +170,7 @@ struct ur_context_handle_t_ : _ur_object {
   ur_mutex EventCacheMutex;
 
   // Caches for events.
-  using EventCache = std::vector<std::list<ur_event_handle_t>>;
+  using EventCache = std::vector<std::list<ur_event_handle_legacy_t>>;
   EventCache EventCaches{4};
   std::vector<std::unordered_map<ur_device_handle_t, size_t>>
       EventCachesDeviceMap{4};
@@ -204,14 +204,14 @@ struct ur_context_handle_t_ : _ur_object {
                                              bool CounterBasedEventEnabled,
                                              bool UsingImmCmdList);
 
-  // Get ur_event_handle_t from cache.
-  ur_event_handle_t getEventFromContextCache(bool HostVisible,
-                                             bool WithProfiling,
-                                             ur_device_handle_t Device,
-                                             bool CounterBasedEventEnabled);
+  // Get ur_event_handle_legacy_t from cache.
+  ur_event_handle_legacy_t
+  getEventFromContextCache(bool HostVisible, bool WithProfiling,
+                           ur_device_handle_t Device,
+                           bool CounterBasedEventEnabled);
 
-  // Add ur_event_handle_t to cache.
-  void addEventToContextCache(ur_event_handle_t);
+  // Add ur_event_handle_legacy_t to cache.
+  void addEventToContextCache(ur_event_handle_legacy_t);
 
   enum EventPoolCacheType {
     HostVisibleCacheType,
@@ -271,7 +271,7 @@ struct ur_context_handle_t_ : _ur_object {
 
   // Decrement number of events living in the pool upon event destroy
   // and return the pool to the cache if there are no unreleased events.
-  ur_result_t decrementUnreleasedEventsInPool(ur_event_handle_t Event);
+  ur_result_t decrementUnreleasedEventsInPool(ur_event_handle_legacy_t Event);
 
   // Retrieves a command list for executing on this device along with
   // a fence to be used in tracking the execution of this command list.
@@ -296,7 +296,7 @@ struct ur_context_handle_t_ : _ur_object {
   ur_result_t getAvailableCommandList(
       ur_queue_handle_legacy_t Queue, ur_command_list_ptr_t &CommandList,
       bool UseCopyEngine, uint32_t NumEventsInWaitList,
-      const ur_event_handle_t *EventWaitList, bool AllowBatching = false,
+      const ur_event_handle_legacy_t *EventWaitList, bool AllowBatching = false,
       ze_command_queue_handle_t *ForcedCmdQueue = nullptr);
 
   // Checks if Device is covered by this context.

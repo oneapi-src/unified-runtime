@@ -555,7 +555,7 @@ ur_result_t ur_context_handle_t_::getFreeSlotInExistingOrNewPool(
   return UR_RESULT_SUCCESS;
 }
 
-ur_event_handle_t ur_context_handle_t_::getEventFromContextCache(
+ur_event_handle_legacy_t ur_context_handle_t_::getEventFromContextCache(
     bool HostVisible, bool WithProfiling, ur_device_handle_t Device,
     bool CounterBasedEventEnabled) {
   std::scoped_lock<ur_mutex> Lock(EventCacheMutex);
@@ -564,7 +564,7 @@ ur_event_handle_t ur_context_handle_t_::getEventFromContextCache(
     return nullptr;
 
   auto It = Cache->begin();
-  ur_event_handle_t Event = *It;
+  ur_event_handle_legacy_t Event = *It;
   if (Event->CounterBasedEventsEnabled != CounterBasedEventEnabled) {
     return nullptr;
   }
@@ -574,7 +574,8 @@ ur_event_handle_t ur_context_handle_t_::getEventFromContextCache(
   return Event;
 }
 
-void ur_context_handle_t_::addEventToContextCache(ur_event_handle_t Event) {
+void ur_context_handle_t_::addEventToContextCache(
+    ur_event_handle_legacy_t Event) {
   std::scoped_lock<ur_mutex> Lock(EventCacheMutex);
   ur_device_handle_t Device = nullptr;
 
@@ -587,8 +588,8 @@ void ur_context_handle_t_::addEventToContextCache(ur_event_handle_t Event) {
   Cache->emplace_back(Event);
 }
 
-ur_result_t
-ur_context_handle_t_::decrementUnreleasedEventsInPool(ur_event_handle_t Event) {
+ur_result_t ur_context_handle_t_::decrementUnreleasedEventsInPool(
+    ur_event_handle_legacy_t Event) {
   std::shared_lock<ur_shared_mutex> EventLock(Event->Mutex, std::defer_lock);
   std::scoped_lock<ur_mutex, std::shared_lock<ur_shared_mutex>> LockAll(
       ZeEventPoolCacheMutex, EventLock);
@@ -648,14 +649,14 @@ static const size_t CmdListsCleanupThreshold = [] {
 ur_result_t ur_context_handle_t_::getAvailableCommandList(
     ur_queue_handle_legacy_t Queue, ur_command_list_ptr_t &CommandList,
     bool UseCopyEngine, uint32_t NumEventsInWaitList,
-    const ur_event_handle_t *EventWaitList, bool AllowBatching,
+    const ur_event_handle_legacy_t *EventWaitList, bool AllowBatching,
     ze_command_queue_handle_t *ForcedCmdQueue) {
   // Immediate commandlists have been pre-allocated and are always available.
   if (Queue->UsingImmCmdLists) {
     CommandList = Queue->getQueueGroup(UseCopyEngine).getImmCmdList();
     if (CommandList->second.EventList.size() >=
         Queue->getImmdCmmdListsEventCleanupThreshold()) {
-      std::vector<ur_event_handle_t> EventListToCleanup;
+      std::vector<ur_event_handle_legacy_t> EventListToCleanup;
       Queue->resetCommandList(CommandList, false, EventListToCleanup);
       CleanupEventListFromResetCmdList(EventListToCleanup, true);
     }
@@ -804,7 +805,7 @@ ur_result_t ur_context_handle_t_::getAvailableCommandList(
     ze_result_t ZeResult =
         ZE_CALL_NOCHECK(zeFenceQueryStatus, (it->second.ZeFence));
     if (ZeResult == ZE_RESULT_SUCCESS) {
-      std::vector<ur_event_handle_t> EventListToCleanup;
+      std::vector<ur_event_handle_legacy_t> EventListToCleanup;
       Queue->resetCommandList(it, false, EventListToCleanup);
       CleanupEventListFromResetCmdList(EventListToCleanup,
                                        true /* QueueLocked */);

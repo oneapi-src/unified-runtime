@@ -31,6 +31,9 @@
 struct ur_queue_handle_legacy_t_;
 using ur_queue_handle_legacy_t = ur_queue_handle_legacy_t_ *;
 
+struct ur_event_handle_legacy_t_;
+using ur_event_handle_legacy_t = ur_event_handle_legacy_t_ *;
+
 extern "C" {
 ur_result_t urQueueReleaseInternal(ur_queue_handle_legacy_t Queue);
 } // extern "C"
@@ -88,7 +91,7 @@ private:
 
   // Internal barrier event that is signaled on completion of the batched
   // events.
-  ur_event_handle_t barrierEvent;
+  ur_event_handle_legacy_t barrierEvent;
 
   // Current batch state. Don't use directly.
   state st;
@@ -117,16 +120,16 @@ struct ur_completion_batches {
   // returned to indicate that there are no batches available.
   // This is safe, but will increase how many events are associated
   // with the active batch.
-  ur_result_t tryCleanup(ur_queue_handle_legacy_t queue,
-                         ze_command_list_handle_t cmdlist,
-                         std::vector<ur_event_handle_t> &EventList,
-                         std::vector<ur_event_handle_t> &EventListToCleanup);
+  ur_result_t
+  tryCleanup(ur_queue_handle_legacy_t queue, ze_command_list_handle_t cmdlist,
+             std::vector<ur_event_handle_legacy_t> &EventList,
+             std::vector<ur_event_handle_legacy_t> &EventListToCleanup);
 
   // Adds an event to the the active batch.
   // Ideally, all events that are appended here are then provided in the
   // vector for cleanup. Otherwise the event batch will simply ignore
   // missing events when it comes time for cleanup.
-  void append(ur_event_handle_t event);
+  void append(ur_event_handle_legacy_t event);
 
   // Resets all the batches without waiting for event completion.
   // Only safe when the command list was fully synchronized through
@@ -137,13 +140,15 @@ private:
   // Checks the state of all previously sealed batches. If any are complete,
   // moves the associated events from the EventList to EventListToCleanup,
   // and then resets the batch for reuse.
-  ur_result_t cleanup(std::vector<ur_event_handle_t> &EventList,
-                      std::vector<ur_event_handle_t> &EventListToCleanup);
+  ur_result_t
+  cleanup(std::vector<ur_event_handle_legacy_t> &EventList,
+          std::vector<ur_event_handle_legacy_t> &EventListToCleanup);
 
   // Moves the completed events from EventList to EventListToCleanup.
-  void moveCompletedEvents(ur_completion_batch_it it,
-                           std::vector<ur_event_handle_t> &EventList,
-                           std::vector<ur_event_handle_t> &EventListToCleanup);
+  void moveCompletedEvents(
+      ur_completion_batch_it it,
+      std::vector<ur_event_handle_legacy_t> &EventList,
+      std::vector<ur_event_handle_legacy_t> &EventListToCleanup);
 
   // Find or creates an empty batch. This might fail if there are now empty
   // batches and a batch limit has been reached.
@@ -158,7 +163,7 @@ ur_result_t resetCommandLists(ur_queue_handle_legacy_t Queue);
 ur_result_t
 CleanupEventsInImmCmdLists(ur_queue_handle_legacy_t UrQueue,
                            bool QueueLocked = false, bool QueueSynced = false,
-                           ur_event_handle_t CompletedEvent = nullptr);
+                           ur_event_handle_legacy_t CompletedEvent = nullptr);
 
 // Structure describing the specific use of a command-list in a queue.
 // This is because command-lists are re-used across multiple queues
@@ -219,9 +224,9 @@ struct ur_command_list_info_t {
   // completion.
   // TODO: use this for optimizing events in the same command-list, e.g.
   // only have last one visible to the host.
-  std::vector<ur_event_handle_t> EventList;
+  std::vector<ur_event_handle_legacy_t> EventList;
   size_t size() const { return EventList.size(); }
-  void append(ur_event_handle_t Event);
+  void append(ur_event_handle_legacy_t Event);
 };
 
 // The map type that would track all command-lists in a queue.
@@ -556,7 +561,7 @@ struct ur_queue_handle_legacy_t_ : _ur_object, public ur_queue_handle_t_ {
   // this queue. this is used to add dependency with the last command to add
   // in-order semantics and updated with the latest event each time a new
   // command is enqueued.
-  ur_event_handle_t LastCommandEvent = nullptr;
+  ur_event_handle_legacy_t LastCommandEvent = nullptr;
 
   // Indicates if we own the ZeCommandQueue or it came from interop that
   // asked to not transfer the ownership to SYCL RT.
@@ -599,11 +604,11 @@ struct ur_queue_handle_legacy_t_ : _ur_object, public ur_queue_handle_t_ {
   // A helper structure to keep active barriers of the queue.
   // It additionally manages ref-count of events in this list.
   struct active_barriers {
-    std::vector<ur_event_handle_t> Events;
-    void add(ur_event_handle_t &Event);
+    std::vector<ur_event_handle_legacy_t> Events;
+    void add(ur_event_handle_legacy_t &Event);
     ur_result_t clear();
     bool empty() { return Events.empty(); }
-    std::vector<ur_event_handle_t> &vector() { return Events; }
+    std::vector<ur_event_handle_legacy_t> &vector() { return Events; }
   };
   // A collection of currently active barriers.
   // These should be inserted into a command list whenever an available command
@@ -676,7 +681,7 @@ struct ur_queue_handle_legacy_t_ : _ur_object, public ur_queue_handle_t_ {
   // requested type of event. Each list contains events which can be reused
   // inside all command lists in the queue as described in the 2-event model.
   // Leftover events in the cache are relased at the queue destruction.
-  std::vector<std::list<ur_event_handle_t>> EventCaches{2};
+  std::vector<std::list<ur_event_handle_legacy_t>> EventCaches{2};
   std::vector<std::unordered_map<ur_device_handle_t, size_t>>
       EventCachesDeviceMap{2};
 
@@ -691,7 +696,7 @@ struct ur_queue_handle_legacy_t_ : _ur_object, public ur_queue_handle_t_ {
     // case the event will mark this for deletion when the queue sees fit.
     bool EventHasDied = false;
   };
-  std::map<ur_event_handle_t, end_time_recording> EndTimeRecordings;
+  std::map<ur_event_handle_legacy_t, end_time_recording> EndTimeRecordings;
 
   // Clear the end time recording timestamps entries.
   void clearEndTimeRecordings();
@@ -737,7 +742,7 @@ struct ur_queue_handle_legacy_t_ : _ur_object, public ur_queue_handle_t_ {
   // not used by any command but its ZeEvent is used by many ur_event_handle_t
   // objects. Commands to wait and reset ZeEvent must be submitted to the queue
   // before calling this method.
-  ur_result_t addEventToQueueCache(ur_event_handle_t Event);
+  ur_result_t addEventToQueueCache(ur_event_handle_legacy_t Event);
 
   // Returns true if any commands for this queue are allowed to
   // be batched together.
@@ -769,8 +774,8 @@ struct ur_queue_handle_legacy_t_ : _ur_object, public ur_queue_handle_t_ {
   // two times in a row and have to do round-robin between two events. Otherwise
   // it picks an event from the beginning of the cache and returns it. Event
   // from the last command is always appended to the end of the list.
-  ur_event_handle_t getEventFromQueueCache(bool IsMultiDevice,
-                                           bool HostVisible);
+  ur_event_handle_legacy_t getEventFromQueueCache(bool IsMultiDevice,
+                                                  bool HostVisible);
 
   // Returns true if an OpenCommandList has commands that need to be submitted.
   // If IsCopy is 'true', then the OpenCommandList containing copy commands is
@@ -834,11 +839,11 @@ struct ur_queue_handle_legacy_t_ : _ur_object, public ur_queue_handle_t_ {
   /// @return PI_SUCCESS if successful, PI error code otherwise.
   ur_result_t
   resetCommandList(ur_command_list_ptr_t CommandList, bool MakeAvailable,
-                   std::vector<ur_event_handle_t> &EventListToCleanup,
+                   std::vector<ur_event_handle_legacy_t> &EventListToCleanup,
                    bool CheckStatus = true);
 
   // Gets the open command containing the event, or CommandListMap.end()
-  ur_command_list_ptr_t eventOpenCommandList(ur_event_handle_t Event);
+  ur_command_list_ptr_t eventOpenCommandList(ur_event_handle_legacy_t Event);
 
   // Return the queue group to use based on standard/immediate commandlist mode,
   // and if immediate mode, the thread-specific group.
@@ -883,18 +888,9 @@ struct ur_queue_handle_legacy_t_ : _ur_object, public ur_queue_handle_t_ {
   size_t getImmdCmmdListsEventCleanupThreshold();
 };
 
-template <typename QueueT> QueueT GetQueue(ur_queue_handle_t Queue) {
-  if (!Queue)
-    return nullptr;
-  auto *Q = dynamic_cast<QueueT>(Queue);
-  if (!Q) {
-    throw UR_RESULT_ERROR_INVALID_QUEUE;
-  }
-  return Q;
-}
-
+// Get legacy implementation
 static inline ur_queue_handle_legacy_t Legacy(ur_queue_handle_t Queue) {
-  return GetQueue<ur_queue_handle_legacy_t>(Queue);
+  return GetImpl<ur_queue_handle_legacy_t>(Queue);
 }
 
 // This helper function creates a ur_event_handle_t and associate a
@@ -910,12 +906,11 @@ static inline ur_queue_handle_legacy_t Legacy(ur_queue_handle_t Queue) {
 //        multiple devices.
 // \param ForceHostVisible tells if the event must be created in
 //        the host-visible pool
-ur_result_t
-createEventAndAssociateQueue(ur_queue_handle_legacy_t Queue,
-                             ur_event_handle_t *Event, ur_command_t CommandType,
-                             ur_command_list_ptr_t CommandList, bool IsInternal,
-                             bool IsMultiDevice,
-                             std::optional<bool> HostVisible = std::nullopt);
+ur_result_t createEventAndAssociateQueue(
+    ur_queue_handle_legacy_t Queue, ur_event_handle_legacy_t *Event,
+    ur_command_t CommandType, ur_command_list_ptr_t CommandList,
+    bool IsInternal, bool IsMultiDevice,
+    std::optional<bool> HostVisible = std::nullopt);
 
 // This helper function checks to see if an event for a command can be included
 // at the end of a command list batch. This will only be true if the event does
@@ -923,7 +918,7 @@ createEventAndAssociateQueue(ur_queue_handle_legacy_t Queue,
 // this batch.
 bool eventCanBeBatched(ur_queue_handle_legacy_t Queue, bool UseCopyEngine,
                        uint32_t NumEventsInWaitList,
-                       const ur_event_handle_t *EventWaitList);
+                       const ur_event_handle_legacy_t *EventWaitList);
 
 // This helper function checks to see if a signal event at the end of a command
 // should be set. If the Queue is out of order and the command has no
@@ -931,13 +926,14 @@ bool eventCanBeBatched(ur_queue_handle_legacy_t Queue, bool UseCopyEngine,
 // a command list batch. The signal event will be appended at the end of the
 // batch to be signalled at the end of the command list.
 ur_result_t setSignalEvent(ur_queue_handle_legacy_t Queue, bool UseCopyEngine,
-                           ze_event_handle_t *ZeEvent, ur_event_handle_t *Event,
+                           ze_event_handle_t *ZeEvent,
+                           ur_event_handle_legacy_t *Event,
                            uint32_t NumEventsInWaitList,
-                           const ur_event_handle_t *EventWaitList,
+                           const ur_event_handle_legacy_t *EventWaitList,
                            ze_command_queue_handle_t ZeQueue);
 
 // Helper function to perform the necessary cleanup of the events from reset cmd
 // list.
 ur_result_t CleanupEventListFromResetCmdList(
-    std::vector<ur_event_handle_t> &EventListToCleanup,
+    std::vector<ur_event_handle_legacy_t> &EventListToCleanup,
     bool QueueLocked = false);

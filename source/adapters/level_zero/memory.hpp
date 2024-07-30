@@ -50,8 +50,8 @@ ur_result_t enqueueMemCopyHelper(ur_command_t CommandType,
                                  ur_queue_handle_legacy_t Queue, void *Dst,
                                  ur_bool_t BlockingWrite, size_t Size,
                                  const void *Src, uint32_t NumEventsInWaitList,
-                                 const ur_event_handle_t *EventWaitList,
-                                 ur_event_handle_t *OutEvent,
+                                 const ur_event_handle_legacy_t *EventWaitList,
+                                 ur_event_handle_legacy_t *OutEvent,
                                  bool PreferCopyEngine);
 
 ur_result_t enqueueMemCopyRectHelper(
@@ -60,8 +60,8 @@ ur_result_t enqueueMemCopyRectHelper(
     ur_rect_offset_t DstOrigin, ur_rect_region_t Region, size_t SrcRowPitch,
     size_t DstRowPitch, size_t SrcSlicePitch, size_t DstSlicePitch,
     ur_bool_t Blocking, uint32_t NumEventsInWaitList,
-    const ur_event_handle_t *EventWaitList, ur_event_handle_t *OutEvent,
-    bool PreferCopyEngine = false);
+    const ur_event_handle_legacy_t *EventWaitList,
+    ur_event_handle_legacy_t *OutEvent, bool PreferCopyEngine = false);
 
 struct ur_mem_handle_t_ : _ur_object {
   // Keeps the PI context of this memory handle.

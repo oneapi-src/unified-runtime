@@ -121,18 +121,20 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueKernelLaunch(
                         ///< implementation will choose the work-group size.
     uint32_t NumEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t
-        *EventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                        ///< pointer to a list of events that must be complete
-                        ///< before the kernel execution. If nullptr, the
-                        ///< numEventsInWaitList must be 0, indicating that no
-                        ///< wait event.
+        *UrEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                          ///< pointer to a list of events that must be complete
+                          ///< before the kernel execution. If nullptr, the
+                          ///< numEventsInWaitList must be 0, indicating that no
+                          ///< wait event.
     ur_event_handle_t
-        *OutEvent ///< [in,out][optional] return an event object that identifies
-                  ///< this particular kernel execution instance.
+        *UrOutEvent ///< [in,out][optional] return an event object that
+                    ///< identifies this particular kernel execution instance.
 ) {
   UR_ASSERT(WorkDim > 0, UR_RESULT_ERROR_INVALID_WORK_DIMENSION);
   UR_ASSERT(WorkDim < 4, UR_RESULT_ERROR_INVALID_WORK_DIMENSION);
 
+  auto EventWaitList = Legacy(UrEventWaitList);
+  auto OutEvent = Legacy(UrOutEvent);
   auto Queue = this;
   ze_kernel_handle_t ZeKernel{};
   UR_CALL(getZeKernel(Queue, Kernel, &ZeKernel));
@@ -245,9 +247,9 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueKernelLaunch(
       true /* AllowBatching */));
 
   ze_event_handle_t ZeEvent = nullptr;
-  ur_event_handle_t InternalEvent{};
+  ur_event_handle_legacy_t InternalEvent{};
   bool IsInternal = OutEvent == nullptr;
-  ur_event_handle_t *Event = OutEvent ? OutEvent : &InternalEvent;
+  ur_event_handle_legacy_t *Event = OutEvent ? OutEvent : &InternalEvent;
 
   UR_CALL(createEventAndAssociateQueue(Queue, Event, UR_COMMAND_KERNEL_LAUNCH,
                                        CommandList, IsInternal, false));
@@ -330,18 +332,20 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueCooperativeKernelLaunchExp(
                         ///< implementation will choose the work-group size.
     uint32_t NumEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t
-        *EventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                        ///< pointer to a list of events that must be complete
-                        ///< before the kernel execution. If nullptr, the
-                        ///< numEventsInWaitList must be 0, indicating that no
-                        ///< wait event.
+        *UrEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                          ///< pointer to a list of events that must be complete
+                          ///< before the kernel execution. If nullptr, the
+                          ///< numEventsInWaitList must be 0, indicating that no
+                          ///< wait event.
     ur_event_handle_t
-        *OutEvent ///< [in,out][optional] return an event object that identifies
-                  ///< this particular kernel execution instance.
+        *UrOutEvent ///< [in,out][optional] return an event object that
+                    ///< identifies this particular kernel execution instance.
 ) {
   UR_ASSERT(WorkDim > 0, UR_RESULT_ERROR_INVALID_WORK_DIMENSION);
   UR_ASSERT(WorkDim < 4, UR_RESULT_ERROR_INVALID_WORK_DIMENSION);
 
+  auto EventWaitList = Legacy(UrEventWaitList);
+  auto OutEvent = Legacy(UrOutEvent);
   auto Queue = this;
   auto ZeDevice = Queue->Device->ZeDevice;
 
@@ -509,9 +513,9 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueCooperativeKernelLaunchExp(
       true /* AllowBatching */));
 
   ze_event_handle_t ZeEvent = nullptr;
-  ur_event_handle_t InternalEvent{};
+  ur_event_handle_legacy_t InternalEvent{};
   bool IsInternal = OutEvent == nullptr;
-  ur_event_handle_t *Event = OutEvent ? OutEvent : &InternalEvent;
+  ur_event_handle_legacy_t *Event = OutEvent ? OutEvent : &InternalEvent;
 
   UR_CALL(createEventAndAssociateQueue(Queue, Event, UR_COMMAND_KERNEL_LAUNCH,
                                        CommandList, IsInternal, false));
@@ -586,15 +590,17 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueDeviceGlobalVariableWrite(
     const void *Src, ///< [in] pointer to where the data must be copied from.
     uint32_t NumEventsInWaitList, ///< [in] size of the event wait list.
     const ur_event_handle_t
-        *EventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                        ///< pointer to a list of events that must be complete
-                        ///< before the kernel execution. If nullptr, the
-                        ///< numEventsInWaitList must be 0, indicating that no
-                        ///< wait event.
+        *UrEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                          ///< pointer to a list of events that must be complete
+                          ///< before the kernel execution. If nullptr, the
+                          ///< numEventsInWaitList must be 0, indicating that no
+                          ///< wait event.
     ur_event_handle_t
-        *Event ///< [in,out][optional] return an event object that identifies
-               ///< this particular kernel execution instance.
+        *UrEvent ///< [in,out][optional] return an event object that identifies
+                 ///< this particular kernel execution instance.
 ) {
+  auto EventWaitList = Legacy(UrEventWaitList);
+  auto Event = Legacy(UrEvent);
   auto Queue = this;
   std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
 
@@ -635,15 +641,17 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueDeviceGlobalVariableRead(
     void *Dst,         ///< [in] pointer to where the data must be copied to.
     uint32_t NumEventsInWaitList, ///< [in] size of the event wait list.
     const ur_event_handle_t
-        *EventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                        ///< pointer to a list of events that must be
-                        ///< complete before the kernel execution. If
-                        ///< nullptr, the numEventsInWaitList must be 0,
-                        ///< indicating that no wait event.
+        *UrEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                          ///< pointer to a list of events that must be
+                          ///< complete before the kernel execution. If
+                          ///< nullptr, the numEventsInWaitList must be 0,
+                          ///< indicating that no wait event.
     ur_event_handle_t
-        *Event ///< [in,out][optional] return an event object that
-               ///< identifies this particular kernel execution instance.
+        *UrEvent ///< [in,out][optional] return an event object that
+                 ///< identifies this particular kernel execution instance.
 ) {
+  auto EventWaitList = Legacy(UrEventWaitList);
+  auto Event = Legacy(UrEvent);
   auto Queue = this;
 
   std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);

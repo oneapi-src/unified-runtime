@@ -8,6 +8,7 @@
 //
 //===----------------------------------------------------------------------===//
 #include "command_buffer.hpp"
+#include "event.hpp"
 #include "logger/ur_logger.hpp"
 #include "ur_level_zero.hpp"
 
@@ -268,7 +269,7 @@ ur_result_t createSyncPointAndGetZeEvents(
 
   UR_CALL(getEventsFromSyncPoints(CommandBuffer, NumSyncPointsInWaitList,
                                   SyncPointWaitList, ZeEventList));
-  ur_event_handle_t LaunchEvent;
+  ur_event_handle_legacy_t LaunchEvent;
   UR_CALL(EventCreate(CommandBuffer->Context, nullptr, false, HostVisible,
                       &LaunchEvent, false, !CommandBuffer->IsProfilingEnabled));
   LaunchEvent->CommandType = CommandType;
@@ -414,9 +415,9 @@ ur_exp_command_buffer_handle_t_::ur_exp_command_buffer_handle_t_(
     : Context(Context), Device(Device), ZeComputeCommandList(CommandList),
       ZeComputeCommandListTranslated(CommandListTranslated),
       ZeCommandListResetEvents(CommandListResetEvents),
-      ZeCopyCommandList(CopyCommandList), SignalEvent(SignalEvent),
-      WaitEvent(WaitEvent), AllResetEvent(AllResetEvent), ZeFencesMap(),
-      ZeActiveFence(nullptr), SyncPoints(), NextSyncPoint(0),
+      ZeCopyCommandList(CopyCommandList), SignalEvent(Legacy(SignalEvent)),
+      WaitEvent(Legacy(WaitEvent)), AllResetEvent(Legacy(AllResetEvent)),
+      ZeFencesMap(), ZeActiveFence(nullptr), SyncPoints(), NextSyncPoint(0),
       IsUpdatable(Desc ? Desc->isUpdatable : false),
       IsProfilingEnabled(Desc ? Desc->enableProfiling : false),
       IsInOrderCmdList(IsInOrderCmdList) {
@@ -523,7 +524,8 @@ ur_exp_command_buffer_command_handle_t_::
 }
 
 void ur_exp_command_buffer_handle_t_::registerSyncPoint(
-    ur_exp_command_buffer_sync_point_t SyncPoint, ur_event_handle_t Event) {
+    ur_exp_command_buffer_sync_point_t SyncPoint,
+    ur_event_handle_legacy_t Event) {
   SyncPoints[SyncPoint] = Event;
   NextSyncPoint++;
   ZeEventsList.push_back(Event->ZeEvent);
@@ -633,9 +635,9 @@ urCommandBufferCreateExp(ur_context_handle_t Context, ur_device_handle_t Device,
               UR_RESULT_ERROR_UNSUPPORTED_FEATURE);
   }
 
-  ur_event_handle_t SignalEvent;
-  ur_event_handle_t WaitEvent;
-  ur_event_handle_t AllResetEvent;
+  ur_event_handle_legacy_t SignalEvent;
+  ur_event_handle_legacy_t WaitEvent;
+  ur_event_handle_legacy_t AllResetEvent;
 
   UR_CALL(EventCreate(Context, nullptr, false, false, &SignalEvent, false,
                       !EnableProfiling));
@@ -1248,7 +1250,7 @@ ur_result_t getZeCommandQueue(ur_queue_handle_legacy_t Queue,
 ur_result_t waitForDependencies(ur_exp_command_buffer_handle_t CommandBuffer,
                                 ur_queue_handle_legacy_t Queue,
                                 uint32_t NumEventsInWaitList,
-                                const ur_event_handle_t *EventWaitList) {
+                                const ur_event_handle_legacy_t *EventWaitList) {
   const bool UseCopyEngine = false;
   bool MustSignalWaitEvent = true;
   if (NumEventsInWaitList) {
@@ -1299,9 +1301,9 @@ ur_result_t waitForDependencies(ur_exp_command_buffer_handle_t CommandBuffer,
 ur_result_t createUserEvent(ur_exp_command_buffer_handle_t CommandBuffer,
                             ur_queue_handle_legacy_t Queue,
                             ur_command_list_ptr_t SignalCommandList,
-                            ur_event_handle_t &Event) {
+                            ur_event_handle_legacy_t &Event) {
   // Execution event for this enqueue of the UR command-buffer
-  ur_event_handle_t RetEvent{};
+  ur_event_handle_legacy_t RetEvent{};
 
   UR_CALL(createEventAndAssociateQueue(Queue, &RetEvent,
                                        UR_COMMAND_COMMAND_BUFFER_ENQUEUE_EXP,
@@ -1355,7 +1357,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferEnqueueExp(
   CommandBuffer->getFenceForQueue(ZeCommandQueue, ZeFence);
 
   UR_CALL(waitForDependencies(CommandBuffer, Queue, NumEventsInWaitList,
-                              EventWaitList));
+                              Legacy(EventWaitList)));
 
   // Submit reset events command-list. This command-list is of a batch
   // command-list type, regardless of the UR Queue type. We therefore need to
@@ -1385,9 +1387,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferEnqueueExp(
 
   // Create a command-list to signal the Event on completion
   ur_command_list_ptr_t SignalCommandList{};
-  UR_CALL(Queue->Context->getAvailableCommandList(Queue, SignalCommandList,
-                                                  false, NumEventsInWaitList,
-                                                  EventWaitList, false));
+  UR_CALL(Queue->Context->getAvailableCommandList(
+      Queue, SignalCommandList, false, NumEventsInWaitList,
+      Legacy(EventWaitList), false));
 
   // Reset the wait-event for the UR command-buffer that is signaled when its
   // submission dependencies have been satisfied.
@@ -1399,7 +1401,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferEnqueueExp(
              (SignalCommandList->first, CommandBuffer->AllResetEvent->ZeEvent));
 
   if (Event) {
-    UR_CALL(createUserEvent(CommandBuffer, Queue, SignalCommandList, *Event));
+    UR_CALL(createUserEvent(CommandBuffer, Queue, SignalCommandList,
+                            *Legacy(Event)));
   }
 
   UR_CALL(Queue->executeCommandList(SignalCommandList, false, false));

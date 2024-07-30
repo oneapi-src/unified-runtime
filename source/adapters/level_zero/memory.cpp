@@ -49,8 +49,8 @@ ur_result_t enqueueMemCopyHelper(ur_command_t CommandType,
                                  ur_queue_handle_legacy_t Queue, void *Dst,
                                  ur_bool_t BlockingWrite, size_t Size,
                                  const void *Src, uint32_t NumEventsInWaitList,
-                                 const ur_event_handle_t *EventWaitList,
-                                 ur_event_handle_t *OutEvent,
+                                 const ur_event_handle_legacy_t *EventWaitList,
+                                 ur_event_handle_legacy_t *OutEvent,
                                  bool PreferCopyEngine) {
   bool UseCopyEngine = Queue->useCopyEngine(PreferCopyEngine);
 
@@ -68,9 +68,9 @@ ur_result_t enqueueMemCopyHelper(ur_command_t CommandType,
       OkToBatch));
 
   ze_event_handle_t ZeEvent = nullptr;
-  ur_event_handle_t InternalEvent;
+  ur_event_handle_legacy_t InternalEvent;
   bool IsInternal = OutEvent == nullptr;
-  ur_event_handle_t *Event = OutEvent ? OutEvent : &InternalEvent;
+  ur_event_handle_legacy_t *Event = OutEvent ? OutEvent : &InternalEvent;
   UR_CALL(createEventAndAssociateQueue(Queue, Event, CommandType, CommandList,
                                        IsInternal, false));
   UR_CALL(setSignalEvent(Queue, UseCopyEngine, &ZeEvent, Event,
@@ -104,8 +104,8 @@ ur_result_t enqueueMemCopyRectHelper(
     ur_rect_offset_t DstOrigin, ur_rect_region_t Region, size_t SrcRowPitch,
     size_t DstRowPitch, size_t SrcSlicePitch, size_t DstSlicePitch,
     ur_bool_t Blocking, uint32_t NumEventsInWaitList,
-    const ur_event_handle_t *EventWaitList, ur_event_handle_t *OutEvent,
-    bool PreferCopyEngine) {
+    const ur_event_handle_legacy_t *EventWaitList,
+    ur_event_handle_legacy_t *OutEvent, bool PreferCopyEngine) {
   bool UseCopyEngine = Queue->useCopyEngine(PreferCopyEngine);
 
   _ur_ze_event_list_t TmpWaitList;
@@ -122,9 +122,9 @@ ur_result_t enqueueMemCopyRectHelper(
       OkToBatch));
 
   ze_event_handle_t ZeEvent = nullptr;
-  ur_event_handle_t InternalEvent;
+  ur_event_handle_legacy_t InternalEvent;
   bool IsInternal = OutEvent == nullptr;
-  ur_event_handle_t *Event = OutEvent ? OutEvent : &InternalEvent;
+  ur_event_handle_legacy_t *Event = OutEvent ? OutEvent : &InternalEvent;
   UR_CALL(createEventAndAssociateQueue(Queue, Event, CommandType, CommandList,
                                        IsInternal, false));
   UR_CALL(setSignalEvent(Queue, UseCopyEngine, &ZeEvent, Event,
@@ -184,13 +184,12 @@ ur_result_t enqueueMemCopyRectHelper(
 }
 
 // PI interfaces must have queue's and buffer's mutexes locked on entry.
-static ur_result_t enqueueMemFillHelper(ur_command_t CommandType,
-                                        ur_queue_handle_legacy_t Queue,
-                                        void *Ptr, const void *Pattern,
-                                        size_t PatternSize, size_t Size,
-                                        uint32_t NumEventsInWaitList,
-                                        const ur_event_handle_t *EventWaitList,
-                                        ur_event_handle_t *OutEvent) {
+static ur_result_t
+enqueueMemFillHelper(ur_command_t CommandType, ur_queue_handle_legacy_t Queue,
+                     void *Ptr, const void *Pattern, size_t PatternSize,
+                     size_t Size, uint32_t NumEventsInWaitList,
+                     const ur_event_handle_legacy_t *EventWaitList,
+                     ur_event_handle_legacy_t *OutEvent) {
   auto &Device = Queue->Device;
 
   // Make sure that pattern size matches the capability of the copy queues.
@@ -231,9 +230,9 @@ static ur_result_t enqueueMemFillHelper(ur_command_t CommandType,
       OkToBatch));
 
   ze_event_handle_t ZeEvent = nullptr;
-  ur_event_handle_t InternalEvent;
+  ur_event_handle_legacy_t InternalEvent;
   bool IsInternal = OutEvent == nullptr;
-  ur_event_handle_t *Event = OutEvent ? OutEvent : &InternalEvent;
+  ur_event_handle_legacy_t *Event = OutEvent ? OutEvent : &InternalEvent;
   UR_CALL(createEventAndAssociateQueue(Queue, Event, CommandType, CommandList,
                                        IsInternal, false));
   UR_CALL(setSignalEvent(Queue, UseCopyEngine, &ZeEvent, Event,
@@ -330,8 +329,8 @@ static ur_result_t enqueueMemImageCommandHelper(
     ur_bool_t IsBlocking, ur_rect_offset_t *SrcOrigin,
     ur_rect_offset_t *DstOrigin, ur_rect_region_t *Region, size_t RowPitch,
     size_t SlicePitch, uint32_t NumEventsInWaitList,
-    const ur_event_handle_t *EventWaitList, ur_event_handle_t *OutEvent,
-    bool PreferCopyEngine = false) {
+    const ur_event_handle_legacy_t *EventWaitList,
+    ur_event_handle_legacy_t *OutEvent, bool PreferCopyEngine = false) {
   bool UseCopyEngine = Queue->useCopyEngine(PreferCopyEngine);
 
   _ur_ze_event_list_t TmpWaitList;
@@ -348,9 +347,9 @@ static ur_result_t enqueueMemImageCommandHelper(
       OkToBatch));
 
   ze_event_handle_t ZeEvent = nullptr;
-  ur_event_handle_t InternalEvent;
+  ur_event_handle_legacy_t InternalEvent;
   bool IsInternal = OutEvent == nullptr;
-  ur_event_handle_t *Event = OutEvent ? OutEvent : &InternalEvent;
+  ur_event_handle_legacy_t *Event = OutEvent ? OutEvent : &InternalEvent;
   UR_CALL(createEventAndAssociateQueue(Queue, Event, CommandType, CommandList,
                                        IsInternal, false));
   UR_CALL(setSignalEvent(Queue, UseCopyEngine, &ZeEvent, Event,
@@ -469,16 +468,18 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueMemBufferRead(
     void *pDst, ///< [in] pointer to host memory where data is to be read into
     uint32_t numEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t
-        *phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                          ///< pointer to a list of events that must be complete
-                          ///< before this command can be executed. If nullptr,
-                          ///< the numEventsInWaitList must be 0, indicating
-                          ///< that this command does not wait on any event to
-                          ///< complete.
+        *phUrEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                            ///< pointer to a list of events that must be
+                            ///< complete before this command can be executed.
+                            ///< If nullptr, the numEventsInWaitList must be 0,
+                            ///< indicating that this command does not wait on
+                            ///< any event to complete.
     ur_event_handle_t
-        *phEvent ///< [in,out][optional] return an event object that identifies
-                 ///< this particular command instance.
+        *phUrEvent ///< [in,out][optional] return an event object that
+                   ///< identifies this particular command instance.
 ) {
+  auto phEventWaitList = Legacy(phUrEventWaitList);
+  auto phEvent = Legacy(phUrEvent);
   auto Queue = this;
   ur_mem_handle_t_ *Src = ur_cast<ur_mem_handle_t_ *>(hBuffer);
 
@@ -505,16 +506,18 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueMemBufferWrite(
         *pSrc, ///< [in] pointer to host memory where data is to be written from
     uint32_t numEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t
-        *phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                          ///< pointer to a list of events that must be complete
-                          ///< before this command can be executed. If nullptr,
-                          ///< the numEventsInWaitList must be 0, indicating
-                          ///< that this command does not wait on any event to
-                          ///< complete.
+        *phUrEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                            ///< pointer to a list of events that must be
+                            ///< complete before this command can be executed.
+                            ///< If nullptr, the numEventsInWaitList must be 0,
+                            ///< indicating that this command does not wait on
+                            ///< any event to complete.
     ur_event_handle_t
-        *phEvent ///< [in,out][optional] return an event object that identifies
-                 ///< this particular command instance.
+        *phUrEvent ///< [in,out][optional] return an event object that
+                   ///< identifies this particular command instance.
 ) {
+  auto phEventWaitList = Legacy(phUrEventWaitList);
+  auto phEvent = Legacy(phUrEvent);
   auto Queue = this;
   ur_mem_handle_t_ *Buffer = ur_cast<ur_mem_handle_t_ *>(hBuffer);
 
@@ -550,16 +553,18 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueMemBufferReadRect(
     void *pDst, ///< [in] pointer to host memory where data is to be read into
     uint32_t numEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t
-        *phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                          ///< pointer to a list of events that must be complete
-                          ///< before this command can be executed. If nullptr,
-                          ///< the numEventsInWaitList must be 0, indicating
-                          ///< that this command does not wait on any event to
-                          ///< complete.
+        *phUrEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                            ///< pointer to a list of events that must be
+                            ///< complete before this command can be executed.
+                            ///< If nullptr, the numEventsInWaitList must be 0,
+                            ///< indicating that this command does not wait on
+                            ///< any event to complete.
     ur_event_handle_t
-        *phEvent ///< [in,out][optional] return an event object that identifies
-                 ///< this particular command instance.
+        *phUrEvent ///< [in,out][optional] return an event object that
+                   ///< identifies this particular command instance.
 ) {
+  auto phEventWaitList = Legacy(phUrEventWaitList);
+  auto phEvent = Legacy(phUrEvent);
   auto Queue = this;
   ur_mem_handle_t_ *Buffer = ur_cast<ur_mem_handle_t_ *>(hBuffer);
 
@@ -597,16 +602,18 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueMemBufferWriteRect(
         *pSrc, ///< [in] pointer to host memory where data is to be written from
     uint32_t numEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t
-        *phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                          ///< points to a list of events that must be complete
-                          ///< before this command can be executed. If nullptr,
-                          ///< the numEventsInWaitList must be 0, indicating
-                          ///< that this command does not wait on any event to
-                          ///< complete.
+        *phUrEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                            ///< points to a list of events that must be
+                            ///< complete before this command can be executed.
+                            ///< If nullptr, the numEventsInWaitList must be 0,
+                            ///< indicating that this command does not wait on
+                            ///< any event to complete.
     ur_event_handle_t
-        *phEvent ///< [in,out][optional] return an event object that identifies
-                 ///< this particular command instance.
+        *phUrEvent ///< [in,out][optional] return an event object that
+                   ///< identifies this particular command instance.
 ) {
+  auto phEventWaitList = Legacy(phUrEventWaitList);
+  auto phEvent = Legacy(phUrEvent);
   auto Queue = this;
   ur_mem_handle_t_ *Buffer = ur_cast<ur_mem_handle_t_ *>(hBuffer);
 
@@ -632,16 +639,18 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueMemBufferCopy(
     size_t Size,      ///< [in] size in bytes of data being copied
     uint32_t NumEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t
-        *EventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                        ///< pointer to a list of events that must be complete
-                        ///< before this command can be executed. If nullptr,
-                        ///< the numEventsInWaitList must be 0, indicating
-                        ///< that this command does not wait on any event to
-                        ///< complete.
+        *UrEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                          ///< pointer to a list of events that must be complete
+                          ///< before this command can be executed. If nullptr,
+                          ///< the numEventsInWaitList must be 0, indicating
+                          ///< that this command does not wait on any event to
+                          ///< complete.
     ur_event_handle_t
-        *OutEvent ///< [in,out][optional] return an event object that identifies
-                  ///< this particular command instance.
+        *UrOutEvent ///< [in,out][optional] return an event object that
+                    ///< identifies this particular command instance.
 ) {
+  auto EventWaitList = Legacy(UrEventWaitList);
+  auto OutEvent = Legacy(UrOutEvent);
   auto Queue = this;
   _ur_buffer *SrcBuffer = ur_cast<_ur_buffer *>(BufferSrc);
   _ur_buffer *DstBuffer = ur_cast<_ur_buffer *>(BufferDst);
@@ -694,16 +703,18 @@ ur_queue_handle_legacy_t_::enqueueMemBufferCopyRect( ///< [in] handle of the
                           ///< destination buffer object
     uint32_t NumEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t
-        *EventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                        ///< pointer to a list of events that must be complete
-                        ///< before this command can be executed. If nullptr,
-                        ///< the numEventsInWaitList must be 0, indicating
-                        ///< that this command does not wait on any event to
-                        ///< complete.
+        *UrEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                          ///< pointer to a list of events that must be complete
+                          ///< before this command can be executed. If nullptr,
+                          ///< the numEventsInWaitList must be 0, indicating
+                          ///< that this command does not wait on any event to
+                          ///< complete.
     ur_event_handle_t
-        *OutEvent ///< [in,out][optional] return an event object that identifies
-                  ///< this particular command instance.
+        *UrOutEvent ///< [in,out][optional] return an event object that
+                    ///< identifies this particular command instance.
 ) {
+  auto EventWaitList = Legacy(UrEventWaitList);
+  auto OutEvent = Legacy(UrOutEvent);
   auto Queue = this;
   _ur_buffer *SrcBuffer = ur_cast<_ur_buffer *>(BufferSrc);
   _ur_buffer *DstBuffer = ur_cast<_ur_buffer *>(BufferDst);
@@ -743,16 +754,18 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueMemBufferFill(
     size_t Size, ///< [in] fill size in bytes, must be a multiple of patternSize
     uint32_t NumEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t
-        *EventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                        ///< pointer to a list of events that must be complete
-                        ///< before this command can be executed. If nullptr,
-                        ///< the numEventsInWaitList must be 0, indicating
-                        ///< that this command does not wait on any event to
-                        ///< complete.
+        *UrEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                          ///< pointer to a list of events that must be complete
+                          ///< before this command can be executed. If nullptr,
+                          ///< the numEventsInWaitList must be 0, indicating
+                          ///< that this command does not wait on any event to
+                          ///< complete.
     ur_event_handle_t
-        *OutEvent ///< [in,out][optional] return an event object that identifies
-                  ///< this particular command instance.
+        *UrOutEvent ///< [in,out][optional] return an event object that
+                    ///< identifies this particular command instance.
 ) {
+  auto EventWaitList = Legacy(UrEventWaitList);
+  auto OutEvent = Legacy(UrOutEvent);
   auto Queue = this;
   std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Lock(Queue->Mutex,
                                                           Buffer->Mutex);
@@ -780,16 +793,18 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueMemImageRead(
     void *Dst, ///< [in] pointer to host memory where image is to be read into
     uint32_t NumEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t
-        *EventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                        ///< pointer to a list of events that must be complete
-                        ///< before this command can be executed. If nullptr,
-                        ///< the numEventsInWaitList must be 0, indicating
-                        ///< that this command does not wait on any event to
-                        ///< complete.
+        *UrEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                          ///< pointer to a list of events that must be complete
+                          ///< before this command can be executed. If nullptr,
+                          ///< the numEventsInWaitList must be 0, indicating
+                          ///< that this command does not wait on any event to
+                          ///< complete.
     ur_event_handle_t
-        *OutEvent ///< [in,out][optional] return an event object that identifies
-                  ///< this particular command instance.
+        *UrOutEvent ///< [in,out][optional] return an event object that
+                    ///< identifies this particular command instance.
 ) {
+  auto EventWaitList = Legacy(UrEventWaitList);
+  auto OutEvent = Legacy(UrOutEvent);
   auto Queue = this;
   std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Lock(Queue->Mutex,
                                                           Image->Mutex);
@@ -812,16 +827,18 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueMemImageWrite(
     void *Src, ///< [in] pointer to host memory where image is to be read into
     uint32_t NumEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t
-        *EventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                        ///< pointer to a list of events that must be complete
-                        ///< before this command can be executed. If nullptr,
-                        ///< the numEventsInWaitList must be 0, indicating
-                        ///< that this command does not wait on any event to
-                        ///< complete.
+        *UrEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                          ///< pointer to a list of events that must be complete
+                          ///< before this command can be executed. If nullptr,
+                          ///< the numEventsInWaitList must be 0, indicating
+                          ///< that this command does not wait on any event to
+                          ///< complete.
     ur_event_handle_t
-        *OutEvent ///< [in,out][optional] return an event object that identifies
-                  ///< this particular command instance.
+        *UrOutEvent ///< [in,out][optional] return an event object that
+                    ///< identifies this particular command instance.
 ) {
+  auto EventWaitList = Legacy(UrEventWaitList);
+  auto OutEvent = Legacy(UrOutEvent);
   auto Queue = this;
   std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Lock(Queue->Mutex,
                                                           Image->Mutex);
@@ -844,16 +861,18 @@ ur_queue_handle_legacy_t_::enqueueMemImageCopy( ///< [in] handle of
                                 ///< pixels of the 1D, 2D, or 3D image
     uint32_t NumEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t
-        *EventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                        ///< pointer to a list of events that must be complete
-                        ///< before this command can be executed. If nullptr,
-                        ///< the numEventsInWaitList must be 0, indicating
-                        ///< that this command does not wait on any event to
-                        ///< complete.
+        *UrEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                          ///< pointer to a list of events that must be complete
+                          ///< before this command can be executed. If nullptr,
+                          ///< the numEventsInWaitList must be 0, indicating
+                          ///< that this command does not wait on any event to
+                          ///< complete.
     ur_event_handle_t
-        *OutEvent ///< [in,out][optional] return an event object that identifies
-                  ///< this particular command instance.
+        *UrOutEvent ///< [in,out][optional] return an event object that
+                    ///< identifies this particular command instance.
 ) {
+  auto EventWaitList = Legacy(UrEventWaitList);
+  auto OutEvent = Legacy(UrOutEvent);
   auto Queue = this;
   std::shared_lock<ur_shared_mutex> SrcLock(ImageSrc->Mutex, std::defer_lock);
   std::scoped_lock<std::shared_lock<ur_shared_mutex>, ur_shared_mutex,
@@ -880,26 +899,28 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueMemBufferMap(
     size_t Size,   ///< [in] size in bytes of the buffer region being mapped
     uint32_t NumEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t
-        *EventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                        ///< pointer to a list of events that must be complete
-                        ///< before this command can be executed. If nullptr,
-                        ///< the numEventsInWaitList must be 0, indicating
-                        ///< that this command does not wait on any event to
-                        ///< complete.
+        *UrEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                          ///< pointer to a list of events that must be complete
+                          ///< before this command can be executed. If nullptr,
+                          ///< the numEventsInWaitList must be 0, indicating
+                          ///< that this command does not wait on any event to
+                          ///< complete.
     ur_event_handle_t
-        *OutEvent, ///< [in,out][optional] return an event object that
-                   ///< identifies this particular command instance.
-    void **RetMap  ///< [in,out] return mapped pointer.  TODO: move it before
-                   ///< numEventsInWaitList?
+        *UrOutEvent, ///< [in,out][optional] return an event object that
+                     ///< identifies this particular command instance.
+    void **RetMap    ///< [in,out] return mapped pointer.  TODO: move it before
+                     ///< numEventsInWaitList?
 ) {
+  auto EventWaitList = Legacy(UrEventWaitList);
+  auto OutEvent = Legacy(UrOutEvent);
   auto Queue = this;
   auto Buffer = ur_cast<_ur_buffer *>(Buf);
 
   UR_ASSERT(!Buffer->isImage(), UR_RESULT_ERROR_INVALID_MEM_OBJECT);
 
-  ur_event_handle_t InternalEvent;
+  ur_event_handle_legacy_t InternalEvent;
   bool IsInternal = OutEvent == nullptr;
-  ur_event_handle_t *Event = OutEvent ? OutEvent : &InternalEvent;
+  ur_event_handle_legacy_t *Event = OutEvent ? OutEvent : &InternalEvent;
   ze_event_handle_t ZeEvent = nullptr;
 
   bool UseCopyEngine = false;
@@ -951,7 +972,7 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueMemBufferMap(
   if (Buffer->OnHost) {
     // Wait on incoming events before doing the copy
     if (NumEventsInWaitList > 0)
-      UR_CALL(urEventWait(NumEventsInWaitList, EventWaitList));
+      UR_CALL(urEventWait(NumEventsInWaitList, UrEventWaitList));
 
     if (Queue->isInOrderQueue())
       UR_CALL(urQueueFinish(Queue));
@@ -1010,7 +1031,8 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueMemBufferMap(
         Queue, CommandList, UseCopyEngine, NumEventsInWaitList, EventWaitList));
 
     // Add the event to the command list.
-    CommandList->second.append(reinterpret_cast<ur_event_handle_t>(*Event));
+    CommandList->second.append(
+        reinterpret_cast<ur_event_handle_legacy_t>(*Event));
     (*Event)->RefCount.increment();
 
     const auto &ZeCommandList = CommandList->first;
@@ -1045,16 +1067,18 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueMemUnmap(
     void *MappedPtr,     ///< [in] mapped host address
     uint32_t NumEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t
-        *EventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                        ///< pointer to a list of events that must be complete
-                        ///< before this command can be executed. If nullptr,
-                        ///< the numEventsInWaitList must be 0, indicating
-                        ///< that this command does not wait on any event to
-                        ///< complete.
+        *UrEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                          ///< pointer to a list of events that must be complete
+                          ///< before this command can be executed. If nullptr,
+                          ///< the numEventsInWaitList must be 0, indicating
+                          ///< that this command does not wait on any event to
+                          ///< complete.
     ur_event_handle_t
-        *OutEvent ///< [in,out][optional] return an event object that identifies
-                  ///< this particular command instance.
+        *UrOutEvent ///< [in,out][optional] return an event object that
+                    ///< identifies this particular command instance.
 ) {
+  auto EventWaitList = Legacy(UrEventWaitList);
+  auto OutEvent = Legacy(UrOutEvent);
   auto Queue = this;
   UR_ASSERT(!Mem->isImage(), UR_RESULT_ERROR_INVALID_MEM_OBJECT);
 
@@ -1063,9 +1087,9 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueMemUnmap(
   bool UseCopyEngine = false;
 
   ze_event_handle_t ZeEvent = nullptr;
-  ur_event_handle_t InternalEvent;
+  ur_event_handle_legacy_t InternalEvent;
   bool IsInternal = OutEvent == nullptr;
-  ur_event_handle_t *Event = OutEvent ? OutEvent : &InternalEvent;
+  ur_event_handle_legacy_t *Event = OutEvent ? OutEvent : &InternalEvent;
   {
     // Lock automatically releases when this goes out of scope.
     std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
@@ -1107,7 +1131,7 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueMemUnmap(
   if (Buffer->OnHost) {
     // Wait on incoming events before doing the copy
     if (NumEventsInWaitList > 0)
-      UR_CALL(urEventWait(NumEventsInWaitList, EventWaitList));
+      UR_CALL(urEventWait(NumEventsInWaitList, UrEventWaitList));
 
     if (Queue->isInOrderQueue())
       UR_CALL(urQueueFinish(Queue));
@@ -1136,7 +1160,8 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueMemUnmap(
       reinterpret_cast<ur_queue_handle_legacy_t>(Queue), CommandList,
       UseCopyEngine, NumEventsInWaitList, EventWaitList));
 
-  CommandList->second.append(reinterpret_cast<ur_event_handle_t>(*Event));
+  CommandList->second.append(
+      reinterpret_cast<ur_event_handle_legacy_t>(*Event));
   (*Event)->RefCount.increment();
 
   const auto &ZeCommandList = CommandList->first;
@@ -1174,16 +1199,18 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueUSMMemcpy(
     size_t Size,     ///< [in] size in bytes to be copied
     uint32_t NumEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t
-        *EventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                        ///< pointer to a list of events that must be complete
-                        ///< before this command can be executed. If nullptr,
-                        ///< the numEventsInWaitList must be 0, indicating
-                        ///< that this command does not wait on any event to
-                        ///< complete.
+        *UrEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                          ///< pointer to a list of events that must be complete
+                          ///< before this command can be executed. If nullptr,
+                          ///< the numEventsInWaitList must be 0, indicating
+                          ///< that this command does not wait on any event to
+                          ///< complete.
     ur_event_handle_t
-        *OutEvent ///< [in,out][optional] return an event object that identifies
-                  ///< this particular command instance.
+        *UrOutEvent ///< [in,out][optional] return an event object that
+                    ///< identifies this particular command instance.
 ) {
+  auto EventWaitList = Legacy(UrEventWaitList);
+  auto OutEvent = Legacy(UrOutEvent);
   auto Queue = this;
   std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
 
@@ -1206,16 +1233,18 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueUSMPrefetch(
     ur_usm_migration_flags_t Flags, ///< [in] USM prefetch flags
     uint32_t NumEventsInWaitList,   ///< [in] size of the event wait list
     const ur_event_handle_t
-        *EventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                        ///< pointer to a list of events that must be complete
-                        ///< before this command can be executed. If nullptr,
-                        ///< the numEventsInWaitList must be 0, indicating
-                        ///< that this command does not wait on any event to
-                        ///< complete.
+        *UrEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                          ///< pointer to a list of events that must be complete
+                          ///< before this command can be executed. If nullptr,
+                          ///< the numEventsInWaitList must be 0, indicating
+                          ///< that this command does not wait on any event to
+                          ///< complete.
     ur_event_handle_t
-        *OutEvent ///< [in,out][optional] return an event object that identifies
-                  ///< this particular command instance.
+        *UrOutEvent ///< [in,out][optional] return an event object that
+                    ///< identifies this particular command instance.
 ) {
+  auto EventWaitList = Legacy(UrEventWaitList);
+  auto OutEvent = Legacy(UrOutEvent);
   auto Queue = this;
   std::ignore = Flags;
   // Lock automatically releases when this goes out of scope.
@@ -1242,9 +1271,9 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueUSMPrefetch(
 
   // TODO: do we need to create a unique command type for this?
   ze_event_handle_t ZeEvent = nullptr;
-  ur_event_handle_t InternalEvent;
+  ur_event_handle_legacy_t InternalEvent;
   bool IsInternal = OutEvent == nullptr;
-  ur_event_handle_t *Event = OutEvent ? OutEvent : &InternalEvent;
+  ur_event_handle_legacy_t *Event = OutEvent ? OutEvent : &InternalEvent;
   UR_CALL(createEventAndAssociateQueue(Queue, Event, UR_COMMAND_USM_PREFETCH,
                                        CommandList, IsInternal, false));
   ZeEvent = (*Event)->ZeEvent;
@@ -1273,9 +1302,10 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueUSMAdvise(
     size_t Size,                  ///< [in] size in bytes to be advised
     ur_usm_advice_flags_t Advice, ///< [in] USM memory advice
     ur_event_handle_t
-        *OutEvent ///< [in,out][optional] return an event object that identifies
-                  ///< this particular command instance.
+        *UrOutEvent ///< [in,out][optional] return an event object that
+                    ///< identifies this particular command instance.
 ) {
+  auto OutEvent = Legacy(UrOutEvent);
   auto Queue = this;
   // Lock automatically releases when this goes out of scope.
   std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
@@ -1298,9 +1328,9 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueUSMAdvise(
 
   // TODO: do we need to create a unique command type for this?
   ze_event_handle_t ZeEvent = nullptr;
-  ur_event_handle_t InternalEvent{};
+  ur_event_handle_legacy_t InternalEvent{};
   bool IsInternal = OutEvent == nullptr;
-  ur_event_handle_t *Event = OutEvent ? OutEvent : &InternalEvent;
+  ur_event_handle_legacy_t *Event = OutEvent ? OutEvent : &InternalEvent;
   UR_CALL(createEventAndAssociateQueue(Queue, Event, UR_COMMAND_USM_ADVISE,
                                        CommandList, IsInternal, false));
   ZeEvent = (*Event)->ZeEvent;
@@ -1371,15 +1401,17 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueUSMMemcpy2D(
     size_t Height,   ///< [in] the height of columns to be copied.
     uint32_t NumEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t
-        *EventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                        ///< pointer to a list of events that must be complete
-                        ///< before the kernel execution. If nullptr, the
-                        ///< numEventsInWaitList must be 0, indicating that no
-                        ///< wait event.
+        *UrEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                          ///< pointer to a list of events that must be complete
+                          ///< before the kernel execution. If nullptr, the
+                          ///< numEventsInWaitList must be 0, indicating that no
+                          ///< wait event.
     ur_event_handle_t
-        *Event ///< [in,out][optional] return an event object that identifies
-               ///< this particular kernel execution instance.
+        *UrEvent ///< [in,out][optional] return an event object that identifies
+                 ///< this particular kernel execution instance.
 ) {
+  auto EventWaitList = Legacy(UrEventWaitList);
+  auto Event = Legacy(UrEvent);
   auto Queue = this;
   ur_rect_offset_t ZeroOffset{0, 0, 0};
   ur_rect_region_t Region{Width, Height, 0};
@@ -2285,15 +2317,18 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueUSMFill(
     size_t Size, ///< [in] size in bytes to be set. Must be a multiple of
                  ///< patternSize.
     uint32_t NumEventsInWaitList, ///< [in] size of the event wait list
-    const ur_event_handle_t *
-        EventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
-                       ///< pointer to a list of events that must be complete
-                       ///< before this command can be executed. If nullptr, the
-                       ///< numEventsInWaitList must be 0, indicating that this
-                       ///< command does not wait on any event to complete.
-    ur_event_handle_t *Event ///< [out][optional] return an event object that
-                             ///< identifies this particular command instance.
+    const ur_event_handle_t
+        *UrEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                          ///< pointer to a list of events that must be complete
+                          ///< before this command can be executed. If nullptr,
+                          ///< the numEventsInWaitList must be 0, indicating
+                          ///< that this command does not wait on any event to
+                          ///< complete.
+    ur_event_handle_t *UrEvent ///< [out][optional] return an event object that
+                               ///< identifies this particular command instance.
 ) {
+  auto EventWaitList = Legacy(UrEventWaitList);
+  auto Event = Legacy(UrEvent);
   auto Queue = this;
   std::scoped_lock<ur_shared_mutex> Lock(Queue->Mutex);
 
