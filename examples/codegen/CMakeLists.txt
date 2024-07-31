@@ -3,7 +3,7 @@
 # See LICENSE.TXT
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-set(TARGET_NAME codegen)
+Project(codegen)
 find_package(LLVM CONFIG)
 find_package(PkgConfig)
 
@@ -18,17 +18,17 @@ if(LLVM_FOUND AND PkgConfig_FOUND AND LLVMSPIRVLib_FOUND)
     llvm_map_components_to_libnames(llvm_libs support core irreader bitwriter)
 
     
-    add_ur_executable(${TARGET_NAME}
+    add_ur_executable(${PROJECT_NAME}
         ${CMAKE_CURRENT_SOURCE_DIR}/codegen.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/helpers.cpp
     )
 
-    target_include_directories(${TARGET_NAME} 
+    target_include_directories(${PROJECT_NAME} 
                                     PRIVATE 
                                     ${LLVM_INCLUDE_DIRS}
                                     ${CMAKE_CURRENT_SOURCE_DIR}/help)
-    target_compile_definitions(${TARGET_NAME} PRIVATE ${LLVM_DEFINITIONS})
-    target_link_libraries(${TARGET_NAME}
+    target_compile_definitions(${PROJECT_NAME} PRIVATE ${LLVM_DEFINITIONS})
+    target_link_libraries(${PROJECT_NAME}
             PRIVATE
             ${CMAKE_DL_LIBS}
             ${PROJECT_NAME}::headers
@@ -39,7 +39,7 @@ if(LLVM_FOUND AND PkgConfig_FOUND AND LLVMSPIRVLib_FOUND)
     # TODO: Depend on building adapters.
 
     if(MSVC)
-        set_target_properties(${TARGET_NAME}
+        set_target_properties(${PROJECT_NAME}
             PROPERTIES
                 VS_DEBUGGER_COMMAND_ARGUMENTS ""
                 VS_DEBUGGER_WORKING_DIRECTORY "$(OutDir)"
