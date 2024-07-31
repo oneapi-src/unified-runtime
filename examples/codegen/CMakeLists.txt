@@ -4,8 +4,8 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 set(TARGET_NAME codegen)
-find_package(LLVM CONFIG)
-find_package(PkgConfig)
+find_package(LLVM CONFIG REQUIRED)
+find_package(PkgConfig REQUIRED)
 
 set(TRANSLATOR_FOUND "FALSE")
 if(${PkgConfig_FOUND})
@@ -33,10 +33,14 @@ if(LLVM_FOUND AND PkgConfig_FOUND AND LLVMSPIRVLib_FOUND)
             ${CMAKE_DL_LIBS}
             ${PROJECT_NAME}::headers
             ${PROJECT_NAME}::loader
+            ${llvm_libs}
             LLVM
             PkgConfig::LLVMSPIRVLib
     )
     # TODO: Depend on building adapters.
+    set_target_properties(${TARGET_NAME} PROPERTIES LINK_SEARCH_START_STATIC ON)
+    set_target_properties(${TARGET_NAME} PROPERTIES LINK_SEARCH_END_STATIC ON)
+    
 
     if(MSVC)
         set_target_properties(${TARGET_NAME}
