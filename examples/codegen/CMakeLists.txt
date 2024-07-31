@@ -17,7 +17,7 @@ if(LLVM_FOUND AND PkgConfig_FOUND AND LLVMSPIRVLib_FOUND)
     message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
     llvm_map_components_to_libnames(llvm_libs support core irreader bitwriter)
 
-    add_library(${TARGET_NAME} helpers.cpp)
+    
     add_ur_executable(${TARGET_NAME}
         ${CMAKE_CURRENT_SOURCE_DIR}/codegen.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/helpers.cpp
@@ -26,7 +26,7 @@ if(LLVM_FOUND AND PkgConfig_FOUND AND LLVMSPIRVLib_FOUND)
     target_include_directories(${TARGET_NAME} 
                                     PUBLIC 
                                     ${LLVM_INCLUDE_DIRS}
-                                    ${PROJECT_SOURCE_DIR}/helpers.h)
+                                    ${CMAKE_CURRENT_SOURCE_DIR}/help)
     target_compile_definitions(${TARGET_NAME} PRIVATE ${LLVM_DEFINITIONS})
     target_link_libraries(${TARGET_NAME}
             PRIVATE
