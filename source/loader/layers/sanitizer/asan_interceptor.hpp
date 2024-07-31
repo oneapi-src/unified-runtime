@@ -41,6 +41,7 @@ struct DeviceInfo {
     uptr ShadowOffset = 0;
     uptr ShadowOffsetEnd = 0;
 
+    // lock this mutex if following fields are accessed
     ur_mutex Mutex;
     std::queue<std::shared_ptr<AllocInfo>> Quarantine;
     size_t QuarantineSize = 0;
@@ -63,6 +64,7 @@ struct DeviceInfo {
 struct QueueInfo {
     ur_queue_handle_t Handle;
 
+    // lock this mutex if following fields are accessed
     ur_shared_mutex Mutex;
     ur_event_handle_t LastEvent;
 
@@ -82,8 +84,10 @@ struct QueueInfo {
 
 struct KernelInfo {
     ur_kernel_handle_t Handle;
-    ur_shared_mutex Mutex;
     std::atomic<int32_t> RefCount = 1;
+
+    // lock this mutex if following fields are accessed
+    ur_shared_mutex Mutex;
     std::unordered_map<uint32_t, std::shared_ptr<MemBuffer>> BufferArgs;
 
     // Need preserve the order of local arguments
@@ -104,6 +108,7 @@ struct KernelInfo {
 
 struct ContextInfo {
     ur_context_handle_t Handle;
+    std::atomic<int32_t> RefCount = 1;
 
     std::vector<ur_device_handle_t> DeviceList;
     std::unordered_map<ur_device_handle_t, AllocInfoList> AllocInfosMap;
@@ -114,11 +119,7 @@ struct ContextInfo {
         assert(Result == UR_RESULT_SUCCESS);
     }
 
-    ~ContextInfo() {
-        [[maybe_unused]] auto Result =
-            getContext()->urDdiTable.Context.pfnRelease(Handle);
-        assert(Result == UR_RESULT_SUCCESS);
-    }
+    ~ContextInfo();
 
     void insertAllocInfo(const std::vector<ur_device_handle_t> &Devices,
                          std::shared_ptr<AllocInfo> &AI) {
@@ -202,6 +203,9 @@ class SanitizerInterceptor {
     std::shared_ptr<MemBuffer> getMemBuffer(ur_mem_handle_t MemHandle);
 
     std::optional<AllocationIterator> findAllocInfoByAddress(uptr Address);
+
+    std::vector<AllocationIterator>
+    findAllocInfoByContext(ur_context_handle_t Context);
 
     std::shared_ptr<ContextInfo> getContextInfo(ur_context_handle_t Context) {
         std::shared_lock<ur_shared_mutex> Guard(m_ContextMapMutex);
