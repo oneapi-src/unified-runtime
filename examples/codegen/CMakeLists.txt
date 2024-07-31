@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 set(TARGET_NAME codegen)
-set(BUILD_SHARED_LIBS OFF)
 find_package(LLVM CONFIG)
 find_package(PkgConfig)
 
@@ -18,21 +17,25 @@ if(LLVM_FOUND AND PkgConfig_FOUND AND LLVMSPIRVLib_FOUND)
     message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
     llvm_map_components_to_libnames(llvm_libs support core irreader bitwriter)
 
+    add_library(${TARGET_NAME} helpers.cpp)
     add_ur_executable(${TARGET_NAME}
         ${CMAKE_CURRENT_SOURCE_DIR}/codegen.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/helpers.cpp
     )
 
-    target_include_directories(${TARGET_NAME} PRIVATE ${LLVM_INCLUDE_DIRS})
+    target_include_directories(${TARGET_NAME} 
+                                    PUBLIC 
+                                    ${LLVM_INCLUDE_DIRS}
+                                    ${PROJECT_SOURCE_DIR}/helpers.h)
     target_compile_definitions(${TARGET_NAME} PRIVATE ${LLVM_DEFINITIONS})
     target_link_libraries(${TARGET_NAME}
-
+            PRIVATE
             ${CMAKE_DL_LIBS}
             ${PROJECT_NAME}::headers
             ${PROJECT_NAME}::loader
             LLVM
             PkgConfig::LLVMSPIRVLib
-    -static)
+    )
     # TODO: Depend on building adapters.
 
     if(MSVC)
