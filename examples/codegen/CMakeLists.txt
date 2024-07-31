@@ -24,7 +24,7 @@ if(LLVM_FOUND AND PkgConfig_FOUND AND LLVMSPIRVLib_FOUND)
     )
 
     target_include_directories(${TARGET_NAME} 
-                                    PUBLIC 
+                                    PRIVATE 
                                     ${LLVM_INCLUDE_DIRS}
                                     ${CMAKE_CURRENT_SOURCE_DIR}/help)
     target_compile_definitions(${TARGET_NAME} PRIVATE ${LLVM_DEFINITIONS})
