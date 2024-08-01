@@ -1235,8 +1235,7 @@ namespace {
  * @param[out] ZeCommandQueue The L0 command queue.
  * @return UR_RESULT_SUCCESS or an error code on failure
  */
-ur_result_t getZeCommandQueue(ur_queue_handle_legacy_t Queue,
-                              bool UseCopyEngine,
+ur_result_t getZeCommandQueue(ur_queue_handle_t Queue, bool UseCopyEngine,
                               ze_command_queue_handle_t &ZeCommandQueue) {
   auto &QGroup = Queue->getQueueGroup(UseCopyEngine);
   uint32_t QueueGroupOrdinal;
@@ -1253,7 +1252,7 @@ ur_result_t getZeCommandQueue(ur_queue_handle_legacy_t Queue,
  * @return UR_RESULT_SUCCESS or an error code on failure
  */
 ur_result_t waitForDependencies(ur_exp_command_buffer_handle_t CommandBuffer,
-                                ur_queue_handle_legacy_t Queue,
+                                ur_queue_handle_t Queue,
                                 uint32_t NumEventsInWaitList,
                                 const ur_event_handle_t *EventWaitList) {
   const bool UseCopyEngine = false;
@@ -1304,7 +1303,7 @@ ur_result_t waitForDependencies(ur_exp_command_buffer_handle_t CommandBuffer,
  * @return UR_RESULT_SUCCESS or an error code on failure
  */
 ur_result_t createUserEvent(ur_exp_command_buffer_handle_t CommandBuffer,
-                            ur_queue_handle_legacy_t Queue,
+                            ur_queue_handle_t Queue,
                             ur_command_list_ptr_t SignalCommandList,
                             ur_event_handle_t &Event) {
   // Execution event for this enqueue of the UR command-buffer
@@ -1349,10 +1348,9 @@ ur_result_t createUserEvent(ur_exp_command_buffer_handle_t CommandBuffer,
 } // namespace
 
 UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferEnqueueExp(
-    ur_exp_command_buffer_handle_t CommandBuffer, ur_queue_handle_t UrQueue,
+    ur_exp_command_buffer_handle_t CommandBuffer, ur_queue_handle_t Queue,
     uint32_t NumEventsInWaitList, const ur_event_handle_t *EventWaitList,
     ur_event_handle_t *Event) {
-  auto Queue = Legacy(UrQueue);
   std::scoped_lock<ur_shared_mutex> Lock(Queue->Mutex);
 
   ze_command_queue_handle_t ZeCommandQueue;
