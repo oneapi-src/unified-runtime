@@ -7,7 +7,7 @@ set(TARGET_NAME codegen)
 find_package(LLVM CONFIG)
 find_package(PkgConfig)
 
-add_library(hello_library STATIC src/helpers.cpp)
+add_library(hello_library STATIC helpers.cpp)
 
 set(TRANSLATOR_FOUND "FALSE")
 if(${PkgConfig_FOUND})
@@ -21,17 +21,16 @@ if(LLVM_FOUND AND PkgConfig_FOUND AND LLVMSPIRVLib_FOUND)
 
 
     add_ur_executable(${TARGET_NAME}
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/codegen.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/helpers.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/codegen.cpp
+        # ${CMAKE_CURRENT_SOURCE_DIR}/helpers.cpp
     )
 
     target_include_directories(${TARGET_NAME} 
                                     PUBLIC 
                                     ${LLVM_INCLUDE_DIRS}
-                                    ${CMAKE_CURRENT_SOURCE_DIR}/include)
+                                    ${CMAKE_CURRENT_SOURCE_DIR}/static)
     target_compile_definitions(${TARGET_NAME} PUBLIC ${LLVM_DEFINITIONS})
 
-    add_executable(hello_binary src/codegen.cpp)
 
     target_link_libraries(${TARGET_NAME}
             PUBLIC
