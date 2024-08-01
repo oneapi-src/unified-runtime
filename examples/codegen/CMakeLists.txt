@@ -7,7 +7,7 @@ set(TARGET_NAME codegen)
 find_package(LLVM CONFIG)
 find_package(PkgConfig)
 
-add_library(hello_library STATIC helpers.cpp)
+add_library(hello_library STATIC ${CMAKE_CURRENT_SOURCE_DIR}/helpers.cpp)
 
 set(TRANSLATOR_FOUND "FALSE")
 if(${PkgConfig_FOUND})
