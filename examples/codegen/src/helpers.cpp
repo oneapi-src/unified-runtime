@@ -7,7 +7,7 @@
  * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
  */
 
-#include "helpers.h"
+#include "../include/static/helpers.h"
 
 #include "llvm/IR/Function.h"
 #include "llvm/IR/IRBuilder.h"

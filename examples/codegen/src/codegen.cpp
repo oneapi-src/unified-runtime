@@ -17,7 +17,7 @@
 #include <iostream>
 #include <vector>
 
-#include "helpers.h"
+#include "../include/static/helpers.h"
 #include "ur_api.h"
 
 constexpr unsigned PAGE_SIZE = 4096;

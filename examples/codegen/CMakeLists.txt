@@ -7,6 +7,8 @@ set(TARGET_NAME codegen)
 find_package(LLVM CONFIG)
 find_package(PkgConfig)
 
+add_library(hello_library STATIC src/helpers.cpp)
+
 set(TRANSLATOR_FOUND "FALSE")
 if(${PkgConfig_FOUND})
     pkg_check_modules(LLVMSPIRVLib IMPORTED_TARGET LLVMSPIRVLib)
@@ -17,17 +19,20 @@ if(LLVM_FOUND AND PkgConfig_FOUND AND LLVMSPIRVLib_FOUND)
     message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
     llvm_map_components_to_libnames(llvm_libs support core irreader bitwriter)
 
-    add_library(test_12 static ${CMAKE_CURRENT_SOURCE_DIR}/helpers.cpp)
+
     add_ur_executable(${TARGET_NAME}
-        ${CMAKE_CURRENT_SOURCE_DIR}/codegen.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/helpers.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/codegen.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/helpers.cpp
     )
 
     target_include_directories(${TARGET_NAME} 
                                     PUBLIC 
                                     ${LLVM_INCLUDE_DIRS}
-                                    ${CMAKE_CURRENT_SOURCE_DIR}/help)
+                                    ${CMAKE_CURRENT_SOURCE_DIR}/include)
     target_compile_definitions(${TARGET_NAME} PUBLIC ${LLVM_DEFINITIONS})
+
+    add_executable(hello_binary src/codegen.cpp)
+
     target_link_libraries(${TARGET_NAME}
             PUBLIC
             ${CMAKE_DL_LIBS}
@@ -35,7 +40,7 @@ if(LLVM_FOUND AND PkgConfig_FOUND AND LLVMSPIRVLib_FOUND)
             ${PROJECT_NAME}::loader
             LLVM
             PkgConfig::LLVMSPIRVLib
-            test_12
+            hello_library
     )
     # TODO: Depend on building adapters.
 
