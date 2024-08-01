@@ -28,7 +28,7 @@ if(LLVM_FOUND AND PkgConfig_FOUND AND LLVMSPIRVLib_FOUND)
     target_include_directories(${TARGET_NAME} 
                                     PUBLIC 
                                     ${LLVM_INCLUDE_DIRS}
-                                    ${CMAKE_CURRENT_SOURCE_DIR}/static)
+                                    ${CMAKE_CURRENT_SOURCE_DIR})
     target_compile_definitions(${TARGET_NAME} PUBLIC ${LLVM_DEFINITIONS})
 
 
