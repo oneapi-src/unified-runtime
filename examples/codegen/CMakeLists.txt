@@ -4,8 +4,8 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 set(TARGET_NAME codegen)
-find_package(LLVM CONFIG)
-find_package(PkgConfig)
+find_package(LLVM CONFIG REQUIRED)
+find_package(PkgConfig REQUIRED)
 
 add_library(hello_library STATIC ${CMAKE_CURRENT_SOURCE_DIR}/helpers.cpp)
 
@@ -22,7 +22,7 @@ if(LLVM_FOUND AND PkgConfig_FOUND AND LLVMSPIRVLib_FOUND)
 
     add_ur_executable(${TARGET_NAME}
         ${CMAKE_CURRENT_SOURCE_DIR}/codegen.cpp
-        # ${CMAKE_CURRENT_SOURCE_DIR}/helpers.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/helpers.cpp
     )
 
     target_include_directories(${TARGET_NAME} 
