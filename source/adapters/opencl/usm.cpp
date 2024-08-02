@@ -115,9 +115,11 @@ urUSMHostAlloc(ur_context_handle_t hContext, const ur_usm_desc_t *pUSMDesc,
 
   *ppMem = Ptr;
 
-  assert((Alignment == 0 ||
-          reinterpret_cast<std::uintptr_t>(*ppMem) % Alignment == 0) &&
-         "Allocation not aligned correctly!");
+  if (!(Alignment == 0 ||
+        reinterpret_cast<std::uintptr_t>(*ppMem) % Alignment == 0)) {
+    urUSMFree(hContext, Ptr);
+    return UR_RESULT_ERROR_INVALID_VALUE;
+  }
 
   return UR_RESULT_SUCCESS;
 }
@@ -158,9 +160,11 @@ urUSMDeviceAlloc(ur_context_handle_t hContext, ur_device_handle_t hDevice,
 
   *ppMem = Ptr;
 
-  assert((Alignment == 0 ||
-          reinterpret_cast<std::uintptr_t>(*ppMem) % Alignment == 0) &&
-         "Allocation not aligned correctly!");
+  if (!(Alignment == 0 ||
+        reinterpret_cast<std::uintptr_t>(*ppMem) % Alignment == 0)) {
+    urUSMFree(hContext, Ptr);
+    return UR_RESULT_ERROR_INVALID_VALUE;
+  }
 
   return UR_RESULT_SUCCESS;
 }
@@ -201,9 +205,11 @@ urUSMSharedAlloc(ur_context_handle_t hContext, ur_device_handle_t hDevice,
 
   *ppMem = Ptr;
 
-  assert((Alignment == 0 ||
-          reinterpret_cast<std::uintptr_t>(*ppMem) % Alignment == 0) &&
-         "Allocation not aligned correctly!");
+  if (!(Alignment == 0 ||
+        reinterpret_cast<std::uintptr_t>(*ppMem) % Alignment == 0)) {
+    urUSMFree(hContext, Ptr);
+    return UR_RESULT_ERROR_INVALID_VALUE;
+  }
   return UR_RESULT_SUCCESS;
 }
 
