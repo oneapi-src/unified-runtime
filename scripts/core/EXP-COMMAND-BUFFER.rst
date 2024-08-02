@@ -144,8 +144,8 @@ were obtained from.
     // sync-point
     ${x}CommandBufferAppendKernelLaunchExp(hCommandBuffer, hKernel, workDim,
                                            pGlobalWorkOffset, pGlobalWorkSize,
-                                           pLocalWorkSize, 1, &syncPoint,
-                                           nullptr, nullptr);
+                                           pLocalWorkSize, 0, nullptr, 1,
+                                           &syncPoint, nullptr, nullptr);
 
 Enqueueing Command-Buffers
 --------------------------------------------------------------------------------
@@ -191,7 +191,7 @@ parameters to the kernel and the execution ND-Range.
     ${x}_exp_command_buffer_command_handle_t hCommand;
     ${x}CommandBufferAppendKernelLaunchExp(hCommandBuffer, hKernel, workDim,
                                            pGlobalWorkOffset, pGlobalWorkSize,
-                                           pLocalWorkSize, 0, nullptr,
+                                           pLocalWorkSize, 0, nullptr, 0, nullptr,
                                            nullptr, &hCommand);
 
     // Close the command-buffer before updating
@@ -220,6 +220,7 @@ parameters to the kernel and the execution ND-Range.
     ${x}_exp_command_buffer_update_kernel_launch_desc_t update {
         UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_KERNEL_LAUNCH_DESC, // stype
         nullptr, // pNext
+        hKernel  //hNewKernel
         2, // numNewMemobjArgs
         0, // numNewPointerArgs
         0, // numNewValueArgs

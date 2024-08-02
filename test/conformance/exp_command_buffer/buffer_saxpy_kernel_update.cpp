@@ -83,7 +83,8 @@ struct BufferSaxpyKernelTest
         // Append kernel command to command-buffer and close command-buffer
         ASSERT_SUCCESS(urCommandBufferAppendKernelLaunchExp(
             updatable_cmd_buf_handle, kernel, n_dimensions, &global_offset,
-            &global_size, &local_size, 0, nullptr, nullptr, &command_handle));
+            &global_size, &local_size, 0, nullptr, 0, nullptr, nullptr,
+            &command_handle));
         ASSERT_NE(command_handle, nullptr);
 
         ASSERT_SUCCESS(urCommandBufferFinalizeExp(updatable_cmd_buf_handle));
@@ -183,6 +184,7 @@ TEST_P(BufferSaxpyKernelTest, UpdateParameters) {
     ur_exp_command_buffer_update_kernel_launch_desc_t update_desc = {
         UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_KERNEL_LAUNCH_DESC, // stype
         nullptr,                                                        // pNext
+        kernel,          //hNewKernel
         2,               // numNewMemObjArgs
         0,               // numNewPointerArgs
         1,               // numNewValueArgs

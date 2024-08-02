@@ -7541,6 +7541,13 @@ ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
     const size_t *
         pLocalWorkSize, ///< [in][optional] Local work size to use when executing kernel.
     uint32_t
+        numKernelAlternatives, ///< [in] The number of kernel alternatives provided in
+                               ///< pKernelAlternatives.
+    ur_kernel_handle_t *
+        phKernelAlternatives, ///< [in][optional][range(0, numKernelAlternatives)] List of kernels
+    ///< handles that might be used to update the kernel in this
+    ///< command after the command-buffer is finalized.
+    uint32_t
         numSyncPointsInWaitList, ///< [in] The number of sync points in the provided dependency list.
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
@@ -7557,10 +7564,10 @@ ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
         return UR_RESULT_ERROR_UNINITIALIZED;
     }
 
-    return pfnAppendKernelLaunchExp(hCommandBuffer, hKernel, workDim,
-                                    pGlobalWorkOffset, pGlobalWorkSize,
-                                    pLocalWorkSize, numSyncPointsInWaitList,
-                                    pSyncPointWaitList, pSyncPoint, phCommand);
+    return pfnAppendKernelLaunchExp(
+        hCommandBuffer, hKernel, workDim, pGlobalWorkOffset, pGlobalWorkSize,
+        pLocalWorkSize, numKernelAlternatives, phKernelAlternatives,
+        numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint, phCommand);
 } catch (...) {
     return exceptionToResult(std::current_exception());
 }
@@ -8292,6 +8299,7 @@ ur_result_t UR_APICALL urCommandBufferReleaseCommandExp(
 ///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hCommand`
+///         + `NULL == pUpdateKernelLaunch->hNewKernel`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `NULL == pUpdateKernelLaunch`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
@@ -8299,10 +8307,10 @@ ur_result_t UR_APICALL urCommandBufferReleaseCommandExp(
 ///     - ::UR_RESULT_ERROR_INVALID_OPERATION
 ///         + If ::ur_exp_command_buffer_desc_t::isUpdatable was not set to true on creation of the command buffer `hCommand` belongs to.
 ///         + If the command-buffer `hCommand` belongs to has not been finalized.
-///         + If `pUpdateKernellaunch->newWorkDim` is non-zero and different from the work-dim used on creation of `hCommand`.
-///         + If `pUpdateKernellaunch->newWorkDim` is non-zero and `pUpdateKernelLaunch->pNewLocalWorkSize` is set to a non-NULL value and `pUpdateKernelLaunch->pNewGlobalWorkSize` is NULL.
-///         + If `pUpdateKernellaunch->newWorkDim` is non-zero and `pUpdateKernelLaunch->pNewLocalWorkSize` is set to a non-NULL value when `hCommand` was created with a NULL local work size.
-///         + If `pUpdateKernellaunch->newWorkDim` is non-zero and `pUpdateKernelLaunch->pNewLocalWorkSize` is set to a NULL value when `hCommand` was created with a non-NULL local work size.
+///         + If `pUpdateKernellaunch->newWorkDim` is non-zero, and `pUpdateKernelLaunch->pNewLocalWorkSize` is set to a non-NULL value, and `pUpdateKernelLaunch->pNewGlobalWorkSize` is NULL.
+///         + If `pUpdateKernellaunch->hNewKernel` is equal to the current kernel associated with `hCommand`, and `pUpdateKernellaunch->newWorkDim` is non-zero and different from the work-dim currently associated with `hCommand`.
+///         + If `pUpdateKernellaunch->hNewKernel` is equal to the current kernel associated with `hCommand`, and `pUpdateKernellaunch->newWorkDim` is non-zero, and `pUpdateKernelLaunch->pNewLocalWorkSize` is set to a non-NULL value while `hCommand` is currently associated with a NULL local work size.
+///         + If `pUpdateKernellaunch->hNewKernel` is equal to the current kernel associated with `hCommand`, and `pUpdateKernellaunch->newWorkDim` is non-zero, and `pUpdateKernelLaunch->pNewLocalWorkSize` is set to a NULL value while `hCommand` is currently associated with a non-NULL local work size.
 ///     - ::UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_COMMAND_HANDLE_EXP
 ///     - ::UR_RESULT_ERROR_INVALID_MEM_OBJECT
 ///     - ::UR_RESULT_ERROR_INVALID_KERNEL_ARGUMENT_INDEX
