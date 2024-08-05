@@ -360,3 +360,4 @@ Contributors
 * Ewan Crawford `ewan@codeplay.com <ewan@codeplay.com>`_
 * Maxime France-Pillois `maxime.francepillois@codeplay.com <maxime.francepillois@codeplay.com>`_
 * Aaron Greig `aaron.greig@codeplay.com <aaron.greig@codeplay.com>`_
+* Fábio Mestre `fabio.mestre@codeplay.com <fabio.mestre@codeplay.com>`_
