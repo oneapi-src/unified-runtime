@@ -38,7 +38,7 @@ if (UR_STATIC_ADAPTER_L0)
     if (UMF_BUILD_SHARED_LIBRARY)
         message(STATUS "Static adapter is not compatible with shared UMF, switching to fully statically linked UMF")
         set(UMF_BUILD_SHARED_LIBRARY OFF)
-        set(UMF_LINK_HWLOC_STATICALLY ON)
+        set(UMF_DISABLE_HWLOC ON)
     endif()
 endif()
 
