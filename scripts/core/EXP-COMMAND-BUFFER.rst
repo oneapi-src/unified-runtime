@@ -144,8 +144,8 @@ were obtained from.
     // sync-point
     ${x}CommandBufferAppendKernelLaunchExp(hCommandBuffer, hKernel, workDim,
                                            pGlobalWorkOffset, pGlobalWorkSize,
-                                           pLocalWorkSize, 1, &syncPoint,
-                                           nullptr, nullptr);
+                                           pLocalWorkSize, 0, nullptr, 1,
+                                           &syncPoint, nullptr, nullptr);
 
 Enqueueing Command-Buffers
 --------------------------------------------------------------------------------
@@ -173,7 +173,14 @@ ${X}_DEVICE_INFO_COMMAND_BUFFER_UPDATE_SUPPORT_EXP query.
 Updating kernel commands is done by passing the new kernel configuration
 to ${x}CommandBufferUpdateKernelLaunchExp along with the command handle of
 the kernel command to update. Configurations that can be changed are the
-parameters to the kernel and the execution ND-Range.
+kernel handle, the parameters to the kernel and the execution ND-Range.
+
+To update the kernel handle, it is necessary to first register the new
+kernel handle before the command-buffer is finalized. This can be done
+using the ``phKernelAlternatives`` parameter of
+${x}CommandBufferUpdateKernelLaunchExp. The command-buffer can then
+be updated to use the new kernel handle by passing it to
+${x}CommandBufferUpdateKernelLaunchExp.
 
 .. parsed-literal::
 
@@ -187,12 +194,14 @@ parameters to the kernel and the execution ND-Range.
     ${x}CommandBufferCreateExp(hContext, hDevice, &desc, &hCommandBuffer);
 
     // Append a kernel command which has two buffer parameters, an input
-    // and an output.
+    // and an output. Register hNewKernel as an alternative kernel handle
+    // which can later be used to change the kernel handle associated
+    // with this command.
     ${x}_exp_command_buffer_command_handle_t hCommand;
     ${x}CommandBufferAppendKernelLaunchExp(hCommandBuffer, hKernel, workDim,
                                            pGlobalWorkOffset, pGlobalWorkSize,
-                                           pLocalWorkSize, 0, nullptr,
-                                           nullptr, &hCommand);
+                                           pLocalWorkSize, 1, &hNewKernel,
+                                           0, nullptr, nullptr, &hCommand);
 
     // Close the command-buffer before updating
     ${x}CommandBufferFinalizeExp(hCommandBuffer);
@@ -220,6 +229,7 @@ parameters to the kernel and the execution ND-Range.
     ${x}_exp_command_buffer_update_kernel_launch_desc_t update {
         UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_KERNEL_LAUNCH_DESC, // stype
         nullptr, // pNext
+        hNewKernel  // hNewKernel
         2, // numNewMemobjArgs
         0, // numNewPointerArgs
         0, // numNewValueArgs
@@ -340,6 +350,8 @@ Changelog
 +-----------+-------------------------------------------------------+
 | 1.4       | Add function definitions for kernel command update    |
 +-----------+-------------------------------------------------------+
+| 1.5       | Add support for updating kernel handles.              |
++-----------+-------------------------------------------------------+
 
 Contributors
 --------------------------------------------------------------------------------
@@ -348,3 +360,4 @@ Contributors
 * Ewan Crawford `ewan@codeplay.com <ewan@codeplay.com>`_
 * Maxime France-Pillois `maxime.francepillois@codeplay.com <maxime.francepillois@codeplay.com>`_
 * Aaron Greig `aaron.greig@codeplay.com <aaron.greig@codeplay.com>`_
+* Fábio Mestre `fabio.mestre@codeplay.com <fabio.mestre@codeplay.com>`_

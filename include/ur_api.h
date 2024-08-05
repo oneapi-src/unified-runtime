@@ -8245,6 +8245,9 @@ typedef struct ur_exp_command_buffer_update_kernel_launch_desc_t {
     ur_structure_type_t stype;                                                 ///< [in] type of this structure, must be
                                                                                ///< ::UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_KERNEL_LAUNCH_DESC
     const void *pNext;                                                         ///< [in][optional] pointer to extension-specific structure
+    ur_kernel_handle_t hNewKernel;                                             ///< [in] The new kernel handle. If this value is equal to the current
+                                                                               ///< kernel handle associated
+                                                                               ///< with the command, then only the arguments to the kernel will be updated.
     uint32_t numNewMemObjArgs;                                                 ///< [in] Length of pNewMemObjArgList.
     uint32_t numNewPointerArgs;                                                ///< [in] Length of pNewPointerArgList.
     uint32_t numNewValueArgs;                                                  ///< [in] Length of pNewValueArgList.
@@ -8400,6 +8403,11 @@ urCommandBufferAppendKernelLaunchExp(
     const size_t *pGlobalWorkOffset,                              ///< [in] Offset to use when executing kernel.
     const size_t *pGlobalWorkSize,                                ///< [in] Global work size to use when executing kernel.
     const size_t *pLocalWorkSize,                                 ///< [in][optional] Local work size to use when executing kernel.
+    uint32_t numKernelAlternatives,                               ///< [in] The number of kernel alternatives provided in
+                                                                  ///< pKernelAlternatives.
+    ur_kernel_handle_t *phKernelAlternatives,                     ///< [in][optional][range(0, numKernelAlternatives)] List of kernels
+                                                                  ///< handles that might be used to update the kernel in this
+                                                                  ///< command after the command-buffer is finalized.
     uint32_t numSyncPointsInWaitList,                             ///< [in] The number of sync points in the provided dependency list.
     const ur_exp_command_buffer_sync_point_t *pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                                                                   ///< be ignored if command-buffer is in-order.
@@ -8907,6 +8915,7 @@ urCommandBufferReleaseCommandExp(
 ///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hCommand`
+///         + `NULL == pUpdateKernelLaunch->hNewKernel`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `NULL == pUpdateKernelLaunch`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
@@ -8914,10 +8923,10 @@ urCommandBufferReleaseCommandExp(
 ///     - ::UR_RESULT_ERROR_INVALID_OPERATION
 ///         + If ::ur_exp_command_buffer_desc_t::isUpdatable was not set to true on creation of the command buffer `hCommand` belongs to.
 ///         + If the command-buffer `hCommand` belongs to has not been finalized.
-///         + If `pUpdateKernellaunch->newWorkDim` is non-zero and different from the work-dim used on creation of `hCommand`.
-///         + If `pUpdateKernellaunch->newWorkDim` is non-zero and `pUpdateKernelLaunch->pNewLocalWorkSize` is set to a non-NULL value and `pUpdateKernelLaunch->pNewGlobalWorkSize` is NULL.
-///         + If `pUpdateKernellaunch->newWorkDim` is non-zero and `pUpdateKernelLaunch->pNewLocalWorkSize` is set to a non-NULL value when `hCommand` was created with a NULL local work size.
-///         + If `pUpdateKernellaunch->newWorkDim` is non-zero and `pUpdateKernelLaunch->pNewLocalWorkSize` is set to a NULL value when `hCommand` was created with a non-NULL local work size.
+///         + If `pUpdateKernellaunch->newWorkDim` is non-zero, and `pUpdateKernelLaunch->pNewLocalWorkSize` is set to a non-NULL value, and `pUpdateKernelLaunch->pNewGlobalWorkSize` is NULL.
+///         + If `pUpdateKernellaunch->hNewKernel` is equal to the current kernel associated with `hCommand`, and `pUpdateKernellaunch->newWorkDim` is non-zero and different from the work-dim currently associated with `hCommand`.
+///         + If `pUpdateKernellaunch->hNewKernel` is equal to the current kernel associated with `hCommand`, and `pUpdateKernellaunch->newWorkDim` is non-zero, and `pUpdateKernelLaunch->pNewLocalWorkSize` is set to a non-NULL value while `hCommand` is currently associated with a NULL local work size.
+///         + If `pUpdateKernellaunch->hNewKernel` is equal to the current kernel associated with `hCommand`, and `pUpdateKernellaunch->newWorkDim` is non-zero, and `pUpdateKernelLaunch->pNewLocalWorkSize` is set to a NULL value while `hCommand` is currently associated with a non-NULL local work size.
 ///     - ::UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_COMMAND_HANDLE_EXP
 ///     - ::UR_RESULT_ERROR_INVALID_MEM_OBJECT
 ///     - ::UR_RESULT_ERROR_INVALID_KERNEL_ARGUMENT_INDEX
@@ -11514,6 +11523,8 @@ typedef struct ur_command_buffer_append_kernel_launch_exp_params_t {
     const size_t **ppGlobalWorkOffset;
     const size_t **ppGlobalWorkSize;
     const size_t **ppLocalWorkSize;
+    uint32_t *pnumKernelAlternatives;
+    ur_kernel_handle_t **pphKernelAlternatives;
     uint32_t *pnumSyncPointsInWaitList;
     const ur_exp_command_buffer_sync_point_t **ppSyncPointWaitList;
     ur_exp_command_buffer_sync_point_t **ppSyncPoint;

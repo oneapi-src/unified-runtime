@@ -8349,6 +8349,13 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
     const size_t *
         pLocalWorkSize, ///< [in][optional] Local work size to use when executing kernel.
     uint32_t
+        numKernelAlternatives, ///< [in] The number of kernel alternatives provided in
+                               ///< pKernelAlternatives.
+    ur_kernel_handle_t *
+        phKernelAlternatives, ///< [in][optional][range(0, numKernelAlternatives)] List of kernels
+    ///< handles that might be used to update the kernel in this
+    ///< command after the command-buffer is finalized.
+    uint32_t
         numSyncPointsInWaitList, ///< [in] The number of sync points in the provided dependency list.
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
@@ -8367,6 +8374,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
         &pGlobalWorkOffset,
         &pGlobalWorkSize,
         &pLocalWorkSize,
+        &numKernelAlternatives,
+        &phKernelAlternatives,
         &numSyncPointsInWaitList,
         &pSyncPointWaitList,
         &pSyncPoint,

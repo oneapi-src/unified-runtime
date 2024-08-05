@@ -36,7 +36,8 @@ struct InvalidUpdateTest
         // Append kernel command to command-buffer
         ASSERT_SUCCESS(urCommandBufferAppendKernelLaunchExp(
             updatable_cmd_buf_handle, kernel, n_dimensions, &global_offset,
-            &global_size, &local_size, 0, nullptr, nullptr, &command_handle));
+            &global_size, &local_size, 0, nullptr, 0, nullptr, nullptr,
+            &command_handle));
         ASSERT_NE(command_handle, nullptr);
     }
 
@@ -89,6 +90,7 @@ TEST_P(InvalidUpdateTest, NotFinalizedCommandBuffer) {
     ur_exp_command_buffer_update_kernel_launch_desc_t update_desc = {
         UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_KERNEL_LAUNCH_DESC, // stype
         nullptr,                                                        // pNext
+        kernel,          //hNewKernel
         0,               // numNewMemObjArgs
         0,               // numNewPointerArgs
         1,               // numNewValueArgs
@@ -119,7 +121,7 @@ TEST_P(InvalidUpdateTest, NotUpdatableCommandBuffer) {
     ur_exp_command_buffer_command_handle_t test_command_handle = nullptr;
     EXPECT_SUCCESS(urCommandBufferAppendKernelLaunchExp(
         test_cmd_buf_handle, kernel, n_dimensions, &global_offset, &global_size,
-        &local_size, 0, nullptr, nullptr, &test_command_handle));
+        &local_size, 0, nullptr, 0, nullptr, nullptr, &test_command_handle));
     EXPECT_NE(test_command_handle, nullptr);
 
     EXPECT_SUCCESS(urCommandBufferFinalizeExp(test_cmd_buf_handle));
@@ -139,6 +141,7 @@ TEST_P(InvalidUpdateTest, NotUpdatableCommandBuffer) {
     ur_exp_command_buffer_update_kernel_launch_desc_t update_desc = {
         UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_KERNEL_LAUNCH_DESC, // stype
         nullptr,                                                        // pNext
+        kernel,          //hNewKernel
         0,               // numNewMemObjArgs
         0,               // numNewPointerArgs
         1,               // numNewValueArgs
@@ -175,6 +178,7 @@ TEST_P(InvalidUpdateTest, GlobalLocalSizeMistach) {
     ur_exp_command_buffer_update_kernel_launch_desc_t update_desc = {
         UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_KERNEL_LAUNCH_DESC, // stype
         nullptr,                                                        // pNext
+        kernel,          //hNewKernel
         0,               // numNewMemObjArgs
         0,               // numNewPointerArgs
         0,               // numNewValueArgs
@@ -200,7 +204,8 @@ TEST_P(InvalidUpdateTest, ImplToUserDefinedLocalSize) {
     ur_exp_command_buffer_command_handle_t second_command_handle = nullptr;
     ASSERT_SUCCESS(urCommandBufferAppendKernelLaunchExp(
         updatable_cmd_buf_handle, kernel, n_dimensions, &global_offset,
-        &global_size, nullptr, 0, nullptr, nullptr, &second_command_handle));
+        &global_size, nullptr, 0, nullptr, 0, nullptr, nullptr,
+        &second_command_handle));
     ASSERT_NE(second_command_handle, nullptr);
 
     EXPECT_SUCCESS(urCommandBufferFinalizeExp(updatable_cmd_buf_handle));
@@ -211,6 +216,7 @@ TEST_P(InvalidUpdateTest, ImplToUserDefinedLocalSize) {
     ur_exp_command_buffer_update_kernel_launch_desc_t update_desc = {
         UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_KERNEL_LAUNCH_DESC, // stype
         nullptr,                                                        // pNext
+        kernel,           //hNewKernel
         0,                // numNewMemObjArgs
         0,                // numNewPointerArgs
         0,                // numNewValueArgs
@@ -243,6 +249,7 @@ TEST_P(InvalidUpdateTest, UserToImplDefinedLocalSize) {
     ur_exp_command_buffer_update_kernel_launch_desc_t update_desc = {
         UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_KERNEL_LAUNCH_DESC, // stype
         nullptr,                                                        // pNext
+        kernel,           //hNewKernel
         0,                // numNewMemObjArgs
         0,                // numNewPointerArgs
         0,                // numNewValueArgs

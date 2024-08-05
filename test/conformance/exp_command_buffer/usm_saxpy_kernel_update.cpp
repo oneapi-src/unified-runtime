@@ -81,7 +81,8 @@ struct USMSaxpyKernelTest : USMSaxpyKernelTestBase {
         // Append kernel command to command-buffer and close command-buffer
         ASSERT_SUCCESS(urCommandBufferAppendKernelLaunchExp(
             updatable_cmd_buf_handle, kernel, n_dimensions, &global_offset,
-            &global_size, &local_size, 0, nullptr, nullptr, &command_handle));
+            &global_size, &local_size, 0, nullptr, 0, nullptr, nullptr,
+            &command_handle));
         ASSERT_NE(command_handle, nullptr);
 
         ASSERT_SUCCESS(urCommandBufferFinalizeExp(updatable_cmd_buf_handle));
@@ -147,6 +148,7 @@ TEST_P(USMSaxpyKernelTest, UpdateParameters) {
     ur_exp_command_buffer_update_kernel_launch_desc_t update_desc = {
         UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_KERNEL_LAUNCH_DESC, // stype
         nullptr,                                                        // pNext
+        kernel,          //hNewKernel
         0,               // numNewMemObjArgs
         2,               // numNewPointerArgs
         1,               // numNewValueArgs
@@ -181,7 +183,7 @@ struct USMMultiSaxpyKernelTest : USMSaxpyKernelTestBase {
         for (unsigned node = 0; node < nodes; node++) {
             ASSERT_SUCCESS(urCommandBufferAppendKernelLaunchExp(
                 updatable_cmd_buf_handle, kernel, n_dimensions, &global_offset,
-                &global_size, &local_size, 0, nullptr, nullptr,
+                &global_size, &local_size, 0, nullptr, 0, nullptr, nullptr,
                 &command_handles[node]));
             ASSERT_NE(command_handles[node], nullptr);
         }
@@ -252,6 +254,7 @@ TEST_P(USMMultiSaxpyKernelTest, UpdateParameters) {
     ur_exp_command_buffer_update_kernel_launch_desc_t update_desc = {
         UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_KERNEL_LAUNCH_DESC, // stype
         nullptr,                                                        // pNext
+        kernel,          //hNewKernel
         0,               // numNewMemObjArgs
         2,               // numNewPointerArgs
         1,               // numNewValueArgs
@@ -317,6 +320,7 @@ TEST_P(USMMultiSaxpyKernelTest, UpdateWithoutBlocking) {
     ur_exp_command_buffer_update_kernel_launch_desc_t update_desc = {
         UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_KERNEL_LAUNCH_DESC, // stype
         nullptr,                                                        // pNext
+        kernel,          //hNewKernel
         0,               // numNewMemObjArgs
         2,               // numNewPointerArgs
         1,               // numNewValueArgs
