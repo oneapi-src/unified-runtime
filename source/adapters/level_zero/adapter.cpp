@@ -240,7 +240,8 @@ ur_result_t adapterStateTeardown() {
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urAdapterGet(
+namespace ur::level_zero {
+ur_result_t urAdapterGet(
     uint32_t NumEntries, ///< [in] the number of platforms to be added to
                          ///< phAdapters. If phAdapters is not NULL, then
                          ///< NumEntries should be greater than zero, otherwise
@@ -281,7 +282,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urAdapterGet(
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urAdapterRelease(ur_adapter_handle_t) {
+ur_result_t urAdapterRelease(ur_adapter_handle_t) {
   // Check first if the Adapter pointer is valid
   if (GlobalAdapter) {
     std::lock_guard<std::mutex> Lock{GlobalAdapter->Mutex};
@@ -293,7 +294,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urAdapterRelease(ur_adapter_handle_t) {
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urAdapterRetain(ur_adapter_handle_t) {
+ur_result_t urAdapterRetain(ur_adapter_handle_t) {
   if (GlobalAdapter) {
     std::lock_guard<std::mutex> Lock{GlobalAdapter->Mutex};
     GlobalAdapter->RefCount++;
@@ -302,7 +303,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urAdapterRetain(ur_adapter_handle_t) {
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urAdapterGetLastError(
+ur_result_t urAdapterGetLastError(
     ur_adapter_handle_t,  ///< [in] handle of the platform instance
     const char **Message, ///< [out] pointer to a C string where the adapter
                           ///< specific error message will be stored.
@@ -315,11 +316,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urAdapterGetLastError(
   return ErrorMessageCode;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urAdapterGetInfo(ur_adapter_handle_t,
-                                                     ur_adapter_info_t PropName,
-                                                     size_t PropSize,
-                                                     void *PropValue,
-                                                     size_t *PropSizeRet) {
+ur_result_t urAdapterGetInfo(ur_adapter_handle_t, ur_adapter_info_t PropName,
+                             size_t PropSize, void *PropValue,
+                             size_t *PropSizeRet) {
   UrReturnHelper ReturnValue(PropSize, PropValue, PropSizeRet);
 
   switch (PropName) {
@@ -333,3 +332,4 @@ UR_APIEXPORT ur_result_t UR_APICALL urAdapterGetInfo(ur_adapter_handle_t,
 
   return UR_RESULT_SUCCESS;
 }
+} // namespace ur::level_zero
