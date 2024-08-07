@@ -1140,13 +1140,9 @@ ur_device_handle_t_::useImmediateCommandLists() {
     return std::atoi(ImmediateCommandlistsSettingStr);
   }();
 
-  if (ImmediateCommandlistsSetting == -1)
-  // Change this to PerQueue as default after more testing.
-#ifdef _WIN32
-    return NotUsed;
-#else
-    return isPVC() ? PerQueue : NotUsed;
-#endif
+  if (ImmediateCommandlistsSetting == -1) {
+    return (isPVC() || isDG2()) ? PerQueue : NotUsed;
+  }
   switch (ImmediateCommandlistsSetting) {
   case 0:
     return NotUsed;
