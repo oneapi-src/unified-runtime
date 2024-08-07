@@ -314,7 +314,7 @@ params:
       desc: "[in][optional] Local work size to use when executing kernel."
     - type: uint32_t
       name: "numKernelAlternatives"
-      desc: "[in] The number of kernel alternatives provided in pKernelAlternatives."
+      desc: "[in] The number of kernel alternatives provided in phKernelAlternatives."
     - type: $x_kernel_handle_t*
       name: "phKernelAlternatives"
       desc: |
