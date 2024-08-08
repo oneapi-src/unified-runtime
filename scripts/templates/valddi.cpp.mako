@@ -57,8 +57,16 @@ namespace ur_validation_layer
         {
             %for key, values in sorted_param_checks:
             %for val in values:
-            if( ${val} )
+            %if 'boundsError' in val:
+            if ( getContext()->enableBoundsChecking ) {
+                if ( ${val} ) {
+                    return ${key};
+                }
+            }
+            %else:
+            if ( ${val} )
                 return ${key};
+            %endif
 
             %endfor
             %endfor
