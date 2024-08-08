@@ -147,9 +147,10 @@ struct ur_context_handle_t_ : _ur_object {
   // head.
   //
   // Cache of event pools to which host-visible events are added to.
-  std::vector<std::list<ze_event_pool_handle_t>> ZeEventPoolCache{12};
+  std::vector<std::list<ze_event_pool_handle_t>> ZeEventPoolCache{
+      ZeEventPoolCacheTypeCount * 2};
   std::vector<std::unordered_map<ze_device_handle_t, size_t>>
-      ZeEventPoolCacheDeviceMap{12};
+      ZeEventPoolCacheDeviceMap{ZeEventPoolCacheTypeCount * 2};
 
   // This map will be used to determine if a pool is full or not
   // by storing number of empty slots available in the pool.
@@ -171,9 +172,9 @@ struct ur_context_handle_t_ : _ur_object {
 
   // Caches for events.
   using EventCache = std::vector<std::list<ur_event_handle_t>>;
-  EventCache EventCaches{4};
+  EventCache EventCaches{EventCacheTypeCount};
   std::vector<std::unordered_map<ur_device_handle_t, size_t>>
-      EventCachesDeviceMap{4};
+      EventCachesDeviceMap{EventCacheTypeCount};
 
   // Initialize the PI context.
   ur_result_t initialize();
@@ -208,25 +209,37 @@ struct ur_context_handle_t_ : _ur_object {
   ur_event_handle_t getEventFromContextCache(bool HostVisible,
                                              bool WithProfiling,
                                              ur_device_handle_t Device,
-                                             bool CounterBasedEventEnabled);
+                                             bool CounterBasedEventEnabled,
+                                             bool UsingImmCmdList);
 
   // Add ur_event_handle_t to cache.
   void addEventToContextCache(ur_event_handle_t);
 
-  enum EventPoolCacheType {
+  enum ZeEventPoolCacheType {
     HostVisibleCacheType,
     HostInvisibleCacheType,
     HostVisibleCounterBasedRegularCacheType,
     HostInvisibleCounterBasedRegularCacheType,
     HostVisibleCounterBasedImmediateCacheType,
-    HostInvisibleCounterBasedImmediateCacheType
+    HostInvisibleCounterBasedImmediateCacheType,
+    ZeEventPoolCacheTypeCount
+  };
+
+  enum EventCacheType {
+    HostVisibleProfilingCacheType,
+    HostVisibleRegularCacheType,
+    HostInvisibleProfilingCacheType,
+    HostInvisibleRegularCacheType,
+    CounterBasedImmediateCacheType,
+    CounterBasedRegularCacheType,
+    EventCacheTypeCount
   };
 
   std::list<ze_event_pool_handle_t> *
   getZeEventPoolCache(bool HostVisible, bool WithProfiling,
                       bool CounterBasedEventEnabled, bool UsingImmediateCmdList,
                       ze_device_handle_t ZeDevice) {
-    EventPoolCacheType CacheType;
+    ZeEventPoolCacheType CacheType;
 
     calculateCacheIndex(HostVisible, CounterBasedEventEnabled,
                         UsingImmediateCmdList, CacheType);
@@ -249,7 +262,7 @@ struct ur_context_handle_t_ : _ur_object {
   ur_result_t calculateCacheIndex(bool HostVisible,
                                   bool CounterBasedEventEnabled,
                                   bool UsingImmediateCmdList,
-                                  EventPoolCacheType &CacheType) {
+                                  ZeEventPoolCacheType &CacheType) {
     if (CounterBasedEventEnabled && HostVisible && !UsingImmediateCmdList) {
       CacheType = HostVisibleCounterBasedRegularCacheType;
     } else if (CounterBasedEventEnabled && !HostVisible &&
@@ -310,7 +323,8 @@ private:
     if (HostVisible) {
       if (Device) {
         auto EventCachesMap =
-            WithProfiling ? &EventCachesDeviceMap[0] : &EventCachesDeviceMap[1];
+            WithProfiling ? &EventCachesDeviceMap[HostVisibleProfilingCacheType]
+                          : &EventCachesDeviceMap[HostVisibleRegularCacheType];
         if (EventCachesMap->find(Device) == EventCachesMap->end()) {
           EventCaches.emplace_back();
           EventCachesMap->insert(
@@ -318,12 +332,15 @@ private:
         }
         return &EventCaches[(*EventCachesMap)[Device]];
       } else {
-        return WithProfiling ? &EventCaches[0] : &EventCaches[1];
+        return WithProfiling ? &EventCaches[HostVisibleProfilingCacheType]
+                             : &EventCaches[HostVisibleRegularCacheType];
       }
     } else {
       if (Device) {
         auto EventCachesMap =
-            WithProfiling ? &EventCachesDeviceMap[2] : &EventCachesDeviceMap[3];
+            WithProfiling
+                ? &EventCachesDeviceMap[HostInvisibleProfilingCacheType]
+                : &EventCachesDeviceMap[HostInvisibleRegularCacheType];
         if (EventCachesMap->find(Device) == EventCachesMap->end()) {
           EventCaches.emplace_back();
           EventCachesMap->insert(
@@ -331,13 +348,44 @@ private:
         }
         return &EventCaches[(*EventCachesMap)[Device]];
       } else {
-        return WithProfiling ? &EventCaches[2] : &EventCaches[3];
+        return WithProfiling ? &EventCaches[HostInvisibleProfilingCacheType]
+                             : &EventCaches[HostInvisibleRegularCacheType];
+      }
+    }
+  };
+  auto getCounterBasedEventCache(bool UsingImmediateCmdList,
+                                 ur_device_handle_t Device) {
+    if (UsingImmediateCmdList) {
+      if (Device) {
+        auto EventCachesMap =
+            &EventCachesDeviceMap[CounterBasedImmediateCacheType];
+        if (EventCachesMap->find(Device) == EventCachesMap->end()) {
+          EventCaches.emplace_back();
+          EventCachesMap->insert(
+              std::make_pair(Device, EventCaches.size() - 1));
+        }
+        return &EventCaches[(*EventCachesMap)[Device]];
+      } else {
+        return &EventCaches[CounterBasedImmediateCacheType];
+      }
+    } else {
+      if (Device) {
+        auto EventCachesMap =
+            &EventCachesDeviceMap[CounterBasedRegularCacheType];
+        if (EventCachesMap->find(Device) == EventCachesMap->end()) {
+          EventCaches.emplace_back();
+          EventCachesMap->insert(
+              std::make_pair(Device, EventCaches.size() - 1));
+        }
+        return &EventCaches[(*EventCachesMap)[Device]];
+      } else {
+        return &EventCaches[CounterBasedRegularCacheType];
       }
     }
   }
 };
 
-// Helper function to release the context, a caller must lock the platform-level
-// mutex guarding the container with contexts because the context can be removed
-// from the list of tracked contexts.
+// Helper function to release the context, a caller must lock the
+// platform-level mutex guarding the container with contexts because the
+// context can be removed from the list of tracked contexts.
 ur_result_t ContextReleaseHelper(ur_context_handle_t Context);
