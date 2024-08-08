@@ -175,11 +175,11 @@ to ${x}CommandBufferUpdateKernelLaunchExp along with the command handle of
 the kernel command to update. Configurations that can be changed are the
 kernel handle, the parameters to the kernel and the execution ND-Range.
 
-To update the kernel handle, it is necessary to first register the new
-kernel handle before the command-buffer is finalized. This can be done
+Kernel handles that might be used to update the kernel of a command, need
+to be registered when the command is created. This can be done
 using the ``phKernelAlternatives`` parameter of
-${x}CommandBufferUpdateKernelLaunchExp. The command-buffer can then
-be updated to use the new kernel handle by passing it to
+${x}CommandBufferAppendKernelLaunchExp. The command can then be updated
+to use the new kernel handle by passing it to
 ${x}CommandBufferUpdateKernelLaunchExp.
 
 .. parsed-literal::
