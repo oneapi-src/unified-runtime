@@ -917,6 +917,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     const int CmdBufDriverMinVersion = 50530202; // ROCM 5.5.1
     return ReturnValue(DriverVersion >= CmdBufDriverMinVersion);
   }
+  case UR_DEVICE_INFO_COMMAND_BUFFER_EVENT_SUPPORT_EXP:
+    return ReturnValue(false);
   default:
     break;
   }
