@@ -35,7 +35,7 @@ struct NDRangeUpdateTest
         ASSERT_SUCCESS(urCommandBufferAppendKernelLaunchExp(
             updatable_cmd_buf_handle, kernel, n_dimensions,
             global_offset.data(), global_size.data(), local_size.data(), 0,
-            nullptr, nullptr, &command_handle));
+            nullptr, 0, nullptr, nullptr, nullptr, &command_handle));
         ASSERT_NE(command_handle, nullptr);
 
         ASSERT_SUCCESS(urCommandBufferFinalizeExp(updatable_cmd_buf_handle));

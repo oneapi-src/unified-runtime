@@ -949,13 +949,15 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
   case UR_DEVICE_INFO_COMMAND_BUFFER_SUPPORT_EXP:
     return ReturnValue(true);
   case UR_DEVICE_INFO_COMMAND_BUFFER_UPDATE_SUPPORT_EXP: {
-    // Update support requires being able to update kernel arguments and all
-    // aspects of the kernel NDRange.
+    // Update support requires being able to update kernel arguments, all
+    // aspects of the kernel NDRange, as well as signal & wait events.
     const ze_mutable_command_exp_flags_t UpdateMask =
         ZE_MUTABLE_COMMAND_EXP_FLAG_KERNEL_ARGUMENTS |
         ZE_MUTABLE_COMMAND_EXP_FLAG_GROUP_COUNT |
         ZE_MUTABLE_COMMAND_EXP_FLAG_GROUP_SIZE |
-        ZE_MUTABLE_COMMAND_EXP_FLAG_GLOBAL_OFFSET;
+        ZE_MUTABLE_COMMAND_EXP_FLAG_GLOBAL_OFFSET |
+        ZE_MUTABLE_COMMAND_EXP_FLAG_SIGNAL_EVENT |
+        ZE_MUTABLE_COMMAND_EXP_FLAG_WAIT_EVENTS;
 
     const bool KernelArgUpdateSupport =
         (Device->ZeDeviceMutableCmdListsProperties->mutableCommandFlags &
@@ -963,6 +965,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(
     return ReturnValue(KernelArgUpdateSupport &&
                        Device->Platform->ZeMutableCmdListExt.Supported);
   }
+  case UR_DEVICE_INFO_COMMAND_BUFFER_EVENT_SUPPORT_EXP:
+    return ReturnValue(false);
   case UR_DEVICE_INFO_BINDLESS_IMAGES_SUPPORT_EXP: {
     // On L0 bindless images are supported.
     return ReturnValue(true);

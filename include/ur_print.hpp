@@ -711,9 +711,6 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_function_t value) {
     case UR_FUNCTION_COMMAND_BUFFER_APPEND_KERNEL_LAUNCH_EXP:
         os << "UR_FUNCTION_COMMAND_BUFFER_APPEND_KERNEL_LAUNCH_EXP";
         break;
-    case UR_FUNCTION_COMMAND_BUFFER_ENQUEUE_EXP:
-        os << "UR_FUNCTION_COMMAND_BUFFER_ENQUEUE_EXP";
-        break;
     case UR_FUNCTION_USM_PITCHED_ALLOC_EXP:
         os << "UR_FUNCTION_USM_PITCHED_ALLOC_EXP";
         break;
@@ -858,39 +855,6 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_function_t value) {
     case UR_FUNCTION_LOADER_TEAR_DOWN:
         os << "UR_FUNCTION_LOADER_TEAR_DOWN";
         break;
-    case UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_MEMCPY_EXP:
-        os << "UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_MEMCPY_EXP";
-        break;
-    case UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_FILL_EXP:
-        os << "UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_FILL_EXP";
-        break;
-    case UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_COPY_EXP:
-        os << "UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_COPY_EXP";
-        break;
-    case UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_WRITE_EXP:
-        os << "UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_WRITE_EXP";
-        break;
-    case UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_READ_EXP:
-        os << "UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_READ_EXP";
-        break;
-    case UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_COPY_RECT_EXP:
-        os << "UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_COPY_RECT_EXP";
-        break;
-    case UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_WRITE_RECT_EXP:
-        os << "UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_WRITE_RECT_EXP";
-        break;
-    case UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_READ_RECT_EXP:
-        os << "UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_READ_RECT_EXP";
-        break;
-    case UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_FILL_EXP:
-        os << "UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_FILL_EXP";
-        break;
-    case UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_PREFETCH_EXP:
-        os << "UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_PREFETCH_EXP";
-        break;
-    case UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_ADVISE_EXP:
-        os << "UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_ADVISE_EXP";
-        break;
     case UR_FUNCTION_ENQUEUE_COOPERATIVE_KERNEL_LAUNCH_EXP:
         os << "UR_FUNCTION_ENQUEUE_COOPERATIVE_KERNEL_LAUNCH_EXP";
         break;
@@ -941,6 +905,48 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_function_t value) {
         break;
     case UR_FUNCTION_BINDLESS_IMAGES_RELEASE_EXTERNAL_MEMORY_EXP:
         os << "UR_FUNCTION_BINDLESS_IMAGES_RELEASE_EXTERNAL_MEMORY_EXP";
+        break;
+    case UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_MEMCPY_EXP:
+        os << "UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_MEMCPY_EXP";
+        break;
+    case UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_FILL_EXP:
+        os << "UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_FILL_EXP";
+        break;
+    case UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_COPY_EXP:
+        os << "UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_COPY_EXP";
+        break;
+    case UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_WRITE_EXP:
+        os << "UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_WRITE_EXP";
+        break;
+    case UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_READ_EXP:
+        os << "UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_READ_EXP";
+        break;
+    case UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_COPY_RECT_EXP:
+        os << "UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_COPY_RECT_EXP";
+        break;
+    case UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_WRITE_RECT_EXP:
+        os << "UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_WRITE_RECT_EXP";
+        break;
+    case UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_READ_RECT_EXP:
+        os << "UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_READ_RECT_EXP";
+        break;
+    case UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_FILL_EXP:
+        os << "UR_FUNCTION_COMMAND_BUFFER_APPEND_MEM_BUFFER_FILL_EXP";
+        break;
+    case UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_PREFETCH_EXP:
+        os << "UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_PREFETCH_EXP";
+        break;
+    case UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_ADVISE_EXP:
+        os << "UR_FUNCTION_COMMAND_BUFFER_APPEND_USM_ADVISE_EXP";
+        break;
+    case UR_FUNCTION_COMMAND_BUFFER_ENQUEUE_EXP:
+        os << "UR_FUNCTION_COMMAND_BUFFER_ENQUEUE_EXP";
+        break;
+    case UR_FUNCTION_COMMAND_BUFFER_UPDATE_SIGNAL_EVENT_EXP:
+        os << "UR_FUNCTION_COMMAND_BUFFER_UPDATE_SIGNAL_EVENT_EXP";
+        break;
+    case UR_FUNCTION_COMMAND_BUFFER_UPDATE_WAIT_EVENTS_EXP:
+        os << "UR_FUNCTION_COMMAND_BUFFER_UPDATE_WAIT_EVENTS_EXP";
         break;
     case UR_FUNCTION_BINDLESS_IMAGES_MAP_EXTERNAL_LINEAR_MEMORY_EXP:
         os << "UR_FUNCTION_BINDLESS_IMAGES_MAP_EXTERNAL_LINEAR_MEMORY_EXP";
@@ -2544,6 +2550,9 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_device_info_t value) {
     case UR_DEVICE_INFO_COMMAND_BUFFER_UPDATE_SUPPORT_EXP:
         os << "UR_DEVICE_INFO_COMMAND_BUFFER_UPDATE_SUPPORT_EXP";
         break;
+    case UR_DEVICE_INFO_COMMAND_BUFFER_EVENT_SUPPORT_EXP:
+        os << "UR_DEVICE_INFO_COMMAND_BUFFER_EVENT_SUPPORT_EXP";
+        break;
     case UR_DEVICE_INFO_CLUSTER_LAUNCH_EXP:
         os << "UR_DEVICE_INFO_CLUSTER_LAUNCH_EXP";
         break;
@@ -4050,6 +4059,18 @@ inline ur_result_t printTagged(std::ostream &os, const void *ptr, ur_device_info
         os << ")";
     } break;
     case UR_DEVICE_INFO_COMMAND_BUFFER_UPDATE_SUPPORT_EXP: {
+        const ur_bool_t *tptr = (const ur_bool_t *)ptr;
+        if (sizeof(ur_bool_t) > size) {
+            os << "invalid size (is: " << size << ", expected: >=" << sizeof(ur_bool_t) << ")";
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+        os << (const void *)(tptr) << " (";
+
+        os << *tptr;
+
+        os << ")";
+    } break;
+    case UR_DEVICE_INFO_COMMAND_BUFFER_EVENT_SUPPORT_EXP: {
         const ur_bool_t *tptr = (const ur_bool_t *)ptr;
         if (sizeof(ur_bool_t) > size) {
             os << "invalid size (is: " << size << ", expected: >=" << sizeof(ur_bool_t) << ")";
@@ -15931,10 +15952,33 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
                           *(params->ppSyncPointWaitList));
 
     os << ", ";
+    os << ".numEventsInWaitList = ";
+
+    os << *(params->pnumEventsInWaitList);
+
+    os << ", ";
+    os << ".phEventWaitList = {";
+    for (size_t i = 0; *(params->pphEventWaitList) != NULL && i < *params->pnumEventsInWaitList; ++i) {
+        if (i != 0) {
+            os << ", ";
+        }
+
+        ur::details::printPtr(os,
+                              (*(params->pphEventWaitList))[i]);
+    }
+    os << "}";
+
+    os << ", ";
     os << ".pSyncPoint = ";
 
     ur::details::printPtr(os,
                           *(params->ppSyncPoint));
+
+    os << ", ";
+    os << ".phEvent = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphEvent));
 
     os << ", ";
     os << ".phCommand = ";
@@ -15985,10 +16029,39 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
                           *(params->ppSyncPointWaitList));
 
     os << ", ";
+    os << ".numEventsInWaitList = ";
+
+    os << *(params->pnumEventsInWaitList);
+
+    os << ", ";
+    os << ".phEventWaitList = {";
+    for (size_t i = 0; *(params->pphEventWaitList) != NULL && i < *params->pnumEventsInWaitList; ++i) {
+        if (i != 0) {
+            os << ", ";
+        }
+
+        ur::details::printPtr(os,
+                              (*(params->pphEventWaitList))[i]);
+    }
+    os << "}";
+
+    os << ", ";
     os << ".pSyncPoint = ";
 
     ur::details::printPtr(os,
                           *(params->ppSyncPoint));
+
+    os << ", ";
+    os << ".phEvent = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphEvent));
+
+    os << ", ";
+    os << ".phCommand = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphCommand));
 
     return os;
 }
@@ -16038,10 +16111,39 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
                           *(params->ppSyncPointWaitList));
 
     os << ", ";
+    os << ".numEventsInWaitList = ";
+
+    os << *(params->pnumEventsInWaitList);
+
+    os << ", ";
+    os << ".phEventWaitList = {";
+    for (size_t i = 0; *(params->pphEventWaitList) != NULL && i < *params->pnumEventsInWaitList; ++i) {
+        if (i != 0) {
+            os << ", ";
+        }
+
+        ur::details::printPtr(os,
+                              (*(params->pphEventWaitList))[i]);
+    }
+    os << "}";
+
+    os << ", ";
     os << ".pSyncPoint = ";
 
     ur::details::printPtr(os,
                           *(params->ppSyncPoint));
+
+    os << ", ";
+    os << ".phEvent = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphEvent));
+
+    os << ", ";
+    os << ".phCommand = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphCommand));
 
     return os;
 }
@@ -16096,10 +16198,39 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
                           *(params->ppSyncPointWaitList));
 
     os << ", ";
+    os << ".numEventsInWaitList = ";
+
+    os << *(params->pnumEventsInWaitList);
+
+    os << ", ";
+    os << ".phEventWaitList = {";
+    for (size_t i = 0; *(params->pphEventWaitList) != NULL && i < *params->pnumEventsInWaitList; ++i) {
+        if (i != 0) {
+            os << ", ";
+        }
+
+        ur::details::printPtr(os,
+                              (*(params->pphEventWaitList))[i]);
+    }
+    os << "}";
+
+    os << ", ";
     os << ".pSyncPoint = ";
 
     ur::details::printPtr(os,
                           *(params->ppSyncPoint));
+
+    os << ", ";
+    os << ".phEvent = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphEvent));
+
+    os << ", ";
+    os << ".phCommand = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphCommand));
 
     return os;
 }
@@ -16149,10 +16280,39 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
                           *(params->ppSyncPointWaitList));
 
     os << ", ";
+    os << ".numEventsInWaitList = ";
+
+    os << *(params->pnumEventsInWaitList);
+
+    os << ", ";
+    os << ".phEventWaitList = {";
+    for (size_t i = 0; *(params->pphEventWaitList) != NULL && i < *params->pnumEventsInWaitList; ++i) {
+        if (i != 0) {
+            os << ", ";
+        }
+
+        ur::details::printPtr(os,
+                              (*(params->pphEventWaitList))[i]);
+    }
+    os << "}";
+
+    os << ", ";
     os << ".pSyncPoint = ";
 
     ur::details::printPtr(os,
                           *(params->ppSyncPoint));
+
+    os << ", ";
+    os << ".phEvent = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphEvent));
+
+    os << ", ";
+    os << ".phCommand = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphCommand));
 
     return os;
 }
@@ -16202,10 +16362,39 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
                           *(params->ppSyncPointWaitList));
 
     os << ", ";
+    os << ".numEventsInWaitList = ";
+
+    os << *(params->pnumEventsInWaitList);
+
+    os << ", ";
+    os << ".phEventWaitList = {";
+    for (size_t i = 0; *(params->pphEventWaitList) != NULL && i < *params->pnumEventsInWaitList; ++i) {
+        if (i != 0) {
+            os << ", ";
+        }
+
+        ur::details::printPtr(os,
+                              (*(params->pphEventWaitList))[i]);
+    }
+    os << "}";
+
+    os << ", ";
     os << ".pSyncPoint = ";
 
     ur::details::printPtr(os,
                           *(params->ppSyncPoint));
+
+    os << ", ";
+    os << ".phEvent = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphEvent));
+
+    os << ", ";
+    os << ".phCommand = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphCommand));
 
     return os;
 }
@@ -16280,10 +16469,39 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
                           *(params->ppSyncPointWaitList));
 
     os << ", ";
+    os << ".numEventsInWaitList = ";
+
+    os << *(params->pnumEventsInWaitList);
+
+    os << ", ";
+    os << ".phEventWaitList = {";
+    for (size_t i = 0; *(params->pphEventWaitList) != NULL && i < *params->pnumEventsInWaitList; ++i) {
+        if (i != 0) {
+            os << ", ";
+        }
+
+        ur::details::printPtr(os,
+                              (*(params->pphEventWaitList))[i]);
+    }
+    os << "}";
+
+    os << ", ";
     os << ".pSyncPoint = ";
 
     ur::details::printPtr(os,
                           *(params->ppSyncPoint));
+
+    os << ", ";
+    os << ".phEvent = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphEvent));
+
+    os << ", ";
+    os << ".phCommand = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphCommand));
 
     return os;
 }
@@ -16358,10 +16576,39 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
                           *(params->ppSyncPointWaitList));
 
     os << ", ";
+    os << ".numEventsInWaitList = ";
+
+    os << *(params->pnumEventsInWaitList);
+
+    os << ", ";
+    os << ".phEventWaitList = {";
+    for (size_t i = 0; *(params->pphEventWaitList) != NULL && i < *params->pnumEventsInWaitList; ++i) {
+        if (i != 0) {
+            os << ", ";
+        }
+
+        ur::details::printPtr(os,
+                              (*(params->pphEventWaitList))[i]);
+    }
+    os << "}";
+
+    os << ", ";
     os << ".pSyncPoint = ";
 
     ur::details::printPtr(os,
                           *(params->ppSyncPoint));
+
+    os << ", ";
+    os << ".phEvent = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphEvent));
+
+    os << ", ";
+    os << ".phCommand = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphCommand));
 
     return os;
 }
@@ -16436,10 +16683,39 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
                           *(params->ppSyncPointWaitList));
 
     os << ", ";
+    os << ".numEventsInWaitList = ";
+
+    os << *(params->pnumEventsInWaitList);
+
+    os << ", ";
+    os << ".phEventWaitList = {";
+    for (size_t i = 0; *(params->pphEventWaitList) != NULL && i < *params->pnumEventsInWaitList; ++i) {
+        if (i != 0) {
+            os << ", ";
+        }
+
+        ur::details::printPtr(os,
+                              (*(params->pphEventWaitList))[i]);
+    }
+    os << "}";
+
+    os << ", ";
     os << ".pSyncPoint = ";
 
     ur::details::printPtr(os,
                           *(params->ppSyncPoint));
+
+    os << ", ";
+    os << ".phEvent = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphEvent));
+
+    os << ", ";
+    os << ".phCommand = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphCommand));
 
     return os;
 }
@@ -16494,10 +16770,39 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
                           *(params->ppSyncPointWaitList));
 
     os << ", ";
+    os << ".numEventsInWaitList = ";
+
+    os << *(params->pnumEventsInWaitList);
+
+    os << ", ";
+    os << ".phEventWaitList = {";
+    for (size_t i = 0; *(params->pphEventWaitList) != NULL && i < *params->pnumEventsInWaitList; ++i) {
+        if (i != 0) {
+            os << ", ";
+        }
+
+        ur::details::printPtr(os,
+                              (*(params->pphEventWaitList))[i]);
+    }
+    os << "}";
+
+    os << ", ";
     os << ".pSyncPoint = ";
 
     ur::details::printPtr(os,
                           *(params->ppSyncPoint));
+
+    os << ", ";
+    os << ".phEvent = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphEvent));
+
+    os << ", ";
+    os << ".phCommand = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphCommand));
 
     return os;
 }
@@ -16542,10 +16847,39 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
                           *(params->ppSyncPointWaitList));
 
     os << ", ";
+    os << ".numEventsInWaitList = ";
+
+    os << *(params->pnumEventsInWaitList);
+
+    os << ", ";
+    os << ".phEventWaitList = {";
+    for (size_t i = 0; *(params->pphEventWaitList) != NULL && i < *params->pnumEventsInWaitList; ++i) {
+        if (i != 0) {
+            os << ", ";
+        }
+
+        ur::details::printPtr(os,
+                              (*(params->pphEventWaitList))[i]);
+    }
+    os << "}";
+
+    os << ", ";
     os << ".pSyncPoint = ";
 
     ur::details::printPtr(os,
                           *(params->ppSyncPoint));
+
+    os << ", ";
+    os << ".phEvent = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphEvent));
+
+    os << ", ";
+    os << ".phCommand = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphCommand));
 
     return os;
 }
@@ -16590,10 +16924,39 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
                           *(params->ppSyncPointWaitList));
 
     os << ", ";
+    os << ".numEventsInWaitList = ";
+
+    os << *(params->pnumEventsInWaitList);
+
+    os << ", ";
+    os << ".phEventWaitList = {";
+    for (size_t i = 0; *(params->pphEventWaitList) != NULL && i < *params->pnumEventsInWaitList; ++i) {
+        if (i != 0) {
+            os << ", ";
+        }
+
+        ur::details::printPtr(os,
+                              (*(params->pphEventWaitList))[i]);
+    }
+    os << "}";
+
+    os << ", ";
     os << ".pSyncPoint = ";
 
     ur::details::printPtr(os,
                           *(params->ppSyncPoint));
+
+    os << ", ";
+    os << ".phEvent = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphEvent));
+
+    os << ", ";
+    os << ".phCommand = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphCommand));
 
     return os;
 }
@@ -16685,6 +17048,57 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
 
     ur::details::printPtr(os,
                           *(params->ppUpdateKernelLaunch));
+
+    return os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_command_buffer_update_signal_event_exp_params_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_command_buffer_update_signal_event_exp_params_t *params) {
+
+    os << ".hCommand = ";
+
+    ur::details::printPtr(os,
+                          *(params->phCommand));
+
+    os << ", ";
+    os << ".phSignalEvent = ";
+
+    ur::details::printPtr(os,
+                          *(params->pphSignalEvent));
+
+    return os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_command_buffer_update_wait_events_exp_params_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_command_buffer_update_wait_events_exp_params_t *params) {
+
+    os << ".hCommand = ";
+
+    ur::details::printPtr(os,
+                          *(params->phCommand));
+
+    os << ", ";
+    os << ".numEventsInWaitList = ";
+
+    os << *(params->pnumEventsInWaitList);
+
+    os << ", ";
+    os << ".phEventWaitList = {";
+    for (size_t i = 0; *(params->pphEventWaitList) != NULL && i < *params->pnumEventsInWaitList; ++i) {
+        if (i != 0) {
+            os << ", ";
+        }
+
+        ur::details::printPtr(os,
+                              (*(params->pphEventWaitList))[i]);
+    }
+    os << "}";
 
     return os;
 }
@@ -17962,6 +18376,12 @@ inline ur_result_t UR_APICALL printFunctionParams(std::ostream &os, ur_function_
     } break;
     case UR_FUNCTION_COMMAND_BUFFER_UPDATE_KERNEL_LAUNCH_EXP: {
         os << (const struct ur_command_buffer_update_kernel_launch_exp_params_t *)params;
+    } break;
+    case UR_FUNCTION_COMMAND_BUFFER_UPDATE_SIGNAL_EVENT_EXP: {
+        os << (const struct ur_command_buffer_update_signal_event_exp_params_t *)params;
+    } break;
+    case UR_FUNCTION_COMMAND_BUFFER_UPDATE_WAIT_EVENTS_EXP: {
+        os << (const struct ur_command_buffer_update_wait_events_exp_params_t *)params;
     } break;
     case UR_FUNCTION_COMMAND_BUFFER_GET_INFO_EXP: {
         os << (const struct ur_command_buffer_get_info_exp_params_t *)params;
