@@ -252,6 +252,7 @@ public:
       PixelTypeSizeBytes = 4;
       break;
     default:
+      PixelTypeSizeBytes = 0;
       break;
     }
   }
