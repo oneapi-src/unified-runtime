@@ -19,7 +19,6 @@
 #include <cmath>
 #include <cstdint>
 #include <string>
-#include <vector>
 
 namespace ur_sanitizer_layer {
 

@@ -80,6 +80,7 @@ ur_result_t MemBuffer::getHandle(ur_device_handle_t Device, char *&Handle) {
     if (!Device) {
         Device = GetDevices(Context)[0];
     }
+    assert((void *)Device != nullptr && "Device cannot be nullptr");
 
     auto &Allocation = Allocations[Device];
     if (!Allocation) {
