@@ -78,7 +78,9 @@ ur_result_t MemBuffer::getHandle(ur_device_handle_t Device, char *&Handle) {
     // Device may be null, we follow the L0 adapter's practice to use the first
     // device
     if (!Device) {
-        Device = GetDevices(Context)[0];
+        auto Devices = GetDevices(Context);
+        assert(Devices.size() > 0 && "Devices should not be empty");
+        Device = Devices[0];
     }
     assert((void *)Device != nullptr && "Device cannot be nullptr");
 
