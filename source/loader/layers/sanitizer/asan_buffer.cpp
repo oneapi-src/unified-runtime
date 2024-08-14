@@ -77,7 +77,7 @@ ur_result_t MemBuffer::getHandle(ur_device_handle_t Device, char *&Handle) {
 
     // Device may be null, we follow the L0 adapter's practice to use the first
     // device
-    if(!Device) {
+    if (!Device) {
         Device = GetDevices(Context)[0];
     }
 
