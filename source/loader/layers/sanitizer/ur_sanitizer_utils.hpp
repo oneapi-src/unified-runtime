@@ -34,6 +34,7 @@ ur_context_handle_t GetContext(ur_queue_handle_t Queue);
 ur_context_handle_t GetContext(ur_program_handle_t Program);
 ur_context_handle_t GetContext(ur_kernel_handle_t Kernel);
 ur_device_handle_t GetDevice(ur_queue_handle_t Queue);
+std::vector<ur_device_handle_t> GetDevices(ur_context_handle_t Context);
 DeviceType GetDeviceType(ur_context_handle_t Context,
                          ur_device_handle_t Device);
 ur_device_handle_t GetParentDevice(ur_device_handle_t Device);

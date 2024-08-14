@@ -9,6 +9,7 @@
  * @file asan_buffer.cpp
  *
  */
+#include "common.hpp"
 
 #include "asan_buffer.hpp"
 #include "asan_interceptor.hpp"
@@ -73,6 +74,12 @@ ur_result_t MemBuffer::getHandle(ur_device_handle_t Device, char *&Handle) {
         UR_CALL(SubBuffer->Parent->getHandle(Device, Handle));
         Handle += SubBuffer->Origin;
         return UR_RESULT_SUCCESS;
+    }
+
+    // Device may be null, we follow the L0 adapter's practice to use the first
+    // device
+    if(!Device) {
+        Device = GetDevices(Context)[0];
     }
 
     auto &Allocation = Allocations[Device];

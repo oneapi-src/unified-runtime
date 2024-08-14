@@ -71,6 +71,21 @@ ur_device_handle_t GetDevice(ur_queue_handle_t Queue) {
     assert(Result == UR_RESULT_SUCCESS && "getDevice() failed");
     return Device;
 }
+std::vector<ur_device_handle_t> GetDevices(ur_context_handle_t Context) {
+    std::vector<ur_device_handle_t> Devices{};
+    uint32_t DeviceNum;
+    ur_result_t Result;
+    Result = getContext()->urDdiTable.Context.pfnGetInfo(
+        Context, UR_CONTEXT_INFO_NUM_DEVICES, sizeof(uint32_t), &DeviceNum,
+        nullptr);
+    assert(Result == UR_RESULT_SUCCESS && "getDevices() failed");
+    Devices.resize(DeviceNum);
+    Result = getContext()->urDdiTable.Context.pfnGetInfo(
+        Context, UR_CONTEXT_INFO_DEVICES,
+        sizeof(ur_device_handle_t) * DeviceNum, Devices.data(), nullptr);
+    assert(Result == UR_RESULT_SUCCESS && "getDevices() failed");
+    return Devices;
+}
 
 ur_program_handle_t GetProgram(ur_kernel_handle_t Kernel) {
     ur_program_handle_t Program{};
