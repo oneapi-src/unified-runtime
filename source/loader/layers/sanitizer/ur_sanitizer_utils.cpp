@@ -78,12 +78,12 @@ std::vector<ur_device_handle_t> GetDevices(ur_context_handle_t Context) {
     Result = getContext()->urDdiTable.Context.pfnGetInfo(
         Context, UR_CONTEXT_INFO_NUM_DEVICES, sizeof(uint32_t), &DeviceNum,
         nullptr);
-    assert(Result == UR_RESULT_SUCCESS && "getDevices() failed");
+    assert(Result == UR_RESULT_SUCCESS && "getDevices(Context) failed");
     Devices.resize(DeviceNum);
     Result = getContext()->urDdiTable.Context.pfnGetInfo(
         Context, UR_CONTEXT_INFO_DEVICES,
         sizeof(ur_device_handle_t) * DeviceNum, Devices.data(), nullptr);
-    assert(Result == UR_RESULT_SUCCESS && "getDevices() failed");
+    assert(Result == UR_RESULT_SUCCESS && "getDevices(Context) failed");
     return Devices;
 }
 
@@ -188,8 +188,8 @@ std::vector<ur_device_handle_t> GetDevices(ur_program_handle_t Program) {
     uint32_t DeviceNum;
     [[maybe_unused]] ur_result_t Result =
         getContext()->urDdiTable.Program.pfnGetInfo(
-            Program, UR_PROGRAM_INFO_NUM_DEVICES, sizeof(DeviceNum), nullptr,
-            &DeviceNum);
+            Program, UR_PROGRAM_INFO_NUM_DEVICES, sizeof(DeviceNum),
+            &DeviceNum, nullptr);
     assert(Result == UR_RESULT_SUCCESS, &&"getDevices(Program) failed");
 
     std::vector<ur_device_handle_t> Devices;
@@ -197,7 +197,7 @@ std::vector<ur_device_handle_t> GetDevices(ur_program_handle_t Program) {
     Result = getContext()->urDdiTable.Program.pfnGetInfo(
         Program, UR_PROGRAM_INFO_DEVICES,
         DeviceNum * sizeof(ur_device_handle_t), Devices.data(), nullptr);
-    assert(Result == UR_RESULT_SUCCESS);
+    assert(Result == UR_RESULT_SUCCESS, &&"getDevices(Program) failed");
 
     return Devices;
 }
