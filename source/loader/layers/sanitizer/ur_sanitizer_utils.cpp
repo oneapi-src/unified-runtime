@@ -184,17 +184,19 @@ bool GetDeviceUSMCapability(ur_device_handle_t Device,
     return (bool)Flag;
 }
 
-std::vector<ur_device_handle_t> GetProgramDevices(ur_program_handle_t Program) {
-    size_t PropSize;
+std::vector<ur_device_handle_t> GetDevices(ur_program_handle_t Program) {
+    uint32_t DeviceNum;
     [[maybe_unused]] ur_result_t Result =
         getContext()->urDdiTable.Program.pfnGetInfo(
-            Program, UR_PROGRAM_INFO_DEVICES, 0, nullptr, &PropSize);
-    assert(Result == UR_RESULT_SUCCESS);
+            Program, UR_PROGRAM_INFO_NUM_DEVICES, sizeof(DeviceNum), nullptr,
+            &DeviceNum);
+    assert(Result == UR_RESULT_SUCCESS, &&"getDevices(Program) failed");
 
     std::vector<ur_device_handle_t> Devices;
-    Devices.resize(PropSize / sizeof(ur_device_handle_t));
+    Devices.resize(DeviceNum);
     Result = getContext()->urDdiTable.Program.pfnGetInfo(
-        Program, UR_PROGRAM_INFO_DEVICES, PropSize, Devices.data(), nullptr);
+        Program, UR_PROGRAM_INFO_DEVICES,
+        DeviceNum * sizeof(ur_device_handle_t), Devices.data(), nullptr);
     assert(Result == UR_RESULT_SUCCESS);
 
     return Devices;
