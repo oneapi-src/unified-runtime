@@ -9,7 +9,6 @@
  * @file asan_buffer.cpp
  *
  */
-#include "common.hpp"
 
 #include "asan_buffer.hpp"
 #include "asan_interceptor.hpp"
