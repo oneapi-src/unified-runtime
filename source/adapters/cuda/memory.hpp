@@ -188,7 +188,7 @@ public:
   ur_image_format_t ImageFormat;
   ur_image_desc_t ImageDesc;
   CUDA_ARRAY3D_DESCRIPTOR ArrayDesc;
-  size_t PixelTypeSizeBytes;
+  size_t PixelTypeSizeBytes{};
   void *HostPtr;
   ur_result_t error = UR_RESULT_SUCCESS;
 
@@ -252,7 +252,6 @@ public:
       PixelTypeSizeBytes = 4;
       break;
     default:
-      PixelTypeSizeBytes = 0;
       break;
     }
   }
