@@ -12,6 +12,9 @@
 #include "ur_level_zero.hpp"
 #include <iomanip>
 
+// Look! A non functional change!
+// Wow!
+
 // Due to multiple DLLMain definitions with SYCL, Global Adapter is init at
 // variable creation.
 #if defined(_WIN32)
