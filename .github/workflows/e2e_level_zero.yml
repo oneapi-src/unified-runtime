@@ -21,7 +21,7 @@ jobs:
       config: ""
       unit: "gpu"
       # Failing tests
-      xfail: "Config/select_device.cpp;DeviceCodeSplit/grf.cpp;ESIMD/grf.cpp;ESIMD/named_barriers/loop_extended.cpp;KernelAndProgram/target_register_alloc_mode.cpp;Matrix/SG32/element_wise_all_ops.cpp;Matrix/SG32/get_coord_int8_matB.cpp;Matrix/get_coord_int8_matB.cpp;Matrix/joint_matrix_prefetch.cpp;Matrix/joint_matrix_rowmajorA_rowmajorB.cpp;Plugin/level_zero_barrier_optimization.cpp"
+      xfail: "DeviceCodeSplit/grf.cpp;ESIMD/grf.cpp;ESIMD/named_barriers/loop_extended.cpp;KernelAndProgram/target_register_alloc_mode.cpp;Matrix/SG32/get_coord_int8_matB.cpp;Matrix/get_coord_int8_matB.cpp;Matrix/joint_matrix_prefetch.cpp;Matrix/joint_matrix_rowmajorA_rowmajorB.cpp"
       # Flaky tests
       filter_out: ""
       # These runners by default spawn upwards of 260 workers.
