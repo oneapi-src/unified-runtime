@@ -169,6 +169,22 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextCreateWithNativeHandle(
 UR_APIEXPORT ur_result_t UR_APICALL urContextSetExtendedDeleter(
     ur_context_handle_t hContext, ur_context_extended_deleter_t pfnDeleter,
     void *pUserData) {
+  // Workaround for systems where OpenCL 3.0 loader is not present, load the
+  // function pointer instead of using the symbol directly.
+  cl_context context = cl_adapter::cast<cl_context>(hContext);
+  cl_platform_id platform = nullptr;
+  if (clGetContextInfo(context, CL_CONTEXT_PLATFORM, sizeof(platform),
+                       &platform, nullptr)) {
+    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+  }
+  auto SetContextDestructorCallback =
+      reinterpret_cast<decltype(clSetContextDestructorCallback) *>(
+          clGetExtensionFunctionAddressForPlatform(
+              platform, "clSetContextDestructorCallback"));
+  if (!SetContextDestructorCallback) {
+    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+  }
+
   static std::unordered_map<ur_context_handle_t,
                             std::set<ur_context_extended_deleter_t>>
       ContextCallbackMap;
@@ -212,7 +228,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextSetExtendedDeleter(
     auto *C = static_cast<ContextCallback *>(pUserData);
     C->execute();
   };
-  CL_RETURN_ON_FAILURE(clSetContextDestructorCallback(
+  CL_RETURN_ON_FAILURE(SetContextDestructorCallback(
       cl_adapter::cast<cl_context>(hContext), ClCallback, Callback));
 
   return UR_RESULT_SUCCESS;
