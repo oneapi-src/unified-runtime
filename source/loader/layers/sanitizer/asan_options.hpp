@@ -39,6 +39,7 @@ struct AsanOptions {
     bool DetectLocals = true;
     bool DetectPrivates = true;
     bool PrintStats = false;
+    bool DetectKernelArguments = true;
 
     explicit AsanOptions(logger::Logger &logger) {
         auto OptionsEnvMap = getenv_to_map("UR_LAYER_ASAN_OPTIONS");
@@ -94,6 +95,7 @@ struct AsanOptions {
         SetBoolOption("detect_locals", DetectLocals);
         SetBoolOption("detect_privates", DetectPrivates);
         SetBoolOption("print_stats", PrintStats);
+        SetBoolOption("detect_kernel_arguments", DetectKernelArguments);
 
         auto KV = OptionsEnvMap->find("quarantine_size_mb");
         if (KV != OptionsEnvMap->end()) {
@@ -113,7 +115,7 @@ struct AsanOptions {
 
         KV = OptionsEnvMap->find("redzone");
         if (KV != OptionsEnvMap->end()) {
-            auto Value = KV->second.front();
+            const auto &Value = KV->second.front();
             try {
                 MinRZSize = std::stoul(Value);
                 if (MinRZSize < 16) {
