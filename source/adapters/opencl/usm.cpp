@@ -373,7 +373,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy(
                       sizeof(cl_device_id), &SrcDevice, nullptr));
   CL_RETURN_ON_FAILURE(
       GetMemAllocInfo(CLContext, pDst, CL_MEM_ALLOC_DEVICE_INTEL,
-                      sizeof(cl_device_id), &SrcDevice, nullptr));
+                      sizeof(cl_device_id), &DstDevice, nullptr));
 
   if ((SrcDevice && DstDevice) && SrcDevice != DstDevice) {
     cl_event HostCopyEvent = nullptr, FinalCopyEvent = nullptr;

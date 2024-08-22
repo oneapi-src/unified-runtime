@@ -207,12 +207,24 @@ struct urEnqueueUSMMemcpyMultiDeviceTest : uur::urAllDevicesTest {
     }
 
     void TearDown() override {
-        ASSERT_SUCCESS(urUSMFree(context, src_alloc));
-        ASSERT_SUCCESS(urUSMFree(context, dst_alloc));
-        ASSERT_SUCCESS(urUSMFree(context, host_alloc));
-        ASSERT_SUCCESS(urQueueRelease(src_queue));
-        ASSERT_SUCCESS(urQueueRelease(dst_queue));
-        ASSERT_SUCCESS(urContextRelease(context));
+        if (src_alloc) {
+            ASSERT_SUCCESS(urUSMFree(context, src_alloc));
+        }
+        if (dst_alloc) {
+            ASSERT_SUCCESS(urUSMFree(context, dst_alloc));
+        }
+        if (host_alloc) {
+            ASSERT_SUCCESS(urUSMFree(context, host_alloc));
+        }
+        if (src_queue) {
+            ASSERT_SUCCESS(urQueueRelease(src_queue));
+        }
+        if (dst_queue) {
+            ASSERT_SUCCESS(urQueueRelease(dst_queue));
+        }
+        if (context) {
+            ASSERT_SUCCESS(urContextRelease(context));
+        }
         uur::urAllDevicesTest::TearDown();
     }
 
