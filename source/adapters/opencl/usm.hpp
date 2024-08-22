@@ -39,4 +39,22 @@ struct AllocDeleterCallbackInfo {
   void *Allocation;
 };
 
+struct AllocDeleterCallbackInfoWithQueue : AllocDeleterCallbackInfo {
+  AllocDeleterCallbackInfoWithQueue(clMemBlockingFreeINTEL_fn USMFree,
+                                    cl_context CLContext, void *Allocation,
+                                    cl_command_queue CLQueue)
+      : AllocDeleterCallbackInfo(USMFree, CLContext, Allocation),
+        CLQueue(CLQueue) {
+    clRetainContext(CLContext);
+  }
+  ~AllocDeleterCallbackInfoWithQueue() { clReleaseCommandQueue(CLQueue); }
+  AllocDeleterCallbackInfoWithQueue(const AllocDeleterCallbackInfoWithQueue &) =
+      delete;
+  AllocDeleterCallbackInfoWithQueue &
+  operator=(const AllocDeleterCallbackInfoWithQueue &) = delete;
+
+  cl_command_queue CLQueue;
+};
+
+template <class T>
 void AllocDeleterCallback(cl_event event, cl_int, void *pUserData);

@@ -13,9 +13,10 @@
 #include "common.hpp"
 #include "usm.hpp"
 
+template <class T>
 void AllocDeleterCallback(cl_event event, cl_int, void *pUserData) {
   clReleaseEvent(event);
-  auto Info = static_cast<AllocDeleterCallbackInfo *>(pUserData);
+  auto Info = static_cast<T *>(pUserData);
   delete Info;
 }
 
@@ -316,7 +317,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMFill(
   auto Info = new AllocDeleterCallbackInfo(USMFree, CLContext, HostBuffer);
 
   ClErr =
-      clSetEventCallback(CopyEvent, CL_COMPLETE, AllocDeleterCallback, Info);
+      clSetEventCallback(CopyEvent, CL_COMPLETE,
+                         AllocDeleterCallback<AllocDeleterCallbackInfo>, Info);
   if (ClErr != CL_SUCCESS) {
     // We can attempt to recover gracefully by attempting to wait for the copy
     // to finish and deleting the info struct here.
@@ -376,6 +378,26 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy(
                       sizeof(cl_device_id), &DstDevice, nullptr));
 
   if ((SrcDevice && DstDevice) && SrcDevice != DstDevice) {
+    // We need a queue associated with each device, so first figure out which
+    // one we weren't given.
+    cl_device_id QueueDevice = nullptr;
+    CL_RETURN_ON_FAILURE(clGetCommandQueueInfo(
+        cl_adapter::cast<cl_command_queue>(hQueue), CL_QUEUE_DEVICE,
+        sizeof(QueueDevice), &QueueDevice, nullptr));
+
+    cl_command_queue MissingQueue = nullptr, SrcQueue = nullptr,
+                     DstQueue = nullptr;
+    if (QueueDevice == SrcDevice) {
+      MissingQueue = clCreateCommandQueue(CLContext, DstDevice, 0, &CLErr);
+      SrcQueue = cl_adapter::cast<cl_command_queue>(hQueue);
+      DstQueue = MissingQueue;
+    } else {
+      MissingQueue = clCreateCommandQueue(CLContext, SrcDevice, 0, &CLErr);
+      DstQueue = cl_adapter::cast<cl_command_queue>(hQueue);
+      SrcQueue = MissingQueue;
+    }
+    CL_RETURN_ON_FAILURE(CLErr);
+
     cl_event HostCopyEvent = nullptr, FinalCopyEvent = nullptr;
     clHostMemAllocINTEL_fn HostMemAlloc = nullptr;
     UR_RETURN_ON_FAILURE(cl_ext::getExtFuncFromContext<clHostMemAllocINTEL_fn>(
@@ -402,19 +424,19 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy(
     };
 
     UR_RETURN_ON_FAILURE(checkCLErr(USMMemcpy(
-        cl_adapter::cast<cl_command_queue>(hQueue), blocking, HostAlloc, pSrc,
-        size, numEventsInWaitList,
+        SrcQueue, blocking, HostAlloc, pSrc, size, numEventsInWaitList,
         cl_adapter::cast<const cl_event *>(phEventWaitList), &HostCopyEvent)));
 
-    UR_RETURN_ON_FAILURE(checkCLErr(
-        USMMemcpy(cl_adapter::cast<cl_command_queue>(hQueue), blocking, pDst,
-                  HostAlloc, size, 1, &HostCopyEvent, &FinalCopyEvent)));
+    UR_RETURN_ON_FAILURE(
+        checkCLErr(USMMemcpy(DstQueue, blocking, pDst, HostAlloc, size, 1,
+                             &HostCopyEvent, &FinalCopyEvent)));
 
     // If this is a blocking operation we can do our cleanup immediately,
     // otherwise we need to defer it to an event callback.
     if (blocking) {
       CL_RETURN_ON_FAILURE(USMFree(CLContext, HostAlloc));
       CL_RETURN_ON_FAILURE(clReleaseEvent(HostCopyEvent));
+      CL_RETURN_ON_FAILURE(clReleaseCommandQueue(MissingQueue));
       if (phEvent) {
         *phEvent = cl_adapter::cast<ur_event_handle_t>(FinalCopyEvent);
       } else {
@@ -429,11 +451,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy(
       }
 
       // This self destructs taking the event and allocation with it.
-      auto DeleterInfo =
-          new AllocDeleterCallbackInfo{USMFree, CLContext, HostAlloc};
+      auto DeleterInfo = new AllocDeleterCallbackInfoWithQueue(
+          USMFree, CLContext, HostAlloc, MissingQueue);
 
-      CLErr = clSetEventCallback(HostCopyEvent, CL_COMPLETE,
-                                 AllocDeleterCallback, DeleterInfo);
+      CLErr = clSetEventCallback(
+          HostCopyEvent, CL_COMPLETE,
+          AllocDeleterCallback<AllocDeleterCallbackInfoWithQueue>, DeleterInfo);
 
       if (CLErr != CL_SUCCESS) {
         // We can attempt to recover gracefully by attempting to wait for the
