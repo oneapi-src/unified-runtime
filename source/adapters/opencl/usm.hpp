@@ -1,4 +1,4 @@
-//===-------------- adapter.hpp - OpenCL Adapter ---------------------===//
+//===--------------------- usm.hpp - OpenCL Adapter -----------------------===//
 //
 // Copyright (C) 2024 Intel Corporation
 //
