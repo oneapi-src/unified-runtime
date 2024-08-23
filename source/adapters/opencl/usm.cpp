@@ -401,8 +401,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy(
     cl_event HostCopyEvent = nullptr, FinalCopyEvent = nullptr;
     clHostMemAllocINTEL_fn HostMemAlloc = nullptr;
     UR_RETURN_ON_FAILURE(cl_ext::getExtFuncFromContext<clHostMemAllocINTEL_fn>(
-      CLContext, cl_ext::ExtFuncPtrCache->clHostMemAllocINTELCache,
-      cl_ext::HostMemAllocName, &HostMemAlloc));
+        CLContext, cl_ext::ExtFuncPtrCache->clHostMemAllocINTELCache,
+        cl_ext::HostMemAllocName, &HostMemAlloc));
 
     auto HostAlloc = HostMemAlloc(CLContext, nullptr, size, 0, &CLErr);
     CL_RETURN_ON_FAILURE(CLErr);
