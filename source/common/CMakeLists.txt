@@ -3,6 +3,12 @@
 # See LICENSE.TXT
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
+if (UR_BUILD_ADAPTER_L0 OR UR_BUILD_ADAPTER_L0_V2)
+    include(FetchLevelZero)
+    set(UMF_BUILD_LEVEL_ZERO_PROVIDER ON CACHE INTERNAL "Build Level Zero Provider")
+    set(UMF_LEVEL_ZERO_INCLUDE_DIR "${LEVEL_ZERO_INCLUDE_DIR}" CACHE INTERNAL "Level Zero headers")
+endif()
+
 add_ur_library(ur_common STATIC
     ur_util.cpp
     ur_util.hpp
@@ -24,8 +30,8 @@ if (NOT DEFINED UMF_REPO)
 endif()
 
 if (NOT DEFINED UMF_TAG)
-    # v0.9.x 23.08.2024: Merge pull request #696 ...
-    set(UMF_TAG 3c340e61c197f4f9e29abd947f90ce27c571433e)
+    # main 03.09.2024: Merge pull request #679
+    set(UMF_TAG 3c03e2bac6f5625259949f62885efd7ccb11e9d0)
 endif()
 
 message(STATUS "Will fetch Unified Memory Framework from ${UMF_REPO}")
@@ -38,8 +44,7 @@ FetchContent_Declare(unified-memory-framework
 
 set(UMF_BUILD_TESTS OFF CACHE INTERNAL "Build UMF tests")
 set(UMF_BUILD_EXAMPLES OFF CACHE INTERNAL "Build UMF examples")
-# TODO: L0 provider not ready yet
-set(UMF_BUILD_LEVEL_ZERO_PROVIDER OFF CACHE INTERNAL "Build Level Zero Provider")
+
 set(UMF_BUILD_SHARED_LIBRARY ${UMF_BUILD_SHARED_LIBRARY} CACHE INTERNAL "Build UMF shared library")
 set(UMF_BUILD_LIBUMF_POOL_DISJOINT ON CACHE INTERNAL "Build Disjoint Pool")
 
