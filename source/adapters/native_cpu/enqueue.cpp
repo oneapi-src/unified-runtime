@@ -25,7 +25,7 @@ struct NDRDescT {
   RangeT GlobalOffset;
   RangeT GlobalSize;
   RangeT LocalSize;
-  NDRDescT(uint32_t WorkDim, const size_t *GlobalWorkOffset,
+  inline NDRDescT(uint32_t WorkDim, const size_t *GlobalWorkOffset,
            const size_t *GlobalWorkSize, const size_t *LocalWorkSize)
       : WorkDim(WorkDim) {
     for (uint32_t I = 0; I < WorkDim; I++) {
@@ -52,7 +52,7 @@ struct NDRDescT {
 } // namespace native_cpu
 
 #ifdef NATIVECPU_USE_OCK
-static native_cpu::state getResizedState(const native_cpu::NDRDescT &ndr,
+static inline native_cpu::state getResizedState(const native_cpu::NDRDescT &ndr,
                                          size_t itemsPerThread) {
   native_cpu::state resized_state(
       ndr.GlobalSize[0], ndr.GlobalSize[1], ndr.GlobalSize[2], itemsPerThread,
