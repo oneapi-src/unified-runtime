@@ -3,8 +3,8 @@
 # See LICENSE.TXT
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-set(UR_LEVEL_ZERO_LOADER_LIBRARY "" CACHE FILEPATH "Path of the Level Zero Loader library")
-set(UR_LEVEL_ZERO_INCLUDE_DIR "" CACHE FILEPATH "Directory containing the Level Zero Headers")
+set(UR_LEVEL_ZERO_LOADER_LIBRARY "" CACHE PATH "Path of the Level Zero Loader library")
+set(UR_LEVEL_ZERO_INCLUDE_DIR "" CACHE PATH "Directory containing the Level Zero Headers")
 set(UR_LEVEL_ZERO_LOADER_REPO "" CACHE STRING "Github repo to get the Level Zero loader sources from")
 set(UR_LEVEL_ZERO_LOADER_TAG "" CACHE STRING " GIT tag of the Level Loader taken from github repo")
 
