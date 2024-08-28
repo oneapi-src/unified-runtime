@@ -178,7 +178,7 @@ ur_result_t enqueueMemSetShadow(std::shared_ptr<ContextInfo> &ContextInfo,
 
 ContextInfo::~ContextInfo() {
     if (getContext()->interceptor->getOptions().PrintStats) {
-        Stats.Print();
+        Stats.Print(Handle);
     }
 
     [[maybe_unused]] auto Result =
@@ -225,7 +225,6 @@ ur_result_t SanitizerInterceptor::allocateMemory(
     AllocType Type, void **ResultPtr) {
 
     auto ContextInfo = getContextInfo(Context);
-
     std::shared_ptr<DeviceInfo> DeviceInfo =
         Device ? getDeviceInfo(Device) : nullptr;
 
@@ -364,11 +363,12 @@ ur_result_t SanitizerInterceptor::releaseMemory(ur_context_handle_t Context,
     // If quarantine is disabled, USM is freed immediately
     if (!m_Quarantine) {
         getContext()->logger.debug("Free: {}", (void *)AllocInfo->AllocBegin);
-        std::scoped_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
-        m_AllocationMap.erase(AllocInfoIt);
 
         ContextInfo->Stats.UpdateUSMRealFreed(AllocInfo->AllocSize,
                                               AllocInfo->getRedzoneSize());
+
+        std::scoped_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
+        m_AllocationMap.erase(AllocInfoIt);
 
         return getContext()->urDdiTable.USM.pfnFree(
             Context, (void *)(AllocInfo->AllocBegin));
@@ -381,10 +381,11 @@ ur_result_t SanitizerInterceptor::releaseMemory(ur_context_handle_t Context,
         for (auto &It : ReleaseList) {
             getContext()->logger.info("Quarantine Free: {}",
                                       (void *)It->second->AllocBegin);
-            m_AllocationMap.erase(It);
 
             ContextInfo->Stats.UpdateUSMRealFreed(AllocInfo->AllocSize,
                                                   AllocInfo->getRedzoneSize());
+
+            m_AllocationMap.erase(It);
 
             UR_CALL(getContext()->urDdiTable.USM.pfnFree(
                 Context, (void *)(It->second->AllocBegin)));

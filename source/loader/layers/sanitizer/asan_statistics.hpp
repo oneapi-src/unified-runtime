@@ -26,7 +26,7 @@ struct AsanStats {
     void UpdateShadowMalloced(uptr ShadowSize);
     void UpdateShadowFreed(uptr ShadowSize);
 
-    void Print();
+    void Print(ur_context_handle_t Context);
 
   private:
     std::atomic<uptr> UsmMalloced;
