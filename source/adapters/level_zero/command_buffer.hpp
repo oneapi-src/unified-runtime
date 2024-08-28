@@ -31,8 +31,10 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
       ze_command_list_handle_t CommandList,
       ze_command_list_handle_t CommandListTranslated,
       ze_command_list_handle_t CommandListResetEvents,
-      ze_command_list_handle_t CopyCommandList, ur_event_handle_t SignalEvent,
-      ur_event_handle_t WaitEvent, ur_event_handle_t AllResetEvent,
+      ze_command_list_handle_t CopyCommandList,
+      ur_event_handle_t SignalEvent, ur_event_handle_t WaitEvent,
+      ur_event_handle_t AllResetEvent, ur_event_handle_t CopyFinishedEvent,
+      ur_event_handle_t ComputeFinishedEvent,
       const ur_exp_command_buffer_desc_t *Desc, const bool IsInOrderCmdList);
 
   void registerSyncPoint(ur_exp_command_buffer_sync_point_t SyncPoint,
@@ -90,6 +92,9 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   // Event which a command-buffer waits on until the main command-list event
   // have been reset.
   ur_event_handle_t AllResetEvent = nullptr;
+
+  ur_event_handle_t CopyFinishedEvent = nullptr;
+  ur_event_handle_t ExecutionFinishedEvent = nullptr;
   // This flag is must be set to false if at least one copy command has been
   // added to `ZeCopyCommandList`
   bool MCopyCommandListEmpty = true;
