@@ -11,6 +11,7 @@
  */
 
 #include "asan_statistics.hpp"
+#include "asan_interceptor.hpp"
 #include "ur_sanitizer_layer.hpp"
 
 namespace ur_sanitizer_layer {
@@ -25,9 +26,14 @@ void AsanStats::UpdateUSMMalloced(uptr MallocedSize, uptr RedzoneSize) {
     UsmMallocedRedzones += RedzoneSize;
 }
 
-void AsanStats::UpdateUSMFreed(uptr FreedSize, uptr RedzoneSize) {
+void AsanStats::UpdateUSMFreed(uptr FreedSize) { UsmFreed += FreedSize; }
+
+void AsanStats::UpdateUSMRealFreed(uptr FreedSize, uptr RedzoneSize) {
     UsmMalloced -= FreedSize;
     UsmMallocedRedzones -= RedzoneSize;
+    if (getContext()->interceptor->getOptions().MaxQuarantineSizeMB) {
+        UsmFreed -= FreedSize;
+    }
 }
 
 void AsanStats::UpdateShadowMmaped(uptr ShadowSize) {

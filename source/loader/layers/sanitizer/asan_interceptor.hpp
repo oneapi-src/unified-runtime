@@ -108,6 +108,8 @@ struct ContextInfo {
     std::vector<ur_device_handle_t> DeviceList;
     std::unordered_map<ur_device_handle_t, AllocInfoList> AllocInfosMap;
 
+    AsanStats Stats;
+
     explicit ContextInfo(ur_context_handle_t Context) : Handle(Context) {
         [[maybe_unused]] auto Result =
             getContext()->urDdiTable.Context.pfnRetain(Context);
@@ -228,13 +230,12 @@ class SanitizerInterceptor {
     }
 
     const AsanOptions &getOptions() { return m_Options; }
-    AsanStats& getStats() { return m_Stats; }
 
   private:
     ur_result_t updateShadowMemory(std::shared_ptr<ContextInfo> &ContextInfo,
                                    std::shared_ptr<DeviceInfo> &DeviceInfo,
                                    ur_queue_handle_t Queue);
-    ur_result_t enqueueAllocInfo(ur_context_handle_t Context,
+    ur_result_t enqueueAllocInfo(std::shared_ptr<ContextInfo> &ContextInfo,
                                  std::shared_ptr<DeviceInfo> &DeviceInfo,
                                  ur_queue_handle_t Queue,
                                  std::shared_ptr<AllocInfo> &AI);
@@ -272,7 +273,6 @@ class SanitizerInterceptor {
     std::unique_ptr<Quarantine> m_Quarantine;
 
     AsanOptions m_Options;
-    AsanStats m_Stats;
 
     std::unordered_set<ur_adapter_handle_t> m_Adapters;
     ur_shared_mutex m_AdaptersMutex;
