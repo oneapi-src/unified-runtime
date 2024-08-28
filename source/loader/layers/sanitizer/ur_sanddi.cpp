@@ -53,6 +53,38 @@ ur_result_t setupContext(ur_context_handle_t Context, uint32_t numDevices,
 } // namespace
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urAdapterGet
+__urdlllocal ur_result_t UR_APICALL urAdapterGet(
+    uint32_t
+        NumEntries, ///< [in] the number of adapters to be added to phAdapters.
+    ///< If phAdapters is not NULL, then NumEntries should be greater than
+    ///< zero, otherwise ::UR_RESULT_ERROR_INVALID_SIZE,
+    ///< will be returned.
+    ur_adapter_handle_t *
+        phAdapters, ///< [out][optional][range(0, NumEntries)] array of handle of adapters.
+    ///< If NumEntries is less than the number of adapters available, then
+    ///< ::urAdapterGet shall only retrieve that number of platforms.
+    uint32_t *
+        pNumAdapters ///< [out][optional] returns the total number of adapters available.
+) {
+    auto pfnAdapterGet = getContext()->urDdiTable.Global.pfnAdapterGet;
+
+    if (nullptr == pfnAdapterGet) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    ur_result_t result = pfnAdapterGet(NumEntries, phAdapters, pNumAdapters);
+    if (result == UR_RESULT_SUCCESS && phAdapters) {
+        const uint32_t NumAdapters = pNumAdapters ? *pNumAdapters : NumEntries;
+        for (uint32_t i = 0; i < NumAdapters; ++i) {
+            UR_CALL(getContext()->interceptor->holdAdapter(phAdapters[i]));
+        }
+    }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMHostAlloc
 __urdlllocal ur_result_t UR_APICALL urUSMHostAlloc(
     ur_context_handle_t hContext, ///< [in] handle of the context object
@@ -432,6 +464,19 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreate(
 
     std::shared_ptr<MemBuffer> pMemBuffer =
         std::make_shared<MemBuffer>(hContext, size, hostPtrOrNull);
+
+    if (Host && (flags & UR_MEM_FLAG_ALLOC_COPY_HOST_POINTER)) {
+        std::shared_ptr<ContextInfo> CtxInfo =
+            getContext()->interceptor->getContextInfo(hContext);
+        for (const auto &hDevice : CtxInfo->DeviceList) {
+            ManagedQueue InternalQueue(hContext, hDevice);
+            char *Handle = nullptr;
+            UR_CALL(pMemBuffer->getHandle(hDevice, Handle));
+            UR_CALL(getContext()->urDdiTable.Enqueue.pfnUSMMemcpy(
+                InternalQueue, true, Handle, Host, size, 0, nullptr, nullptr));
+        }
+    }
+
     ur_result_t result = getContext()->interceptor->insertMemBuffer(pMemBuffer);
     *phBuffer = ur_cast<ur_mem_handle_t>(pMemBuffer.get());
 
@@ -1325,6 +1370,36 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgPointer(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Exported function for filling application's Global table
+///        with current process' addresses
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+__urdlllocal ur_result_t UR_APICALL urGetGlobalProcAddrTable(
+    ur_api_version_t version, ///< [in] API version requested
+    ur_global_dditable_t
+        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
+) {
+    if (nullptr == pDdiTable) {
+        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    if (UR_MAJOR_VERSION(ur_sanitizer_layer::getContext()->version) !=
+            UR_MAJOR_VERSION(version) ||
+        UR_MINOR_VERSION(ur_sanitizer_layer::getContext()->version) >
+            UR_MINOR_VERSION(version)) {
+        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+    }
+
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    pDdiTable->pfnAdapterGet = ur_sanitizer_layer::urAdapterGet;
+
+    return result;
+}
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's Context table
 ///        with current process' addresses
 ///
@@ -1596,6 +1671,11 @@ ur_result_t context_t::init(ur_dditable_t *dditable,
     }
 
     urDdiTable = *dditable;
+
+    if (UR_RESULT_SUCCESS == result) {
+        result = ur_sanitizer_layer::urGetGlobalProcAddrTable(
+            UR_API_VERSION_CURRENT, &dditable->Global);
+    }
 
     if (UR_RESULT_SUCCESS == result) {
         result = ur_sanitizer_layer::urGetContextProcAddrTable(

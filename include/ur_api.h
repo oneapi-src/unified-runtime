@@ -7,7 +7,7 @@
  * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
  *
  * @file ur_api.h
- * @version v0.10-r0
+ * @version v0.11-r0
  *
  */
 #ifndef UR_API_H_INCLUDED
@@ -1133,7 +1133,8 @@ typedef enum ur_api_version_t {
     UR_API_VERSION_0_8 = UR_MAKE_VERSION(0, 8),      ///< version 0.8
     UR_API_VERSION_0_9 = UR_MAKE_VERSION(0, 9),      ///< version 0.9
     UR_API_VERSION_0_10 = UR_MAKE_VERSION(0, 10),    ///< version 0.10
-    UR_API_VERSION_CURRENT = UR_MAKE_VERSION(0, 10), ///< latest known version
+    UR_API_VERSION_0_11 = UR_MAKE_VERSION(0, 11),    ///< version 0.11
+    UR_API_VERSION_CURRENT = UR_MAKE_VERSION(0, 11), ///< latest known version
     /// @cond
     UR_API_VERSION_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -2062,7 +2063,7 @@ typedef struct ur_device_native_properties_t {
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
 ///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
-///         + `NULL == hPlatform`
+///         + `NULL == hAdapter`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `NULL == phDevice`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
@@ -2070,7 +2071,7 @@ typedef struct ur_device_native_properties_t {
 UR_APIEXPORT ur_result_t UR_APICALL
 urDeviceCreateWithNativeHandle(
     ur_native_handle_t hNativeDevice,                 ///< [in][nocheck] the native handle of the device.
-    ur_platform_handle_t hPlatform,                   ///< [in] handle of the platform instance
+    ur_adapter_handle_t hAdapter,                     ///< [in] handle of the adapter to which `hNativeDevice` belongs
     const ur_device_native_properties_t *pProperties, ///< [in][optional] pointer to native device properties struct.
     ur_device_handle_t *phDevice                      ///< [out] pointer to the handle of the device object created.
 );
@@ -4785,6 +4786,7 @@ urKernelSetArgValue(
     size_t argSize,                                      ///< [in] size of argument type
     const ur_kernel_arg_value_properties_t *pProperties, ///< [in][optional] pointer to value properties.
     const void *pArgValue                                ///< [in] argument value represented as matching arg type.
+                                                         ///< The data pointed to will be copied and therefore can be reused on return.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -11972,7 +11974,7 @@ typedef struct ur_device_get_native_handle_params_t {
 ///     allowing the callback the ability to modify the parameter's value
 typedef struct ur_device_create_with_native_handle_params_t {
     ur_native_handle_t *phNativeDevice;
-    ur_platform_handle_t *phPlatform;
+    ur_adapter_handle_t *phAdapter;
     const ur_device_native_properties_t **ppProperties;
     ur_device_handle_t **pphDevice;
 } ur_device_create_with_native_handle_params_t;
