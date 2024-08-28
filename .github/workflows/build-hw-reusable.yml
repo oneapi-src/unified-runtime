@@ -44,6 +44,8 @@ jobs:
         exclude:
          - adapter: {name: L0, platform: ""}
            compiler: {c: clang, cxx: clang++}
+         - adapter: {name: L0_V2, platform: ""}
+           compiler: {c: clang, cxx: clang++}
         # Exclude these configurations to avoid overloading the runners.
          - adapter: {static_Loader: ON}
            build_type: Release
