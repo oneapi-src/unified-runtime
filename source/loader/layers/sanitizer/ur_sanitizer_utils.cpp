@@ -186,7 +186,7 @@ bool GetDeviceUSMCapability(ur_device_handle_t Device,
 }
 
 std::vector<ur_device_handle_t> GetDevices(ur_program_handle_t Program) {
-    uint32_t DeviceNum;
+    uint32_t DeviceNum = 0;
     [[maybe_unused]] ur_result_t Result =
         getContext()->urDdiTable.Program.pfnGetInfo(
             Program, UR_PROGRAM_INFO_NUM_DEVICES, sizeof(DeviceNum), &DeviceNum,
