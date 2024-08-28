@@ -12,22 +12,44 @@
 
 #include "asan_statistics.hpp"
 #include "ur_sanitizer_layer.hpp"
-#include <atomic>
 
 namespace ur_sanitizer_layer {
 
 void AsanStats::Print() {
-    getContext()->logger.always(
-        "Stats: {}M malloced ({}M for red zones) by {} calls",
-        usm_malloced >> 20, usm_malloced_redzones >> 20, usm_mallocs);
-    getContext()->logger.always("Stats: {}M freed by {} calls", usm_freed >> 20,
-                                usm_frees);
-    getContext()->logger.always("Stats: {}M really freed by {} calls",
-                                usm_really_freed >> 20, usm_real_frees);
+    getContext()->logger.always("Stats: peak memory overhead = {}%",
+                                Overhead * 100);
+}
 
-    getContext()->logger.always(
-        "Stats: shadow memory {}G reserved, {}M mapped; {} maps",
-        shadow_reserved >> 30, shadow_mmaped >> 20, shadow_mmaps);
+void AsanStats::UpdateUSMMalloced(uptr MallocedSize, uptr RedzoneSize) {
+    UsmMalloced += MallocedSize;
+    UsmMallocedRedzones += RedzoneSize;
+}
+
+void AsanStats::UpdateUSMFreed(uptr FreedSize, uptr RedzoneSize) {
+    UsmMalloced -= FreedSize;
+    UsmMallocedRedzones -= RedzoneSize;
+}
+
+void AsanStats::UpdateShadowMmaped(uptr ShadowSize) {
+    ShadowMmaped += ShadowSize;
+}
+
+void AsanStats::UpdateShadowMalloced(uptr ShadowSize) {
+    ShadowMalloced += ShadowSize;
+}
+
+void AsanStats::UpdateShadowFreed(uptr ShadowSize) {
+    ShadowMalloced -= ShadowSize;
+}
+
+void AsanStats::UpdateOverhead() {
+    auto ShadowSize = ShadowMmaped + ShadowMalloced;
+    auto TotalSize = UsmMalloced + ShadowSize;
+    if (TotalSize == 0) {
+        return;
+    }
+    auto NewOverhead = ShadowSize / (double)TotalSize;
+    Overhead = std::max(Overhead, NewOverhead);
 }
 
 } // namespace ur_sanitizer_layer

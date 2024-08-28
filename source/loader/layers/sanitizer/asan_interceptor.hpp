@@ -160,7 +160,7 @@ struct DeviceGlobalInfo {
 
 class SanitizerInterceptor {
   public:
-    explicit SanitizerInterceptor(logger::Logger &logger);
+    explicit SanitizerInterceptor();
 
     ~SanitizerInterceptor();
 
@@ -273,7 +273,6 @@ class SanitizerInterceptor {
 
     AsanOptions m_Options;
     AsanStats m_Stats;
-    logger::Logger &logger;
 
     std::unordered_set<ur_adapter_handle_t> m_Adapters;
     ur_shared_mutex m_AdaptersMutex;

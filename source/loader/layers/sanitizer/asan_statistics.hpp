@@ -18,26 +18,25 @@
 namespace ur_sanitizer_layer {
 
 struct AsanStats {
-    std::atomic<uptr> usm_mallocs;
-    std::atomic<uptr> usm_malloced;
-    std::atomic<uptr> usm_malloced_redzones;
+    void UpdateUSMMalloced(uptr MallocedSize, uptr RedzoneSize);
+    void UpdateUSMFreed(uptr FreedSize, uptr RedzoneSize);
 
-    std::atomic<uptr> usm_frees;
-    std::atomic<uptr> usm_freed;
-    std::atomic<uptr> usm_real_frees;
-    std::atomic<uptr> usm_really_freed;
+    void UpdateShadowMmaped(uptr ShadowSize);
+    void UpdateShadowMalloced(uptr ShadowSize);
+    void UpdateShadowFreed(uptr ShadowSize);
 
-    std::atomic<uptr> shadow_reserved;
-    std::atomic<uptr> shadow_mmaps;
-    std::atomic<uptr> shadow_mmaped;
-    std::atomic<uptr> shadow_malloced;
-    std::atomic<uptr> shadow_freed;
+    void Print();
 
-    // AsanStats();
+  private:
+    std::atomic<uptr> UsmMalloced;
+    std::atomic<uptr> UsmMallocedRedzones;
 
-    void Print(); // Prints formatted stats to stderr.
-    void Clear();
-    void MergeFrom(const AsanStats *stats);
+    std::atomic<uptr> ShadowMmaped;
+    std::atomic<uptr> ShadowMalloced;
+
+    double Overhead = 0.0;
+
+    void UpdateOverhead();
 };
 
 } // namespace ur_sanitizer_layer

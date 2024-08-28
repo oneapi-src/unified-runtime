@@ -136,6 +136,8 @@ if(UR_ENABLE_SANITIZER)
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_interceptor.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_interceptor.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_libdevice.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_options.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_options.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_quarantine.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_quarantine.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_report.cpp

@@ -184,8 +184,7 @@ ContextInfo::~ContextInfo() {
     assert(Result == UR_RESULT_SUCCESS);
 }
 
-SanitizerInterceptor::SanitizerInterceptor(logger::Logger &logger)
-    : m_Options(logger) {
+SanitizerInterceptor::SanitizerInterceptor() {
     if (getOptions().MaxQuarantineSizeMB) {
         m_Quarantine = std::make_unique<Quarantine>(
             static_cast<uint64_t>(getOptions().MaxQuarantineSizeMB) * 1024 *
@@ -210,7 +209,9 @@ SanitizerInterceptor::~SanitizerInterceptor() {
         getContext()->urDdiTable.Global.pfnAdapterRelease(Adapter);
     }
 
-    m_Stats.Print();
+    if (getOptions().PrintStats) {
+        m_Stats.Print();
+    }
 }
 
 /// The memory chunk allocated from the underlying allocator looks like this:
@@ -732,14 +733,14 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
         auto KernelInfo = getKernelInfo(Kernel);
 
         // Validate pointer arguments
-        if (Options(logger).DetectKernelArguments) {
+        if (getOptions().DetectKernelArguments) {
             for (const auto &[ArgIndex, PtrPair] : KernelInfo->PointerArgs) {
                 auto Ptr = PtrPair.first;
                 if (Ptr == nullptr) {
                     continue;
                 }
                 if (auto ValidateResult = ValidateUSMPointer(
-                        Context, DeviceInfo->Handle, (uptr)Ptr)) {
+                        ContextInfo->Handle, DeviceInfo->Handle, (uptr)Ptr)) {
                     ReportInvalidKernelArgument(Kernel, ArgIndex, (uptr)Ptr,
                                                 ValidateResult, PtrPair.second);
                     exit(1);
@@ -797,7 +798,7 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
         // We use "uint64_t" here because EnqueueWriteGlobal will fail when it's "uint32_t"
         // Because EnqueueWriteGlobal is a async write, so
         // we need to extend its lifetime
-        static uint64_t Debug = Options(logger).Debug ? 1 : 0;
+        static uint64_t Debug = getOptions().Debug ? 1 : 0;
         EnqueueWriteGlobal(kSPIR_AsanDebug, &Debug, sizeof(Debug));
 
         // Write shadow memory offset for global memory
