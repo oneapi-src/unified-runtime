@@ -74,7 +74,7 @@ ur_device_handle_t GetDevice(ur_queue_handle_t Queue) {
 
 std::vector<ur_device_handle_t> GetDevices(ur_context_handle_t Context) {
     std::vector<ur_device_handle_t> Devices{};
-    uint32_t DeviceNum;
+    uint32_t DeviceNum = 0;
     [[maybe_unused]] ur_result_t Result;
     Result = getContext()->urDdiTable.Context.pfnGetInfo(
         Context, UR_CONTEXT_INFO_NUM_DEVICES, sizeof(uint32_t), &DeviceNum,
