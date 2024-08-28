@@ -6,7 +6,7 @@
  * See LICENSE.TXT
  * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
  *
- * @file asan_report.hpp
+ * @file asan_statistics.hpp
  *
  */
 
