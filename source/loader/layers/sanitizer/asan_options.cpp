@@ -77,7 +77,7 @@ AsanOptions::AsanOptions() {
 
     auto KV = OptionsEnvMap->find("quarantine_size_mb");
     if (KV != OptionsEnvMap->end()) {
-        auto Value = KV->second.front();
+        const auto &Value = KV->second.front();
         try {
             auto temp_long = std::stoul(Value);
             if (temp_long > UINT32_MAX) {
@@ -108,7 +108,7 @@ AsanOptions::AsanOptions() {
 
     KV = OptionsEnvMap->find("max_redzone");
     if (KV != OptionsEnvMap->end()) {
-        auto Value = KV->second.front();
+        const auto &Value = KV->second.front();
         try {
             MaxRZSize = std::stoul(Value);
             if (MaxRZSize > 2048) {
