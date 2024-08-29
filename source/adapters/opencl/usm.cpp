@@ -313,6 +313,13 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMFill(
       numEventsInWaitList, cl_adapter::cast<const cl_event *>(phEventWaitList),
       &CopyEvent));
 
+  if (phEvent) {
+    // Since we're releasing this in the callback above we need to retain it
+    // here to keep the user copy alive.
+    CL_RETURN_ON_FAILURE(clRetainEvent(CopyEvent));
+    *phEvent = cl_adapter::cast<ur_event_handle_t>(CopyEvent);
+  }
+
   // This self destructs taking the event and allocation with it.
   auto Info = new AllocDeleterCallbackInfo(USMFree, CLContext, HostBuffer);
 
@@ -326,12 +333,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMFill(
     delete Info;
     clReleaseEvent(CopyEvent);
     CL_RETURN_ON_FAILURE(ClErr);
-  }
-  if (phEvent) {
-    // Since we're releasing this in the callback above we need to retain it
-    // here to keep the user copy alive.
-    CL_RETURN_ON_FAILURE(clRetainEvent(CopyEvent));
-    *phEvent = cl_adapter::cast<ur_event_handle_t>(CopyEvent);
   }
 
   return UR_RESULT_SUCCESS;
