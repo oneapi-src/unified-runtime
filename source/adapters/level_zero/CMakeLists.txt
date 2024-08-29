@@ -140,6 +140,11 @@ if(UR_BUILD_ADAPTER_L0)
             PRIVATE
                 ${CMAKE_CURRENT_SOURCE_DIR}/adapter_lib_init_linux.cpp
         )
+    else()
+        target_sources(ur_adapter_level_zero
+            PRIVATE
+                ${CMAKE_CURRENT_SOURCE_DIR}/adapter_lib_init_windows.cpp
+        )
     endif()
 
     # TODO: fix level_zero adapter conversion warnings

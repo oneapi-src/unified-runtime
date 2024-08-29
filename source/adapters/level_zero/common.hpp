@@ -450,6 +450,9 @@ extern const bool UseUSMAllocator;
 
 // Controls support of the indirect access kernels and deferred memory release.
 const bool IndirectAccessTrackingEnabled = [] {
+#ifdef _WIN32
+  return false;
+#endif
   char *UrRet = std::getenv("UR_L0_TRACK_INDIRECT_ACCESS_MEMORY");
   char *PiRet = std::getenv("SYCL_PI_LEVEL_ZERO_TRACK_INDIRECT_ACCESS_MEMORY");
   const bool RetVal = UrRet ? std::stoi(UrRet) : (PiRet ? std::stoi(PiRet) : 0);
@@ -529,5 +532,20 @@ extern thread_local int32_t ErrorAdapterNativeCode;
 [[maybe_unused]] void setErrorMessage(const char *pMessage,
                                       ur_result_t ErrorCode,
                                       int32_t AdapterErrorCode);
+
+template <class T>
+void addToCachedList(T &CachedObject, std::list<T> &CachedList) {
+  auto It = std::find(CachedList.begin(), CachedList.end(), CachedObject);
+  if (It == CachedList.end()) {
+    CachedList.push_back(CachedObject);
+  }
+}
+
+template <class T>
+void deleteFromCachedList(T &CachedObject, std::list<T> &CachedList) {
+  auto It = std::find(CachedList.begin(), CachedList.end(), CachedObject);
+  if (It != CachedList.end())
+    CachedList.erase(It);
+}
 
 #define L0_DRIVER_INORDER_MIN_VERSION 29534

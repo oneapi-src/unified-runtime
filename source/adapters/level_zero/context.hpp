@@ -175,6 +175,8 @@ struct ur_context_handle_t_ : _ur_object {
   std::vector<std::unordered_map<ur_device_handle_t, size_t>>
       EventCachesDeviceMap{4};
 
+  std::list<ur_kernel_handle_t> KernelsCache;
+
   // Initialize the PI context.
   ur_result_t initialize();
 
@@ -308,6 +310,14 @@ struct ur_context_handle_t_ : _ur_object {
 
   // Get handle to the L0 context
   ze_context_handle_t getZeHandle() const;
+
+  void deleteCachedObjectsOnDestruction() {
+    while (!KernelsCache.empty()) {
+      ur_kernel_handle_t &kernel = KernelsCache.front();
+      UR_CALL_THROWS(urKernelRelease(kernel));
+      deleteFromCachedList(kernel, KernelsCache);
+    }
+  }
 
 private:
   // Get the cache of events for a provided scope and profiling mode.

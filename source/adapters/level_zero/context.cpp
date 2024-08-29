@@ -40,10 +40,15 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextCreate(
 
     Context->initialize();
     *RetContext = reinterpret_cast<ur_context_handle_t>(Context);
+#ifdef _WIN32
+    std::scoped_lock<ur_shared_mutex> Lock(Platform->ContextsMutex);
+    addToCachedList<ur_context_handle_t>(*RetContext, Platform->Contexts);
+#else
     if (IndirectAccessTrackingEnabled) {
       std::scoped_lock<ur_shared_mutex> Lock(Platform->ContextsMutex);
       Platform->Contexts.push_back(*RetContext);
     }
+#endif
   } catch (const std::bad_alloc &) {
     return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   } catch (...) {
@@ -355,13 +360,21 @@ ur_result_t ContextReleaseHelper(ur_context_handle_t Context) {
   if (!Context->RefCount.decrementAndTest())
     return UR_RESULT_SUCCESS;
 
-  if (IndirectAccessTrackingEnabled) {
+  auto DeleteFromContextsCache = [&]() {
     ur_platform_handle_t Plt = Context->getPlatform();
     auto &Contexts = Plt->Contexts;
     auto It = std::find(Contexts.begin(), Contexts.end(), Context);
     if (It != Contexts.end())
       Contexts.erase(It);
+  };
+
+#ifdef _WIN32
+  DeleteFromContextsCache();
+#else
+  if (IndirectAccessTrackingEnabled) {
+    DeleteFromContextsCache();
   }
+#endif
   ze_context_handle_t DestroyZeContext =
       Context->OwnNativeHandle ? Context->ZeContext : nullptr;
 
@@ -451,6 +464,12 @@ ur_result_t ur_context_handle_t_::finalize() {
       }
     }
   }
+
+  for (auto &kernel : KernelsCache) {
+    UR_CALL(urKernelRelease(kernel));
+  }
+  KernelsCache.clear();
+
   return UR_RESULT_SUCCESS;
 }
 
