@@ -21,7 +21,6 @@ namespace ur_sanitizer_layer {
 struct DeviceSanitizerReport;
 struct AllocInfo;
 struct StackTrace;
-struct ValidateUSMResult;
 
 void ReportBadFree(uptr Addr, const StackTrace &stack,
                    const std::shared_ptr<AllocInfo> &AllocInfo);
@@ -40,9 +39,5 @@ void ReportGenericError(const DeviceSanitizerReport &Report,
 
 void ReportUseAfterFree(const DeviceSanitizerReport &Report,
                         ur_kernel_handle_t Kernel, ur_context_handle_t Context);
-
-void ReportInvalidKernelArgument(ur_kernel_handle_t Kernel, uint32_t ArgIndex,
-                                 uptr Addr, const ValidateUSMResult &VR,
-                                 StackTrace Stack);
 
 } // namespace ur_sanitizer_layer
