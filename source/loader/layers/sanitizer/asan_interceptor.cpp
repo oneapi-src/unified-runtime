@@ -313,7 +313,8 @@ ur_result_t SanitizerInterceptor::releaseMemory(ur_context_handle_t Context,
     }
 
     auto AllocInfoIt = *AllocInfoItOp;
-    auto &AllocInfo = AllocInfoIt->second;
+    // AllocInfo is a shared_ptr and we need to keep a copy to avoid early release
+    auto AllocInfo = AllocInfoIt->second;
 
     if (AllocInfo->Context != Context) {
         if (AllocInfo->UserBegin == Addr) {
