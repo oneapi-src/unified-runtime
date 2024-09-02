@@ -163,6 +163,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextCreateWithNativeHandle(
         ZeContext, NumDevices, Devices, OwnNativeHandle);
     UrContext->initialize();
     *Context = reinterpret_cast<ur_context_handle_t>(UrContext);
+#ifdef _WIN32
+    ur_platform_handle_t Platform = Devices[0]->Platform;
+    std::scoped_lock<ur_shared_mutex> Lock(Platform->ContextsMutex);
+    addToCachedList<ur_context_handle_t>(*Context, Platform->Contexts);
+#endif
   } catch (const std::bad_alloc &) {
     return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   } catch (...) {
@@ -463,11 +468,6 @@ ur_result_t ur_context_handle_t_::finalize() {
       }
     }
   }
-
-  for (auto &kernel : KernelsCache) {
-    UR_CALL(urKernelRelease(kernel));
-  }
-  KernelsCache.clear();
 
   return UR_RESULT_SUCCESS;
 }
@@ -864,6 +864,8 @@ void ur_context_handle_t_::deleteCachedObjectsOnDestruction() {
     while (RefCount--) {
       UR_CALL_THROWS(urKernelRelease(kernel));
     }
+    // kernel object should be deleted at this point, but this is a guard call
+    // to protect from infinite loop on case of error.
     deleteFromCachedList(kernel, KernelsCache);
   }
 }

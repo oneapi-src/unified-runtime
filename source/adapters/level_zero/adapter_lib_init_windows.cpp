@@ -27,6 +27,8 @@ ur_result_t deleteCacheOnDestruction() {
       while (RefCount--) {
         UR_CALL(urContextRelease(ctx));
       }
+      // context object should be deleted at this point, but this is a guard
+      // call to protect from infinite loop on case of error.
       deleteFromCachedList<ur_context_handle_t>(ctx, p->Contexts);
     }
   }

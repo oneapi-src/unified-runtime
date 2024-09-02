@@ -594,11 +594,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelCreate(
 
 #ifdef _WIN32
     auto &Context = Program->Context;
-    auto It = std::find(Context->KernelsCache.begin(),
-                        Context->KernelsCache.end(), *RetKernel);
-    if (It == Context->KernelsCache.end()) {
-      Context->KernelsCache.push_back(*RetKernel);
-    }
+    addToCachedList(*RetKernel, Context->KernelsCache);
 #endif
 
   } catch (const std::bad_alloc &) {
@@ -912,13 +908,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelRelease(
         return ze2urResult(ZeResult);
     }
   }
-
   Kernel->ZeKernelMap.clear();
-
   if (IndirectAccessTrackingEnabled) {
     UR_CALL(urContextRelease(KernelProgram->Context));
   }
-
   // do a release on the program this kernel was part of without delete of the
   // program handle
   KernelProgram->ur_release_program_resources(false);
@@ -1098,6 +1091,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
     }
 
     *RetKernel = reinterpret_cast<ur_kernel_handle_t>(Kernel);
+#ifdef _WIN32
+    auto &Context = Program->Context;
+    addToCachedList(*RetKernel, Context->KernelsCache);
+#endif
   } catch (const std::bad_alloc &) {
     return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   } catch (...) {
