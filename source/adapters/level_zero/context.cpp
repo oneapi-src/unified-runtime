@@ -368,13 +368,12 @@ ur_result_t ContextReleaseHelper(ur_context_handle_t Context) {
       Contexts.erase(It);
   };
 
-#ifdef _WIN32
   DeleteFromContextsCache();
-#else
+
   if (IndirectAccessTrackingEnabled) {
     DeleteFromContextsCache();
   }
-#endif
+
   ze_context_handle_t DestroyZeContext =
       Context->OwnNativeHandle ? Context->ZeContext : nullptr;
 
@@ -856,4 +855,15 @@ ur_context_handle_t_::getDevices() const {
 
 ze_context_handle_t ur_context_handle_t_::getZeHandle() const {
   return ZeContext;
+}
+
+void ur_context_handle_t_::deleteCachedObjectsOnDestruction() {
+  while (!KernelsCache.empty()) {
+    ur_kernel_handle_t &kernel = KernelsCache.front();
+    uint32_t RefCount = kernel->RefCount.load();
+    while (RefCount--) {
+      UR_CALL_THROWS(urKernelRelease(kernel));
+    }
+    deleteFromCachedList(kernel, KernelsCache);
+  }
 }

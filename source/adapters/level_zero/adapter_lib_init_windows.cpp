@@ -13,6 +13,25 @@
 
 #include <windows.h>
 
+// On windows, UR is destructed before sycl-rt have destructed the objects, so
+// we need to clear the leftover memory before UR destruction.
+ur_result_t deleteCacheOnDestruction() {
+  std::lock_guard<std::mutex> Lock{GlobalAdapter->Mutex};
+  const auto *platforms = GlobalAdapter->PlatformCache->get_value();
+  for (const auto &p : *platforms) {
+    std::scoped_lock<ur_shared_mutex> ContextsLock(p->ContextsMutex);
+    while (!p->Contexts.empty()) {
+      ur_context_handle_t &ctx = p->Contexts.front();
+      ctx->deleteCachedObjectsOnDestruction();
+      uint32_t RefCount = ctx->RefCount.load();
+      while (RefCount--) {
+        UR_CALL(urContextRelease(ctx));
+      }
+      deleteFromCachedList<ur_context_handle_t>(ctx, p->Contexts);
+    }
+  }
+}
+
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, // handle to DLL module
                     DWORD fdwReason,    // reason for calling function
                     LPVOID lpReserved)  // reserved
@@ -21,18 +40,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, // handle to DLL module
   case DLL_PROCESS_ATTACH:
     break;
   case DLL_PROCESS_DETACH: {
-    std::lock_guard<std::mutex> Lock{GlobalAdapter->Mutex};
-    const auto *platforms = GlobalAdapter->PlatformCache->get_value();
-    for (const auto &p : *platforms) {
-      std::scoped_lock<ur_shared_mutex> ContextsLock(p->ContextsMutex);
-      while (!p->Contexts.empty()) {
-        ur_context_handle_t &ctx = p->Contexts.front();
-        ctx->deleteCachedObjectsOnDestruction();
-        UR_CALL(urContextRelease(ctx));
-        deleteFromCachedList<ur_context_handle_t>(ctx, p->Contexts);
-      }
-    }
-    break;
+    return deleteCacheOnDestruction() == UR_RESULT_SUCCESS;
   }
   case DLL_THREAD_ATTACH:
     break;

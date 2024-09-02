@@ -23,6 +23,7 @@
 #include <zes_api.h>
 
 #include "common.hpp"
+#include "kernel.hpp"
 #include "queue.hpp"
 
 #include <umf_helpers.hpp>
@@ -311,13 +312,7 @@ struct ur_context_handle_t_ : _ur_object {
   // Get handle to the L0 context
   ze_context_handle_t getZeHandle() const;
 
-  void deleteCachedObjectsOnDestruction() {
-    while (!KernelsCache.empty()) {
-      ur_kernel_handle_t &kernel = KernelsCache.front();
-      UR_CALL_THROWS(urKernelRelease(kernel));
-      deleteFromCachedList(kernel, KernelsCache);
-    }
-  }
+  void deleteCachedObjectsOnDestruction();
 
 private:
   // Get the cache of events for a provided scope and profiling mode.
