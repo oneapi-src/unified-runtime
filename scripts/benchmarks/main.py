@@ -14,6 +14,7 @@ from benches.easywave import Easywave
 from benches.quicksilver import QuickSilver
 from benches.SobelFilter import SobelFilter
 from benches.velocity import VelocityBench
+from benches.syclbench import *
 from benches.options import options
 from output import generate_markdown
 import argparse
@@ -27,6 +28,7 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
 
     vb = VelocityBench(directory)
     cb = ComputeBench(directory)
+    sb = SyclBench(directory)
 
     benchmarks = [
         SubmitKernelSYCL(cb, 0),
@@ -40,12 +42,38 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
         ExecImmediateCopyQueue(cb, 0, 1, 'Device', 'Device', 1024),
         ExecImmediateCopyQueue(cb, 1, 1, 'Device', 'Host', 1024),
         VectorSum(cb),
+        
         Hashtable(vb),
         Bitcracker(vb),
-        CudaSift(vb),
+        # CudaSift(vb),
         Easywave(vb),
         QuickSilver(vb),
-        SobelFilter(vb)
+        # SobelFilter(vb),
+
+        TwoDConvolution(sb),
+        Two_mm(sb),
+        Three_mm(sb),
+        Arith(sb),
+        Atax(sb),
+        Atomic_reduction(sb),
+        Bicg(sb),
+        Correlation(sb),
+        Covariance(sb),
+        Gemm(sb),
+        Gesumv(sb),
+        Gramschmidt(sb),
+        KMeans(sb),
+        LinRegCoeff(sb),
+        LinRegError(sb),
+        LocalMem(sb, "int32"),
+        LocalMem(sb, "fp32"),
+        MatmulChain(sb),
+        MolDyn(sb),
+        Mvt(sb),
+        Sf(sb),
+        Syr2k(sb),
+        Syrk(sb),
+
     ]
 
     if filter:

@@ -43,6 +43,8 @@ def run(command, env_vars={}, cwd=None, add_sycl=False):
 def git_clone(dir, name, repo, commit):
     repo_path = os.path.join(dir, name)
 
+    print(f"Cloning {repo} to {repo_path} at commit {commit}")
+
     if os.path.isdir(repo_path) and os.path.isdir(os.path.join(repo_path, '.git')):
         run("git fetch", cwd=repo_path)
         run(f"git checkout {commit}", cwd=repo_path)
