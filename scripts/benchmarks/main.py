@@ -31,6 +31,7 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
     sb = SyclBench(directory)
 
     benchmarks = [
+        # *** Compute benchmarks
         SubmitKernelSYCL(cb, 0),
         SubmitKernelSYCL(cb, 1),
         SubmitKernelUR(cb, 0),
@@ -43,13 +44,30 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
         ExecImmediateCopyQueue(cb, 1, 1, 'Device', 'Host', 1024),
         VectorSum(cb),
         
+        # *** Velocity benchmarks
         Hashtable(vb),
         Bitcracker(vb),
-        # CudaSift(vb),
+        CudaSift(vb),
         Easywave(vb),
         QuickSilver(vb),
-        # SobelFilter(vb),
+        SobelFilter(vb),
 
+        # *** sycl-bench multi benchmarks
+        Blocked_transform(sb),
+        DagTaskI(sb),
+        DagTaskS(sb),
+        HostDevBandwidth(sb),
+        Pattern_L2(sb),
+        Reduction(sb),
+        ScalarProd(sb),
+        SegmentReduction(sb),
+        UsmAccLatency(sb),
+        UsmAllocLatency(sb),
+        UsmInstrMix(sb),
+        UsmPinnedOverhead(sb),
+        VecAdd(sb),
+
+        # *** sycl-bench single benchmarks
         TwoDConvolution(sb),
         Two_mm(sb),
         Three_mm(sb),
@@ -73,7 +91,6 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
         Sf(sb),
         Syr2k(sb),
         Syrk(sb),
-
     ]
 
     if filter:
@@ -92,22 +109,34 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
             print(f"running {benchmark.name()}, iteration {iter}... ", end='', flush=True)
             bench_results = benchmark.run(merged_env_vars)
             if bench_results is not None:
-                print(f"complete ({bench_results.value} {benchmark.unit()}).")
-                iteration_results.append(bench_results)
+                for bench_result in bench_results:
+                    print(f"complete ({bench_result.label}: {bench_result.value} {benchmark.unit()}).")
+                    iteration_results.append(bench_result)
             else:
                 print(f"did not finish.")
 
         if len(iteration_results) == 0:
             continue
 
-        iteration_results.sort(key=lambda res: res.value)
-        median_index = len(iteration_results) // 2
-        median_result = iteration_results[median_index]
+        for label in set([result.label for result in iteration_results]):
+            label_results = [result for result in iteration_results if result.label == label]
+            label_results.sort(key=lambda res: res.value)
+            median_index = len(label_results) // 2
+            median_result = label_results[median_index]
 
-        median_result.unit = benchmark.unit()
-        median_result.name = benchmark.name()
+            median_result.unit = benchmark.unit()
+            median_result.name = label
 
-        results.append(median_result)
+            results.append(median_result)
+
+        # iteration_results.sort(key=lambda res: res.value)
+        # median_index = len(iteration_results) // 2
+        # median_result = iteration_results[median_index]
+
+        # median_result.unit = benchmark.unit()
+        # median_result.name = benchmark.name()
+
+        # results.append(median_result)
 
     for benchmark in benchmarks:
         print(f"tearing down {benchmark.name()}... ", end='', flush=True)
