@@ -148,6 +148,20 @@ jobs:
       adapter_name: L0_V2
       runner_name: L0
 
+  level-zero-pvc:
+    name: Level Zero PVC
+    uses: ./.github/workflows/build-hw-reusable.yml
+    with:
+      adapter_name: L0
+      runner_name: E2E_L0
+
+  level-zero-pvc-v2:
+    name: Level Zero PVC V2
+    uses: ./.github/workflows/build-hw-reusable.yml
+    with:
+      adapter_name: L0_V2
+      runner_name: E2E_L0
+
   level-zero-static:
     name: Level Zero static
     uses: ./.github/workflows/build-hw-reusable.yml
