@@ -97,47 +97,50 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
         benchmarks = [benchmark for benchmark in benchmarks if filter.search(benchmark.name())]
 
     for benchmark in benchmarks:
-        print(f"setting up {benchmark.name()}... ", end='', flush=True)
-        benchmark.setup()
-        print("complete.")
+        try:
+            print(f"setting up {benchmark.name()}... ", end='', flush=True)
+            benchmark.setup()
+            print("complete.")
+        except Exception as e:
+            if options.exit_on_failure:
+                raise e
+            else:
+                print(f"failed: {e}")
 
     results = []
     for benchmark in benchmarks:
-        merged_env_vars = {**additional_env_vars}
-        iteration_results = []
-        for iter in range(options.iterations):
-            print(f"running {benchmark.name()}, iteration {iter}... ", end='', flush=True)
-            bench_results = benchmark.run(merged_env_vars)
-            if bench_results is not None:
-                for bench_result in bench_results:
-                    print(f"complete ({bench_result.label}: {bench_result.value} {benchmark.unit()}).")
-                    iteration_results.append(bench_result)
+        try:
+            merged_env_vars = {**additional_env_vars}
+            iteration_results = []
+            for iter in range(options.iterations):
+                print(f"running {benchmark.name()}, iteration {iter}... ", end='', flush=True)
+                bench_results = benchmark.run(merged_env_vars)
+                if bench_results is not None:
+                    for bench_result in bench_results:
+                        print(f"complete ({bench_result.label}: {bench_result.value} {benchmark.unit()}).")
+                        iteration_results.append(bench_result)
+                else:
+                    print(f"did not finish.")
+
+            if len(iteration_results) == 0:
+                continue
+
+            for label in set([result.label for result in iteration_results]):
+                label_results = [result for result in iteration_results if result.label == label]
+                label_results.sort(key=lambda res: res.value)
+                median_index = len(label_results) // 2
+                median_result = label_results[median_index]
+
+                median_result.unit = benchmark.unit()
+                median_result.name = label
+
+                results.append(median_result)
+        except Exception as e:
+            if options.exit_on_failure:
+                raise e
             else:
-                print(f"did not finish.")
-
-        if len(iteration_results) == 0:
-            continue
-
-        for label in set([result.label for result in iteration_results]):
-            label_results = [result for result in iteration_results if result.label == label]
-            label_results.sort(key=lambda res: res.value)
-            median_index = len(label_results) // 2
-            median_result = label_results[median_index]
-
-            median_result.unit = benchmark.unit()
-            median_result.name = label
-
-            results.append(median_result)
-
-        # iteration_results.sort(key=lambda res: res.value)
-        # median_index = len(iteration_results) // 2
-        # median_result = iteration_results[median_index]
-
-        # median_result.unit = benchmark.unit()
-        # median_result.name = benchmark.name()
-
-        # results.append(median_result)
-
+                print(f"failed: {e}")
+        
     for benchmark in benchmarks:
         print(f"tearing down {benchmark.name()}... ", end='', flush=True)
         benchmark.teardown()
@@ -183,6 +186,7 @@ if __name__ == "__main__":
     parser.add_argument("--timeout", type=int, help='Timeout for individual benchmarks in seconds.', default=600)
     parser.add_argument("--filter", type=str, help='Regex pattern to filter benchmarks by name.', default=None)
     parser.add_argument("--verbose", help='Print output of all the commands.', action="store_true")
+    parser.add_argument("--exit_on_failure", help='Exit on first failure.', action="store_true")
 
     args = parser.parse_args()
     additional_env_vars = validate_and_parse_env_args(args.env)
@@ -194,6 +198,7 @@ if __name__ == "__main__":
     options.timeout = args.timeout
     options.ur_dir = args.ur_dir
     options.ur_adapter_name = args.ur_adapter_name
+    options.exit_on_failure = args.exit_on_failure
 
     benchmark_filter = re.compile(args.filter) if args.filter else None
 
