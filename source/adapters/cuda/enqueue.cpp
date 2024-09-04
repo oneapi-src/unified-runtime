@@ -250,9 +250,18 @@ setKernelParams([[maybe_unused]] const ur_context_handle_t Context,
       return UR_RESULT_ERROR_INVALID_WORK_GROUP_SIZE;
     }
 
+    size_t MaxGridDim[3] = {0, 0, 0};
+    urDeviceGetInfo(Device, UR_DEVICE_INFO_MAX_WORK_GROUPS_3D,
+                    sizeof(MaxGridDim), &MaxGridDim, nullptr);
     for (size_t i = 0; i < WorkDim; i++) {
       BlocksPerGrid[i] =
           (GlobalWorkSize[i] + ThreadsPerBlock[i] - 1) / ThreadsPerBlock[i];
+
+      if (BlocksPerGrid[i] > MaxGridDim[i]) {
+        // Currently this is handled as an invalid value error. Revisit when a
+        // better alternative result error code is agreed on.
+        return UR_RESULT_ERROR_INVALID_VALUE;
+      }
     }
 
     // Set the implicit global offset parameter if kernel has offset variant
