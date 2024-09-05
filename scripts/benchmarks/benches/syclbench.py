@@ -74,8 +74,6 @@ class SyclBenchmark(Benchmark):
         command += self.bin_args()
         env_vars.update(self.extra_env_vars())
 
-        print(f"Running {self.test} -> {command}")
-
         result = self.run_bench(command, env_vars)
 
         with open(outputfile, 'r') as f:
@@ -94,7 +92,6 @@ class SyclBenchmark(Benchmark):
             for label in set(result.label for result in res_list):
                 values = [result.value for result in res_list if result.label == label]
                 median_value = sorted(values)[len(values) // 2]
-                print(f"Median for {label}: {median_value}")
                 median_list.append(Result(label=label, value=median_value, command=command, env=env_vars, stdout=result))
 
         return median_list
@@ -107,7 +104,7 @@ class SyclBenchmark(Benchmark):
 
 class Arith(SyclBenchmark):
     def __init__(self, bench):
-        super().__init__(bench, "arith", "MicroBench_Arith_int32_512")
+        super().__init__(bench, "arith", "Arith_int32_512")
 
     def bin_args(self) -> list[str]:
         return [
@@ -116,11 +113,11 @@ class Arith(SyclBenchmark):
 
 class TwoDConvolution(SyclBenchmark):
     def __init__(self, bench):
-        super().__init__(bench, "2DConvolution", "Polybench_2DConvolution")
+        super().__init__(bench, "2DConvolution", "2DConvolution")
 
 class Two_mm(SyclBenchmark):
     def __init__(self, bench):
-        super().__init__(bench, "2mm", "Polybench_2mm")
+        super().__init__(bench, "2mm", "2mm")
 
     def bin_args(self) -> list[str]:
         return [
@@ -129,7 +126,7 @@ class Two_mm(SyclBenchmark):
 
 class Three_mm(SyclBenchmark):
     def __init__(self, bench):
-        super().__init__(bench, "3mm", "Polybench_3mm")
+        super().__init__(bench, "3mm", "3mm")
 
     def bin_args(self) -> list[str]:
         return [
@@ -138,7 +135,7 @@ class Three_mm(SyclBenchmark):
 
 class Atax(SyclBenchmark):
     def __init__(self, bench):
-        super().__init__(bench, "atax", "Polybench_Atax")
+        super().__init__(bench, "atax", "Atax")
 
     def bin_args(self) -> list[str]:
         return [
@@ -151,7 +148,7 @@ class Atomic_reduction(SyclBenchmark):
 
 class Bicg(SyclBenchmark):
     def __init__(self, bench):
-        super().__init__(bench, "bicg", "Polybench_Bicg")
+        super().__init__(bench, "bicg", "Bicg")
 
     def bin_args(self) -> list[str]:
         return [
@@ -160,7 +157,7 @@ class Bicg(SyclBenchmark):
     
 class Correlation(SyclBenchmark):
     def __init__(self, bench):
-        super().__init__(bench, "correlation", "Polybench_Correlation")
+        super().__init__(bench, "correlation", "Correlation")
 
     def bin_args(self) -> list[str]:
         return [
@@ -169,7 +166,7 @@ class Correlation(SyclBenchmark):
 
 class Covariance(SyclBenchmark):
     def __init__(self, bench):
-        super().__init__(bench, "covariance", "Polybench_Covariance")
+        super().__init__(bench, "covariance", "Covariance")
 
     def bin_args(self) -> list[str]:
         return [
@@ -178,7 +175,7 @@ class Covariance(SyclBenchmark):
 
 class Gemm(SyclBenchmark):
     def __init__(self, bench):
-        super().__init__(bench, "gemm", "Polybench_Gemm")
+        super().__init__(bench, "gemm", "Gemm")
 
     def bin_args(self) -> list[str]:
         return [
@@ -187,7 +184,7 @@ class Gemm(SyclBenchmark):
     
 class Gesumv(SyclBenchmark):
     def __init__(self, bench):
-        super().__init__(bench, "gesummv", "Polybench_Gesummv")
+        super().__init__(bench, "gesummv", "Gesummv")
 
     def bin_args(self) -> list[str]:
         return [
@@ -196,7 +193,7 @@ class Gesumv(SyclBenchmark):
 
 class Gramschmidt(SyclBenchmark):
     def __init__(self, bench):
-        super().__init__(bench, "gramschmidt", "Polybench_Gramschmidt")
+        super().__init__(bench, "gramschmidt", "Gramschmidt")
 
     def bin_args(self) -> list[str]:
         return [
@@ -205,7 +202,7 @@ class Gramschmidt(SyclBenchmark):
 
 class KMeans(SyclBenchmark):
     def __init__(self, bench):
-        super().__init__(bench, "kmeans", "Kmeans_fp32")
+        super().__init__(bench, "kmeans", "Kmeans")
 
     def bin_args(self) -> list[str]:
         return [
@@ -214,22 +211,12 @@ class KMeans(SyclBenchmark):
 
 class LinRegCoeff(SyclBenchmark):
     def __init__(self, bench):
-        super().__init__(bench, "lin_reg_coeff", "LinearRegressionCoeff_fp32")
+        super().__init__(bench, "lin_reg_coeff", "LinearRegressionCoeff")
 
 class LinRegError(SyclBenchmark):
     def __init__(self, bench):
-        super().__init__(bench, "lin_reg_error", "LinearRegression_fp32")
+        super().__init__(bench, "lin_reg_error", "LinearRegression")
 
-class LocalMem(SyclBenchmark):
-    def __init__(self, bench, type):
-        if type != "int32" and type != "fp32":
-            raise ValueError("Invalid type for LocalMem benchmark")
-        super().__init__(bench, "local_mem", f"MicroBench_LocalMem_{type}_4096")
-
-    def bin_args(self) -> list[str]:
-        return [
-            f"--size=512",
-        ]
 class MatmulChain(SyclBenchmark):
     def __init__(self, bench):
         super().__init__(bench, "matmulchain", "MatmulChain")
@@ -257,7 +244,7 @@ class MolDyn(SyclBenchmark):
 
 class Mvt(SyclBenchmark):
     def __init__(self, bench):
-        super().__init__(bench, "mvt", "Polybench_Mvt")
+        super().__init__(bench, "mvt", "Mvt")
 
     def bin_args(self) -> list[str]:
         return [
@@ -272,7 +259,7 @@ class Mvt(SyclBenchmark):
 
 class Sf(SyclBenchmark):
     def __init__(self, bench):
-        super().__init__(bench, "sf", "MicroBench_sf_fp32_16")
+        super().__init__(bench, "sf", "sf_16")
 
     def bin_args(self) -> list[str]:
         return [
@@ -287,7 +274,7 @@ class Sf(SyclBenchmark):
 
 class Syr2k(SyclBenchmark):
     def __init__(self, bench):
-        super().__init__(bench, "syr2k", "Polybench_Syr2k")
+        super().__init__(bench, "syr2k", "Syr2k")
 
     def bin_args(self) -> list[str]:
         return [
@@ -296,7 +283,7 @@ class Syr2k(SyclBenchmark):
     
 class Syrk(SyclBenchmark):
     def __init__(self, bench):
-        super().__init__(bench, "syrk", "Polybench_Syrk")
+        super().__init__(bench, "syrk", "Syrk")
 
     def bin_args(self) -> list[str]:
         return [
@@ -315,7 +302,7 @@ class Blocked_transform(SyclBenchmark):
 
 class DagTaskI(SyclBenchmark):
     def __init__(self, bench):
-        super().__init__(bench, "dag_task_throughput_independent", "Runtime_IndependentDAGTaskThroughput_")
+        super().__init__(bench, "dag_task_throughput_independent", "IndependentDAGTaskThroughput_multi")
 
     def bin_args(self) -> list[str]:
         return [
@@ -324,7 +311,7 @@ class DagTaskI(SyclBenchmark):
     
 class DagTaskS(SyclBenchmark):
     def __init__(self, bench):
-        super().__init__(bench, "dag_task_throughput_sequential", "Runtime_DAGTaskThroughput_")
+        super().__init__(bench, "dag_task_throughput_sequential", "DAGTaskThroughput_multi")
 
     def bin_args(self) -> list[str]:
         return [
@@ -333,11 +320,20 @@ class DagTaskS(SyclBenchmark):
 
 class HostDevBandwidth(SyclBenchmark):
     def __init__(self, bench):
-        super().__init__(bench, "host_device_bandwidth", "MicroBench_HostDeviceBandwidth_")
+        super().__init__(bench, "host_device_bandwidth", "HostDeviceBandwidth_multi")
+
+class LocalMem(SyclBenchmark):
+    def __init__(self, bench):
+        super().__init__(bench, "local_mem", f"LocalMem_multi")
+
+    def bin_args(self) -> list[str]:
+        return [
+            f"--size=512",
+        ]
 
 class Pattern_L2(SyclBenchmark):
     def __init__(self, bench):
-        super().__init__(bench, "pattern_L2", "MicroBench_L2_multi")
+        super().__init__(bench, "pattern_L2", "L2_multi")
 
 class Reduction(SyclBenchmark):
     def __init__(self, bench):
@@ -357,7 +353,7 @@ class UsmAccLatency(SyclBenchmark):
 
 class UsmAllocLatency(SyclBenchmark):
     def __init__(self, bench):
-        super().__init__(bench, "usm_allocation_latency", "USM_Allocation_latency_fp32_multi")
+        super().__init__(bench, "usm_allocation_latency", "USM_Allocation_latency_multi")
 
 class UsmInstrMix(SyclBenchmark):
     def __init__(self, bench):
