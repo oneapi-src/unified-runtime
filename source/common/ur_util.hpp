@@ -441,11 +441,6 @@ template <typename T> class AtomicSingleton {
 
     static T *get_direct() {
         auto ptr = instance.bypass()->get_direct();
-        if (ptr == nullptr) {
-            auto val = instance.acquire();
-            ptr = val->get_or_create(false);
-            instance.release();
-        }
 
         // This ptr is *not* safe to access if
         // this thread is not holding a refcount

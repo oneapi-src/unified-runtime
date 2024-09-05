@@ -59,6 +59,8 @@ try {
 %if th.obj_traits.is_loader_only(obj):
     return ur_lib::${th.make_func_name(n, tags, obj)}(${", ".join(th.make_param_lines(n, tags, obj, format=["name"]))} );
 %else:
+    if( ${x}_lib::getContext() == nullptr )
+        return ${X}_RESULT_ERROR_UNINITIALIZED;
     ${th.get_initial_null_set(obj)}auto ${th.make_pfn_name(n, tags, obj)} = ${x}_lib::getContext()->${n}DdiTable.${th.get_table_name(n, tags, obj)}.${th.make_pfn_name(n, tags, obj)};
     if( nullptr == ${th.make_pfn_name(n, tags, obj)} )
         return ${X}_RESULT_ERROR_UNINITIALIZED;

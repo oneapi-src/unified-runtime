@@ -78,6 +78,10 @@ __urdlllocal ur_result_t context_t::Init(
     logger::init(logger_name);
     logger::debug("Logger {} initialized successfully!", logger_name);
 
+    if (ur_loader::getContext() == nullptr) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
     result = ur_loader::getContext()->init();
 
     if (UR_RESULT_SUCCESS == result) {
@@ -196,6 +200,9 @@ ur_result_t UR_APICALL urLoaderInit(ur_device_init_flags_t device_flags,
     }
 
     auto context = ur_lib::context_t::get();
+    if (context == nullptr) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
 
     ur_result_t result = UR_RESULT_SUCCESS;
     std::call_once(context->initOnce,
