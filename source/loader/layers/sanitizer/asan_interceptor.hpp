@@ -245,8 +245,10 @@ class SanitizerInterceptor {
 
     std::shared_ptr<KernelInfo> getKernelInfo(ur_kernel_handle_t Kernel) {
         std::shared_lock<ur_shared_mutex> Guard(m_KernelMapMutex);
-        assert(m_KernelMap.find(Kernel) != m_KernelMap.end());
-        return m_KernelMap[Kernel];
+        if (m_KernelMap.find(Kernel) != m_KernelMap.end()) {
+            return m_KernelMap[Kernel];
+        }
+        return nullptr;
     }
 
   private:

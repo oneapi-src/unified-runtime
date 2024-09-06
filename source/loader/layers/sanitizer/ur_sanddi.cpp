@@ -50,6 +50,12 @@ ur_result_t setupContext(ur_context_handle_t Context, uint32_t numDevices,
     return UR_RESULT_SUCCESS;
 }
 
+bool isInstrumentedKernel(ur_kernel_handle_t hKernel) {
+    auto hContext = GetContext(hKernel);
+    auto CI = getContext()->interceptor->getContextInfo(hContext);
+    return CI->isKernelInstrumented(hKernel);
+}
+
 } // namespace
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -322,17 +328,15 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunch(
 
     getContext()->logger.debug("==== urEnqueueKernelLaunch");
 
-    auto hContext = GetContext(hQueue);
-    auto CI = getContext()->interceptor->getContextInfo(hContext);
-    auto isInstrumented = CI->isKernelInstrumented(hKernel);
-    if (!isInstrumented) {
+    if (!isInstrumentedKernel(hKernel)) {
         return pfnKernelLaunch(hQueue, hKernel, workDim, pGlobalWorkOffset,
                                pGlobalWorkSize, pLocalWorkSize,
                                numEventsInWaitList, phEventWaitList, phEvent);
     }
 
-    USMLaunchInfo LaunchInfo(hContext, GetDevice(hQueue), pGlobalWorkSize,
-                             pLocalWorkSize, pGlobalWorkOffset, workDim);
+    USMLaunchInfo LaunchInfo(GetContext(hKernel), GetDevice(hQueue),
+                             pGlobalWorkSize, pLocalWorkSize, pGlobalWorkOffset,
+                             workDim);
     UR_CALL(LaunchInfo.initialize());
 
     UR_CALL(getContext()->interceptor->preLaunchKernel(hKernel, hQueue,
@@ -1195,7 +1199,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreate(
     getContext()->logger.debug("==== urKernelCreate");
 
     UR_CALL(pfnCreate(hProgram, pKernelName, phKernel));
-    UR_CALL(getContext()->interceptor->insertKernel(*phKernel));
+    if (isInstrumentedKernel(*phKernel)) {
+        UR_CALL(getContext()->interceptor->insertKernel(*phKernel));
+    }
 
     return UR_RESULT_SUCCESS;
 }
@@ -1266,10 +1272,11 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgValue(
     getContext()->logger.debug("==== urKernelSetArgValue");
 
     std::shared_ptr<MemBuffer> MemBuffer;
+    std::shared_ptr<KernelInfo> KernelInfo;
     if (argSize == sizeof(ur_mem_handle_t) &&
         (MemBuffer = getContext()->interceptor->getMemBuffer(
-             *ur_cast<const ur_mem_handle_t *>(pArgValue)))) {
-        auto KernelInfo = getContext()->interceptor->getKernelInfo(hKernel);
+             *ur_cast<const ur_mem_handle_t *>(pArgValue))) &&
+        (KernelInfo = getContext()->interceptor->getKernelInfo(hKernel))) {
         std::scoped_lock<ur_shared_mutex> Guard(KernelInfo->Mutex);
         KernelInfo->BufferArgs[argIndex] = std::move(MemBuffer);
     } else {
@@ -1297,8 +1304,10 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgMemObj(
 
     getContext()->logger.debug("==== urKernelSetArgMemObj");
 
-    if (auto MemBuffer = getContext()->interceptor->getMemBuffer(hArgValue)) {
-        auto KernelInfo = getContext()->interceptor->getKernelInfo(hKernel);
+    std::shared_ptr<MemBuffer> MemBuffer;
+    std::shared_ptr<KernelInfo> KernelInfo;
+    if ((MemBuffer = getContext()->interceptor->getMemBuffer(hArgValue)) &&
+        (KernelInfo = getContext()->interceptor->getKernelInfo(hKernel))) {
         std::scoped_lock<ur_shared_mutex> Guard(KernelInfo->Mutex);
         KernelInfo->BufferArgs[argIndex] = std::move(MemBuffer);
     } else {
@@ -1328,8 +1337,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgLocal(
         "==== urKernelSetArgLocal (argIndex={}, argSize={})", argIndex,
         argSize);
 
-    {
-        auto KI = getContext()->interceptor->getKernelInfo(hKernel);
+    if (auto KI = getContext()->interceptor->getKernelInfo(hKernel)) {
         std::scoped_lock<ur_shared_mutex> Guard(KI->Mutex);
         // TODO: get local variable alignment
         auto argSizeWithRZ = GetSizeAndRedzoneSizeForLocal(
@@ -1365,8 +1373,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgPointer(
         "==== urKernelSetArgPointer (argIndex={}, pArgValue={})", argIndex,
         pArgValue);
 
-    if (Options(getContext()->logger).DetectKernelArguments) {
-        auto KI = getContext()->interceptor->getKernelInfo(hKernel);
+    std::shared_ptr<KernelInfo> KI;
+    if (Options(getContext()->logger).DetectKernelArguments &&
+        (KI = getContext()->interceptor->getKernelInfo(hKernel))) {
         std::scoped_lock<ur_shared_mutex> Guard(KI->Mutex);
         KI->PointerArgs[argIndex] = {pArgValue, GetCurrentBacktrace()};
     }
