@@ -102,7 +102,7 @@ struct KernelInfo {
 };
 
 struct ProgramInfo {
-    std::unordered_map<std::string, bool> KernelMetadataMap;
+    std::unordered_set<std::string> InstrumentedKernels;
 };
 
 struct ContextInfo {
@@ -139,6 +139,8 @@ struct ContextInfo {
         std::scoped_lock<ur_shared_mutex> Guard(Mutex);
         return ProgramInfoMap[Program];
     }
+
+    bool isKernelInstrumented(ur_kernel_handle_t Kernel);
 };
 
 struct USMLaunchInfo {
@@ -174,9 +176,8 @@ struct DeviceGlobalInfo {
 };
 
 struct SpirKernelInfo {
-    const char *KernelName;
-    uint32_t Size;
-    uint32_t IsInstrumented;
+    uptr KernelName;
+    uptr Size;
 };
 
 class SanitizerInterceptor {
