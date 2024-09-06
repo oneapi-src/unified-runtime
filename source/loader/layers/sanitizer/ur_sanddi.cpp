@@ -285,9 +285,9 @@ ur_result_t UR_APICALL urProgramLinkExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramRelease
-ur_result_t UR_APICALL
-urProgramRelease(
-    ur_program_handle_t hProgram ///< [in][release] handle for the Program to release
+ur_result_t UR_APICALL urProgramRelease(
+    ur_program_handle_t
+        hProgram ///< [in][release] handle for the Program to release
 ) {
     auto pfnProgramRelease = getContext()->urDdiTable.Program.pfnRelease;
 
