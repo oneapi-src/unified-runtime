@@ -284,6 +284,28 @@ ur_result_t UR_APICALL urProgramLinkExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urProgramRelease
+ur_result_t UR_APICALL
+urProgramRelease(
+    ur_program_handle_t hProgram ///< [in][release] handle for the Program to release
+) {
+    auto pfnProgramRelease = getContext()->urDdiTable.Program.pfnRelease;
+
+    if (nullptr == pfnProgramRelease) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    UR_CALL(getContext()->interceptor->unregisterDeviceGlobals(
+        GetContext(hProgram), hProgram));
+
+    UR_CALL(pfnProgramRelease(hProgram));
+
+    getContext()->logger.debug("==== urProgramRelease");
+
+    return UR_RESULT_SUCCESS;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueKernelLaunch
 __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunch(
     ur_queue_handle_t hQueue,   ///< [in] handle of the queue object

@@ -111,47 +111,56 @@ ur_result_t enqueueMemSetShadow(ur_context_handle_t Context,
 
             ur_physical_mem_properties_t Desc{
                 UR_STRUCTURE_TYPE_PHYSICAL_MEM_PROPERTIES, nullptr, 0};
-            static ur_physical_mem_handle_t PhysicalMem{};
 
             // Make sure [Ptr, Ptr + Size] is mapped to physical memory
             for (auto MappedPtr = RoundDownTo(ShadowBegin, PageSize);
                  MappedPtr <= ShadowEnd; MappedPtr += PageSize) {
-                if (!PhysicalMem) {
-                    auto URes = getContext()->urDdiTable.PhysicalMem.pfnCreate(
-                        Context, DeviceInfo->Handle, PageSize, &Desc,
-                        &PhysicalMem);
-                    if (URes != UR_RESULT_SUCCESS) {
-                        getContext()->logger.error("urPhysicalMemCreate(): {}",
-                                                   URes);
-                        return URes;
-                    }
-                }
+                {
+                    std::scoped_lock<ur_mutex> Guard(DeviceInfo->Mutex);
+                    if (DeviceInfo->VirtualMemMaps.find(MappedPtr) ==
+                        DeviceInfo->VirtualMemMaps.end()) {
+                        ur_physical_mem_handle_t PhysicalMem{};
+                        auto URes =
+                            getContext()->urDdiTable.PhysicalMem.pfnCreate(
+                                Context, DeviceInfo->Handle, PageSize, &Desc,
+                                &PhysicalMem);
+                        if (URes != UR_RESULT_SUCCESS) {
+                            getContext()->logger.error(
+                                "urPhysicalMemCreate(): {}", URes);
+                            return URes;
+                        }
 
-                getContext()->logger.debug("urVirtualMemMap: {} ~ {}",
-                                           (void *)MappedPtr,
-                                           (void *)(MappedPtr + PageSize - 1));
+                        URes = getContext()->urDdiTable.VirtualMem.pfnMap(
+                            Context, (void *)MappedPtr, PageSize, PhysicalMem,
+                            0, UR_VIRTUAL_MEM_ACCESS_FLAG_READ_WRITE);
+                        if (URes != UR_RESULT_SUCCESS) {
+                            getContext()->logger.debug(
+                                "urVirtualMemMap({}, {}): {}",
+                                (void *)MappedPtr, PageSize, URes);
+                            return URes;
+                        }
 
-                // FIXME: No flag to check the failed reason is VA is already mapped
-                auto URes = getContext()->urDdiTable.VirtualMem.pfnMap(
-                    Context, (void *)MappedPtr, PageSize, PhysicalMem, 0,
-                    UR_VIRTUAL_MEM_ACCESS_FLAG_READ_WRITE);
-                if (URes != UR_RESULT_SUCCESS) {
-                    getContext()->logger.debug("urVirtualMemMap({}, {}): {}",
-                                               (void *)MappedPtr, PageSize,
-                                               URes);
-                }
+                        getContext()->logger.debug(
+                            "urVirtualMemMap: {} ~ {}", (void *)MappedPtr,
+                            (void *)(MappedPtr + PageSize - 1));
 
-                // Initialize to zero
-                if (URes == UR_RESULT_SUCCESS) {
-                    // Reset PhysicalMem to null since it's been mapped
-                    PhysicalMem = nullptr;
+                        // Initialize to zero
+                        URes = urEnqueueUSMSet(Queue, (void *)MappedPtr, 0,
+                                               PageSize);
+                        if (URes != UR_RESULT_SUCCESS) {
+                            getContext()->logger.error("urEnqueueUSMFill(): {}",
+                                                       URes);
+                            return URes;
+                        }
 
-                    auto URes =
-                        urEnqueueUSMSet(Queue, (void *)MappedPtr, 0, PageSize);
-                    if (URes != UR_RESULT_SUCCESS) {
-                        getContext()->logger.error("urEnqueueUSMFill(): {}",
-                                                   URes);
-                        return URes;
+                        auto AllocInfoIt =
+                            getContext()->interceptor->findAllocInfoByAddress(
+                                Ptr);
+                        assert(AllocInfoIt);
+                        DeviceInfo->VirtualMemMaps[MappedPtr].first =
+                            PhysicalMem;
+                        DeviceInfo->VirtualMemMaps[MappedPtr].second.insert(
+                            (*AllocInfoIt)->second);
                     }
                 }
             }
@@ -349,6 +358,13 @@ ur_result_t SanitizerInterceptor::releaseMemory(ur_context_handle_t Context,
         getContext()->logger.debug("Free: {}", (void *)AllocInfo->AllocBegin);
         std::scoped_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
         m_AllocationMap.erase(AllocInfoIt);
+        if (AllocInfo->Type == AllocType::HOST_USM) {
+            UR_CALL(releasePhysicalMem(Context, ContextInfo->DeviceList,
+                                       AllocInfo));
+        } else {
+            UR_CALL(
+                releasePhysicalMem(Context, {AllocInfo->Device}, AllocInfo));
+        }
         return getContext()->urDdiTable.USM.pfnFree(
             Context, (void *)(AllocInfo->AllocBegin));
     }
@@ -360,8 +376,68 @@ ur_result_t SanitizerInterceptor::releaseMemory(ur_context_handle_t Context,
             getContext()->logger.info("Quarantine Free: {}",
                                       (void *)It->second->AllocBegin);
             m_AllocationMap.erase(It);
+            if (AllocInfo->Type == AllocType::HOST_USM) {
+                UR_CALL(releasePhysicalMem(Context, ContextInfo->DeviceList,
+                                           AllocInfo));
+            } else {
+                UR_CALL(releasePhysicalMem(Context, {AllocInfo->Device},
+                                           AllocInfo));
+            }
             UR_CALL(getContext()->urDdiTable.USM.pfnFree(
                 Context, (void *)(It->second->AllocBegin)));
+        }
+    }
+
+    return UR_RESULT_SUCCESS;
+}
+
+ur_result_t SanitizerInterceptor::releasePhysicalMem(
+    ur_context_handle_t Context, const std::vector<ur_device_handle_t> &Devices,
+    std::shared_ptr<struct AllocInfo> AI) {
+    for (auto Device : Devices) {
+        auto DeviceInfo = getDeviceInfo(Device);
+
+        if (DeviceInfo->Type != DeviceType::GPU_PVC &&
+            DeviceInfo->Type != DeviceType::GPU_DG2) {
+            continue;
+        }
+
+        uptr ShadowBegin = 0, ShadowEnd = 0;
+
+        if (DeviceInfo->Type == DeviceType::GPU_PVC) {
+            ShadowBegin =
+                MemToShadow_PVC(DeviceInfo->ShadowOffset, AI->AllocBegin);
+            ShadowEnd = MemToShadow_PVC(DeviceInfo->ShadowOffset,
+                                        AI->AllocBegin + AI->AllocSize - 1);
+        } else if (DeviceInfo->Type == DeviceType::GPU_DG2) {
+            ShadowBegin =
+                MemToShadow_DG2(DeviceInfo->ShadowOffset, AI->AllocBegin);
+            ShadowEnd = MemToShadow_DG2(DeviceInfo->ShadowOffset,
+                                        AI->AllocBegin + AI->AllocSize - 1);
+        }
+
+        assert(ShadowBegin <= ShadowEnd);
+
+        static const size_t PageSize =
+            GetVirtualMemGranularity(Context, DeviceInfo->Handle);
+
+        for (auto MappedPtr = RoundDownTo(ShadowBegin, PageSize);
+             MappedPtr <= ShadowEnd; MappedPtr += PageSize) {
+            std::scoped_lock<ur_mutex> Guard(DeviceInfo->Mutex);
+            if (DeviceInfo->VirtualMemMaps.find(MappedPtr) ==
+                DeviceInfo->VirtualMemMaps.end()) {
+                continue;
+            }
+            DeviceInfo->VirtualMemMaps[MappedPtr].second.erase(AI);
+            if (DeviceInfo->VirtualMemMaps[MappedPtr].second.empty()) {
+                UR_CALL(getContext()->urDdiTable.VirtualMem.pfnUnmap(
+                    Context, (void *)MappedPtr, PageSize));
+                UR_CALL(getContext()->urDdiTable.PhysicalMem.pfnRelease(
+                    DeviceInfo->VirtualMemMaps[MappedPtr].first));
+                getContext()->logger.debug("urVirtualMemUnmap: {} ~ {}",
+                                           (void *)MappedPtr,
+                                           (void *)(MappedPtr + PageSize - 1));
+            }
         }
     }
 
@@ -584,6 +660,54 @@ SanitizerInterceptor::registerDeviceGlobals(ur_context_handle_t Context,
                           {}});
 
             ContextInfo->insertAllocInfo({Device}, AI);
+
+            // For VirtualMem Unmap
+            {
+                std::scoped_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
+                m_AllocationMap.emplace(AI->AllocBegin, std::move(AI));
+            }
+        }
+    }
+
+    return UR_RESULT_SUCCESS;
+}
+
+ur_result_t
+SanitizerInterceptor::unregisterDeviceGlobals(ur_context_handle_t Context,
+                                              ur_program_handle_t Program) {
+    std::vector<ur_device_handle_t> Devices = GetProgramDevices(Program);
+
+    for (auto Device : Devices) {
+        ManagedQueue Queue(Context, Device);
+
+        uint64_t NumOfDeviceGlobal;
+        auto Result =
+            getContext()->urDdiTable.Enqueue.pfnDeviceGlobalVariableRead(
+                Queue, Program, kSPIR_AsanDeviceGlobalCount, true,
+                sizeof(NumOfDeviceGlobal), 0, &NumOfDeviceGlobal, 0, nullptr,
+                nullptr);
+        if (Result != UR_RESULT_SUCCESS) {
+            getContext()->logger.info("No device globals");
+            continue;
+        }
+
+        std::vector<DeviceGlobalInfo> GVInfos(NumOfDeviceGlobal);
+        Result = getContext()->urDdiTable.Enqueue.pfnDeviceGlobalVariableRead(
+            Queue, Program, kSPIR_AsanDeviceGlobalMetadata, true,
+            sizeof(DeviceGlobalInfo) * NumOfDeviceGlobal, 0, &GVInfos[0], 0,
+            nullptr, nullptr);
+        if (Result != UR_RESULT_SUCCESS) {
+            getContext()->logger.error("Device Global[{}] Read Failed: {}",
+                                       kSPIR_AsanDeviceGlobalMetadata, Result);
+            return Result;
+        }
+
+        for (size_t i = 0; i < NumOfDeviceGlobal; i++) {
+            std::scoped_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
+            auto AllocInfo = m_AllocationMap[GVInfos[i].Addr];
+            UR_CALL(
+                releasePhysicalMem(Context, {AllocInfo->Device}, AllocInfo));
+            m_AllocationMap.erase(GVInfos[i].Addr);
         }
     }
 

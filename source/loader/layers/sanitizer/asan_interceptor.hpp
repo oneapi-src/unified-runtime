@@ -47,6 +47,10 @@ struct DeviceInfo {
 
     ur_mutex Mutex;
     std::queue<std::shared_ptr<AllocInfo>> Quarantine;
+    std::unordered_map<
+        uptr, std::pair<ur_physical_mem_handle_t,
+                        std::unordered_set<std::shared_ptr<AllocInfo>>>>
+        VirtualMemMaps;
     size_t QuarantineSize = 0;
 
     // Device handles are special and alive in the whole process lifetime,
@@ -173,8 +177,16 @@ class SanitizerInterceptor {
                                AllocType Type, void **ResultPtr);
     ur_result_t releaseMemory(ur_context_handle_t Context, void *Ptr);
 
+    ur_result_t
+    releasePhysicalMem(ur_context_handle_t Context,
+                       const std::vector<ur_device_handle_t> &Devices,
+                       std::shared_ptr<struct AllocInfo> AI);
+
     ur_result_t registerDeviceGlobals(ur_context_handle_t Context,
                                       ur_program_handle_t Program);
+
+    ur_result_t unregisterDeviceGlobals(ur_context_handle_t Context,
+                                        ur_program_handle_t Program);
 
     ur_result_t preLaunchKernel(ur_kernel_handle_t Kernel,
                                 ur_queue_handle_t Queue,
