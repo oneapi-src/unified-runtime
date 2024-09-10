@@ -19,11 +19,13 @@ class SyclBench:
         return
 
     def setup(self):
-        if self.built:
+        build_path = create_build_path(self.directory, 'sycl-bench-build')
+        self.bins = build_path
+
+        if self.built or not options.rebuild:
             return
 
         repo_path = git_clone(self.directory, "sycl-bench-repo", "https://github.com/mateuszpn/sycl-bench.git", "1e6ab2cfd004a72c5336c26945965017e06eab71")
-        build_path = create_build_path(self.directory, 'sycl-bench-build')
 
         configure_command = [
             "cmake",
@@ -34,12 +36,11 @@ class SyclBench:
             f"-DCMAKE_C_COMPILER={options.sycl}/bin/clang",
             f"-DSYCL_IMPL=dpcpp"
         ]
-        run(configure_command, add_sycl=True)
 
+        run(configure_command, add_sycl=True)
         run(f"cmake --build {build_path} -j", add_sycl=True)
 
         self.built = True
-        self.bins = build_path
         return
     
 class SyclBenchmark(Benchmark):

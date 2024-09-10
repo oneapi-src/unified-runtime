@@ -42,6 +42,9 @@ def run(command, env_vars={}, cwd=None, add_sycl=False):
 
 def git_clone(dir, name, repo, commit):
     repo_path = os.path.join(dir, name)
+    if not options.rebuild:
+        print("No rebuild, {repo} not fetched!")
+        return repo_path
 
     print(f"Cloning {repo} to {repo_path} at commit {commit}")
 
