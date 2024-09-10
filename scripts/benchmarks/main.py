@@ -150,7 +150,7 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
     for name in compare_names:
         print(f"compare name: {name}")
         compare_result = load_benchmark_results(directory, name)
-        if compare_result in not None:
+        if compare_result is not None:
             for result in compare_result:
                 print(f"Result: {result}")
         if compare_result:
