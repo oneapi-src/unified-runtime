@@ -148,8 +148,11 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
     chart_data = {"This PR" : results}
 
     for name in compare_names:
-        print(f"compare name {name}")
+        print(f"compare name: {name}")
         compare_result = load_benchmark_results(directory, name)
+        if compare_result in not None:
+            for result in compare_result:
+                print(f"Result: {result}")
         if compare_result:
             chart_data[name] = compare_result
 

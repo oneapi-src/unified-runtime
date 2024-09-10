@@ -70,6 +70,7 @@ def save_benchmark_results(dir, save_name, benchmark_data: list[Result]):
 
 def load_benchmark_results(dir, compare_name) -> list[Result]:
     file_path = Path(os.path.join(dir, 'results', f"{compare_name}.json"))
+    print(f"Compare file path: {file_path}")
     if file_path.exists():
         with file_path.open('r') as file:
             data = json.load(file)
