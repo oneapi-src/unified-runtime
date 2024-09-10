@@ -77,19 +77,32 @@ urPlatformGet(ur_adapter_handle_t *, uint32_t, uint32_t NumEntries,
           int NumDevices = 0;
           UR_CHECK_ERROR(cuDeviceGetCount(&NumDevices));
           try {
+            CUevent EvBase;
             for (int i = 0; i < NumDevices; ++i) {
               CUdevice Device;
               UR_CHECK_ERROR(cuDeviceGet(&Device, i));
               CUcontext Context;
-              UR_CHECK_ERROR(cuDevicePrimaryCtxRetain(&Context, Device));
-
-              ScopedContext Active(Context); // Set native ctx as active
-              CUevent EvBase;
-              UR_CHECK_ERROR(cuEventCreate(&EvBase, CU_EVENT_DEFAULT));
-
-              // Use default stream to record base event counter
-              UR_CHECK_ERROR(cuEventRecord(EvBase, 0));
-
+              // The first device in the platform is used to create a base event for all
+              // devices in the platform. This requires it to have its primary CUcontext
+              // momentarily initialized. The CUcontext is immediately released (which implies
+              // it is destroyed, since platform creation is required for any later usage of
+              // CUcontext) after creating the event, in case the device is not later used.
+              // The device's primary CUcontext may be subsequently reinitialized in the case
+              // that a ur_context_handle_t is instantiated using the device. The
+              // initialization/destruction here adds a one off ~0.1s overhead to platform
+              // initialization, but this ensures SYCL specification compliance and MPI
+              // compatibility. A similar overhead occurs if UR_DEVICE_INFO_GLOBAL_MEM_FREE is
+              // queried for a device before the device has been used to instantiate a current
+              // ur_context_handle_t instance.
+              if (i == 0)
+              {
+                UR_CHECK_ERROR(cuDevicePrimaryCtxRetain(&Context, Device));
+                ScopedContext Active(Context);
+                UR_CHECK_ERROR(cuEventCreate(&EvBase, CU_EVENT_DEFAULT));
+                // Use default stream to record base event counter
+                UR_CHECK_ERROR(cuEventRecord(EvBase, 0));
+                UR_CHECK_ERROR(cuDevicePrimaryCtxRelease(Device));
+              }
               Platform.Devices.emplace_back(
                   new ur_device_handle_t_{Device, Context, EvBase, &Platform,
                                           static_cast<uint32_t>(i)});

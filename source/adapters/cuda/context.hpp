@@ -90,12 +90,14 @@ struct ur_context_handle_t_ {
       : Devices{Devs, Devs + NumDevices}, RefCount{1} {
     for (auto &Dev : Devices) {
       urDeviceRetain(Dev);
+      Dev->retainNativeContext();
     }
   };
 
   ~ur_context_handle_t_() {
     for (auto &Dev : Devices) {
       urDeviceRelease(Dev);
+      UR_CHECK_ERROR(cuDevicePrimaryCtxRelease(Dev->get()));
     }
   }
 

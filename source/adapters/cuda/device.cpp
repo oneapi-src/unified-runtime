@@ -47,8 +47,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
 
   static constexpr uint32_t MaxWorkItemDimensions = 3u;
 
-  ScopedContext Active(hDevice);
-
   switch ((uint32_t)propName) {
   case UR_DEVICE_INFO_TYPE: {
     return ReturnValue(UR_DEVICE_TYPE_GPU);
@@ -814,9 +812,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_GLOBAL_MEM_FREE: {
     size_t FreeMemory = 0;
     size_t TotalMemory = 0;
+
+    CUcontext tmpContext;
+    UR_CHECK_ERROR(cuDevicePrimaryCtxRetain(&tmpContext, hDevice->get()));
+    ScopedContext Active(tmpContext);
     detail::ur::assertion(cuMemGetInfo(&FreeMemory, &TotalMemory) ==
                               CUDA_SUCCESS,
                           "failed cuMemGetInfo() API.");
+    UR_CHECK_ERROR(cuDevicePrimaryCtxRelease(hDevice->get()));
     return ReturnValue(FreeMemory);
   }
   case UR_DEVICE_INFO_MEMORY_CLOCK_RATE: {

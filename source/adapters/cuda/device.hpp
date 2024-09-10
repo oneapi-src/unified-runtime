@@ -76,7 +76,11 @@ public:
     UR_CHECK_ERROR(cuDeviceTotalMem(&MaxAllocSize, cuDevice));
   }
 
-  ~ur_device_handle_t_() { cuDevicePrimaryCtxRelease(CuDevice); }
+  ~ur_device_handle_t_() {}
+
+  void retainNativeContext() {
+    UR_CHECK_ERROR(cuDevicePrimaryCtxRetain(&CuContext, CuDevice));
+  };
 
   native_type get() const noexcept { return CuDevice; };
 
