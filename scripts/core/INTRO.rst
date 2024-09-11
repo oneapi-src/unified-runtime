@@ -161,7 +161,7 @@ Tracing
 
 Unified Runtime loader implements tracing support through the `XPTI framework <https://github.com/intel/llvm/blob/sycl/xptifw/doc/XPTI_Framework.md>`__.
 
-.. list-table:: UR Stream `"ur"` Notification Signatures
+.. list-table:: UR Stream `"ur.call"` Notification Signatures
    :header-rows: 1
 
    * - Trace Point Type
@@ -395,6 +395,14 @@ Specific environment variables can be set to control the behavior of unified run
     .. note::
 
     See the Layers_ section for details of the layers currently included in the runtime.
+
+.. envvar:: UR_LOADER_PRELOAD_FILTER
+
+    If set, the loader will read `ONEAPI_DEVICE_SELECTOR` before loading the UR Adapters to determine which backends should be loaded.
+
+    .. note::
+
+    This environment variable is default enabled on Linux, but default disabled on Windows.
 
 Service identifiers
 ---------------------
