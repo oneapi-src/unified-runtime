@@ -30,6 +30,9 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGet(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     size_t adapterIndex = 0;
@@ -70,6 +73,9 @@ __urdlllocal ur_result_t UR_APICALL urAdapterRelease(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -94,6 +100,9 @@ __urdlllocal ur_result_t UR_APICALL urAdapterRetain(
     ur_adapter_handle_t hAdapter ///< [in][retain] Adapter handle to retain
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -125,6 +134,9 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGetLastError(
                ///< be stored.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -160,6 +172,9 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGetInfo(
         pPropSizeRet ///< [out][optional] pointer to the actual number of bytes being queried by pPropValue.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -199,6 +214,9 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGet(
         pNumPlatforms ///< [out][optional] returns the total number of platforms available.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
     uint32_t total_platform_handle_count = 0;
@@ -276,6 +294,9 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetInfo(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -304,6 +325,9 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetApiVersion(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -331,6 +355,9 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetNativeHandle(
         phNativePlatform ///< [out] a pointer to the native handle of the platform.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -368,6 +395,9 @@ __urdlllocal ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
         phPlatform ///< [out] pointer to the handle of the platform object created.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -414,6 +444,9 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetBackendOption(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -451,6 +484,9 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGet(
     ///< pNumDevices will be updated with the total number of devices available.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -503,6 +539,9 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetInfo(
         pPropSizeRet ///< [out][optional] pointer to the actual size in bytes of the queried propName.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -599,6 +638,9 @@ __urdlllocal ur_result_t UR_APICALL urDeviceRetain(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -624,6 +666,9 @@ __urdlllocal ur_result_t UR_APICALL urDeviceRelease(
         hDevice ///< [in][release] handle of the device to release.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -659,6 +704,9 @@ __urdlllocal ur_result_t UR_APICALL urDevicePartition(
     ///< partitioned into according to the partitioning property.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -710,6 +758,9 @@ __urdlllocal ur_result_t UR_APICALL urDeviceSelectBinary(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -736,6 +787,9 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetNativeHandle(
         *phNativeDevice ///< [out] a pointer to the native handle of the device.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -772,6 +826,9 @@ __urdlllocal ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
         *phDevice ///< [out] pointer to the handle of the device object created.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -819,6 +876,9 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetGlobalTimestamps(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -849,6 +909,9 @@ __urdlllocal ur_result_t UR_APICALL urContextCreate(
         *phContext ///< [out] pointer to handle of context object created
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -895,6 +958,9 @@ __urdlllocal ur_result_t UR_APICALL urContextRetain(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -920,6 +986,9 @@ __urdlllocal ur_result_t UR_APICALL urContextRelease(
         hContext ///< [in][release] handle of the context to release.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -957,6 +1026,9 @@ __urdlllocal ur_result_t UR_APICALL urContextGetInfo(
         pPropSizeRet ///< [out][optional] pointer to the actual size in bytes of the queried propName.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -1018,6 +1090,9 @@ __urdlllocal ur_result_t UR_APICALL urContextGetNativeHandle(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -1057,6 +1132,9 @@ __urdlllocal ur_result_t UR_APICALL urContextCreateWithNativeHandle(
         phContext ///< [out] pointer to the handle of the context object created.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -1110,6 +1188,9 @@ __urdlllocal ur_result_t UR_APICALL urContextSetExtendedDeleter(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -1140,6 +1221,9 @@ __urdlllocal ur_result_t UR_APICALL urMemImageCreate(
     ur_mem_handle_t *phMem ///< [out] pointer to handle of image object created
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -1185,6 +1269,9 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreate(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -1223,6 +1310,9 @@ __urdlllocal ur_result_t UR_APICALL urMemRetain(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -1248,6 +1338,9 @@ __urdlllocal ur_result_t UR_APICALL urMemRelease(
         hMem ///< [in][release] handle of the memory object to release
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -1280,6 +1373,9 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferPartition(
         *phMem ///< [out] pointer to the handle of sub buffer created
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -1324,6 +1420,9 @@ __urdlllocal ur_result_t UR_APICALL urMemGetNativeHandle(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -1363,6 +1462,9 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
         *phMem ///< [out] pointer to handle of buffer memory object created.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -1411,6 +1513,9 @@ __urdlllocal ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
         *phMem ///< [out] pointer to handle of image memory object created.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -1462,6 +1567,9 @@ __urdlllocal ur_result_t UR_APICALL urMemGetInfo(
         pPropSizeRet ///< [out][optional] pointer to the actual size in bytes of the queried propName.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -1532,6 +1640,9 @@ __urdlllocal ur_result_t UR_APICALL urMemImageGetInfo(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -1560,6 +1671,9 @@ __urdlllocal ur_result_t UR_APICALL urSamplerCreate(
         *phSampler ///< [out] pointer to handle of sampler object created
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -1600,6 +1714,9 @@ __urdlllocal ur_result_t UR_APICALL urSamplerRetain(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -1625,6 +1742,9 @@ __urdlllocal ur_result_t UR_APICALL urSamplerRelease(
         hSampler ///< [in][release] handle of the sampler object to release
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -1658,6 +1778,9 @@ __urdlllocal ur_result_t UR_APICALL urSamplerGetInfo(
         pPropSizeRet ///< [out][optional] size in bytes returned in sampler property value
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -1719,6 +1842,9 @@ __urdlllocal ur_result_t UR_APICALL urSamplerGetNativeHandle(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -1753,6 +1879,9 @@ __urdlllocal ur_result_t UR_APICALL urSamplerCreateWithNativeHandle(
         phSampler ///< [out] pointer to the handle of the sampler object created.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -1801,6 +1930,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMHostAlloc(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -1837,6 +1969,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMDeviceAlloc(
     void **ppMem ///< [out] pointer to USM device memory object
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -1878,6 +2013,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMSharedAlloc(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -1910,6 +2048,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMFree(
     void *pMem                    ///< [in] pointer to USM memory object
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -1945,6 +2086,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMGetMemAllocInfo(
         pPropSizeRet ///< [out][optional] bytes returned in USM allocation property
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -2021,6 +2165,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolCreate(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -2059,6 +2206,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolRetain(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -2083,6 +2233,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolRelease(
     ur_usm_pool_handle_t pPool ///< [in][release] pointer to USM memory pool
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -2115,6 +2268,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolGetInfo(
         pPropSizeRet ///< [out][optional] size in bytes returned in pool property value
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -2189,6 +2345,9 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemGranularityGetInfo(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -2229,6 +2388,9 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemReserve(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -2256,6 +2418,9 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemFree(
     size_t size ///< [in] size in bytes of the virtual memory range to free.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -2291,6 +2456,9 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemMap(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -2323,6 +2491,9 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemUnmap(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -2352,6 +2523,9 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemSetAccess(
         flags ///< [in] access flags to set for the mapped virtual memory range.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -2391,6 +2565,9 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemGetInfo(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -2424,6 +2601,9 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemCreate(
         phPhysicalMem ///< [out] pointer to handle of physical memory object created.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -2467,6 +2647,9 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemRetain(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -2494,6 +2677,9 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemRelease(
         hPhysicalMem ///< [in][release] handle of the physical memory object to release.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -2527,6 +2713,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithIL(
         *phProgram ///< [out] pointer to handle of program object created.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -2574,6 +2763,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithBinary(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -2619,6 +2811,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuild(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -2650,6 +2845,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramCompile(
         pOptions ///< [in][optional] pointer to build options null-terminated string.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -2688,6 +2886,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramLink(
     if (nullptr != phProgram) {
         *phProgram = nullptr;
     }
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -2734,6 +2935,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramRetain(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -2759,6 +2963,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramRelease(
         hProgram ///< [in][release] handle for the Program to release
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -2793,6 +3000,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetFunctionPointer(
         ppFunctionPointer ///< [out] Returns the pointer to the function if it is found in the program.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -2832,6 +3042,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetGlobalVariablePointer(
         ppGlobalVariablePointerRet ///< [out] Returns the pointer to the global variable if it is found in the program.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -2874,6 +3087,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetInfo(
         pPropSizeRet ///< [out][optional] pointer to the actual size in bytes of the queried propName.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -2958,6 +3174,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetBuildInfo(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -2991,6 +3210,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramSetSpecializationConstants(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -3018,6 +3240,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetNativeHandle(
         phNativeProgram ///< [out] a pointer to the native handle of the program.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -3053,6 +3278,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithNativeHandle(
         phProgram ///< [out] pointer to the handle of the program object created.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -3096,6 +3324,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreate(
         *phKernel ///< [out] pointer to handle of kernel object created.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -3142,6 +3373,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgValue(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -3171,6 +3405,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgLocal(
         *pProperties ///< [in][optional] pointer to local buffer properties.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -3208,6 +3445,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetInfo(
                      ///< queried by propName.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -3289,6 +3529,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetGroupInfo(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -3328,6 +3571,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetSubGroupInfo(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -3357,6 +3603,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelRetain(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -3382,6 +3631,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelRelease(
         hKernel ///< [in][release] handle for the Kernel to release
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -3413,6 +3665,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgPointer(
     ///< mapping operation. If null then argument value is considered null.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -3446,6 +3701,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetExecInfo(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -3475,6 +3733,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgSampler(
     ur_sampler_handle_t hArgValue ///< [in] handle of Sampler object.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -3507,6 +3768,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgMemObj(
     ur_mem_handle_t hArgValue ///< [in][optional] handle of Memory object.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -3541,6 +3805,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetSpecializationConstants(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -3568,6 +3835,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetNativeHandle(
         *phNativeKernel ///< [out] a pointer to the native handle of the kernel.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -3605,6 +3875,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
         *phKernel ///< [out] pointer to the handle of the kernel object created.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -3665,6 +3938,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetSuggestedLocalWorkSize(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -3703,6 +3979,9 @@ __urdlllocal ur_result_t UR_APICALL urQueueGetInfo(
         pPropSizeRet ///< [out][optional] size in bytes returned in queue property value
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -3791,6 +4070,9 @@ __urdlllocal ur_result_t UR_APICALL urQueueCreate(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -3833,6 +4115,9 @@ __urdlllocal ur_result_t UR_APICALL urQueueRetain(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -3858,6 +4143,9 @@ __urdlllocal ur_result_t UR_APICALL urQueueRelease(
         hQueue ///< [in][release] handle of the queue object to release
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -3887,6 +4175,9 @@ __urdlllocal ur_result_t UR_APICALL urQueueGetNativeHandle(
         *phNativeQueue ///< [out] a pointer to the native handle of the queue.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -3923,6 +4214,9 @@ __urdlllocal ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
         *phQueue ///< [out] pointer to the handle of the queue object created.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -3969,6 +4263,9 @@ __urdlllocal ur_result_t UR_APICALL urQueueFinish(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -3993,6 +4290,9 @@ __urdlllocal ur_result_t UR_APICALL urQueueFlush(
     ur_queue_handle_t hQueue ///< [in] handle of the queue to be flushed.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -4024,6 +4324,9 @@ __urdlllocal ur_result_t UR_APICALL urEventGetInfo(
     size_t *pPropSizeRet ///< [out][optional] bytes returned in event property
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -4104,6 +4407,9 @@ __urdlllocal ur_result_t UR_APICALL urEventGetProfilingInfo(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -4132,6 +4438,9 @@ __urdlllocal ur_result_t UR_APICALL urEventWait(
                         ///< completion
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -4163,6 +4472,9 @@ __urdlllocal ur_result_t UR_APICALL urEventRetain(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -4187,6 +4499,9 @@ __urdlllocal ur_result_t UR_APICALL urEventRelease(
     ur_event_handle_t hEvent ///< [in][release] handle of the event object
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -4214,6 +4529,9 @@ __urdlllocal ur_result_t UR_APICALL urEventGetNativeHandle(
         *phNativeEvent ///< [out] a pointer to the native handle of the event.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -4249,6 +4567,9 @@ __urdlllocal ur_result_t UR_APICALL urEventCreateWithNativeHandle(
         *phEvent ///< [out] pointer to the handle of the event object created.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -4293,6 +4614,9 @@ __urdlllocal ur_result_t UR_APICALL urEventSetCallback(
         pUserData ///< [in][out][optional] pointer to data to be passed to callback.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -4344,6 +4668,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunch(
                 ///< kernel execution instance.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -4410,6 +4737,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWait(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -4469,6 +4799,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
                 ///< command instance.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -4535,6 +4868,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferRead(
                 ///< command instance.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -4606,6 +4942,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWrite(
                 ///< command instance.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -4687,6 +5026,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
                 ///< command instance.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -4773,6 +5115,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -4843,6 +5188,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopy(
                 ///< command instance.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -4926,6 +5274,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -4998,6 +5349,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferFill(
                 ///< command instance.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -5073,6 +5427,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageRead(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -5147,6 +5504,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageWrite(
                 ///< command instance.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -5224,6 +5584,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageCopy(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -5298,6 +5661,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferMap(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -5363,6 +5729,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemUnmap(
                 ///< command instance.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -5434,6 +5803,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -5500,6 +5872,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -5564,6 +5939,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMPrefetch(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -5620,6 +5998,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMAdvise(
                 ///< command instance.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -5683,6 +6064,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill2D(
                 ///< kernel execution instance.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -5756,6 +6140,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -5824,6 +6211,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
                 ///< kernel execution instance.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -5897,6 +6287,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
                 ///< kernel execution instance.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -5975,6 +6368,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueReadHostPipe(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -6051,6 +6447,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueWriteHostPipe(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -6117,6 +6516,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMPitchedAllocExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -6154,6 +6556,9 @@ urBindlessImagesUnsampledImageHandleDestroyExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -6186,6 +6591,9 @@ urBindlessImagesSampledImageHandleDestroyExp(
         hImage ///< [in][release] pointer to handle of image object to destroy
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -6221,6 +6629,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageAllocateExp(
         *phImageMem ///< [out] pointer to handle of image memory allocated
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -6259,6 +6670,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageFreeExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -6294,6 +6708,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesUnsampledImageCreateExp(
         *phImage ///< [out] pointer to handle of image object created
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -6337,6 +6754,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesSampledImageCreateExp(
         *phImage ///< [out] pointer to handle of image object created
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -6399,6 +6819,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageCopyExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -6455,6 +6878,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageGetInfoExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -6486,6 +6912,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMipmapGetLevelExp(
         *phImageMem ///< [out] returning memory handle to the individual image
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -6524,6 +6953,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMipmapFreeExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -6559,6 +6991,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportExternalMemoryExp(
         *phExternalMem ///< [out] external memory handle to the external memory
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -6611,6 +7046,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMapExternalArrayExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -6655,6 +7093,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMapExternalLinearMemoryExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -6691,6 +7132,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesReleaseExternalMemoryExp(
         hExternalMem ///< [in][release] handle of external memory to be destroyed
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -6731,6 +7175,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportExternalSemaphoreExp(
         phExternalSemaphore ///< [out] external semaphore handle to the external semaphore
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -6779,6 +7226,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesReleaseExternalSemaphoreExp(
         hExternalSemaphore ///< [in][release] handle of external semaphore to be destroyed
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -6832,6 +7282,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesWaitExternalSemaphoreExp(
                 ///< command instance.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -6907,6 +7360,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesSignalExternalSemaphoreExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -6968,6 +7424,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferCreateExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -7011,6 +7470,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferRetainExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -7041,6 +7503,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -7070,6 +7535,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferFinalizeExp(
         hCommandBuffer ///< [in] Handle of the command-buffer object.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -7128,6 +7596,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
         *phCommand ///< [out][optional] Handle to this command.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -7201,6 +7672,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMMemcpyExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -7246,6 +7720,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMFillExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -7290,6 +7767,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
         pSyncPoint ///< [out][optional] Sync point associated with this command.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -7342,6 +7822,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -7388,6 +7871,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
         pSyncPoint ///< [out][optional] Sync point associated with this command.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -7443,6 +7929,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
         pSyncPoint ///< [out][optional] Sync point associated with this command.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -7509,6 +7998,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -7569,6 +8061,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -7619,6 +8114,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -7665,6 +8163,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMPrefetchExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -7708,6 +8209,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMAdviseExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -7750,6 +8254,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
                 ///< command-buffer execution instance.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -7808,6 +8315,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferRetainCommandExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -7838,6 +8348,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseCommandExp(
         hCommand ///< [in][release] Handle of the command-buffer command.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -7871,6 +8384,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
         pUpdateKernelLaunch ///< [in] Struct defining how the kernel command is to be updated.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -7941,6 +8457,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferGetInfoExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -7980,6 +8499,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferCommandGetInfoExp(
         pPropSizeRet ///< [out][optional] bytes returned in command-buffer command property
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -8037,6 +8559,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
                 ///< kernel execution instance.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -8101,6 +8626,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -8145,6 +8673,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
     ///< reports the timestamp recorded when the command is executed on the device.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -8220,6 +8751,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -8256,6 +8790,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuildExp(
         pOptions ///< [in][optional] pointer to build options null-terminated string.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -8294,6 +8831,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramCompileExp(
         pOptions ///< [in][optional] pointer to build options null-terminated string.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -8340,6 +8880,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramLinkExp(
     if (nullptr != phProgram) {
         *phProgram = nullptr;
     }
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -8394,6 +8937,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMImportExp(
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    // For testing
+    abort();
+
     [[maybe_unused]] auto context = getContext();
 
     // extract platform's function pointer table
@@ -8419,6 +8965,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMReleaseExp(
     void *pMem                    ///< [in] pointer to host memory object
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -8446,6 +8995,9 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PEnablePeerAccessExp(
     ur_device_handle_t peerDevice ///< [in] handle of the peer device object
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -8478,6 +9030,9 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PDisablePeerAccessExp(
     ur_device_handle_t peerDevice ///< [in] handle of the peer device object
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -8522,6 +9077,9 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PPeerAccessGetInfoExp(
         pPropSizeRet ///< [out][optional] pointer to the actual size in bytes of the queried propName.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 
@@ -8574,6 +9132,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueNativeCommandExp(
     ///< been enqueued in nativeEnqueueFunc.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    // For testing
+    abort();
 
     [[maybe_unused]] auto context = getContext();
 

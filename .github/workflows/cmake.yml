@@ -177,6 +177,15 @@ jobs:
       adapter_name: NATIVE_CPU
       runner_name: NATIVE_CPU
 
+  combined-opencl-level-zero:
+    name: OpenCL + Level Zero
+    uses: ./.github/workflows/build-hw-reusable.yml
+    with:
+      adapter_name: OPENCL
+      other_adapter_name: L0
+      runner_name: L0
+      platform: "Intel(R) OpenCL"
+
   e2e-level-zero:
     name: E2E L0
     permissions:

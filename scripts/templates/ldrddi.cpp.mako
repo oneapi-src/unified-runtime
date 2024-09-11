@@ -40,6 +40,9 @@ namespace ur_loader
         add_local = False
     %>${th.get_initial_null_set(obj)}
 
+        // For testing
+        abort();
+
         [[maybe_unused]] auto context = getContext();
         %if re.match(r"\w+AdapterGet$", th.make_func_name(n, tags, obj)):
         
