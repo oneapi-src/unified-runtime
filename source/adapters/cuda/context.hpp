@@ -74,6 +74,35 @@ typedef void (*ur_context_extended_deleter_t)(void *user_data);
 ///  if necessary.
 ///
 ///
+namespace {
+class ScopedContext {
+public:
+  ScopedContext(ur_device_handle_t Device) {
+    if (!Device) {
+      throw UR_RESULT_ERROR_INVALID_DEVICE;
+    }
+    setContext(Device->getNativeContext());
+  }
+
+  ScopedContext(CUcontext NativeContext) { setContext(NativeContext); }
+
+  ~ScopedContext() {}
+
+private:
+  void setContext(CUcontext Desired) {
+    CUcontext Original = nullptr;
+
+    UR_CHECK_ERROR(cuCtxGetCurrent(&Original));
+
+    // Make sure the desired context is active on the current thread, setting
+    // it if necessary
+    if (Original != Desired) {
+      UR_CHECK_ERROR(cuCtxSetCurrent(Desired));
+    }
+  }
+};
+} // namespace
+
 struct ur_context_handle_t_ {
 
   struct deleter_data {
@@ -88,9 +117,22 @@ struct ur_context_handle_t_ {
 
   ur_context_handle_t_(const ur_device_handle_t *Devs, uint32_t NumDevices)
       : Devices{Devs, Devs + NumDevices}, RefCount{1} {
+    CUevent EvBase = nullptr;
+    int i = 0;
     for (auto &Dev : Devices) {
       urDeviceRetain(Dev);
       Dev->retainNativeContext();
+      // The first device in the context is used to create a base event for all
+      // devices in the context. Any queue created with this context will have
+      // the same base event used as a base timestamp for profiling.
+      if (i == 0) {
+        ScopedContext Active(Dev);
+        UR_CHECK_ERROR(cuEventCreate(&EvBase, CU_EVENT_DEFAULT));
+        // Use default stream to record base event counter
+        UR_CHECK_ERROR(cuEventRecord(EvBase, 0));
+      }
+      Dev->setBaseEvent(EvBase);
+      i++;
     }
   };
 
@@ -142,32 +184,3 @@ private:
   std::vector<deleter_data> ExtendedDeleters;
   std::set<ur_usm_pool_handle_t> PoolHandles;
 };
-
-namespace {
-class ScopedContext {
-public:
-  ScopedContext(ur_device_handle_t Device) {
-    if (!Device) {
-      throw UR_RESULT_ERROR_INVALID_DEVICE;
-    }
-    setContext(Device->getNativeContext());
-  }
-
-  ScopedContext(CUcontext NativeContext) { setContext(NativeContext); }
-
-  ~ScopedContext() {}
-
-private:
-  void setContext(CUcontext Desired) {
-    CUcontext Original = nullptr;
-
-    UR_CHECK_ERROR(cuCtxGetCurrent(&Original));
-
-    // Make sure the desired context is active on the current thread, setting
-    // it if necessary
-    if (Original != Desired) {
-      UR_CHECK_ERROR(cuCtxSetCurrent(Desired));
-    }
-  }
-};
-} // namespace

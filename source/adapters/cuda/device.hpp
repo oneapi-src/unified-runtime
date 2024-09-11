@@ -82,6 +82,8 @@ public:
     UR_CHECK_ERROR(cuDevicePrimaryCtxRetain(&CuContext, CuDevice));
   };
 
+  void setBaseEvent(const CUevent &event) { EvBase = event; };
+
   native_type get() const noexcept { return CuDevice; };
 
   CUcontext getNativeContext() const noexcept { return CuContext; };

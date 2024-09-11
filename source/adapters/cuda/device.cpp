@@ -812,7 +812,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_GLOBAL_MEM_FREE: {
     size_t FreeMemory = 0;
     size_t TotalMemory = 0;
-
+    // This driver api call requires a CUcontext set on the device. In the case
+    // that a CUcontext is not already initialized on the device, we implicitly
+    // choose to momentarily initialize the primary CUcontext of the device (by
+    // retaining it). The CUcontext is immediately released in case the device
+    // is not later used. In the unlikely circumstance that the primary
+    // CUcontext has not already been retained by the programmer, the implicit
+    // initialization/destruction here adds a ~0.1s overhead, but this ensures
+    // SYCL specification compliance and MPI compatibility.
     CUcontext tmpContext;
     UR_CHECK_ERROR(cuDevicePrimaryCtxRetain(&tmpContext, hDevice->get()));
     ScopedContext Active(tmpContext);
