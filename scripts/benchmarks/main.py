@@ -154,27 +154,27 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
         if compare_result:
             chart_data[name] = compare_result
 
-    if len(chart_data.keys()) == 2:
-        key0 = list(chart_data.keys())[0]
-        key1 = list(chart_data.keys())[1]
+    # if len(chart_data.keys()) == 2:
+    #     key0 = list(chart_data.keys())[0]
+    #     key1 = list(chart_data.keys())[1]
 
-        dict0 = { result.label: (result.value, result.lower_is_better) for result in chart_data[key0] }
-        dict1 = { result.label: (result.value, result.lower_is_better) for result in chart_data[key1] }
+    #     dict0 = { result.label: (result.value, result.lower_is_better) for result in chart_data[key0] }
+    #     dict1 = { result.label: (result.value, result.lower_is_better) for result in chart_data[key1] }
 
-        for name in dict0:
-            if name in dict1:
-                diff = dict0[name][0] - dict1[name][0]
-                if not dict1[name][0] == 0:
-                    frac = diff / dict1[name][0]
-                else:
-                    frac = 0
+    #     for name in dict0:
+    #         if name in dict1:
+    #             if dict0[name][0] == 0 or dict1[name][0] == 0:
+    #                 continue
+    #             diff = dict0[name][0]/dict1[name][0]
+    #             if dict1[name][1] == False: # not lower_is_better
+    #                 diff = 1/diff
 
-                if diff == 0: 
-                    print(f"{name}: values are EQUAL or one not existing")
-                elif (diff > 0 and dict0[name][1]) or (diff < 0 and not dict0[name][1]): 
-                    print(f"value[{name}] BETTER in {key0} by {frac * 100:.1f}% - value[{key0}]={dict0[name][0]:.3f}, value[{key1}]={(dict1[name][0]):.3f}")
-                else:
-                    print(f"value[{name}] WORSE  in {key0} by {frac * 100:.1f}% - value[{key0}]={dict0[name][0]:.3f}, value[{key1}]={dict1[name][0]:.3f}")
+    #             if diff == 1: 
+    #                 print(f"{name}: values are EQUAL")
+    #             elif (diff < 1): 
+    #                 print(f"value[{name}] BETTER in {key0} by {(1-diff) * 100:.1f}% - value[{key0}]={dict0[name][0]:.3f}, value[{key1}]={(dict1[name][0]):.3f}")
+    #             else:
+    #                 print(f"value[{name}] WORSE  in {key0} by {(1-diff) * 100:.1f}% - value[{key0}]={dict0[name][0]:.3f}, value[{key1}]={dict1[name][0]:.3f}")
                 
 
     if save_name:
