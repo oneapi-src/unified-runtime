@@ -52,6 +52,7 @@ class ComputeBenchmark(Benchmark):
         self.bench_name = name
         self.test = test
         super().__init__(bench.directory)
+        self.setup()
 
     def bin_args(self) -> list[str]:
         return []

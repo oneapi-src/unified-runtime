@@ -121,6 +121,11 @@ def generate_summary_table(chart_data: dict[str, list[Result]]):
                     row += f" {value} |"
             else:
                 row += " - |"
+            if len(chart_data.keys()) == 2:
+                key0 = list(chart_data.keys())[0]
+                key1 = list(chart_data.keys())[1]
+                diff = results[key0].value - results[key1].value
+                row += f"{(diff * 100):.1f}"
 
         summary_table += row + "\n"
 

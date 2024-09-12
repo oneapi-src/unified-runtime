@@ -34,62 +34,62 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
         # *** Compute benchmarks
         SubmitKernelSYCL(cb, 0),
         SubmitKernelSYCL(cb, 1),
-        # SubmitKernelUR(cb, 0),
-        # SubmitKernelUR(cb, 1),
-        # QueueInOrderMemcpy(cb, 0, 'Device', 'Device', 1024),
-        # QueueInOrderMemcpy(cb, 0, 'Host', 'Device', 1024),
-        # QueueMemcpy(cb, 'Device', 'Device', 1024),
-        # StreamMemory(cb, 'Triad', 10 * 1024, 'Device'),
-        # ExecImmediateCopyQueue(cb, 0, 1, 'Device', 'Device', 1024),
-        # ExecImmediateCopyQueue(cb, 1, 1, 'Device', 'Host', 1024),
-        # VectorSum(cb),
+        SubmitKernelUR(cb, 0),
+        SubmitKernelUR(cb, 1),
+        QueueInOrderMemcpy(cb, 0, 'Device', 'Device', 1024),
+        QueueInOrderMemcpy(cb, 0, 'Host', 'Device', 1024),
+        QueueMemcpy(cb, 'Device', 'Device', 1024),
+        StreamMemory(cb, 'Triad', 10 * 1024, 'Device'),
+        ExecImmediateCopyQueue(cb, 0, 1, 'Device', 'Device', 1024),
+        ExecImmediateCopyQueue(cb, 1, 1, 'Device', 'Host', 1024),
+        VectorSum(cb),
         
         # *** Velocity benchmarks
         Hashtable(vb),
-        # Bitcracker(vb),
-        # CudaSift(vb),
-        # Easywave(vb),
-        # QuickSilver(vb),
-        # SobelFilter(vb),
+        Bitcracker(vb),
+        CudaSift(vb),
+        Easywave(vb),
+        QuickSilver(vb),
+        SobelFilter(vb),
 
         # *** sycl-bench multi benchmarks
         Blocked_transform(sb),
         DagTaskI(sb),
         DagTaskS(sb),
-        # HostDevBandwidth(sb),
-        # LocalMem(sb),
-        # Pattern_L2(sb),
-        # Reduction(sb),
-        # ScalarProd(sb),
-        # SegmentReduction(sb),
-        # UsmAccLatency(sb),
-        # UsmAllocLatency(sb),
-        # UsmInstrMix(sb),
-        # UsmPinnedOverhead(sb),
-        # VecAdd(sb),
+        HostDevBandwidth(sb),
+        LocalMem(sb),
+        Pattern_L2(sb),
+        Reduction(sb),
+        ScalarProd(sb),
+        SegmentReduction(sb),
+        UsmAccLatency(sb),
+        UsmAllocLatency(sb),
+        UsmInstrMix(sb),
+        UsmPinnedOverhead(sb),
+        VecAdd(sb),
 
-        # # *** sycl-bench single benchmarks
-        # TwoDConvolution(sb),
-        # Two_mm(sb),
-        # Three_mm(sb),
-        # Arith(sb),
-        # Atax(sb),
-        # Atomic_reduction(sb),
-        # Bicg(sb),
-        # Correlation(sb),
-        # Covariance(sb),
-        # Gemm(sb),
-        # Gesumv(sb),
-        # Gramschmidt(sb),
-        # KMeans(sb),
-        # LinRegCoeff(sb),
-        # LinRegError(sb),
-        # MatmulChain(sb),
-        # MolDyn(sb),
-        # Mvt(sb),
-        # Sf(sb),
-        # Syr2k(sb),
-        # Syrk(sb),
+        # *** sycl-bench single benchmarks
+        TwoDConvolution(sb),
+        Two_mm(sb),
+        Three_mm(sb),
+        Arith(sb),
+        Atax(sb),
+        Atomic_reduction(sb),
+        Bicg(sb),
+        Correlation(sb),
+        Covariance(sb),
+        Gemm(sb),
+        Gesumv(sb),
+        Gramschmidt(sb),
+        KMeans(sb),
+        LinRegCoeff(sb),
+        LinRegError(sb),
+        MatmulChain(sb),
+        MolDyn(sb),
+        Mvt(sb),
+        Sf(sb),
+        Syr2k(sb),
+        Syrk(sb),
     ]
 
     if filter:
@@ -100,6 +100,7 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
             print(f"setting up {benchmark.name()}... ", end='', flush=True)
             benchmark.setup()
             print("complete.")
+
         except Exception as e:
             if options.exit_on_failure:
                 raise e
@@ -150,11 +151,31 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
     for name in compare_names:
         print(f"compare name: {name}")
         compare_result = load_benchmark_results(directory, name)
-        if compare_result is not None:
-            for result in compare_result:
-                print(f"Result: {result}")
         if compare_result:
             chart_data[name] = compare_result
+
+    if len(chart_data.keys()) == 2:
+        key0 = list(chart_data.keys())[0]
+        key1 = list(chart_data.keys())[1]
+
+        dict0 = { result.label: (result.value, result.lower_is_better) for result in chart_data[key0] }
+        dict1 = { result.label: (result.value, result.lower_is_better) for result in chart_data[key1] }
+
+        for name in dict0:
+            if name in dict1:
+                diff = dict0[name][0] - dict1[name][0]
+                if not dict1[name][0] == 0:
+                    frac = diff / dict1[name][0]
+                else:
+                    frac = 0
+
+                if diff == 0: 
+                    print(f"{name}: values are EQUAL or one not existing")
+                elif (diff > 0 and dict0[name][1]) or (diff < 0 and not dict0[name][1]): 
+                    print(f"value[{name}] BETTER in {key0} by {frac * 100:.1f}% - value[{key0}]={dict0[name][0]:.3f}, value[{key1}]={(dict1[name][0]):.3f}")
+                else:
+                    print(f"value[{name}] WORSE  in {key0} by {frac * 100:.1f}% - value[{key0}]={dict0[name][0]:.3f}, value[{key1}]={dict1[name][0]:.3f}")
+                
 
     if save_name:
         save_benchmark_results(directory, save_name, results)

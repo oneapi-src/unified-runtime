@@ -19,13 +19,18 @@ class SyclBench:
         return
 
     def setup(self):
-        build_path = create_build_path(self.directory, 'sycl-bench-build')
+        build_path = os.path.join(self.directory, 'sycl-bench-build')
         self.bins = build_path
 
         if self.built or not options.rebuild:
             return
 
+        create_build_path(build_path, '')
+
         repo_path = git_clone(self.directory, "sycl-bench-repo", "https://github.com/mateuszpn/sycl-bench.git", "1e6ab2cfd004a72c5336c26945965017e06eab71")
+        print(f"Clone repo to: {repo_path}")
+
+        print(f"Build path: {build_path}")
 
         configure_command = [
             "cmake",
@@ -37,7 +42,9 @@ class SyclBench:
             f"-DSYCL_IMPL=dpcpp"
         ]
 
+        print(f"Run {configure_command}")
         run(configure_command, add_sycl=True)
+        print(f"Run cmake --build {build_path}")
         run(f"cmake --build {build_path} -j", add_sycl=True)
 
         self.built = True
@@ -71,10 +78,12 @@ class SyclBenchmark(Benchmark):
             f"--num-runs=3",
             f"--output={outputfile}"
         ]
+        bin_dir = self.bench.bins
 
         command += self.bin_args()
         env_vars.update(self.extra_env_vars())
 
+        print(f"Command: {command}")
         result = self.run_bench(command, env_vars)
 
         with open(outputfile, 'r') as f:

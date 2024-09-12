@@ -29,10 +29,10 @@ class VelocityBase(Benchmark):
 
     def setup(self):
         build_path = create_build_path(self.directory, self.bench_name)
+        self.benchmark_bin = os.path.join(build_path, self.bin_name)
 
         if options.rebuild:
             self.download_deps()
-
             configure_command = [
                 "cmake",
                 f"-B {build_path}",
@@ -42,7 +42,6 @@ class VelocityBase(Benchmark):
             run(configure_command, {'CC': 'clang', 'CXX':'clang++'}, add_sycl=True)
             run(f"cmake --build {build_path} -j", add_sycl=True)
 
-        self.benchmark_bin = os.path.join(build_path, self.bin_name)
 
     def bin_args(self) -> list[str]:
         return []
