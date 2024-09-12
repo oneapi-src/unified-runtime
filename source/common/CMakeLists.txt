@@ -23,8 +23,8 @@ if (NOT DEFINED UMF_REPO)
 endif()
 
 if (NOT DEFINED UMF_TAG)
-    # v0.9.x 19.08.2024: Merge pull request #688 ...
-    set(UMF_TAG 59c4150b7120a7af5b3c8eb2d9b8bbb5d2e96aa3)
+    # v0.9.x 12.09.2024: 0.9.0 release
+    set(UMF_TAG v0.9.0)
 endif()
 
 message(STATUS "Will fetch Unified Memory Framework from ${UMF_REPO}")
