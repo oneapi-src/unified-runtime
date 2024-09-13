@@ -78,8 +78,9 @@ struct QueueInfo {
 
 struct KernelInfo {
     ur_kernel_handle_t Handle;
-    ur_shared_mutex Mutex;
     std::atomic<int32_t> RefCount = 1;
+
+    ur_shared_mutex Mutex;
     std::unordered_map<uint32_t, std::shared_ptr<MemBuffer>> BufferArgs;
     std::unordered_map<uint32_t, std::pair<const void *, StackTrace>>
         PointerArgs;
@@ -100,11 +101,18 @@ struct KernelInfo {
     }
 };
 
+struct ProgramInfo {
+    std::unordered_set<std::string> InstrumentedKernels;
+};
+
 struct ContextInfo {
     ur_context_handle_t Handle;
 
     std::vector<ur_device_handle_t> DeviceList;
     std::unordered_map<ur_device_handle_t, AllocInfoList> AllocInfosMap;
+
+    ur_shared_mutex Mutex;
+    std::unordered_map<ur_program_handle_t, ProgramInfo> ProgramInfoMap;
 
     explicit ContextInfo(ur_context_handle_t Context) : Handle(Context) {
         [[maybe_unused]] auto Result =
@@ -126,6 +134,13 @@ struct ContextInfo {
             AllocInfos.List.emplace_back(AI);
         }
     }
+
+    ProgramInfo &getProgramInfo(ur_program_handle_t Program) {
+        std::scoped_lock<ur_shared_mutex> Guard(Mutex);
+        return ProgramInfoMap[Program];
+    }
+
+    bool isKernelInstrumented(ur_kernel_handle_t Kernel);
 };
 
 struct USMLaunchInfo {
@@ -160,6 +175,11 @@ struct DeviceGlobalInfo {
     uptr Addr;
 };
 
+struct SpirKernelInfo {
+    uptr KernelName;
+    uptr Size;
+};
+
 class SanitizerInterceptor {
   public:
     explicit SanitizerInterceptor(logger::Logger &logger);
@@ -173,8 +193,8 @@ class SanitizerInterceptor {
                                AllocType Type, void **ResultPtr);
     ur_result_t releaseMemory(ur_context_handle_t Context, void *Ptr);
 
-    ur_result_t registerDeviceGlobals(ur_context_handle_t Context,
-                                      ur_program_handle_t Program);
+    ur_result_t registerDeviceGlobals(ur_program_handle_t Program);
+    ur_result_t registerSpirKernels(ur_program_handle_t Program);
 
     ur_result_t preLaunchKernel(ur_kernel_handle_t Kernel,
                                 ur_queue_handle_t Queue,
@@ -225,8 +245,10 @@ class SanitizerInterceptor {
 
     std::shared_ptr<KernelInfo> getKernelInfo(ur_kernel_handle_t Kernel) {
         std::shared_lock<ur_shared_mutex> Guard(m_KernelMapMutex);
-        assert(m_KernelMap.find(Kernel) != m_KernelMap.end());
-        return m_KernelMap[Kernel];
+        if (m_KernelMap.find(Kernel) != m_KernelMap.end()) {
+            return m_KernelMap[Kernel];
+        }
+        return nullptr;
     }
 
   private:

@@ -173,6 +173,13 @@ ur_result_t enqueueMemSetShadow(ur_context_handle_t Context,
 
 } // namespace
 
+bool ContextInfo::isKernelInstrumented(ur_kernel_handle_t Kernel) {
+    auto Program = GetProgram(Kernel);
+    auto Name = GetKernelName(Kernel);
+    const auto &PI = getProgramInfo(Program);
+    return PI.InstrumentedKernels.find(Name) != PI.InstrumentedKernels.end();
+}
+
 SanitizerInterceptor::SanitizerInterceptor(logger::Logger &logger)
     : logger(logger) {
     if (Options(logger).MaxQuarantineSizeMB) {
@@ -538,10 +545,67 @@ ur_result_t SanitizerInterceptor::updateShadowMemory(
 }
 
 ur_result_t
-SanitizerInterceptor::registerDeviceGlobals(ur_context_handle_t Context,
-                                            ur_program_handle_t Program) {
+SanitizerInterceptor::registerSpirKernels(ur_program_handle_t Program) {
     std::vector<ur_device_handle_t> Devices = GetProgramDevices(Program);
+    assert(Devices.size() != 0 && "No devices in registerSpirKernels");
+    auto Context = GetContext(Program);
+    auto CI = getContextInfo(Context);
 
+    size_t MetadataSize;
+    void *MetadataPtr;
+    ur_result_t Result =
+        getContext()->urDdiTable.Program.pfnGetGlobalVariablePointer(
+            Devices[0], Program, kSPIR_AsanSpirKernelMetadata, &MetadataSize,
+            &MetadataPtr);
+    if (Result != UR_RESULT_SUCCESS) {
+        getContext()->logger.error("Can't get the pointer of <{}>: {}",
+                                   kSPIR_AsanSpirKernelMetadata, Result);
+        return Result;
+    }
+
+    const uint64_t NumOfSpirKernel = MetadataSize / sizeof(SpirKernelInfo);
+    assert((MetadataSize % sizeof(SpirKernelInfo) == 0) &&
+           "SpirKernelMetadata size is not correct");
+    ManagedQueue Queue(Context, Devices[0]);
+
+    std::vector<SpirKernelInfo> SKInfo(NumOfSpirKernel);
+    Result = getContext()->urDdiTable.Enqueue.pfnUSMMemcpy(
+        Queue, true, &SKInfo[0], MetadataPtr,
+        sizeof(SpirKernelInfo) * NumOfSpirKernel, 0, nullptr, nullptr);
+    if (Result != UR_RESULT_SUCCESS) {
+        getContext()->logger.error("Can't read the value of <{}>: {}",
+                                   kSPIR_AsanSpirKernelMetadata, Result);
+        return Result;
+    }
+
+    ProgramInfo &PI = CI->getProgramInfo(Program);
+    for (const auto &SKI : SKInfo) {
+        std::vector<char> KernelNameV(SKI.Size);
+        Result = getContext()->urDdiTable.Enqueue.pfnUSMMemcpy(
+            Queue, true, KernelNameV.data(), (void *)SKI.KernelName,
+            sizeof(char) * SKI.Size, 0, nullptr, nullptr);
+        if (Result != UR_RESULT_SUCCESS) {
+            getContext()->logger.error("Can't read kernel name: {}", Result);
+            return Result;
+        }
+
+        std::string KernelName =
+            std::string(KernelNameV.begin(), KernelNameV.end());
+
+        getContext()->logger.info("SpirKernel(name='{}', isInstrumented={})",
+                                  KernelName, true);
+
+        PI.InstrumentedKernels.insert(KernelName);
+    }
+
+    return UR_RESULT_SUCCESS;
+}
+
+ur_result_t
+SanitizerInterceptor::registerDeviceGlobals(ur_program_handle_t Program) {
+    std::vector<ur_device_handle_t> Devices = GetProgramDevices(Program);
+    assert(Devices.size() != 0 && "No devices in registerDeviceGlobals");
+    auto Context = GetContext(Program);
     auto ContextInfo = getContextInfo(Context);
 
     for (auto Device : Devices) {
