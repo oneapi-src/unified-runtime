@@ -35,12 +35,13 @@ std::string getCudaVersionString();
 constexpr size_t MaxMessageSize = 256;
 extern thread_local ur_result_t ErrorMessageCode;
 extern thread_local char ErrorMessage[MaxMessageSize];
+extern thread_local int32_t ErrorAdapterNativeCode;
 
 // Utility function for setting a message and warning
 [[maybe_unused]] void setErrorMessage(const char *pMessage,
                                       ur_result_t ErrorCode);
 
-void setPluginSpecificMessage(CUresult cu_res);
+void setAdapterSpecificMessage(CUresult cu_res);
 
 /// ------ Error handling, matching OpenCL plugin semantics.
 namespace detail {
