@@ -81,9 +81,10 @@ AsanOptions::AsanOptions() {
     };
 
     SetBoolOption("debug", Debug);
+    SetBoolOption("detect_kernel_arguments", DetectKernelArguments);
     SetBoolOption("detect_locals", DetectLocals);
     SetBoolOption("detect_privates", DetectPrivates);
-    SetBoolOption("detect_kernel_arguments", DetectKernelArguments);
+    SetBoolOption("print_stats", PrintStats);
 
     auto KV = OptionsEnvMap->find("quarantine_size_mb");
     if (KV != OptionsEnvMap->end()) {
