@@ -18,6 +18,7 @@
 #include "common.hpp"
 #include "event.hpp"
 #include "logger/ur_logger.hpp"
+#include "ur_interface_loader.hpp"
 #include "ur_level_zero.hpp"
 
 void printZeEventList(const _ur_ze_event_list_t &UrZeEventList) {
@@ -59,7 +60,9 @@ bool WaitListEmptyOrAllEventsFromSameQueue(
   return true;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWait(
+namespace ur::level_zero {
+
+ur_result_t urEnqueueEventsWait(
     ur_queue_handle_t Queue,      ///< [in] handle of the queue object
     uint32_t NumEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t
@@ -151,7 +154,7 @@ static const bool InOrderBarrierBySignal = [] {
   return (UrRet ? std::atoi(UrRet) : true);
 }();
 
-UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
+ur_result_t urEnqueueEventsWaitWithBarrier(
     ur_queue_handle_t Queue,      ///< [in] handle of the queue object
     uint32_t NumEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t
@@ -218,9 +221,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
     return UR_RESULT_SUCCESS;
   }
 
-  ur_event_handle_t InternalEvent;
+  ur_event_handle_t ResultEvent = nullptr;
   bool IsInternal = OutEvent == nullptr;
-  ur_event_handle_t *Event = OutEvent ? OutEvent : &InternalEvent;
 
   // For in-order queue and wait-list which is empty or has events from
   // the same queue just use the last command event as the barrier event.
@@ -230,8 +232,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
       WaitListEmptyOrAllEventsFromSameQueue(Queue, NumEventsInWaitList,
                                             EventWaitList) &&
       Queue->LastCommandEvent && !Queue->LastCommandEvent->IsDiscarded) {
-    UR_CALL(urEventRetain(Queue->LastCommandEvent));
-    *Event = Queue->LastCommandEvent;
+    UR_CALL(ur::level_zero::urEventRetain(Queue->LastCommandEvent));
+    ResultEvent = Queue->LastCommandEvent;
+    if (OutEvent) {
+      *OutEvent = ResultEvent;
+    }
     return UR_RESULT_SUCCESS;
   }
 
@@ -261,15 +266,20 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
         EventWaitList, OkToBatch));
 
     // Insert the barrier into the command-list and execute.
-    UR_CALL(insertBarrierIntoCmdList(CmdList, TmpWaitList, *Event, IsInternal));
+    UR_CALL(insertBarrierIntoCmdList(CmdList, TmpWaitList, ResultEvent,
+                                     IsInternal));
 
     UR_CALL(Queue->executeCommandList(CmdList, false, OkToBatch));
 
     // Because of the dependency between commands in the in-order queue we don't
     // need to keep track of any active barriers if we have in-order queue.
     if (UseMultipleCmdlistBarriers && !Queue->isInOrderQueue()) {
-      auto UREvent = reinterpret_cast<ur_event_handle_t>(*Event);
+      auto UREvent = reinterpret_cast<ur_event_handle_t>(ResultEvent);
       Queue->ActiveBarriers.add(UREvent);
+    }
+
+    if (OutEvent) {
+      *OutEvent = ResultEvent;
     }
     return UR_RESULT_SUCCESS;
   }
@@ -358,14 +368,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
     // Insert a barrier with the events from each command-queue into the
     // convergence command list. The resulting event signals the convergence of
     // all barriers.
-    UR_CALL(insertBarrierIntoCmdList(ConvergenceCmdList, BaseWaitList, *Event,
-                                     IsInternal));
+    UR_CALL(insertBarrierIntoCmdList(ConvergenceCmdList, BaseWaitList,
+                                     ResultEvent, IsInternal));
   } else {
     // If there is only a single queue then insert a barrier and the single
     // result event can be used as our active barrier and used as the return
     // event. Take into account whether output event is discarded or not.
-    UR_CALL(insertBarrierIntoCmdList(CmdLists[0], _ur_ze_event_list_t{}, *Event,
-                                     IsInternal));
+    UR_CALL(insertBarrierIntoCmdList(CmdLists[0], _ur_ze_event_list_t{},
+                                     ResultEvent, IsInternal));
   }
 
   // Execute each command list so the barriers can be encountered.
@@ -381,12 +391,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
   }
 
   UR_CALL(Queue->ActiveBarriers.clear());
-  auto UREvent = reinterpret_cast<ur_event_handle_t>(*Event);
-  Queue->ActiveBarriers.add(UREvent);
+  Queue->ActiveBarriers.add(ResultEvent);
+  if (OutEvent) {
+    *OutEvent = ResultEvent;
+  }
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urEventGetInfo(
+ur_result_t urEventGetInfo(
     ur_event_handle_t Event,  ///< [in] handle of the event object
     ur_event_info_t PropName, ///< [in] the name of the event property to query
     size_t PropValueSize, ///< [in] size in bytes of the event property value
@@ -469,7 +481,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetInfo(
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urEventGetProfilingInfo(
+ur_result_t urEventGetProfilingInfo(
     ur_event_handle_t Event, ///< [in] handle of the event object
     ur_profiling_info_t
         PropName, ///< [in] the name of the profiling property to query
@@ -658,7 +670,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetProfilingInfo(
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
+ur_result_t urEnqueueTimestampRecordingExp(
     ur_queue_handle_t Queue,      ///< [in] handle of the queue object
     bool Blocking,                ///< [in] blocking or non-blocking enqueue
     uint32_t NumEventsInWaitList, ///< [in] size of the event wait list
@@ -696,7 +708,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
   (*OutEvent)->WaitList = TmpWaitList;
 
   uint64_t DeviceStartTimestamp = 0;
-  UR_CALL(urDeviceGetGlobalTimestamps(Device, &DeviceStartTimestamp, nullptr));
+  UR_CALL(ur::level_zero::urDeviceGetGlobalTimestamps(
+      Device, &DeviceStartTimestamp, nullptr));
   (*OutEvent)->RecordEventStartTimestamp = DeviceStartTimestamp;
 
   // Create a new entry in the queue's recordings.
@@ -715,60 +728,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
   return UR_RESULT_SUCCESS;
 }
 
-ur_result_t ur_event_handle_t_::getOrCreateHostVisibleEvent(
-    ze_event_handle_t &ZeHostVisibleEvent) {
-  auto UrQueue = this->UrQueue;
-
-  std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Lock(UrQueue->Mutex,
-                                                          this->Mutex);
-
-  if (!HostVisibleEvent) {
-    this->IsCreatingHostProxyEvent = true;
-    if (UrQueue->ZeEventsScope != OnDemandHostVisibleProxy)
-      die("getOrCreateHostVisibleEvent: missing host-visible event");
-
-    // Submit the command(s) signalling the proxy event to the queue.
-    // We have to first submit a wait for the device-only event for which this
-    // proxy is created.
-    //
-    // Get a new command list to be used on this call
-
-    // We want to batch these commands to avoid extra submissions (costly)
-    bool OkToBatch = true;
-
-    ur_command_list_ptr_t CommandList{};
-    UR_CALL(UrQueue->Context->getAvailableCommandList(
-        UrQueue, CommandList, false /* UseCopyEngine */, 0, nullptr, OkToBatch))
-
-    // Create a "proxy" host-visible event.
-    UR_CALL(createEventAndAssociateQueue(
-        UrQueue, &HostVisibleEvent, UR_EXT_COMMAND_TYPE_USER, CommandList,
-        /* IsInternal */ false, /* IsMultiDevice */ false,
-        /* HostVisible */ true));
-
-    if (this->IsInnerBatchedEvent) {
-      ZE2UR_CALL(zeCommandListAppendBarrier,
-                 (CommandList->first, ZeEvent, 0, nullptr));
-    } else {
-      ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
-                 (CommandList->first, 1, &ZeEvent));
-    }
-    ZE2UR_CALL(zeCommandListAppendSignalEvent,
-               (CommandList->first, HostVisibleEvent->ZeEvent));
-
-    UR_CALL(UrQueue->executeCommandList(CommandList, false, OkToBatch))
-    this->IsCreatingHostProxyEvent = false;
-  }
-
-  ZeHostVisibleEvent = HostVisibleEvent->ZeEvent;
-  return UR_RESULT_SUCCESS;
-}
-
-UR_APIEXPORT ur_result_t UR_APICALL urEventWait(
-    uint32_t NumEvents, ///< [in] number of events in the event list
-    const ur_event_handle_t
-        *EventWaitList ///< [in][range(0, numEvents)] pointer to a list of
-                       ///< events to wait for completion
+ur_result_t
+urEventWait(uint32_t NumEvents, ///< [in] number of events in the event list
+            const ur_event_handle_t
+                *EventWaitList ///< [in][range(0, numEvents)] pointer to a list
+                               ///< of events to wait for completion
 ) {
   for (uint32_t I = 0; I < NumEvents; I++) {
     auto e = EventWaitList[I];
@@ -855,8 +819,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventWait(
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urEventRetain(
-    ur_event_handle_t Event ///< [in] handle of the event object
+ur_result_t
+urEventRetain(ur_event_handle_t Event ///< [in] handle of the event object
 ) {
   Event->RefCountExternal++;
   Event->RefCount.increment();
@@ -864,8 +828,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventRetain(
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urEventRelease(
-    ur_event_handle_t Event ///< [in] handle of the event object
+ur_result_t
+urEventRelease(ur_event_handle_t Event ///< [in] handle of the event object
 ) {
   Event->RefCountExternal--;
   UR_CALL(urEventReleaseInternal(Event));
@@ -873,7 +837,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventRelease(
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urEventGetNativeHandle(
+ur_result_t urEventGetNativeHandle(
     ur_event_handle_t Event, ///< [in] handle of the event.
     ur_native_handle_t
         *NativeEvent ///< [out] a pointer to the native handle of the event.
@@ -898,7 +862,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetNativeHandle(
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urExtEventCreate(
+ur_result_t urExtEventCreate(
     ur_context_handle_t Context, ///< [in] handle of the context object
     ur_event_handle_t
         *Event ///< [out] pointer to the handle of the event object created.
@@ -911,7 +875,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urExtEventCreate(
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urEventCreateWithNativeHandle(
+ur_result_t urEventCreateWithNativeHandle(
     ur_native_handle_t NativeEvent, ///< [in] the native handle of the event.
     ur_context_handle_t Context,    ///< [in] handle of the context object
     const ur_event_native_properties_t *Properties,
@@ -961,7 +925,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventCreateWithNativeHandle(
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urEventSetCallback(
+ur_result_t urEventSetCallback(
     ur_event_handle_t Event,        ///< [in] handle of the event object
     ur_execution_info_t ExecStatus, ///< [in] execution status of the event
     ur_event_callback_t Notify,     ///< [in] execution status of the event
@@ -975,6 +939,57 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventSetCallback(
   logger::error(logger::LegacyMessage("[UR][L0] {} function not implemented!"),
                 "{} function not implemented!", __FUNCTION__);
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+}
+
+} // namespace ur::level_zero
+
+ur_result_t ur_event_handle_t_::getOrCreateHostVisibleEvent(
+    ze_event_handle_t &ZeHostVisibleEvent) {
+  auto UrQueue = this->UrQueue;
+
+  std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Lock(UrQueue->Mutex,
+                                                          this->Mutex);
+
+  if (!HostVisibleEvent) {
+    this->IsCreatingHostProxyEvent = true;
+    if (UrQueue->ZeEventsScope != OnDemandHostVisibleProxy)
+      die("getOrCreateHostVisibleEvent: missing host-visible event");
+
+    // Submit the command(s) signalling the proxy event to the queue.
+    // We have to first submit a wait for the device-only event for which this
+    // proxy is created.
+    //
+    // Get a new command list to be used on this call
+
+    // We want to batch these commands to avoid extra submissions (costly)
+    bool OkToBatch = true;
+
+    ur_command_list_ptr_t CommandList{};
+    UR_CALL(UrQueue->Context->getAvailableCommandList(
+        UrQueue, CommandList, false /* UseCopyEngine */, 0, nullptr, OkToBatch))
+
+    // Create a "proxy" host-visible event.
+    UR_CALL(createEventAndAssociateQueue(
+        UrQueue, &HostVisibleEvent, UR_EXT_COMMAND_TYPE_USER, CommandList,
+        /* IsInternal */ false, /* IsMultiDevice */ false,
+        /* HostVisible */ true));
+
+    if (this->IsInnerBatchedEvent) {
+      ZE2UR_CALL(zeCommandListAppendBarrier,
+                 (CommandList->first, ZeEvent, 0, nullptr));
+    } else {
+      ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
+                 (CommandList->first, 1, &ZeEvent));
+    }
+    ZE2UR_CALL(zeCommandListAppendSignalEvent,
+               (CommandList->first, HostVisibleEvent->ZeEvent));
+
+    UR_CALL(UrQueue->executeCommandList(CommandList, false, OkToBatch))
+    this->IsCreatingHostProxyEvent = false;
+  }
+
+  ZeHostVisibleEvent = HostVisibleEvent->ZeEvent;
+  return UR_RESULT_SUCCESS;
 }
 
 ur_result_t urEventReleaseInternal(ur_event_handle_t Event) {
@@ -1152,7 +1167,7 @@ ur_result_t CleanupCompletedEvent(ur_event_handle_t Event, bool QueueLocked,
   // We've reset event data members above, now cleanup resources.
   if (AssociatedKernel) {
     ReleaseIndirectMem(AssociatedKernel);
-    UR_CALL(urKernelRelease(AssociatedKernel));
+    UR_CALL(ur::level_zero::urKernelRelease(AssociatedKernel));
   }
 
   if (AssociatedQueue) {
@@ -1211,7 +1226,7 @@ ur_result_t CleanupCompletedEvent(ur_event_handle_t Event, bool QueueLocked,
     }
     if (DepEventKernel) {
       ReleaseIndirectMem(DepEventKernel);
-      UR_CALL(urKernelRelease(DepEventKernel));
+      UR_CALL(ur::level_zero::urKernelRelease(DepEventKernel));
     }
     UR_CALL(urEventReleaseInternal(DepEvent));
   }
@@ -1502,8 +1517,8 @@ ur_result_t _ur_ze_event_list_t::createAndRetainUrZeEventList(
 
         std::shared_lock<ur_shared_mutex> Lock(EventList[I]->Mutex);
 
-        ur_device_handle_t QueueRootDevice;
-        ur_device_handle_t CurrentQueueRootDevice;
+        ur_device_handle_t QueueRootDevice = nullptr;
+        ur_device_handle_t CurrentQueueRootDevice = nullptr;
         if (Queue) {
           QueueRootDevice = Queue->Device;
           CurrentQueueRootDevice = CurQueueDevice;
