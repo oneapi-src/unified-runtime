@@ -47,8 +47,8 @@ TEST_P(QueueBufferTestWithParam, QueueBufferTest) {
     std::vector<ur_event_handle_t> EventsFill;
     ur_event_handle_t Event;
 
-    size_t Buffer1Index;
-    size_t Buffer2Index;
+    size_t Buffer1Index = 0;
+    size_t Buffer2Index = 0;
     ASSERT_NO_FATAL_FAILURE(
         AddBuffer1DArg(ArraySize * sizeof(uint32_t), &Buffer1, &Buffer1Index));
     ASSERT_NO_FATAL_FAILURE(
