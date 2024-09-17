@@ -185,6 +185,7 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
     with open('benchmark_results.md', 'w') as file:
         file.write(markdown_content)
 
+    print("Current Directory:", os.getcwd())
     print("Markdown with benchmark results has been written to benchmark_results.md")
 
 def validate_and_parse_env_args(env_args):
