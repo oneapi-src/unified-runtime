@@ -1,4 +1,4 @@
-name: Compute Benchmarks
+name: Benchmarks Publish
 
 on:
   # Can be triggered via manual "dispatch" (from workflow view in GitHub Actions tab)
