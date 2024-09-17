@@ -1,6 +1,6 @@
 name: Benchmarks Publish
 
-on: [workflow_dispatch]
+on: [push, workflow_dispatch]
   # Can be triggered via manual "dispatch" (from workflow view in GitHub Actions tab)
 
   push:
