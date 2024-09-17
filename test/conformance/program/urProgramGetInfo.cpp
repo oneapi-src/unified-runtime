@@ -56,7 +56,7 @@ TEST_P(urProgramGetInfoTest, Success) {
                                         nullptr));
     } else {
         auto result = urProgramGetInfo(program, property_name, 0, nullptr,
-                               &property_size);
+                                       &property_size);
         if (result != UR_RESULT_SUCCESS) {
             ASSERT_EQ_RESULT(result, UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION);
             ASSERT_TRUE(optionalQueries.count(property_name));
