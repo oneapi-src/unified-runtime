@@ -2371,6 +2371,7 @@ ur_queue_handle_legacy_t_::ur_queue_group_t::getImmCmdList() {
   ZeCommandQueueDesc.ordinal = QueueOrdinal;
   ZeCommandQueueDesc.index = QueueIndex;
   ZeCommandQueueDesc.mode = ZE_COMMAND_QUEUE_MODE_ASYNCHRONOUS;
+  bool isInOrderList = false;
   const char *Priority = "Normal";
   if (Queue->isPriorityLow()) {
     ZeCommandQueueDesc.priority = ZE_COMMAND_QUEUE_PRIORITY_PRIORITY_LOW;
@@ -2386,6 +2387,7 @@ ur_queue_handle_legacy_t_::ur_queue_group_t::getImmCmdList() {
   }
 
   if (Queue->Device->useDriverInOrderLists() && Queue->isInOrderQueue()) {
+    isInOrderList = true;
     ZeCommandQueueDesc.flags |= ZE_COMMAND_QUEUE_FLAG_IN_ORDER;
   }
 
@@ -2434,7 +2436,7 @@ ur_queue_handle_legacy_t_::ur_queue_group_t::getImmCmdList() {
               ZeCommandList,
               ur_command_list_info_t(
                   nullptr, true, false, nullptr, ZeCommandQueueDesc,
-                  Queue->useCompletionBatching(), true, false, true)})
+                  Queue->useCompletionBatching(), true, isInOrderList, true)})
           .first;
 
   return ImmCmdLists[Index];
