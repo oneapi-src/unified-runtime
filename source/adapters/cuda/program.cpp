@@ -11,6 +11,8 @@
 #include "program.hpp"
 #include "ur_util.hpp"
 
+#include <array>
+
 bool getMaxRegistersJitOptionValue(const std::string &BuildOptions,
                                    unsigned int &Value) {
   using namespace std::string_view_literals;
@@ -137,8 +139,8 @@ ur_result_t ur_program_handle_t_::buildProgram(const char *BuildOptions) {
   }
 
   UR_CHECK_ERROR(cuModuleLoadDataEx(&Module, static_cast<const void *>(Binary),
-                                    Options.size(), Options.data(),
-                                    OptionVals.data()));
+                                    static_cast<unsigned int>(Options.size()),
+                                    Options.data(), OptionVals.data()));
 
   BuildStatus = UR_PROGRAM_BUILD_STATUS_SUCCESS;
 
