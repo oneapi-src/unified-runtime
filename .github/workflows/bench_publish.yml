@@ -1,11 +1,11 @@
 name: Benchmarks Publish
 
-on:
+on: [workflow_dispatch]
   # Can be triggered via manual "dispatch" (from workflow view in GitHub Actions tab)
 
   push:
     branches:
-      - add-sycl-bench  # Trigger on push to the main branch
+      - main  # Trigger on push to the main branch
 
 jobs:
   build:
