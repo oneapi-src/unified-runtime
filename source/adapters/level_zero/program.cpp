@@ -118,6 +118,26 @@ ur_result_t urProgramCreateWithBinary(
   return UR_RESULT_SUCCESS;
 }
 
+ur_result_t urProgramCreateWithBinaryExp(
+    ur_context_handle_t hContext, ///< [in] handle of the context instance
+    uint32_t numDevices,          ///< [in] number of devices
+    ur_device_handle_t
+        *phDevices, ///< [in][range(0, numDevices)] a pointer to a list of
+                    ///< device handles. The binaries are loaded for devices
+                    ///< specified in this list.
+    size_t *pLengths, ///< [in][range(0, numDevices)] array of sizes of program
+                      ///< binaries specified by `pBinaries` (in bytes).
+    const uint8_t *
+        *ppBinaries, ///< [in][range(0, numDevices)] pointer to program binaries
+                     ///< to be loaded for devices specified by `phDevices`.
+    const ur_program_properties_t *
+        pProperties, ///< [in][optional] pointer to program creation properties.
+    ur_program_handle_t
+        *phProgram ///< [out] pointer to handle of Program object created.
+) {
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+}
+
 ur_result_t urProgramBuild(
     ur_context_handle_t Context, ///< [in] handle of the context instance.
     ur_program_handle_t Program, ///< [in] Handle of the program to build.
