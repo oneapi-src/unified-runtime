@@ -8,6 +8,13 @@ from benches.base import Result
 import math
 import matplotlib.pyplot as plt
 
+class OutputLine:
+    def __init__(self, name):
+        self.label = name
+        self.diff = None
+        self.bars = None
+        self.row = ""
+
 # Function to generate the mermaid bar chart script
 def generate_mermaid_script(chart_data: dict[str, list[Result]]):
     benches = collections.defaultdict(list)
@@ -101,10 +108,15 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
             benchmark_results[res.name][key] = res
 
     # Generate the table rows
-    diffs_dict = {}
+    # diffs_dict = {}
+    # sorted_dict = {}
+    # bar_dict = {}
+    output_list = []    
 
     for bname, results in benchmark_results.items():
-        row = f"| {bname} |"
+        l = OutputLine(bname) 
+        
+        l.row = f"| {bname} |"
         best_value = None
         best_key = None
 
@@ -117,68 +129,48 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
         # Generate the row with the best value highlighted
         for key in chart_data.keys():
             if key in results:
-                value = results[key].value
+                intv = results[key].value
                 if key == best_key:
-                    row += f" <ins>{value}</ins> |"  # Highlight the best value
+                    l.row += f" <ins>{intv}</ins> |"  # Highlight the best value
                 else:
-                    row += f" {value} |"
+                    l.row += f" {intv} |"
             else:
-                row += " - |"
+                l.row += " - |"
 
+        
         if len(chart_data.keys()) == 2:
             key0 = list(chart_data.keys())[0]
             key1 = list(chart_data.keys())[1]
             if (key0 in results) and (key1 in results):
-                v0 = results[key0].value;
-                v1 = results[key1].value;
+                v0 = results[key0].value
+                v1 = results[key1].value
                 diff = None
                 if v0 != 0 and results[key0].lower_is_better:
                     diff = v1/v0
                 elif v1 != 0 and not results[key0].lower_is_better:
                     diff = v0/v1
                 if diff != None:
-                    row += f"diff:{(diff * 100):.1f}%"
-                    diffs_dict[results[key0].label] = diff
+                    l.row += f"diff:{(diff * 100):.2f}%"
+                    l.diff = diff
 
-        summary_table += row + "\n"
-
-    n = len(diffs_dict)
-    values = list(diffs_dict.values())
+        output_list.append(l)
 
 
-    if n > 0: # we have some values to compare
-        # calculate geom. mean
-        product = 1
-        for value in values:
-            product *= value
+    sorted_output_list = sorted(output_list, key=lambda x: (x.diff is not None, x.diff), reverse=True)
 
-        geometric_mean = product ** (1/n)
-        summary_table += f"Mean performance: {(geometric_mean*100):.1f}% of baseline (higher is better)" + "\n"
-        print(f"Mean performance: {(geometric_mean*100):.1f}% of baseline")
-
-        # create hiriz. bar chart for particular benchmarks
-
-        labels = list(diffs_dict.keys())
-        values = list(diffs_dict.values())
-
-        colors = ['blue' if value > 1 else 'red' for value in values]
-
-        # Adding labels next to each bar
-        for index, value in enumerate(values):
-            plt.text(value/2, index, f"{(value*100):.2f}%", va='center', color='white')
-
-        plt.figure(figsize=(8, len(values) * .5))
-
-        # Create horizontal bar chart
-        plt.barh(labels, values, color=colors)
-
-        # Adding labels and title
-        plt.xlabel('Speedup')
-        plt.title('Performance compared to baseline')
-
-        # Save the plot as a PNG file
-        plt.savefig('benchmarks_chart.png', bbox_inches='tight')
-
+    diff_values = [l.diff for l in sorted_output_list if l.diff is not None]
+    max_diff = max(max(diff_values) - 1, 1 - min(diff_values))
+    
+    for l in sorted_output_list: 
+        if l.diff != None:
+            l.row += f" | Perf change: {(l.diff - 1)*100:.1f}%"
+            l.bars = round(10*(l.diff - 1)/max_diff)
+            if l.bars > 0: 
+                l.row += f" | | {'+' * l.bars}"
+            else:
+                l.row += f" | {'-' * (-l.bars)} | "
+            print(l.row)                   
+        summary_table += l.row + "\n"
 
     return summary_table
 

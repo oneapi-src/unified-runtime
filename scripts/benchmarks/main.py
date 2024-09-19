@@ -34,7 +34,7 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
         # *** Compute benchmarks
         SubmitKernelSYCL(cb, 0),
         # SubmitKernelSYCL(cb, 1),
-        # SubmitKernelUR(cb, 0),
+        SubmitKernelUR(cb, 0),
         # SubmitKernelUR(cb, 1),
         # QueueInOrderMemcpy(cb, 0, 'Device', 'Device', 1024),
         # QueueInOrderMemcpy(cb, 0, 'Host', 'Device', 1024),
@@ -45,15 +45,15 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
         # VectorSum(cb),
         
         # *** Velocity benchmarks
-        Hashtable(vb),
-        # Bitcracker(vb),
+        # Hashtable(vb),
+        Bitcracker(vb),
         # CudaSift(vb),
         # Easywave(vb),
         # QuickSilver(vb),
         # SobelFilter(vb),
 
         # *** sycl-bench multi benchmarks
-        Blocked_transform(sb),
+        # Blocked_transform(sb),
         # DagTaskI(sb),
         # DagTaskS(sb),
         # HostDevBandwidth(sb),
@@ -69,7 +69,7 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
         # VecAdd(sb),
 
         # *** sycl-bench single benchmarks
-        TwoDConvolution(sb),
+        # TwoDConvolution(sb),
         Two_mm(sb),
         # Three_mm(sb),
         # Arith(sb),
