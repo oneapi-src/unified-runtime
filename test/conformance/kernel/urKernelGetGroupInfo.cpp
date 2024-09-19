@@ -19,8 +19,6 @@ UUR_TEST_SUITE_P(
                       UR_KERNEL_GROUP_INFO_PRIVATE_MEM_SIZE),
     uur::deviceTestWithParamPrinter<ur_kernel_group_info_t>);
 
-const std::set optionalQueries{UR_KERNEL_GROUP_INFO_GLOBAL_WORK_SIZE};
-
 struct urKernelGetGroupInfoSingleTest : uur::urKernelTest {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(urKernelTest::SetUp());
@@ -43,14 +41,9 @@ TEST_P(urKernelGetGroupInfoTest, Success) {
     auto property_name = getParam();
     size_t property_size = 0;
     std::vector<char> property_value;
-    auto result = urKernelGetGroupInfo(kernel, device, property_name, 0,
-                                       nullptr, &property_size);
-    if (result == UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION) {
-        ASSERT_TRUE(optionalQueries.count(property_name));
-        return;
-    } else {
-        ASSERT_SUCCESS(result);
-    }
+    ASSERT_QUERY_SUCCESS(urKernelGetGroupInfo(kernel, device, property_name, 0,
+                                              nullptr, &property_size),
+                         property_name);
     property_value.resize(property_size);
     ASSERT_SUCCESS(urKernelGetGroupInfo(kernel, device, property_name,
                                         property_size, property_value.data(),

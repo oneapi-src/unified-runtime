@@ -27,44 +27,41 @@ UUR_TEST_SUITE_P(urQueueGetInfoTestWithInfoParam,
 TEST_P(urQueueGetInfoTestWithInfoParam, Success) {
     ur_queue_info_t info_type = getParam();
     size_t size = 0;
-    auto result = urQueueGetInfo(queue, info_type, 0, nullptr, &size);
+    ASSERT_QUERY_SUCCESS(urQueueGetInfo(queue, info_type, 0, nullptr, &size),
+                         info_type);
 
-    if (result == UR_RESULT_SUCCESS) {
-        ASSERT_NE(size, 0);
+    ASSERT_NE(size, 0);
 
-        if (const auto expected_size = queue_info_size_map.find(info_type);
-            expected_size != queue_info_size_map.end()) {
-            ASSERT_EQ(expected_size->second, size);
-        }
+    if (const auto expected_size = queue_info_size_map.find(info_type);
+        expected_size != queue_info_size_map.end()) {
+        ASSERT_EQ(expected_size->second, size);
+    }
 
-        std::vector<uint8_t> data(size);
-        ASSERT_SUCCESS(
-            urQueueGetInfo(queue, info_type, size, data.data(), nullptr));
+    std::vector<uint8_t> data(size);
+    ASSERT_SUCCESS(
+        urQueueGetInfo(queue, info_type, size, data.data(), nullptr));
 
-        switch (info_type) {
-        case UR_QUEUE_INFO_CONTEXT: {
-            auto returned_context =
-                reinterpret_cast<ur_context_handle_t *>(data.data());
-            ASSERT_EQ(context, *returned_context);
-            break;
-        }
-        case UR_QUEUE_INFO_DEVICE: {
-            auto returned_device =
-                reinterpret_cast<ur_device_handle_t *>(data.data());
-            ASSERT_EQ(*returned_device, device);
-            break;
-        }
-        case UR_QUEUE_INFO_REFERENCE_COUNT: {
-            auto returned_reference_count =
-                reinterpret_cast<uint32_t *>(data.data());
-            ASSERT_GT(*returned_reference_count, 0U);
-            break;
-        }
-        default:
-            break;
-        }
-    } else {
-        ASSERT_EQ_RESULT(result, UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION);
+    switch (info_type) {
+    case UR_QUEUE_INFO_CONTEXT: {
+        auto returned_context =
+            reinterpret_cast<ur_context_handle_t *>(data.data());
+        ASSERT_EQ(context, *returned_context);
+        break;
+    }
+    case UR_QUEUE_INFO_DEVICE: {
+        auto returned_device =
+            reinterpret_cast<ur_device_handle_t *>(data.data());
+        ASSERT_EQ(*returned_device, device);
+        break;
+    }
+    case UR_QUEUE_INFO_REFERENCE_COUNT: {
+        auto returned_reference_count =
+            reinterpret_cast<uint32_t *>(data.data());
+        ASSERT_GT(*returned_reference_count, 0U);
+        break;
+    }
+    default:
+        break;
     }
 }
 
@@ -109,7 +106,8 @@ UUR_TEST_SUITE_P(urQueueGetInfoDeviceQueueTestWithInfoParam,
 TEST_P(urQueueGetInfoDeviceQueueTestWithInfoParam, Success) {
     ur_queue_info_t info_type = getParam();
     size_t size = 0;
-    ASSERT_SUCCESS(urQueueGetInfo(queue, info_type, 0, nullptr, &size));
+    ASSERT_QUERY_SUCCESS(urQueueGetInfo(queue, info_type, 0, nullptr, &size),
+                         info_type);
 
     ASSERT_NE(size, 0);
 

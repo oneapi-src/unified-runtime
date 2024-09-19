@@ -23,9 +23,6 @@ UUR_TEST_SUITE_P(
                       UR_PROGRAM_INFO_KERNEL_NAMES),
     uur::deviceTestWithParamPrinter<ur_program_info_t>);
 
-const std::set optionalQueries{UR_PROGRAM_INFO_NUM_KERNELS,
-                               UR_PROGRAM_INFO_KERNEL_NAMES};
-
 struct urProgramGetInfoSingleTest : uur::urProgramTest {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(urProgramTest::SetUp());
@@ -55,13 +52,9 @@ TEST_P(urProgramGetInfoTest, Success) {
                                         sizeof(binaries[0]), binaries,
                                         nullptr));
     } else {
-        auto result = urProgramGetInfo(program, property_name, 0, nullptr,
-                                       &property_size);
-        if (result != UR_RESULT_SUCCESS) {
-            ASSERT_EQ_RESULT(result, UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION);
-            ASSERT_TRUE(optionalQueries.count(property_name));
-            return;
-        }
+        ASSERT_QUERY_SUCCESS(urProgramGetInfo(program, property_name, 0,
+                                              nullptr, &property_size),
+                             property_name);
         property_value.resize(property_size);
         ASSERT_SUCCESS(urProgramGetInfo(program, property_name, property_size,
                                         property_value.data(), nullptr));

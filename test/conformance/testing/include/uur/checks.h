@@ -9,6 +9,7 @@
 #include <gtest/gtest.h>
 #include <ur_api.h>
 #include <ur_print.hpp>
+#include <uur/optional_queries.h>
 #include <uur/utils.h>
 
 namespace uur {
@@ -44,6 +45,19 @@ inline std::ostream &operator<<(std::ostream &out, const Result &result) {
 #endif
 #ifndef EXPECT_SUCCESS
 #define EXPECT_SUCCESS(ACTUAL) EXPECT_EQ_RESULT(UR_RESULT_SUCCESS, ACTUAL)
+#endif
+
+// This macro is intended to be used for the first call to a GetInfo query, it
+// gracefully handles cases where the adapter doesn't support a query marked
+// [optional-query] in the spec by returning early.
+#ifndef ASSERT_QUERY_SUCCESS
+#define ASSERT_QUERY_SUCCESS(CALL, QUERY)                                      \
+    auto result = CALL;                                                        \
+    if (result != UR_RESULT_SUCCESS) {                                         \
+        ASSERT_EQ_RESULT(result, UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION);     \
+        ASSERT_TRUE(uur::isQueryOptional(QUERY));                              \
+        return;                                                                \
+    }
 #endif
 
 inline std::ostream &operator<<(std::ostream &out,

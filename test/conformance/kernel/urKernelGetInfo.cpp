@@ -15,8 +15,6 @@ UUR_TEST_SUITE_P(
                       UR_KERNEL_INFO_NUM_REGS),
     uur::deviceTestWithParamPrinter<ur_kernel_info_t>);
 
-const std::set optionalQueries{UR_KERNEL_INFO_NUM_REGS};
-
 using urKernelGetInfoSingleTest = uur::urKernelExecutionTest;
 UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urKernelGetInfoSingleTest);
 
@@ -24,14 +22,9 @@ TEST_P(urKernelGetInfoTest, Success) {
     auto property_name = getParam();
     size_t property_size = 0;
     std::vector<char> property_value;
-    auto result =
-        urKernelGetInfo(kernel, property_name, 0, nullptr, &property_size);
-    if (result == UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION) {
-        ASSERT_TRUE(optionalQueries.count(property_name));
-        return;
-    } else {
-        ASSERT_SUCCESS(result);
-    }
+    ASSERT_QUERY_SUCCESS(
+        urKernelGetInfo(kernel, property_name, 0, nullptr, &property_size),
+        property_name);
     property_value.resize(property_size);
     ASSERT_SUCCESS(urKernelGetInfo(kernel, property_name, property_size,
                                    property_value.data(), nullptr));

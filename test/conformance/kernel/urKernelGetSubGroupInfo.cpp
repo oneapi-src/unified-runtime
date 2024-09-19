@@ -27,8 +27,9 @@ TEST_P(urKernelGetSubGroupInfoTest, Success) {
     auto property_name = getParam();
     size_t property_size = 0;
     std::vector<char> property_value;
-    ASSERT_SUCCESS(urKernelGetSubGroupInfo(kernel, device, property_name, 0,
-                                           nullptr, &property_size));
+    ASSERT_QUERY_SUCCESS(urKernelGetSubGroupInfo(kernel, device, property_name,
+                                                 0, nullptr, &property_size),
+                         property_name);
     property_value.resize(property_size);
     ASSERT_SUCCESS(urKernelGetSubGroupInfo(kernel, device, property_name,
                                            property_size, property_value.data(),
