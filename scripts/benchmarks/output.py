@@ -6,7 +6,6 @@
 import collections
 from benches.base import Result
 import math
-import matplotlib.pyplot as plt
 
 class OutputLine:
     def __init__(self, name):
