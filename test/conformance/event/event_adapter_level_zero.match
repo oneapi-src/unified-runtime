@@ -4,4 +4,7 @@
 {{OPT}}urEventGetProfilingInfoTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_PROFILING_INFO_COMMAND_SUBMIT
 {{OPT}}urEventGetProfilingInfoTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_PROFILING_INFO_COMMAND_COMPLETE
 {{OPT}}urEventGetProfilingInfoWithTimingComparisonTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
-{{OPT}}{{Segmentation fault|Aborted}}
+urEventSetCallbackTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
+urEventSetCallbackTest.ValidateParameters/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
+urEventSetCallbackTest.AllStates/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
+urEventSetCallbackTest.EventAlreadyCompleted/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_

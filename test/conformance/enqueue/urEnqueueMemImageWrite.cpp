@@ -104,6 +104,9 @@ TEST_P(urEnqueueMemImageWriteTest, InvalidOrigin3D) {
 }
 
 TEST_P(urEnqueueMemImageWriteTest, InvalidRegion1D) {
+    UUR_SKIP_ON_BACKEND(
+        UR_PLATFORM_BACKEND_LEVEL_ZERO,
+        "Crashes: https://github.com/oneapi-src/unified-runtime/issues/2103");
     std::vector<uint32_t> input(width * 4, 42);
     ur_rect_region_t bad_region{width + 1, 1, 1};
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
@@ -113,6 +116,9 @@ TEST_P(urEnqueueMemImageWriteTest, InvalidRegion1D) {
 }
 
 TEST_P(urEnqueueMemImageWriteTest, InvalidRegion2D) {
+    UUR_SKIP_ON_BACKEND(
+        UR_PLATFORM_BACKEND_LEVEL_ZERO,
+        "Crashes: https://github.com/oneapi-src/unified-runtime/issues/2103");
     std::vector<uint32_t> input(width * height * 4, 42);
     ur_rect_region_t bad_region{width, height + 1, 1};
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
@@ -122,6 +128,9 @@ TEST_P(urEnqueueMemImageWriteTest, InvalidRegion2D) {
 }
 
 TEST_P(urEnqueueMemImageWriteTest, InvalidRegion3D) {
+    UUR_SKIP_ON_BACKEND(
+        UR_PLATFORM_BACKEND_LEVEL_ZERO,
+        "Crashes: https://github.com/oneapi-src/unified-runtime/issues/2103");
     std::vector<uint32_t> input(width * height * depth * 4, 42);
     ur_rect_region_t bad_region{width, height, depth + 1};
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,

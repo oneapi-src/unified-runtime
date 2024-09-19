@@ -188,6 +188,9 @@ TEST_P(urMemImageCreateTest, InvalidNullPointerImageFormat) {
 }
 
 TEST_P(urMemImageCreateTest, InvalidSize) {
+    UUR_SKIP_ON_BACKEND(
+        UR_PLATFORM_BACKEND_LEVEL_ZERO,
+        "Crashes: https://github.com/oneapi-src/unified-runtime/issues/2103");
 
     uur::raii::Mem image_handle = nullptr;
 
@@ -295,6 +298,9 @@ UUR_TEST_SUITE_P(urMemImageCreateWithHostPtrFlagsTest,
                  uur::deviceTestWithParamPrinter<ur_mem_flag_t>);
 
 TEST_P(urMemImageCreateWithHostPtrFlagsTest, Success) {
+    UUR_SKIP_ON_BACKEND(
+        UR_PLATFORM_BACKEND_LEVEL_ZERO,
+        "Crashes: https://github.com/oneapi-src/unified-runtime/issues/2103");
     uur::raii::Mem host_ptr_buffer = nullptr;
     ASSERT_SUCCESS(urMemImageCreate(context, UR_MEM_FLAG_ALLOC_HOST_POINTER,
                                     &image_format, &image_desc, nullptr,

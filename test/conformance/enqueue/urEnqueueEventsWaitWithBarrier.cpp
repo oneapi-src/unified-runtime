@@ -37,6 +37,9 @@ struct urEnqueueEventsWaitWithBarrierTest : uur::urMultiQueueTest {
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueEventsWaitWithBarrierTest);
 
 TEST_P(urEnqueueEventsWaitWithBarrierTest, Success) {
+    UUR_SKIP_ON_BACKEND(
+        UR_PLATFORM_BACKEND_LEVEL_ZERO,
+        "Crashes: https://github.com/oneapi-src/unified-runtime/issues/2103");
     ur_event_handle_t event1 = nullptr;
     ur_event_handle_t waitEvent = nullptr;
     ASSERT_SUCCESS(urEnqueueMemBufferCopy(queue1, src_buffer, dst_buffer, 0, 0,
@@ -48,6 +51,7 @@ TEST_P(urEnqueueEventsWaitWithBarrierTest, Success) {
     EXPECT_SUCCESS(urEventWait(1, &waitEvent));
 
     std::vector<uint32_t> output(count, 1);
+    // Corrupts the stack
     EXPECT_SUCCESS(urEnqueueMemBufferRead(queue1, dst_buffer, true, 0, size,
                                           output.data(), 0, nullptr, nullptr));
     EXPECT_EQ(input, output);

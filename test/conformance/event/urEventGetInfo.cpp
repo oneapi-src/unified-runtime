@@ -8,7 +8,9 @@
 using urEventGetInfoTest = uur::event::urEventTestWithParam<ur_event_info_t>;
 
 TEST_P(urEventGetInfoTest, Success) {
-
+    UUR_SKIP_ON_BACKEND(
+        UR_PLATFORM_BACKEND_LEVEL_ZERO,
+        "Crashes: https://github.com/oneapi-src/unified-runtime/issues/2103");
     ur_event_info_t info_type = getParam();
     size_t size;
     ASSERT_SUCCESS(urEventGetInfo(event, info_type, 0, nullptr, &size));

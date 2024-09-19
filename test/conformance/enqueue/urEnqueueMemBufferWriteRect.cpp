@@ -76,6 +76,9 @@ UUR_TEST_SUITE_P(
     uur::printRectTestString<urEnqueueMemBufferWriteRectTestWithParam>);
 
 TEST_P(urEnqueueMemBufferWriteRectTestWithParam, Success) {
+    UUR_SKIP_ON_BACKEND(
+        UR_PLATFORM_BACKEND_LEVEL_ZERO,
+        "Crashes: https://github.com/oneapi-src/unified-runtime/issues/2103");
     // Unpack the parameters.
     const auto host_size = getParam().src_size;
     const auto buffer_size = getParam().dst_size;

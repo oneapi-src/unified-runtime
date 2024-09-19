@@ -2,4 +2,18 @@
 urMemBufferPartitionTest.InvalidValueCreateType/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
 urMemBufferPartitionTest.InvalidValueBufferCreateInfoOutOfBounds/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
 {{OPT}}urMemGetInfoImageTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_MEM_INFO_SIZE
-{{Segmentation fault|Aborted}}
+{{OPT}}urMemImageGetInfoTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_IMAGE_INFO_FORMAT
+{{OPT}}urMemImageGetInfoTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_IMAGE_INFO_ELEMENT_SIZE
+{{OPT}}urMemImageGetInfoTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_IMAGE_INFO_ROW_PITCH
+{{OPT}}urMemImageGetInfoTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_IMAGE_INFO_SLICE_PITCH
+{{OPT}}urMemImageGetInfoTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_IMAGE_INFO_WIDTH
+{{OPT}}urMemImageGetInfoTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_IMAGE_INFO_HEIGHT
+{{OPT}}urMemImageGetInfoTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_IMAGE_INFO_DEPTH
+{{OPT}}urMemImageGetInfoTest.InvalidSizeSmall/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_IMAGE_INFO_FORMAT
+{{OPT}}urMemImageGetInfoTest.InvalidSizeSmall/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_IMAGE_INFO_ELEMENT_SIZE
+{{OPT}}urMemImageGetInfoTest.InvalidSizeSmall/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_IMAGE_INFO_ROW_PITCH
+{{OPT}}urMemImageGetInfoTest.InvalidSizeSmall/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_IMAGE_INFO_SLICE_PITCH
+{{OPT}}urMemImageGetInfoTest.InvalidSizeSmall/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_IMAGE_INFO_WIDTH
+{{OPT}}urMemImageGetInfoTest.InvalidSizeSmall/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_IMAGE_INFO_HEIGHT
+{{OPT}}urMemImageGetInfoTest.InvalidSizeSmall/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_IMAGE_INFO_DEPTH
+{{OPT}}urMemImageCreateTest.InvalidImageDescStype/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
