@@ -200,7 +200,7 @@ etors:
     - name: VENDOR_ID
       desc: "[uint32_t] vendor Id of the device"
     - name: DEVICE_ID
-      desc: "[uint32_t] Id of the device"
+      desc: "[uint32_t][optional-query] Id of the device"
     - name: MAX_COMPUTE_UNITS
       desc: "[uint32_t] the number of compute units"
     - name: MAX_WORK_ITEM_DIMENSIONS
