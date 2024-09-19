@@ -10,6 +10,8 @@
 #pragma once
 
 #include "common.hpp"
+#include "context.hpp"
+#include "device.hpp"
 
 struct ur_program_handle_t_ : _ur_object {
   // ur_program_handle_t_() {}
@@ -68,50 +70,60 @@ struct ur_program_handle_t_ : _ur_object {
   // Construct a program in IL.
   ur_program_handle_t_(state St, ur_context_handle_t Context, const void *Input,
                        size_t Length)
-      : Context{Context}, NativeDevice{nullptr}, NativeProperties{nullptr},
-        OwnZeModule{true}, State{St}, Code{new uint8_t[Length]},
-        CodeLength{Length}, ZeModule{nullptr}, ZeBuildLog{nullptr} {
-    std::memcpy(Code.get(), Input, Length);
+      : Context{Context}, NativeProperties{nullptr}, OwnZeModule{true},
+        SpirvCode{new uint8_t[Length]}, SpirvCodeLength{Length},
+        InteropZeModule{nullptr} {
+    std::memcpy(SpirvCode.get(), Input, Length);
+    // All devices have the program in IL state.
+    for (auto &Device : Context->getDevices()) {
+      DeviceData &PerDevData = DeviceDataMap[Device->ZeDevice];
+      PerDevData.State = St;
+    }
   }
 
-  // Construct a program in NATIVE.
+  // Construct a program in NATIVE for multiple devices.
   ur_program_handle_t_(state St, ur_context_handle_t Context,
-                       ur_device_handle_t Device,
+                       const uint32_t NumDevices,
+                       const ur_device_handle_t *Devices,
                        const ur_program_properties_t *Properties,
-                       const void *Input, size_t Length)
-      : Context{Context}, NativeDevice(Device), NativeProperties(Properties),
-        OwnZeModule{true}, State{St}, Code{new uint8_t[Length]},
-        CodeLength{Length}, ZeModule{nullptr}, ZeBuildLog{nullptr} {
-    std::memcpy(Code.get(), Input, Length);
+                       const uint8_t **Inputs, const size_t *Lengths)
+      : Context{Context}, NativeProperties(Properties), OwnZeModule{true},
+        InteropZeModule{nullptr} {
+    for (uint32_t I = 0; I < NumDevices; ++I) {
+      DeviceData &PerDevData = DeviceDataMap[Devices[I]->ZeDevice];
+      PerDevData.State = St;
+      PerDevData.Binary = std::make_pair(
+          std::unique_ptr<uint8_t[]>(new uint8_t[Lengths[I]]), Lengths[I]);
+      std::memcpy(PerDevData.Binary.first.get(), Inputs[I], Lengths[I]);
+    }
   }
 
   // Construct a program in Exe or Invalid state.
   ur_program_handle_t_(state St, ur_context_handle_t Context,
                        ze_module_handle_t ZeModule,
                        ze_module_build_log_handle_t ZeBuildLog)
-      : Context{Context}, NativeDevice{nullptr}, NativeProperties{nullptr},
-        OwnZeModule{true}, State{St}, ZeModule{ZeModule}, ZeBuildLog{
-                                                              ZeBuildLog} {}
+      : Context{Context}, NativeProperties{nullptr}, OwnZeModule{true},
+        InteropZeModule{ZeModule} {
+    for (auto &Device : Context->getDevices()) {
+      DeviceData &PerDevData = DeviceDataMap[Device->ZeDevice];
+      PerDevData.State = St;
+    }
+  }
 
   // Construct a program in Exe state (interop).
   ur_program_handle_t_(state St, ur_context_handle_t Context,
                        ze_module_handle_t ZeModule, bool OwnZeModule)
-      : Context{Context}, NativeDevice{nullptr}, NativeProperties{nullptr},
-        OwnZeModule{OwnZeModule}, State{St}, ZeModule{ZeModule}, ZeBuildLog{
-                                                                     nullptr} {}
-
-  // Construct a program from native handle
-  ur_program_handle_t_(state St, ur_context_handle_t Context,
-                       ze_module_handle_t ZeModule)
-      : Context{Context}, NativeDevice{nullptr}, NativeProperties{nullptr},
-        OwnZeModule{true}, State{St}, ZeModule{ZeModule}, ZeBuildLog{nullptr} {}
+      : Context{Context}, NativeProperties{nullptr}, OwnZeModule{OwnZeModule},
+        InteropZeModule{ZeModule} {
+    // TODO: Currently it is not possible to understand the device associated
+    // with provided ZeModule. So we can't set the state on that device to Exe.
+  }
 
   // Construct a program in Invalid state with a custom error message.
   ur_program_handle_t_(state St, ur_context_handle_t Context,
                        const std::string &ErrorMessage)
-      : Context{Context}, NativeDevice{nullptr}, NativeProperties{nullptr},
-        OwnZeModule{true}, ErrorMessage{ErrorMessage}, State{St},
-        ZeModule{nullptr}, ZeBuildLog{nullptr} {}
+      : Context{Context}, NativeProperties{nullptr}, OwnZeModule{true},
+        ErrorMessage{ErrorMessage}, InteropZeModule{nullptr} {}
 
   ~ur_program_handle_t_();
   void ur_release_program_resources(bool deletion);
@@ -121,9 +133,6 @@ struct ur_program_handle_t_ : _ur_object {
   bool resourcesReleased = false;
 
   const ur_context_handle_t Context; // Context of the program.
-
-  // Device Handle used for the Native Build
-  ur_device_handle_t NativeDevice;
 
   // Properties used for the Native Build
   const ur_program_properties_t *NativeProperties;
@@ -136,12 +145,10 @@ struct ur_program_handle_t_ : _ur_object {
   // message from a call to urProgramLink.
   const std::string ErrorMessage;
 
-  state State;
-
   // In IL and Object states, this contains the SPIR-V representation of the
-  // module.  In Native state, it contains the native code.
-  std::unique_ptr<uint8_t[]> Code; // Array containing raw IL / native code.
-  size_t CodeLength{0};            // Size (bytes) of the array.
+  // module.
+  std::unique_ptr<uint8_t[]> SpirvCode; // Array containing raw IL code.
+  size_t SpirvCodeLength;               // Size (bytes) of the array.
 
   // Used only in IL and Object states.  Contains the SPIR-V specialization
   // constants as a map from the SPIR-V "SpecID" to a buffer that contains the
@@ -149,22 +156,35 @@ struct ur_program_handle_t_ : _ur_object {
   // maintaining the storage of this buffer.
   std::unordered_map<uint32_t, const void *> SpecConstants;
 
-  // Used only in Object state.  Contains the build flags from the last call to
-  // urProgramCompile().
-  std::string BuildFlags;
+  // The Level Zero module handle for interoperability.
+  // This module handle is either initialized with the handle provided to
+  // interoperability UR API, or with one of the handles after building the
+  // program. This handle is returned by UR API which allows to get the native
+  // handle from the program.
+  // TODO: Currently interoparability UR API does not support multiple devices.
+  ze_module_handle_t InteropZeModule{};
 
-  // The Level Zero module handle.  Used primarily in Exe state.
-  ze_module_handle_t ZeModule{};
+  struct DeviceData {
+    // Log from the result of building the program for the device using
+    // zeModuleCreate().
+    ze_module_build_log_handle_t ZeBuildLog{};
 
-  // Map of L0 Modules created for all the devices for which a UR Program
-  // has been built.
-  std::unordered_map<ze_device_handle_t, ze_module_handle_t> ZeModuleMap;
+    // The Level Zero module handle for the device. Used primarily in Exe state.
+    ze_module_handle_t ZeModule{};
 
-  // The Level Zero build log from the last call to zeModuleCreate().
-  ze_module_build_log_handle_t ZeBuildLog{};
+    // In Native state, contains the pair of the binary code for the device and
+    // its length in bytes.
+    std::pair<std::unique_ptr<uint8_t[]>, size_t> Binary{nullptr, 0};
 
-  // Map of L0 Module Build logs created for all the devices for which a UR
-  // Program has been built.
-  std::unordered_map<ze_device_handle_t, ze_module_build_log_handle_t>
-      ZeBuildLogMap;
+    // Build flags used for building the program for the device.
+    // May be different for different devices, for example, if
+    // urProgramCompileExp was called multiple times with different build flags
+    // for different devices.
+    std::string BuildFlags{};
+
+    // State of the program for the device.
+    state State{};
+  };
+
+  std::unordered_map<ze_device_handle_t, DeviceData> DeviceDataMap;
 };
