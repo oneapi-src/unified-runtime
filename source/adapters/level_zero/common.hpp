@@ -240,6 +240,19 @@ enum {
       2, // blocking UR calls, where supported (usually in enqueue commands)
 };
 
+typedef uint32_t ur_event_flags_t;
+typedef enum ur_event_flag_t {
+  USING_IMM_CMDLIST = UR_BIT(0),
+  HOST_VISIBLE = UR_BIT(1),
+  COUNTER_BASED = UR_BIT(2),
+  ENABLE_PROFILER = UR_BIT(3),
+  MULTIDEVICE = UR_BIT(4),
+  /// @cond
+  UR_EVENT_FLAG_FORCE_UINT32 = 0x7FFFFFFF
+  /// @endcond
+
+} ur_event_flag_t;
+
 static const uint32_t UrL0Serialize = [] {
   const char *ZeSerializeMode = std::getenv("ZE_SERIALIZE");
   const char *UrL0SerializeMode = std::getenv("UR_L0_SERIALIZE");

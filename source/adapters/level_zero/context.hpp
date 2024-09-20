@@ -154,10 +154,9 @@ struct ur_context_handle_t_ : _ur_object {
   // head.
   //
   // Cache of event pools to which host-visible events are added to.
-  std::vector<std::list<ze_event_pool_handle_t>> ZeEventPoolCache{
-      ZeEventPoolCacheTypeCount * 2};
+  std::vector<std::list<ze_event_pool_handle_t>> ZeEventPoolCache{12};
   std::vector<std::unordered_map<ze_device_handle_t, size_t>>
-      ZeEventPoolCacheDeviceMap{ZeEventPoolCacheTypeCount * 2};
+      ZeEventPoolCacheDeviceMap{12};
 
   // This map will be used to determine if a pool is full or not
   // by storing number of empty slots available in the pool.
@@ -209,31 +208,15 @@ struct ur_context_handle_t_ : _ur_object {
   // slot for a host-visible event. The ProfilingEnabled tells is we need a
   // slot for an event with profiling capabilities.
   ur_result_t getFreeSlotInExistingOrNewPool(ze_event_pool_handle_t &, size_t &,
-                                             bool HostVisible,
-                                             bool ProfilingEnabled,
-                                             ur_device_handle_t Device,
-                                             bool CounterBasedEventEnabled,
-                                             bool UsingImmCmdList);
+                                             ur_event_flags_t Flags,
+                                             ur_device_handle_t Device);
 
   // Get ur_event_handle_t from cache.
-  ur_event_handle_t getEventFromContextCache(bool HostVisible,
-                                             bool WithProfiling,
-                                             ur_device_handle_t Device,
-                                             bool CounterBasedEventEnabled,
-                                             bool UsingImmCmdList);
+  ur_event_handle_t getEventFromContextCache(ur_event_flags_t Flags,
+                                             ur_device_handle_t Device);
 
   // Add ur_event_handle_t to cache.
   void addEventToContextCache(ur_event_handle_t);
-
-  enum ZeEventPoolCacheType {
-    HostVisibleCacheType,
-    HostInvisibleCacheType,
-    HostVisibleCounterBasedRegularCacheType,
-    HostInvisibleCounterBasedRegularCacheType,
-    HostVisibleCounterBasedImmediateCacheType,
-    HostInvisibleCounterBasedImmediateCacheType,
-    ZeEventPoolCacheTypeCount
-  };
 
   enum EventCacheType {
     HostVisibleProfilingCacheType,
@@ -246,19 +229,18 @@ struct ur_context_handle_t_ : _ur_object {
     CounterBasedRegularProfilingCacheType,
     EventCacheTypeCount
   };
-
   std::list<ze_event_pool_handle_t> *
-  getZeEventPoolCache(bool HostVisible, bool WithProfiling,
-                      bool CounterBasedEventEnabled, bool UsingImmediateCmdList,
-                      ze_device_handle_t ZeDevice) {
-    ZeEventPoolCacheType CacheType;
+  getZeEventPoolCache(ur_event_flags_t Flags, ze_device_handle_t ZeDevice) {
+    bool WithProfiling = Flags & ENABLE_PROFILER;
+    Flags &= ~ENABLE_PROFILER;
+    Flags &= ~MULTIDEVICE;
+    int index = static_cast<int>(Flags);
+    (Flags & COUNTER_BASED) ? index /= 2 : (index - 2);
 
-    calculateCacheIndex(HostVisible, CounterBasedEventEnabled,
-                        UsingImmediateCmdList, CacheType);
     if (ZeDevice) {
       auto ZeEventPoolCacheMap =
-          WithProfiling ? &ZeEventPoolCacheDeviceMap[CacheType * 2]
-                        : &ZeEventPoolCacheDeviceMap[CacheType * 2 + 1];
+          WithProfiling ? &ZeEventPoolCacheDeviceMap[index * 2]
+                        : &ZeEventPoolCacheDeviceMap[index * 2 + 1];
       if (ZeEventPoolCacheMap->find(ZeDevice) == ZeEventPoolCacheMap->end()) {
         ZeEventPoolCache.emplace_back();
         ZeEventPoolCacheMap->insert(
@@ -266,32 +248,9 @@ struct ur_context_handle_t_ : _ur_object {
       }
       return &ZeEventPoolCache[(*ZeEventPoolCacheMap)[ZeDevice]];
     } else {
-      return WithProfiling ? &ZeEventPoolCache[CacheType * 2]
-                           : &ZeEventPoolCache[CacheType * 2 + 1];
+      return WithProfiling ? &ZeEventPoolCache[index * 2]
+                           : &ZeEventPoolCache[index * 2 + 1];
     }
-  }
-
-  ur_result_t calculateCacheIndex(bool HostVisible,
-                                  bool CounterBasedEventEnabled,
-                                  bool UsingImmediateCmdList,
-                                  ZeEventPoolCacheType &CacheType) {
-    if (CounterBasedEventEnabled && HostVisible && !UsingImmediateCmdList) {
-      CacheType = HostVisibleCounterBasedRegularCacheType;
-    } else if (CounterBasedEventEnabled && !HostVisible &&
-               !UsingImmediateCmdList) {
-      CacheType = HostInvisibleCounterBasedRegularCacheType;
-    } else if (CounterBasedEventEnabled && HostVisible &&
-               UsingImmediateCmdList) {
-      CacheType = HostVisibleCounterBasedImmediateCacheType;
-    } else if (CounterBasedEventEnabled && !HostVisible &&
-               UsingImmediateCmdList) {
-      CacheType = HostInvisibleCounterBasedImmediateCacheType;
-    } else if (!CounterBasedEventEnabled && HostVisible) {
-      CacheType = HostVisibleCacheType;
-    } else {
-      CacheType = HostInvisibleCacheType;
-    }
-    return UR_RESULT_SUCCESS;
   }
 
   // Decrement number of events living in the pool upon event destroy
@@ -333,54 +292,66 @@ struct ur_context_handle_t_ : _ur_object {
 
 private:
   // Get the cache of events for a provided scope and profiling mode.
-  auto getEventCache(bool HostVisible, bool WithProfiling,
-                     ur_device_handle_t Device) {
-    if (HostVisible) {
+  auto getEventCache(ur_event_flags_t Flags, ur_device_handle_t Device) {
+    if (Flags & HOST_VISIBLE) {
       if (Device) {
         auto EventCachesMap =
-            WithProfiling ? &EventCachesDeviceMap[HostVisibleProfilingCacheType]
-                          : &EventCachesDeviceMap[HostVisibleRegularCacheType];
+            (Flags & ENABLE_PROFILER)
+                ? &EventCachesDeviceMap[HostVisibleProfilingCacheType]
+                : &EventCachesDeviceMap[HostVisibleRegularCacheType];
+        if (EventCachesMap->find(Device) == EventCachesMap->end()) {
+          EventCaches.emplace_back();
+          EventCachesMap->insert(
+              std::make_pair(Device, EventCaches.size() - 1));
+        }
         return &EventCaches[(*EventCachesMap)[Device]];
       } else {
-        return WithProfiling ? &EventCaches[HostVisibleProfilingCacheType]
-                             : &EventCaches[HostVisibleRegularCacheType];
+        return (Flags & ENABLE_PROFILER)
+                   ? &EventCaches[HostVisibleProfilingCacheType]
+                   : &EventCaches[HostVisibleRegularCacheType];
       }
     } else {
       if (Device) {
         auto EventCachesMap =
-            WithProfiling
+            (Flags & ENABLE_PROFILER)
                 ? &EventCachesDeviceMap[HostInvisibleProfilingCacheType]
                 : &EventCachesDeviceMap[HostInvisibleRegularCacheType];
+        if (EventCachesMap->find(Device) == EventCachesMap->end()) {
+          EventCaches.emplace_back();
+          EventCachesMap->insert(
+              std::make_pair(Device, EventCaches.size() - 1));
+        }
         return &EventCaches[(*EventCachesMap)[Device]];
       } else {
-        return WithProfiling ? &EventCaches[HostInvisibleProfilingCacheType]
-                             : &EventCaches[HostInvisibleRegularCacheType];
+        return (Flags & ENABLE_PROFILER)
+                   ? &EventCaches[HostInvisibleProfilingCacheType]
+                   : &EventCaches[HostInvisibleRegularCacheType];
       }
     }
   };
-  auto getCounterBasedEventCache(bool WithProfiling, bool UsingImmediateCmdList,
+  auto getCounterBasedEventCache(ur_event_flags_t Flags,
                                  ur_device_handle_t Device) {
-    if (UsingImmediateCmdList) {
+    if (Flags & USING_IMM_CMDLIST) {
       if (Device) {
         auto EventCachesMap =
-            WithProfiling
+            (Flags & ENABLE_PROFILER)
                 ? &EventCachesDeviceMap[CounterBasedImmediateProfilingCacheType]
                 : &EventCachesDeviceMap[CounterBasedImmediateCacheType];
         return &EventCaches[(*EventCachesMap)[Device]];
       } else {
-        return WithProfiling
+        return (Flags & ENABLE_PROFILER)
                    ? &EventCaches[CounterBasedImmediateProfilingCacheType]
                    : &EventCaches[CounterBasedImmediateCacheType];
       }
     } else {
       if (Device) {
         auto EventCachesMap =
-            WithProfiling
+            (Flags & ENABLE_PROFILER)
                 ? &EventCachesDeviceMap[CounterBasedRegularProfilingCacheType]
                 : &EventCachesDeviceMap[CounterBasedRegularCacheType];
         return &EventCaches[(*EventCachesMap)[Device]];
       } else {
-        return WithProfiling
+        return (Flags & ENABLE_PROFILER)
                    ? &EventCaches[CounterBasedRegularProfilingCacheType]
                    : &EventCaches[CounterBasedRegularCacheType];
       }

@@ -473,9 +473,8 @@ static const uint32_t MaxNumEventsPerPool = [] {
 }();
 
 ur_result_t ur_context_handle_t_::getFreeSlotInExistingOrNewPool(
-    ze_event_pool_handle_t &Pool, size_t &Index, bool HostVisible,
-    bool ProfilingEnabled, ur_device_handle_t Device,
-    bool CounterBasedEventEnabled, bool UsingImmCmdList) {
+    ze_event_pool_handle_t &Pool, size_t &Index, ur_event_flags_t Flags,
+    ur_device_handle_t Device) {
   // Lock while updating event pool machinery.
   std::scoped_lock<ur_mutex> Lock(ZeEventPoolCacheMutex);
 
@@ -485,8 +484,7 @@ ur_result_t ur_context_handle_t_::getFreeSlotInExistingOrNewPool(
     ZeDevice = Device->ZeDevice;
   }
   std::list<ze_event_pool_handle_t> *ZePoolCache =
-      getZeEventPoolCache(HostVisible, ProfilingEnabled,
-                          CounterBasedEventEnabled, UsingImmCmdList, ZeDevice);
+      getZeEventPoolCache(Flags, ZeDevice);
 
   if (!ZePoolCache->empty()) {
     if (NumEventsAvailableInEventPool[ZePoolCache->front()] == 0) {
@@ -517,14 +515,14 @@ ur_result_t ur_context_handle_t_::getFreeSlotInExistingOrNewPool(
     ZeEventPoolDesc.count = MaxNumEventsPerPool;
     ZeEventPoolDesc.flags = 0;
     ZeEventPoolDesc.pNext = nullptr;
-    if (HostVisible)
+    if (Flags & HOST_VISIBLE)
       ZeEventPoolDesc.flags |= ZE_EVENT_POOL_FLAG_HOST_VISIBLE;
-    if (ProfilingEnabled)
+    if (Flags & ENABLE_PROFILER)
       ZeEventPoolDesc.flags |= ZE_EVENT_POOL_FLAG_KERNEL_TIMESTAMP;
     logger::debug("ze_event_pool_desc_t flags set to: {}",
                   ZeEventPoolDesc.flags);
-    if (CounterBasedEventEnabled) {
-      if (UsingImmCmdList) {
+    if (Flags & COUNTER_BASED) {
+      if (Flags & USING_IMM_CMDLIST) {
         counterBasedExt.flags = ZE_EVENT_POOL_COUNTER_BASED_EXP_FLAG_IMMEDIATE;
       } else {
         counterBasedExt.flags =
@@ -558,22 +556,24 @@ ur_result_t ur_context_handle_t_::getFreeSlotInExistingOrNewPool(
   return UR_RESULT_SUCCESS;
 }
 
-ur_event_handle_t ur_context_handle_t_::getEventFromContextCache(
-    bool HostVisible, bool WithProfiling, ur_device_handle_t Device,
-    bool CounterBasedEventEnabled, bool UsingImmCmdList) {
+ur_event_handle_t
+ur_context_handle_t_::getEventFromContextCache(ur_event_flags_t Flags,
+                                               ur_device_handle_t Device) {
   std::scoped_lock<ur_mutex> Lock(EventCacheMutex);
-  auto Cache = getEventCache(HostVisible, WithProfiling, Device);
-  if (CounterBasedEventEnabled) {
-    Cache = getCounterBasedEventCache(WithProfiling, UsingImmCmdList, Device);
+  auto Cache = getEventCache(Flags, Device);
+  if (Flags & COUNTER_BASED) {
+    Cache = getCounterBasedEventCache(Flags, Device);
   }
   if (Cache->empty())
     return nullptr;
 
   auto It = Cache->begin();
   ur_event_handle_t Event = *It;
-  if (Event->CounterBasedEventsEnabled != CounterBasedEventEnabled) {
+  if (Event->CounterBasedEventsEnabled !=
+      static_cast<bool>(Flags & COUNTER_BASED)) {
     return nullptr;
   }
+
   Cache->erase(It);
   // We have to reset event before using it.
   Event->reset();
@@ -587,15 +587,17 @@ void ur_context_handle_t_::addEventToContextCache(ur_event_handle_t Event) {
   if (!Event->IsMultiDevice && Event->UrQueue) {
     Device = Event->UrQueue->Device;
   }
+  ur_event_flags_t Flags = 0;
+  if (Event->isHostVisible())
+    Flags |= HOST_VISIBLE;
+  if (Event->isProfilingEnabled())
+    Flags |= ENABLE_PROFILER;
 
   if (Event->CounterBasedEventsEnabled) {
-    auto Cache = getCounterBasedEventCache(
-        Event->isProfilingEnabled(),
-        !(Event->UrQueue) || (Event->UrQueue)->UsingImmCmdLists, Device);
+    auto Cache = getCounterBasedEventCache(Flags, Device);
     Cache->emplace_back(Event);
   } else {
-    auto Cache = getEventCache(Event->isHostVisible(),
-                               Event->isProfilingEnabled(), Device);
+    auto Cache = getEventCache(Flags, Device);
     Cache->emplace_back(Event);
   }
 }
@@ -619,9 +621,17 @@ ur_context_handle_t_::decrementUnreleasedEventsInPool(ur_event_handle_t Event) {
     ZeDevice = Event->UrQueue->Device->ZeDevice;
   }
 
-  std::list<ze_event_pool_handle_t> *ZePoolCache = getZeEventPoolCache(
-      Event->isHostVisible(), Event->isProfilingEnabled(),
-      Event->CounterBasedEventsEnabled, UsingImmediateCommandlists, ZeDevice);
+  ur_event_flags_t Flags = 0;
+  if (Event->isHostVisible())
+    Flags |= HOST_VISIBLE;
+  if (Event->isProfilingEnabled())
+    Flags |= ENABLE_PROFILER;
+  if (Event->CounterBasedEventsEnabled)
+    Flags |= COUNTER_BASED;
+  if (UsingImmediateCommandlists)
+    Flags |= USING_IMM_CMDLIST;
+  std::list<ze_event_pool_handle_t> *ZePoolCache =
+      getZeEventPoolCache(Flags, ZeDevice);
 
   // Put the empty pool to the cache of the pools.
   if (NumEventsUnreleasedInEventPool[Event->ZeEventPool] == 0)
