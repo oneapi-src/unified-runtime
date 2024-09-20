@@ -199,7 +199,8 @@ ur_queue_handle_legacy_t_::enqueueEventsWaitWithBarrier( ///< [in] handle of the
             !Queue->isProfilingEnabled()) {
           // If we are using driver in order lists, then append wait on events
           // is unnecessary and we can signal the event created.
-          if (EventWaitList.Length && !CmdList->second.IsInOrderList) {
+
+          if (EventWaitList.Length && (!CmdList->second.IsInOrderList || EventWaitList.hasNativeEvents)) {
             ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
                        (CmdList->first, EventWaitList.Length,
                         EventWaitList.ZeEventList));
@@ -1325,6 +1326,7 @@ ur_result_t _ur_ze_event_list_t::createAndRetainUrZeEventList(
   this->Length = 0;
   this->ZeEventList = nullptr;
   this->UrEventList = nullptr;
+  this->hasNativeEvents = false;
 
   if (CurQueue->isInOrderQueue() && CurQueue->LastCommandEvent != nullptr) {
     if (CurQueue->UsingImmCmdLists) {
@@ -1566,6 +1568,9 @@ ur_result_t _ur_ze_event_list_t::createAndRetainUrZeEventList(
         if (QueueLock.has_value()) {
           QueueLock.reset();
           CurQueue->Mutex.lock();
+        }
+        if (this->UrEventList[TmpListLength]->ZeEventPool == nullptr) {
+          this->hasNativeEvents = true;
         }
         TmpListLength += 1;
       }

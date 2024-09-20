@@ -78,6 +78,8 @@ struct _ur_ze_event_list_t {
   // of elements in the above arrays that are valid.
   uint32_t Length = {0};
 
+  bool hasNativeEvents = false;
+
   // Initialize this using the array of events in EventList, and retain
   // all the ur_event_handle_t in the created data structure.
   // CurQueue is the ur_queue_handle_t that the command with this event wait
