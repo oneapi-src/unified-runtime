@@ -192,9 +192,10 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
     summary_table = "\n## Performance change in benchmark groups\n"
 
     for name, outgroup in grouped_objects.items():
+        outgroup_s = sorted(outgroup, key=lambda x: (x.diff is not None, x.diff), reverse=True)
         product = 1.0
-        n = len(outgroup)
-        for l in outgroup:
+        n = len(outgroup_s)
+        for l in outgroup_s:
             if l.diff != None: product *= l.diff
         print(f"Relative performance in group {name}: {math.pow(product, 1/n)}")
         summary_table += f"""
@@ -205,7 +206,7 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
         summary_table += "| Benchmark | " + " | ".join(chart_data.keys()) + " | Relative perf | Change | - |\n"
         summary_table += "|---" * (len(chart_data) + 4) + "|\n"
 
-        for l in outgroup:
+        for l in outgroup_s:
             summary_table += f"{l.row}\n"
             
         summary_table += f"""
