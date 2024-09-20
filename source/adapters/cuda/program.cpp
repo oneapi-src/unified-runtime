@@ -13,47 +13,50 @@
 
 #include <algorithm>
 #include <array>
+#include <charconv>
 #include <cstdint>
 #include <cstring>
 #include <memory>
 #include <new>
 #include <string>
+#include <system_error>
 #include <tuple>
 #include <utility>
 #include <vector>
 
-bool getMaxRegistersJitOptionValue(const std::string &BuildOptions,
-                                   unsigned int &Value) {
+static unsigned int
+parseMaxRegistersJitOptionValue(std::string_view BuildOptions) {
+  // Note: The default value of 'CU_JIT_MAX_REGISTERS' is 0 if no user-defined
+  // limit is provided. This implies the limit by the underlying architecture.
+  static constexpr const unsigned int DefaultValue{0u};
+
   using namespace std::string_view_literals;
   const std::size_t OptionPos = BuildOptions.find_first_of("maxrregcount"sv);
-  if (OptionPos == std::string::npos) {
-    return false;
-  }
+  if (OptionPos == std::string::npos)
+    return DefaultValue;
 
   const std::size_t DelimPos = BuildOptions.find('=', OptionPos + 1u);
-  if (DelimPos == std::string::npos) {
-    return false;
-  }
+  if (DelimPos == std::string::npos)
+    return DefaultValue;
 
   const std::size_t Length = BuildOptions.length();
   const std::size_t StartPos = DelimPos + 1u;
-  if (DelimPos == std::string::npos || StartPos >= Length) {
-    return false;
-  }
+  if (DelimPos == std::string::npos || StartPos >= Length)
+    return DefaultValue;
 
   std::size_t Pos = StartPos;
   while (Pos < Length &&
-         std::isdigit(static_cast<unsigned char>(BuildOptions[Pos]))) {
+         std::isdigit(static_cast<unsigned char>(BuildOptions[Pos])))
     Pos++;
-  }
 
-  const std::string ValueString = BuildOptions.substr(StartPos, Pos - StartPos);
-  if (ValueString.empty()) {
-    return false;
-  }
+  const auto ValueString = BuildOptions.substr(StartPos, Pos - StartPos);
+  if (ValueString.empty())
+    return DefaultValue;
 
-  Value = static_cast<unsigned int>(std::stoi(ValueString));
-  return true;
+  unsigned int Value{};
+  auto [ErrStr, Errc] = std::from_chars(
+      ValueString.data(), ValueString.data() + ValueString.size(), Value);
+  return Errc == std::errc() ? Value : DefaultValue;
 }
 
 ur_result_t
@@ -137,14 +140,11 @@ ur_result_t ur_program_handle_t_::buildProgram(const char *BuildOptions) {
   OptionVals[3] = (void *)(long)MaxLogSize;
 
   if (!this->BuildOptions.empty()) {
-    unsigned int MaxRegs;
-    const bool Valid =
-        getMaxRegistersJitOptionValue(this->BuildOptions, MaxRegs);
-    if (Valid) {
-      Options.push_back(CU_JIT_MAX_REGISTERS);
-      OptionVals.push_back(
-          reinterpret_cast<void *>(static_cast<std::uintptr_t>(MaxRegs)));
-    }
+    unsigned int MaxRegs = parseMaxRegistersJitOptionValue(this->BuildOptions);
+    std::cout << "Parsed MaxRegs: " << MaxRegs << "\n";
+    Options.push_back(CU_JIT_MAX_REGISTERS);
+    OptionVals.push_back(
+        reinterpret_cast<void *>(static_cast<std::uintptr_t>(MaxRegs)));
   }
 
   UR_CHECK_ERROR(cuModuleLoadDataEx(&Module, static_cast<const void *>(Binary),
