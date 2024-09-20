@@ -592,12 +592,18 @@ etors:
 - name: LOADER_CONFIG_SET_MOCKING_ENABLED
   desc: Enumerator for $xLoaderConfigSetMockingEnabled
   value: '229'
-- name: BINDLESS_IMAGES_RELEASE_EXTERNAL_MEMORY_EXP
-  desc: Enumerator for $xBindlessImagesReleaseExternalMemoryExp
+- name: ADAPTER_SET_LOGGER_CALLBACK
+  desc: Enumerator for $xAdapterSetLoggerCallback
   value: '230'
+- name: ADAPTER_SET_LOGGER_CALLBACK_LEVEL
+  desc: Enumerator for $xAdapterSetLoggerCallbackLevel
+  value: '231'
 - name: BINDLESS_IMAGES_MAP_EXTERNAL_LINEAR_MEMORY_EXP
   desc: Enumerator for $xBindlessImagesMapExternalLinearMemoryExp
-  value: '231'
+  value: '232'
+- name: BINDLESS_IMAGES_RELEASE_EXTERNAL_MEMORY_EXP
+  desc: Enumerator for $xBindlessImagesReleaseExternalMemoryExp
+  value: '233'
 ---
 type: enum
 desc: Defines structure types
