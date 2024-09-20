@@ -3,7 +3,7 @@
 # See LICENSE.TXT
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-import collections
+import collections, re
 from benches.base import Result
 import math
 
@@ -13,6 +13,12 @@ class OutputLine:
         self.diff = None
         self.bars = None
         self.row = ""
+    
+    def __str__(self):
+        return f"(Label:{self.label}, diff:{self.diff})"
+    
+    def __repr__(self):
+        return self.__str__()
 
 # Function to generate the mermaid bar chart script
 def generate_mermaid_script(chart_data: dict[str, list[Result]]):
@@ -107,10 +113,7 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
             benchmark_results[res.name][key] = res
 
     # Generate the table rows
-    # diffs_dict = {}
-    # sorted_dict = {}
-    # bar_dict = {}
-    output_list = []    
+    output_detailed_list = []    
 
     for bname, results in benchmark_results.items():
         l = OutputLine(bname) 
@@ -149,24 +152,24 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
                 elif v1 != 0 and not results[key0].lower_is_better:
                     diff = v0/v1
                 if diff != None:
-                    l.row += f"diff:{(diff * 100):.2f}%"
+                    l.row += f"{(diff * 100):.1f}%"
                     l.diff = diff
 
-        output_list.append(l)
+        output_detailed_list.append(l)
 
 
-    sorted_output_list = sorted(output_list, key=lambda x: (x.diff is not None, x.diff), reverse=True)
+    sorted_detailed_list = sorted(output_detailed_list, key=lambda x: (x.diff is not None, x.diff), reverse=True)
 
-    diff_values = [l.diff for l in sorted_output_list if l.diff is not None]
+    diff_values = [l.diff for l in sorted_detailed_list if l.diff is not None]
     max_diff = max(max(diff_values) - 1, 1 - min(diff_values))
     
-    for l in sorted_output_list: 
+    for l in sorted_detailed_list: 
         if l.diff != None:
-            l.row += f" | Perf change: {(l.diff - 1)*100:.1f}%"
+            l.row += f" | {(l.diff - 1)*100:.2f}%"
             l.bars = round(10*(l.diff - 1)/max_diff)
-            if l.bars > 0:
+            if l.bars == 0:
                 l.row += " | 0 |" 
-            elif l.bars == 0: 
+            elif l.bars > 0: 
                 l.row += f" | {'+' * l.bars} |"
             else:
                 l.row += f" | {'-' * (-l.bars)} |"
@@ -174,6 +177,42 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
         else:
             l.row += " |   |"                   
         summary_table += l.row + "\n"
+
+    grouped_objects = collections.defaultdict(list)
+    
+    for l in output_detailed_list:
+        # prefix = l.label.split('_')[0]
+        s = l.label
+        prefix = re.match(r'^[^_\s-]+', s)[0]
+        grouped_objects[prefix].append(l)
+
+    grouped_objects = dict(grouped_objects)
+
+
+
+    summary_table = "## Performance change in benchmark groups\n"
+
+    for name, outgroup in grouped_objects.items():
+        product = 1.0
+        n = len(outgroup)
+        for l in outgroup:
+            if l.diff != None: product *= l.diff
+        print(f"Perf change in group {name}: {math.pow(product, 1/n)}")
+        summary_table += f"""
+<details>
+<summary>"Perf change in group {name}: {math.pow(product, 1/n)}"</summary>
+
+"""
+        summary_table += "| Benchmark | " + " | ".join(chart_data.keys()) + " | Relative perf | Change | - |\n"
+        summary_table += "|---" * (len(chart_data) + 4) + "|\n"
+
+        for l in outgroup:
+            summary_table += f"{l.row}\n"
+            
+        summary_table += f"""
+</details>
+
+"""            
 
     return summary_table
 
