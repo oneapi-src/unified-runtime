@@ -97,8 +97,8 @@ def generate_markdown_details(results: list[Result]):
     return "\n".join(markdown_sections)
 
 def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
-    summary_table = "| Benchmark | " + " | ".join(chart_data.keys()) + " |\n"
-    summary_table += "|---" * (len(chart_data) + 1) + "|\n"
+    summary_table = "| Benchmark | " + " | ".join(chart_data.keys()) + " | Relative perf | Change | - |\n"
+    summary_table += "|---" * (len(chart_data) + 4) + "|\n"
 
     # Collect all benchmarks and their results
     benchmark_results = collections.defaultdict(dict)
@@ -164,11 +164,15 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
         if l.diff != None:
             l.row += f" | Perf change: {(l.diff - 1)*100:.1f}%"
             l.bars = round(10*(l.diff - 1)/max_diff)
-            if l.bars > 0: 
-                l.row += f" | | {'+' * l.bars}"
+            if l.bars > 0:
+                l.row += " | 0 |" 
+            elif l.bars == 0: 
+                l.row += f" | {'+' * l.bars} |"
             else:
-                l.row += f" | {'-' * (-l.bars)} | "
-            print(l.row)                   
+                l.row += f" | {'-' * (-l.bars)} |"
+            print(l.row)
+        else:
+            l.row += " |   |"                   
         summary_table += l.row + "\n"
 
     return summary_table
