@@ -527,7 +527,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
           cl_adapter::cast<cl_device_id>(hDevice), {"cl_khr_fp16"}, Supported));
 
       if (!Supported) {
-        return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
+        // If we don't support the extension then our capabilities are 0.
+        ur_device_fp_capability_flags_t halfCapabilities = 0;
+        return ReturnValue(halfCapabilities);
       }
     }
 
