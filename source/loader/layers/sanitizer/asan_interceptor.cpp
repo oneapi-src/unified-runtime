@@ -177,9 +177,7 @@ ur_result_t enqueueMemSetShadow(std::shared_ptr<ContextInfo> &ContextInfo,
 } // namespace
 
 ContextInfo::~ContextInfo() {
-    if (getContext()->interceptor->getOptions().PrintStats) {
-        Stats.Print(Handle);
-    }
+    Stats.Print(Handle);
 
     [[maybe_unused]] auto Result =
         getContext()->urDdiTable.Context.pfnRelease(Handle);

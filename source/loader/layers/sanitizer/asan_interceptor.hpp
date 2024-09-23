@@ -113,7 +113,7 @@ struct ContextInfo {
     std::vector<ur_device_handle_t> DeviceList;
     std::unordered_map<ur_device_handle_t, AllocInfoList> AllocInfosMap;
 
-    AsanStats Stats;
+    AsanStatsWrapper Stats;
 
     explicit ContextInfo(ur_context_handle_t Context) : Handle(Context) {
         [[maybe_unused]] auto Result =

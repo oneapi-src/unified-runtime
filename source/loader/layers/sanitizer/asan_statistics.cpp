@@ -16,6 +16,32 @@
 
 namespace ur_sanitizer_layer {
 
+struct AsanStats {
+    void UpdateUSMMalloced(uptr MallocedSize, uptr RedzoneSize);
+    void UpdateUSMFreed(uptr FreedSize);
+    void UpdateUSMRealFreed(uptr FreedSize, uptr RedzoneSize);
+
+    void UpdateShadowMmaped(uptr ShadowSize);
+    void UpdateShadowMalloced(uptr ShadowSize);
+    void UpdateShadowFreed(uptr ShadowSize);
+
+    void Print(ur_context_handle_t Context);
+
+  private:
+    std::atomic<uptr> UsmMalloced;
+    std::atomic<uptr> UsmMallocedRedzones;
+
+    // Quarantined memory
+    std::atomic<uptr> UsmFreed;
+
+    std::atomic<uptr> ShadowMmaped;
+    std::atomic<uptr> ShadowMalloced;
+
+    double Overhead = 0.0;
+
+    void UpdateOverhead();
+};
+
 void AsanStats::Print(ur_context_handle_t Context) {
     getContext()->logger.always("Stats: Context {}", (void *)Context);
     getContext()->logger.always("Stats:   peak memory overhead: {}%",
@@ -78,5 +104,55 @@ void AsanStats::UpdateOverhead() {
     auto NewOverhead = (ShadowSize + UsmMallocedRedzones) / (double)TotalSize;
     Overhead = std::max(Overhead, NewOverhead);
 }
+
+void AsanStatsWrapper::UpdateUSMMalloced(uptr MallocedSize, uptr RedzoneSize) {
+    if (Stat) {
+        Stat->UpdateUSMMalloced(MallocedSize, RedzoneSize);
+    }
+}
+
+void AsanStatsWrapper::UpdateUSMFreed(uptr FreedSize) {
+    if (Stat) {
+        Stat->UpdateUSMFreed(FreedSize);
+    }
+}
+
+void AsanStatsWrapper::UpdateUSMRealFreed(uptr FreedSize, uptr RedzoneSize) {
+    if (Stat) {
+        Stat->UpdateUSMRealFreed(FreedSize, RedzoneSize);
+    }
+}
+
+void AsanStatsWrapper::UpdateShadowMmaped(uptr ShadowSize) {
+    if (Stat) {
+        Stat->UpdateShadowMmaped(ShadowSize);
+    }
+}
+
+void AsanStatsWrapper::UpdateShadowMalloced(uptr ShadowSize) {
+    if (Stat) {
+        Stat->UpdateShadowMalloced(ShadowSize);
+    }
+}
+
+void AsanStatsWrapper::UpdateShadowFreed(uptr ShadowSize) {
+    if (Stat) {
+        Stat->UpdateShadowFreed(ShadowSize);
+    }
+}
+
+void AsanStatsWrapper::Print(ur_context_handle_t Context) {
+    if (Stat) {
+        Stat->Print(Context);
+    }
+}
+
+AsanStatsWrapper::AsanStatsWrapper() : Stat(nullptr) {
+    if (getContext()->interceptor->getOptions().PrintStats) {
+        Stat = new AsanStats;
+    }
+}
+
+AsanStatsWrapper::~AsanStatsWrapper() { delete Stat; }
 
 } // namespace ur_sanitizer_layer

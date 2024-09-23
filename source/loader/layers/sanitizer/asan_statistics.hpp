@@ -17,7 +17,13 @@
 
 namespace ur_sanitizer_layer {
 
-struct AsanStats {
+struct AsanStats;
+
+struct AsanStatsWrapper {
+
+    AsanStatsWrapper();
+    ~AsanStatsWrapper();
+
     void UpdateUSMMalloced(uptr MallocedSize, uptr RedzoneSize);
     void UpdateUSMFreed(uptr FreedSize);
     void UpdateUSMRealFreed(uptr FreedSize, uptr RedzoneSize);
@@ -29,18 +35,7 @@ struct AsanStats {
     void Print(ur_context_handle_t Context);
 
   private:
-    std::atomic<uptr> UsmMalloced;
-    std::atomic<uptr> UsmMallocedRedzones;
-
-    // Quarantined memory
-    std::atomic<uptr> UsmFreed;
-
-    std::atomic<uptr> ShadowMmaped;
-    std::atomic<uptr> ShadowMalloced;
-
-    double Overhead = 0.0;
-
-    void UpdateOverhead();
+    AsanStats *Stat;
 };
 
 } // namespace ur_sanitizer_layer
