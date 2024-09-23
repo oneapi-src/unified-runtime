@@ -40,11 +40,19 @@ class ComputeBench:
             f"-DUMF_DISABLE_HWLOC=ON",
             f"-DBENCHMARK_UR_SOURCE_DIR={options.ur_dir}",
         ]
-        conf_out = run(configure_command, add_sycl=True)
-        print(conf_out)
+        try:
+            print(f"Run {configure_command}")
+            conf_out = run(configure_command, add_sycl=True)
+            print(conf_out)
 
-        build_out = run(f"cmake --build {build_path} -j", add_sycl=True)
-        print(build_out)
+            print(f"Run cmake --build {build_path} -j")
+            build_out = run(f"cmake --build {build_path} -j", add_sycl=True)
+            print(build_out)
+        except Exception as e:
+            if options.exit_on_failure:
+                raise e
+            else:
+                print(f"Build failed: {e}")
 
         self.built = True
 

@@ -145,12 +145,13 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
                 v0 = results[key0].value
                 v1 = results[key1].value
                 diff = None
-                if v0 != 0 and results[key0].lower_is_better:
+                if v0 != 0 and results[key0].lower_is_better: 
                     diff = v1/v0
                 elif v1 != 0 and not results[key0].lower_is_better:
                     diff = v0/v1
+                    
                 if diff != None:
-                    l.row += f"{(diff * 100):.1f}%"
+                    l.row += f"{(diff * 100):.2f}%"
                     l.diff = diff
 
         output_detailed_list.append(l)
