@@ -1480,7 +1480,7 @@ urDeviceGetSelected(
 typedef enum ur_device_info_t {
     UR_DEVICE_INFO_TYPE = 0,                                         ///< [::ur_device_type_t] type of the device
     UR_DEVICE_INFO_VENDOR_ID = 1,                                    ///< [uint32_t] vendor Id of the device
-    UR_DEVICE_INFO_DEVICE_ID = 2,                                    ///< [uint32_t] Id of the device
+    UR_DEVICE_INFO_DEVICE_ID = 2,                                    ///< [uint32_t][optional-query] Id of the device
     UR_DEVICE_INFO_MAX_COMPUTE_UNITS = 3,                            ///< [uint32_t] the number of compute units
     UR_DEVICE_INFO_MAX_WORK_ITEM_DIMENSIONS = 4,                     ///< [uint32_t] max work item dimensions
     UR_DEVICE_INFO_MAX_WORK_ITEM_SIZES = 5,                          ///< [size_t[]] return an array of max work item sizes
