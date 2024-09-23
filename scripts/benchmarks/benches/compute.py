@@ -18,11 +18,13 @@ class ComputeBench:
         return
 
     def setup(self):
-        if self.built:
+        build_path = create_build_path(self.directory, 'compute-benchmarks-build')
+        self.bins = os.path.join(build_path, 'bin')
+
+        if self.built or not options.rebuild:
             return
 
         repo_path = git_clone(self.directory, "compute-benchmarks-repo", "https://github.com/intel/compute-benchmarks.git", "08c41bb8bc1762ad53c6194df6d36bfcceff4aa2")
-        build_path = create_build_path(self.directory, 'compute-benchmarks-build')
 
         configure_command = [
             "cmake",
@@ -43,7 +45,6 @@ class ComputeBench:
         run(f"cmake --build {build_path} -j", add_sycl=True)
 
         self.built = True
-        self.bins = os.path.join(build_path, 'bin')
 
 class ComputeBenchmark(Benchmark):
     def __init__(self, bench, name, test):
@@ -51,6 +52,7 @@ class ComputeBenchmark(Benchmark):
         self.bench_name = name
         self.test = test
         super().__init__(bench.directory)
+        self.setup()
 
     def bin_args(self) -> list[str]:
         return []
@@ -78,7 +80,7 @@ class ComputeBenchmark(Benchmark):
 
         result = self.run_bench(command, env_vars)
         (label, mean) = self.parse_output(result)
-        return Result(label=label, value=mean, command=command, env=env_vars, stdout=result, lower_is_better=self.lower_is_better())
+        return [ Result(label=self.name(), value=mean, command=command, env=env_vars, stdout=result, lower_is_better=self.lower_is_better()) ]
 
     def parse_output(self, output):
         csv_file = io.StringIO(output)

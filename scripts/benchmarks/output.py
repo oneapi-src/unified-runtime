@@ -3,9 +3,22 @@
 # See LICENSE.TXT
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-import collections
+import collections, re
 from benches.base import Result
 import math
+
+class OutputLine:
+    def __init__(self, name):
+        self.label = name
+        self.diff = None
+        self.bars = None
+        self.row = ""
+
+    def __str__(self):
+        return f"(Label:{self.label}, diff:{self.diff})"
+
+    def __repr__(self):
+        return self.__str__()
 
 # Function to generate the mermaid bar chart script
 def generate_mermaid_script(chart_data: dict[str, list[Result]]):
@@ -89,9 +102,9 @@ def generate_markdown_details(results: list[Result]):
 """)
     return "\n".join(markdown_sections)
 
-def generate_summary_table(chart_data: dict[str, list[Result]]):
-    summary_table = "| Benchmark | " + " | ".join(chart_data.keys()) + " |\n"
-    summary_table += "|---" * (len(chart_data) + 1) + "|\n"
+def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
+    summary_table = "| Benchmark | " + " | ".join(chart_data.keys()) + " | Relative perf | Change | - |\n"
+    summary_table += "|---" * (len(chart_data) + 4) + "|\n"
 
     # Collect all benchmarks and their results
     benchmark_results = collections.defaultdict(dict)
@@ -100,8 +113,11 @@ def generate_summary_table(chart_data: dict[str, list[Result]]):
             benchmark_results[res.name][key] = res
 
     # Generate the table rows
+    output_detailed_list = []
+
     for bname, results in benchmark_results.items():
-        row = f"| {bname} |"
+        l = OutputLine(bname)
+        l.row = f"| {bname} |"
         best_value = None
         best_key = None
 
@@ -114,21 +130,99 @@ def generate_summary_table(chart_data: dict[str, list[Result]]):
         # Generate the row with the best value highlighted
         for key in chart_data.keys():
             if key in results:
-                value = results[key].value
+                intv = results[key].value
                 if key == best_key:
-                    row += f" <ins>{value}</ins> |"  # Highlight the best value
+                    l.row += f" <ins>{intv}</ins> |"  # Highlight the best value
                 else:
-                    row += f" {value} |"
+                    l.row += f" {intv} |"
             else:
-                row += " - |"
+                l.row += " - |"
 
-        summary_table += row + "\n"
+        if len(chart_data.keys()) == 2:
+            key0 = list(chart_data.keys())[0]
+            key1 = list(chart_data.keys())[1]
+            if (key0 in results) and (key1 in results):
+                v0 = results[key0].value
+                v1 = results[key1].value
+                diff = None
+                if v0 != 0 and results[key0].lower_is_better:
+                    diff = v1/v0
+                elif v1 != 0 and not results[key0].lower_is_better:
+                    diff = v0/v1
+                if diff != None:
+                    l.row += f"{(diff * 100):.1f}%"
+                    l.diff = diff
+
+        output_detailed_list.append(l)
+
+
+    sorted_detailed_list = sorted(output_detailed_list, key=lambda x: (x.diff is not None, x.diff), reverse=True)
+
+    diff_values = [l.diff for l in sorted_detailed_list if l.diff is not None]
+
+    if len(diff_values) > 0:
+        max_diff = max(max(diff_values) - 1, 1 - min(diff_values))
+
+        for l in sorted_detailed_list:
+            if l.diff != None:
+                l.row += f" | {(l.diff - 1)*100:.2f}%"
+                l.bars = round(10*(l.diff - 1)/max_diff)
+                if l.bars == 0:
+                    l.row += " | . |"
+                elif l.bars > 0: 
+                    l.row += f" | {'+' * l.bars} |"
+                else:
+                    l.row += f" | {'-' * (-l.bars)} |"
+                print(l.row)
+            else:
+                l.row += " |   |"              
+            summary_table += l.row + "\n"
+    else:
+        for l in sorted_detailed_list: 
+            l.row += " |   |"
+            summary_table += l.row + "\n"
+
+    grouped_objects = collections.defaultdict(list)
+
+    for l in output_detailed_list:
+        s = l.label
+        prefix = re.match(r'^[^_\s]+', s)[0]
+        grouped_objects[prefix].append(l)
+
+    grouped_objects = dict(grouped_objects)
+
+
+
+    summary_table = "\n## Performance change in benchmark groups\n"
+
+    for name, outgroup in grouped_objects.items():
+        outgroup_s = sorted(outgroup, key=lambda x: (x.diff is not None, x.diff), reverse=True)
+        product = 1.0
+        n = len(outgroup_s)
+        for l in outgroup_s:
+            if l.diff != None: product *= l.diff
+        print(f"Relative performance in group {name}: {math.pow(product, 1/n)}")
+        summary_table += f"""
+<details>
+<summary>"Relative perf in group {name}: {math.pow(product, 1/n)}"</summary>
+
+"""
+        summary_table += "| Benchmark | " + " | ".join(chart_data.keys()) + " | Relative perf | Change | - |\n"
+        summary_table += "|---" * (len(chart_data) + 4) + "|\n"
+
+        for l in outgroup_s:
+            summary_table += f"{l.row}\n"
+
+        summary_table += f"""
+</details>
+
+"""
 
     return summary_table
 
 def generate_markdown(chart_data: dict[str, list[Result]]):
     mermaid_script = generate_mermaid_script(chart_data)
-    summary_table = generate_summary_table(chart_data)
+    summary_table = generate_summary_table_and_chart(chart_data)
 
     return f"""
 # Summary
