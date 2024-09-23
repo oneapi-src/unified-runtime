@@ -16,7 +16,6 @@
 #include "asan_quarantine.hpp"
 #include "asan_report.hpp"
 #include "asan_shadow_setup.hpp"
-#include "asan_statistics.hpp"
 #include "asan_validator.hpp"
 #include "stacktrace.hpp"
 #include "ur_sanitizer_utils.hpp"
@@ -175,14 +174,6 @@ ur_result_t enqueueMemSetShadow(std::shared_ptr<ContextInfo> &ContextInfo,
 }
 
 } // namespace
-
-ContextInfo::~ContextInfo() {
-    Stats.Print(Handle);
-
-    [[maybe_unused]] auto Result =
-        getContext()->urDdiTable.Context.pfnRelease(Handle);
-    assert(Result == UR_RESULT_SUCCESS);
-}
 
 SanitizerInterceptor::SanitizerInterceptor() {
     if (getOptions().MaxQuarantineSizeMB) {
@@ -468,9 +459,10 @@ ur_result_t DeviceInfo::allocShadowMemory(ur_context_handle_t Context) {
     // Set shadow memory for null pointer
     ManagedQueue Queue(Context, Handle);
 
+    auto CI = getContext()->interceptor->getContextInfo(Context);
     auto DI = getContext()->interceptor->getDeviceInfo(Handle);
     auto URes =
-        enqueueMemSetShadow(Context, DI, Queue, 0, 1, kNullPointerRedzoneMagic);
+        enqueueMemSetShadow(CI, DI, Queue, 0, 1, kNullPointerRedzoneMagic);
     if (URes != UR_RESULT_SUCCESS) {
         getContext()->logger.error("enqueueMemSetShadow(NullPointerRZ): {}",
                                    URes);
@@ -995,10 +987,13 @@ SanitizerInterceptor::findAllocInfoByContext(ur_context_handle_t Context) {
 }
 
 ContextInfo::~ContextInfo() {
+    Stats.Print(Handle);
+
     [[maybe_unused]] auto Result =
         getContext()->urDdiTable.Context.pfnRelease(Handle);
     assert(Result == UR_RESULT_SUCCESS);
 
+    // check memory leaks
     std::vector<AllocationIterator> AllocInfos =
         getContext()->interceptor->findAllocInfoByContext(Handle);
     for (const auto &It : AllocInfos) {
