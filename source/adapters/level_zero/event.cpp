@@ -198,7 +198,7 @@ ur_result_t urEnqueueEventsWaitWithBarrier(
             !Queue->isProfilingEnabled()) {
           // If we are using driver in order lists, then append wait on events
           // is unnecessary and we can signal the event created.
-          if (EventWaitList.Length && !CmdList->second.IsInOrderList) {
+          if (EventWaitList.Length) {
             ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
                        (CmdList->first, EventWaitList.Length,
                         EventWaitList.ZeEventList));
