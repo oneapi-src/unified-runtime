@@ -100,21 +100,8 @@ TEST_P(urMemImageCreateTestWithImageFormatParam, Success) {
     ur_result_t res =
         urMemImageCreate(context, UR_MEM_FLAG_READ_WRITE, &image_format,
                          &image_desc, nullptr, &image_handle);
-
-    bool is_primary_image_format = false;
-    for (auto primary_image_format : primary_image_formats) {
-        if (primary_image_format.channelOrder == image_format.channelOrder &&
-            primary_image_format.channelType == image_format.channelType) {
-            is_primary_image_format = true;
-            break;
-        }
-    }
-
-    if (!is_primary_image_format &&
-        res == UR_RESULT_ERROR_UNSUPPORTED_IMAGE_FORMAT) {
-        GTEST_SKIP();
-    }
-    ASSERT_SUCCESS(res);
+    UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(res);
     ASSERT_NE(nullptr, image_handle);
+
     ASSERT_SUCCESS(urMemRelease(image_handle));
 }

@@ -314,3 +314,22 @@ TEST_P(urMemImageCreateWithHostPtrFlagsTest, InvalidHostPtr) {
                                       &image_desc, nullptr,
                                       image_handle.ptr()));
 }
+
+using urMemImageCreateWithHostPtrFlagsValidBufferTest = urMemImageCreateTest;
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(
+    urMemImageCreateWithHostPtrFlagsValidBufferTest);
+
+TEST_P(urMemImageCreateWithHostPtrFlagsValidBufferTest, InvalidHostPtr) {
+    uur::raii::Mem image_handle = nullptr;
+    uur::raii::Mem buffer;
+
+    ur_mem_flags_t flags = 0;
+
+    ASSERT_SUCCESS(
+        urMemBufferCreate(context, flags, 4096, nullptr, buffer.ptr()));
+
+    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_HOST_PTR,
+                     urMemImageCreate(context, flags, &image_format,
+                                      &image_desc, &buffer,
+                                      image_handle.ptr()));
+}
