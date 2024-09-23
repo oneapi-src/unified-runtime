@@ -13,7 +13,6 @@
 #pragma once
 
 #include "common.hpp"
-#include <atomic>
 
 namespace ur_sanitizer_layer {
 

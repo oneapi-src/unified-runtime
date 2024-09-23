@@ -14,6 +14,8 @@
 #include "asan_interceptor.hpp"
 #include "ur_sanitizer_layer.hpp"
 
+#include <atomic>
+
 namespace ur_sanitizer_layer {
 
 struct AsanStats {
