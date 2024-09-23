@@ -3,8 +3,7 @@ import re
 from templates import helper as th
 %><%
 optional_queries = th.get_optional_queries(specs, namespace, tags)
-%>
-/*
+%>/*
  *
  * Copyright (C) 2024 Intel Corporation
  *

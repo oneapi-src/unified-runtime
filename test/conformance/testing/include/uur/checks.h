@@ -50,8 +50,8 @@ inline std::ostream &operator<<(std::ostream &out, const Result &result) {
 // This macro is intended to be used for the first call to a GetInfo query, it
 // gracefully handles cases where the adapter doesn't support a query marked
 // [optional-query] in the spec by returning early.
-#ifndef ASSERT_QUERY_SUCCESS
-#define ASSERT_QUERY_SUCCESS(CALL, QUERY)                                      \
+#ifndef ASSERT_SUCCES_OR_OPTIONAL_QUERY
+#define ASSERT_SUCCES_OR_OPTIONAL_QUERY(CALL, QUERY)                           \
     auto result = CALL;                                                        \
     if (result != UR_RESULT_SUCCESS) {                                         \
         ASSERT_EQ_RESULT(result, UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION);     \

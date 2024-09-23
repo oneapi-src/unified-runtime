@@ -549,6 +549,11 @@ def generate_level_zero_queue_api(path, section, namespace, tags, version, specs
             meta=meta)
     print("QUEUE Generated %s lines of code.\n" % loc)
 
+"""
+Entry-point:
+    generates headers used by the CTS, for example containing meta-information
+    about info query enums
+"""
 def generate_cts_headers(path, section, namespace, tags, version, specs, meta):
     template = "optional_queries.h.mako"
     fin = os.path.join("templates", template)

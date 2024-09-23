@@ -43,7 +43,7 @@ UUR_TEST_SUITE_P(urContextGetInfoTestWithInfoParam,
 TEST_P(urContextGetInfoTestWithInfoParam, Success) {
     ur_context_info_t info = getParam();
     size_t info_size = 0;
-    ASSERT_QUERY_SUCCESS(
+    ASSERT_SUCCES_OR_OPTIONAL_QUERY(
         urContextGetInfo(context, info, 0, nullptr, &info_size), info);
     ASSERT_NE(info_size, 0);
 

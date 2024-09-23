@@ -274,7 +274,7 @@ TEST_P(urDeviceGetInfoTest, Success) {
     ur_device_info_t info_type = GetParam();
     for (auto device : devices) {
         size_t size = 0;
-        ASSERT_QUERY_SUCCESS(
+        ASSERT_SUCCES_OR_OPTIONAL_QUERY(
             urDeviceGetInfo(device, info_type, 0, nullptr, &size), info_type);
 
         if (doesReturnArray(info_type) && size == 0) {

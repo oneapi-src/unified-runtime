@@ -52,9 +52,10 @@ TEST_P(urProgramGetInfoTest, Success) {
                                         sizeof(binaries[0]), binaries,
                                         nullptr));
     } else {
-        ASSERT_QUERY_SUCCESS(urProgramGetInfo(program, property_name, 0,
-                                              nullptr, &property_size),
-                             property_name);
+        ASSERT_SUCCES_OR_OPTIONAL_QUERY(urProgramGetInfo(program, property_name,
+                                                         0, nullptr,
+                                                         &property_size),
+                                        property_name);
         property_value.resize(property_size);
         ASSERT_SUCCESS(urProgramGetInfo(program, property_name, property_size,
                                         property_value.data(), nullptr));

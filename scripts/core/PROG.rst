@@ -197,8 +197,8 @@ points for this are generally of the form:
 where ``propName`` selects the information to query out. The object info enum
 representing possible queries will generally be found in the enums section of
 the relevant object. Some info queries would be difficult or impossible to
-support for certain backends, these are denoted with "(optional)" in the enum
-description. Using any enum marked optional may result in
+support for certain backends, these are denoted with [optional-query] in the
+enum description. Using any enum marked optional in this way may result in
 ${X}_RESULT_ERROR_UNSUPPORTED_ENUMERATION if the adapter doesn't support it.
 
 Programs and Kernels

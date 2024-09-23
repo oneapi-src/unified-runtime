@@ -542,9 +542,9 @@ class function_traits:
             return False
 
 """
-    Extracts traits from an enum
+    Extracts traits from an enumerator
 """
-class enum_traits:
+class etor_traits:
     RE_OPTIONAL_QUERY = r".*\[optional-query\].*"
 
     @classmethod
@@ -797,7 +797,6 @@ def etor_get_associated_type(namespace, tags, item):
         associated_type = match.group(1)
         return subt(namespace, tags, associated_type)
     else:
-        print("couldn't figure type from %s" % item['desc'])
         return None
 
 """
@@ -1719,7 +1718,7 @@ def get_optional_queries(specs, namespace, tags):
             if obj['type'] == 'enum':
                 optional_etors = []
                 for e in obj['etors']:
-                    if enum_traits.is_optional_query(e):
+                    if etor_traits.is_optional_query(e):
                         name = make_enum_name(namespace, tags, e)
                         optional_etors.append(name)
                 if optional_etors:

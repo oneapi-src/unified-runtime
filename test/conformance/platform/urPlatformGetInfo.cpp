@@ -29,7 +29,7 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_P(urPlatformGetInfoTest, Success) {
     size_t size = 0;
     ur_platform_info_t info_type = GetParam();
-    ASSERT_QUERY_SUCCESS(
+    ASSERT_SUCCES_OR_OPTIONAL_QUERY(
         urPlatformGetInfo(platform, info_type, 0, nullptr, &size), info_type);
     if (info_type == UR_PLATFORM_INFO_BACKEND) {
         ASSERT_EQ(size, sizeof(ur_platform_backend_t));

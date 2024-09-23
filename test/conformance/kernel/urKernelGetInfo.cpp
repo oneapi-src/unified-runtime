@@ -22,7 +22,7 @@ TEST_P(urKernelGetInfoTest, Success) {
     auto property_name = getParam();
     size_t property_size = 0;
     std::vector<char> property_value;
-    ASSERT_QUERY_SUCCESS(
+    ASSERT_SUCCES_OR_OPTIONAL_QUERY(
         urKernelGetInfo(kernel, property_name, 0, nullptr, &property_size),
         property_name);
     property_value.resize(property_size);

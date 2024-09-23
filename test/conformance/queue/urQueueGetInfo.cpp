@@ -27,8 +27,8 @@ UUR_TEST_SUITE_P(urQueueGetInfoTestWithInfoParam,
 TEST_P(urQueueGetInfoTestWithInfoParam, Success) {
     ur_queue_info_t info_type = getParam();
     size_t size = 0;
-    ASSERT_QUERY_SUCCESS(urQueueGetInfo(queue, info_type, 0, nullptr, &size),
-                         info_type);
+    ASSERT_SUCCES_OR_OPTIONAL_QUERY(
+        urQueueGetInfo(queue, info_type, 0, nullptr, &size), info_type);
 
     ASSERT_NE(size, 0);
 
@@ -106,8 +106,8 @@ UUR_TEST_SUITE_P(urQueueGetInfoDeviceQueueTestWithInfoParam,
 TEST_P(urQueueGetInfoDeviceQueueTestWithInfoParam, Success) {
     ur_queue_info_t info_type = getParam();
     size_t size = 0;
-    ASSERT_QUERY_SUCCESS(urQueueGetInfo(queue, info_type, 0, nullptr, &size),
-                         info_type);
+    ASSERT_SUCCES_OR_OPTIONAL_QUERY(
+        urQueueGetInfo(queue, info_type, 0, nullptr, &size), info_type);
 
     ASSERT_NE(size, 0);
 
