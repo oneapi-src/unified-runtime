@@ -40,9 +40,11 @@ class ComputeBench:
             f"-DUMF_DISABLE_HWLOC=ON",
             f"-DBENCHMARK_UR_SOURCE_DIR={options.ur_dir}",
         ]
-        run(configure_command, add_sycl=True)
+        conf_out = run(configure_command, add_sycl=True)
+        print(conf_out)
 
-        run(f"cmake --build {build_path} -j", add_sycl=True)
+        build_out = run(f"cmake --build {build_path} -j", add_sycl=True)
+        print(build_out)
 
         self.built = True
 

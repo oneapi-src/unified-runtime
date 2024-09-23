@@ -43,9 +43,11 @@ class SyclBench:
         ]
 
         print(f"Run {configure_command}")
-        run(configure_command, add_sycl=True)
+        conf_out = run(configure_command, add_sycl=True)
+        print(conf_out)
         print(f"Run cmake --build {build_path}")
-        run(f"cmake --build {build_path} -j", add_sycl=True)
+        build_out = run(f"cmake --build {build_path} -j", add_sycl=True)
+        print(build_out)
 
         self.built = True
         return

@@ -39,9 +39,10 @@ class VelocityBase(Benchmark):
                 f"-S {self.code_path}",
                 f"-DCMAKE_BUILD_TYPE=Release"
             ]
-            run(configure_command, {'CC': 'clang', 'CXX':'clang++'}, add_sycl=True)
-            run(f"cmake --build {build_path} -j", add_sycl=True)
-
+            conf_out = run(configure_command, {'CC': 'clang', 'CXX':'clang++'}, add_sycl=True)
+            print(conf_out)
+            build_out = run(f"cmake --build {build_path} -j", add_sycl=True)
+            print(build_out)
 
     def bin_args(self) -> list[str]:
         return []
