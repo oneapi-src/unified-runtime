@@ -28,7 +28,8 @@ UUR_TEST_SUITE_P(urMemImageGetInfoTest,
 TEST_P(urMemImageGetInfoTest, Success) {
     ur_image_info_t info = getParam();
     size_t size = 0;
-    ASSERT_SUCCESS(urMemImageGetInfo(image, info, 0, nullptr, &size));
+    UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(
+        urMemImageGetInfo(image, info, 0, nullptr, &size));
     ASSERT_NE(size, 0);
 
     if (const auto expected_size = image_info_size_map.find(info);

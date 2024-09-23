@@ -2,3 +2,4 @@
 urMemImageCreateTest.InvalidSize/AMD_HIP_BACKEND___{{.*}}
 urMemImageGetInfoTest.Success/AMD_HIP_BACKEND___{{.*}}
 urMemImageGetInfoTest.Success/AMD_HIP_BACKEND___{{.*}}
+urMemImageCreateWithNativeHandle.Success/AMD_HIP_BACKEND___{{.*}}

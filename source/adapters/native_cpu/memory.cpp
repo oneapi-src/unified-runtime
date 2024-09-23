@@ -85,17 +85,16 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferPartition(
     ur_buffer_create_type_t bufferCreateType, const ur_buffer_region_t *pRegion,
     ur_mem_handle_t *phMem) {
 
+  if (flags != UR_MEM_FLAG_READ_WRITE) {
+    return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
+  }
+
   std::ignore = bufferCreateType;
   UR_ASSERT(hBuffer && !hBuffer->isImage() &&
                 !(static_cast<_ur_buffer *>(hBuffer))->isSubBuffer(),
             UR_RESULT_ERROR_INVALID_MEM_OBJECT);
 
   std::shared_lock<ur_shared_mutex> Guard(hBuffer->Mutex);
-
-  if (flags != UR_MEM_FLAG_READ_WRITE) {
-    die("urMemBufferPartition: NativeCPU implements only read-write buffer,"
-        "no read-only or write-only yet.");
-  }
 
   try {
     auto partitionedBuffer = new _ur_buffer(static_cast<_ur_buffer *>(hBuffer),

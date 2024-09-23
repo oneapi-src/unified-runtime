@@ -60,13 +60,6 @@ TEST_P(urMemBufferCreateWithHostPtrFlagsTest, SUCCESS) {
                                      buffer.ptr()));
 }
 
-TEST_P(urMemBufferCreateWithHostPtrFlagsTest, InvalidHostPtr) {
-    uur::raii::Mem buffer = nullptr;
-    ASSERT_EQ_RESULT(
-        UR_RESULT_ERROR_INVALID_HOST_PTR,
-        urMemBufferCreate(context, getParam(), 4096, nullptr, buffer.ptr()));
-}
-
 TEST_P(urMemBufferCreateWithFlagsTest, InvalidNullPointerBuffer) {
     ASSERT_EQ_RESULT(
         UR_RESULT_ERROR_INVALID_NULL_POINTER,
@@ -78,4 +71,44 @@ TEST_P(urMemBufferCreateWithFlagsTest, InvalidBufferSizeZero) {
     ASSERT_EQ_RESULT(
         UR_RESULT_ERROR_INVALID_BUFFER_SIZE,
         urMemBufferCreate(context, getParam(), 0, nullptr, buffer.ptr()));
+}
+
+struct urMemBufferCreateWithHostPtrFlagsInvalidTest
+    : public urMemBufferCreateTest {
+    uur::raii::Mem buffer;
+    ur_mem_flags_t flags =
+        UR_MEM_FLAG_USE_HOST_POINTER | UR_MEM_FLAG_ALLOC_COPY_HOST_POINTER;
+    ur_buffer_properties_t properties;
+};
+
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(
+    urMemBufferCreateWithHostPtrFlagsInvalidTest);
+
+TEST_P(urMemBufferCreateWithHostPtrFlagsInvalidTest,
+       InvalidHostPtrNullProperties) {
+    ASSERT_EQ_RESULT(
+        UR_RESULT_ERROR_INVALID_HOST_PTR,
+        urMemBufferCreate(context, flags, 4096, nullptr, buffer.ptr()));
+}
+
+TEST_P(urMemBufferCreateWithHostPtrFlagsInvalidTest,
+       InvalidHostPtrValidPropertiesNullHostPtr) {
+    properties.pHost = nullptr;
+
+    ASSERT_EQ_RESULT(
+        UR_RESULT_ERROR_INVALID_HOST_PTR,
+        urMemBufferCreate(context, flags, 4096, &properties, buffer.ptr()));
+}
+
+TEST_P(urMemBufferCreateWithHostPtrFlagsInvalidTest,
+       InvalidHostPtrValidPropertiesValidHostPtr) {
+    flags = 0;
+
+    properties.pHost = nullptr;
+    int host = 42;
+    properties.pHost = &host;
+
+    ASSERT_EQ_RESULT(
+        UR_RESULT_ERROR_INVALID_HOST_PTR,
+        urMemBufferCreate(context, flags, 4096, &properties, buffer.ptr()));
 }

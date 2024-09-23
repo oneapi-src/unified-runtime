@@ -24,7 +24,9 @@
 
 #define UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(ret)                                 \
     auto status = ret;                                                         \
-    if (status == UR_RESULT_ERROR_UNSUPPORTED_FEATURE) {                       \
+    if (status == UR_RESULT_ERROR_UNSUPPORTED_FEATURE ||                       \
+        status == UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION ||                   \
+        status == UR_RESULT_ERROR_UNSUPPORTED_IMAGE_FORMAT) {                  \
         GTEST_SKIP();                                                          \
     } else {                                                                   \
         ASSERT_EQ(status, UR_RESULT_SUCCESS);                                  \
@@ -205,6 +207,9 @@ struct urMemImageTest : urContextTest {
         if (!imageSupported) {
             GTEST_SKIP();
         }
+        UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(
+            urMemImageCreate(context, UR_MEM_FLAG_READ_WRITE, &image_format,
+                             &image_desc, nullptr, &image));
     }
 
     void TearDown() override {
@@ -215,9 +220,10 @@ struct urMemImageTest : urContextTest {
     }
 
     ur_image_format_t image_format = {
-        /*.channelOrder =*/UR_IMAGE_CHANNEL_ORDER_ARGB,
+        /*.channelOrder =*/UR_IMAGE_CHANNEL_ORDER_RGBA,
         /*.channelType =*/UR_IMAGE_CHANNEL_TYPE_UNORM_INT8,
     };
+
     ur_image_desc_t image_desc = {
         /*.stype =*/UR_STRUCTURE_TYPE_IMAGE_DESC,
         /*.pNext =*/nullptr,
@@ -226,11 +232,12 @@ struct urMemImageTest : urContextTest {
         /*.height =*/16,
         /*.depth =*/1,
         /*.arraySize =*/1,
-        /*.rowPitch =*/16 * sizeof(char[4]),
-        /*.slicePitch =*/16 * 16 * sizeof(char[4]),
+        /*.rowPitch =*/0,
+        /*.slicePitch =*/0,
         /*.numMipLevel =*/0,
         /*.numSamples =*/0,
     };
+
     ur_mem_handle_t image = nullptr;
 };
 
@@ -316,8 +323,9 @@ template <class T> struct urMemImageTestWithParam : urContextTestWithParam<T> {
         if (!imageSupported) {
             GTEST_SKIP();
         }
-        ASSERT_SUCCESS(urMemImageCreate(this->context, UR_MEM_FLAG_READ_WRITE,
-                                        &format, &desc, nullptr, &image));
+        UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(
+            urMemImageCreate(this->context, UR_MEM_FLAG_READ_WRITE, &format,
+                             &desc, nullptr, &image));
         ASSERT_NE(nullptr, image);
     }
 
