@@ -132,9 +132,9 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
             if key in results:
                 intv = results[key].value
                 if key == best_key:
-                    l.row += f" <ins>{intv}</ins> |"  # Highlight the best value
+                    l.row += f" <ins>{intv}</ins> {results.unit} |"  # Highlight the best value
                 else:
-                    l.row += f" {intv} |"
+                    l.row += f" {intv} {results.unit} |"
             else:
                 l.row += " - |"
 
@@ -205,7 +205,7 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
         print(f"Relative performance in group {name}: {math.pow(product, 1/n)}")
         summary_table += f"""
 <details>
-<summary>"Relative perf in group {name}: {math.pow(product, 1/n)}"</summary>
+<summary>"Relative perf in group {name}: {math.pow(product, 1/n)*100:.3f}%"</summary>
 
 """
         summary_table += "| Benchmark | " + " | ".join(chart_data.keys()) + " | Relative perf | Change | - |\n"
@@ -222,7 +222,7 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
     return summary_table
 
 def generate_markdown(chart_data: dict[str, list[Result]]):
-    mermaid_script = generate_mermaid_script(chart_data)
+    # mermaid_script = generate_mermaid_script(chart_data)
     summary_table = generate_summary_table_and_chart(chart_data)
 
     return f"""
