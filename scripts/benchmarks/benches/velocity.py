@@ -14,7 +14,10 @@ import re
 class VelocityBench:
     def __init__(self, directory):
         self.directory = directory
-        self.repo_path = git_clone(self.directory, "velocity-bench-repo", "https://github.com/oneapi-src/Velocity-Bench", "34ee4ebe18d91dfdd38b7d798fd986b41874fcbc")
+        if options.rebuild:
+            self.repo_path = git_clone(self.directory, "velocity-bench-repo", "https://github.com/oneapi-src/Velocity-Bench", "34ee4ebe18d91dfdd38b7d798fd986b41874fcbc")
+        else:
+            self.repo_path = os.path.join(self.directory, "velocity-bench-repo")
 
 class VelocityBase(Benchmark):
     def __init__(self, name: str, bin_name: str, vb: VelocityBench):
@@ -30,19 +33,17 @@ class VelocityBase(Benchmark):
     def setup(self):
         build_path = create_build_path(self.directory, self.bench_name)
         self.benchmark_bin = os.path.join(build_path, self.bin_name)
+        self.download_deps()
 
         if options.rebuild:
-            self.download_deps()
             configure_command = [
                 "cmake",
                 f"-B {build_path}",
                 f"-S {self.code_path}",
                 f"-DCMAKE_BUILD_TYPE=Release"
             ]
-            conf_out = run(configure_command, {'CC': 'clang', 'CXX':'clang++'}, add_sycl=True)
-            print(conf_out)
-            build_out = run(f"cmake --build {build_path} -j", add_sycl=True)
-            print(build_out)
+            run(configure_command, {'CC': 'clang', 'CXX':'clang++'}, add_sycl=True)
+            run(f"cmake --build {build_path} -j", add_sycl=True)
 
     def bin_args(self) -> list[str]:
         return []

@@ -8,9 +8,9 @@ import json
 import shutil
 import subprocess # nosec B404
 from pathlib import Path
-from collections import defaultdict
-import csv
-import io
+# from collections import defaultdict
+# import csv
+# import io
 from benches.result import Result
 from benches.options import options
 

@@ -6,7 +6,6 @@
 import os
 import shutil
 from pathlib import Path
-import subprocess  # nosec B404
 from .result import Result
 from .options import options
 from utils.utils import run

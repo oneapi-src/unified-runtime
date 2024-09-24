@@ -18,11 +18,13 @@ class ComputeBench:
         return
 
     def setup(self):
-        build_path = create_build_path(self.directory, 'compute-benchmarks-build')
-        self.bins = os.path.join(build_path, 'bin')
+        self.bins = os.path.join(self.directory, 'compute-benchmarks-build', 'bin')
 
         if self.built or not options.rebuild:
+            print(f"Skip build")
             return
+
+        build_path = create_build_path(self.directory, 'compute-benchmarks-build')
 
         repo_path = git_clone(self.directory, "compute-benchmarks-repo", "https://github.com/intel/compute-benchmarks.git", "08c41bb8bc1762ad53c6194df6d36bfcceff4aa2")
 
@@ -40,21 +42,29 @@ class ComputeBench:
             f"-DUMF_DISABLE_HWLOC=ON",
             f"-DBENCHMARK_UR_SOURCE_DIR={options.ur_dir}",
         ]
-        try:
-            print(f"Run {configure_command}")
-            conf_out = run(configure_command, add_sycl=True)
-            print(conf_out)
+        self.built = True
 
-            print(f"Run cmake --build {build_path} -j")
-            build_out = run(f"cmake --build {build_path} -j", add_sycl=True)
-            print(build_out)
+        print(f"Run {configure_command}")
+        try:
+            run(configure_command, add_sycl=True)
         except Exception as e:
             if options.exit_on_failure:
                 raise e
             else:
-                print(f"Build failed: {e}")
+                print(f"Configure failed: {e}")
 
-        self.built = True
+        print(f"Run cmake --build {build_path} -j")
+        try:
+            run(f"cmake --build {build_path} -j -- --keep-going", add_sycl=True)
+        except Exception as e:
+            if options.exit_on_failure: 
+                raise e
+            else: 
+                print(f"Configure failed: {e}")
+                run(f"ls -la {build_path}")
+
+        run(f"ls -la {build_path}/bin")
+        print(f"self.built set to {self.built}")
 
 class ComputeBenchmark(Benchmark):
     def __init__(self, bench, name, test):

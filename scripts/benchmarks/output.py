@@ -115,6 +115,13 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
     # Generate the table rows
     output_detailed_list = []
 
+
+    global_product = 1
+    mean_cnt = 0
+    improved = 0
+    regressed = 0
+    no_change = 0
+    
     for bname, results in benchmark_results.items():
         l = OutputLine(bname)
         l.row = f"| {bname} |"
@@ -128,13 +135,14 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
                 best_key = key
 
         # Generate the row with the best value highlighted
+        print(f"Results: {results}")
         for key in chart_data.keys():
             if key in results:
                 intv = results[key].value
                 if key == best_key:
-                    l.row += f" <ins>{intv}</ins> {results.unit} |"  # Highlight the best value
+                    l.row += f" <ins>{intv}</ins> |"  # Highlight the best value
                 else:
-                    l.row += f" {intv} {results.unit} |"
+                    l.row += f" {intv} |"
             else:
                 l.row += " - |"
 
@@ -167,14 +175,27 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
         for l in sorted_detailed_list:
             if l.diff != None:
                 l.row += f" | {(l.diff - 1)*100:.2f}%"
+                epsilon = 0.005
+                delta = l.diff - 1
                 l.bars = round(10*(l.diff - 1)/max_diff)
-                if l.bars == 0:
+                if l.bars == 0 or abs(delta) < epsilon:
                     l.row += " | . |"
                 elif l.bars > 0: 
                     l.row += f" | {'+' * l.bars} |"
                 else:
                     l.row += f" | {'-' * (-l.bars)} |"
                 print(l.row)
+                
+                mean_cnt += 1
+                if abs(delta) > epsilon:
+                    if delta > 0:
+                        improved+=1
+                    else:
+                        regressed+=1
+                else:
+                    no_change+=1
+                    
+                global_product *= l.diff
             else:
                 l.row += " |   |"              
             summary_table += l.row + "\n"
@@ -182,6 +203,13 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
         for l in sorted_detailed_list: 
             l.row += " |   |"
             summary_table += l.row + "\n"
+
+    global_mean = 0
+    if mean_cnt > 0:
+        global_mean = global_product ** (1/mean_cnt)    
+        print(f"Total perf diffs in mean: {mean_cnt} Perf change geomean {global_mean} Improved {improved} Regressed {regressed}")
+    else:
+        print(f"No diffs to calculate performance change")
 
     grouped_objects = collections.defaultdict(list)
 
@@ -229,8 +257,6 @@ def generate_markdown(chart_data: dict[str, list[Result]]):
 # Summary
 <ins>result</ins> is better\n
 {summary_table}
-# Charts
-{mermaid_script}
 # Details
 {generate_markdown_details(chart_data["This PR"])}
 """
