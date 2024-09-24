@@ -204,12 +204,6 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
             l.row += " |   |"
             summary_table += l.row + "\n"
 
-    global_mean = 0
-    if mean_cnt > 0:
-        global_mean = global_product ** (1/mean_cnt)    
-        print(f"Total perf diffs in mean: {mean_cnt} Perf change geomean {global_mean} Improved {improved} Regressed {regressed}")
-    else:
-        print(f"No diffs to calculate performance change")
 
     grouped_objects = collections.defaultdict(list)
 
@@ -220,6 +214,12 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
 
     grouped_objects = dict(grouped_objects)
 
+    if mean_cnt > 0:
+        global_mean = global_product ** (1/mean_cnt)    
+        summary_line = f"Total {mean_cnt} benchmarks in mean"
+        summary_line += f"Perf change geomean {global_mean*100:.3f} Improved {improved} Regressed {regressed}"
+    else:
+        summary_line = f"No diffs to calculate performance change"
 
 
     summary_table = "\n## Performance change in benchmark groups\n"
@@ -247,15 +247,16 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
 
 """
 
-    return summary_table
+    return summary_line, summary_table
 
 def generate_markdown(chart_data: dict[str, list[Result]]):
     # mermaid_script = generate_mermaid_script(chart_data)
-    summary_table = generate_summary_table_and_chart(chart_data)
+    (summary_line, summary_table) = generate_summary_table_and_chart(chart_data)
 
     return f"""
 # Summary
-<ins>result</ins> is better\n
+{summary_line}\n
+(<ins>result</ins> is better)\n
 {summary_table}
 # Details
 {generate_markdown_details(chart_data["This PR"])}
