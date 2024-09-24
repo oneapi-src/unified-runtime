@@ -106,10 +106,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urProgramBuild(ur_context_handle_t hContext,
-                                                   ur_program_handle_t hProgram,
-                                                   const char *pOptions) {
-  std::ignore = hContext;
+UR_APIEXPORT ur_result_t UR_APICALL
+urProgramBuild(ur_program_handle_t hProgram, uint32_t numDevices,
+               ur_device_handle_t *phDevices, const char *pOptions) {
+  std::ignore = numDevices;
+  std::ignore = phDevices;
   std::ignore = hProgram;
   std::ignore = pOptions;
 
@@ -117,9 +118,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramBuild(ur_context_handle_t hContext,
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
-urProgramCompile(ur_context_handle_t hContext, ur_program_handle_t hProgram,
-                 const char *pOptions) {
-  std::ignore = hContext;
+urProgramCompile(ur_program_handle_t hProgram, uint32_t numDevices,
+                 ur_device_handle_t *phDevices, const char *pOptions) {
+  std::ignore = numDevices;
+  std::ignore = phDevices;
   std::ignore = hProgram;
   std::ignore = pOptions;
 
@@ -127,32 +129,21 @@ urProgramCompile(ur_context_handle_t hContext, ur_program_handle_t hProgram,
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
-urProgramLink(ur_context_handle_t hContext, uint32_t count,
+urProgramLink(ur_context_handle_t hContext, uint32_t numDevices,
+              ur_device_handle_t *phDevices, uint32_t count,
               const ur_program_handle_t *phPrograms, const char *pOptions,
               ur_program_handle_t *phProgram) {
   if (nullptr != phProgram) {
     *phProgram = nullptr;
   }
   std::ignore = hContext;
+  std::ignore = numDevices;
+  std::ignore = phDevices;
   std::ignore = count;
   std::ignore = phPrograms;
   std::ignore = pOptions;
 
   DIE_NO_IMPLEMENTATION
-}
-
-UR_APIEXPORT ur_result_t UR_APICALL urProgramCompileExp(ur_program_handle_t,
-                                                        uint32_t,
-                                                        ur_device_handle_t *,
-                                                        const char *) {
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-}
-
-UR_APIEXPORT ur_result_t UR_APICALL urProgramBuildExp(ur_program_handle_t,
-                                                      uint32_t,
-                                                      ur_device_handle_t *,
-                                                      const char *) {
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urProgramLinkExp(

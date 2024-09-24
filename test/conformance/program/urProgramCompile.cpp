@@ -9,15 +9,20 @@ using urProgramCompileTest = uur::urProgramTest;
 UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urProgramCompileTest);
 
 TEST_P(urProgramCompileTest, Success) {
-    ASSERT_SUCCESS(urProgramCompile(context, program, nullptr));
-}
-
-TEST_P(urProgramCompileTest, InvalidNullHandleContext) {
-    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_HANDLE,
-                     urProgramCompile(nullptr, program, nullptr));
+    ASSERT_SUCCESS(urProgramCompile(program, 1, &device, nullptr));
 }
 
 TEST_P(urProgramCompileTest, InvalidNullHandleProgram) {
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_HANDLE,
-                     urProgramCompile(context, nullptr, nullptr));
+                     urProgramCompile(nullptr, 1, &device, nullptr));
+}
+
+TEST_P(urProgramCompileTest, InvalidNullPointerDevices) {
+    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_POINTER,
+                     urProgramCompile(program, 1, nullptr, nullptr));
+}
+
+TEST_P(urProgramCompileTest, InvalidSizeNumDevices) {
+    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
+                     urProgramCompile(program, 0, &device, nullptr));
 }
