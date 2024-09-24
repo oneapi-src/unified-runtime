@@ -148,8 +148,8 @@ if(UR_ENABLE_SANITIZER)
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_quarantine.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_report.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_report.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_shadow_setup.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_shadow_setup.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_shadow.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_shadow.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_validator.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_validator.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/common.hpp

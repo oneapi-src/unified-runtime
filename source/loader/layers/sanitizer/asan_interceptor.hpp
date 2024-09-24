@@ -15,6 +15,7 @@
 #include "asan_allocator.hpp"
 #include "asan_buffer.hpp"
 #include "asan_libdevice.hpp"
+#include "asan_shadow.hpp"
 #include "common.hpp"
 #include "ur_sanitizer_layer.hpp"
 
@@ -39,8 +40,7 @@ struct DeviceInfo {
 
     DeviceType Type = DeviceType::UNKNOWN;
     size_t Alignment = 0;
-    uptr ShadowOffset = 0;
-    uptr ShadowOffsetEnd = 0;
+    std::unique_ptr<ShadowMemory> Shadow;
 
     // Device features
     bool IsSupportSharedSystemUSM = false;
@@ -100,6 +100,27 @@ struct KernelInfo {
     ~KernelInfo() {
         [[maybe_unused]] auto Result =
             getContext()->urDdiTable.Kernel.pfnRelease(Handle);
+        assert(Result == UR_RESULT_SUCCESS);
+    }
+};
+
+struct ProgramInfo {
+    ur_program_handle_t Handle;
+    std::atomic<int32_t> RefCount = 1;
+
+    // lock this mutex if following fields are accessed
+    ur_shared_mutex Mutex;
+    std::unordered_set<std::shared_ptr<AllocInfo>> AllocInfoForGlobals;
+
+    explicit ProgramInfo(ur_program_handle_t Program) : Handle(Program) {
+        [[maybe_unused]] auto Result =
+            getContext()->urDdiTable.Program.pfnRetain(Handle);
+        assert(Result == UR_RESULT_SUCCESS);
+    }
+
+    ~ProgramInfo() {
+        [[maybe_unused]] auto Result =
+            getContext()->urDdiTable.Program.pfnRelease(Handle);
         assert(Result == UR_RESULT_SUCCESS);
     }
 };
@@ -177,6 +198,8 @@ class SanitizerInterceptor {
     ur_result_t registerDeviceGlobals(ur_context_handle_t Context,
                                       ur_program_handle_t Program);
 
+    ur_result_t unregisterDeviceGlobals(ur_program_handle_t Program);
+
     ur_result_t preLaunchKernel(ur_kernel_handle_t Kernel,
                                 ur_queue_handle_t Queue,
                                 USMLaunchInfo &LaunchInfo);
@@ -192,6 +215,9 @@ class SanitizerInterceptor {
     ur_result_t insertDevice(ur_device_handle_t Device,
                              std::shared_ptr<DeviceInfo> &CI);
     ur_result_t eraseDevice(ur_device_handle_t Device);
+
+    ur_result_t insertProgram(ur_program_handle_t Program);
+    ur_result_t eraseProgram(ur_program_handle_t Program);
 
     ur_result_t insertKernel(ur_kernel_handle_t Kernel);
     ur_result_t eraseKernel(ur_kernel_handle_t Kernel);
@@ -227,6 +253,12 @@ class SanitizerInterceptor {
         return m_DeviceMap[Device];
     }
 
+    std::shared_ptr<ProgramInfo> getProgramInfo(ur_program_handle_t Program) {
+        std::shared_lock<ur_shared_mutex> Guard(m_ProgramMapMutex);
+        assert(m_ProgramMap.find(Program) != m_ProgramMap.end());
+        return m_ProgramMap[Program];
+    }
+
     std::shared_ptr<KernelInfo> getKernelInfo(ur_kernel_handle_t Kernel) {
         std::shared_lock<ur_shared_mutex> Guard(m_KernelMapMutex);
         assert(m_KernelMap.find(Kernel) != m_KernelMap.end());
@@ -237,8 +269,8 @@ class SanitizerInterceptor {
     ur_result_t updateShadowMemory(std::shared_ptr<ContextInfo> &ContextInfo,
                                    std::shared_ptr<DeviceInfo> &DeviceInfo,
                                    ur_queue_handle_t Queue);
-    ur_result_t enqueueAllocInfo(ur_context_handle_t Context,
-                                 std::shared_ptr<DeviceInfo> &DeviceInfo,
+
+    ur_result_t enqueueAllocInfo(std::shared_ptr<DeviceInfo> &DeviceInfo,
                                  ur_queue_handle_t Queue,
                                  std::shared_ptr<AllocInfo> &AI);
 
@@ -259,6 +291,10 @@ class SanitizerInterceptor {
     std::unordered_map<ur_device_handle_t, std::shared_ptr<DeviceInfo>>
         m_DeviceMap;
     ur_shared_mutex m_DeviceMapMutex;
+
+    std::unordered_map<ur_program_handle_t, std::shared_ptr<ProgramInfo>>
+        m_ProgramMap;
+    ur_shared_mutex m_ProgramMapMutex;
 
     std::unordered_map<ur_kernel_handle_t, std::shared_ptr<KernelInfo>>
         m_KernelMap;
