@@ -28,9 +28,6 @@ class SyclBench:
         create_build_path(build_path, '')
 
         repo_path = git_clone(self.directory, "sycl-bench-repo", "https://github.com/mateuszpn/sycl-bench.git", "1e6ab2cfd004a72c5336c26945965017e06eab71")
-        print(f"Clone repo to: {repo_path}")
-
-        print(f"Build path: {build_path}")
 
         configure_command = [
             "cmake",

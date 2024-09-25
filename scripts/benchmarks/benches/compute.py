@@ -21,7 +21,6 @@ class ComputeBench:
         self.bins = os.path.join(self.directory, 'compute-benchmarks-build', 'bin')
 
         if self.built or not options.rebuild:
-            print(f"Skip build")
             return
 
         build_path = create_build_path(self.directory, 'compute-benchmarks-build')
@@ -60,11 +59,7 @@ class ComputeBench:
             if options.exit_on_failure: 
                 raise e
             else: 
-                print(f"Configure failed: {e}")
-                run(f"ls -la {build_path}")
-
-        run(f"ls -la {build_path}/bin")
-        print(f"self.built set to {self.built}")
+                print(f"Build failed: {e}")
 
 class ComputeBenchmark(Benchmark):
     def __init__(self, bench, name, test):

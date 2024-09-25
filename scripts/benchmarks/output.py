@@ -5,6 +5,7 @@
 
 import collections, re
 from benches.base import Result
+from .options import options
 import math
 
 class OutputLine:
@@ -83,6 +84,14 @@ gantt
 # Function to generate the markdown collapsible sections for each variant
 def generate_markdown_details(results: list[Result]):
     markdown_sections = []
+
+    markdown_sections.append(f"""
+<details>
+<summary>Environment, command, output...</summary>
+<details>
+<summary>api_overhead_benchmark_sycl SubmitKernel out of order</summary>
+""")
+
     for res in results:
         env_vars_str = '\n'.join(f"{key}={value}" for key, value in res.env.items())
         markdown_sections.append(f"""
@@ -98,6 +107,9 @@ def generate_markdown_details(results: list[Result]):
 #### Output:
 {res.stdout}
 
+</details>
+""")
+    markdown_sections.append(f"""
 </details>
 """)
     return "\n".join(markdown_sections)
@@ -135,7 +147,7 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
                 best_key = key
 
         # Generate the row with the best value highlighted
-        print(f"Results: {results}")
+        if options.verbose: print(f"Results: {results}")
         for key in chart_data.keys():
             if key in results:
                 intv = results[key].value
@@ -184,7 +196,7 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
                     l.row += f" | {'+' * l.bars} |"
                 else:
                     l.row += f" | {'-' * (-l.bars)} |"
-                print(l.row)
+                if options.verbose: print(l.row)
                 
                 mean_cnt += 1
                 if abs(delta) > epsilon:
@@ -215,11 +227,13 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
     grouped_objects = dict(grouped_objects)
 
     if mean_cnt > 0:
-        global_mean = global_product ** (1/mean_cnt)    
+        global_mean = global_product ** (1/mean_cnt)      
         summary_line = f"Total {mean_cnt} benchmarks in mean. "
-        summary_line += "\n" + f"Geomean {global_mean*100:.3f}%. \nImproved {improved} Regressed {regressed} (treshold {epsilon*100}:.2f)"
+        summary_line += "\n" + f"Geomean {global_mean*100:.3f}%. \nImproved {improved} Regressed {regressed} (treshold {epsilon*100:.2f}%)"
     else:
         summary_line = f"No diffs to calculate performance change"
+
+    if options.verbose: print(summary_line)
 
 
     summary_table = "\n## Performance change in benchmark groups\n"
