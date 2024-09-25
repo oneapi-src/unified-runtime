@@ -216,8 +216,8 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
 
     if mean_cnt > 0:
         global_mean = global_product ** (1/mean_cnt)    
-        summary_line = f"Total {mean_cnt} benchmarks in mean"
-        summary_line += f"Perf change geomean {global_mean*100:.3f} Improved {improved} Regressed {regressed}"
+        summary_line = f"Total {mean_cnt} benchmarks in mean. "
+        summary_line += "\n" + f"Geomean {global_mean*100:.3f}%. \nImproved {improved} Regressed {regressed} (treshold {epsilon*100}:.2f)"
     else:
         summary_line = f"No diffs to calculate performance change"
 
@@ -230,10 +230,9 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
         n = len(outgroup_s)
         for l in outgroup_s:
             if l.diff != None: product *= l.diff
-        print(f"Relative performance in group {name}: {math.pow(product, 1/n)}")
         summary_table += f"""
 <details>
-<summary>"Relative perf in group {name}: {math.pow(product, 1/n)*100:.3f}%"</summary>
+<summary> Relative perf in group {name}: {math.pow(product, 1/n)*100:.3f}% </summary>
 
 """
         summary_table += "| Benchmark | " + " | ".join(chart_data.keys()) + " | Relative perf | Change | - |\n"
