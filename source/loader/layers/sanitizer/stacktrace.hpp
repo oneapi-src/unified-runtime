@@ -18,7 +18,7 @@
 
 namespace ur_sanitizer_layer {
 
-constexpr size_t MAX_BACKTRACE_FRAMES = 48;
+constexpr size_t MAX_BACKTRACE_FRAMES = 64;
 
 struct StackTrace {
     std::vector<BacktraceFrame> stack;

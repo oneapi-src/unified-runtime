@@ -15,7 +15,7 @@
 namespace ur_sanitizer_layer {
 
 StackTrace GetCurrentBacktrace() {
-    void *Frames[MAX_BACKTRACE_FRAMES];
+    BacktraceFrame Frames[MAX_BACKTRACE_FRAMES];
     int FrameCount = backtrace(Frames, MAX_BACKTRACE_FRAMES);
 
     StackTrace Stack;
