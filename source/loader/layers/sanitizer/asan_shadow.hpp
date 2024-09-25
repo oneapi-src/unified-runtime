@@ -21,6 +21,8 @@ namespace ur_sanitizer_layer {
 struct ShadowMemory {
     ShadowMemory(ur_context_handle_t Context, ur_device_handle_t Device)
         : Context(Context), Device(Device) {}
+    
+    virtual ~ShadowMemory() {}
 
     virtual ur_result_t Setup() = 0;
 
