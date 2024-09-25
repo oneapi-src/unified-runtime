@@ -201,7 +201,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuild(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urProgramLinkExp
+/// @brief Intercept function for urProgramLink
 ur_result_t UR_APICALL urProgramLink(
     ur_context_handle_t hContext, ///< [in] handle of the context instance.
     uint32_t numDevices,          ///< [in] number of devices
@@ -221,7 +221,7 @@ ur_result_t UR_APICALL urProgramLink(
         return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
     }
 
-    getContext()->logger.debug("==== urProgramLinkExp");
+    getContext()->logger.debug("==== urProgramLink");
 
     UR_CALL(pfnProgramLink(hContext, numDevices, phDevices, count, phPrograms,
                            pOptions, phProgram));

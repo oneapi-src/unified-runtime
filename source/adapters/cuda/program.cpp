@@ -261,15 +261,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramBuild(ur_program_handle_t hProgram,
   return Result;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urProgramLinkExp(
-    ur_context_handle_t, uint32_t, ur_device_handle_t *, uint32_t,
-    const ur_program_handle_t *, const char *, ur_program_handle_t *phProgram) {
-  if (nullptr != phProgram) {
-    *phProgram = nullptr;
-  }
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-}
-
 /// Creates a new UR program object that is the outcome of linking all input
 /// programs.
 /// \TODO Implement linker options, requires mapping of OpenCL to CUDA
