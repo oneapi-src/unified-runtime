@@ -118,7 +118,7 @@ ur_result_t urProgramCreateWithBinary(
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urProgramBuild(
+ur_result_t urProgramBuild(
     ur_program_handle_t hProgram,  ///< [in] Handle of the program to build.
     uint32_t numDevices,           ///< [in] number of devices
     ur_device_handle_t *phDevices, ///< [in][range(0, numDevices)] pointer to
@@ -221,7 +221,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramBuild(
   return Result;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urProgramCompile(
+ur_result_t urProgramCompile(
     ur_program_handle_t
         hProgram,        ///< [in][out] handle of the program to compile.
     uint32_t numDevices, ///< [in] number of devices
@@ -262,7 +262,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCompile(
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urProgramLink(
+ur_result_t urProgramLink(
     ur_context_handle_t hContext,  ///< [in] handle of the context instance.
     uint32_t numDevices,           ///< [in] number of devices
     ur_device_handle_t *phDevices, ///< [in][range(0, numDevices)] pointer to
