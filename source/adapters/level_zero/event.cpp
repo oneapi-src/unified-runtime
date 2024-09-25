@@ -200,10 +200,10 @@ ur_result_t urEnqueueEventsWaitWithBarrier(
       // is unnecessary IF the cmdlists match.
       if (EventWaitList.Length) {
         if (CmdList->second.IsInOrderList) {
-          for (unsigned i = EventWaitList.Length; i-- < 0;) {
+          for (unsigned i = EventWaitList.Length; i-- > 0;) {
             // if the events is from the same cmdlist, we can remove it
             // from the waitlist.
-            if (EventWaitList.UrEventList[i]->CommandList == CmdList) {
+            if (EventWaitList.UrEventList[i]->CommandList != std::nullopt) {
               EventWaitList.Length--;
               if (EventWaitList.Length != i) {
                 std::swap(EventWaitList.UrEventList[i],
