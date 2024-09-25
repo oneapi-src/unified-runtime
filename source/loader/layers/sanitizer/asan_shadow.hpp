@@ -12,8 +12,8 @@
 
 #pragma once
 
-#include "common.hpp"
 #include "asan_allocator.hpp"
+#include "common.hpp"
 #include <unordered_set>
 
 namespace ur_sanitizer_layer {
@@ -21,7 +21,7 @@ namespace ur_sanitizer_layer {
 struct ShadowMemory {
     ShadowMemory(ur_context_handle_t Context, ur_device_handle_t Device)
         : Context(Context), Device(Device) {}
-    
+
     virtual ~ShadowMemory() {}
 
     virtual ur_result_t Setup() = 0;
@@ -63,9 +63,7 @@ struct ShadowMemoryCPU final : public ShadowMemory {
     virtual ur_result_t EnqueuePoisonShadow(ur_queue_handle_t Queue, uptr Ptr,
                                             uptr Size, u8 Value) override;
 
-    virtual size_t GetShadowSize() override {
-        return 0x80000000000ULL;
-    }
+    virtual size_t GetShadowSize() override { return 0x80000000000ULL; }
 };
 
 struct ShadowMemoryGPU : public ShadowMemory {
@@ -111,9 +109,7 @@ struct ShadowMemoryPVC final : public ShadowMemoryGPU {
 
     virtual uptr MemToShadow(uptr Ptr) override;
 
-    virtual size_t GetShadowSize() override {
-        return 0x180000000000ULL;
-    }
+    virtual size_t GetShadowSize() override { return 0x180000000000ULL; }
 };
 
 /// Shadow Memory layout of GPU PVC device
@@ -132,9 +128,7 @@ struct ShadowMemoryDG2 final : public ShadowMemoryGPU {
 
     virtual uptr MemToShadow(uptr Ptr) override;
 
-    virtual size_t GetShadowSize() override {
-        return 0x100000000000ULL;
-    }
+    virtual size_t GetShadowSize() override { return 0x100000000000ULL; }
 };
 
 } // namespace ur_sanitizer_layer
