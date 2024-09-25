@@ -18,14 +18,16 @@
 
 namespace ur_sanitizer_layer {
 
-constexpr size_t MAX_BACKTRACE_FRAMES = 64;
+constexpr size_t MAX_BACKTRACE_FRAMES = 48;
 
 struct StackTrace {
-    std::vector<BacktraceInfo> stack;
+    std::vector<BacktraceFrame> stack;
 
     void print() const;
 };
 
 StackTrace GetCurrentBacktrace();
+
+char **GetBacktraceSymbols(const std::vector<BacktraceFrame> &BacktraceFrames);
 
 } // namespace ur_sanitizer_layer
