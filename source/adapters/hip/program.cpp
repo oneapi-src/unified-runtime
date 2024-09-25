@@ -291,7 +291,7 @@ urProgramCompile(ur_program_handle_t hProgram, uint32_t numDevices,
 /// See \ref ur_program_handle_t for implementation details.
 UR_APIEXPORT ur_result_t UR_APICALL urProgramBuild(ur_program_handle_t hProgram,
                                                    uint32_t,
-                                                   ur_context_handle_t *,
+                                                   ur_device_handle_t *,
                                                    const char *pOptions) {
   ur_result_t Result = UR_RESULT_SUCCESS;
 
