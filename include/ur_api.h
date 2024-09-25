@@ -1480,7 +1480,7 @@ urDeviceGetSelected(
 typedef enum ur_device_info_t {
     UR_DEVICE_INFO_TYPE = 0,                                         ///< [::ur_device_type_t] type of the device
     UR_DEVICE_INFO_VENDOR_ID = 1,                                    ///< [uint32_t] vendor Id of the device
-    UR_DEVICE_INFO_DEVICE_ID = 2,                                    ///< [uint32_t] Id of the device
+    UR_DEVICE_INFO_DEVICE_ID = 2,                                    ///< [uint32_t][optional-query] Id of the device
     UR_DEVICE_INFO_MAX_COMPUTE_UNITS = 3,                            ///< [uint32_t] the number of compute units
     UR_DEVICE_INFO_MAX_WORK_ITEM_DIMENSIONS = 4,                     ///< [uint32_t] max work item dimensions
     UR_DEVICE_INFO_MAX_WORK_ITEM_SIZES = 5,                          ///< [size_t[]] return an array of max work item sizes
@@ -1507,7 +1507,7 @@ typedef enum ur_device_info_t {
     UR_DEVICE_INFO_NATIVE_VECTOR_WIDTH_DOUBLE = 23,                  ///< [uint32_t] native vector width for double
     UR_DEVICE_INFO_NATIVE_VECTOR_WIDTH_HALF = 24,                    ///< [uint32_t] native vector width for half float
     UR_DEVICE_INFO_MAX_CLOCK_FREQUENCY = 25,                         ///< [uint32_t] max clock frequency in MHz
-    UR_DEVICE_INFO_MEMORY_CLOCK_RATE = 26,                           ///< [uint32_t] memory clock frequency in MHz
+    UR_DEVICE_INFO_MEMORY_CLOCK_RATE = 26,                           ///< [uint32_t][optional-query] memory clock frequency in MHz
     UR_DEVICE_INFO_ADDRESS_BITS = 27,                                ///< [uint32_t] address bits
     UR_DEVICE_INFO_MAX_MEM_ALLOC_SIZE = 28,                          ///< [uint64_t] max memory allocation size
     UR_DEVICE_INFO_IMAGE_SUPPORTED = 29,                             ///< [::ur_bool_t] images are supported
@@ -1531,7 +1531,8 @@ typedef enum ur_device_info_t {
     UR_DEVICE_INFO_GLOBAL_MEM_CACHELINE_SIZE = 44,                   ///< [uint32_t] global memory cache line size in bytes
     UR_DEVICE_INFO_GLOBAL_MEM_CACHE_SIZE = 45,                       ///< [uint64_t] size of global memory cache in bytes
     UR_DEVICE_INFO_GLOBAL_MEM_SIZE = 46,                             ///< [uint64_t] size of global memory in bytes
-    UR_DEVICE_INFO_GLOBAL_MEM_FREE = 47,                             ///< [uint64_t] size of global memory which is free in bytes
+    UR_DEVICE_INFO_GLOBAL_MEM_FREE = 47,                             ///< [uint64_t][optional-query] size of global memory which is free in
+                                                                     ///< bytes
     UR_DEVICE_INFO_MAX_CONSTANT_BUFFER_SIZE = 48,                    ///< [uint64_t] max constant buffer size in bytes
     UR_DEVICE_INFO_MAX_CONSTANT_ARGS = 49,                           ///< [uint32_t] max number of __const declared arguments in a kernel
     UR_DEVICE_INFO_LOCAL_MEM_TYPE = 50,                              ///< [::ur_device_local_mem_type_t] local memory type
@@ -1588,15 +1589,16 @@ typedef enum ur_device_info_t {
                                                                      ///< shared memory access
     UR_DEVICE_INFO_USM_SYSTEM_SHARED_SUPPORT = 87,                   ///< [::ur_device_usm_access_capability_flags_t] support USM system wide
                                                                      ///< shared memory access
-    UR_DEVICE_INFO_UUID = 88,                                        ///< [uint8_t[]] return device UUID
-    UR_DEVICE_INFO_PCI_ADDRESS = 89,                                 ///< [char[]] return device PCI address
-    UR_DEVICE_INFO_GPU_EU_COUNT = 90,                                ///< [uint32_t] return Intel GPU EU count
-    UR_DEVICE_INFO_GPU_EU_SIMD_WIDTH = 91,                           ///< [uint32_t] return Intel GPU EU SIMD width
-    UR_DEVICE_INFO_GPU_EU_SLICES = 92,                               ///< [uint32_t] return Intel GPU number of slices
-    UR_DEVICE_INFO_GPU_EU_COUNT_PER_SUBSLICE = 93,                   ///< [uint32_t] return Intel GPU EU count per subslice
-    UR_DEVICE_INFO_GPU_SUBSLICES_PER_SLICE = 94,                     ///< [uint32_t] return Intel GPU number of subslices per slice
-    UR_DEVICE_INFO_GPU_HW_THREADS_PER_EU = 95,                       ///< [uint32_t] return Intel GPU number of threads per EU
-    UR_DEVICE_INFO_MAX_MEMORY_BANDWIDTH = 96,                        ///< [uint32_t] return max memory bandwidth in Mb/s
+    UR_DEVICE_INFO_UUID = 88,                                        ///< [uint8_t[]][optional-query] return device UUID
+    UR_DEVICE_INFO_PCI_ADDRESS = 89,                                 ///< [char[]][optional-query] return device PCI address
+    UR_DEVICE_INFO_GPU_EU_COUNT = 90,                                ///< [uint32_t][optional-query] return Intel GPU EU count
+    UR_DEVICE_INFO_GPU_EU_SIMD_WIDTH = 91,                           ///< [uint32_t][optional-query] return Intel GPU EU SIMD width
+    UR_DEVICE_INFO_GPU_EU_SLICES = 92,                               ///< [uint32_t][optional-query] return Intel GPU number of slices
+    UR_DEVICE_INFO_GPU_EU_COUNT_PER_SUBSLICE = 93,                   ///< [uint32_t][optional-query] return Intel GPU EU count per subslice
+    UR_DEVICE_INFO_GPU_SUBSLICES_PER_SLICE = 94,                     ///< [uint32_t][optional-query] return Intel GPU number of subslices per
+                                                                     ///< slice
+    UR_DEVICE_INFO_GPU_HW_THREADS_PER_EU = 95,                       ///< [uint32_t][optional-query] return Intel GPU number of threads per EU
+    UR_DEVICE_INFO_MAX_MEMORY_BANDWIDTH = 96,                        ///< [uint32_t][optional-query] return max memory bandwidth in Mb/s
     UR_DEVICE_INFO_IMAGE_SRGB = 97,                                  ///< [::ur_bool_t] device supports sRGB images
     UR_DEVICE_INFO_BUILD_ON_SUBDEVICE = 98,                          ///< [::ur_bool_t] Return true if sub-device should do its own program
                                                                      ///< build
@@ -1615,17 +1617,18 @@ typedef enum ur_device_info_t {
                                                                      ///< available for this device.
     UR_DEVICE_INFO_KERNEL_SET_SPECIALIZATION_CONSTANTS = 106,        ///< [::ur_bool_t] support the ::urKernelSetSpecializationConstants entry
                                                                      ///< point
-    UR_DEVICE_INFO_MEMORY_BUS_WIDTH = 107,                           ///< [uint32_t] return the width in bits of the memory bus interface of the
-                                                                     ///< device.
+    UR_DEVICE_INFO_MEMORY_BUS_WIDTH = 107,                           ///< [uint32_t][optional-query] return the width in bits of the memory bus
+                                                                     ///< interface of the device.
     UR_DEVICE_INFO_MAX_WORK_GROUPS_3D = 108,                         ///< [size_t[3]] return max 3D work groups
     UR_DEVICE_INFO_ASYNC_BARRIER = 109,                              ///< [::ur_bool_t] return true if Async Barrier is supported
     UR_DEVICE_INFO_MEM_CHANNEL_SUPPORT = 110,                        ///< [::ur_bool_t] return true if specifying memory channels is supported
     UR_DEVICE_INFO_HOST_PIPE_READ_WRITE_SUPPORTED = 111,             ///< [::ur_bool_t] Return true if the device supports enqueueing commands
                                                                      ///< to read and write pipes from the host.
-    UR_DEVICE_INFO_MAX_REGISTERS_PER_WORK_GROUP = 112,               ///< [uint32_t] The maximum number of registers available per block.
-    UR_DEVICE_INFO_IP_VERSION = 113,                                 ///< [uint32_t] The device IP version. The meaning of the device IP version
-                                                                     ///< is implementation-defined, but newer devices should have a higher
-                                                                     ///< version than older devices.
+    UR_DEVICE_INFO_MAX_REGISTERS_PER_WORK_GROUP = 112,               ///< [uint32_t][optional-query] The maximum number of registers available
+                                                                     ///< per block.
+    UR_DEVICE_INFO_IP_VERSION = 113,                                 ///< [uint32_t][optional-query] The device IP version. The meaning of the
+                                                                     ///< device IP version is implementation-defined, but newer devices should
+                                                                     ///< have a higher version than older devices.
     UR_DEVICE_INFO_VIRTUAL_MEMORY_SUPPORT = 114,                     ///< [::ur_bool_t] return true if the device supports virtual memory.
     UR_DEVICE_INFO_ESIMD_SUPPORT = 115,                              ///< [::ur_bool_t] return true if the device supports ESIMD.
     UR_DEVICE_INFO_COMPONENT_DEVICES = 116,                          ///< [::ur_device_handle_t[]] The set of component devices contained by
@@ -4494,9 +4497,10 @@ typedef enum ur_program_info_t {
     UR_PROGRAM_INFO_BINARY_SIZES = 5,    ///< [size_t[]] Return program binary sizes for each device.
     UR_PROGRAM_INFO_BINARIES = 6,        ///< [unsigned char[]] Return program binaries for all devices for this
                                          ///< Program.
-    UR_PROGRAM_INFO_NUM_KERNELS = 7,     ///< [size_t] Number of kernels in Program, return type size_t.
-    UR_PROGRAM_INFO_KERNEL_NAMES = 8,    ///< [char[]] Return a null-terminated, semi-colon separated list of kernel
-                                         ///< names in Program.
+    UR_PROGRAM_INFO_NUM_KERNELS = 7,     ///< [size_t][optional-query] Number of kernels in Program, return type
+                                         ///< size_t.
+    UR_PROGRAM_INFO_KERNEL_NAMES = 8,    ///< [char[]][optional-query] Return a null-terminated, semi-colon
+                                         ///< separated list of kernel names in Program.
     /// @cond
     UR_PROGRAM_INFO_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -4842,8 +4846,8 @@ typedef enum ur_kernel_info_t {
     UR_KERNEL_INFO_CONTEXT = 3,         ///< [::ur_context_handle_t] Return Context object associated with Kernel.
     UR_KERNEL_INFO_PROGRAM = 4,         ///< [::ur_program_handle_t] Return Program object associated with Kernel.
     UR_KERNEL_INFO_ATTRIBUTES = 5,      ///< [char[]] Return null-terminated kernel attributes string.
-    UR_KERNEL_INFO_NUM_REGS = 6,        ///< [uint32_t] Return the number of registers used by the compiled kernel
-                                        ///< (device specific).
+    UR_KERNEL_INFO_NUM_REGS = 6,        ///< [uint32_t][optional-query] Return the number of registers used by the
+                                        ///< compiled kernel.
     /// @cond
     UR_KERNEL_INFO_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -4853,7 +4857,7 @@ typedef enum ur_kernel_info_t {
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Get Kernel Work Group information
 typedef enum ur_kernel_group_info_t {
-    UR_KERNEL_GROUP_INFO_GLOBAL_WORK_SIZE = 0,                   ///< [size_t[3]] Return Work Group maximum global size
+    UR_KERNEL_GROUP_INFO_GLOBAL_WORK_SIZE = 0,                   ///< [size_t[3]][optional-query] Return Work Group maximum global size
     UR_KERNEL_GROUP_INFO_WORK_GROUP_SIZE = 1,                    ///< [size_t] Return maximum Work Group size
     UR_KERNEL_GROUP_INFO_COMPILE_WORK_GROUP_SIZE = 2,            ///< [size_t[3]] Return Work Group size required by the source code, such
                                                                  ///< as __attribute__((required_work_group_size(X,Y,Z)), or (0, 0, 0) if
@@ -5379,8 +5383,8 @@ typedef enum ur_queue_info_t {
     UR_QUEUE_INFO_SIZE = 5,            ///< [uint32_t] The size of the queue on the device. Only a valid query
                                        ///< if the queue was created with the `ON_DEVICE` queue flag, otherwise
                                        ///< `::urQueueGetInfo` will return `::UR_RESULT_ERROR_INVALID_QUEUE`.
-    UR_QUEUE_INFO_EMPTY = 6,           ///< [::ur_bool_t] return true if the queue was empty at the time of the
-                                       ///< query
+    UR_QUEUE_INFO_EMPTY = 6,           ///< [::ur_bool_t][optional-query] return true if the queue was empty at
+                                       ///< the time of the query.
     /// @cond
     UR_QUEUE_INFO_FORCE_UINT32 = 0x7fffffff
     /// @endcond
