@@ -10,10 +10,11 @@
  *
  */
 
-#include "asan_buffer.hpp"
-#include "asan_interceptor.hpp"
+#include "sanitizer_buffer.hpp"
+#include "sanitizer_interceptor.hpp"
+#include "sanitizer_utils.hpp"
+
 #include "ur_sanitizer_layer.hpp"
-#include "ur_sanitizer_utils.hpp"
 
 namespace ur_sanitizer_layer {
 

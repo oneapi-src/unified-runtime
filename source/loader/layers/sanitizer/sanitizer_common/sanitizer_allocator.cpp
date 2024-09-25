@@ -10,7 +10,7 @@
  *
  */
 
-#include "asan_allocator.hpp"
+#include "sanitizer_allocator.hpp"
 #include "ur_sanitizer_layer.hpp"
 
 namespace ur_sanitizer_layer {

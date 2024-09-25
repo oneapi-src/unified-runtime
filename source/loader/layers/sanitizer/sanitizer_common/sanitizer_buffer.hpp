@@ -16,7 +16,7 @@
 #include <memory>
 #include <optional>
 
-#include "common.hpp"
+#include "sanitizer_common.hpp"
 
 namespace ur_sanitizer_layer {
 

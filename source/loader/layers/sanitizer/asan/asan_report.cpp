@@ -11,13 +11,13 @@
  */
 
 #include "asan_report.hpp"
-#include "asan_allocator.hpp"
 #include "asan_interceptor.hpp"
-#include "asan_libdevice.hpp"
 #include "asan_options.hpp"
 #include "asan_validator.hpp"
+#include "sanitizer_common/sanitizer_allocator.hpp"
+#include "sanitizer_common/sanitizer_libdevice.hpp"
+#include "sanitizer_common/sanitizer_utils.hpp"
 #include "ur_sanitizer_layer.hpp"
-#include "ur_sanitizer_utils.hpp"
 
 namespace ur_sanitizer_layer {
 
@@ -127,7 +127,7 @@ void ReportUseAfterFree(const DeviceSanitizerReport &Report,
     getContext()->logger.always("  #0 {} {}:{}", Func, File, Report.Line);
     getContext()->logger.always("");
 
-    if (Options(getContext()->logger).MaxQuarantineSizeMB > 0) {
+    if (getContext()->asanOptions->MaxQuarantineSizeMB > 0) {
         auto AllocInfoItOp =
             getContext()->interceptor->findAllocInfoByAddress(Report.Address);
 

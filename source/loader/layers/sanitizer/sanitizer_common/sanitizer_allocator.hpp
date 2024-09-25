@@ -12,8 +12,8 @@
 
 #pragma once
 
-#include "common.hpp"
-#include "stacktrace.hpp"
+#include "sanitizer_common.hpp"
+#include "sanitizer_stacktrace.hpp"
 
 #include <map>
 #include <memory>

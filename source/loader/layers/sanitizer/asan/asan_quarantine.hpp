@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "asan_allocator.hpp"
+#include "sanitizer_common/sanitizer_allocator.hpp"
 
 #include <atomic>
 #include <queue>

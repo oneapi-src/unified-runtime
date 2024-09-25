@@ -11,7 +11,7 @@
  */
 #pragma once
 
-#include "asan_allocator.hpp"
+#include "sanitizer_common/sanitizer_allocator.hpp"
 
 namespace ur_sanitizer_layer {
 

@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "common.hpp"
+#include "sanitizer_common.hpp"
 
 #include <vector>
 

@@ -10,7 +10,7 @@
  *
  */
 
-#include "stacktrace.hpp"
+#include "sanitizer_stacktrace.hpp"
 #include "ur_sanitizer_layer.hpp"
 
 extern "C" {

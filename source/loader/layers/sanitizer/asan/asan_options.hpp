@@ -24,14 +24,6 @@ namespace ur_sanitizer_layer {
 
 struct AsanOptions {
   public:
-    AsanOptions(AsanOptions &other) = delete;
-    void operator=(const AsanOptions &) = delete;
-
-    static AsanOptions &getInstance(logger::Logger &logger) {
-        static AsanOptions instance(logger);
-        return instance;
-    }
-
     bool Debug = false;
     uint64_t MinRZSize = 16;
     uint64_t MaxRZSize = 2048;
@@ -40,7 +32,6 @@ struct AsanOptions {
     bool DetectPrivates = true;
     bool DetectKernelArguments = true;
 
-  private:
     AsanOptions(logger::Logger &logger) {
         auto OptionsEnvMap = getenv_to_map("UR_LAYER_ASAN_OPTIONS");
         if (!OptionsEnvMap.has_value()) {
@@ -143,9 +134,5 @@ struct AsanOptions {
         }
     }
 };
-
-inline const AsanOptions &Options(logger::Logger &logger) {
-    return AsanOptions::getInstance(logger);
-}
 
 } // namespace ur_sanitizer_layer
