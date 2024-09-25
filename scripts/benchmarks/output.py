@@ -5,7 +5,7 @@
 
 import collections, re
 from benches.base import Result
-from .options import options
+from benches.options import options
 import math
 
 class OutputLine:
