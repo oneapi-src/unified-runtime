@@ -13,6 +13,21 @@
 
 #include "../device.hpp"
 
+typedef struct _zex_intel_queue_copy_operations_offload_hint_exp_desc_t {
+  ze_structure_type_t stype;
+  const void *pNext;
+  ze_bool_t copyOffloadEnabled;
+} zex_intel_queue_copy_operations_offload_hint_exp_desc_t;
+
+#define ZEX_INTEL_STRUCTURE_TYPE_QUEUE_COPY_OPERATIONS_OFFLOAD_HINT_EXP_PROPERTIES \
+  (ze_structure_type_t)0x0003001B
+
+template <>
+ze_structure_type_t
+getZeStructureType<zex_intel_queue_copy_operations_offload_hint_exp_desc_t>() {
+  return ZEX_INTEL_STRUCTURE_TYPE_QUEUE_COPY_OPERATIONS_OFFLOAD_HINT_EXP_PROPERTIES;
+}
+
 bool v2::immediate_command_list_descriptor_t::operator==(
     const immediate_command_list_descriptor_t &rhs) const {
   return ZeDevice == rhs.ZeDevice && IsInOrder == rhs.IsInOrder &&
@@ -45,6 +60,9 @@ command_list_cache_t::command_list_cache_t(ze_context_handle_t ZeContext)
 
 raii::ze_command_list_handle_t
 command_list_cache_t::createCommandList(const command_list_descriptor_t &desc) {
+  ZeStruct<zex_intel_queue_copy_operations_offload_hint_exp_desc_t> offloadDesc;
+  offloadDesc.copyOffloadEnabled = true;
+
   if (auto ImmCmdDesc =
           std::get_if<immediate_command_list_descriptor_t>(&desc)) {
     ze_command_list_handle_t ZeCommandList;
@@ -58,6 +76,9 @@ command_list_cache_t::createCommandList(const command_list_descriptor_t &desc) {
       QueueDesc.flags |= ZE_COMMAND_QUEUE_FLAG_EXPLICIT_ONLY;
       QueueDesc.index = ImmCmdDesc->Index.value();
     }
+    if (ImmCmdDesc->CopyOffloadEnabled) {
+      QueueDesc.pNext = &offloadDesc;
+    }
     ZE2UR_CALL_THROWS(
         zeCommandListCreateImmediate,
         (ZeContext, ImmCmdDesc->ZeDevice, &QueueDesc, &ZeCommandList));
@@ -69,6 +90,10 @@ command_list_cache_t::createCommandList(const command_list_descriptor_t &desc) {
         RegCmdDesc.IsInOrder ? ZE_COMMAND_LIST_FLAG_IN_ORDER : 0;
     CmdListDesc.commandQueueGroupOrdinal = RegCmdDesc.Ordinal;
 
+    if (RegCmdDesc.CopyOffloadEnabled) {
+      CmdListDesc.pNext = &offloadDesc;
+    }
+
     ze_command_list_handle_t ZeCommandList;
     ZE2UR_CALL_THROWS(zeCommandListCreate, (ZeContext, RegCmdDesc.ZeDevice,
                                             &CmdListDesc, &ZeCommandList));
@@ -78,13 +103,14 @@ command_list_cache_t::createCommandList(const command_list_descriptor_t &desc) {
 
 raii::command_list_unique_handle command_list_cache_t::getImmediateCommandList(
     ze_device_handle_t ZeDevice, bool IsInOrder, uint32_t Ordinal,
-    ze_command_queue_mode_t Mode, ze_command_queue_priority_t Priority,
-    std::optional<uint32_t> Index) {
+    bool CopyOffloadEnable, ze_command_queue_mode_t Mode,
+    ze_command_queue_priority_t Priority, std::optional<uint32_t> Index) {
   TRACK_SCOPE_LATENCY("command_list_cache_t::getImmediateCommandList");
 
   immediate_command_list_descriptor_t Desc;
   Desc.ZeDevice = ZeDevice;
   Desc.Ordinal = Ordinal;
+  Desc.CopyOffloadEnabled = CopyOffloadEnable;
   Desc.IsInOrder = IsInOrder;
   Desc.Mode = Mode;
   Desc.Priority = Priority;
@@ -99,13 +125,15 @@ raii::command_list_unique_handle command_list_cache_t::getImmediateCommandList(
 
 raii::command_list_unique_handle
 command_list_cache_t::getRegularCommandList(ze_device_handle_t ZeDevice,
-                                            bool IsInOrder, uint32_t Ordinal) {
+                                            bool IsInOrder, uint32_t Ordinal,
+                                            bool CopyOffloadEnable) {
   TRACK_SCOPE_LATENCY("command_list_cache_t::getRegularCommandList");
 
   regular_command_list_descriptor_t Desc;
   Desc.ZeDevice = ZeDevice;
   Desc.IsInOrder = IsInOrder;
   Desc.Ordinal = Ordinal;
+  Desc.CopyOffloadEnabled = CopyOffloadEnable;
 
   auto [CommandList, _] = getCommandList(Desc).release();
 
