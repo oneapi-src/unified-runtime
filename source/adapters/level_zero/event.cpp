@@ -171,46 +171,63 @@ ur_result_t urEnqueueEventsWaitWithBarrier(
   std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
 
   // Helper function for appending a barrier to a command list.
-  auto insertBarrierIntoCmdList =
-      [&Queue](ur_command_list_ptr_t CmdList,
-               const _ur_ze_event_list_t &EventWaitList,
-               ur_event_handle_t &Event, bool IsInternal) {
-        UR_CALL(createEventAndAssociateQueue(
-            Queue, &Event, UR_COMMAND_EVENTS_WAIT_WITH_BARRIER, CmdList,
-            IsInternal, false));
+  auto insertBarrierIntoCmdList = [&Queue](ur_command_list_ptr_t CmdList,
+                                           _ur_ze_event_list_t &EventWaitList,
+                                           ur_event_handle_t &Event,
+                                           bool IsInternal) {
+    UR_CALL(createEventAndAssociateQueue(Queue, &Event,
+                                         UR_COMMAND_EVENTS_WAIT_WITH_BARRIER,
+                                         CmdList, IsInternal, false));
 
-        Event->WaitList = EventWaitList;
+    Event->WaitList = EventWaitList;
 
-        // For in-order queue we don't need a real barrier, just wait for
-        // requested events in potentially different queues and add a "barrier"
-        // event signal because it is already guaranteed that previous commands
-        // in this queue are completed when the signal is started.
-        //
-        // Only consideration here is that when profiling is used, signalEvent
-        // cannot be used if EventWaitList.Lenght == 0. In those cases, we need
-        // to fallback directly to barrier to have correct timestamps. See here:
-        // https://spec.oneapi.io/level-zero/latest/core/api.html?highlight=appendsignalevent#_CPPv430zeCommandListAppendSignalEvent24ze_command_list_handle_t17ze_event_handle_t
-        //
-        // TODO: this and other special handling of in-order queues to be
-        // updated when/if Level Zero adds native support for in-order queues.
-        //
-        if (Queue->isInOrderQueue() && InOrderBarrierBySignal &&
-            !Queue->isProfilingEnabled()) {
-          if (EventWaitList.Length) {
-            ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
-                       (CmdList->first, EventWaitList.Length,
-                        EventWaitList.ZeEventList));
+    // For in-order queue we don't need a real barrier, just wait for
+    // requested events in potentially different queues and add a "barrier"
+    // event signal because it is already guaranteed that previous commands
+    // in this queue are completed when the signal is started.
+    //
+    // Only consideration here is that when profiling is used, signalEvent
+    // cannot be used if EventWaitList.Lenght == 0. In those cases, we need
+    // to fallback directly to barrier to have correct timestamps. See here:
+    // https://spec.oneapi.io/level-zero/latest/core/api.html?highlight=appendsignalevent#_CPPv430zeCommandListAppendSignalEvent24ze_command_list_handle_t17ze_event_handle_t
+    //
+    // TODO: this and other special handling of in-order queues to be
+    // updated when/if Level Zero adds native support for in-order queues.
+    //
+    if (Queue->isInOrderQueue() && InOrderBarrierBySignal &&
+        !Queue->isProfilingEnabled()) {
+      // If we are using driver in order lists, then append wait on events
+      // is unnecessary IF the cmdlists match.
+      if (EventWaitList.Length) {
+        if (CmdList->second.IsInOrderList) {
+          for (unsigned i = EventWaitList.Length; i-- < 0;) {
+            // if the events is from the same cmdlist, we can remove it
+            // from the waitlist.
+            if (EventWaitList.UrEventList[i]->CommandList == CmdList) {
+              EventWaitList.Length--;
+              if (EventWaitList.Length != i) {
+                std::swap(EventWaitList.UrEventList[i],
+                          EventWaitList.UrEventList[EventWaitList.Length]);
+                std::swap(EventWaitList.ZeEventList[i],
+                          EventWaitList.ZeEventList[EventWaitList.Length]);
+              }
+            }
           }
-          ZE2UR_CALL(zeCommandListAppendSignalEvent,
-                     (CmdList->first, Event->ZeEvent));
-        } else {
-          ZE2UR_CALL(zeCommandListAppendBarrier,
-                     (CmdList->first, Event->ZeEvent, EventWaitList.Length,
-                      EventWaitList.ZeEventList));
         }
+        ZE2UR_CALL(
+            zeCommandListAppendWaitOnEvents,
+            (CmdList->first, EventWaitList.Length, EventWaitList.ZeEventList));
+      }
+      ZE2UR_CALL(zeCommandListAppendSignalEvent,
+                 (CmdList->first, Event->ZeEvent));
+    } else {
+      ZE2UR_CALL(zeCommandListAppendBarrier,
+                 (CmdList->first, Event->ZeEvent, EventWaitList.Length,
+                  EventWaitList.ZeEventList));
+    }
 
-        return UR_RESULT_SUCCESS;
-      };
+    return UR_RESULT_SUCCESS;
+  };
 
   // If the queue is in-order then each command in it effectively acts as a
   // barrier, so we don't need to do anything except if we were requested
@@ -221,9 +238,8 @@ ur_result_t urEnqueueEventsWaitWithBarrier(
     return UR_RESULT_SUCCESS;
   }
 
-  ur_event_handle_t InternalEvent;
+  ur_event_handle_t ResultEvent = nullptr;
   bool IsInternal = OutEvent == nullptr;
-  ur_event_handle_t *Event = OutEvent ? OutEvent : &InternalEvent;
 
   // For in-order queue and wait-list which is empty or has events from
   // the same queue just use the last command event as the barrier event.
@@ -234,7 +250,10 @@ ur_result_t urEnqueueEventsWaitWithBarrier(
                                             EventWaitList) &&
       Queue->LastCommandEvent && !Queue->LastCommandEvent->IsDiscarded) {
     UR_CALL(ur::level_zero::urEventRetain(Queue->LastCommandEvent));
-    *Event = Queue->LastCommandEvent;
+    ResultEvent = Queue->LastCommandEvent;
+    if (OutEvent) {
+      *OutEvent = ResultEvent;
+    }
     return UR_RESULT_SUCCESS;
   }
 
@@ -264,15 +283,20 @@ ur_result_t urEnqueueEventsWaitWithBarrier(
         EventWaitList, OkToBatch));
 
     // Insert the barrier into the command-list and execute.
-    UR_CALL(insertBarrierIntoCmdList(CmdList, TmpWaitList, *Event, IsInternal));
+    UR_CALL(insertBarrierIntoCmdList(CmdList, TmpWaitList, ResultEvent,
+                                     IsInternal));
 
     UR_CALL(Queue->executeCommandList(CmdList, false, OkToBatch));
 
     // Because of the dependency between commands in the in-order queue we don't
     // need to keep track of any active barriers if we have in-order queue.
     if (UseMultipleCmdlistBarriers && !Queue->isInOrderQueue()) {
-      auto UREvent = reinterpret_cast<ur_event_handle_t>(*Event);
+      auto UREvent = reinterpret_cast<ur_event_handle_t>(ResultEvent);
       Queue->ActiveBarriers.add(UREvent);
+    }
+
+    if (OutEvent) {
+      *OutEvent = ResultEvent;
     }
     return UR_RESULT_SUCCESS;
   }
@@ -340,9 +364,9 @@ ur_result_t urEnqueueEventsWaitWithBarrier(
     // command-lists.
     std::vector<ur_event_handle_t> EventWaitVector(CmdLists.size());
     for (size_t I = 0; I < CmdLists.size(); ++I) {
-      UR_CALL(insertBarrierIntoCmdList(CmdLists[I], _ur_ze_event_list_t{},
-                                       EventWaitVector[I],
-                                       true /*IsInternal*/));
+      _ur_ze_event_list_t waitlist;
+      UR_CALL(insertBarrierIntoCmdList(
+          CmdLists[I], waitlist, EventWaitVector[I], true /*IsInternal*/));
     }
     // If there were multiple queues we need to create a "convergence" event to
     // be our active barrier. This convergence event is signalled by a barrier
@@ -361,13 +385,14 @@ ur_result_t urEnqueueEventsWaitWithBarrier(
     // Insert a barrier with the events from each command-queue into the
     // convergence command list. The resulting event signals the convergence of
     // all barriers.
-    UR_CALL(insertBarrierIntoCmdList(ConvergenceCmdList, BaseWaitList, *Event,
-                                     IsInternal));
+    UR_CALL(insertBarrierIntoCmdList(ConvergenceCmdList, BaseWaitList,
+                                     ResultEvent, IsInternal));
   } else {
     // If there is only a single queue then insert a barrier and the single
     // result event can be used as our active barrier and used as the return
     // event. Take into account whether output event is discarded or not.
-    UR_CALL(insertBarrierIntoCmdList(CmdLists[0], _ur_ze_event_list_t{}, *Event,
+    _ur_ze_event_list_t waitlist;
+    UR_CALL(insertBarrierIntoCmdList(CmdLists[0], waitlist, ResultEvent,
                                      IsInternal));
   }
 
@@ -384,8 +409,10 @@ ur_result_t urEnqueueEventsWaitWithBarrier(
   }
 
   UR_CALL(Queue->ActiveBarriers.clear());
-  auto UREvent = reinterpret_cast<ur_event_handle_t>(*Event);
-  Queue->ActiveBarriers.add(UREvent);
+  Queue->ActiveBarriers.add(ResultEvent);
+  if (OutEvent) {
+    *OutEvent = ResultEvent;
+  }
   return UR_RESULT_SUCCESS;
 }
 
@@ -1508,8 +1535,8 @@ ur_result_t _ur_ze_event_list_t::createAndRetainUrZeEventList(
 
         std::shared_lock<ur_shared_mutex> Lock(EventList[I]->Mutex);
 
-        ur_device_handle_t QueueRootDevice;
-        ur_device_handle_t CurrentQueueRootDevice;
+        ur_device_handle_t QueueRootDevice = nullptr;
+        ur_device_handle_t CurrentQueueRootDevice = nullptr;
         if (Queue) {
           QueueRootDevice = Queue->Device;
           CurrentQueueRootDevice = CurQueueDevice;
@@ -1537,8 +1564,13 @@ ur_result_t _ur_ze_event_list_t::createAndRetainUrZeEventList(
 
           ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
                      (ZeCommandList, 1u, &EventList[I]->ZeEvent));
-          if (!MultiDeviceEvent->CounterBasedEventsEnabled)
+          if (!MultiDeviceEvent->CounterBasedEventsEnabled) {
             ZE2UR_CALL(zeEventHostSignal, (MultiDeviceZeEvent));
+          } else {
+            ZE2UR_CALL(zeCommandListAppendSignalEvent,
+                       (ZeCommandList, MultiDeviceZeEvent));
+          }
+          MultiDeviceEvent->Completed = true;
 
           UR_CALL(Queue->executeCommandList(CommandList, /* IsBlocking */ false,
                                             /* OkToBatchCommand */ true));
