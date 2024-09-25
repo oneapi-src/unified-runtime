@@ -54,30 +54,29 @@ struct ShadowMemoryCPU final : public ShadowMemory {
     ShadowMemoryCPU(ur_context_handle_t Context, ur_device_handle_t Device)
         : ShadowMemory(Context, Device) {}
 
-    virtual ur_result_t Setup() override;
+    ur_result_t Setup() override;
 
-    virtual ur_result_t Destory() override;
+    ur_result_t Destory() override;
 
-    virtual uptr MemToShadow(uptr Ptr) override;
+    uptr MemToShadow(uptr Ptr) override;
 
-    virtual ur_result_t EnqueuePoisonShadow(ur_queue_handle_t Queue, uptr Ptr,
-                                            uptr Size, u8 Value) override;
+    ur_result_t EnqueuePoisonShadow(ur_queue_handle_t Queue, uptr Ptr,
+                                    uptr Size, u8 Value) override;
 
-    virtual size_t GetShadowSize() override { return 0x80000000000ULL; }
+    size_t GetShadowSize() override { return 0x80000000000ULL; }
 };
 
 struct ShadowMemoryGPU : public ShadowMemory {
     ShadowMemoryGPU(ur_context_handle_t Context, ur_device_handle_t Device)
         : ShadowMemory(Context, Device) {}
 
-    virtual ur_result_t Setup() override;
+    ur_result_t Setup() override;
 
-    virtual ur_result_t Destory() override;
-    virtual ur_result_t EnqueuePoisonShadow(ur_queue_handle_t Queue, uptr Ptr,
-                                            uptr Size, u8 Value) override final;
+    ur_result_t Destory() override;
+    ur_result_t EnqueuePoisonShadow(ur_queue_handle_t Queue, uptr Ptr,
+                                    uptr Size, u8 Value) override final;
 
-    virtual ur_result_t
-    ReleaseShadow(std::shared_ptr<AllocInfo> AI) override final;
+    ur_result_t ReleaseShadow(std::shared_ptr<AllocInfo> AI) override final;
 
     ur_mutex VirtualMemMapsMutex;
 
@@ -107,9 +106,9 @@ struct ShadowMemoryPVC final : public ShadowMemoryGPU {
     ShadowMemoryPVC(ur_context_handle_t Context, ur_device_handle_t Device)
         : ShadowMemoryGPU(Context, Device) {}
 
-    virtual uptr MemToShadow(uptr Ptr) override;
+    uptr MemToShadow(uptr Ptr) override;
 
-    virtual size_t GetShadowSize() override { return 0x180000000000ULL; }
+    size_t GetShadowSize() override { return 0x180000000000ULL; }
 };
 
 /// Shadow Memory layout of GPU PVC device
@@ -126,9 +125,9 @@ struct ShadowMemoryDG2 final : public ShadowMemoryGPU {
     ShadowMemoryDG2(ur_context_handle_t Context, ur_device_handle_t Device)
         : ShadowMemoryGPU(Context, Device) {}
 
-    virtual uptr MemToShadow(uptr Ptr) override;
+    uptr MemToShadow(uptr Ptr) override;
 
-    virtual size_t GetShadowSize() override { return 0x100000000000ULL; }
+    size_t GetShadowSize() override { return 0x100000000000ULL; }
 };
 
 } // namespace ur_sanitizer_layer
