@@ -160,7 +160,7 @@ class Bicg(SyclBenchmark):
 
     def bin_args(self) -> list[str]:
         return [
-            f"--size=8192",
+            f"--size=81920",
         ]
     
 class Correlation(SyclBenchmark):
@@ -169,7 +169,7 @@ class Correlation(SyclBenchmark):
 
     def bin_args(self) -> list[str]:
         return [
-            f"--size=512",
+            f"--size=2048",
         ]
 
 class Covariance(SyclBenchmark):
@@ -178,7 +178,7 @@ class Covariance(SyclBenchmark):
 
     def bin_args(self) -> list[str]:
         return [
-            f"--size=512",
+            f"--size=2048",
         ]
 
 class Gemm(SyclBenchmark):
@@ -187,7 +187,7 @@ class Gemm(SyclBenchmark):
 
     def bin_args(self) -> list[str]:
         return [
-            f"--size=1024",
+            f"--size=16384",
         ]
     
 class Gesumv(SyclBenchmark):
@@ -214,16 +214,26 @@ class KMeans(SyclBenchmark):
 
     def bin_args(self) -> list[str]:
         return [
-            f"--size=67108864",
+            f"--size=700000000",
         ]
 
 class LinRegCoeff(SyclBenchmark):
     def __init__(self, bench):
         super().__init__(bench, "lin_reg_coeff", "LinearRegressionCoeff")
 
+    def bin_args(self) -> list[str]:
+        return [
+            f"--size=1638400000",
+        ]
+
 class LinRegError(SyclBenchmark):
     def __init__(self, bench):
         super().__init__(bench, "lin_reg_error", "LinearRegression")
+
+    def bin_args(self) -> list[str]:
+        return [
+            f"--size=640000",
+        ]
 
 class MatmulChain(SyclBenchmark):
     def __init__(self, bench):
@@ -231,7 +241,7 @@ class MatmulChain(SyclBenchmark):
 
     def bin_args(self) -> list[str]:
         return [
-            f"--size=1024",
+            f"--size=2048",
         ]
 
 # ** bad input file path **
@@ -239,7 +249,7 @@ class MatmulChain(SyclBenchmark):
 # class Median(SyclBenchmark):
 #     def __init__(self, bench):
 #         super().__init__(bench, "median", "MedianFilter")
-# 
+
 #     def bin_args(self) -> list[str]:
 #         return [
 #             f"--size=512",
@@ -249,6 +259,10 @@ class MolDyn(SyclBenchmark):
     def __init__(self, bench):
         super().__init__(bench, "mol_dyn", "MolecularDynamics")
 
+    def bin_args(self) -> list[str]:
+        return [
+            f"--size=8196",
+        ]
 
 class Mvt(SyclBenchmark):
     def __init__(self, bench):
@@ -256,14 +270,17 @@ class Mvt(SyclBenchmark):
 
     def bin_args(self) -> list[str]:
         return [
-            f"--size=16384",
+            f"--size=32767",
         ]
     
-# ** verification fail **
-# 
-# class NBody(SyclBenchmark):
-#     def __init__(self, bench):
-#         super().__init__(bench, "nbody", "NBody_")
+class NBody(SyclBenchmark):
+    def __init__(self, bench):
+        super().__init__(bench, "nbody", "NBody_")
+
+    def bin_args(self) -> list[str]:
+        return [
+            f"--size=81920",
+        ]
 
 class Sf(SyclBenchmark):
     def __init__(self, bench):
@@ -273,9 +290,8 @@ class Sf(SyclBenchmark):
         return [
             f"--size=--size=100000000",
         ]
-    
-# bad input file path
-# 
+# ../../share/Brommy.bmp could not be opened
+#    
 # class SobelX(SyclBenchmark):
 #     def __init__(self, bench):
 #         super().__init__(bench, "sobel", "SobelFilter")
@@ -286,7 +302,7 @@ class Syr2k(SyclBenchmark):
 
     def bin_args(self) -> list[str]:
         return [
-            f"--size=1024",
+            f"--size=6144",
         ]
     
 class Syrk(SyclBenchmark):
@@ -295,7 +311,7 @@ class Syrk(SyclBenchmark):
 
     def bin_args(self) -> list[str]:
         return [
-            f"--size=1024",
+            f"--size=4096",
         ]
 
 # multi benchmarks
@@ -305,7 +321,8 @@ class Blocked_transform(SyclBenchmark):
 
     def bin_args(self) -> list[str]:
         return [
-            f"--size=512",
+            f"--size=819200",
+            f"--local=8192"
         ]
 
 class DagTaskI(SyclBenchmark):
@@ -314,7 +331,7 @@ class DagTaskI(SyclBenchmark):
 
     def bin_args(self) -> list[str]:
         return [
-            f"--size=512",
+            f"--size=32768",
         ]
     
 class DagTaskS(SyclBenchmark):
@@ -323,7 +340,7 @@ class DagTaskS(SyclBenchmark):
 
     def bin_args(self) -> list[str]:
         return [
-            f"--size=512",
+            f"--size=327680",
         ]
 
 class HostDevBandwidth(SyclBenchmark):
