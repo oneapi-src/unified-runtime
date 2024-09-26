@@ -46,8 +46,6 @@ struct ShadowMemory {
     uptr ShadowBegin = 0;
 
     uptr ShadowEnd = 0;
-
-    bool IsShadowMemInited = false;
 };
 
 struct ShadowMemoryCPU final : public ShadowMemory {

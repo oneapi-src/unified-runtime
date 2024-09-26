@@ -19,22 +19,36 @@
 namespace ur_sanitizer_layer {
 
 ur_result_t ShadowMemoryCPU::Setup() {
+    static uptr Begin = 0, End = 0;
     static ur_result_t Result = [this]() {
         size_t ShadowSize = GetShadowSize();
-        ShadowBegin = MmapNoReserve(0, ShadowSize);
-        if (ShadowBegin == 0) {
+        Begin = MmapNoReserve(0, ShadowSize);
+        if (Begin == 0) {
             return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
         }
-        DontCoredumpRange(ShadowBegin, ShadowSize);
-        ShadowEnd = ShadowBegin + ShadowSize;
-        IsShadowMemInited = true;
-        return UR_RESULT_SUCCESS;
+        DontCoredumpRange(Begin, ShadowSize);
+        End = Begin + ShadowSize;
+
+        ShadowBegin = Begin;
+        ShadowEnd = End;
+
+        // Set shadow memory for null pointer
+        auto URes = EnqueuePoisonShadow({}, 0, 1, kNullPointerRedzoneMagic);
+        if (URes != UR_RESULT_SUCCESS) {
+            getContext()->logger.error("EnqueuePoisonShadow(NullPointerRZ): {}",
+                                       URes);
+            return URes;
+        }
+        return URes;
     }();
+    assert(Begin != 0 && End != 0);
+    ShadowBegin = Begin;
+    ShadowEnd = End;
     return Result;
 }
 
 ur_result_t ShadowMemoryCPU::Destory() {
-    if (!IsShadowMemInited) {
+    if (ShadowBegin == 0) {
         return UR_RESULT_SUCCESS;
     }
     static ur_result_t Result = [this]() {
@@ -68,6 +82,7 @@ ur_result_t ShadowMemoryCPU::EnqueuePoisonShadow(ur_queue_handle_t, uptr Ptr,
 }
 
 ur_result_t ShadowMemoryGPU::Setup() {
+    static uptr Begin = 0, End = 0;
     // Currently, Level-Zero doesn't create independent VAs for each contexts, if we reserve
     // shadow memory for each contexts, this will cause out-of-resource error when user uses
     // multiple contexts. Therefore, we just create one shadow memory here.
@@ -75,20 +90,36 @@ ur_result_t ShadowMemoryGPU::Setup() {
         size_t ShadowSize = GetShadowSize();
         // TODO: Protect Bad Zone
         auto Result = getContext()->urDdiTable.VirtualMem.pfnReserve(
-            Context, nullptr, ShadowSize, (void **)&ShadowBegin);
+            Context, nullptr, ShadowSize, (void **)&Begin);
         if (Result == UR_RESULT_SUCCESS) {
-            ShadowEnd = ShadowBegin + ShadowSize;
+            End = Begin + ShadowSize;
             // Retain the context which reserves shadow memory
             getContext()->urDdiTable.Context.pfnRetain(Context);
         }
-        IsShadowMemInited = true;
+
+        ShadowBegin = Begin;
+        ShadowEnd = End;
+
+        // Set shadow memory for null pointer
+        ManagedQueue Queue(Context, Device);
+
+        auto URes = EnqueuePoisonShadow({}, 0, 1, kNullPointerRedzoneMagic);
+        if (URes != UR_RESULT_SUCCESS) {
+            getContext()->logger.error("EnqueuePoisonShadow(NullPointerRZ): {}",
+                                       URes);
+            return URes;
+        }
+        return URes;
         return Result;
     }();
+    assert(Begin != 0 && End != 0);
+    ShadowBegin = Begin;
+    ShadowEnd = End;
     return Result;
 }
 
 ur_result_t ShadowMemoryGPU::Destory() {
-    if (!IsShadowMemInited) {
+    if (ShadowBegin == 0) {
         return UR_RESULT_SUCCESS;
     }
     static ur_result_t Result = [this]() {
@@ -135,7 +166,7 @@ ur_result_t ShadowMemoryGPU::EnqueuePoisonShadow(ur_queue_handle_t Queue,
                     Context, (void *)MappedPtr, PageSize, PhysicalMem, 0,
                     UR_VIRTUAL_MEM_ACCESS_FLAG_READ_WRITE);
                 if (URes != UR_RESULT_SUCCESS) {
-                    getContext()->logger.debug("urVirtualMemMap({}, {}): {}",
+                    getContext()->logger.error("urVirtualMemMap({}, {}): {}",
                                                (void *)MappedPtr, PageSize,
                                                URes);
                     return URes;
@@ -157,7 +188,8 @@ ur_result_t ShadowMemoryGPU::EnqueuePoisonShadow(ur_queue_handle_t Queue,
                 VirtualMemMaps[MappedPtr].first = PhysicalMem;
             }
 
-            // We don't need to record virtual memory map for null pointer.
+            // We don't need to record virtual memory map for null pointer,
+            // since it doesn't have an alloc info.
             if (Ptr == 0) {
                 continue;
             }

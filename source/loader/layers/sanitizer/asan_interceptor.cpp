@@ -307,17 +307,6 @@ ur_result_t DeviceInfo::allocShadowMemory(ur_context_handle_t Context) {
     getContext()->logger.info("ShadowMemory(Global): {} - {}",
                               (void *)Shadow->ShadowBegin,
                               (void *)Shadow->ShadowEnd);
-
-    // Set shadow memory for null pointer
-    ManagedQueue Queue(Context, Handle);
-
-    auto URes =
-        Shadow->EnqueuePoisonShadow(Queue, 0, 1, kNullPointerRedzoneMagic);
-    if (URes != UR_RESULT_SUCCESS) {
-        getContext()->logger.error("enqueueMemSetShadow(NullPointerRZ): {}",
-                                   URes);
-        return URes;
-    }
     return UR_RESULT_SUCCESS;
 }
 
