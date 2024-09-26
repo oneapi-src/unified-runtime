@@ -504,6 +504,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
   return UR_RESULT_SUCCESS;
 }
 
+UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinaryExp(
+    ur_context_handle_t hContext, uint32_t numDevices,
+    ur_device_handle_t *phDevices, size_t *pLengths, const uint8_t **ppBinaries,
+    const ur_program_properties_t *pProperties,
+    ur_program_handle_t *phProgram) {
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+}
+
 // This entry point is only used for native specialization constants (SPIR-V),
 // and the CUDA plugin is AOT only so this entry point is not supported.
 UR_APIEXPORT ur_result_t UR_APICALL urProgramSetSpecializationConstants(
