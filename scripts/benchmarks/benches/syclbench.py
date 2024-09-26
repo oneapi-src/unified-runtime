@@ -79,8 +79,9 @@ class SyclBenchmark(Benchmark):
         command += self.bin_args()
         env_vars.update(self.extra_env_vars())
 
-        result = self.run_bench(command, env_vars)
-
+        # no output to stdout, all in outputfile
+        self.run_bench(command, env_vars)
+        
         with open(outputfile, 'r') as f:
             reader = csv.reader(f)
             res_list = []
@@ -91,7 +92,8 @@ class SyclBenchmark(Benchmark):
                                value=float(row[12]) * 1000, # convert to ms 
                                command=command, 
                                env=env_vars, 
-                               stdout=result))
+                               stdout=row))
+                            #    stdout=result))
             
             # median_list = []
             # for label in set(result.label for result in res_list):
