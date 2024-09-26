@@ -1,11 +1,14 @@
 {{NONDETERMINISTIC}}
 {{OPT}}urProgramBuildTest.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 {{OPT}}urProgramBuildTest.SuccessWithOptions/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
+{{OPT}}urProgramBuildTest.InvalidNullPointerDevices/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
+{{OPT}}urProgramBuildTest.InvalidSizeNumDevices/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 {{OPT}}urProgramBuildTest.InvalidNullHandleContext/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 {{OPT}}urProgramBuildTest.InvalidNullHandleProgram/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 {{OPT}}urProgramBuildTest.BuildFailure/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 {{OPT}}urProgramCompileTest.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
-{{OPT}}urProgramCompileTest.InvalidNullHandleContext/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
+{{OPT}}urProgramCompileTest.InvalidNullPointerDevices/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
+{{OPT}}urProgramCompileTest.InvalidSizeNumDevices/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 {{OPT}}urProgramCompileTest.InvalidNullHandleProgram/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 {{OPT}}urProgramCreateWithBinaryTest.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 {{OPT}}urProgramCreateWithBinaryTest.InvalidNullHandleContext/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
@@ -127,6 +130,8 @@
 {{OPT}}urProgramLinkTest.InvalidNullHandleContext/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 {{OPT}}urProgramLinkTest.InvalidNullPointerProgram/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 {{OPT}}urProgramLinkTest.InvalidNullPointerInputPrograms/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
+{{OPT}}urProgramLinkTest.InvalidSizeNumDevices/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
+{{OPT}}urProgramLinkTest.InvalidNullPointerDevices/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 {{OPT}}urProgramLinkTest.InvalidSizeCount/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 {{OPT}}urProgramLinkTest.SetOutputOnZeroCount/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 {{OPT}}urProgramLinkErrorTest.LinkFailure/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
