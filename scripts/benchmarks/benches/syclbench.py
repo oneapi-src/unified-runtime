@@ -19,12 +19,10 @@ class SyclBench:
         return
 
     def setup(self):
-        build_path = os.path.join(self.directory, 'sycl-bench-build')
-        self.bins = build_path
-
-        if self.built or not options.rebuild:
+        if self.built:
             return
 
+        build_path = os.path.join(self.directory, 'sycl-bench-build')
         create_build_path(build_path, '')
 
         repo_path = git_clone(self.directory, "sycl-bench-repo", "https://github.com/mateuszpn/sycl-bench.git", "1e6ab2cfd004a72c5336c26945965017e06eab71")
@@ -46,7 +44,7 @@ class SyclBench:
         run(f"cmake --build {build_path} -j", add_sycl=True)
 
         self.built = True
-        return
+        self.bins = build_path
     
 class SyclBenchmark(Benchmark):
     def __init__(self, bench, name, test):
@@ -321,8 +319,8 @@ class Blocked_transform(SyclBenchmark):
 
     def bin_args(self) -> list[str]:
         return [
-            f"--size=819200",
-            f"--local=8192"
+            f"--size=65536",
+            f"--local=1024"
         ]
 
 class DagTaskI(SyclBenchmark):
