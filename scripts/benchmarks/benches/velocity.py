@@ -52,7 +52,7 @@ class VelocityBase(Benchmark):
     def parse_output(self, stdout: str) -> float:
         raise NotImplementedError()
 
-    def run(self, env_vars) -> Result:
+    def run(self, env_vars) -> list[Result]:
         env_vars.update(self.extra_env_vars())
 
         command = [

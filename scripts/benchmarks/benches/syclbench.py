@@ -66,7 +66,7 @@ class SyclBenchmark(Benchmark):
         self.bench.setup()
         self.benchmark_bin = os.path.join(self.bench.bins, self.bench_name)
 
-    def run(self, env_vars) -> Result:
+    def run(self, env_vars) -> list[Result]:
         outputfile = f"{self.bench.directory}/{self.test}.csv"
         command = [
             f"{self.benchmark_bin}",
@@ -79,7 +79,6 @@ class SyclBenchmark(Benchmark):
         command += self.bin_args()
         env_vars.update(self.extra_env_vars())
 
-        print(f"Command: {command}")
         result = self.run_bench(command, env_vars)
 
         with open(outputfile, 'r') as f:
@@ -94,13 +93,14 @@ class SyclBenchmark(Benchmark):
                                env=env_vars, 
                                stdout=result))
             
-            median_list = []
-            for label in set(result.label for result in res_list):
-                values = [result.value for result in res_list if result.label == label]
-                median_value = sorted(values)[len(values) // 2]
-                median_list.append(Result(label=label, value=median_value, command=command, env=env_vars, stdout=result))
+            # median_list = []
+            # for label in set(result.label for result in res_list):
+            #     values = [result.value for result in res_list if result.label == label]
+            #     median_value = sorted(values)[len(values) // 2]
+            #     median_list.append(Result(label=label, value=median_value, command=command, env=env_vars, stdout=result))
 
-        return median_list
+        # return median_list
+        return res_list
 
     def teardown(self):
         return
@@ -158,7 +158,7 @@ class Bicg(SyclBenchmark):
 
     def bin_args(self) -> list[str]:
         return [
-            f"--size=81920",
+            f"--size=20480",
         ]
     
 class Correlation(SyclBenchmark):
@@ -185,7 +185,7 @@ class Gemm(SyclBenchmark):
 
     def bin_args(self) -> list[str]:
         return [
-            f"--size=16384",
+            f"--size=8192",
         ]
     
 class Gesumv(SyclBenchmark):
@@ -319,7 +319,7 @@ class Blocked_transform(SyclBenchmark):
 
     def bin_args(self) -> list[str]:
         return [
-            f"--size=65536",
+            f"--size=16384",
             f"--local=1024"
         ]
 
