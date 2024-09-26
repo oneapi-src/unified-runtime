@@ -90,9 +90,9 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
             if key in results:
                 intv = results[key].value
                 if key == best_key:
-                    l.row += f" <ins>{intv}</ins> {results[key].unit} |"  # Highlight the best value
+                    l.row += f" <ins>{intv:3f}</ins> {results[key].unit} |"  # Highlight the best value
                 else:
-                    l.row += f" {intv} {results[key].unit} |"
+                    l.row += f" {intv:.3f} {results[key].unit} |"
             else:
                 l.row += " - |"
 
@@ -180,11 +180,21 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
         outgroup_s = sorted(outgroup, key=lambda x: (x.diff is not None, x.diff), reverse=True)
         product = 1.0
         n = len(outgroup_s)
+        r = 0
         for l in outgroup_s:
-            if l.diff != None: product *= l.diff
-        summary_table += f"""
+            if l.diff != None: 
+                product *= l.diff
+                r += 1
+        if r > 0:
+            summary_table += f"""
 <details>
-<summary> Relative perf in group {name}: {math.pow(product, 1/n)*100:.3f}% </summary>
+<summary> Relative perf in group {name} ({n}): {math.pow(product, 1/r)*100:.3f}% </summary>
+
+"""
+        else:
+            summary_table += f"""
+<details>
+<summary> Relative perf in group {name} ({n}): cannot calculate </summary>
 
 """
         summary_table += "| Benchmark | " + " | ".join(chart_data.keys()) + " | Relative perf | Change | - |\n"
