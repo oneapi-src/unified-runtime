@@ -797,77 +797,20 @@ ur_result_t urKernelGetGroupInfo(
     size_t *ParamValueSizeRet ///< [out][optional] pointer to the actual size in
                               ///< bytes of data being queried by propName.
 ) {
-  UrReturnHelper ReturnValue(ParamValueSize, ParamValue, ParamValueSizeRet);
-
   std::shared_lock<ur_shared_mutex> Guard(Kernel->Mutex);
-  switch (ParamName) {
-  case UR_KERNEL_GROUP_INFO_GLOBAL_WORK_SIZE: {
-    // TODO: To revisit after level_zero/issues/262 is resolved
-    struct {
-      size_t Arr[3];
-    } GlobalWorkSize = {{(Device->ZeDeviceComputeProperties->maxGroupSizeX *
-                          Device->ZeDeviceComputeProperties->maxGroupCountX),
-                         (Device->ZeDeviceComputeProperties->maxGroupSizeY *
-                          Device->ZeDeviceComputeProperties->maxGroupCountY),
-                         (Device->ZeDeviceComputeProperties->maxGroupSizeZ *
-                          Device->ZeDeviceComputeProperties->maxGroupCountZ)}};
-    return ReturnValue(GlobalWorkSize);
-  }
-  case UR_KERNEL_GROUP_INFO_WORK_GROUP_SIZE: {
-    ZeStruct<ze_kernel_max_group_size_properties_ext_t> workGroupProperties;
-    workGroupProperties.maxGroupSize = 0;
 
-    ZeStruct<ze_kernel_properties_t> kernelProperties;
-    kernelProperties.pNext = &workGroupProperties;
-    // Set the Kernel to use as the ZeKernel initally for native handle support.
-    // This makes the assumption that this device is the same device where this
-    // kernel was created.
-    auto ZeKernelDevice = Kernel->ZeKernel;
-    auto It = Kernel->ZeKernelMap.find(Device->ZeDevice);
-    if (It != Kernel->ZeKernelMap.end()) {
-      ZeKernelDevice = Kernel->ZeKernelMap[Device->ZeDevice];
-    }
-    if (ZeKernelDevice) {
-      auto ZeResult = ZE_CALL_NOCHECK(zeKernelGetProperties,
-                                      (ZeKernelDevice, &kernelProperties));
-      if (ZeResult || workGroupProperties.maxGroupSize == 0) {
-        return ReturnValue(
-            uint64_t{Device->ZeDeviceComputeProperties->maxTotalGroupSize});
-      }
-      return ReturnValue(workGroupProperties.maxGroupSize);
-    } else {
-      return ReturnValue(
-          uint64_t{Device->ZeDeviceComputeProperties->maxTotalGroupSize});
-    }
+  // Set the Kernel to use as the ZeKernel initally for native handle support.
+  // This makes the assumption that this device is the same device where this
+  // kernel was created.
+  auto ZeKernelDevice = Kernel->ZeKernel;
+  auto It = Kernel->ZeKernelMap.find(Device->ZeDevice);
+  if (It != Kernel->ZeKernelMap.end()) {
+    ZeKernelDevice = Kernel->ZeKernelMap[Device->ZeDevice];
   }
-  case UR_KERNEL_GROUP_INFO_COMPILE_WORK_GROUP_SIZE: {
-    struct {
-      size_t Arr[3];
-    } WgSize = {{Kernel->ZeKernelProperties->requiredGroupSizeX,
-                 Kernel->ZeKernelProperties->requiredGroupSizeY,
-                 Kernel->ZeKernelProperties->requiredGroupSizeZ}};
-    return ReturnValue(WgSize);
-  }
-  case UR_KERNEL_GROUP_INFO_LOCAL_MEM_SIZE:
-    return ReturnValue(uint32_t{Kernel->ZeKernelProperties->localMemSize});
-  case UR_KERNEL_GROUP_INFO_PREFERRED_WORK_GROUP_SIZE_MULTIPLE: {
-    return ReturnValue(size_t{Device->ZeDeviceProperties->physicalEUSimdWidth});
-  }
-  case UR_KERNEL_GROUP_INFO_PRIVATE_MEM_SIZE: {
-    return ReturnValue(uint32_t{Kernel->ZeKernelProperties->privateMemSize});
-  }
-  case UR_KERNEL_GROUP_INFO_COMPILE_MAX_WORK_GROUP_SIZE:
-  case UR_KERNEL_GROUP_INFO_COMPILE_MAX_LINEAR_WORK_GROUP_SIZE:
-    // No corresponding enumeration in Level Zero
-    return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
-  default: {
-    logger::error(
-        "Unknown ParamName in urKernelGetGroupInfo: ParamName={}(0x{})",
-        ParamName, logger::toHex(ParamName));
-    return UR_RESULT_ERROR_INVALID_VALUE;
-  }
-  }
-  return UR_RESULT_SUCCESS;
+
+  return kernelGetGroupInfo(ZeKernelDevice, Device,
+                            Kernel->ZeKernelProperties.operator->(), ParamName,
+                            ParamValueSize, ParamValue, ParamValueSizeRet);
 }
 
 ur_result_t urKernelGetSubGroupInfo(
@@ -883,22 +826,9 @@ ur_result_t urKernelGetSubGroupInfo(
 ) {
   std::ignore = Device;
 
-  UrReturnHelper ReturnValue(PropSize, PropValue, PropSizeRet);
-
   std::shared_lock<ur_shared_mutex> Guard(Kernel->Mutex);
-  if (PropName == UR_KERNEL_SUB_GROUP_INFO_MAX_SUB_GROUP_SIZE) {
-    ReturnValue(uint32_t{Kernel->ZeKernelProperties->maxSubgroupSize});
-  } else if (PropName == UR_KERNEL_SUB_GROUP_INFO_MAX_NUM_SUB_GROUPS) {
-    ReturnValue(uint32_t{Kernel->ZeKernelProperties->maxNumSubgroups});
-  } else if (PropName == UR_KERNEL_SUB_GROUP_INFO_COMPILE_NUM_SUB_GROUPS) {
-    ReturnValue(uint32_t{Kernel->ZeKernelProperties->requiredNumSubGroups});
-  } else if (PropName == UR_KERNEL_SUB_GROUP_INFO_SUB_GROUP_SIZE_INTEL) {
-    ReturnValue(uint32_t{Kernel->ZeKernelProperties->requiredSubgroupSize});
-  } else {
-    die("urKernelGetSubGroupInfo: parameter not implemented");
-    return {};
-  }
-  return UR_RESULT_SUCCESS;
+  return kernelGetSubGroupInfo(Kernel->ZeKernelProperties.operator->(),
+                               PropName, PropSize, PropValue, PropSizeRet);
 }
 
 ur_result_t urKernelRetain(
@@ -966,38 +896,8 @@ ur_result_t urKernelSetExecInfo(
   std::ignore = PropSize;
   std::ignore = Properties;
 
-  auto ZeKernel = Kernel->ZeKernel;
   std::scoped_lock<ur_shared_mutex> Guard(Kernel->Mutex);
-  if (PropName == UR_KERNEL_EXEC_INFO_USM_INDIRECT_ACCESS &&
-      *(static_cast<const ur_bool_t *>(PropValue)) == true) {
-    // The whole point for users really was to not need to know anything
-    // about the types of allocations kernel uses. So in DPC++ we always
-    // just set all 3 modes for each kernel.
-    ze_kernel_indirect_access_flags_t IndirectFlags =
-        ZE_KERNEL_INDIRECT_ACCESS_FLAG_HOST |
-        ZE_KERNEL_INDIRECT_ACCESS_FLAG_DEVICE |
-        ZE_KERNEL_INDIRECT_ACCESS_FLAG_SHARED;
-    ZE2UR_CALL(zeKernelSetIndirectAccess, (ZeKernel, IndirectFlags));
-  } else if (PropName == UR_KERNEL_EXEC_INFO_CACHE_CONFIG) {
-    ze_cache_config_flag_t ZeCacheConfig{};
-    auto CacheConfig =
-        *(static_cast<const ur_kernel_cache_config_t *>(PropValue));
-    if (CacheConfig == UR_KERNEL_CACHE_CONFIG_LARGE_SLM)
-      ZeCacheConfig = ZE_CACHE_CONFIG_FLAG_LARGE_SLM;
-    else if (CacheConfig == UR_KERNEL_CACHE_CONFIG_LARGE_DATA)
-      ZeCacheConfig = ZE_CACHE_CONFIG_FLAG_LARGE_DATA;
-    else if (CacheConfig == UR_KERNEL_CACHE_CONFIG_DEFAULT)
-      ZeCacheConfig = static_cast<ze_cache_config_flag_t>(0);
-    else
-      // Unexpected cache configuration value.
-      return UR_RESULT_ERROR_INVALID_VALUE;
-    ZE2UR_CALL(zeKernelSetCacheConfig, (ZeKernel, ZeCacheConfig););
-  } else {
-    logger::error("urKernelSetExecInfo: unsupported ParamName");
-    return UR_RESULT_ERROR_INVALID_VALUE;
-  }
-
-  return UR_RESULT_SUCCESS;
+  return kernelSetExecInfo(Kernel->ZeKernel, PropName, PropValue);
 }
 
 ur_result_t urKernelSetArgSampler(

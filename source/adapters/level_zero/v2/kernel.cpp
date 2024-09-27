@@ -15,6 +15,7 @@
 #include "memory.hpp"
 
 #include "../device.hpp"
+#include "../helpers/kernel_helpers.hpp"
 #include "../platform.hpp"
 #include "../program.hpp"
 #include "../ur_interface_loader.hpp"
@@ -205,36 +206,8 @@ ur_result_t ur_kernel_handle_t_::setExecInfo(ur_kernel_exec_info_t propName,
   for (auto &kernel : deviceKernels) {
     if (!kernel.has_value())
       continue;
-    if (propName == UR_KERNEL_EXEC_INFO_USM_INDIRECT_ACCESS &&
-        *(static_cast<const ur_bool_t *>(pPropValue)) == true) {
-      // The whole point for users really was to not need to know anything
-      // about the types of allocations kernel uses. So in DPC++ we always
-      // just set all 3 modes for each kernel.
-      ze_kernel_indirect_access_flags_t indirectFlags =
-          ZE_KERNEL_INDIRECT_ACCESS_FLAG_HOST |
-          ZE_KERNEL_INDIRECT_ACCESS_FLAG_DEVICE |
-          ZE_KERNEL_INDIRECT_ACCESS_FLAG_SHARED;
-      ZE2UR_CALL(zeKernelSetIndirectAccess,
-                 (kernel->hKernel.get(), indirectFlags));
-    } else if (propName == UR_KERNEL_EXEC_INFO_CACHE_CONFIG) {
-      ze_cache_config_flag_t zeCacheConfig{};
-      auto cacheConfig =
-          *(static_cast<const ur_kernel_cache_config_t *>(pPropValue));
-      if (cacheConfig == UR_KERNEL_CACHE_CONFIG_LARGE_SLM)
-        zeCacheConfig = ZE_CACHE_CONFIG_FLAG_LARGE_SLM;
-      else if (cacheConfig == UR_KERNEL_CACHE_CONFIG_LARGE_DATA)
-        zeCacheConfig = ZE_CACHE_CONFIG_FLAG_LARGE_DATA;
-      else if (cacheConfig == UR_KERNEL_CACHE_CONFIG_DEFAULT)
-        zeCacheConfig = static_cast<ze_cache_config_flag_t>(0);
-      else
-        // Unexpected cache configuration value.
-        return UR_RESULT_ERROR_INVALID_VALUE;
-      ZE2UR_CALL(zeKernelSetCacheConfig,
-                 (kernel->hKernel.get(), zeCacheConfig););
-    } else {
-      logger::error("urKernelSetExecInfo: unsupported ParamName");
-      return UR_RESULT_ERROR_INVALID_VALUE;
-    }
+    UR_CALL(
+        kernelSetExecInfo(kernel.value().hKernel.get(), propName, pPropValue));
   }
 
   return UR_RESULT_SUCCESS;
@@ -362,73 +335,13 @@ ur_result_t urKernelGetGroupInfo(
     size_t *pParamValueSizeRet ///< [out][optional] pointer to the actual size
                                ///< in bytes of data being queried by propName.
 ) {
-  UrReturnHelper returnValue(paramValueSize, pParamValue, pParamValueSizeRet);
-
   std::shared_lock<ur_shared_mutex> Guard(hKernel->Mutex);
-  switch (paramName) {
-  case UR_KERNEL_GROUP_INFO_GLOBAL_WORK_SIZE: {
-    // TODO: To revisit after level_zero/issues/262 is resolved
-    struct {
-      size_t Arr[3];
-    } GlobalWorkSize = {{(hDevice->ZeDeviceComputeProperties->maxGroupSizeX *
-                          hDevice->ZeDeviceComputeProperties->maxGroupCountX),
-                         (hDevice->ZeDeviceComputeProperties->maxGroupSizeY *
-                          hDevice->ZeDeviceComputeProperties->maxGroupCountY),
-                         (hDevice->ZeDeviceComputeProperties->maxGroupSizeZ *
-                          hDevice->ZeDeviceComputeProperties->maxGroupCountZ)}};
-    return returnValue(GlobalWorkSize);
-  }
-  case UR_KERNEL_GROUP_INFO_WORK_GROUP_SIZE: {
-    ZeStruct<ze_kernel_max_group_size_properties_ext_t> workGroupProperties;
-    workGroupProperties.maxGroupSize = 0;
 
-    ZeStruct<ze_kernel_properties_t> kernelProperties;
-    kernelProperties.pNext = &workGroupProperties;
+  auto zeKernel = hKernel->getZeHandle(hDevice);
+  auto properties = hKernel->getProperties(hDevice);
 
-    auto zeDevice = hKernel->getZeHandle(hDevice);
-    if (zeDevice) {
-      auto zeResult =
-          ZE_CALL_NOCHECK(zeKernelGetProperties, (zeDevice, &kernelProperties));
-      if (zeResult == ZE_RESULT_SUCCESS &&
-          workGroupProperties.maxGroupSize != 0) {
-        return returnValue(workGroupProperties.maxGroupSize);
-      }
-      return returnValue(
-          uint64_t{hDevice->ZeDeviceComputeProperties->maxTotalGroupSize});
-    }
-  }
-  case UR_KERNEL_GROUP_INFO_COMPILE_WORK_GROUP_SIZE: {
-    auto props = hKernel->getProperties(hDevice);
-    struct {
-      size_t Arr[3];
-    } WgSize = {{props.requiredGroupSizeX, props.requiredGroupSizeY,
-                 props.requiredGroupSizeZ}};
-    return returnValue(WgSize);
-  }
-  case UR_KERNEL_GROUP_INFO_LOCAL_MEM_SIZE: {
-    auto props = hKernel->getProperties(hDevice);
-    return returnValue(uint32_t{props.localMemSize});
-  }
-  case UR_KERNEL_GROUP_INFO_PREFERRED_WORK_GROUP_SIZE_MULTIPLE: {
-    return returnValue(
-        size_t{hDevice->ZeDeviceProperties->physicalEUSimdWidth});
-  }
-  case UR_KERNEL_GROUP_INFO_PRIVATE_MEM_SIZE: {
-    auto props = hKernel->getProperties(hDevice);
-    return returnValue(uint32_t{props.privateMemSize});
-  }
-  case UR_KERNEL_GROUP_INFO_COMPILE_MAX_WORK_GROUP_SIZE:
-  case UR_KERNEL_GROUP_INFO_COMPILE_MAX_LINEAR_WORK_GROUP_SIZE:
-    // No corresponding enumeration in Level Zero
-    return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
-  default: {
-    logger::error(
-        "Unknown ParamName in urKernelGetGroupInfo: ParamName={}(0x{})",
-        paramName, logger::toHex(paramName));
-    return UR_RESULT_ERROR_INVALID_VALUE;
-  }
-  }
-  return UR_RESULT_SUCCESS;
+  return kernelGetGroupInfo(zeKernel, hDevice, &properties, paramName,
+                            paramValueSize, pParamValue, pParamValueSizeRet);
 }
 
 ur_result_t urKernelGetSubGroupInfo(
@@ -442,25 +355,62 @@ ur_result_t urKernelGetSubGroupInfo(
     size_t *pPropSizeRet ///< [out][optional] pointer to the actual size in
                          ///< bytes of data being queried by propName.
 ) {
-  std::ignore = hDevice;
-
-  UrReturnHelper returnValue(propSize, pPropValue, pPropSizeRet);
+  std::shared_lock<ur_shared_mutex> Guard(hKernel->Mutex);
 
   auto props = hKernel->getProperties(hDevice);
+  return kernelGetSubGroupInfo(&props, propName, propSize, pPropValue,
+                               pPropSizeRet);
+}
+
+ur_result_t urKernelGetInfo(
+    ur_kernel_handle_t hKernel, ///< [in] handle of the Kernel object
+    ur_kernel_info_t paramName, ///< [in] name of the Kernel property to query
+    size_t propSize,            ///< [in] the size of the Kernel property value.
+    void *pKernelInfo, ///< [in,out][optional] array of bytes holding the kernel
+                       ///< info property. If propSize is not equal to or
+                       ///< greater than the real number of bytes needed to
+                       ///< return the info then the
+                       ///< ::UR_RESULT_ERROR_INVALID_SIZE error is returned and
+                       ///< pKernelInfo is not used.
+    size_t *pPropSizeRet ///< [out][optional] pointer to the actual size in
+                         ///< bytes of data being queried by propName.
+) {
+
+  UrReturnHelper ReturnValue(propSize, pKernelInfo, pPropSizeRet);
 
   std::shared_lock<ur_shared_mutex> Guard(hKernel->Mutex);
-  if (propName == UR_KERNEL_SUB_GROUP_INFO_MAX_SUB_GROUP_SIZE) {
-    returnValue(uint32_t{props.maxSubgroupSize});
-  } else if (propName == UR_KERNEL_SUB_GROUP_INFO_MAX_NUM_SUB_GROUPS) {
-    returnValue(uint32_t{props.maxNumSubgroups});
-  } else if (propName == UR_KERNEL_SUB_GROUP_INFO_COMPILE_NUM_SUB_GROUPS) {
-    returnValue(uint32_t{props.requiredNumSubGroups});
-  } else if (propName == UR_KERNEL_SUB_GROUP_INFO_SUB_GROUP_SIZE_INTEL) {
-    returnValue(uint32_t{props.requiredSubgroupSize});
-  } else {
-    die("urKernelGetSubGroupInfo: parameter not implemented");
-    return {};
+  switch (paramName) {
+  case UR_KERNEL_INFO_CONTEXT:
+    return ReturnValue(
+        ur_context_handle_t{hKernel->getProgramHandle()->Context});
+  case UR_KERNEL_INFO_PROGRAM:
+    return ReturnValue(ur_program_handle_t{hKernel->getProgramHandle()});
+  case UR_KERNEL_INFO_FUNCTION_NAME: {
+    const std::string &KernelName = hKernel->getName();
+    return ReturnValue(static_cast<const char *>(KernelName.c_str()));
   }
+  case UR_KERNEL_INFO_NUM_REGS:
+  case UR_KERNEL_INFO_NUM_ARGS: {
+    auto anyDevice = hKernel->getDevices().at(0);
+    return ReturnValue(
+        uint32_t{hKernel->getProperties(anyDevice).numKernelArgs});
+  }
+  case UR_KERNEL_INFO_REFERENCE_COUNT:
+    return ReturnValue(uint32_t{hKernel->RefCount.load()});
+  case UR_KERNEL_INFO_ATTRIBUTES: {
+    auto anyDevice = hKernel->getDevices().at(0);
+    auto attributes =
+        getKernelSourceAttributes(hKernel->getZeHandle(anyDevice));
+    return ReturnValue(attributes.data());
+  }
+  default:
+    logger::error(
+        "Unsupported ParamName in urKernelGetInfo: ParamName={}(0x{})",
+        paramName, logger::toHex(paramName));
+    return UR_RESULT_ERROR_INVALID_VALUE;
+  }
+
   return UR_RESULT_SUCCESS;
 }
+
 } // namespace ur::level_zero
