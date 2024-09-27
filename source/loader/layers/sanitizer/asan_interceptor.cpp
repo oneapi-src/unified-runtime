@@ -293,16 +293,8 @@ ur_result_t SanitizerInterceptor::postLaunchKernel(ur_kernel_handle_t Kernel,
 }
 
 ur_result_t DeviceInfo::allocShadowMemory(ur_context_handle_t Context) {
-    if (Type == DeviceType::CPU) {
-        Shadow = std::make_unique<ShadowMemoryCPU>(Context, Handle);
-    } else if (Type == DeviceType::GPU_PVC) {
-        Shadow = std::make_unique<ShadowMemoryPVC>(Context, Handle);
-    } else if (Type == DeviceType::GPU_DG2) {
-        Shadow = std::make_unique<ShadowMemoryDG2>(Context, Handle);
-    } else {
-        getContext()->logger.error("Unsupport device type");
-        return UR_RESULT_ERROR_INVALID_ARGUMENT;
-    }
+    Shadow = GetShadowMemory(Context, Handle, Type);
+    assert(Shadow && "Failed to get shadow memory");
     UR_CALL(Shadow->Setup());
     getContext()->logger.info("ShadowMemory(Global): {} - {}",
                               (void *)Shadow->ShadowBegin,

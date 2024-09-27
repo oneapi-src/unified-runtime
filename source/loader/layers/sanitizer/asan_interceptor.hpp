@@ -40,7 +40,7 @@ struct DeviceInfo {
 
     DeviceType Type = DeviceType::UNKNOWN;
     size_t Alignment = 0;
-    std::unique_ptr<ShadowMemory> Shadow;
+    std::shared_ptr<ShadowMemory> Shadow;
 
     // Device features
     bool IsSupportSharedSystemUSM = false;

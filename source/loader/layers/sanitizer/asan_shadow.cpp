@@ -18,19 +18,36 @@
 
 namespace ur_sanitizer_layer {
 
+std::shared_ptr<ShadowMemory> GetShadowMemory(ur_context_handle_t Context,
+                                              ur_device_handle_t Device,
+                                              DeviceType Type) {
+    if (Type == DeviceType::CPU) {
+        static std::shared_ptr<ShadowMemory> ShadowCPU =
+            std::make_shared<ShadowMemoryCPU>(Context, Device);
+        return ShadowCPU;
+    } else if (Type == DeviceType::GPU_PVC) {
+        static std::shared_ptr<ShadowMemory> ShadowPVC =
+            std::make_shared<ShadowMemoryPVC>(Context, Device);
+        return ShadowPVC;
+    } else if (Type == DeviceType::GPU_DG2) {
+        static std::shared_ptr<ShadowMemory> ShadowDG2 =
+            std::make_shared<ShadowMemoryDG2>(Context, Device);
+        return ShadowDG2;
+    } else {
+        getContext()->logger.error("Unsupport device type");
+        return nullptr;
+    }
+}
+
 ur_result_t ShadowMemoryCPU::Setup() {
-    static uptr Begin = 0, End = 0;
     static ur_result_t Result = [this]() {
         size_t ShadowSize = GetShadowSize();
-        Begin = MmapNoReserve(0, ShadowSize);
-        if (Begin == 0) {
+        ShadowBegin = MmapNoReserve(0, ShadowSize);
+        if (ShadowBegin == 0) {
             return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
         }
-        DontCoredumpRange(Begin, ShadowSize);
-        End = Begin + ShadowSize;
-
-        ShadowBegin = Begin;
-        ShadowEnd = End;
+        DontCoredumpRange(ShadowBegin, ShadowSize);
+        ShadowEnd = ShadowBegin + ShadowSize;
 
         // Set shadow memory for null pointer
         auto URes = EnqueuePoisonShadow({}, 0, 1, kNullPointerRedzoneMagic);
@@ -41,9 +58,6 @@ ur_result_t ShadowMemoryCPU::Setup() {
         }
         return URes;
     }();
-    assert(Begin != 0 && End != 0);
-    ShadowBegin = Begin;
-    ShadowEnd = End;
     return Result;
 }
 
@@ -82,7 +96,6 @@ ur_result_t ShadowMemoryCPU::EnqueuePoisonShadow(ur_queue_handle_t, uptr Ptr,
 }
 
 ur_result_t ShadowMemoryGPU::Setup() {
-    static uptr Begin = 0, End = 0;
     // Currently, Level-Zero doesn't create independent VAs for each contexts, if we reserve
     // shadow memory for each contexts, this will cause out-of-resource error when user uses
     // multiple contexts. Therefore, we just create one shadow memory here.
@@ -90,31 +103,24 @@ ur_result_t ShadowMemoryGPU::Setup() {
         size_t ShadowSize = GetShadowSize();
         // TODO: Protect Bad Zone
         auto Result = getContext()->urDdiTable.VirtualMem.pfnReserve(
-            Context, nullptr, ShadowSize, (void **)&Begin);
+            Context, nullptr, ShadowSize, (void **)&ShadowBegin);
         if (Result == UR_RESULT_SUCCESS) {
-            End = Begin + ShadowSize;
+            ShadowEnd = ShadowBegin + ShadowSize;
             // Retain the context which reserves shadow memory
             getContext()->urDdiTable.Context.pfnRetain(Context);
         }
 
-        ShadowBegin = Begin;
-        ShadowEnd = End;
-
         // Set shadow memory for null pointer
         ManagedQueue Queue(Context, Device);
 
-        auto URes = EnqueuePoisonShadow(Queue, 0, 1, kNullPointerRedzoneMagic);
-        if (URes != UR_RESULT_SUCCESS) {
+        Result = EnqueuePoisonShadow(Queue, 0, 1, kNullPointerRedzoneMagic);
+        if (Result != UR_RESULT_SUCCESS) {
             getContext()->logger.error("EnqueuePoisonShadow(NullPointerRZ): {}",
-                                       URes);
-            return URes;
+                                       Result);
+            return Result;
         }
-        return URes;
         return Result;
     }();
-    assert(Begin != 0 && End != 0);
-    ShadowBegin = Begin;
-    ShadowEnd = End;
     return Result;
 }
 
