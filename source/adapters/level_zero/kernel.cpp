@@ -602,7 +602,8 @@ ur_result_t urKernelCreate(
 
   for (auto &Dev : Program->AssociatedDevices) {
     auto ZeDevice = Dev->ZeDevice;
-    // Program may be associated with all devices from the context but built only for subset of devices.
+    // Program may be associated with all devices from the context but built
+    // only for subset of devices.
     if (Program->getState(ZeDevice) != ur_program_handle_t_::state::Exe)
       continue;
 
@@ -637,7 +638,7 @@ ur_result_t urKernelCreate(
     for (auto ZeSubDevice : ZeSubDevices) {
       (*RetKernel)->ZeKernelMap[ZeSubDevice] = ZeKernel;
     }
-  } 
+  }
   // There is no any successfully built executable for program.
   if ((*RetKernel)->ZeKernelMap.empty())
     return UR_RESULT_ERROR_INVALID_PROGRAM_EXECUTABLE;
