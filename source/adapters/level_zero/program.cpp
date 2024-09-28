@@ -122,9 +122,9 @@ ur_result_t urProgramCreateWithBinaryExp(
     ur_context_handle_t hContext, ///< [in] handle of the context instance
     uint32_t numDevices,          ///< [in] number of devices
     ur_device_handle_t
-        *phDevices, ///< [in][range(0, numDevices)] a pointer to a list of
-                    ///< device handles. The binaries are loaded for devices
-                    ///< specified in this list.
+        *phDevices,   ///< [in][range(0, numDevices)] a pointer to a list of
+                      ///< device handles. The binaries are loaded for devices
+                      ///< specified in this list.
     size_t *pLengths, ///< [in][range(0, numDevices)] array of sizes of program
                       ///< binaries specified by `pBinaries` (in bytes).
     const uint8_t *
@@ -460,8 +460,6 @@ ur_result_t urProgramLinkExp(
       }
     }
 
-    // TODO: Use the module of the first device as the interop module because of
-    // lack of multi-device support for interop case.
     ur_program_handle_t_ *UrProgram = new ur_program_handle_t_(hContext);
     *phProgram = reinterpret_cast<ur_program_handle_t>(UrProgram);
     for (uint32_t i = 0; i < numDevices; i++) {
@@ -476,12 +474,13 @@ ur_result_t urProgramLinkExp(
       // here. Clear values of the previous device first.
       BuildFlagPtrs.clear();
       for (uint32_t I = 0; I < count; I++) {
-        BuildFlagPtrs.push_back(phPrograms[I]->getBuildOptions(ZeDevice).c_str());
+        BuildFlagPtrs.push_back(
+            phPrograms[I]->getBuildOptions(ZeDevice).c_str());
       }
       ZeExtModuleDesc.pBuildFlags = BuildFlagPtrs.data();
       if (count == 1)
-          ZeModuleDesc.pBuildFlags = ZeExtModuleDesc.pBuildFlags[0];
-      
+        ZeModuleDesc.pBuildFlags = ZeExtModuleDesc.pBuildFlags[0];
+
       ze_result_t ZeResult =
           ZE_CALL_NOCHECK(zeModuleCreate, (ZeContext, ZeDevice, &ZeModuleDesc,
                                            &ZeModule, &ZeBuildLog));
