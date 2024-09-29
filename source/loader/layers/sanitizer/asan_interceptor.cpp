@@ -399,9 +399,8 @@ ur_result_t SanitizerInterceptor::updateShadowMemory(
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t
-SanitizerInterceptor::registerDeviceGlobals(ur_context_handle_t Context,
-                                            ur_program_handle_t Program) {
+ur_result_t SanitizerInterceptor::registerProgram(ur_context_handle_t Context,
+                                                  ur_program_handle_t Program) {
     std::vector<ur_device_handle_t> Devices = GetProgramDevices(Program);
 
     auto ContextInfo = getContextInfo(Context);
@@ -409,6 +408,42 @@ SanitizerInterceptor::registerDeviceGlobals(ur_context_handle_t Context,
 
     for (auto Device : Devices) {
         ManagedQueue Queue(Context, Device);
+        auto DeviceInfo = getDeviceInfo(Device);
+
+        // Write global variable to program
+        auto EnqueueWriteGlobal = [&Queue, &Program](
+                                      const char *Name, const void *Value,
+                                      size_t Size, bool ReportWarning = true) {
+            auto Result =
+                getContext()->urDdiTable.Enqueue.pfnDeviceGlobalVariableWrite(
+                    Queue, Program, Name, false, Size, 0, Value, 0, nullptr,
+                    nullptr);
+            if (ReportWarning && Result != UR_RESULT_SUCCESS) {
+                getContext()->logger.warning(
+                    "Failed to write device global \"{}\": {}", Name, Result);
+                return false;
+            }
+            return true;
+        };
+
+        // Write debug
+        // We use "uint64_t" here because EnqueueWriteGlobal will fail when it's "uint32_t"
+        // Because EnqueueWriteGlobal is a async write, so
+        // we need to extend its lifetime
+        static uint64_t Debug = Options(logger).Debug ? 1 : 0;
+        EnqueueWriteGlobal(kSPIR_AsanDebug, &Debug, sizeof(Debug), false);
+
+        // Write shadow memory offset for global memory
+        EnqueueWriteGlobal(kSPIR_AsanShadowMemoryGlobalStart,
+                           &DeviceInfo->Shadow->ShadowBegin,
+                           sizeof(DeviceInfo->Shadow->ShadowBegin));
+        EnqueueWriteGlobal(kSPIR_AsanShadowMemoryGlobalEnd,
+                           &DeviceInfo->Shadow->ShadowEnd,
+                           sizeof(DeviceInfo->Shadow->ShadowEnd));
+
+        // Write device type
+        EnqueueWriteGlobal(kSPIR_DeviceType, &DeviceInfo->Type,
+                           sizeof(DeviceInfo->Type));
 
         uint64_t NumOfDeviceGlobal;
         auto Result =
@@ -432,7 +467,6 @@ SanitizerInterceptor::registerDeviceGlobals(ur_context_handle_t Context,
             return Result;
         }
 
-        auto DeviceInfo = getDeviceInfo(Device);
         for (size_t i = 0; i < NumOfDeviceGlobal; i++) {
             auto AI = std::make_shared<AllocInfo>(
                 AllocInfo{GVInfos[i].Addr,
@@ -461,7 +495,7 @@ SanitizerInterceptor::registerDeviceGlobals(ur_context_handle_t Context,
 }
 
 ur_result_t
-SanitizerInterceptor::unregisterDeviceGlobals(ur_program_handle_t Program) {
+SanitizerInterceptor::unregisterProgram(ur_program_handle_t Program) {
     auto ProgramInfo = getProgramInfo(Program);
 
     std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Guard(
@@ -597,7 +631,6 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
     ur_context_handle_t Context, std::shared_ptr<DeviceInfo> &DeviceInfo,
     ur_queue_handle_t Queue, ur_kernel_handle_t Kernel,
     USMLaunchInfo &LaunchInfo) {
-    auto Program = GetProgram(Kernel);
 
     do {
         auto KernelInfo = getKernelInfo(Kernel);
@@ -647,41 +680,6 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
                 return URes;
             }
         }
-
-        // Write global variable to program
-        auto EnqueueWriteGlobal = [Queue, Program](
-                                      const char *Name, const void *Value,
-                                      size_t Size, bool ReportWarning = true) {
-            auto Result =
-                getContext()->urDdiTable.Enqueue.pfnDeviceGlobalVariableWrite(
-                    Queue, Program, Name, false, Size, 0, Value, 0, nullptr,
-                    nullptr);
-            if (ReportWarning && Result != UR_RESULT_SUCCESS) {
-                getContext()->logger.warning(
-                    "Failed to write device global \"{}\": {}", Name, Result);
-                return false;
-            }
-            return true;
-        };
-
-        // Write debug
-        // We use "uint64_t" here because EnqueueWriteGlobal will fail when it's "uint32_t"
-        // Because EnqueueWriteGlobal is a async write, so
-        // we need to extend its lifetime
-        static uint64_t Debug = Options(logger).Debug ? 1 : 0;
-        EnqueueWriteGlobal(kSPIR_AsanDebug, &Debug, sizeof(Debug), false);
-
-        // Write shadow memory offset for global memory
-        EnqueueWriteGlobal(kSPIR_AsanShadowMemoryGlobalStart,
-                           &DeviceInfo->Shadow->ShadowBegin,
-                           sizeof(DeviceInfo->Shadow->ShadowBegin));
-        EnqueueWriteGlobal(kSPIR_AsanShadowMemoryGlobalEnd,
-                           &DeviceInfo->Shadow->ShadowEnd,
-                           sizeof(DeviceInfo->Shadow->ShadowEnd));
-
-        // Write device type
-        EnqueueWriteGlobal(kSPIR_DeviceType, &DeviceInfo->Type,
-                           sizeof(DeviceInfo->Type));
 
         if (LaunchInfo.LocalWorkSize.empty()) {
             LaunchInfo.LocalWorkSize.resize(LaunchInfo.WorkDim);

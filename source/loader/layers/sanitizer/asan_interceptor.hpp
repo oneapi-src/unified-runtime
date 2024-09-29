@@ -195,10 +195,10 @@ class SanitizerInterceptor {
                                AllocType Type, void **ResultPtr);
     ur_result_t releaseMemory(ur_context_handle_t Context, void *Ptr);
 
-    ur_result_t registerDeviceGlobals(ur_context_handle_t Context,
-                                      ur_program_handle_t Program);
+    ur_result_t registerProgram(ur_context_handle_t Context,
+                                ur_program_handle_t Program);
 
-    ur_result_t unregisterDeviceGlobals(ur_program_handle_t Program);
+    ur_result_t unregisterProgram(ur_program_handle_t Program);
 
     ur_result_t preLaunchKernel(ur_kernel_handle_t Kernel,
                                 ur_queue_handle_t Queue,
