@@ -60,6 +60,8 @@ ur_result_t ze2urResult(ze_result_t ZeResult) {
     return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   case ZE_RESULT_ERROR_UNSUPPORTED_FEATURE:
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+  case ZE_RESULT_ERROR_MODULE_LINK_FAILURE:
+    return UR_RESULT_ERROR_PROGRAM_LINK_FAILURE;
   default:
     return UR_RESULT_ERROR_UNKNOWN;
   }
@@ -143,11 +145,14 @@ ze_result_t ZeCall::doCall(ze_result_t ZeResult, const char *ZeName,
                            const char *ZeArgs, bool TraceError) {
   logger::debug("ZE ---> {}{}", ZeName, ZeArgs);
 
-  if (UrL0LeaksDebug) {
-    ++(*ZeCallCount)[ZeName];
+  if (ZeResult == ZE_RESULT_SUCCESS) {
+    if (UrL0LeaksDebug) {
+      ++(*ZeCallCount)[ZeName];
+    }
+    return ZE_RESULT_SUCCESS;
   }
 
-  if (ZeResult && TraceError) {
+  if (TraceError) {
     const char *ErrorString = "Unknown";
     zeParseError(ZeResult, ErrorString);
     logger::error("Error ({}) in {}", ErrorString, ZeName);

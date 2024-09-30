@@ -15,28 +15,39 @@ from argparse import ArgumentParser
 import subprocess  # nosec B404
 import signal
 import re
+from collections import OrderedDict
 
 if __name__ == '__main__':
 
     parser = ArgumentParser()
     parser.add_argument("--test_command", help="Ctest test case")
-    parser.add_argument("--test_devices_count", type=str, help="Number of devices on which tests will be run")
-    parser.add_argument("--test_platforms_count", type=str, help="Number of platforms on which tests will be run")
+    parser.add_argument("--devices_count", type=str, help="Number of devices on which tests will be run")
+    parser.add_argument("--platforms_count", type=str, help="Number of platforms on which tests will be run")
     args = parser.parse_args()
 
     result = subprocess.Popen([args.test_command, '--gtest_brief=1',        # nosec B603
-                               f'--devices_count={args.test_devices_count}',
-                               f'--platforms_count={args.test_platforms_count}'],
+                               f'--devices_count={args.devices_count}',
+                               f'--platforms_count={args.platforms_count}'],
                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
     pat = re.compile(r'\[( )*FAILED( )*\]')
     output_list = []
+    test_cases = []
     for line in result.stdout:
         output_list.append(line)
         if pat.search(line):
             test_case = line.split(" ")[5]
             test_case = test_case.rstrip(',')
-            print(test_case)
+            test_cases.append(test_case)
+
+    # Every fail has a single corresponding match line but if there are multiple
+    # devices being tested there will be multiple lines with the same failure
+    # message. To avoid matching mismatch, remove lines that differ only by device ID.
+    test_cases = [re.sub(r'ID[0-9]ID', 'X', tc) for tc in test_cases]
+    test_cases = list(OrderedDict.fromkeys(test_cases))
+
+    for tc in test_cases:
+        print(tc)
 
     rc = result.wait()
     if rc < 0:

@@ -100,7 +100,15 @@ macro(add_device_binary SOURCE_FILE)
             continue()
         endif()
 
-        add_custom_command(OUTPUT "${BIN_PATH}"
+        # cuda and hip seem to do linking at compile time (rather than runtime)
+        if(${TRIPLE} MATCHES "nvptx" AND ${KERNEL_NAME} MATCHES "linker_error")
+            continue()
+        endif()
+        if(${TRIPLE} MATCHES "amd" AND ${KERNEL_NAME} MATCHES "linker_error")
+            continue()
+        endif()
+
+        add_custom_command(OUTPUT ${BIN_PATH}
             COMMAND ${UR_DPCXX} -fsycl -fsycl-targets=${TRIPLE} -fsycl-device-code-split=off 
             ${AMD_TARGET_BACKEND} ${AMD_OFFLOAD_ARCH} ${AMD_NOGPULIB}
             ${DPCXX_BUILD_FLAGS_LIST} ${SOURCE_FILE} -o ${EXE_PATH}
@@ -136,6 +144,7 @@ add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/fill_usm.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/foo.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/image_copy.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/inc.cpp)
+add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/increment.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/mean.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/cpy_and_mult.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/cpy_and_mult_usm.cpp)
@@ -150,6 +159,7 @@ add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/build_failure.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/fixed_wg_size.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/standard_types.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/subgroup.cpp)
+add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/linker_error.cpp)
 
 set(KERNEL_HEADER ${UR_CONFORMANCE_DEVICE_BINARIES_DIR}/kernel_entry_points.h)
 add_custom_command(OUTPUT ${KERNEL_HEADER}

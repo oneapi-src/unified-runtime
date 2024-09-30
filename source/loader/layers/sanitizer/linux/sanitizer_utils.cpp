@@ -37,15 +37,22 @@ uptr MmapNoReserve(uptr Addr, uptr Size) {
 
 bool Munmap(uptr Addr, uptr Size) { return munmap((void *)Addr, Size) == 0; }
 
+bool DontCoredumpRange(uptr Addr, uptr Size) {
+    Size = RoundUpTo(Size, EXEC_PAGESIZE);
+    Addr = RoundDownTo(Addr, EXEC_PAGESIZE);
+    return madvise((void *)Addr, Size, MADV_DONTDUMP) == 0;
+}
+
 void *GetMemFunctionPointer(const char *FuncName) {
     void *handle = dlopen(LIBC_SO, RTLD_LAZY | RTLD_NOLOAD);
     if (!handle) {
-        context.logger.error("Failed to dlopen {}", LIBC_SO);
+        getContext()->logger.error("Failed to dlopen {}", LIBC_SO);
         return nullptr;
     }
     auto ptr = dlsym(handle, FuncName);
     if (!ptr) {
-        context.logger.error("Failed to get '{}' from {}", FuncName, LIBC_SO);
+        getContext()->logger.error("Failed to get '{}' from {}", FuncName,
+                                   LIBC_SO);
     }
     return ptr;
 }

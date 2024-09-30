@@ -10,9 +10,19 @@
 #pragma once
 
 #include "common.hpp"
+#include "ur_api.h"
 #include "ze_api.h"
+#include "zes_api.h"
 
 struct ur_device_handle_t_;
+
+typedef size_t DeviceId;
+
+struct ur_zes_device_handle_data_t {
+  zes_device_handle_t ZesDevice;
+  uint32_t SubDeviceId;
+  ze_bool_t SubDevice = false;
+};
 
 struct ur_platform_handle_t_ : public _ur_platform {
   ur_platform_handle_t_(ze_driver_handle_t Driver)
@@ -24,9 +34,18 @@ struct ur_platform_handle_t_ : public _ur_platform {
   // a pretty good fit to keep here.
   ze_driver_handle_t ZeDriver;
 
+  // Cache of the ZesDevices mapped to the ZeDevices for use in zes apis calls
+  // based on a ze device handle.
+  std::unordered_map<ze_device_handle_t, ur_zes_device_handle_data_t>
+      ZedeviceToZesDeviceMap;
+
   // Given a multi driver scenario, the driver handle must be translated to the
   // internal driver handle to allow calls to driver experimental apis.
   ze_driver_handle_t ZeDriverHandleExpTranslated;
+
+  // Helper wrapper for working with Driver Version String extension in Level
+  // Zero.
+  ZeDriverVersionStringExtension ZeDriverVersionString;
 
   // Cache versions info from zeDriverGetProperties.
   std::string ZeDriverVersion;
@@ -49,9 +68,18 @@ struct ur_platform_handle_t_ : public _ur_platform {
   // Check the device cache and load it if necessary.
   ur_result_t populateDeviceCacheIfNeeded();
 
+  size_t getNumDevices();
+
+  ur_device_handle_t getDeviceById(DeviceId);
+
   // Return the PI device from cache that represents given native device.
   // If not found, then nullptr is returned.
   ur_device_handle_t getDeviceFromNativeHandle(ze_device_handle_t);
+
+  /// Checks the version of the level-zero driver.
+  bool isDriverVersionNewerOrSimilar(uint32_t VersionMajor,
+                                     uint32_t VersionMinor,
+                                     uint32_t VersionBuild);
 
   // Keep track of all contexts in the platform. This is needed to manage
   // a lifetime of memory allocations in each context when there are kernels

@@ -70,6 +70,7 @@ function(add_ur_target_compile_options name)
         )
         if (CMAKE_BUILD_TYPE STREQUAL "Release")
             target_compile_definitions(${name} PRIVATE -D_FORTIFY_SOURCE=2)
+            target_compile_options(${name} PRIVATE -fvisibility=hidden)
         endif()
         if(UR_DEVELOPER_MODE)
             target_compile_options(${name} PRIVATE
@@ -131,6 +132,11 @@ function(add_ur_library name)
     add_library(${name} ${ARGN})
     add_ur_target_compile_options(${name})
     add_ur_target_link_options(${name})
+    if(MSVC)
+        target_link_options(${name} PRIVATE
+            $<$<STREQUAL:$<TARGET_LINKER_FILE_NAME:${name}>,link.exe>:/DEPENDENTLOADFLAG:0x2000>
+        )
+    endif()
 endfunction()
 
 include(FetchContent)

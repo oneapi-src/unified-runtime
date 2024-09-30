@@ -272,8 +272,8 @@ cl_int(CL_API_CALL *)(cl_command_buffer_khr command_buffer);
 
 using clCommandNDRangeKernelKHR_fn = CL_API_ENTRY cl_int(CL_API_CALL *)(
     cl_command_buffer_khr command_buffer, cl_command_queue command_queue,
-    const cl_ndrange_kernel_command_properties_khr *properties,
-    cl_kernel kernel, cl_uint work_dim, const size_t *global_work_offset,
+    const cl_command_properties_khr *properties, cl_kernel kernel,
+    cl_uint work_dim, const size_t *global_work_offset,
     const size_t *global_work_size, const size_t *local_work_size,
     cl_uint num_sync_points_in_wait_list,
     const cl_sync_point_khr *sync_point_wait_list,
@@ -281,24 +281,27 @@ using clCommandNDRangeKernelKHR_fn = CL_API_ENTRY cl_int(CL_API_CALL *)(
 
 using clCommandCopyBufferKHR_fn = CL_API_ENTRY cl_int(CL_API_CALL *)(
     cl_command_buffer_khr command_buffer, cl_command_queue command_queue,
-    cl_mem src_buffer, cl_mem dst_buffer, size_t src_offset, size_t dst_offset,
-    size_t size, cl_uint num_sync_points_in_wait_list,
+    const cl_command_properties_khr *properties, cl_mem src_buffer,
+    cl_mem dst_buffer, size_t src_offset, size_t dst_offset, size_t size,
+    cl_uint num_sync_points_in_wait_list,
     const cl_sync_point_khr *sync_point_wait_list,
     cl_sync_point_khr *sync_point, cl_mutable_command_khr *mutable_handle);
 
 using clCommandCopyBufferRectKHR_fn = CL_API_ENTRY cl_int(CL_API_CALL *)(
     cl_command_buffer_khr command_buffer, cl_command_queue command_queue,
-    cl_mem src_buffer, cl_mem dst_buffer, const size_t *src_origin,
-    const size_t *dst_origin, const size_t *region, size_t src_row_pitch,
-    size_t src_slice_pitch, size_t dst_row_pitch, size_t dst_slice_pitch,
+    const cl_command_properties_khr *properties, cl_mem src_buffer,
+    cl_mem dst_buffer, const size_t *src_origin, const size_t *dst_origin,
+    const size_t *region, size_t src_row_pitch, size_t src_slice_pitch,
+    size_t dst_row_pitch, size_t dst_slice_pitch,
     cl_uint num_sync_points_in_wait_list,
     const cl_sync_point_khr *sync_point_wait_list,
     cl_sync_point_khr *sync_point, cl_mutable_command_khr *mutable_handle);
 
 using clCommandFillBufferKHR_fn = CL_API_ENTRY cl_int(CL_API_CALL *)(
     cl_command_buffer_khr command_buffer, cl_command_queue command_queue,
-    cl_mem buffer, const void *pattern, size_t pattern_size, size_t offset,
-    size_t size, cl_uint num_sync_points_in_wait_list,
+    const cl_command_properties_khr *properties, cl_mem buffer,
+    const void *pattern, size_t pattern_size, size_t offset, size_t size,
+    cl_uint num_sync_points_in_wait_list,
     const cl_sync_point_khr *sync_point_wait_list,
     cl_sync_point_khr *sync_point, cl_mutable_command_khr *mutable_handle);
 
@@ -313,51 +316,40 @@ using clGetCommandBufferInfoKHR_fn = CL_API_ENTRY cl_int(CL_API_CALL *)(
     size_t param_value_size, void *param_value, size_t *param_value_size_ret);
 
 using clUpdateMutableCommandsKHR_fn = CL_API_ENTRY
-cl_int(CL_API_CALL *)(cl_command_buffer_khr command_buffer,
-                      const cl_mutable_base_config_khr *mutable_config);
+cl_int(CL_API_CALL *)(cl_command_buffer_khr command_buffer, cl_uint num_configs,
+                      const cl_command_buffer_update_type_khr *config_types,
+                      const void **configs);
 
 template <typename T> struct FuncPtrCache {
   std::map<cl_context, T> Map;
   std::mutex Mutex;
+
+  void clear(cl_context context) {
+    std::lock_guard<std::mutex> CacheLock{Mutex};
+    Map.erase(context);
+  }
 };
 
-// FIXME: There's currently no mechanism for cleaning up this cache, meaning
-// that it is invalidated whenever a context is destroyed. This could lead to
-// reusing an invalid function pointer if another context happens to have the
-// same native handle.
 struct ExtFuncPtrCacheT {
-  FuncPtrCache<clHostMemAllocINTEL_fn> clHostMemAllocINTELCache;
-  FuncPtrCache<clDeviceMemAllocINTEL_fn> clDeviceMemAllocINTELCache;
-  FuncPtrCache<clSharedMemAllocINTEL_fn> clSharedMemAllocINTELCache;
-  FuncPtrCache<clGetDeviceFunctionPointer_fn> clGetDeviceFunctionPointerCache;
-  FuncPtrCache<clGetDeviceGlobalVariablePointer_fn>
-      clGetDeviceGlobalVariablePointerCache;
-  FuncPtrCache<clCreateBufferWithPropertiesINTEL_fn>
-      clCreateBufferWithPropertiesINTELCache;
-  FuncPtrCache<clMemBlockingFreeINTEL_fn> clMemBlockingFreeINTELCache;
-  FuncPtrCache<clSetKernelArgMemPointerINTEL_fn>
-      clSetKernelArgMemPointerINTELCache;
-  FuncPtrCache<clEnqueueMemFillINTEL_fn> clEnqueueMemFillINTELCache;
-  FuncPtrCache<clEnqueueMemcpyINTEL_fn> clEnqueueMemcpyINTELCache;
-  FuncPtrCache<clGetMemAllocInfoINTEL_fn> clGetMemAllocInfoINTELCache;
-  FuncPtrCache<clEnqueueWriteGlobalVariable_fn>
-      clEnqueueWriteGlobalVariableCache;
-  FuncPtrCache<clEnqueueReadGlobalVariable_fn> clEnqueueReadGlobalVariableCache;
-  FuncPtrCache<clEnqueueReadHostPipeINTEL_fn> clEnqueueReadHostPipeINTELCache;
-  FuncPtrCache<clEnqueueWriteHostPipeINTEL_fn> clEnqueueWriteHostPipeINTELCache;
-  FuncPtrCache<clSetProgramSpecializationConstant_fn>
-      clSetProgramSpecializationConstantCache;
-  FuncPtrCache<clCreateCommandBufferKHR_fn> clCreateCommandBufferKHRCache;
-  FuncPtrCache<clRetainCommandBufferKHR_fn> clRetainCommandBufferKHRCache;
-  FuncPtrCache<clReleaseCommandBufferKHR_fn> clReleaseCommandBufferKHRCache;
-  FuncPtrCache<clFinalizeCommandBufferKHR_fn> clFinalizeCommandBufferKHRCache;
-  FuncPtrCache<clCommandNDRangeKernelKHR_fn> clCommandNDRangeKernelKHRCache;
-  FuncPtrCache<clCommandCopyBufferKHR_fn> clCommandCopyBufferKHRCache;
-  FuncPtrCache<clCommandCopyBufferRectKHR_fn> clCommandCopyBufferRectKHRCache;
-  FuncPtrCache<clCommandFillBufferKHR_fn> clCommandFillBufferKHRCache;
-  FuncPtrCache<clEnqueueCommandBufferKHR_fn> clEnqueueCommandBufferKHRCache;
-  FuncPtrCache<clGetCommandBufferInfoKHR_fn> clGetCommandBufferInfoKHRCache;
-  FuncPtrCache<clUpdateMutableCommandsKHR_fn> clUpdateMutableCommandsKHRCache;
+#define CL_EXTENSION_FUNC(func) FuncPtrCache<func##_fn> func##Cache;
+
+#include "extension_functions.def"
+
+#undef CL_EXTENSION_FUNC
+
+  // If a context stored in the current caching mechanism is destroyed by the
+  // CL driver all of its function pointers are invalidated. This can lead to a
+  // pathological case where a subsequently created context gets returned with
+  // a coincidentally identical handle to the destroyed one and ends up being
+  // used to retrieve bad function pointers. To avoid this we clear the cache
+  // when contexts are released.
+  void clearCache(cl_context context) {
+#define CL_EXTENSION_FUNC(func) func##Cache.clear(context);
+
+#include "extension_functions.def"
+
+#undef CL_EXTENSION_FUNC
+  }
 };
 // A raw pointer is used here since the lifetime of this map has to be tied to
 // piTeardown to avoid issues with static destruction order (a user application

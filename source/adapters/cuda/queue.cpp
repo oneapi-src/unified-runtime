@@ -45,7 +45,8 @@ CUstream ur_queue_handle_t_::getNextComputeStream(uint32_t *StreamToken) {
       // change NumComputeStreams after that
       if (NumComputeStreams < ComputeStreams.size()) {
         UR_CHECK_ERROR(cuStreamCreateWithPriority(
-            &ComputeStreams[NumComputeStreams++], Flags, Priority));
+            &ComputeStreams[NumComputeStreams], Flags, Priority));
+        ++NumComputeStreams;
       }
     }
     Token = ComputeStreamIndex++;
@@ -110,7 +111,8 @@ CUstream ur_queue_handle_t_::getNextTransferStream() {
     // change NumTransferStreams after that
     if (NumTransferStreams < TransferStreams.size()) {
       UR_CHECK_ERROR(cuStreamCreateWithPriority(
-          &TransferStreams[NumTransferStreams++], Flags, Priority));
+          &TransferStreams[NumTransferStreams], Flags, Priority));
+      ++NumTransferStreams;
     }
   }
   uint32_t StreamI = TransferStreamIndex++ % TransferStreams.size();
@@ -263,7 +265,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
     ur_native_handle_t hNativeQueue, ur_context_handle_t hContext,
     ur_device_handle_t hDevice, const ur_queue_native_properties_t *pProperties,
     ur_queue_handle_t *phQueue) {
-  (void)hDevice;
+  if (!hDevice && hContext->getDevices().size() == 1)
+    hDevice = hContext->getDevices().front();
 
   unsigned int CuFlags;
   CUstream CuStream = reinterpret_cast<CUstream>(hNativeQueue);

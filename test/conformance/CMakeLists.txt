@@ -10,20 +10,24 @@ set(UR_CONFORMANCE_DEVICE_BINARIES_DIR
     "Internal cache variable for device binaries directory")
 
 function(add_test_adapter name adapter)
+    if(NOT "${ARGN}" STREQUAL "")
+        set(EXTRA_NAME "-${ARGN}")
+    endif()
     set(TEST_TARGET_NAME test-${name})
-    set(TEST_NAME ${name}-${adapter})
+    set(TEST_NAME ${name}-${adapter}${EXTRA_NAME})
 
     set(TEST_COMMAND
-        "${PROJECT_BINARY_DIR}/bin/${TEST_TARGET_NAME} --test_devices_count=${UR_TEST_DEVICES_COUNT} --test_platforms_count=${UR_TEST_PLATFORMS_COUNT}"
+        "${PROJECT_BINARY_DIR}/bin/${TEST_TARGET_NAME} --devices_count=${UR_TEST_DEVICES_COUNT} --platforms_count=${UR_TEST_PLATFORMS_COUNT}"
     )
+    set(MATCH_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${name}_${adapter}${EXTRA_NAME}.match")
 
-    if(UR_CONFORMANCE_ENABLE_MATCH_FILES)
+    if(${UR_CONFORMANCE_ENABLE_MATCH_FILES} AND EXISTS ${MATCH_FILE})
         add_test(NAME ${TEST_NAME}
             COMMAND ${CMAKE_COMMAND}
             -D TEST_FILE=${Python3_EXECUTABLE}
             -D TEST_ARGS="${UR_CONFORMANCE_TEST_DIR}/cts_exe.py --test_command ${TEST_COMMAND}"
             -D MODE=stdout
-            -D MATCH_FILE=${CMAKE_CURRENT_SOURCE_DIR}/${name}_${adapter}.match
+            -D MATCH_FILE=${MATCH_FILE}
             -P ${PROJECT_SOURCE_DIR}/cmake/match.cmake
             DEPENDS ${TEST_TARGET_NAME}
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -70,6 +74,9 @@ function(add_conformance_test name)
     if(UR_BUILD_ADAPTER_L0 OR UR_BUILD_ADAPTER_ALL)
         add_test_adapter(${name} adapter_level_zero)
     endif()
+    if(UR_BUILD_ADAPTER_L0_V2)
+        add_test_adapter(${name} adapter_level_zero_v2)
+    endif()
     if(UR_BUILD_ADAPTER_OPENCL OR UR_BUILD_ADAPTER_ALL)
         add_test_adapter(${name} adapter_opencl)
     endif()
@@ -79,8 +86,9 @@ function(add_conformance_test name)
 
     if(NOT (UR_BUILD_ADAPTER_CUDA OR UR_BUILD_ADAPTER_HIP
             OR UR_BUILD_ADAPTER_L0 OR UR_BUILD_ADAPTER_OPENCL
-            OR UR_BUILD_ADAPTER_NATIVE_CPU OR UR_BUILD_ADAPTER_ALL))
-        add_test_adapter(${name} adapter_null)
+            OR UR_BUILD_ADAPTER_NATIVE_CPU OR UR_BUILD_ADAPTER_L0_V2
+            OR UR_BUILD_ADAPTER_ALL))
+        add_test_adapter(${name} adapter_mock)
     endif()
 endfunction()
 
@@ -115,6 +123,19 @@ add_subdirectory(queue)
 add_subdirectory(sampler)
 add_subdirectory(virtual_memory)
 
+set(TEST_SUBDIRECTORIES_DPCXX
+    "device_code"
+    "kernel"
+    "program"
+    "enqueue"
+    "integration"
+    "exp_command_buffer"
+    "exp_enqueue_native"
+    "exp_usm_p2p"
+    "exp_launch_properties"
+    "memory-migrate"
+)
+
 if(UR_DPCXX)
     add_custom_target(generate_device_binaries)
 
@@ -123,7 +144,7 @@ if(UR_DPCXX)
     file(MAKE_DIRECTORY ${UR_CONFORMANCE_DEVICE_BINARIES_DIR})
 
     if("${UR_CONFORMANCE_TARGET_TRIPLES}" STREQUAL "")
-        if(UR_BUILD_ADAPTER_L0 OR UR_BUILD_ADAPTER_OPENCL OR UR_BUILD_ADAPTER_ALL)
+        if(UR_BUILD_ADAPTER_L0 OR UR_BUILD_ADAPTER_L0_V2 OR UR_BUILD_ADAPTER_OPENCL OR UR_BUILD_ADAPTER_ALL)
             list(APPEND TARGET_TRIPLES "spir64")
         endif()
         if(UR_BUILD_ADAPTER_CUDA OR UR_BUILD_ADAPTER_ALL)
@@ -136,18 +157,20 @@ if(UR_DPCXX)
         string(REPLACE "," ";" TARGET_TRIPLES ${UR_CONFORMANCE_TARGET_TRIPLES})
     endif()
 
-    add_subdirectory(device_code)
-    add_subdirectory(kernel)
-    add_subdirectory(program)
-    add_subdirectory(enqueue)
-    add_subdirectory(integration)
-    add_subdirectory(exp_command_buffer)
-    add_subdirectory(exp_enqueue_native)
-    add_subdirectory(exp_usm_p2p)
-    add_subdirectory(exp_launch_properties)
-    add_subdirectory(memory-migrate)
+    foreach(dir ${TEST_SUBDIRECTORIES_DPCXX})
+        add_subdirectory(${dir})
+    endforeach()
 else()
+    set(DISABLED_TESTS "")
+    foreach(dir ${TEST_SUBDIRECTORIES_DPCXX})
+        if(NOT dir STREQUAL "device_code")
+            list(APPEND DISABLED_TESTS "test-${dir}")
+        endif()
+    endforeach()
+
+    string(REPLACE ";" ", " DISABLED_TESTS_STR "${DISABLED_TESTS}")
+
     message(WARNING
         "UR_DPCXX is not defined, the following conformance test executables \
-        are disabled: test-program, test-kernel, test-enqueue")
+        are disabled: ${DISABLED_TESTS_STR}")
 endif()

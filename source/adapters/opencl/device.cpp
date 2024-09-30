@@ -32,6 +32,17 @@ ur_result_t cl_adapter::getDeviceVersion(cl_device_id Dev,
   return UR_RESULT_SUCCESS;
 }
 
+static bool isIntelFPGAEmuDevice(cl_device_id Dev) {
+  size_t NameSize = 0;
+  CL_RETURN_ON_FAILURE(
+      clGetDeviceInfo(Dev, CL_DEVICE_NAME, 0, nullptr, &NameSize));
+  std::string NameStr(NameSize, '\0');
+  CL_RETURN_ON_FAILURE(
+      clGetDeviceInfo(Dev, CL_DEVICE_NAME, NameSize, NameStr.data(), nullptr));
+
+  return NameStr.find("Intel(R) FPGA Emulation Device") != std::string::npos;
+}
+
 ur_result_t cl_adapter::checkDeviceExtensions(
     cl_device_id Dev, const std::vector<std::string> &Exts, bool &Supported) {
   size_t ExtSize = 0;
@@ -46,6 +57,14 @@ ur_result_t cl_adapter::checkDeviceExtensions(
   Supported = true;
   for (const std::string &Ext : Exts) {
     if (!(Supported = (ExtStr.find(Ext) != std::string::npos))) {
+      // The Intel FPGA emulation device does actually support these, even if it
+      // doesn't report them.
+      if (isIntelFPGAEmuDevice(Dev) &&
+          (Ext == "cl_intel_device_attribute_query" ||
+           Ext == "cl_intel_required_subgroup_size")) {
+        Supported = true;
+        continue;
+      }
       break;
     }
   }
@@ -348,7 +367,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   }
   case UR_DEVICE_INFO_DEVICE_ID: {
     bool Supported = false;
-    CL_RETURN_ON_FAILURE(cl_adapter::checkDeviceExtensions(
+    UR_RETURN_ON_FAILURE(cl_adapter::checkDeviceExtensions(
         cl_adapter::cast<cl_device_id>(hDevice), {"cl_khr_pci_bus_info"},
         Supported));
 
@@ -365,7 +384,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
 
   case UR_DEVICE_INFO_BACKEND_RUNTIME_VERSION: {
     oclv::OpenCLVersion Version;
-    CL_RETURN_ON_FAILURE(cl_adapter::getDeviceVersion(
+    UR_RETURN_ON_FAILURE(cl_adapter::getDeviceVersion(
         cl_adapter::cast<cl_device_id>(hDevice), Version));
 
     const std::string Results = std::to_string(Version.getMajor()) + "." +
@@ -431,15 +450,16 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
       URValue[i].type = static_cast<ur_device_partition_t>(CLValue[0]);
       switch (URValue[i].type) {
       case UR_DEVICE_PARTITION_EQUALLY: {
-        URValue[i].value.equally = CLValue[i + 1];
+        URValue[i].value.equally = static_cast<uint32_t>(CLValue[i + 1]);
         break;
       }
       case UR_DEVICE_PARTITION_BY_COUNTS: {
-        URValue[i].value.count = CLValue[i + 1];
+        URValue[i].value.count = static_cast<uint32_t>(CLValue[i + 1]);
         break;
       }
       case UR_DEVICE_PARTITION_BY_AFFINITY_DOMAIN: {
-        URValue[i].value.affinity_domain = CLValue[i + 1];
+        URValue[i].value.affinity_domain =
+            static_cast<uint32_t>(CLValue[i + 1]);
         break;
       }
       default: {
@@ -473,7 +493,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     /* Corresponding OpenCL query is only available starting with OpenCL 2.1
      * and we have to emulate it on older OpenCL runtimes. */
     oclv::OpenCLVersion DevVer;
-    CL_RETURN_ON_FAILURE(cl_adapter::getDeviceVersion(
+    UR_RETURN_ON_FAILURE(cl_adapter::getDeviceVersion(
         cl_adapter::cast<cl_device_id>(hDevice), DevVer));
 
     if (DevVer >= oclv::V2_1) {
@@ -503,7 +523,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
      * UR type: ur_device_fp_capability_flags_t */
     if (propName == UR_DEVICE_INFO_HALF_FP_CONFIG) {
       bool Supported;
-      CL_RETURN_ON_FAILURE(cl_adapter::checkDeviceExtensions(
+      UR_RETURN_ON_FAILURE(cl_adapter::checkDeviceExtensions(
           cl_adapter::cast<cl_device_id>(hDevice), {"cl_khr_fp16"}, Supported));
 
       if (!Supported) {
@@ -523,7 +543,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     /* This query is missing before OpenCL 3.0. Check version and handle
      * appropriately */
     oclv::OpenCLVersion DevVer;
-    CL_RETURN_ON_FAILURE(cl_adapter::getDeviceVersion(
+    UR_RETURN_ON_FAILURE(cl_adapter::getDeviceVersion(
         cl_adapter::cast<cl_device_id>(hDevice), DevVer));
 
     /* Minimum required capability to be returned. For OpenCL 1.2, this is all
@@ -583,7 +603,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
         UR_MEMORY_SCOPE_CAPABILITY_FLAG_WORK_GROUP;
 
     oclv::OpenCLVersion DevVer;
-    CL_RETURN_ON_FAILURE(cl_adapter::getDeviceVersion(
+    UR_RETURN_ON_FAILURE(cl_adapter::getDeviceVersion(
         cl_adapter::cast<cl_device_id>(hDevice), DevVer));
 
     cl_device_atomic_capabilities CLCapabilities;
@@ -637,7 +657,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
         UR_MEMORY_ORDER_CAPABILITY_FLAG_ACQ_REL;
 
     oclv::OpenCLVersion DevVer;
-    CL_RETURN_ON_FAILURE(cl_adapter::getDeviceVersion(
+    UR_RETURN_ON_FAILURE(cl_adapter::getDeviceVersion(
         cl_adapter::cast<cl_device_id>(hDevice), DevVer));
 
     cl_device_atomic_capabilities CLCapabilities;
@@ -687,7 +707,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
         UR_MEMORY_SCOPE_CAPABILITY_FLAG_WORK_GROUP;
 
     oclv::OpenCLVersion DevVer;
-    CL_RETURN_ON_FAILURE(cl_adapter::getDeviceVersion(
+    UR_RETURN_ON_FAILURE(cl_adapter::getDeviceVersion(
         cl_adapter::cast<cl_device_id>(hDevice), DevVer));
 
     auto convertCapabilities =
@@ -755,7 +775,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   }
   case UR_DEVICE_INFO_ATOMIC_64: {
     bool Supported = false;
-    CL_RETURN_ON_FAILURE(cl_adapter::checkDeviceExtensions(
+    UR_RETURN_ON_FAILURE(cl_adapter::checkDeviceExtensions(
         cl_adapter::cast<cl_device_id>(hDevice),
         {"cl_khr_int64_base_atomics", "cl_khr_int64_extended_atomics"},
         Supported));
@@ -773,7 +793,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   }
   case UR_DEVICE_INFO_MEM_CHANNEL_SUPPORT: {
     bool Supported = false;
-    CL_RETURN_ON_FAILURE(cl_adapter::checkDeviceExtensions(
+    UR_RETURN_ON_FAILURE(cl_adapter::checkDeviceExtensions(
         cl_adapter::cast<cl_device_id>(hDevice),
         {"cl_intel_mem_channel_property"}, Supported));
 
@@ -807,14 +827,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   }
   case UR_DEVICE_INFO_HOST_PIPE_READ_WRITE_SUPPORTED: {
     bool Supported = false;
-    CL_RETURN_ON_FAILURE(cl_adapter::checkDeviceExtensions(
+    UR_RETURN_ON_FAILURE(cl_adapter::checkDeviceExtensions(
         cl_adapter::cast<cl_device_id>(hDevice),
         {"cl_intel_program_scope_host_pipe"}, Supported));
     return ReturnValue(Supported);
   }
   case UR_DEVICE_INFO_GLOBAL_VARIABLE_SUPPORT: {
     bool Supported = false;
-    CL_RETURN_ON_FAILURE(cl_adapter::checkDeviceExtensions(
+    UR_RETURN_ON_FAILURE(cl_adapter::checkDeviceExtensions(
         cl_adapter::cast<cl_device_id>(hDevice),
         {"cl_intel_global_variable_access"}, Supported));
     return ReturnValue(Supported);
@@ -825,12 +845,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_GLOBAL_MEM_CACHE_TYPE:
   case UR_DEVICE_INFO_LOCAL_MEM_TYPE:
   case UR_DEVICE_INFO_EXECUTION_CAPABILITIES:
-  case UR_DEVICE_INFO_PARTITION_AFFINITY_DOMAIN:
-  case UR_DEVICE_INFO_USM_HOST_SUPPORT:
-  case UR_DEVICE_INFO_USM_DEVICE_SUPPORT:
-  case UR_DEVICE_INFO_USM_SINGLE_SHARED_SUPPORT:
-  case UR_DEVICE_INFO_USM_CROSS_SHARED_SUPPORT:
-  case UR_DEVICE_INFO_USM_SYSTEM_SHARED_SUPPORT: {
+  case UR_DEVICE_INFO_PARTITION_AFFINITY_DOMAIN: {
     /* CL type: cl_bitfield / enum
      * UR type: ur_flags_t (uint32_t) */
 
@@ -843,6 +858,27 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
      * map 1 to 1 for these properties. cl_bitfield is uint64_t and ur_flags_t
      * types are uint32_t */
     return ReturnValue(static_cast<uint32_t>(CLValue));
+  }
+  case UR_DEVICE_INFO_USM_HOST_SUPPORT:
+  case UR_DEVICE_INFO_USM_DEVICE_SUPPORT:
+  case UR_DEVICE_INFO_USM_SINGLE_SHARED_SUPPORT:
+  case UR_DEVICE_INFO_USM_CROSS_SHARED_SUPPORT:
+  case UR_DEVICE_INFO_USM_SYSTEM_SHARED_SUPPORT: {
+    /* CL type: cl_bitfield / enum
+     * UR type: ur_flags_t (uint32_t) */
+    bool Supported = false;
+    UR_RETURN_ON_FAILURE(cl_adapter::checkDeviceExtensions(
+        cl_adapter::cast<cl_device_id>(hDevice),
+        {"cl_intel_unified_shared_memory"}, Supported));
+    if (Supported) {
+      cl_bitfield CLValue = 0;
+      CL_RETURN_ON_FAILURE(
+          clGetDeviceInfo(cl_adapter::cast<cl_device_id>(hDevice), CLPropName,
+                          sizeof(cl_bitfield), &CLValue, nullptr));
+      return ReturnValue(static_cast<uint32_t>(CLValue));
+    } else {
+      return ReturnValue(0);
+    }
   }
   case UR_DEVICE_INFO_IMAGE_SUPPORTED:
   case UR_DEVICE_INFO_ERROR_CORRECTION_SUPPORT:
@@ -938,8 +974,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_VERSION:
   case UR_EXT_DEVICE_INFO_OPENCL_C_VERSION:
   case UR_DEVICE_INFO_BUILT_IN_KERNELS:
-  case UR_DEVICE_INFO_MAX_WORK_ITEM_SIZES:
-  case UR_DEVICE_INFO_IP_VERSION: {
+  case UR_DEVICE_INFO_MAX_WORK_ITEM_SIZES: {
     /* We can just use the OpenCL outputs because the sizes of OpenCL types
      * are the same as UR.
      * | CL                 | UR                     | Size |
@@ -957,7 +992,33 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
 
     return UR_RESULT_SUCCESS;
   }
+  case UR_DEVICE_INFO_IP_VERSION: {
+    bool Supported;
+    UR_RETURN_ON_FAILURE(cl_adapter::checkDeviceExtensions(
+        cl_adapter::cast<cl_device_id>(hDevice),
+        {"cl_intel_device_attribute_query"}, Supported));
+    if (!Supported) {
+      return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
+    }
+    CL_RETURN_ON_FAILURE(
+        clGetDeviceInfo(cl_adapter::cast<cl_device_id>(hDevice), CLPropName,
+                        propSize, pPropValue, pPropSizeRet));
+
+    return UR_RESULT_SUCCESS;
+  }
+
   case UR_DEVICE_INFO_SUB_GROUP_SIZES_INTEL: {
+    bool isExtensionSupported;
+    if (cl_adapter::checkDeviceExtensions(
+            cl_adapter::cast<cl_device_id>(hDevice),
+            {"cl_intel_required_subgroup_size"},
+            isExtensionSupported) != UR_RESULT_SUCCESS ||
+        !isExtensionSupported) {
+      std::vector<uint32_t> aThreadIsItsOwnSubGroup({1});
+      return ReturnValue(aThreadIsItsOwnSubGroup.data(),
+                         aThreadIsItsOwnSubGroup.size());
+    }
+
     // Have to convert size_t to uint32_t
     size_t SubGroupSizesSize = 0;
     CL_RETURN_ON_FAILURE(
@@ -1145,7 +1206,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetNativeHandle(
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
-    ur_native_handle_t hNativeDevice, ur_platform_handle_t,
+    ur_native_handle_t hNativeDevice, ur_adapter_handle_t,
     const ur_device_native_properties_t *, ur_device_handle_t *phDevice) {
 
   *phDevice = reinterpret_cast<ur_device_handle_t>(hNativeDevice);
