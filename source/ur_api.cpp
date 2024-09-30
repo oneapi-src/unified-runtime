@@ -771,7 +771,7 @@ ur_result_t UR_APICALL urDeviceGetSelected(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hDevice`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_DEVICE_INFO_2D_BLOCK_ARRAY_CAPABILITIES_EXP < propName`
+///         + `::UR_DEVICE_INFO_ENQUEUE_USM_ALLOCATIONS_EXP < propName`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
 ///         + If `propName` is not supported by the adapter.
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
@@ -5633,6 +5633,157 @@ ur_result_t UR_APICALL urEnqueueWriteHostPipe(
     ///< and can be used to query or queue a wait for this command to complete.
     ///< If phEventWaitList and phEvent are not NULL, phEvent must not refer to
     ///< an element of the phEventWaitList array.
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Enqueue an asynchronous USM device allocation
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hQueue`
+///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
+///         + `NULL != pProperties && ::UR_EXP_ENQUEUE_USM_ALLOC_FLAGS_MASK & pProperties->flags`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == ppMem`
+///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
+ur_result_t UR_APICALL urEnqueueUSMDeviceAllocExp(
+    ur_queue_handle_t hQueue, ///< [in] handle of the queue object
+    ur_usm_pool_handle_t
+        pPool, ///< [in][optional] handle of the USM memory pool
+    const size_t
+        size, ///< [in] minimum size in bytes of the USM memory object to be allocated
+    const ur_exp_enqueue_usm_alloc_properties_t *
+        pProperties, ///< [in][optional] pointer to the enqueue asynchronous USM allocation
+                     ///< properties
+    uint32_t numEventsInWaitList, ///< [in] size of the event wait list
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the kernel execution.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating no wait events.
+    void **ppMem, ///< [out] pointer to USM memory object
+    ur_event_handle_t
+        *phEvent ///< [out][optional] return an event object that identifies the
+                 ///< asynchronous USM device allocation
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Enqueue an asynchronous USM shared allocation
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hQueue`
+///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
+///         + `NULL != pProperties && ::UR_EXP_ENQUEUE_USM_ALLOC_FLAGS_MASK & pProperties->flags`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == ppMem`
+///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
+ur_result_t UR_APICALL urEnqueueUSMSharedAllocExp(
+    ur_queue_handle_t hQueue, ///< [in] handle of the queue object
+    ur_usm_pool_handle_t
+        pPool, ///< [in][optional] handle of the USM memory pool
+    const size_t
+        size, ///< [in] minimum size in bytes of the USM memory object to be allocated
+    const ur_exp_enqueue_usm_alloc_properties_t *
+        pProperties, ///< [in][optional] pointer to the enqueue asynchronous USM allocation
+                     ///< properties
+    uint32_t numEventsInWaitList, ///< [in] size of the event wait list
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the kernel execution.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating no wait events.
+    void **ppMem, ///< [out] pointer to USM memory object
+    ur_event_handle_t
+        *phEvent ///< [out][optional] return an event object that identifies the
+                 ///< asynchronous USM shared allocation
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Enqueue an asynchronous USM host allocation
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hQueue`
+///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
+///         + `NULL != pProperties && ::UR_EXP_ENQUEUE_USM_ALLOC_FLAGS_MASK & pProperties->flags`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == ppMem`
+///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
+///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
+ur_result_t UR_APICALL urEnqueueUSMHostAllocExp(
+    ur_queue_handle_t hQueue, ///< [in] handle of the queue object
+    ur_usm_pool_handle_t
+        pPool, ///< [in][optional] handle of the USM memory pool
+    const size_t
+        size, ///< [in] minimum size in bytes of the USM memory object to be allocated
+    const ur_exp_enqueue_usm_alloc_properties_t *
+        pProperties, ///< [in][optional] pointer to the enqueue asynchronous USM allocation
+                     ///< properties
+    uint32_t numEventsInWaitList, ///< [in] size of the event wait list
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the kernel execution.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating no wait events.
+    void **ppMem, ///< [out] pointer to USM memory object
+    ur_event_handle_t
+        *phEvent ///< [out][optional] return an event object that identifies the
+                 ///< asynchronous USM host allocation
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Enqueue an asynchronous USM deallocation
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hQueue`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pMem`
+///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
+///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
+ur_result_t UR_APICALL urEnqueueUSMFreeExp(
+    ur_queue_handle_t hQueue, ///< [in] handle of the queue object
+    ur_usm_pool_handle_t
+        pPool,  ///< [in][optional] handle of the USM memory pool
+    void *pMem, ///< [in] pointer to USM memory object
+    uint32_t numEventsInWaitList, ///< [in] size of the event wait list
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the kernel execution.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating no wait events.
+    ur_event_handle_t
+        *phEvent ///< [out][optional] return an event object that identifies the
+                 ///< asynchronous USM deallocation
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
     return result;
