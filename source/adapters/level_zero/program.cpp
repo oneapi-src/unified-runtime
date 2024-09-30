@@ -1017,18 +1017,16 @@ void ur_program_handle_t_::ur_release_program_resources(bool deletion) {
         ZE_CALL_NOCHECK(zeModuleBuildLogDestroy, (DeviceData.ZeBuildLog));
     }
 
-    if (InteropZeModule && OwnZeModule) {
-      if (DeviceDataMap.empty()) {
-        // interop api
-        ZE_CALL_NOCHECK(zeModuleDestroy, (InteropZeModule));
-      } else {
-        for (auto &[ZeDevice, DeviceData] : this->DeviceDataMap) {
-          if (DeviceData.ZeModule)
-            ZE_CALL_NOCHECK(zeModuleDestroy, (DeviceData.ZeModule));
-        }
-        this->DeviceDataMap.clear();
-      }
-    }
+    // interop api
+    if (InteropZeModule && OwnZeModule)
+      ZE_CALL_NOCHECK(zeModuleDestroy, (InteropZeModule));
+
+    for (auto &[ZeDevice, DeviceData] : this->DeviceDataMap)
+      if (DeviceData.ZeModule)
+        ZE_CALL_NOCHECK(zeModuleDestroy, (DeviceData.ZeModule));
+
+    this->DeviceDataMap.clear();
+
     resourcesReleased = true;
   }
 }

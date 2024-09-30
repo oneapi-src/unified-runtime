@@ -281,5 +281,5 @@ private:
   // program. This handle is returned by UR API which allows to get the native
   // handle from the program.
   // TODO: Currently interoparability UR API does not support multiple devices.
-  ze_module_handle_t InteropZeModule{};
+  ze_module_handle_t InteropZeModule = nullptr;
 };
