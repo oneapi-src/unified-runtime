@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include "asan_allocator.hpp"
 #include "sanitizer_common/sanitizer_interceptor.hpp"
 
 #include <memory>

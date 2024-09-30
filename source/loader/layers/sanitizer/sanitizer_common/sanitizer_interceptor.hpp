@@ -23,10 +23,11 @@
 #include <optional>
 #include <queue>
 #include <unordered_map>
-#include <unordered_set>
 #include <vector>
 
 namespace ur_sanitizer_layer {
+
+struct ShadowMemory;
 
 struct AllocInfoList {
     std::vector<std::shared_ptr<AllocInfo>> List;
@@ -40,6 +41,7 @@ struct DeviceInfo {
     size_t Alignment = 0;
     uptr ShadowOffset = 0;
     uptr ShadowOffsetEnd = 0;
+    ShadowMemory *Shadow = nullptr;
 
     // Device features
     bool IsSupportSharedSystemUSM = false;

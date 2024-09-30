@@ -29,7 +29,7 @@ enum class SanitizerType {
 };
 
 class SanitizerInterceptor;
-class AsanOptions;
+struct AsanOptions;
 
 ///////////////////////////////////////////////////////////////////////////////
 class __urdlllocal context_t : public proxy_layer_context_t,

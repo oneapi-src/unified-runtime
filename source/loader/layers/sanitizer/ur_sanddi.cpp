@@ -11,6 +11,7 @@
  */
 
 #include "asan/asan_interceptor.hpp"
+#include "msan/msan_interceptor.hpp"
 #include "asan/asan_options.hpp"
 #include "sanitizer_common/sanitizer_utils.hpp"
 #include "ur_sanitizer_layer.hpp"
@@ -1644,31 +1645,33 @@ ur_result_t context_t::init(ur_dditable_t *dditable,
                             [[maybe_unused]] codeloc_data codelocData) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
-    if (enabledLayerNames.count("UR_LAYER_ASAN")) {
-        enabledType = SanitizerType::AddressSanitizer;
+    // if (enabledLayerNames.count("UR_LAYER_ASAN")) {
+    //     enabledType = SanitizerType::AddressSanitizer;
         asanOptions = std::make_unique<AsanOptions>(logger);
-        interceptor = std::make_unique<AsanInterceptor>();
-    } else if (enabledLayerNames.count("UR_LAYER_MSAN")) {
-        enabledType = SanitizerType::MemorySanitizer;
-    } else if (enabledLayerNames.count("UR_LAYER_TSAN")) {
-        enabledType = SanitizerType::ThreadSanitizer;
-    }
+    //     interceptor = std::make_unique<AsanInterceptor>();
+    // } else if (enabledLayerNames.count("UR_LAYER_MSAN")) {
+    enabledType = SanitizerType::MemorySanitizer;
+    interceptor = std::make_unique<MsanInterceptor>();
+
+    // } else if (enabledLayerNames.count("UR_LAYER_TSAN")) {
+    //     enabledType = SanitizerType::ThreadSanitizer;
+    // }
 
     // Only support AddressSanitizer now
-    if (enabledType != SanitizerType::AddressSanitizer) {
-        return result;
-    }
+    // if (enabledType != SanitizerType::AddressSanitizer) {
+    //     return result;
+    // }
 
-    if (enabledType == SanitizerType::AddressSanitizer) {
-        if (!(dditable->VirtualMem.pfnReserve && dditable->VirtualMem.pfnMap &&
-              dditable->VirtualMem.pfnGranularityGetInfo)) {
-            die("Some VirtualMem APIs are needed to enable UR_LAYER_ASAN");
-        }
+    // if (enabledType == SanitizerType::AddressSanitizer) {
+    //     if (!(dditable->VirtualMem.pfnReserve && dditable->VirtualMem.pfnMap &&
+    //           dditable->VirtualMem.pfnGranularityGetInfo)) {
+    //         die("Some VirtualMem APIs are needed to enable UR_LAYER_ASAN");
+    //     }
 
-        if (!dditable->PhysicalMem.pfnCreate) {
-            die("Some PhysicalMem APIs are needed to enable UR_LAYER_ASAN");
-        }
-    }
+    //     if (!dditable->PhysicalMem.pfnCreate) {
+    //         die("Some PhysicalMem APIs are needed to enable UR_LAYER_ASAN");
+    //     }
+    // }
 
     urDdiTable = *dditable;
 

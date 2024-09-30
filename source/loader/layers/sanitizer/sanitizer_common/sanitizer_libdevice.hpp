@@ -120,6 +120,15 @@ constexpr auto kSPIR_AsanDebug = "__AsanDebug";
 constexpr auto kSPIR_AsanDeviceGlobalCount = "__AsanDeviceGlobalCount";
 constexpr auto kSPIR_AsanDeviceGlobalMetadata = "__AsanDeviceGlobalMetadata";
 
+constexpr auto kSPIR_MsanShadowMemoryGlobalStart =
+    "__MsanShadowMemoryGlobalStart";
+constexpr auto kSPIR_MsanShadowMemoryGlobalEnd = "__MsanShadowMemoryGlobalEnd";
+
+constexpr auto kSPIR_MsanDebug = "__MsanDebug";
+
+constexpr auto kSPIR_MsanDeviceGlobalCount = "__MsanDeviceGlobalCount";
+constexpr auto kSPIR_MsanDeviceGlobalMetadata = "__MsanDeviceGlobalMetadata";
+
 inline const char *ToString(DeviceSanitizerMemoryType MemoryType) {
     switch (MemoryType) {
     case DeviceSanitizerMemoryType::USM_DEVICE:

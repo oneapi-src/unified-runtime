@@ -427,22 +427,6 @@ ur_result_t AsanInterceptor::postLaunchKernel(ur_kernel_handle_t Kernel,
     return Result;
 }
 
-ur_result_t DeviceInfo::allocShadowMemory(ur_context_handle_t Context) {
-    if (Type == DeviceType::CPU) {
-        UR_CALL(SetupShadowMemoryOnCPU(ShadowOffset, ShadowOffsetEnd));
-    } else if (Type == DeviceType::GPU_PVC) {
-        UR_CALL(SetupShadowMemoryOnPVC(Context, ShadowOffset, ShadowOffsetEnd));
-    } else if (Type == DeviceType::GPU_DG2) {
-        UR_CALL(SetupShadowMemoryOnDG2(Context, ShadowOffset, ShadowOffsetEnd));
-    } else {
-        getContext()->logger.error("Unsupport device type");
-        return UR_RESULT_ERROR_INVALID_ARGUMENT;
-    }
-    getContext()->logger.info("ShadowMemory(Global): {} - {}",
-                              (void *)ShadowOffset, (void *)ShadowOffsetEnd);
-    return UR_RESULT_SUCCESS;
-}
-
 /// Each 8 bytes of application memory are mapped into one byte of shadow memory
 /// The meaning of that byte:
 ///  - Negative: All bytes are not accessible (poisoned)
@@ -934,63 +918,6 @@ AsanInterceptor::findAllocInfoByAddress(uptr Address) {
            Address < It->second->AllocBegin + It->second->AllocSize &&
            "Wrong AllocInfo for the address");
     return It;
-}
-
-ur_result_t USMLaunchInfo::initialize() {
-    UR_CALL(getContext()->urDdiTable.Context.pfnRetain(Context));
-    UR_CALL(getContext()->urDdiTable.Device.pfnRetain(Device));
-    UR_CALL(getContext()->urDdiTable.USM.pfnSharedAlloc(
-        Context, Device, nullptr, nullptr, sizeof(LaunchInfo), (void **)&Data));
-    *Data = LaunchInfo{};
-    return UR_RESULT_SUCCESS;
-}
-
-ur_result_t USMLaunchInfo::updateKernelInfo(const KernelInfo &KI) {
-    auto NumArgs = KI.LocalArgs.size();
-    if (NumArgs) {
-        Data->NumLocalArgs = NumArgs;
-        UR_CALL(getContext()->urDdiTable.USM.pfnSharedAlloc(
-            Context, Device, nullptr, nullptr, sizeof(LocalArgsInfo) * NumArgs,
-            (void **)&Data->LocalArgs));
-        uint32_t i = 0;
-        for (auto [ArgIndex, ArgInfo] : KI.LocalArgs) {
-            Data->LocalArgs[i++] = ArgInfo;
-            getContext()->logger.debug(
-                "local_args (argIndex={}, size={}, sizeWithRZ={})", ArgIndex,
-                ArgInfo.Size, ArgInfo.SizeWithRedZone);
-        }
-    }
-    return UR_RESULT_SUCCESS;
-}
-
-USMLaunchInfo::~USMLaunchInfo() {
-    [[maybe_unused]] ur_result_t Result;
-    if (Data) {
-        auto Type = GetDeviceType(Context, Device);
-        if (Type == DeviceType::GPU_PVC || Type == DeviceType::GPU_DG2) {
-            if (Data->PrivateShadowOffset) {
-                Result = getContext()->urDdiTable.USM.pfnFree(
-                    Context, (void *)Data->PrivateShadowOffset);
-                assert(Result == UR_RESULT_SUCCESS);
-            }
-            if (Data->LocalShadowOffset) {
-                Result = getContext()->urDdiTable.USM.pfnFree(
-                    Context, (void *)Data->LocalShadowOffset);
-                assert(Result == UR_RESULT_SUCCESS);
-            }
-        }
-        if (Data->LocalArgs) {
-            Result = getContext()->urDdiTable.USM.pfnFree(
-                Context, (void *)Data->LocalArgs);
-            assert(Result == UR_RESULT_SUCCESS);
-        }
-        Result = getContext()->urDdiTable.USM.pfnFree(Context, (void *)Data);
-        assert(Result == UR_RESULT_SUCCESS);
-    }
-    Result = getContext()->urDdiTable.Context.pfnRelease(Context);
-    assert(Result == UR_RESULT_SUCCESS);
-    Result = getContext()->urDdiTable.Device.pfnRelease(Device);
-    assert(Result == UR_RESULT_SUCCESS);
 }
 
 } // namespace ur_sanitizer_layer
