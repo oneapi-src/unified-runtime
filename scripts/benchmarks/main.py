@@ -43,7 +43,7 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
         ExecImmediateCopyQueue(cb, 0, 1, 'Device', 'Device', 1024),
         ExecImmediateCopyQueue(cb, 1, 1, 'Device', 'Host', 1024),
         VectorSum(cb),
-        
+
         # *** Velocity benchmarks
         Hashtable(vb),
         Bitcracker(vb),
@@ -186,6 +186,7 @@ if __name__ == "__main__":
     parser.add_argument("--iterations", type=int, help='Number of times to run each benchmark to select a median value.', default=5)
     parser.add_argument("--timeout", type=int, help='Timeout for individual benchmarks in seconds.', default=600)
     parser.add_argument("--filter", type=str, help='Regex pattern to filter benchmarks by name.', default=None)
+    parser.add_argument("--epsilon", type=float, help='Threshold to consider change of performance significant', default=0.005)
     parser.add_argument("--verbose", help='Print output of all the commands.', action="store_true")
     parser.add_argument("--exit_on_failure", help='Exit on first failure.', action="store_true")
 
@@ -197,6 +198,7 @@ if __name__ == "__main__":
     options.sycl = args.sycl
     options.iterations = args.iterations
     options.timeout = args.timeout
+    options.epsilon = args.epsilon
     options.ur_dir = args.ur_dir
     options.ur_adapter_name = args.ur_adapter_name
     options.exit_on_failure = args.exit_on_failure

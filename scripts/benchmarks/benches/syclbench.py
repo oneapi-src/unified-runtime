@@ -39,13 +39,13 @@ class SyclBench:
 
         print(f"Run {configure_command}")
         run(configure_command, add_sycl=True)
-        
+
         print(f"Run cmake --build {build_path}")
         run(f"cmake --build {build_path} -j", add_sycl=True)
 
         self.built = True
         self.bins = build_path
-    
+
 class SyclBenchmark(Benchmark):
     def __init__(self, bench, name, test):
         self.bench = bench
@@ -81,27 +81,19 @@ class SyclBenchmark(Benchmark):
 
         # no output to stdout, all in outputfile
         self.run_bench(command, env_vars)
-        
+
         with open(outputfile, 'r') as f:
             reader = csv.reader(f)
             res_list = []
             for row in reader:
                 if not row[0].startswith('#'):
                     res_list.append(
-                        Result(label=row[0], 
-                               value=float(row[12]) * 1000, # convert to ms 
-                               command=command, 
-                               env=env_vars, 
+                        Result(label=row[0],
+                               value=float(row[12]) * 1000, # convert to ms
+                               command=command,
+                               env=env_vars,
                                stdout=row))
-                            #    stdout=result))
-            
-            # median_list = []
-            # for label in set(result.label for result in res_list):
-            #     values = [result.value for result in res_list if result.label == label]
-            #     median_value = sorted(values)[len(values) // 2]
-            #     median_list.append(Result(label=label, value=median_value, command=command, env=env_vars, stdout=result))
 
-        # return median_list
         return res_list
 
     def teardown(self):
@@ -162,7 +154,7 @@ class Bicg(SyclBenchmark):
         return [
             f"--size=20480",
         ]
-    
+
 class Correlation(SyclBenchmark):
     def __init__(self, bench):
         super().__init__(bench, "correlation", "Correlation")
@@ -189,7 +181,7 @@ class Gemm(SyclBenchmark):
         return [
             f"--size=8192",
         ]
-    
+
 class Gesumv(SyclBenchmark):
     def __init__(self, bench):
         super().__init__(bench, "gesummv", "Gesummv")
@@ -244,17 +236,6 @@ class MatmulChain(SyclBenchmark):
             f"--size=2048",
         ]
 
-# ** bad input file path **
-# 
-# class Median(SyclBenchmark):
-#     def __init__(self, bench):
-#         super().__init__(bench, "median", "MedianFilter")
-
-#     def bin_args(self) -> list[str]:
-#         return [
-#             f"--size=512",
-#         ]
-
 class MolDyn(SyclBenchmark):
     def __init__(self, bench):
         super().__init__(bench, "mol_dyn", "MolecularDynamics")
@@ -272,7 +253,7 @@ class Mvt(SyclBenchmark):
         return [
             f"--size=32767",
         ]
-    
+
 class NBody(SyclBenchmark):
     def __init__(self, bench):
         super().__init__(bench, "nbody", "NBody_")
@@ -290,11 +271,6 @@ class Sf(SyclBenchmark):
         return [
             f"--size=--size=100000000",
         ]
-# ../../share/Brommy.bmp could not be opened
-#    
-# class SobelX(SyclBenchmark):
-#     def __init__(self, bench):
-#         super().__init__(bench, "sobel", "SobelFilter")
 
 class Syr2k(SyclBenchmark):
     def __init__(self, bench):
@@ -304,7 +280,7 @@ class Syr2k(SyclBenchmark):
         return [
             f"--size=6144",
         ]
-    
+
 class Syrk(SyclBenchmark):
     def __init__(self, bench):
         super().__init__(bench, "syrk", "Syrk")
@@ -333,7 +309,7 @@ class DagTaskI(SyclBenchmark):
         return [
             f"--size=32768",
         ]
-    
+
 class DagTaskS(SyclBenchmark):
     def __init__(self, bench):
         super().__init__(bench, "dag_task_throughput_sequential", "DAGTaskThroughput_multi")
