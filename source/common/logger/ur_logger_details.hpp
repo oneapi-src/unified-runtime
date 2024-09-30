@@ -13,7 +13,7 @@
 namespace logger {
 
 struct LegacyMessage {
-  LegacyMessage(const char *p) : message(p) {};
+  LegacyMessage(const char *p) : message(p){};
   const char *message;
 };
 
