@@ -7100,6 +7100,248 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueWriteHostPipe(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urEnqueueUSMDeviceAllocExp
+__urdlllocal ur_result_t UR_APICALL urEnqueueUSMDeviceAllocExp(
+    ur_queue_handle_t hQueue,   ///< [in] handle of the queue object
+    ur_usm_pool_handle_t pPool, ///< [in][optional] USM pool descriptor
+    const size_t
+        size, ///< [in] minimum size in bytes of the USM memory object to be allocated
+    const ur_exp_async_usm_alloc_properties_t *
+        pProperties, ///< [in][optional] pointer to the enqueue async alloc properties
+    uint32_t numEventsInWaitList, ///< [in] size of the event wait list
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the kernel execution.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating no wait events.
+    void **ppMem, ///< [out] pointer to USM memory object
+    ur_event_handle_t *
+        phEvent ///< [out][optional] return an event object that identifies the async alloc
+    ) try {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    ur_enqueue_usm_device_alloc_exp_params_t params = {
+        &hQueue,          &pPool, &size,   &pProperties, &numEventsInWaitList,
+        &phEventWaitList, &ppMem, &phEvent};
+
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_before_callback("urEnqueueUSMDeviceAllocExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
+
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_replace_callback(
+            "urEnqueueUSMDeviceAllocExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
+
+        // optional output handle
+        if (phEvent) {
+            *phEvent = mock::createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback("urEnqueueUSMDeviceAllocExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
+
+    return result;
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urEnqueueUSMSharedAllocExp
+__urdlllocal ur_result_t UR_APICALL urEnqueueUSMSharedAllocExp(
+    ur_queue_handle_t hQueue,   ///< [in] handle of the queue object
+    ur_usm_pool_handle_t pPool, ///< [in][optional] USM pool descriptor
+    const size_t
+        size, ///< [in] minimum size in bytes of the USM memory object to be allocated
+    const ur_exp_async_usm_alloc_properties_t *
+        pProperties, ///< [in][optional] pointer to the enqueue async alloc properties
+    uint32_t numEventsInWaitList, ///< [in] size of the event wait list
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the kernel execution.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating no wait events.
+    void **ppMem, ///< [out] pointer to USM memory object
+    ur_event_handle_t *
+        phEvent ///< [out][optional] return an event object that identifies the async alloc
+    ) try {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    ur_enqueue_usm_shared_alloc_exp_params_t params = {
+        &hQueue,          &pPool, &size,   &pProperties, &numEventsInWaitList,
+        &phEventWaitList, &ppMem, &phEvent};
+
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_before_callback("urEnqueueUSMSharedAllocExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
+
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_replace_callback(
+            "urEnqueueUSMSharedAllocExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
+
+        // optional output handle
+        if (phEvent) {
+            *phEvent = mock::createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback("urEnqueueUSMSharedAllocExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
+
+    return result;
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urEnqueueUSMHostAllocExp
+__urdlllocal ur_result_t UR_APICALL urEnqueueUSMHostAllocExp(
+    ur_queue_handle_t hQueue,   ///< [in] handle of the queue object
+    ur_usm_pool_handle_t pPool, ///< [in][optional] USM pool descriptor
+    const size_t
+        size, ///< [in] minimum size in bytes of the USM memory object to be allocated
+    const ur_exp_async_usm_alloc_properties_t *
+        pProperties, ///< [in][optional] pointer to the enqueue async alloc properties
+    uint32_t numEventsInWaitList, ///< [in] size of the event wait list
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the kernel execution.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating no wait events.
+    void **ppMem, ///< [out] pointer to USM memory object
+    ur_event_handle_t *
+        phEvent ///< [out][optional] return an event object that identifies the async alloc
+    ) try {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    ur_enqueue_usm_host_alloc_exp_params_t params = {
+        &hQueue,          &pPool, &size,   &pProperties, &numEventsInWaitList,
+        &phEventWaitList, &ppMem, &phEvent};
+
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_before_callback("urEnqueueUSMHostAllocExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
+
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_replace_callback("urEnqueueUSMHostAllocExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
+
+        // optional output handle
+        if (phEvent) {
+            *phEvent = mock::createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback("urEnqueueUSMHostAllocExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
+
+    return result;
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urEnqueueUSMFreeExp
+__urdlllocal ur_result_t UR_APICALL urEnqueueUSMFreeExp(
+    ur_queue_handle_t hQueue,     ///< [in] handle of the queue object
+    ur_usm_pool_handle_t pPool,   ///< [in][optional] USM pool descriptor
+    void *pMem,                   ///< [in] pointer to USM memory object
+    uint32_t numEventsInWaitList, ///< [in] size of the event wait list
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the kernel execution.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating no wait events.
+    ur_event_handle_t *
+        phEvent ///< [out][optional] return an event object that identifies the async alloc
+    ) try {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    ur_enqueue_usm_free_exp_params_t params = {
+        &hQueue,          &pPool,  &pMem, &numEventsInWaitList,
+        &phEventWaitList, &phEvent};
+
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_before_callback("urEnqueueUSMFreeExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
+
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_replace_callback("urEnqueueUSMFreeExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
+
+        // optional output handle
+        if (phEvent) {
+            *phEvent = mock::createDummyHandle<ur_event_handle_t>();
+        }
+        result = UR_RESULT_SUCCESS;
+    }
+
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback("urEnqueueUSMFreeExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
+
+    return result;
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMPitchedAllocExp
 __urdlllocal ur_result_t UR_APICALL urUSMPitchedAllocExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
@@ -11019,6 +11261,14 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetEnqueueExpProcAddrTable(
 
     pDdiTable->pfnKernelLaunchCustomExp =
         driver::urEnqueueKernelLaunchCustomExp;
+
+    pDdiTable->pfnUSMDeviceAllocExp = driver::urEnqueueUSMDeviceAllocExp;
+
+    pDdiTable->pfnUSMSharedAllocExp = driver::urEnqueueUSMSharedAllocExp;
+
+    pDdiTable->pfnUSMHostAllocExp = driver::urEnqueueUSMHostAllocExp;
+
+    pDdiTable->pfnUSMFreeExp = driver::urEnqueueUSMFreeExp;
 
     pDdiTable->pfnCooperativeKernelLaunchExp =
         driver::urEnqueueCooperativeKernelLaunchExp;

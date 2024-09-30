@@ -416,5 +416,8 @@ inline void printDeviceInfos(ur_device_handle_t hDevice,
     std::cout << prefix;
     printDeviceInfo<ur_bool_t>(
         hDevice, UR_DEVICE_INFO_ENQUEUE_NATIVE_COMMAND_SUPPORT_EXP);
+    std::cout << prefix;
+    printDeviceInfo<ur_bool_t>(hDevice,
+                               UR_DEVICE_INFO_ASYNC_USM_ALLOCATIONS_EXP);
 }
 } // namespace urinfo

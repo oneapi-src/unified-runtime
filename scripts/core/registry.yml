@@ -604,6 +604,18 @@ etors:
 - name: BINDLESS_IMAGES_MAP_EXTERNAL_LINEAR_MEMORY_EXP
   desc: Enumerator for $xBindlessImagesMapExternalLinearMemoryExp
   value: '245'
+- name: ENQUEUE_USM_DEVICE_ALLOC_EXP
+  desc: Enumerator for $xEnqueueUSMDeviceAllocExp
+  value: '246'
+- name: ENQUEUE_USM_SHARED_ALLOC_EXP
+  desc: Enumerator for $xEnqueueUSMSharedAllocExp
+  value: '247'
+- name: ENQUEUE_USM_HOST_ALLOC_EXP
+  desc: Enumerator for $xEnqueueUSMHostAllocExp
+  value: '248'
+- name: ENQUEUE_USM_FREE_EXP
+  desc: Enumerator for $xEnqueueUSMFreeExp
+  value: '249'
 ---
 type: enum
 desc: Defines structure types
