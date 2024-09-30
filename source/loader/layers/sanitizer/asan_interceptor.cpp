@@ -198,15 +198,6 @@ ur_result_t SanitizerInterceptor::releaseMemory(ur_context_handle_t Context,
         getContext()->logger.debug("Free: {}", (void *)AllocInfo->AllocBegin);
         std::scoped_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
         m_AllocationMap.erase(AllocInfoIt);
-        if (AllocInfo->Type == AllocType::HOST_USM) {
-            for (auto &Device : ContextInfo->DeviceList) {
-                UR_CALL(
-                    getDeviceInfo(Device)->Shadow->ReleaseShadow(AllocInfo));
-            }
-        } else {
-            UR_CALL(getDeviceInfo(AllocInfo->Device)
-                        ->Shadow->ReleaseShadow(AllocInfo));
-        }
         return getContext()->urDdiTable.USM.pfnFree(
             Context, (void *)(AllocInfo->AllocBegin));
     }
