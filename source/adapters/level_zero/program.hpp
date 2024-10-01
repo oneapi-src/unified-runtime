@@ -103,22 +103,22 @@ struct ur_program_handle_t_ : _ur_object {
         AssociatedDevices(Context->getDevices()) {}
 
   // Construct a program in Exe or Invalid state.
-  ur_program_handle_t_([[maybe_unused]] state St, ur_context_handle_t Context,
+  ur_program_handle_t_(state, ur_context_handle_t Context,
                        ze_module_handle_t InteropZeModule)
       : Context{Context}, NativeProperties{nullptr}, OwnZeModule{true},
-        AssociatedDevices({Context->getDevices()[0]}), InteropZeModule{
-                                                           InteropZeModule} {}
+        AssociatedDevices({Context->getDevices()[0]}),
+        InteropZeModule{InteropZeModule} {}
 
   // Construct a program in Exe state (interop).
   // TODO: Currently it is not possible to get the device associated with the
   // interop module, API must be changed to either get that info from the user
   // or new API need to be added to L0 to fetch that info. Consider it
   // associated with the first device in the context.
-  ur_program_handle_t_([[maybe_unused]] state St, ur_context_handle_t Context,
+  ur_program_handle_t_(state, ur_context_handle_t Context,
                        ze_module_handle_t InteropZeModule, bool OwnZeModule)
       : Context{Context}, NativeProperties{nullptr}, OwnZeModule{OwnZeModule},
-        AssociatedDevices({Context->getDevices()[0]}), InteropZeModule{
-                                                           InteropZeModule} {
+        AssociatedDevices({Context->getDevices()[0]}),
+        InteropZeModule{InteropZeModule} {
     // TODO: Currently it is not possible to understand the device associated
     // with provided ZeModule. So we can't set the state on that device to Exe.
   }
