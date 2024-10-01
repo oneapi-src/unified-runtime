@@ -83,42 +83,6 @@ ur_result_t urProgramCreateWithIL(
 }
 
 ur_result_t urProgramCreateWithBinary(
-    ur_context_handle_t Context, ///< [in] handle of the context instance
-    ur_device_handle_t
-        Device,            ///< [in] handle to device associated with binary.
-    size_t Size,           ///< [in] size in bytes.
-    const uint8_t *Binary, ///< [in] pointer to binary.
-    const ur_program_properties_t
-        *Properties, ///< [in][optional] pointer to program creation properties.
-    ur_program_handle_t
-        *Program ///< [out] pointer to handle of Program object created.
-) {
-  // In OpenCL, clCreateProgramWithBinary() can be used to load any of the
-  // following: "program executable", "compiled program", or "library of
-  // compiled programs".  In addition, the loaded program can be either
-  // IL (SPIR-v) or native device code.  For now, we assume that
-  // urProgramCreateWithBinary() is only used to load a "program executable"
-  // as native device code.
-  // If we wanted to support all the same cases as OpenCL, we would need to
-  // somehow examine the binary image to distinguish the cases.  Alternatively,
-  // we could change the PI interface and have the caller pass additional
-  // information to distinguish the cases.
-
-  try {
-    ur_program_handle_t_ *UrProgram =
-        new ur_program_handle_t_(ur_program_handle_t_::Native, Context, 1,
-                                 &Device, Properties, &Binary, &Size);
-    *Program = reinterpret_cast<ur_program_handle_t>(UrProgram);
-  } catch (const std::bad_alloc &) {
-    return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
-  } catch (...) {
-    return UR_RESULT_ERROR_UNKNOWN;
-  }
-
-  return UR_RESULT_SUCCESS;
-}
-
-ur_result_t urProgramCreateWithBinaryExp(
     ur_context_handle_t hContext, ///< [in] handle of the context instance
     uint32_t numDevices,          ///< [in] number of devices
     ur_device_handle_t
@@ -135,6 +99,16 @@ ur_result_t urProgramCreateWithBinaryExp(
     ur_program_handle_t
         *phProgram ///< [out] pointer to handle of Program object created.
 ) {
+  // In OpenCL, clCreateProgramWithBinary() can be used to load any of the
+  // following: "program executable", "compiled program", or "library of
+  // compiled programs".  In addition, the loaded program can be either
+  // IL (SPIR-v) or native device code.  For now, we assume that
+  // urProgramCreateWithBinary() is only used to load a "program executable"
+  // as native device code.
+  // If we wanted to support all the same cases as OpenCL, we would need to
+  // somehow examine the binary image to distinguish the cases.  Alternatively,
+  // we could change the PI interface and have the caller pass additional
+  // information to distinguish the cases.
   try {
     ur_program_handle_t_ *UrProgram = new ur_program_handle_t_(
         ur_program_handle_t_::Native, hContext, numDevices, phDevices,
