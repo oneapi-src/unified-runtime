@@ -1,0 +1,19 @@
+name: "Fetch DPC++"
+description: "Fetch DPC++"
+inputs:
+  url:
+    description: "Path to a DPC++ build"
+    required: false
+    default: "https://github.com/intel/llvm/releases/download/nightly-2024-10-15/sycl_linux.tar.gz"
+  dir:
+    description: "Install location"
+    required: false
+    default: "dpcpp_compiler"
+runs:
+  using: composite
+  steps:
+    - run: |
+        wget -O ${{github.workspace}}/dpcpp_compiler.tar.gz ${{inputs.url}}
+        mkdir ${{inputs.dir}}
+        tar -xvf ${{github.workspace}}/dpcpp_compiler.tar.gz -C ${{inputs.dir}}
+      shell: bash
