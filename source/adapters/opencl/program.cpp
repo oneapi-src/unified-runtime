@@ -116,27 +116,22 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithIL(
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
-    ur_context_handle_t hContext, ur_device_handle_t hDevice, size_t size,
-    const uint8_t *pBinary, const ur_program_properties_t *,
+    ur_context_handle_t hContext, uint32_t numDevices,
+    ur_device_handle_t *phDevices, size_t *pLengths, const uint8_t **ppBinaries,
+    const ur_program_properties_t *pProperties,
     ur_program_handle_t *phProgram) {
-
-  const cl_device_id Devices[1] = {cl_adapter::cast<cl_device_id>(hDevice)};
-  const size_t Lengths[1] = {size};
-  cl_int BinaryStatus[1];
+  cl_device_id Devices[numDevices];
+  for (uint32_t i = 0; i < numDevices; ++i)
+    Devices[i] = cl_adapter::cast<cl_device_id>(phDevices[i]);
+  cl_int BinaryStatus[numDevices];
   cl_int CLResult;
   *phProgram = cl_adapter::cast<ur_program_handle_t>(clCreateProgramWithBinary(
       cl_adapter::cast<cl_context>(hContext), cl_adapter::cast<cl_uint>(1u),
-      Devices, Lengths, &pBinary, BinaryStatus, &CLResult));
+      Devices, pLengths, ppBinaries, BinaryStatus, &CLResult));
   CL_RETURN_ON_FAILURE(BinaryStatus[0]);
   CL_RETURN_ON_FAILURE(CLResult);
 
   return UR_RESULT_SUCCESS;
-}
-
-UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinaryExp(
-    ur_context_handle_t, uint32_t, ur_device_handle_t *, size_t *,
-    const uint8_t **, const ur_program_properties_t *, ur_program_handle_t *) {
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
