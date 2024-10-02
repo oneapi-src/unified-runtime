@@ -85,6 +85,7 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
                 best_key = key
 
         # Generate the row with the best value highlighted
+        if options.verbose: print(f"Results: {results}")
         for key in chart_data.keys():
             if key in results:
                 intv = results[key].value
@@ -166,8 +167,8 @@ def generate_summary_table_and_chart(chart_data: dict[str, list[Result]]):
 
     if mean_cnt > 0:
         global_mean = global_product ** (1/mean_cnt)
-        summary_line = f"Total {mean_cnt} benchmarks in mean."
-        summary_line += "\n" + f"Geomean {global_mean*100:.3f}%.\nImproved {improved} Regressed {regressed} (threshold {options.epsilon*100:.2f}%)"
+        summary_line = f"Total {mean_cnt} benchmarks in mean. "
+        summary_line += "\n" + f"Geomean {global_mean*100:.3f}%. \nImproved {improved} Regressed {regressed} (threshold {options.epsilon*100:.2f}%)"
     else:
         summary_line = f"No diffs to calculate performance change"
 
