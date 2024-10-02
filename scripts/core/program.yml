@@ -158,6 +158,7 @@ returns:
         - "`NULL != pProperties && pProperties->count > 0 && NULL == pProperties->pMetadatas`"
     - $X_RESULT_ERROR_INVALID_SIZE:
         - "`NULL != pProperties && NULL != pProperties->pMetadatas && pProperties->count == 0`"
+        - "`numDevices == 0`"
     - $X_RESULT_ERROR_INVALID_NATIVE_BINARY:
         - "If any binary in `ppBinaries` isn't a valid binary for the corresponding device in `phDevices.`"
 --- #--------------------------------------------------------------------------
