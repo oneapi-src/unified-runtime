@@ -28,22 +28,25 @@ class VelocityBase(Benchmark):
 
     def setup(self):
         self.download_deps()
+        self.benchmark_bin = os.path.join(self.directory, self.bench_name, self.bin_name)
+        
+        if options.no_git:
+            return
+        
+        build_path = create_build_path(self.directory, self.bench_name)
 
-        if not options.no_git:
-            build_path = create_build_path(self.directory, self.bench_name)
+        configure_command = [
+            "cmake",
+            f"-B {build_path}",
+            f"-S {self.code_path}",
+            f"-DCMAKE_BUILD_TYPE=Release"
+        ]
+        run(configure_command, {'CC': 'clang', 'CXX':'clang++'}, add_sycl=True)
+        run(f"cmake --build {build_path} -j", add_sycl=True)
 
-            configure_command = [
-                "cmake",
-                f"-B {build_path}",
-                f"-S {self.code_path}",
-                f"-DCMAKE_BUILD_TYPE=Release"
-            ]
-            run(configure_command, {'CC': 'clang', 'CXX':'clang++'}, add_sycl=True)
-            run(f"cmake --build {build_path} -j", add_sycl=True)
-
-            self.benchmark_bin = os.path.join(build_path, self.bin_name)
-        else:
-            self.benchmark_bin = os.path.join(self.directory, self.bench_name, self.bin_name)
+        # self.benchmark_bin = os.path.join(build_path, self.bin_name)
+        
+            
 
     def bin_args(self) -> list[str]:
         return []

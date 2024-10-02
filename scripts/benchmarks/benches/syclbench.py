@@ -85,8 +85,8 @@ class SyclBenchmark(Benchmark):
         command += self.bin_args()
         env_vars.update(self.extra_env_vars())
         
-        if options.verbose:
-            print(f"{self.__class__.__name__}: run_bench {command} env {env_vars}")
+        # if options.verbose:
+        print(f"{self.__class__.__name__}: run_bench {command} env {env_vars}")
         
         # no output to stdout, all in outputfile
         self.run_bench(command, env_vars)
