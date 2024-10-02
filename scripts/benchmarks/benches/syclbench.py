@@ -72,19 +72,18 @@ class SyclBenchmark(Benchmark):
     def run(self, env_vars) -> list[Result]:
         if self.done:
             return
-        outputfile = os.path.join(self.bench.directory, "results", self.test+".csv")
-        print(f"{self.__class__.__name__}: Results in {outputfile}")
+        self.outputfile = os.path.join(self.bench.directory, "results", self.test+".csv")
+        print(f"{self.__class__.__name__}: Results in {self.outputfile}")
         command = [
             f"{self.benchmark_bin}",
             f"--warmup-run",
             f"--num-runs={options.iterations}",
-            f"--output={outputfile}"
+            f"--output={self.outputfile}"
         ]
         bin_dir = self.bench.bins
 
         command += self.bin_args()
         env_vars.update(self.extra_env_vars())
-
         
         if options.verbose:
             print(f"{self.__class__.__name__}: run_bench {command} env {env_vars}")
@@ -92,7 +91,7 @@ class SyclBenchmark(Benchmark):
         # no output to stdout, all in outputfile
         self.run_bench(command, env_vars)
 
-        with open(outputfile, 'r') as f:
+        with open(self.outputfile, 'r') as f:
             reader = csv.reader(f)
             res_list = []
             for row in reader:
@@ -108,11 +107,142 @@ class SyclBenchmark(Benchmark):
         return res_list
 
     def teardown(self):
+        print(f"Removing {self.outputfile}...")
+        os.remove(self.outputfile)
         return
 
     def name(self):
         return self.test
 
+# multi benchmarks
+class Blocked_transform(SyclBenchmark):
+    def __init__(self, bench):
+        super().__init__(bench, "blocked_transform", "BlockedTransform_multi")
+
+    def bin_args(self) -> list[str]:
+        return [
+            f"--size=2049",
+            f"--local=1024"
+        ]
+
+class DagTaskI(SyclBenchmark):
+    def __init__(self, bench):
+        super().__init__(bench, "dag_task_throughput_independent", "IndependentDAGTaskThroughput_multi")
+
+    def bin_args(self) -> list[str]:
+        return [
+            f"--size=32768",
+        ]
+
+class DagTaskS(SyclBenchmark):
+    def __init__(self, bench):
+        super().__init__(bench, "dag_task_throughput_sequential", "DAGTaskThroughput_multi")
+
+    def bin_args(self) -> list[str]:
+        return [
+            f"--size=327680",
+        ]
+
+class HostDevBandwidth(SyclBenchmark):
+    def __init__(self, bench):
+        super().__init__(bench, "host_device_bandwidth", "HostDeviceBandwidth_multi")
+
+    def bin_args(self) -> list[str]:
+        return [
+            f"--size=512",
+        ]
+
+class LocalMem(SyclBenchmark):
+    def __init__(self, bench):
+        super().__init__(bench, "local_mem", f"LocalMem_multi")
+
+    def bin_args(self) -> list[str]:
+        return [
+            f"--size=10240000",
+        ]
+
+class Pattern_L2(SyclBenchmark):
+    def __init__(self, bench):
+        super().__init__(bench, "pattern_L2", "L2_multi")
+        
+    def bin_args(self) -> list[str]:
+        return [
+            f"--size=1024000000",
+        ]
+
+class Reduction(SyclBenchmark):
+    def __init__(self, bench):
+        super().__init__(bench, "reduction", "Pattern_Reduction_multi")
+    
+    def bin_args(self) -> list[str]:
+        return [
+            f"--size=10240000",
+        ]
+        
+class ScalarProd(SyclBenchmark):
+    def __init__(self, bench):
+        super().__init__(bench, "scalar_prod", "ScalarProduct_multi")
+        
+    def bin_args(self) -> list[str]:
+        return [
+            f"--size=102400000",
+        ]
+
+class SegmentReduction(SyclBenchmark):
+    def __init__(self, bench):
+        super().__init__(bench, "segmentedreduction", "Pattern_SegmentedReduction_multi")
+        
+    def bin_args(self) -> list[str]:
+        return [
+            f"--size=102400000",
+        ]
+
+class UsmAccLatency(SyclBenchmark):
+    def __init__(self, bench):
+        super().__init__(bench, "usm_accessors_latency", "USM_Latency_multi")
+       
+    def bin_args(self) -> list[str]:
+        return [
+            f"--size=4096",
+        ]
+        
+class UsmAllocLatency(SyclBenchmark):
+    def __init__(self, bench):
+        super().__init__(bench, "usm_allocation_latency", "USM_Allocation_latency_multi")
+      
+    def bin_args(self) -> list[str]:
+        return [
+            f"--size=1024000000",
+        ]
+ 
+class UsmInstrMix(SyclBenchmark):
+    def __init__(self, bench):
+        super().__init__(bench, "usm_instr_mix", "USM_Instr_Mix_multi")
+      
+    def bin_args(self) -> list[str]:
+        return [
+            f"--size=8192",
+        ]
+
+class UsmPinnedOverhead(SyclBenchmark):
+    def __init__(self, bench):
+        super().__init__(bench, "usm_pinned_overhead", "USM_Pinned_Overhead_multi")
+
+    def bin_args(self) -> list[str]:
+        return [
+            f"--size=10240000",
+        ]
+
+class VecAdd(SyclBenchmark):
+    def __init__(self, bench):
+        super().__init__(bench, "vec_add", "VectorAddition_multi")
+
+    def bin_args(self) -> list[str]:
+        return [
+            f"--size=102400000",
+        ]
+
+# single benchmarks
 class Arith(SyclBenchmark):
     def __init__(self, bench):
         super().__init__(bench, "arith", "Arith_int32_512")
@@ -229,16 +359,14 @@ class LinRegCoeff(SyclBenchmark):
             f"--size=1638400000",
         ]
 
-# too fast
-# 
-# class LinRegError(SyclBenchmark):
-#     def __init__(self, bench):
-#         super().__init__(bench, "lin_reg_error", "LinearRegression")
+class LinRegError(SyclBenchmark):
+    def __init__(self, bench):
+        super().__init__(bench, "lin_reg_error", "LinearRegression")
 
-#     def bin_args(self) -> list[str]:
-#         return [
-#             f"--size=64000",
-#         ]
+    def bin_args(self) -> list[str]:
+        return [
+            f"--size=4096",
+        ]
 
 class MatmulChain(SyclBenchmark):
     def __init__(self, bench):
@@ -282,7 +410,7 @@ class Sf(SyclBenchmark):
 
     def bin_args(self) -> list[str]:
         return [
-            f"--size=--size=1000000000",
+            f"--size=5000000000",
         ]
 
 class Syr2k(SyclBenchmark):
@@ -291,7 +419,7 @@ class Syr2k(SyclBenchmark):
 
     def bin_args(self) -> list[str]:
         return [
-            f"--size=6144",
+            f"--size=2048",
         ]
 
 class Syrk(SyclBenchmark):
@@ -302,84 +430,3 @@ class Syrk(SyclBenchmark):
         return [
             f"--size=1024",
         ]
-
-# multi benchmarks
-class Blocked_transform(SyclBenchmark):
-    def __init__(self, bench):
-        super().__init__(bench, "blocked_transform", "BlockedTransform_multi")
-
-    def bin_args(self) -> list[str]:
-        return [
-            f"--size=16384",
-            f"--local=1024"
-        ]
-
-class DagTaskI(SyclBenchmark):
-    def __init__(self, bench):
-        super().__init__(bench, "dag_task_throughput_independent", "IndependentDAGTaskThroughput_multi")
-
-    def bin_args(self) -> list[str]:
-        return [
-            f"--size=32768",
-        ]
-
-class DagTaskS(SyclBenchmark):
-    def __init__(self, bench):
-        super().__init__(bench, "dag_task_throughput_sequential", "DAGTaskThroughput_multi")
-
-    def bin_args(self) -> list[str]:
-        return [
-            f"--size=327680",
-        ]
-
-class HostDevBandwidth(SyclBenchmark):
-    def __init__(self, bench):
-        super().__init__(bench, "host_device_bandwidth", "HostDeviceBandwidth_multi")
-
-class LocalMem(SyclBenchmark):
-    def __init__(self, bench):
-        super().__init__(bench, "local_mem", f"LocalMem_multi")
-
-    def bin_args(self) -> list[str]:
-        return [
-            f"--size=512",
-        ]
-
-class Pattern_L2(SyclBenchmark):
-    def __init__(self, bench):
-        super().__init__(bench, "pattern_L2", "L2_multi")
-
-class Reduction(SyclBenchmark):
-    def __init__(self, bench):
-        super().__init__(bench, "reduction", "Pattern_Reduction_multi")
-
-class ScalarProd(SyclBenchmark):
-    def __init__(self, bench):
-        super().__init__(bench, "scalar_prod", "ScalarProduct_multi")
-
-class SegmentReduction(SyclBenchmark):
-    def __init__(self, bench):
-        super().__init__(bench, "segmentedreduction", "Pattern_SegmentedReduction_multi")
-
-class UsmAccLatency(SyclBenchmark):
-    def __init__(self, bench):
-        super().__init__(bench, "usm_accessors_latency", "USM_Latency_multi")
-
-# too fast
-# 
-# class UsmAllocLatency(SyclBenchmark):
-#     def __init__(self, bench):
-#         super().__init__(bench, "usm_allocation_latency", "USM_Allocation_latency_multi")
-
-class UsmInstrMix(SyclBenchmark):
-    def __init__(self, bench):
-        super().__init__(bench, "usm_instr_mix", "USM_Instr_Mix_multi")
-
-class UsmPinnedOverhead(SyclBenchmark):
-    def __init__(self, bench):
-        super().__init__(bench, "usm_pinned_overhead", "USM_Pinned_Overhead_multi")
-
-class VecAdd(SyclBenchmark):
-    def __init__(self, bench):
-        super().__init__(bench, "vec_add", "VectorAddition_multi")
-
