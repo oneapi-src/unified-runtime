@@ -21,7 +21,6 @@ urUSMDeviceAllocAlignmentTest.SuccessAlignedAllocations/Intel_R__OpenCL___{{.*}}
 urUSMDeviceAllocAlignmentTest.SuccessAlignedAllocations/Intel_R__OpenCL___{{.*}}___UsePoolEnabled_64_8
 urUSMDeviceAllocAlignmentTest.SuccessAlignedAllocations/Intel_R__OpenCL___{{.*}}___UsePoolEnabled_64_512
 urUSMDeviceAllocAlignmentTest.SuccessAlignedAllocations/Intel_R__OpenCL___{{.*}}___UsePoolEnabled_64_2048
-urUSMGetMemAllocInfoTest.Success/Intel_R__OpenCL___{{.*}}___UR_USM_ALLOC_INFO_POOL
 urUSMHostAllocTest.Success/Intel_R__OpenCL___{{.*}}___UsePoolEnabled
 urUSMHostAllocTest.SuccessWithDescriptors/Intel_R__OpenCL___{{.*}}___UsePoolEnabled
 urUSMHostAllocTest.InvalidNullHandleContext/Intel_R__OpenCL___{{.*}}___UsePoolEnabled
