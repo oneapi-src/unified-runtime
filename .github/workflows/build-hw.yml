@@ -1,0 +1,60 @@
+name: H/W Build and Test
+
+on: [push, pull_request]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  level-zero:
+    name: Level Zero
+    uses: ./.github/workflows/build-hw-reusable.yml
+    with:
+      adapter_name: L0
+      runner_name: L0
+
+  level-zero-v2:
+    name: Level Zero V2
+    uses: ./.github/workflows/build-hw-reusable.yml
+    with:
+      adapter_name: L0_V2
+      runner_name: L0
+
+  level-zero-static:
+    name: Level Zero static
+    uses: ./.github/workflows/build-hw-reusable.yml
+    with:
+      adapter_name: L0
+      runner_name: L0
+      static_loader: ON
+      static_adapter: ON
+
+  opencl:
+    name: OpenCL
+    uses: ./.github/workflows/build-hw-reusable.yml
+    with:
+      adapter_name: OPENCL
+      runner_name: OPENCL
+      platform: "Intel(R) OpenCL"
+
+  cuda:
+    name: CUDA
+    uses: ./.github/workflows/build-hw-reusable.yml
+    with:
+      adapter_name: CUDA
+      runner_name: CUDA
+
+  hip:
+    name: HIP
+    uses: ./.github/workflows/build-hw-reusable.yml
+    with:
+      adapter_name: HIP
+      runner_name: HIP
+
+  native-cpu:
+    name: Native CPU
+    uses: ./.github/workflows/build-hw-reusable.yml
+    with:
+      adapter_name: NATIVE_CPU
+      runner_name: NATIVE_CPU
