@@ -158,7 +158,8 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueKernelLaunch(
     char **ZeHandlePtr = nullptr;
     if (Arg.Value) {
       UR_CALL(Arg.Value->getZeHandlePtr(ZeHandlePtr, Arg.AccessMode,
-                                        Queue->Device));
+                                        Queue->Device, EventWaitList,
+                                        NumEventsInWaitList));
     }
     ZE2UR_CALL(zeKernelSetArgumentValue,
                (ZeKernel, Arg.Index, Arg.Size, ZeHandlePtr));
@@ -377,7 +378,8 @@ ur_result_t ur_queue_handle_legacy_t_::enqueueCooperativeKernelLaunchExp(
     char **ZeHandlePtr = nullptr;
     if (Arg.Value) {
       UR_CALL(Arg.Value->getZeHandlePtr(ZeHandlePtr, Arg.AccessMode,
-                                        Queue->Device));
+                                        Queue->Device, EventWaitList,
+                                        NumEventsInWaitList));
     }
     ZE2UR_CALL(zeKernelSetArgumentValue,
                (ZeKernel, Arg.Index, Arg.Size, ZeHandlePtr));
