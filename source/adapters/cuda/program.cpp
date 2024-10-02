@@ -500,9 +500,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
   if (numDevices > 1)
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 
-  if (numDevices == 0)
-    return UR_RESULT_ERROR_INVALID_DEVICE;
-
   UR_CHECK_ERROR(createProgram(hContext, phDevices[0], pLengths[0],
                                ppBinaries[0], pProperties, phProgram));
   (*phProgram)->BinaryType = UR_PROGRAM_BINARY_TYPE_COMPILED_OBJECT;

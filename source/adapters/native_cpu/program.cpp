@@ -61,9 +61,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
   if (numDevices > 1)
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 
-  if (numDevices == 0)
-    return UR_RESULT_ERROR_INVALID_DEVICE;
-
   auto hDevice = phDevices[0];
   auto pBinary = ppBinaries[0];
   std::ignore = pLengths;

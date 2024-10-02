@@ -4235,6 +4235,7 @@ urProgramCreateWithIL(
 ///         + `NULL != pProperties && pProperties->count > 0 && NULL == pProperties->pMetadatas`
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         + `NULL != pProperties && NULL != pProperties->pMetadatas && pProperties->count == 0`
+///         + `numDevices == 0`
 ///     - ::UR_RESULT_ERROR_INVALID_NATIVE_BINARY
 ///         + If any binary in `ppBinaries` isn't a valid binary for the corresponding device in `phDevices.`
 UR_APIEXPORT ur_result_t UR_APICALL

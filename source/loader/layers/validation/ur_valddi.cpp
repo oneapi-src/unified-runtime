@@ -2773,6 +2773,10 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithBinary(
             pProperties->count == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
+
+        if (numDevices == 0) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
