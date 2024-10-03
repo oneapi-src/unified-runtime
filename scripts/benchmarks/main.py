@@ -26,9 +26,9 @@ INTERNAL_WORKDIR_VERSION = '1.7'
 def main(directory, additional_env_vars, save_name, compare_names, filter):
     prepare_workdir(directory, INTERNAL_WORKDIR_VERSION)
 
-    # # cb = ComputeBench(directory)
-    # # vb = VelocityBench(directory)
-    # sb = SyclBench(directory)
+    cb = ComputeBench(directory)
+    vb = VelocityBench(directory)
+    sb = SyclBench(directory)
 
     benchmarks = [
         # *** Compute benchmarks
