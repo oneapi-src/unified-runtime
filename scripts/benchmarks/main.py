@@ -26,9 +26,9 @@ INTERNAL_WORKDIR_VERSION = '1.7'
 def main(directory, additional_env_vars, save_name, compare_names, filter):
     prepare_workdir(directory, INTERNAL_WORKDIR_VERSION)
 
-    cb = ComputeBench(directory)
-    vb = VelocityBench(directory)
-    sb = SyclBench(directory)
+    # # cb = ComputeBench(directory)
+    # # vb = VelocityBench(directory)
+    # sb = SyclBench(directory)
 
     benchmarks = [
         # *** Compute benchmarks
@@ -53,7 +53,7 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
         SobelFilter(vb),
 
         # *** sycl-bench multi benchmarks
-        Blocked_transform(sb),
+        # Blocked_transform(sb), # run time < 1ms
         DagTaskI(sb),
         DagTaskS(sb),
         HostDevBandwidth(sb),
@@ -69,12 +69,12 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
         VecAdd(sb),
 
         # *** sycl-bench single benchmarks
-        TwoDConvolution(sb),
+        # TwoDConvolution(sb), # run time < 1ms
         Two_mm(sb),
         Three_mm(sb),
-        Arith(sb),
+        # Arith(sb), # run time < 1ms
         Atax(sb),
-        Atomic_reduction(sb),
+        # Atomic_reduction(sb), # run time < 1ms
         Bicg(sb),
         Correlation(sb),
         Covariance(sb),
@@ -83,7 +83,7 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
         Gramschmidt(sb),
         KMeans(sb),
         LinRegCoeff(sb),
-        LinRegError(sb),
+        # LinRegError(sb), # run time < 1ms
         MatmulChain(sb),
         MolDyn(sb),
         Mvt(sb),
