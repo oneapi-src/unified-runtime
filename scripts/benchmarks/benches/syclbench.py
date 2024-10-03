@@ -72,7 +72,7 @@ class SyclBenchmark(Benchmark):
     def run(self, env_vars) -> list[Result]:
         if self.done:
             return
-        self.outputfile = os.path.join(self.bench.directory, "results", self.test+".csv")
+        self.outputfile = os.path.join(self.bench.directory, self.test+".csv")
         print(f"{self.__class__.__name__}: Results in {self.outputfile}")
         command = [
             f"{self.benchmark_bin}",
