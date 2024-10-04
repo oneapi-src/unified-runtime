@@ -4259,6 +4259,12 @@ ur_result_t UR_APICALL urKernelGetNativeHandle(
 ///         + `NULL == phKernel`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
 ///         + If the adapter has no underlying equivalent handle.
+///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
+///         + The implementation requires that the context be associated with
+///         the kernel, but it is not.
+///     - ::UR_RESULT_ERROR_INVALID_PROGRAM
+///         + The implementation requires that the program be associated with
+///         the kernel, but it is not.
 ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
     /// [in][nocheck] the native handle of the kernel.
     ur_native_handle_t hNativeKernel,
