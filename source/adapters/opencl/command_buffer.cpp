@@ -10,6 +10,11 @@
 
 #include "command_buffer.hpp"
 #include "common.hpp"
+#include "context.hpp"
+#include "event.hpp"
+#include "kernel.hpp"
+#include "memory.hpp"
+#include "queue.hpp"
 
 namespace {
 ur_result_t
@@ -61,7 +66,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferCreateExp(
   ur_queue_handle_t Queue = nullptr;
   UR_RETURN_ON_FAILURE(urQueueCreate(hContext, hDevice, nullptr, &Queue));
 
-  cl_context CLContext = cl_adapter::cast<cl_context>(hContext);
+  cl_context CLContext = hContext->get();
   cl_ext::clCreateCommandBufferKHR_fn clCreateCommandBufferKHR = nullptr;
   UR_RETURN_ON_FAILURE(
       cl_ext::getExtFuncFromContext<decltype(clCreateCommandBufferKHR)>(
@@ -86,16 +91,19 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferCreateExp(
       IsUpdatable ? CL_COMMAND_BUFFER_MUTABLE_KHR : 0u, 0};
 
   cl_int Res = CL_SUCCESS;
+  cl_command_queue CLQueue = Queue->get();
   auto CLCommandBuffer = clCreateCommandBufferKHR(
-      1, cl_adapter::cast<cl_command_queue *>(&Queue), Properties, &Res);
+      1, CLQueue, Properties, &Res);
   CL_RETURN_ON_FAILURE_AND_SET_NULL(Res, phCommandBuffer);
 
   try {
     auto URCommandBuffer = std::make_unique<ur_exp_command_buffer_handle_t_>(
         Queue, hContext, CLCommandBuffer, IsUpdatable);
     *phCommandBuffer = URCommandBuffer.release();
-  } catch (...) {
+  } catch (std::bad_alloc &) {
     return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+  } catch (...) {
+    return UR_RESULT_ERROR_UNKNOWN;
   }
 
   CL_RETURN_ON_FAILURE(Res);
@@ -124,7 +132,7 @@ urCommandBufferReleaseExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urCommandBufferFinalizeExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
-  cl_context CLContext = cl_adapter::cast<cl_context>(hCommandBuffer->hContext);
+  cl_context CLContext = hCommandBuffer->hContext->get();
   cl_ext::clFinalizeCommandBufferKHR_fn clFinalizeCommandBufferKHR = nullptr;
   UR_RETURN_ON_FAILURE(
       cl_ext::getExtFuncFromContext<decltype(clFinalizeCommandBufferKHR)>(
@@ -148,7 +156,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
     ur_exp_command_buffer_sync_point_t *pSyncPoint,
     ur_exp_command_buffer_command_handle_t *phCommandHandle) {
 
-  cl_context CLContext = cl_adapter::cast<cl_context>(hCommandBuffer->hContext);
+  cl_context CLContext = hCommandBuffer->hContext->get();
   cl_ext::clCommandNDRangeKernelKHR_fn clCommandNDRangeKernelKHR = nullptr;
   UR_RETURN_ON_FAILURE(
       cl_ext::getExtFuncFromContext<decltype(clCommandNDRangeKernelKHR)>(
@@ -171,7 +179,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
       hCommandBuffer->IsUpdatable ? UpdateProperties : nullptr;
   CL_RETURN_ON_FAILURE(clCommandNDRangeKernelKHR(
       hCommandBuffer->CLCommandBuffer, nullptr, Properties,
-      cl_adapter::cast<cl_kernel>(hKernel), workDim, pGlobalWorkOffset,
+      hKernel->get(), workDim, pGlobalWorkOffset,
       pGlobalWorkSize, pLocalWorkSize, numSyncPointsInWaitList,
       pSyncPointWaitList, pSyncPoint, OutCommandHandle));
 
@@ -221,7 +229,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
     const ur_exp_command_buffer_sync_point_t *pSyncPointWaitList,
     ur_exp_command_buffer_sync_point_t *pSyncPoint) {
 
-  cl_context CLContext = cl_adapter::cast<cl_context>(hCommandBuffer->hContext);
+  cl_context CLContext = hCommandBuffer->hContext->get();
   cl_ext::clCommandCopyBufferKHR_fn clCommandCopyBufferKHR = nullptr;
   UR_RETURN_ON_FAILURE(
       cl_ext::getExtFuncFromContext<decltype(clCommandCopyBufferKHR)>(
@@ -230,7 +238,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
 
   CL_RETURN_ON_FAILURE(clCommandCopyBufferKHR(
       hCommandBuffer->CLCommandBuffer, nullptr, nullptr,
-      cl_adapter::cast<cl_mem>(hSrcMem), cl_adapter::cast<cl_mem>(hDstMem),
+      hSrcMem->get(), hDstMem->get(),
       srcOffset, dstOffset, size, numSyncPointsInWaitList, pSyncPointWaitList,
       pSyncPoint, nullptr));
 
@@ -255,7 +263,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
   size_t OpenCLDstRect[3]{dstOrigin.x, dstOrigin.y, dstOrigin.z};
   size_t OpenCLRegion[3]{region.width, region.height, region.depth};
 
-  cl_context CLContext = cl_adapter::cast<cl_context>(hCommandBuffer->hContext);
+  cl_context CLContext = hCommandBuffer->hContext->get();
   cl_ext::clCommandCopyBufferRectKHR_fn clCommandCopyBufferRectKHR = nullptr;
   UR_RETURN_ON_FAILURE(
       cl_ext::getExtFuncFromContext<decltype(clCommandCopyBufferRectKHR)>(
@@ -264,7 +272,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
 
   CL_RETURN_ON_FAILURE(clCommandCopyBufferRectKHR(
       hCommandBuffer->CLCommandBuffer, nullptr, nullptr,
-      cl_adapter::cast<cl_mem>(hSrcMem), cl_adapter::cast<cl_mem>(hDstMem),
+      hSrcMem->get(), hDstMem->get(),
       OpenCLOriginRect, OpenCLDstRect, OpenCLRegion, srcRowPitch, srcSlicePitch,
       dstRowPitch, dstSlicePitch, numSyncPointsInWaitList, pSyncPointWaitList,
       pSyncPoint, nullptr));
@@ -339,7 +347,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
     const ur_exp_command_buffer_sync_point_t *pSyncPointWaitList,
     ur_exp_command_buffer_sync_point_t *pSyncPoint) {
 
-  cl_context CLContext = cl_adapter::cast<cl_context>(hCommandBuffer->hContext);
+  cl_context CLContext = hCommandBuffer->hContext->get();
   cl_ext::clCommandFillBufferKHR_fn clCommandFillBufferKHR = nullptr;
   UR_RETURN_ON_FAILURE(
       cl_ext::getExtFuncFromContext<decltype(clCommandFillBufferKHR)>(
@@ -348,7 +356,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
 
   CL_RETURN_ON_FAILURE(clCommandFillBufferKHR(
       hCommandBuffer->CLCommandBuffer, nullptr, nullptr,
-      cl_adapter::cast<cl_mem>(hBuffer), pPattern, patternSize, offset, size,
+      hBuffer->get(), pPattern, patternSize, offset, size,
       numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint, nullptr));
 
   return UR_RESULT_SUCCESS;
@@ -393,7 +401,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferEnqueueExp(
     uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
     ur_event_handle_t *phEvent) {
 
-  cl_context CLContext = cl_adapter::cast<cl_context>(hCommandBuffer->hContext);
+  cl_context CLContext = hCommandBuffer->hContext->get();
   cl_ext::clEnqueueCommandBufferKHR_fn clEnqueueCommandBufferKHR = nullptr;
   UR_RETURN_ON_FAILURE(
       cl_ext::getExtFuncFromContext<decltype(clEnqueueCommandBufferKHR)>(
@@ -401,13 +409,26 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferEnqueueExp(
           cl_ext::EnqueueCommandBufferName, &clEnqueueCommandBufferKHR));
 
   const uint32_t NumberOfQueues = 1;
-
+  cl_event Event;
+  std::vector<cl_event> CLWaitEvents(numEventsInWaitList);
+  for (uint32_t i = 0; i < numEventsInWaitList; i++) {
+    CLWaitEvents[i] = phEventWaitList[i]->get();
+  }
+  cl_command_queue CLQueue = hQueue->get();
   CL_RETURN_ON_FAILURE(clEnqueueCommandBufferKHR(
-      NumberOfQueues, cl_adapter::cast<cl_command_queue *>(&hQueue),
-      hCommandBuffer->CLCommandBuffer, numEventsInWaitList,
-      cl_adapter::cast<const cl_event *>(phEventWaitList),
-      cl_adapter::cast<cl_event *>(phEvent)));
-
+      NumberOfQueues, &CLQueue, hCommandBuffer->CLCommandBuffer,
+      numEventsInWaitList, CLWaitEvents.data(), &Event));
+  if (phEvent) {
+    try {
+      auto UREvent =
+          std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+      *phEvent = UREvent.release();
+    } catch (std::bad_alloc &) {
+      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+    } catch (...) {
+      return UR_RESULT_ERROR_UNKNOWN;
+    }
+  }
   return UR_RESULT_SUCCESS;
 }
 
