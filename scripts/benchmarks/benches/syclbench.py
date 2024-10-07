@@ -46,7 +46,7 @@ class SyclBench:
             run(f"cmake --build {build_path} -j", add_sycl=True)
 
         self.built = True
-        self.bins = build_path
+        # self.bins = build_path
 
 class SyclBenchmark(Benchmark):
     def __init__(self, bench, name, test):
@@ -67,7 +67,7 @@ class SyclBenchmark(Benchmark):
 
     def setup(self):
         self.bench.setup()
-        self.benchmark_bin = os.path.join(self.bench.bins, self.bench_name)
+        self.benchmark_bin = os.path.join(self.directory, 'sycl-bench-build', self.bench_name)
 
     def run(self, env_vars) -> list[Result]:
         if self.done:
@@ -80,7 +80,6 @@ class SyclBenchmark(Benchmark):
             f"--num-runs={options.iterations}",
             f"--output={self.outputfile}"
         ]
-        bin_dir = self.bench.bins
 
         command += self.bin_args()
         env_vars.update(self.extra_env_vars())

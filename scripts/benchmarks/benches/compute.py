@@ -17,6 +17,7 @@ class ComputeBench:
         self.built = False
 
     def setup(self):
+        # self.bins = os.path.join(self.directory, 'compute-benchmarks-build', 'bin')
         if self.built:
             return
 
@@ -48,7 +49,6 @@ class ComputeBench:
             build_path = os.path.join(self.directory, 'compute-benchmarks-build')
 
         self.built = True
-        self.bins = os.path.join(build_path, 'bin')
 
 class ComputeBenchmark(Benchmark):
     def __init__(self, bench, name, test):
@@ -68,7 +68,7 @@ class ComputeBenchmark(Benchmark):
 
     def setup(self):
         self.bench.setup()
-        self.benchmark_bin = os.path.join(self.bench.bins, self.bench_name)
+        self.benchmark_bin = os.path.join(self.directory, 'compute-benchmarks-build', 'bin', self.bench_name)
 
     def run(self, env_vars) -> list[Result]:
         command = [
