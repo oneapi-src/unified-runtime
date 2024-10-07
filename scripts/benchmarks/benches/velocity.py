@@ -13,7 +13,7 @@ import os
 class VelocityBench:
     def __init__(self, directory):
         self.directory = directory
-        self.repo_path = git_clone(self.directory, "velocity-bench-repo", "https://github.com/mateuszpn/Velocity-Bench", "66e81889c4ae5028771ad38f3b924d64488be600")
+        self.repo_path = git_clone(self.directory, "velocity-bench-repo", "https://github.com/mateuszpn/Velocity-Bench", "66e8188")
 
 class VelocityBase(Benchmark):
     def __init__(self, name: str, bin_name: str, vb: VelocityBench):
