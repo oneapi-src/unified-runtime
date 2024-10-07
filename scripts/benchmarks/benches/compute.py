@@ -15,7 +15,6 @@ class ComputeBench:
     def __init__(self, directory):
         self.directory = directory
         self.built = False
-        return
 
     def setup(self):
         if self.built:
