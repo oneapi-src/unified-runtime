@@ -21,7 +21,7 @@ import argparse
 import re
 
 # Update this if you are changing the layout of the results files
-INTERNAL_WORKDIR_VERSION = '1.7'
+INTERNAL_WORKDIR_VERSION = '1.8'
 
 def main(directory, additional_env_vars, save_name, compare_names, filter):
     prepare_workdir(directory, INTERNAL_WORKDIR_VERSION)
