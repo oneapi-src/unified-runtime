@@ -13,7 +13,7 @@ import os
 class VelocityBench:
     def __init__(self, directory):
         self.directory = directory
-        self.repo_path = git_clone(self.directory, "velocity-bench-repo", "https://github.com/oneapi-src/Velocity-Bench", "34ee4ebe18d91dfdd38b7d798fd986b41874fcbc")
+        self.repo_path = git_clone(self.directory, "velocity-bench-repo", "https://github.com/mateuszpn/Velocity-Bench", "66e81889c4ae5028771ad38f3b924d64488be600")
 
 class VelocityBase(Benchmark):
     def __init__(self, name: str, bin_name: str, vb: VelocityBench):
@@ -43,10 +43,6 @@ class VelocityBase(Benchmark):
         ]
         run(configure_command, {'CC': 'clang', 'CXX':'clang++'}, add_sycl=True)
         run(f"cmake --build {build_path} -j", add_sycl=True)
-
-        # self.benchmark_bin = os.path.join(build_path, self.bin_name)
-        
-            
 
     def bin_args(self) -> list[str]:
         return []
