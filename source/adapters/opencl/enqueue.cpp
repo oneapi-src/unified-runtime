@@ -529,18 +529,30 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
     ur_event_handle_t *phEvent) {
 
   cl_context Ctx = hQueue->Context->get();
-
+  cl_event Event;
+  std::vector<cl_event> CLWaitEvents(numEventsInWaitList);
+  for (uint32_t i = 0; i < numEventsInWaitList; i++) {
+    CLWaitEvents[i] = phEventWaitList[i]->get();
+  }
   cl_ext::clEnqueueWriteGlobalVariable_fn F = nullptr;
   UR_RETURN_ON_FAILURE(cl_ext::getExtFuncFromContext<decltype(F)>(
       Ctx, cl_ext::ExtFuncPtrCache->clEnqueueWriteGlobalVariableCache,
       cl_ext::EnqueueWriteGlobalVariableName, &F));
 
-  Res = F(hQueue->get(),
-          hProgram->get(), name, blockingWrite, count,
-          offset, pSrc, numEventsInWaitList,
-          cl_adapter::cast<const cl_event *>(phEventWaitList),
-          cl_adapter::cast<cl_event *>(phEvent));
-
+  cl_int Res =
+      F(hQueue->get(), hProgram->get(), name, blockingWrite, count, offset,
+        pSrc, numEventsInWaitList, CLWaitEvents.data(), &Event);
+  if (phEvent) {
+    try {
+      auto UREvent =
+          std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+      *phEvent = UREvent.release();
+    } catch (std::bad_alloc &) {
+      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+    } catch (...) {
+      return UR_RESULT_ERROR_UNKNOWN;
+    }
+  }
   return mapCLErrorToUR(Res);
 }
 
@@ -551,18 +563,31 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
     ur_event_handle_t *phEvent) {
 
   cl_context Ctx = hQueue->Context->get();
-
+  cl_event Event;
+  std::vector<cl_event> CLWaitEvents(numEventsInWaitList);
+  for (uint32_t i = 0; i < numEventsInWaitList; i++) {
+    CLWaitEvents[i] = phEventWaitList[i]->get();
+  }
   cl_ext::clEnqueueReadGlobalVariable_fn F = nullptr;
   UR_RETURN_ON_FAILURE(cl_ext::getExtFuncFromContext<decltype(F)>(
       Ctx, cl_ext::ExtFuncPtrCache->clEnqueueReadGlobalVariableCache,
       cl_ext::EnqueueReadGlobalVariableName, &F));
 
-  Res = F(hQueue->get(),
-          hProgram, name, blockingRead, count,
-          offset, pDst, numEventsInWaitList,
-          cl_adapter::cast<const cl_event *>(phEventWaitList),
-          cl_adapter::cast<cl_event *>(phEvent));
+  cl_int Res =
+      F(hQueue->get(), hProgram->get(), name, blockingRead, count, offset, pDst,
+        numEventsInWaitList, CLWaitEvents.data(), &Event);
 
+  if (phEvent) {
+    try {
+      auto UREvent =
+          std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
+      *phEvent = UREvent.release();
+    } catch (std::bad_alloc &) {
+      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+    } catch (...) {
+      return UR_RESULT_ERROR_UNKNOWN;
+    }
+  }
   return mapCLErrorToUR(Res);
 }
 
@@ -573,7 +598,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueReadHostPipe(
     ur_event_handle_t *phEvent) {
 
   cl_context CLContext = hQueue->Context->get();
-
+  cl_event Event;
+  std::vector<cl_event> CLWaitEvents(numEventsInWaitList);
+  for (uint32_t i = 0; i < numEventsInWaitList; i++) {
+    CLWaitEvents[i] = phEventWaitList[i]->get();
+  }
   cl_ext::clEnqueueReadHostPipeINTEL_fn FuncPtr = nullptr;
   UR_RETURN_ON_FAILURE(
       cl_ext::getExtFuncFromContext<cl_ext::clEnqueueReadHostPipeINTEL_fn>(
@@ -581,12 +610,21 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueReadHostPipe(
           cl_ext::EnqueueReadHostPipeName, &FuncPtr));
 
   if (FuncPtr) {
-    CL_RETURN_ON_FAILURE(
-        FuncPtr(hQueue->get(),
-                hProgram->get(), pipe_symbol, blocking,
-                pDst, size, numEventsInWaitList,
-                cl_adapter::cast<const cl_event *>(phEventWaitList),
-                cl_adapter::cast<cl_event *>(phEvent)));
+    CL_RETURN_ON_FAILURE(FuncPtr(hQueue->get(), hProgram->get(), pipe_symbol,
+                                 blocking, pDst, size, numEventsInWaitList,
+                                 CLWaitEvents.data(), &Event));
+
+    if (phEvent) {
+      try {
+        auto UREvent = std::make_unique<ur_event_handle_t_>(
+            Event, hQueue->Context, hQueue);
+        *phEvent = UREvent.release();
+      } catch (std::bad_alloc &) {
+        return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+      } catch (...) {
+        return UR_RESULT_ERROR_UNKNOWN;
+      }
+    }
   }
 
   return UR_RESULT_SUCCESS;
@@ -599,7 +637,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueWriteHostPipe(
     ur_event_handle_t *phEvent) {
 
   cl_context CLContext = hQueue->Context->get();
-
+  cl_event Event;
+  std::vector<cl_event> CLWaitEvents(numEventsInWaitList);
+  for (uint32_t i = 0; i < numEventsInWaitList; i++) {
+    CLWaitEvents[i] = phEventWaitList[i]->get();
+  }
   cl_ext::clEnqueueWriteHostPipeINTEL_fn FuncPtr = nullptr;
   UR_RETURN_ON_FAILURE(
       cl_ext::getExtFuncFromContext<cl_ext::clEnqueueWriteHostPipeINTEL_fn>(
@@ -607,12 +649,20 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueWriteHostPipe(
           cl_ext::EnqueueWriteHostPipeName, &FuncPtr));
 
   if (FuncPtr) {
-    CL_RETURN_ON_FAILURE(
-        FuncPtr(hQueue->get(),
-                hProgram->get(), pipe_symbol, blocking,
-                pSrc, size, numEventsInWaitList,
-                cl_adapter::cast<const cl_event *>(phEventWaitList),
-                cl_adapter::cast<cl_event *>(phEvent)));
+    CL_RETURN_ON_FAILURE(FuncPtr(hQueue->get(), hProgram->get(), pipe_symbol,
+                                 blocking, pSrc, size, numEventsInWaitList,
+                                 CLWaitEvents.data(), &Event));
+    if (phEvent) {
+      try {
+        auto UREvent = std::make_unique<ur_event_handle_t_>(
+            Event, hQueue->Context, hQueue);
+        *phEvent = UREvent.release();
+      } catch (std::bad_alloc &) {
+        return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+      } catch (...) {
+        return UR_RESULT_ERROR_UNKNOWN;
+      }
+    }
   }
 
   return UR_RESULT_SUCCESS;

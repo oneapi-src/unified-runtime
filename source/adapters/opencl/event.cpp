@@ -193,16 +193,19 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetInfo(ur_event_handle_t hEvent,
       *pPropSizeRet = CheckPropSize;
     }
 
-  if (pPropValue) {
-    if (propName == UR_EVENT_INFO_COMMAND_TYPE) {
-      *reinterpret_cast<ur_command_t *>(pPropValue) = convertCLCommandTypeToUR(
-          *reinterpret_cast<cl_command_type *>(pPropValue));
-    } else if (propName == UR_EVENT_INFO_COMMAND_EXECUTION_STATUS) {
-      const auto param_value_int = static_cast<ur_event_status_t *>(pPropValue);
-      if (*param_value_int < 0) {
-        // This can contain a negative return code to signify that the command
-        // terminated in an unexpected way.
-        *param_value_int = UR_EVENT_STATUS_ERROR;
+    if (pPropValue) {
+      if (propName == UR_EVENT_INFO_COMMAND_TYPE) {
+        *reinterpret_cast<ur_command_t *>(pPropValue) =
+            convertCLCommandTypeToUR(
+                *reinterpret_cast<cl_command_type *>(pPropValue));
+      } else if (propName == UR_EVENT_INFO_COMMAND_EXECUTION_STATUS) {
+        const auto param_value_int =
+            static_cast<ur_event_status_t *>(pPropValue);
+        if (*param_value_int < 0) {
+          // This can contain a negative return code to signify that the command
+          // terminated in an unexpected way.
+          *param_value_int = UR_EVENT_STATUS_ERROR;
+        }
       }
     }
   }

@@ -25,9 +25,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextCreate(
   }
 
   try {
-    cl_context Ctx = clCreateContext(
-        nullptr, cl_adapter::cast<cl_uint>(DeviceCount), CLDevices.data(),
-        nullptr, nullptr, cl_adapter::cast<cl_int *>(&Ret));
+    cl_context Ctx = clCreateContext(nullptr, static_cast<cl_uint>(DeviceCount),
+                                     CLDevices.data(), nullptr, nullptr,
+                                     static_cast<cl_int *>(&Ret));
     CL_RETURN_ON_FAILURE(Ret);
     auto URContext =
         std::make_unique<ur_context_handle_t_>(Ctx, DeviceCount, phDevices);
@@ -84,22 +84,19 @@ urContextRelease(ur_context_handle_t hContext) {
   static std::mutex contextReleaseMutex;
   auto clContext = hContext->get();
 
-  {
-    std::lock_guard<std::mutex> lock(contextReleaseMutex);
-    size_t refCount = 0;
-    CL_RETURN_ON_FAILURE(clGetContextInfo(clContext, CL_CONTEXT_REFERENCE_COUNT,
-                                          sizeof(size_t), &refCount, nullptr));
-
-    // ExtFuncPtrCache is destroyed in an atexit() callback, so it doesn't
-    // necessarily outlive the adapter (or all the contexts).
-    if (refCount == 1 && cl_ext::ExtFuncPtrCache) {
-      cl_ext::ExtFuncPtrCache->clearCache(clContext);
-    }
+  std::lock_guard<std::mutex> lock(contextReleaseMutex);
+  size_t refCount = hContext->getReferenceCount();
+  // ExtFuncPtrCache is destroyed in an atexit() callback, so it doesn't
+  // necessarily outlive the adapter (or all the contexts).
+  if (refCount == 1 && cl_ext::ExtFuncPtrCache) {
+    cl_ext::ExtFuncPtrCache->clearCache(clContext);
   }
 
-  CL_RETURN_ON_FAILURE(
-      clReleaseContext(hContext->get()));
-
+  if (hContext->decrementReferenceCount() == 0) {
+    delete hContext;
+  } else {
+    CL_RETURN_ON_FAILURE(clReleaseContext(hContext->get()));
+  }
   return UR_RESULT_SUCCESS;
 }
 
@@ -118,8 +115,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextGetNativeHandle(
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urContextCreateWithNativeHandle(
-    ur_native_handle_t hNativeContext, ur_adapter_handle_t, uint32_t,
-    const ur_device_handle_t *,
+    ur_native_handle_t hNativeContext, ur_adapter_handle_t, uint32_t numDevices,
+    const ur_device_handle_t *phDevices,
     const ur_context_native_properties_t *pProperties,
     ur_context_handle_t *phContext) {
 

@@ -12,6 +12,7 @@
 #include "device.hpp"
 #include "memory.hpp"
 #include "program.hpp"
+#include "queue.hpp"
 #include "sampler.hpp"
 
 #include <algorithm>
@@ -42,7 +43,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelSetArgValue(
     const ur_kernel_arg_value_properties_t *, const void *pArgValue) {
 
   CL_RETURN_ON_FAILURE(clSetKernelArg(
-      hKernel->get(), cl_adapter::cast<cl_uint>(argIndex), argSize, pArgValue));
+      hKernel->get(), static_cast<cl_uint>(argIndex), argSize, pArgValue));
 
   return UR_RESULT_SUCCESS;
 }
@@ -52,7 +53,7 @@ urKernelSetArgLocal(ur_kernel_handle_t hKernel, uint32_t argIndex,
                     size_t argSize, const ur_kernel_arg_local_properties_t *) {
 
   CL_RETURN_ON_FAILURE(clSetKernelArg(
-      hKernel->get(), cl_adapter::cast<cl_uint>(argIndex), argSize, nullptr));
+      hKernel->get(), static_cast<cl_uint>(argIndex), argSize, nullptr));
 
   return UR_RESULT_SUCCESS;
 }
@@ -84,20 +85,35 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelGetInfo(ur_kernel_handle_t hKernel,
                                                     size_t propSize,
                                                     void *pPropValue,
                                                     size_t *pPropSizeRet) {
+
+  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+
+  switch (propName) {
   // OpenCL doesn't have a way to support this.
-  if (propName == UR_KERNEL_INFO_NUM_REGS) {
+  case UR_KERNEL_INFO_NUM_REGS: {
     return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
   }
-  size_t CheckPropSize = 0;
-  cl_int ClResult = clGetKernelInfo(hKernel->get(),
-                                    mapURKernelInfoToCL(propName), propSize,
-                                    pPropValue, &CheckPropSize);
-  if (pPropValue && CheckPropSize != propSize) {
-    return UR_RESULT_ERROR_INVALID_SIZE;
+  case UR_KERNEL_INFO_PROGRAM: {
+    return ReturnValue(hKernel->Program);
   }
-  CL_RETURN_ON_FAILURE(ClResult);
-  if (pPropSizeRet) {
-    *pPropSizeRet = CheckPropSize;
+  case UR_KERNEL_INFO_CONTEXT: {
+    return ReturnValue(hKernel->Context);
+  }
+  case UR_KERNEL_INFO_REFERENCE_COUNT: {
+    return ReturnValue(hKernel->getReferenceCount());
+  }
+  default: {
+    size_t CheckPropSize = 0;
+    cl_int ClResult =
+        clGetKernelInfo(hKernel->get(), mapURKernelInfoToCL(propName), propSize,
+                        pPropValue, &CheckPropSize);
+    if (pPropValue && CheckPropSize != propSize) {
+      return UR_RESULT_ERROR_INVALID_SIZE;
+    }
+    CL_RETURN_ON_FAILURE(ClResult);
+    if (pPropSizeRet) {
+      *pPropSizeRet = CheckPropSize;
+    }
   }
   }
 
@@ -356,9 +372,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelSetArgPointer(
           cl_ext::SetKernelArgMemPointerName, &FuncPtr));
 
   if (FuncPtr) {
-    CL_RETURN_ON_FAILURE(FuncPtr(hKernel->get(),
-                                 cl_adapter::cast<cl_uint>(argIndex),
-                                 pArgValue));
+    CL_RETURN_ON_FAILURE(
+        FuncPtr(hKernel->get(), static_cast<cl_uint>(argIndex), pArgValue));
   }
 
   return UR_RESULT_SUCCESS;
@@ -400,7 +415,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelSetArgMemObj(
 
   cl_mem CLArgValue = hArgValue ? hArgValue->get() : nullptr;
   CL_RETURN_ON_FAILURE(clSetKernelArg(hKernel->get(),
-                                      cl_adapter::cast<cl_uint>(argIndex),
+                                      static_cast<cl_uint>(argIndex),
                                       sizeof(CLArgValue), &CLArgValue));
   return UR_RESULT_SUCCESS;
 }
@@ -410,9 +425,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelSetArgSampler(
     const ur_kernel_arg_sampler_properties_t *, ur_sampler_handle_t hArgValue) {
 
   cl_sampler CLArgSampler = hArgValue->get();
-  cl_int RetErr =
-      clSetKernelArg(hKernel->get(), cl_adapter::cast<cl_uint>(argIndex),
-                     sizeof(CLArgSampler), &CLArgSampler);
+  cl_int RetErr = clSetKernelArg(hKernel->get(), static_cast<cl_uint>(argIndex),
+                                 sizeof(CLArgSampler), &CLArgSampler);
   CL_RETURN_ON_FAILURE(RetErr);
   return UR_RESULT_SUCCESS;
 }
@@ -425,8 +439,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelGetSuggestedLocalWorkSize(
   cl_platform_id Platform;
 
   CL_RETURN_ON_FAILURE(clGetCommandQueueInfo(
-      cl_adapter::cast<cl_command_queue>(hQueue), CL_QUEUE_DEVICE,
-      sizeof(cl_device_id), &Device, nullptr));
+      hQueue->get(), CL_QUEUE_DEVICE, sizeof(cl_device_id), &Device, nullptr));
 
   CL_RETURN_ON_FAILURE(clGetDeviceInfo(
       Device, CL_DEVICE_PLATFORM, sizeof(cl_platform_id), &Platform, nullptr));
@@ -439,8 +452,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelGetSuggestedLocalWorkSize(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 
   CL_RETURN_ON_FAILURE(GetKernelSuggestedLocalWorkSizeFuncPtr(
-      cl_adapter::cast<cl_command_queue>(hQueue),
-      cl_adapter::cast<cl_kernel>(hKernel), workDim, pGlobalWorkOffset,
+      hQueue->get(), hKernel->get(), workDim, pGlobalWorkOffset,
       pGlobalWorkSize, pSuggestedLocalWorkSize));
   return UR_RESULT_SUCCESS;
 }

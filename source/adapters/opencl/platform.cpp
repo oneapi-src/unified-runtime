@@ -43,10 +43,8 @@ urPlatformGetInfo(ur_platform_handle_t hPlatform, ur_platform_info_t propName,
   case UR_PLATFORM_INFO_VERSION:
   case UR_PLATFORM_INFO_EXTENSIONS:
   case UR_PLATFORM_INFO_PROFILE: {
-    cl_platform_id Plat = nullptr;
-    if (hPlatform) {
-      Plat = hPlatform->get();
-    }
+    cl_platform_id Plat = hPlatform->get();
+
     CL_RETURN_ON_FAILURE(
         clGetPlatformInfo(Plat, CLPropName, propSize, pPropValue, pSizeRet));
 
@@ -75,16 +73,16 @@ urPlatformGet(ur_adapter_handle_t *, uint32_t, uint32_t NumEntries,
 
   std::call_once(
       InitFlag,
-      [](cl_int &Result) {
-        Result = clGetPlatformIDs(0, nullptr, &NumPlatforms);
-        if (Result != CL_SUCCESS) {
-          return Result;
+      [](cl_int &Res) {
+        Res = clGetPlatformIDs(0, nullptr, &NumPlatforms);
+        if (Res != CL_SUCCESS) {
+          return Res;
         }
         std::vector<cl_platform_id> CLPlatforms(NumPlatforms);
-        Result = clGetPlatformIDs(cl_adapter::cast<cl_uint>(NumPlatforms),
-                                  CLPlatforms.data(), nullptr);
-        if (Result != CL_SUCCESS) {
-          return Result;
+        Res = clGetPlatformIDs(static_cast<cl_uint>(NumPlatforms),
+                               CLPlatforms.data(), nullptr);
+        if (Res != CL_SUCCESS) {
+          return Res;
         }
         try {
           for (uint32_t i = 0; i < NumPlatforms; i++) {
@@ -97,7 +95,7 @@ urPlatformGet(ur_adapter_handle_t *, uint32_t, uint32_t NumEntries,
         } catch (...) {
           return CL_INVALID_PLATFORM;
         }
-        return Result;
+        return Res;
       },
       Result);
 

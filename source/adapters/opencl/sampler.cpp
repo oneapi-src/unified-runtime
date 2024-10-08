@@ -166,16 +166,25 @@ urSamplerGetInfo(ur_sampler_handle_t hSampler, ur_sampler_info_t propName,
   cl_sampler_info SamplerInfo = ur2CLSamplerInfo(propName);
   static_assert(sizeof(cl_addressing_mode) ==
                 sizeof(ur_sampler_addressing_mode_t));
+  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
 
   ur_result_t Err = UR_RESULT_SUCCESS;
+
+  switch (propName) {
+  case UR_SAMPLER_INFO_CONTEXT: {
+    return ReturnValue(hSampler->Context);
+  }
+  case UR_SAMPLER_INFO_REFERENCE_COUNT: {
+    return ReturnValue(hSampler->getReferenceCount());
+  }
   // ur_bool_t have a size of uint8_t, but cl_bool size have the size of
   // uint32_t so this adjust UR_SAMPLER_INFO_NORMALIZED_COORDS info to map
   // between them.
-  if (propName == UR_SAMPLER_INFO_NORMALIZED_COORDS) {
+  case UR_SAMPLER_INFO_NORMALIZED_COORDS: {
     cl_bool normalized_coords = false;
-    Err = mapCLErrorToUR(
-        clGetSamplerInfo(hSampler->get(), SamplerInfo,
-                         sizeof(cl_bool), &normalized_coords, nullptr));
+    Err = mapCLErrorToUR(clGetSamplerInfo(hSampler->get(), SamplerInfo,
+                                          sizeof(cl_bool), &normalized_coords,
+                                          nullptr));
     if (pPropValue && propSize != sizeof(ur_bool_t)) {
       return UR_RESULT_ERROR_INVALID_SIZE;
     }
@@ -187,18 +196,7 @@ urSamplerGetInfo(ur_sampler_handle_t hSampler, ur_sampler_info_t propName,
     if (pPropSizeRet) {
       *pPropSizeRet = sizeof(ur_bool_t);
     }
-  } else {
-    size_t CheckPropSize = 0;
-    Err = mapCLErrorToUR(
-        clGetSamplerInfo(hSampler->get(), SamplerInfo,
-                         propSize, pPropValue, &CheckPropSize));
-    if (pPropValue && CheckPropSize != propSize) {
-      return UR_RESULT_ERROR_INVALID_SIZE;
-    }
-    UR_RETURN_ON_FAILURE(Err);
-    if (pPropSizeRet) {
-      *pPropSizeRet = CheckPropSize;
-    }
+    break;
   }
   default: {
     size_t CheckPropSize = 0;

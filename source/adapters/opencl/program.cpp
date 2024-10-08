@@ -116,8 +116,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
   cl_int CLResult;
   try {
     cl_program Program = clCreateProgramWithBinary(
-        hContext->get(), cl_adapter::cast<cl_uint>(1u), Devices, Lengths,
-        &pBinary, BinaryStatus, &CLResult);
+        hContext->get(), static_cast<cl_uint>(1u), Devices, Lengths, &pBinary,
+        BinaryStatus, &CLResult);
     CL_RETURN_ON_FAILURE(CLResult);
     auto URProgram = std::make_unique<ur_program_handle_t_>(Program, hContext);
     *phProgram = URProgram.release();
@@ -136,8 +136,11 @@ UR_APIEXPORT ur_result_t UR_APICALL
 urProgramCompile([[maybe_unused]] ur_context_handle_t hContext,
                  ur_program_handle_t hProgram, const char *pOptions) {
 
-  std::unique_ptr<std::vector<cl_device_id>> DevicesInProgram;
-  UR_RETURN_ON_FAILURE(getDevicesFromProgram(hProgram, DevicesInProgram));
+  uint32_t DeviceCount = hProgram->Context->DeviceCount;
+  std::vector<cl_device_id> CLDevicesInProgram(DeviceCount);
+  for (uint32_t i = 0; i < DeviceCount; i++) {
+    CLDevicesInProgram[i] = hProgram->Context->Devices[i]->get();
+  }
 
   CL_RETURN_ON_FAILURE(clCompileProgram(hProgram->get(), DeviceCount,
                                         CLDevicesInProgram.data(), pOptions, 0,
@@ -218,12 +221,15 @@ UR_APIEXPORT ur_result_t UR_APICALL
 urProgramBuild([[maybe_unused]] ur_context_handle_t hContext,
                ur_program_handle_t hProgram, const char *pOptions) {
 
-  std::unique_ptr<std::vector<cl_device_id>> DevicesInProgram;
-  UR_RETURN_ON_FAILURE(getDevicesFromProgram(hProgram, DevicesInProgram));
+  uint32_t DeviceCount = hProgram->Context->DeviceCount;
+  std::vector<cl_device_id> CLDevicesInProgram(DeviceCount);
+  for (uint32_t i = 0; i < DeviceCount; i++) {
+    CLDevicesInProgram[i] = hProgram->Context->Devices[i]->get();
+  }
 
-  CL_RETURN_ON_FAILURE(clBuildProgram(
-      hProgram->get(), DevicesInProgram->size(),
-      DevicesInProgram->data(), pOptions, nullptr, nullptr));
+  CL_RETURN_ON_FAILURE(
+      clBuildProgram(hProgram->get(), CLDevicesInProgram.size(),
+                     CLDevicesInProgram.data(), pOptions, nullptr, nullptr));
   return UR_RESULT_SUCCESS;
 }
 
@@ -238,9 +244,9 @@ urProgramLink(ur_context_handle_t hContext, uint32_t count,
     CLPrograms[i] = phPrograms[i]->get();
   }
   cl_program Program = clLinkProgram(
-      hContext->get(), 0, nullptr, pOptions, cl_adapter::cast<cl_uint>(count),
+      hContext->get(), 0, nullptr, pOptions, static_cast<cl_uint>(count),
       CLPrograms.data(), nullptr, nullptr, &CLResult);
-  
+
   if (CL_INVALID_BINARY == CLResult) {
     // Some OpenCL drivers incorrectly return CL_INVALID_BINARY here, convert it
     // to CL_LINK_PROGRAM_FAILURE

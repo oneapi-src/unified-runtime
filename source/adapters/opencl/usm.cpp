@@ -218,7 +218,7 @@ urUSMSharedAlloc(ur_context_handle_t Context, ur_device_handle_t hDevice,
     cl_int ClResult = CL_SUCCESS;
     Ptr = FuncPtr(CLContext, hDevice->get(),
                   AllocProperties.empty() ? nullptr : AllocProperties.data(),
-                  size, Alignment, cl_adapter::cast<cl_int *>(&ClResult));
+                  size, Alignment, static_cast<cl_int *>(&ClResult));
     if (ClResult == CL_INVALID_BUFFER_SIZE) {
       return UR_RESULT_ERROR_INVALID_USM_SIZE;
     }

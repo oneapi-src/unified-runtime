@@ -121,8 +121,7 @@ cl_image_format mapURImageFormatToCL(const ur_image_format_t *PImageFormat) {
 
 cl_image_desc mapURImageDescToCL(const ur_image_desc_t *PImageDesc) {
   cl_image_desc CLImageDesc;
-  CLImageDesc.image_type =
-      cl_adapter::cast<cl_mem_object_type>(PImageDesc->type);
+  CLImageDesc.image_type = static_cast<cl_mem_object_type>(PImageDesc->type);
 
   switch (PImageDesc->type) {
   case UR_MEM_TYPE_IMAGE2D:
@@ -259,7 +258,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
       try {
         cl_mem Buffer = FuncPtr(
             CLContext, PropertiesIntel.data(), static_cast<cl_mem_flags>(flags),
-            size, pProperties->pHost, cl_adapter::cast<cl_int *>(&RetErr));
+            size, pProperties->pHost, static_cast<cl_int *>(&RetErr));
         CL_RETURN_ON_FAILURE(RetErr);
         auto URMem = std::make_unique<ur_mem_handle_t_>(Buffer, hContext);
         *phBuffer = URMem.release();
@@ -276,7 +275,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
   try {
     cl_mem Buffer =
         clCreateBuffer(hContext->get(), static_cast<cl_mem_flags>(flags), size,
-                       HostPtr, cl_adapter::cast<cl_int *>(&RetErr));
+                       HostPtr, static_cast<cl_int *>(&RetErr));
     CL_RETURN_ON_FAILURE(RetErr);
     auto URMem = std::make_unique<ur_mem_handle_t_>(Buffer, hContext);
     *phBuffer = URMem.release();
@@ -303,7 +302,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreate(
   try {
     cl_mem Mem =
         clCreateImage(hContext->get(), MapFlags, &ImageFormat, &ImageDesc,
-                      pHost, cl_adapter::cast<cl_int *>(&RetErr));
+                      pHost, static_cast<cl_int *>(&RetErr));
     CL_RETURN_ON_FAILURE(RetErr);
     auto URMem = std::make_unique<ur_mem_handle_t_>(Mem, hContext);
     *phMem = URMem.release();
@@ -338,7 +337,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferPartition(
   try {
     cl_mem Buffer = clCreateSubBuffer(
         hBuffer->get(), static_cast<cl_mem_flags>(flags), BufferCreateType,
-        &BufferRegion, cl_adapter::cast<cl_int *>(&RetErr));
+        &BufferRegion, static_cast<cl_int *>(&RetErr));
     if (RetErr == CL_INVALID_VALUE) {
       size_t BufferSize = 0;
       CL_RETURN_ON_FAILURE(clGetMemObjectInfo(hBuffer->get(), CL_MEM_SIZE,
