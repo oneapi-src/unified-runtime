@@ -19,11 +19,14 @@ from benches.options import options
 from output import generate_markdown
 import argparse
 import re
+import subprocess
 
 # Update this if you are changing the layout of the results files
 INTERNAL_WORKDIR_VERSION = '1.8'
 
 def main(directory, additional_env_vars, save_name, compare_names, filter):
+    subprocess.run("pwd")
+    subprocess.run("ls -la")
     prepare_workdir(directory, INTERNAL_WORKDIR_VERSION)
 
     cb = ComputeBench(directory)
