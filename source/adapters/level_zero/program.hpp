@@ -11,11 +11,6 @@
 
 #include "common.hpp"
 #include "device.hpp"
-#ifdef UR_ADAPTER_LEVEL_ZERO_V2
-#include "v2/context.hpp"
-#else
-#include "context.hpp"
-#endif
 
 struct ur_program_handle_t_ : _ur_object {
   // ur_program_handle_t_() {}
@@ -73,45 +68,20 @@ struct ur_program_handle_t_ : _ur_object {
 
   // Construct a program in IL.
   ur_program_handle_t_(state St, ur_context_handle_t Context, const void *Input,
-                       size_t Length)
-      : Context{Context}, NativeProperties{nullptr}, OwnZeModule{true},
-        AssociatedDevices(Context->getDevices()),
-        SpirvCode{new uint8_t[Length]}, SpirvCodeLength{Length} {
-    std::memcpy(SpirvCode.get(), Input, Length);
-    // All devices have the program in IL state.
-    for (auto &Device : Context->getDevices()) {
-      DeviceData &PerDevData = DeviceDataMap[Device->ZeDevice];
-      PerDevData.State = St;
-    }
-  }
+                       size_t Length);
 
   // Construct a program in NATIVE for multiple devices.
   ur_program_handle_t_(state St, ur_context_handle_t Context,
                        const uint32_t NumDevices,
                        const ur_device_handle_t *Devices,
                        const ur_program_properties_t *Properties,
-                       const uint8_t **Inputs, const size_t *Lengths)
-      : Context{Context}, NativeProperties(Properties), OwnZeModule{true},
-        AssociatedDevices(Devices, Devices + NumDevices) {
-    for (uint32_t I = 0; I < NumDevices; ++I) {
-      DeviceData &PerDevData = DeviceDataMap[Devices[I]->ZeDevice];
-      PerDevData.State = St;
-      PerDevData.Binary = std::make_pair(
-          std::unique_ptr<uint8_t[]>(new uint8_t[Lengths[I]]), Lengths[I]);
-      std::memcpy(PerDevData.Binary.first.get(), Inputs[I], Lengths[I]);
-    }
-  }
+                       const uint8_t **Inputs, const size_t *Lengths);
 
-  ur_program_handle_t_(ur_context_handle_t Context)
-      : Context{Context}, NativeProperties{nullptr}, OwnZeModule{true},
-        AssociatedDevices(Context->getDevices()) {}
+  ur_program_handle_t_(ur_context_handle_t Context);
 
   // Construct a program in Exe or Invalid state.
   ur_program_handle_t_(state, ur_context_handle_t Context,
-                       ze_module_handle_t InteropZeModule)
-      : Context{Context}, NativeProperties{nullptr}, OwnZeModule{true},
-        AssociatedDevices({Context->getDevices()[0]}), InteropZeModule{
-                                                           InteropZeModule} {}
+                       ze_module_handle_t InteropZeModule);
 
   // Construct a program in Exe state (interop).
   // TODO: Currently it is not possible to get the device associated with the
@@ -119,24 +89,11 @@ struct ur_program_handle_t_ : _ur_object {
   // or new API need to be added to L0 to fetch that info. Consider it
   // associated with the first device in the context.
   ur_program_handle_t_(state, ur_context_handle_t Context,
-                       ze_module_handle_t InteropZeModule, bool OwnZeModule)
-      : Context{Context}, NativeProperties{nullptr}, OwnZeModule{OwnZeModule},
-        AssociatedDevices({Context->getDevices()[0]}), InteropZeModule{
-                                                           InteropZeModule} {
-    // TODO: Currently it is not possible to understand the device associated
-    // with provided ZeModule. So we can't set the state on that device to Exe.
-  }
+                       ze_module_handle_t InteropZeModule, bool OwnZeModule);
 
   // Construct a program in Invalid state with a custom error message.
   ur_program_handle_t_(state St, ur_context_handle_t Context,
-                       const std::string &ErrorMessage)
-      : Context{Context}, NativeProperties{nullptr}, OwnZeModule{true},
-        ErrorMessage{ErrorMessage}, AssociatedDevices(Context->getDevices()) {
-    for (auto &Device : Context->getDevices()) {
-      DeviceData &PerDevData = DeviceDataMap[Device->ZeDevice];
-      PerDevData.State = St;
-    }
-  }
+                       const std::string &ErrorMessage);
 
   ~ur_program_handle_t_();
   void ur_release_program_resources(bool deletion);

@@ -25,17 +25,9 @@
 #include <zes_api.h>
 
 #include "common.hpp"
-#ifdef UR_ADAPTER_LEVEL_ZERO_V2
-#include "v2/context.hpp"
-#else
 #include "context.hpp"
-#endif
 #include "device.hpp"
-#ifdef UR_ADAPTER_LEVEL_ZERO_V2
-#include "v2/event.hpp"
-#else
 #include "event.hpp"
-#endif
 #include "image.hpp"
 #include "kernel.hpp"
 #include "memory.hpp"
