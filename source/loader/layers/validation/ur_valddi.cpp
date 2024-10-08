@@ -8077,8 +8077,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
                             ///< be ignored if command-buffer is in-order.
     ur_exp_command_buffer_sync_point_t *
         pSyncPoint, ///< [out][optional] Sync point associated with this command.
-    ur_exp_command_buffer_command_handle_t
-        *phCommand ///< [out][optional] Handle to this command.
+    ur_exp_command_buffer_command_handle_t *
+        phCommand ///< [out][optional] Handle to this command. Only available if the
+                  ///< command-buffer is updatable.
 ) {
     auto pfnAppendKernelLaunchExp =
         getContext()->urDdiTable.CommandBufferExp.pfnAppendKernelLaunchExp;
@@ -9005,7 +9006,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferGetInfoExp(
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
 
-        if (UR_EXP_COMMAND_BUFFER_INFO_REFERENCE_COUNT < propName) {
+        if (UR_EXP_COMMAND_BUFFER_INFO_DESCRIPTOR < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
 

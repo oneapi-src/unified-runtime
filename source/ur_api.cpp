@@ -6391,6 +6391,7 @@ ur_result_t UR_APICALL urCommandBufferFinalizeExp(
 ///         + `pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0`
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+///     - ::UR_RESULT_ERROR_INVALID_OPERATION - "phCommand is not NULL and hCommandBuffer is not updatable."
 ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer,         ///< [in] Handle of the command-buffer object.
@@ -6420,8 +6421,9 @@ ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
                             ///< be ignored if command-buffer is in-order.
     ur_exp_command_buffer_sync_point_t *
         pSyncPoint, ///< [out][optional] Sync point associated with this command.
-    ur_exp_command_buffer_command_handle_t
-        *phCommand ///< [out][optional] Handle to this command.
+    ur_exp_command_buffer_command_handle_t *
+        phCommand ///< [out][optional] Handle to this command. Only available if the
+                  ///< command-buffer is updatable.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
     return result;
@@ -7063,7 +7065,7 @@ ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hCommandBuffer`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_EXP_COMMAND_BUFFER_INFO_REFERENCE_COUNT < propName`
+///         + `::UR_EXP_COMMAND_BUFFER_INFO_DESCRIPTOR < propName`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
 ///         + If `propName` is not supported by the adapter.
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
