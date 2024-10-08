@@ -100,6 +100,7 @@ uur::PlatformEnvironment::PlatformEnvironment(int argc, char **argv)
     adapters.resize(adapter_count);
     urAdapterGet(adapter_count, adapters.data(), nullptr);
 
+    std::vector<ur_platform_handle_t> available_platforms;
     // Search through the adapters individually so we can store the one we end
     // up choosing.
     for (auto a : adapters) {
@@ -121,7 +122,6 @@ uur::PlatformEnvironment::PlatformEnvironment(int argc, char **argv)
         }
 
         if (platform_options.platform_name.empty()) {
-
             if (platforms.size() == 1 ||
                 platform_options.platforms_count == 1) {
                 platform = platforms[0];
@@ -155,19 +155,20 @@ uur::PlatformEnvironment::PlatformEnvironment(int argc, char **argv)
                     adapter = a;
                     break;
                 }
-            }
-            if (!platform) {
-                std::stringstream ss_error;
-                ss_error << "Platform \"" << platform_options.platform_name
-                         << "\" not found. Select a single platform from below "
-                            "using the "
-                            "--platform=NAME command-line options:"
-                         << platforms << std::endl
-                         << "or set --platforms_count=1.";
-                error = ss_error.str();
-                return;
+                available_platforms.push_back(candidate);
             }
         }
+    }
+    if (!platform) {
+        std::stringstream ss_error;
+        ss_error << "Platform \"" << platform_options.platform_name
+                 << "\" not found. Select a single platform from below "
+                    "using the "
+                    "--platform=NAME command-line options:"
+                 << available_platforms << std::endl
+                 << "or set --platforms_count=1.";
+        error = ss_error.str();
+        return;
     }
 }
 
