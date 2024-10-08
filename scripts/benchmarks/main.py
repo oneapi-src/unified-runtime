@@ -26,7 +26,8 @@ INTERNAL_WORKDIR_VERSION = '1.8'
 
 def main(directory, additional_env_vars, save_name, compare_names, filter):
     subprocess.run("pwd")
-    subprocess.run("ls -la")
+    subprocess.run("/bin/bash -c \"ls -la\"")
+    subprocess.run("/bin/bash -c \"ls -la ./*\"")
     prepare_workdir(directory, INTERNAL_WORKDIR_VERSION)
 
     cb = ComputeBench(directory)
