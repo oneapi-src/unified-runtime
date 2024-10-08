@@ -6520,6 +6520,9 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_usm_pool_flag_t value)
     case UR_USM_POOL_FLAG_ZERO_INITIALIZE_BLOCK:
         os << "UR_USM_POOL_FLAG_ZERO_INITIALIZE_BLOCK";
         break;
+    case UR_USM_POOL_FLAG_USE_NATIVE_MEMORY_POOL_EXP:
+        os << "UR_USM_POOL_FLAG_USE_NATIVE_MEMORY_POOL_EXP";
+        break;
     default:
         os << "unknown enumerator";
         break;
@@ -6543,6 +6546,16 @@ inline ur_result_t printFlag<ur_usm_pool_flag_t>(std::ostream &os, uint32_t flag
             first = false;
         }
         os << UR_USM_POOL_FLAG_ZERO_INITIALIZE_BLOCK;
+    }
+
+    if ((val & UR_USM_POOL_FLAG_USE_NATIVE_MEMORY_POOL_EXP) == (uint32_t)UR_USM_POOL_FLAG_USE_NATIVE_MEMORY_POOL_EXP) {
+        val ^= (uint32_t)UR_USM_POOL_FLAG_USE_NATIVE_MEMORY_POOL_EXP;
+        if (!first) {
+            os << " | ";
+        } else {
+            first = false;
+        }
+        os << UR_USM_POOL_FLAG_USE_NATIVE_MEMORY_POOL_EXP;
     }
     if (val != 0) {
         std::bitset<32> bits(val);

@@ -3350,15 +3350,16 @@ typedef enum ur_usm_device_mem_flag_t {
 /// @brief USM memory property flags
 typedef uint32_t ur_usm_pool_flags_t;
 typedef enum ur_usm_pool_flag_t {
-    UR_USM_POOL_FLAG_ZERO_INITIALIZE_BLOCK = UR_BIT(0), ///< All coarse-grain allocations (allocations from the driver) will be
-                                                        ///< zero-initialized.
+    UR_USM_POOL_FLAG_ZERO_INITIALIZE_BLOCK = UR_BIT(0),      ///< All coarse-grain allocations (allocations from the driver) will be
+                                                             ///< zero-initialized.
+    UR_USM_POOL_FLAG_USE_NATIVE_MEMORY_POOL_EXP = UR_BIT(1), ///< Use the native memory pool API
     /// @cond
     UR_USM_POOL_FLAG_FORCE_UINT32 = 0x7fffffff
     /// @endcond
 
 } ur_usm_pool_flag_t;
 /// @brief Bit Mask for validating ur_usm_pool_flags_t
-#define UR_USM_POOL_FLAGS_MASK 0xfffffffe
+#define UR_USM_POOL_FLAGS_MASK 0xfffffffc
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief USM allocation type
