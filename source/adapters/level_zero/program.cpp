@@ -970,6 +970,67 @@ ur_result_t urProgramSetSpecializationConstants(
 
 } // namespace ur::level_zero
 
+ur_program_handle_t_::ur_program_handle_t_(state St,
+                                           ur_context_handle_t Context,
+                                           const void *Input, size_t Length)
+    : Context{Context}, NativeProperties{nullptr}, OwnZeModule{true},
+      AssociatedDevices(Context->getDevices()), SpirvCode{new uint8_t[Length]},
+      SpirvCodeLength{Length} {
+  std::memcpy(SpirvCode.get(), Input, Length);
+  // All devices have the program in IL state.
+  for (auto &Device : Context->getDevices()) {
+    DeviceData &PerDevData = DeviceDataMap[Device->ZeDevice];
+    PerDevData.State = St;
+  }
+}
+
+ur_program_handle_t_::ur_program_handle_t_(
+    state St, ur_context_handle_t Context, const uint32_t NumDevices,
+    const ur_device_handle_t *Devices,
+    const ur_program_properties_t *Properties, const uint8_t **Inputs,
+    const size_t *Lengths)
+    : Context{Context}, NativeProperties(Properties), OwnZeModule{true},
+      AssociatedDevices(Devices, Devices + NumDevices) {
+  for (uint32_t I = 0; I < NumDevices; ++I) {
+    DeviceData &PerDevData = DeviceDataMap[Devices[I]->ZeDevice];
+    PerDevData.State = St;
+    PerDevData.Binary = std::make_pair(
+        std::unique_ptr<uint8_t[]>(new uint8_t[Lengths[I]]), Lengths[I]);
+    std::memcpy(PerDevData.Binary.first.get(), Inputs[I], Lengths[I]);
+  }
+}
+
+ur_program_handle_t_::ur_program_handle_t_(ur_context_handle_t Context)
+    : Context{Context}, NativeProperties{nullptr}, OwnZeModule{true},
+      AssociatedDevices(Context->getDevices()) {}
+
+ur_program_handle_t_::ur_program_handle_t_(state, ur_context_handle_t Context,
+                                           ze_module_handle_t InteropZeModule)
+    : Context{Context}, NativeProperties{nullptr}, OwnZeModule{true},
+      AssociatedDevices({Context->getDevices()[0]}),
+      InteropZeModule{InteropZeModule} {}
+
+ur_program_handle_t_::ur_program_handle_t_(state, ur_context_handle_t Context,
+                                           ze_module_handle_t InteropZeModule,
+                                           bool OwnZeModule)
+    : Context{Context}, NativeProperties{nullptr}, OwnZeModule{OwnZeModule},
+      AssociatedDevices({Context->getDevices()[0]}),
+      InteropZeModule{InteropZeModule} {
+  // TODO: Currently it is not possible to understand the device associated
+  // with provided ZeModule. So we can't set the state on that device to Exe.
+}
+
+ur_program_handle_t_::ur_program_handle_t_(state St,
+                                           ur_context_handle_t Context,
+                                           const std::string &ErrorMessage)
+    : Context{Context}, NativeProperties{nullptr}, OwnZeModule{true},
+      ErrorMessage{ErrorMessage}, AssociatedDevices(Context->getDevices()) {
+  for (auto &Device : Context->getDevices()) {
+    DeviceData &PerDevData = DeviceDataMap[Device->ZeDevice];
+    PerDevData.State = St;
+  }
+}
+
 ur_program_handle_t_::~ur_program_handle_t_() {
   if (!resourcesReleased) {
     ur_release_program_resources(true);
