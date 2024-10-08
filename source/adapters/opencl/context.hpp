@@ -40,9 +40,6 @@ struct ur_context_handle_t_ {
   static ur_result_t makeWithNative(native_type Ctx, uint32_t DevCount,
                                     const ur_device_handle_t *phDevices,
                                     ur_context_handle_t &Context) {
-    if (!phDevices) {
-      return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-    }
     try {
       uint32_t CLDeviceCount;
       CL_RETURN_ON_FAILURE(clGetContextInfo(Ctx, CL_CONTEXT_NUM_DEVICES,
@@ -63,6 +60,7 @@ struct ur_context_handle_t_ {
       auto URContext =
           std::make_unique<ur_context_handle_t_>(Ctx, DevCount, phDevices);
       Context = URContext.release();
+      CL_RETURN_ON_FAILURE(clRetainContext(Ctx));
     } catch (std::bad_alloc &) {
       return UR_RESULT_ERROR_OUT_OF_RESOURCES;
     } catch (...) {

@@ -34,9 +34,6 @@ struct ur_queue_handle_t_ {
                                     ur_context_handle_t Context,
                                     ur_device_handle_t Device,
                                     ur_queue_handle_t &Queue) {
-    if (!Context || !Device) {
-      return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-    }
     try {
       cl_context CLContext;
       CL_RETURN_ON_FAILURE(clGetCommandQueueInfo(NativeQueue, CL_QUEUE_CONTEXT,

@@ -46,7 +46,7 @@ commandHandleReleaseInternal(ur_exp_command_buffer_command_handle_t Command) {
 ur_exp_command_buffer_handle_t_::~ur_exp_command_buffer_handle_t_() {
   urQueueRelease(hInternalQueue);
 
-  cl_context CLContext = cl_adapter::cast<cl_context>(hContext);
+  cl_context CLContext = hContext->get();
   cl_ext::clReleaseCommandBufferKHR_fn clReleaseCommandBufferKHR = nullptr;
   cl_int Res =
       cl_ext::getExtFuncFromContext<decltype(clReleaseCommandBufferKHR)>(
@@ -77,7 +77,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferCreateExp(
       pCommandBufferDesc ? pCommandBufferDesc->isUpdatable : false;
 
   ur_device_command_buffer_update_capability_flags_t UpdateCapabilities;
-  cl_device_id CLDevice = cl_adapter::cast<cl_device_id>(hDevice);
+  cl_device_id CLDevice = hDevice->get();
   CL_RETURN_ON_FAILURE(
       getDeviceCommandBufferUpdateCapabilities(CLDevice, UpdateCapabilities));
   bool DeviceSupportsUpdate = UpdateCapabilities > 0;
@@ -91,9 +91,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferCreateExp(
       IsUpdatable ? CL_COMMAND_BUFFER_MUTABLE_KHR : 0u, 0};
 
   cl_int Res = CL_SUCCESS;
-  cl_command_queue CLQueue = Queue->get();
-  auto CLCommandBuffer = clCreateCommandBufferKHR(
-      1, CLQueue, Properties, &Res);
+  const cl_command_queue CLQueue = Queue->get();
+  auto CLCommandBuffer =
+      clCreateCommandBufferKHR(1, &CLQueue, Properties, &Res);
   CL_RETURN_ON_FAILURE_AND_SET_NULL(Res, phCommandBuffer);
 
   try {
@@ -178,10 +178,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
   cl_command_properties_khr *Properties =
       hCommandBuffer->IsUpdatable ? UpdateProperties : nullptr;
   CL_RETURN_ON_FAILURE(clCommandNDRangeKernelKHR(
-      hCommandBuffer->CLCommandBuffer, nullptr, Properties,
-      hKernel->get(), workDim, pGlobalWorkOffset,
-      pGlobalWorkSize, pLocalWorkSize, numSyncPointsInWaitList,
-      pSyncPointWaitList, pSyncPoint, OutCommandHandle));
+      hCommandBuffer->CLCommandBuffer, nullptr, Properties, hKernel->get(),
+      workDim, pGlobalWorkOffset, pGlobalWorkSize, pLocalWorkSize,
+      numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint,
+      OutCommandHandle));
 
   try {
     auto URCommandHandle =
@@ -237,10 +237,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
           cl_ext::CommandCopyBufferName, &clCommandCopyBufferKHR));
 
   CL_RETURN_ON_FAILURE(clCommandCopyBufferKHR(
-      hCommandBuffer->CLCommandBuffer, nullptr, nullptr,
-      hSrcMem->get(), hDstMem->get(),
-      srcOffset, dstOffset, size, numSyncPointsInWaitList, pSyncPointWaitList,
-      pSyncPoint, nullptr));
+      hCommandBuffer->CLCommandBuffer, nullptr, nullptr, hSrcMem->get(),
+      hDstMem->get(), srcOffset, dstOffset, size, numSyncPointsInWaitList,
+      pSyncPointWaitList, pSyncPoint, nullptr));
 
   return UR_RESULT_SUCCESS;
 }
@@ -271,11 +270,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
           cl_ext::CommandCopyBufferRectName, &clCommandCopyBufferRectKHR));
 
   CL_RETURN_ON_FAILURE(clCommandCopyBufferRectKHR(
-      hCommandBuffer->CLCommandBuffer, nullptr, nullptr,
-      hSrcMem->get(), hDstMem->get(),
-      OpenCLOriginRect, OpenCLDstRect, OpenCLRegion, srcRowPitch, srcSlicePitch,
-      dstRowPitch, dstSlicePitch, numSyncPointsInWaitList, pSyncPointWaitList,
-      pSyncPoint, nullptr));
+      hCommandBuffer->CLCommandBuffer, nullptr, nullptr, hSrcMem->get(),
+      hDstMem->get(), OpenCLOriginRect, OpenCLDstRect, OpenCLRegion,
+      srcRowPitch, srcSlicePitch, dstRowPitch, dstSlicePitch,
+      numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint, nullptr));
 
   return UR_RESULT_SUCCESS;
 }
@@ -355,9 +353,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
           cl_ext::CommandFillBufferName, &clCommandFillBufferKHR));
 
   CL_RETURN_ON_FAILURE(clCommandFillBufferKHR(
-      hCommandBuffer->CLCommandBuffer, nullptr, nullptr,
-      hBuffer->get(), pPattern, patternSize, offset, size,
-      numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint, nullptr));
+      hCommandBuffer->CLCommandBuffer, nullptr, nullptr, hBuffer->get(),
+      pPattern, patternSize, offset, size, numSyncPointsInWaitList,
+      pSyncPointWaitList, pSyncPoint, nullptr));
 
   return UR_RESULT_SUCCESS;
 }
@@ -481,11 +479,11 @@ void updateKernelArgs(std::vector<cl_mutable_dispatch_arg_khr> &CLArgs,
   for (uint32_t i = 0; i < NumMemobjArgs; i++) {
     const ur_exp_command_buffer_update_memobj_arg_desc_t &URMemObjArg =
         ArgMemobjList[i];
+    cl_mem arg_value = URMemObjArg.hNewMemObjArg->get();
     cl_mutable_dispatch_arg_khr CLArg{
         URMemObjArg.argIndex, // arg_index
         sizeof(cl_mem),       // arg_size
-        cl_adapter::cast<const cl_mem *>(
-            &URMemObjArg.hNewMemObjArg) // arg_value
+        &arg_value            // arg_value
     };
 
     CLArgs.push_back(CLArg);
@@ -516,7 +514,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
   }
 
   ur_exp_command_buffer_handle_t hCommandBuffer = hCommand->hCommandBuffer;
-  cl_context CLContext = cl_adapter::cast<cl_context>(hCommandBuffer->hContext);
+  cl_context CLContext = hCommandBuffer->hContext->get();
 
   cl_ext::clUpdateMutableCommandsKHR_fn clUpdateMutableCommandsKHR = nullptr;
   UR_RETURN_ON_FAILURE(
@@ -566,8 +564,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
     updateNDRange(CLLocalWorkSize, LocalWorkSizePtr);
   }
 
-  cl_mutable_command_khr command =
-      cl_adapter::cast<cl_mutable_command_khr>(hCommand->CLMutableCommand);
+  cl_mutable_command_khr command = hCommand->CLMutableCommand;
   cl_mutable_dispatch_config_khr dispatch_config = {
       command,
       static_cast<cl_uint>(CLArgs.size()),    // num_args
