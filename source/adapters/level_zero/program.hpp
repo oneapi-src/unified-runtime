@@ -10,8 +10,12 @@
 #pragma once
 
 #include "common.hpp"
-#include "context.hpp"
 #include "device.hpp"
+#ifdef UR_ADAPTER_LEVEL_ZERO_V2
+#include "v2/context.hpp"
+#else
+#include "context.hpp"
+#endif
 
 struct ur_program_handle_t_ : _ur_object {
   // ur_program_handle_t_() {}
