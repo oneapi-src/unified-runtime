@@ -396,6 +396,7 @@ ur_result_t urKernelGetGroupInfo(
       return returnValue(
           uint64_t{hDevice->ZeDeviceComputeProperties->maxTotalGroupSize});
     }
+    return UR_RESULT_ERROR_INVALID_VALUE;
   }
   case UR_KERNEL_GROUP_INFO_COMPILE_WORK_GROUP_SIZE: {
     auto props = hKernel->getProperties(hDevice);
