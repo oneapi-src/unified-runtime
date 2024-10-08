@@ -65,6 +65,7 @@ class ComputeBenchmark(Benchmark):
     def setup(self):
         self.bench.setup()
         self.benchmark_bin = os.path.join(self.bench.directory, 'compute-benchmarks-build', 'bin', self.bench_name)
+        print(f"Binary path set: {self.benchmark_bin}")
 
     def run(self, env_vars) -> list[Result]:
         print(f"Benchmark bin:   {self.benchmark_bin}")
