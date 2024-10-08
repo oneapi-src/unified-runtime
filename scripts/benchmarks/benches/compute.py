@@ -17,13 +17,11 @@ class ComputeBench:
         self.built = False
 
     def setup(self):
-        # self.bins = os.path.join(self.directory, 'compute-benchmarks-build', 'bin')
         if self.built:
             return
-
-        repo_path = git_clone(self.directory, "compute-benchmarks-repo", "https://github.com/intel/compute-benchmarks.git", "08c41bb8bc1762ad53c6194df6d36bfcceff4aa2")
         
         if not options.no_git:
+            repo_path = git_clone(self.directory, "compute-benchmarks-repo", "https://github.com/intel/compute-benchmarks.git", "08c41bb8bc1762ad53c6194df6d36bfcceff4aa2")
             build_path = create_build_path(self.directory, 'compute-benchmarks-build')
 
             configure_command = [
@@ -44,9 +42,7 @@ class ComputeBench:
             print(f"{self.__class__.__name__}: Run {configure_command}")
             run(configure_command, add_sycl=True)
             print(f"{self.__class__.__name__}: Run cmake --build {build_path} -j")
-            run(f"cmake --build {build_path} -j", add_sycl=True)
-        else:
-            build_path = os.path.join(self.directory, 'compute-benchmarks-build')
+            run(f"cmake --build {build_path} -j 8", add_sycl=True)
 
         self.built = True
 
@@ -71,6 +67,8 @@ class ComputeBenchmark(Benchmark):
         self.benchmark_bin = os.path.join(self.bench.directory, 'compute-benchmarks-build', 'bin', self.bench_name)
 
     def run(self, env_vars) -> list[Result]:
+        if self.benchmark_bin == None:
+            raise ValueError("Benchmark binary not found. Did you call setup()?")
         command = [
             f"{self.benchmark_bin}",
             f"--test={self.test}",

@@ -33,16 +33,16 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
     benchmarks = [
         # *** Compute benchmarks
         SubmitKernelSYCL(cb, 0),
-        SubmitKernelSYCL(cb, 1),
-        SubmitKernelUR(cb, 0),
-        SubmitKernelUR(cb, 1),
-        QueueInOrderMemcpy(cb, 0, 'Device', 'Device', 1024),
-        QueueInOrderMemcpy(cb, 0, 'Host', 'Device', 1024),
-        QueueMemcpy(cb, 'Device', 'Device', 1024),
-        StreamMemory(cb, 'Triad', 10 * 1024, 'Device'),
-        ExecImmediateCopyQueue(cb, 0, 1, 'Device', 'Device', 1024),
-        ExecImmediateCopyQueue(cb, 1, 1, 'Device', 'Host', 1024),
-        VectorSum(cb),
+        # SubmitKernelSYCL(cb, 1),
+        # SubmitKernelUR(cb, 0),
+        # SubmitKernelUR(cb, 1),
+        # QueueInOrderMemcpy(cb, 0, 'Device', 'Device', 1024),
+        # QueueInOrderMemcpy(cb, 0, 'Host', 'Device', 1024),
+        # QueueMemcpy(cb, 'Device', 'Device', 1024),
+        # StreamMemory(cb, 'Triad', 10 * 1024, 'Device'),
+        # ExecImmediateCopyQueue(cb, 0, 1, 'Device', 'Device', 1024),
+        # ExecImmediateCopyQueue(cb, 1, 1, 'Device', 'Host', 1024),
+        # VectorSum(cb),
 
         # # *** Velocity benchmarks
         # Hashtable(vb),
