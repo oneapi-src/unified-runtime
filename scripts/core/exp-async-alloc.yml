@@ -26,6 +26,16 @@ etors:
 --- #--------------------------------------------------------------------------
 type: enum
 extend: true
+name: $x_usm_pool_flags_t
+desc: "USM memory property flag for creating a native USM pool"
+etors:
+    - name: USE_NATIVE_MEMORY_POOL_EXP
+      value: "$X_BIT(1)"
+      desc: "Use the native memory pool API"
+
+--- #--------------------------------------------------------------------------
+type: enum
+extend: true
 desc: "Command Type experimental enumerations."
 name: $x_command_t
 etors:
