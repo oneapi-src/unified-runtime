@@ -27,8 +27,8 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
     prepare_workdir(directory, INTERNAL_WORKDIR_VERSION)
 
     cb = ComputeBench(directory)
-    vb = VelocityBench(directory)
-    sb = SyclBench(directory)
+    # vb = VelocityBench(directory)
+    # sb = SyclBench(directory)
 
     benchmarks = [
         # *** Compute benchmarks
@@ -44,52 +44,52 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
         ExecImmediateCopyQueue(cb, 1, 1, 'Device', 'Host', 1024),
         VectorSum(cb),
 
-        # *** Velocity benchmarks
-        Hashtable(vb),
-        Bitcracker(vb),
-        CudaSift(vb),
-        Easywave(vb),
-        QuickSilver(vb),
-        SobelFilter(vb),
+        # # *** Velocity benchmarks
+        # Hashtable(vb),
+        # Bitcracker(vb),
+        # CudaSift(vb),
+        # Easywave(vb),
+        # QuickSilver(vb),
+        # SobelFilter(vb),
 
-        # *** sycl-bench multi benchmarks
-        # Blocked_transform(sb), # run time < 1ms
-        DagTaskI(sb),
-        DagTaskS(sb),
-        HostDevBandwidth(sb),
-        LocalMem(sb),
-        Pattern_L2(sb),
-        Reduction(sb),
-        ScalarProd(sb),
-        SegmentReduction(sb),
-        UsmAccLatency(sb),
-        UsmAllocLatency(sb),
-        UsmInstrMix(sb),
-        UsmPinnedOverhead(sb),
-        VecAdd(sb),
+        # # *** sycl-bench multi benchmarks
+        # # Blocked_transform(sb), # run time < 1ms
+        # DagTaskI(sb),
+        # DagTaskS(sb),
+        # HostDevBandwidth(sb),
+        # LocalMem(sb),
+        # Pattern_L2(sb),
+        # Reduction(sb),
+        # ScalarProd(sb),
+        # SegmentReduction(sb),
+        # UsmAccLatency(sb),
+        # UsmAllocLatency(sb),
+        # UsmInstrMix(sb),
+        # UsmPinnedOverhead(sb),
+        # VecAdd(sb),
 
-        # *** sycl-bench single benchmarks
-        # TwoDConvolution(sb), # run time < 1ms
-        Two_mm(sb),
-        Three_mm(sb),
-        # Arith(sb), # run time < 1ms
-        Atax(sb),
-        # Atomic_reduction(sb), # run time < 1ms
-        Bicg(sb),
-        Correlation(sb),
-        Covariance(sb),
-        Gemm(sb),
-        Gesumv(sb),
-        Gramschmidt(sb),
-        KMeans(sb),
-        LinRegCoeff(sb),
-        # LinRegError(sb), # run time < 1ms
-        MatmulChain(sb),
-        MolDyn(sb),
-        Mvt(sb),
-        Sf(sb),
-        Syr2k(sb),
-        Syrk(sb),
+        # # *** sycl-bench single benchmarks
+        # # TwoDConvolution(sb), # run time < 1ms
+        # Two_mm(sb),
+        # Three_mm(sb),
+        # # Arith(sb), # run time < 1ms
+        # Atax(sb),
+        # # Atomic_reduction(sb), # run time < 1ms
+        # Bicg(sb),
+        # Correlation(sb),
+        # Covariance(sb),
+        # Gemm(sb),
+        # Gesumv(sb),
+        # Gramschmidt(sb),
+        # KMeans(sb),
+        # LinRegCoeff(sb),
+        # # LinRegError(sb), # run time < 1ms
+        # MatmulChain(sb),
+        # MolDyn(sb),
+        # Mvt(sb),
+        # Sf(sb),
+        # Syr2k(sb),
+        # Syrk(sb),
     ]
 
     if filter:

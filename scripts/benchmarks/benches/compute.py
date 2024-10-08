@@ -68,7 +68,7 @@ class ComputeBenchmark(Benchmark):
 
     def setup(self):
         self.bench.setup()
-        self.benchmark_bin = os.path.join(self.directory, 'compute-benchmarks-build', 'bin', self.bench_name)
+        self.benchmark_bin = os.path.join(self.bench.directory, 'compute-benchmarks-build', 'bin', self.bench_name)
 
     def run(self, env_vars) -> list[Result]:
         command = [
