@@ -25,10 +25,15 @@ import subprocess
 INTERNAL_WORKDIR_VERSION = '1.8'
 
 def main(directory, additional_env_vars, save_name, compare_names, filter):
+    cmd = "ls -la ./*"
+    
     subprocess.run("pwd")
-    subprocess.run("/bin/bash -c \"ls -la\"")
-    subprocess.run("/bin/bash -c \"ls -la ./*\"")
-    prepare_workdir(directory, INTERNAL_WORKDIR_VERSION)
+
+    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    o, e = p.communicate()
+    print(o.decode())
+    
+   prepare_workdir(directory, INTERNAL_WORKDIR_VERSION)
 
     cb = ComputeBench(directory)
     # vb = VelocityBench(directory)
