@@ -672,7 +672,7 @@ setKernelPendingArguments(ur_exp_command_buffer_handle_t CommandBuffer,
     char **ZeHandlePtr = nullptr;
     if (Arg.Value) {
       UR_CALL(Arg.Value->getZeHandlePtr(ZeHandlePtr, Arg.AccessMode,
-                                        CommandBuffer->Device));
+                                        CommandBuffer->Device, nullptr, 0u));
     }
     ZE2UR_CALL(zeKernelSetArgumentValue,
                (Kernel->ZeKernel, Arg.Index, Arg.Size, ZeHandlePtr));
@@ -733,6 +733,8 @@ ur_result_t urCommandBufferAppendKernelLaunchExp(
     ur_exp_command_buffer_handle_t CommandBuffer, ur_kernel_handle_t Kernel,
     uint32_t WorkDim, const size_t *GlobalWorkOffset,
     const size_t *GlobalWorkSize, const size_t *LocalWorkSize,
+    uint32_t /*numKernelAlternatives*/,
+    ur_kernel_handle_t * /*phKernelAlternatives*/,
     uint32_t NumSyncPointsInWaitList,
     const ur_exp_command_buffer_sync_point_t *SyncPointWaitList,
     ur_exp_command_buffer_sync_point_t *RetSyncPoint,
@@ -824,10 +826,10 @@ ur_result_t urCommandBufferAppendMemBufferCopyExp(
 
   char *ZeHandleSrc;
   UR_CALL(SrcBuffer->getZeHandle(ZeHandleSrc, ur_mem_handle_t_::read_only,
-                                 CommandBuffer->Device));
+                                 CommandBuffer->Device, nullptr, 0u));
   char *ZeHandleDst;
   UR_CALL(DstBuffer->getZeHandle(ZeHandleDst, ur_mem_handle_t_::write_only,
-                                 CommandBuffer->Device));
+                                 CommandBuffer->Device, nullptr, 0u));
 
   bool PreferCopyEngine = (SrcBuffer->OnHost || DstBuffer->OnHost);
 
@@ -856,10 +858,10 @@ ur_result_t urCommandBufferAppendMemBufferCopyRectExp(
 
   char *ZeHandleSrc;
   UR_CALL(SrcBuffer->getZeHandle(ZeHandleSrc, ur_mem_handle_t_::read_only,
-                                 CommandBuffer->Device));
+                                 CommandBuffer->Device, nullptr, 0u));
   char *ZeHandleDst;
   UR_CALL(DstBuffer->getZeHandle(ZeHandleDst, ur_mem_handle_t_::write_only,
-                                 CommandBuffer->Device));
+                                 CommandBuffer->Device, nullptr, 0u));
 
   bool PreferCopyEngine = (SrcBuffer->OnHost || DstBuffer->OnHost);
 
@@ -882,7 +884,7 @@ ur_result_t urCommandBufferAppendMemBufferWriteExp(
 
   char *ZeHandleDst = nullptr;
   UR_CALL(Buffer->getZeHandle(ZeHandleDst, ur_mem_handle_t_::write_only,
-                              CommandBuffer->Device));
+                              CommandBuffer->Device, nullptr, 0u));
   // Always prefer copy engine for writes
   bool PreferCopyEngine = true;
 
@@ -906,7 +908,7 @@ ur_result_t urCommandBufferAppendMemBufferWriteRectExp(
 
   char *ZeHandleDst = nullptr;
   UR_CALL(Buffer->getZeHandle(ZeHandleDst, ur_mem_handle_t_::write_only,
-                              CommandBuffer->Device));
+                              CommandBuffer->Device, nullptr, 0u));
 
   // Always prefer copy engine for writes
   bool PreferCopyEngine = true;
@@ -928,7 +930,7 @@ ur_result_t urCommandBufferAppendMemBufferReadExp(
 
   char *ZeHandleSrc = nullptr;
   UR_CALL(Buffer->getZeHandle(ZeHandleSrc, ur_mem_handle_t_::read_only,
-                              CommandBuffer->Device));
+                              CommandBuffer->Device, nullptr, 0u));
 
   // Always prefer copy engine for reads
   bool PreferCopyEngine = true;
@@ -951,7 +953,7 @@ ur_result_t urCommandBufferAppendMemBufferReadRectExp(
 
   char *ZeHandleSrc;
   UR_CALL(Buffer->getZeHandle(ZeHandleSrc, ur_mem_handle_t_::read_only,
-                              CommandBuffer->Device));
+                              CommandBuffer->Device, nullptr, 0u));
 
   // Always prefer copy engine for reads
   bool PreferCopyEngine = true;
@@ -1076,7 +1078,7 @@ ur_result_t urCommandBufferAppendMemBufferFillExp(
   char *ZeHandleDst = nullptr;
   _ur_buffer *UrBuffer = reinterpret_cast<_ur_buffer *>(Buffer);
   UR_CALL(UrBuffer->getZeHandle(ZeHandleDst, ur_mem_handle_t_::write_only,
-                                CommandBuffer->Device));
+                                CommandBuffer->Device, nullptr, 0u));
 
   return enqueueCommandBufferFillHelper(
       UR_COMMAND_MEM_BUFFER_FILL, CommandBuffer, ZeHandleDst + Offset,
@@ -1318,27 +1320,15 @@ ur_result_t validateCommandDesc(
           ->mutableCommandFlags;
   logger::debug("Mutable features supported by device {}", SupportedFeatures);
 
-  uint32_t Dim = CommandDesc->newWorkDim;
-  if (Dim != 0) {
-    // Error if work dim changes
-    if (Dim != Command->WorkDim) {
-      return UR_RESULT_ERROR_INVALID_OPERATION;
-    }
+  // Kernel handle updates are not yet supported.
+  if (CommandDesc->hNewKernel != Command->Kernel) {
+    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+  }
 
-    // Error If Local size and not global size
-    if ((CommandDesc->pNewLocalWorkSize != nullptr) &&
-        (CommandDesc->pNewGlobalWorkSize == nullptr)) {
-      return UR_RESULT_ERROR_INVALID_OPERATION;
-    }
-
-    // Error if local size non-nullptr and created with null
-    // or if local size nullptr and created with non-null
-    const bool IsNewLocalSizeNull = CommandDesc->pNewLocalWorkSize == nullptr;
-    const bool IsOriginalLocalSizeNull = !Command->UserDefinedLocalSize;
-
-    if (IsNewLocalSizeNull ^ IsOriginalLocalSizeNull) {
-      return UR_RESULT_ERROR_INVALID_OPERATION;
-    }
+  if (CommandDesc->newWorkDim != Command->WorkDim &&
+      (!CommandDesc->pNewGlobalWorkOffset ||
+       !CommandDesc->pNewGlobalWorkSize)) {
+    return UR_RESULT_ERROR_INVALID_VALUE;
   }
 
   // Check if new global offset is provided.
@@ -1346,7 +1336,7 @@ ur_result_t validateCommandDesc(
   UR_ASSERT(!NewGlobalWorkOffset ||
                 (SupportedFeatures & ZE_MUTABLE_COMMAND_EXP_FLAG_GLOBAL_OFFSET),
             UR_RESULT_ERROR_UNSUPPORTED_FEATURE);
-  if (NewGlobalWorkOffset && Dim > 0) {
+  if (NewGlobalWorkOffset) {
     if (!CommandBuffer->Context->getPlatform()
              ->ZeDriverGlobalOffsetExtensionFound) {
       logger::error("No global offset extension found on this driver");
@@ -1522,7 +1512,7 @@ ur_result_t updateKernelCommand(
     char **ZeHandlePtr = nullptr;
     if (NewMemObjArg) {
       UR_CALL(NewMemObjArg->getZeHandlePtr(ZeHandlePtr, UrAccessMode,
-                                           CommandBuffer->Device));
+                                           CommandBuffer->Device, nullptr, 0u));
     }
 
     auto ZeMutableArgDesc =
@@ -1616,8 +1606,6 @@ ur_result_t urCommandBufferUpdateKernelLaunchExp(
     ur_exp_command_buffer_command_handle_t Command,
     const ur_exp_command_buffer_update_kernel_launch_desc_t *CommandDesc) {
   UR_ASSERT(Command->Kernel, UR_RESULT_ERROR_INVALID_NULL_HANDLE);
-  UR_ASSERT(CommandDesc->newWorkDim <= 3,
-            UR_RESULT_ERROR_INVALID_WORK_DIMENSION);
 
   // Lock command, kernel and command buffer for update.
   std::scoped_lock<ur_shared_mutex, ur_shared_mutex, ur_shared_mutex> Guard(
