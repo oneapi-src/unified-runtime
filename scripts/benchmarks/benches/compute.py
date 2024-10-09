@@ -61,11 +61,9 @@ class ComputeBenchmark(Benchmark):
 
     def setup(self):
         self.benchmark_bin = os.path.join(self.bench.directory, 'compute-benchmarks-build', 'bin', self.bench_name)
-        print(f"Binary path set: {self.benchmark_bin}")
         self.bench.setup()
 
     def run(self, env_vars) -> list[Result]:
-        print(f"Benchmark bin:   {self.benchmark_bin}")
         command = [
             f"{self.benchmark_bin}",
             f"--test={self.test}",
@@ -75,8 +73,6 @@ class ComputeBenchmark(Benchmark):
 
         command += self.bin_args()
         env_vars.update(self.extra_env_vars())
-
-        print(f"Running command: {command}")
 
         result = self.run_bench(command, env_vars)
         (label, mean) = self.parse_output(result)
