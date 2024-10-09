@@ -22,83 +22,75 @@ import re
 import subprocess
 
 # Update this if you are changing the layout of the results files
-INTERNAL_WORKDIR_VERSION = '1.8'
+INTERNAL_WORKDIR_VERSION = '1.7'
 
 def main(directory, additional_env_vars, save_name, compare_names, filter):
-    cmd = "ls -la ./*"
-    
-    subprocess.run("pwd")
-
-    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    o, e = p.communicate()
-    print(o.decode())
-    
     prepare_workdir(directory, INTERNAL_WORKDIR_VERSION)
 
     cb = ComputeBench(directory)
-    # vb = VelocityBench(directory)
-    # sb = SyclBench(directory)
+    vb = VelocityBench(directory)
+    sb = SyclBench(directory)
 
     benchmarks = [
         # *** Compute benchmarks
         SubmitKernelSYCL(cb, 0),
-        # SubmitKernelSYCL(cb, 1),
-        # SubmitKernelUR(cb, 0),
-        # SubmitKernelUR(cb, 1),
-        # QueueInOrderMemcpy(cb, 0, 'Device', 'Device', 1024),
-        # QueueInOrderMemcpy(cb, 0, 'Host', 'Device', 1024),
-        # QueueMemcpy(cb, 'Device', 'Device', 1024),
-        # StreamMemory(cb, 'Triad', 10 * 1024, 'Device'),
-        # ExecImmediateCopyQueue(cb, 0, 1, 'Device', 'Device', 1024),
-        # ExecImmediateCopyQueue(cb, 1, 1, 'Device', 'Host', 1024),
-        # VectorSum(cb),
+        SubmitKernelSYCL(cb, 1),
+        SubmitKernelUR(cb, 0),
+        SubmitKernelUR(cb, 1),
+        QueueInOrderMemcpy(cb, 0, 'Device', 'Device', 1024),
+        QueueInOrderMemcpy(cb, 0, 'Host', 'Device', 1024),
+        QueueMemcpy(cb, 'Device', 'Device', 1024),
+        StreamMemory(cb, 'Triad', 10 * 1024, 'Device'),
+        ExecImmediateCopyQueue(cb, 0, 1, 'Device', 'Device', 1024),
+        ExecImmediateCopyQueue(cb, 1, 1, 'Device', 'Host', 1024),
+        VectorSum(cb),
 
-        # # *** Velocity benchmarks
-        # Hashtable(vb),
-        # Bitcracker(vb),
-        # CudaSift(vb),
-        # Easywave(vb),
-        # QuickSilver(vb),
-        # SobelFilter(vb),
+        # *** Velocity benchmarks
+        Hashtable(vb),
+        Bitcracker(vb),
+        CudaSift(vb),
+        Easywave(vb),
+        QuickSilver(vb),
+        SobelFilter(vb),
 
-        # # *** sycl-bench multi benchmarks
-        # # Blocked_transform(sb), # run time < 1ms
-        # DagTaskI(sb),
-        # DagTaskS(sb),
-        # HostDevBandwidth(sb),
-        # LocalMem(sb),
-        # Pattern_L2(sb),
-        # Reduction(sb),
-        # ScalarProd(sb),
-        # SegmentReduction(sb),
-        # UsmAccLatency(sb),
-        # UsmAllocLatency(sb),
-        # UsmInstrMix(sb),
-        # UsmPinnedOverhead(sb),
-        # VecAdd(sb),
+        # *** sycl-bench multi benchmarks
+        # Blocked_transform(sb), # run time < 1ms
+        DagTaskI(sb),
+        DagTaskS(sb),
+        HostDevBandwidth(sb),
+        LocalMem(sb),
+        Pattern_L2(sb),
+        Reduction(sb),
+        ScalarProd(sb),
+        SegmentReduction(sb),
+        UsmAccLatency(sb),
+        UsmAllocLatency(sb),
+        UsmInstrMix(sb),
+        UsmPinnedOverhead(sb),
+        VecAdd(sb),
 
-        # # *** sycl-bench single benchmarks
-        # # TwoDConvolution(sb), # run time < 1ms
-        # Two_mm(sb),
-        # Three_mm(sb),
-        # # Arith(sb), # run time < 1ms
-        # Atax(sb),
-        # # Atomic_reduction(sb), # run time < 1ms
-        # Bicg(sb),
-        # Correlation(sb),
-        # Covariance(sb),
-        # Gemm(sb),
-        # Gesumv(sb),
-        # Gramschmidt(sb),
-        # KMeans(sb),
-        # LinRegCoeff(sb),
-        # # LinRegError(sb), # run time < 1ms
-        # MatmulChain(sb),
-        # MolDyn(sb),
-        # Mvt(sb),
-        # Sf(sb),
-        # Syr2k(sb),
-        # Syrk(sb),
+        # *** sycl-bench single benchmarks
+        # TwoDConvolution(sb), # run time < 1ms
+        Two_mm(sb),
+        Three_mm(sb),
+        # Arith(sb), # run time < 1ms
+        Atax(sb),
+        # Atomic_reduction(sb), # run time < 1ms
+        Bicg(sb),
+        Correlation(sb),
+        Covariance(sb),
+        Gemm(sb),
+        Gesumv(sb),
+        Gramschmidt(sb),
+        KMeans(sb),
+        LinRegCoeff(sb),
+        # LinRegError(sb), # run time < 1ms
+        MatmulChain(sb),
+        MolDyn(sb),
+        Mvt(sb),
+        Sf(sb),
+        Syr2k(sb),
+        Syrk(sb),
     ]
 
     if filter:

@@ -33,16 +33,13 @@ class ComputeBench:
                 f"-DSYCL_COMPILER_ROOT={options.sycl}",
                 f"-DALLOW_WARNINGS=ON",
                 f"-DBUILD_UR=ON",
-                f"-DUR_BUILD_TESTS=OFF",
-                f"-DUR_BUILD_TESTS=OFF",
-                f"-DUMF_DISABLE_HWLOC=ON",
-                f"-DBENCHMARK_UR_SOURCE_DIR={options.ur_dir}",
+                f"-Dunified-runtime_DIR={options.ur_dir}/lib/cmake/unified-runtime",
             ]
             
             print(f"{self.__class__.__name__}: Run {configure_command}")
             run(configure_command, add_sycl=True)
             print(f"{self.__class__.__name__}: Run cmake --build {build_path} -j")
-            run(f"cmake --build {build_path} -j 8", add_sycl=True)
+            run(f"cmake --build {build_path} -j 10", add_sycl=True)
 
         self.built = True
 
