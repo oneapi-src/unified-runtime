@@ -31,12 +31,12 @@ SanitizerInterceptor::SanitizerInterceptor() {
 }
 
 SanitizerInterceptor::~SanitizerInterceptor() {
+    // We must release these objects before releasing adapters, since
+    // they may use the adapter in their destructor
     for (const auto &[_, DeviceInfo] : m_DeviceMap) {
         DeviceInfo->Shadow->Destory();
     }
 
-    // We must release these objects before releasing adapters, since
-    // they may use the adapter in their destructor
     m_Quarantine = nullptr;
     m_MemBufferMap.clear();
     m_AllocationMap.clear();
