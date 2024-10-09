@@ -22,11 +22,10 @@
 
 namespace ur_sanitizer_layer {
 
-SanitizerInterceptor::SanitizerInterceptor(logger::Logger &logger)
-    : logger(logger) {
-    if (Options(logger).MaxQuarantineSizeMB) {
+SanitizerInterceptor::SanitizerInterceptor() {
+    if (getOptions().MaxQuarantineSizeMB) {
         m_Quarantine = std::make_unique<Quarantine>(
-            static_cast<uint64_t>(Options(logger).MaxQuarantineSizeMB) * 1024 *
+            static_cast<uint64_t>(getOptions().MaxQuarantineSizeMB) * 1024 *
             1024);
     }
 }
@@ -80,8 +79,8 @@ ur_result_t SanitizerInterceptor::allocateMemory(
         Alignment = MinAlignment;
     }
 
-    uptr RZLog = ComputeRZLog(Size, Options(logger).MinRZSize,
-                              Options(logger).MaxRZSize);
+    uptr RZLog =
+        ComputeRZLog(Size, getOptions().MinRZSize, getOptions().MaxRZSize);
     uptr RZSize = RZLog2Size(RZLog);
     uptr RoundedSize = RoundUpTo(Size, Alignment);
     uptr NeededSize = RoundedSize + RZSize * 2;
@@ -107,6 +106,9 @@ ur_result_t SanitizerInterceptor::allocateMemory(
         getContext()->logger.error("Unsupport memory type");
         return UR_RESULT_ERROR_INVALID_ARGUMENT;
     }
+
+    // Udpate statistics
+    ContextInfo->Stats.UpdateUSMMalloced(NeededSize, NeededSize - Size);
 
     uptr AllocBegin = reinterpret_cast<uptr>(Allocated);
     [[maybe_unused]] uptr AllocEnd = AllocBegin + NeededSize;
@@ -162,7 +164,8 @@ ur_result_t SanitizerInterceptor::releaseMemory(ur_context_handle_t Context,
     }
 
     auto AllocInfoIt = *AllocInfoItOp;
-    auto &AllocInfo = AllocInfoIt->second;
+    // NOTE: AllocInfoIt will be erased later, so "AllocInfo" must be a new reference here
+    auto AllocInfo = AllocInfoIt->second;
 
     if (AllocInfo->Context != Context) {
         if (AllocInfo->UserBegin == Addr) {
@@ -196,18 +199,28 @@ ur_result_t SanitizerInterceptor::releaseMemory(ur_context_handle_t Context,
     // If quarantine is disabled, USM is freed immediately
     if (!m_Quarantine) {
         getContext()->logger.debug("Free: {}", (void *)AllocInfo->AllocBegin);
+
+        ContextInfo->Stats.UpdateUSMRealFreed(AllocInfo->AllocSize,
+                                              AllocInfo->getRedzoneSize());
+
         std::scoped_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
         m_AllocationMap.erase(AllocInfoIt);
+
         return getContext()->urDdiTable.USM.pfnFree(
             Context, (void *)(AllocInfo->AllocBegin));
     }
 
+    // If quarantine is enabled, cache it
     auto ReleaseList = m_Quarantine->put(AllocInfo->Device, AllocInfoIt);
     if (ReleaseList.size()) {
         std::scoped_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
         for (auto &It : ReleaseList) {
             getContext()->logger.info("Quarantine Free: {}",
                                       (void *)It->second->AllocBegin);
+
+            ContextInfo->Stats.UpdateUSMRealFreed(AllocInfo->AllocSize,
+                                                  AllocInfo->getRedzoneSize());
+
             m_AllocationMap.erase(It);
             if (AllocInfo->Type == AllocType::HOST_USM) {
                 for (auto &Device : ContextInfo->DeviceList) {
@@ -218,10 +231,12 @@ ur_result_t SanitizerInterceptor::releaseMemory(ur_context_handle_t Context,
                 UR_CALL(getDeviceInfo(AllocInfo->Device)
                             ->Shadow->ReleaseShadow(AllocInfo));
             }
+
             UR_CALL(getContext()->urDdiTable.USM.pfnFree(
                 Context, (void *)(It->second->AllocBegin)));
         }
     }
+    ContextInfo->Stats.UpdateUSMFreed(AllocInfo->AllocSize);
 
     return UR_RESULT_SUCCESS;
 }
@@ -243,8 +258,8 @@ ur_result_t SanitizerInterceptor::preLaunchKernel(ur_kernel_handle_t Kernel,
         return UR_RESULT_ERROR_INVALID_QUEUE;
     }
 
-    UR_CALL(
-        prepareLaunch(Context, DeviceInfo, InternalQueue, Kernel, LaunchInfo));
+    UR_CALL(prepareLaunch(ContextInfo, DeviceInfo, InternalQueue, Kernel,
+                          LaunchInfo));
 
     UR_CALL(updateShadowMemory(ContextInfo, DeviceInfo, InternalQueue));
 
@@ -421,7 +436,7 @@ ur_result_t SanitizerInterceptor::registerProgram(ur_context_handle_t Context,
         // We use "uint64_t" here because EnqueueWriteGlobal will fail when it's "uint32_t"
         // Because EnqueueWriteGlobal is a async write, so
         // we need to extend its lifetime
-        static uint64_t Debug = Options(logger).Debug ? 1 : 0;
+        static uint64_t Debug = getOptions().Debug ? 1 : 0;
         EnqueueWriteGlobal(kSPIR_AsanDebug, &Debug, sizeof(Debug), false);
 
         // Write shadow memory offset for global memory
@@ -619,22 +634,22 @@ SanitizerInterceptor::getMemBuffer(ur_mem_handle_t MemHandle) {
 }
 
 ur_result_t SanitizerInterceptor::prepareLaunch(
-    ur_context_handle_t Context, std::shared_ptr<DeviceInfo> &DeviceInfo,
-    ur_queue_handle_t Queue, ur_kernel_handle_t Kernel,
-    USMLaunchInfo &LaunchInfo) {
+    std::shared_ptr<ContextInfo> &ContextInfo,
+    std::shared_ptr<DeviceInfo> &DeviceInfo, ur_queue_handle_t Queue,
+    ur_kernel_handle_t Kernel, USMLaunchInfo &LaunchInfo) {
 
     do {
         auto KernelInfo = getKernelInfo(Kernel);
 
         // Validate pointer arguments
-        if (Options(logger).DetectKernelArguments) {
+        if (getOptions().DetectKernelArguments) {
             for (const auto &[ArgIndex, PtrPair] : KernelInfo->PointerArgs) {
                 auto Ptr = PtrPair.first;
                 if (Ptr == nullptr) {
                     continue;
                 }
                 if (auto ValidateResult = ValidateUSMPointer(
-                        Context, DeviceInfo->Handle, (uptr)Ptr)) {
+                        ContextInfo->Handle, DeviceInfo->Handle, (uptr)Ptr)) {
                     ReportInvalidKernelArgument(Kernel, ArgIndex, (uptr)Ptr,
                                                 ValidateResult, PtrPair.second);
                     exit(1);
@@ -698,12 +713,12 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
                      LocalWorkSize[Dim];
         }
 
-        auto EnqueueAllocateShadowMemory = [Context, &DeviceInfo,
+        auto EnqueueAllocateShadowMemory = [Context = ContextInfo->Handle,
+                                            Device = DeviceInfo->Handle,
                                             Queue](size_t Size, uptr &Ptr) {
             void *Allocated = nullptr;
             auto URes = getContext()->urDdiTable.USM.pfnDeviceAlloc(
-                Context, DeviceInfo->Handle, nullptr, nullptr, Size,
-                &Allocated);
+                Context, Device, nullptr, nullptr, Size, &Allocated);
             if (URes != UR_RESULT_SUCCESS) {
                 return URes;
             }
@@ -730,7 +745,7 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
             LocalMemoryUsage, PrivateMemoryUsage);
 
         // Write shadow memory offset for local memory
-        if (Options(logger).DetectLocals) {
+        if (getOptions().DetectLocals) {
             // CPU needn't this
             if (DeviceInfo->Type == DeviceType::GPU_PVC ||
                 DeviceInfo->Type == DeviceType::GPU_DG2) {
@@ -761,6 +776,9 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
                         LaunchInfo.Data->LocalShadowOffset +
                         LocalShadowMemorySize - 1;
 
+                    ContextInfo->Stats.UpdateShadowMalloced(
+                        LocalShadowMemorySize);
+
                     getContext()->logger.info(
                         "ShadowMemory(Local, {} - {})",
                         (void *)LaunchInfo.Data->LocalShadowOffset,
@@ -770,7 +788,7 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
         }
 
         // Write shadow memory offset for private memory
-        if (Options(logger).DetectPrivates) {
+        if (getOptions().DetectPrivates) {
             if (DeviceInfo->Type == DeviceType::CPU) {
                 LaunchInfo.Data->PrivateShadowOffset =
                     DeviceInfo->Shadow->ShadowBegin;
@@ -799,6 +817,10 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
                     LaunchInfo.Data->PrivateShadowOffsetEnd =
                         LaunchInfo.Data->PrivateShadowOffset +
                         PrivateShadowMemorySize - 1;
+
+                    ContextInfo->Stats.UpdateShadowMalloced(
+                        PrivateShadowMemorySize);
+
                     getContext()->logger.info(
                         "ShadowMemory(Private, {} - {})",
                         (void *)LaunchInfo.Data->PrivateShadowOffset,
@@ -840,10 +862,13 @@ SanitizerInterceptor::findAllocInfoByContext(ur_context_handle_t Context) {
 }
 
 ContextInfo::~ContextInfo() {
+    Stats.Print(Handle);
+
     [[maybe_unused]] auto Result =
         getContext()->urDdiTable.Context.pfnRelease(Handle);
     assert(Result == UR_RESULT_SUCCESS);
 
+    // check memory leaks
     std::vector<AllocationIterator> AllocInfos =
         getContext()->interceptor->findAllocInfoByContext(Handle);
     for (const auto &It : AllocInfos) {
@@ -885,13 +910,19 @@ USMLaunchInfo::~USMLaunchInfo() {
     [[maybe_unused]] ur_result_t Result;
     if (Data) {
         auto Type = GetDeviceType(Context, Device);
+        auto ContextInfo = getContext()->interceptor->getContextInfo(Context);
         if (Type == DeviceType::GPU_PVC || Type == DeviceType::GPU_DG2) {
             if (Data->PrivateShadowOffset) {
+                ContextInfo->Stats.UpdateShadowFreed(
+                    Data->PrivateShadowOffsetEnd - Data->PrivateShadowOffset +
+                    1);
                 Result = getContext()->urDdiTable.USM.pfnFree(
                     Context, (void *)Data->PrivateShadowOffset);
                 assert(Result == UR_RESULT_SUCCESS);
             }
             if (Data->LocalShadowOffset) {
+                ContextInfo->Stats.UpdateShadowFreed(
+                    Data->LocalShadowOffsetEnd - Data->LocalShadowOffset + 1);
                 Result = getContext()->urDdiTable.USM.pfnFree(
                     Context, (void *)Data->LocalShadowOffset);
                 assert(Result == UR_RESULT_SUCCESS);
