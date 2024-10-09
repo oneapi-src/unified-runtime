@@ -33,7 +33,7 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
     o, e = p.communicate()
     print(o.decode())
     
-   prepare_workdir(directory, INTERNAL_WORKDIR_VERSION)
+    prepare_workdir(directory, INTERNAL_WORKDIR_VERSION)
 
     cb = ComputeBench(directory)
     # vb = VelocityBench(directory)
