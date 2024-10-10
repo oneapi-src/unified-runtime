@@ -2696,8 +2696,10 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithBinary(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramBuild
 __urdlllocal ur_result_t UR_APICALL urProgramBuild(
-    ur_context_handle_t hContext, ///< [in] handle of the context instance.
     ur_program_handle_t hProgram, ///< [in] Handle of the program to build.
+    uint32_t numDevices,          ///< [in] length of `phDevices`
+    ur_device_handle_t *
+        phDevices, ///< [in][range(0, numDevices)] pointer to array of device handles
     const char *
         pOptions ///< [in][optional] pointer to build options null-terminated string.
 ) {
@@ -2707,14 +2709,15 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuild(
         return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
     }
 
-    ur_program_build_params_t params = {&hContext, &hProgram, &pOptions};
+    ur_program_build_params_t params = {&hProgram, &numDevices, &phDevices,
+                                        &pOptions};
     uint64_t instance = getContext()->notify_begin(UR_FUNCTION_PROGRAM_BUILD,
                                                    "urProgramBuild", &params);
 
     auto &logger = getContext()->logger;
     logger.info("   ---> urProgramBuild\n");
 
-    ur_result_t result = pfnBuild(hContext, hProgram, pOptions);
+    ur_result_t result = pfnBuild(hProgram, numDevices, phDevices, pOptions);
 
     getContext()->notify_end(UR_FUNCTION_PROGRAM_BUILD, "urProgramBuild",
                              &params, &result, instance);
@@ -2733,9 +2736,11 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuild(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramCompile
 __urdlllocal ur_result_t UR_APICALL urProgramCompile(
-    ur_context_handle_t hContext, ///< [in] handle of the context instance.
     ur_program_handle_t
-        hProgram, ///< [in][out] handle of the program to compile.
+        hProgram,        ///< [in][out] handle of the program to compile.
+    uint32_t numDevices, ///< [in] length of `phDevices`
+    ur_device_handle_t *
+        phDevices, ///< [in][range(0, numDevices)] pointer to array of device handles
     const char *
         pOptions ///< [in][optional] pointer to build options null-terminated string.
 ) {
@@ -2745,14 +2750,15 @@ __urdlllocal ur_result_t UR_APICALL urProgramCompile(
         return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
     }
 
-    ur_program_compile_params_t params = {&hContext, &hProgram, &pOptions};
+    ur_program_compile_params_t params = {&hProgram, &numDevices, &phDevices,
+                                          &pOptions};
     uint64_t instance = getContext()->notify_begin(UR_FUNCTION_PROGRAM_COMPILE,
                                                    "urProgramCompile", &params);
 
     auto &logger = getContext()->logger;
     logger.info("   ---> urProgramCompile\n");
 
-    ur_result_t result = pfnCompile(hContext, hProgram, pOptions);
+    ur_result_t result = pfnCompile(hProgram, numDevices, phDevices, pOptions);
 
     getContext()->notify_end(UR_FUNCTION_PROGRAM_COMPILE, "urProgramCompile",
                              &params, &result, instance);
@@ -2772,6 +2778,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramCompile(
 /// @brief Intercept function for urProgramLink
 __urdlllocal ur_result_t UR_APICALL urProgramLink(
     ur_context_handle_t hContext, ///< [in] handle of the context instance.
+    uint32_t numDevices,          ///< [in] number of devices
+    ur_device_handle_t *
+        phDevices, ///< [in][range(0, numDevices)] pointer to array of device handles
     uint32_t count, ///< [in] number of program handles in `phPrograms`.
     const ur_program_handle_t *
         phPrograms, ///< [in][range(0, count)] pointer to array of program handles.
@@ -2789,16 +2798,17 @@ __urdlllocal ur_result_t UR_APICALL urProgramLink(
         return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
     }
 
-    ur_program_link_params_t params = {&hContext, &count, &phPrograms,
-                                       &pOptions, &phProgram};
+    ur_program_link_params_t params = {&hContext, &numDevices, &phDevices,
+                                       &count,    &phPrograms, &pOptions,
+                                       &phProgram};
     uint64_t instance = getContext()->notify_begin(UR_FUNCTION_PROGRAM_LINK,
                                                    "urProgramLink", &params);
 
     auto &logger = getContext()->logger;
     logger.info("   ---> urProgramLink\n");
 
-    ur_result_t result =
-        pfnLink(hContext, count, phPrograms, pOptions, phProgram);
+    ur_result_t result = pfnLink(hContext, numDevices, phDevices, count,
+                                 phPrograms, pOptions, phProgram);
 
     getContext()->notify_end(UR_FUNCTION_PROGRAM_LINK, "urProgramLink", &params,
                              &result, instance);
@@ -8443,138 +8453,6 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urProgramBuildExp
-__urdlllocal ur_result_t UR_APICALL urProgramBuildExp(
-    ur_program_handle_t hProgram, ///< [in] Handle of the program to build.
-    uint32_t numDevices,          ///< [in] number of devices
-    ur_device_handle_t *
-        phDevices, ///< [in][range(0, numDevices)] pointer to array of device handles
-    const char *
-        pOptions ///< [in][optional] pointer to build options null-terminated string.
-) {
-    auto pfnBuildExp = getContext()->urDdiTable.ProgramExp.pfnBuildExp;
-
-    if (nullptr == pfnBuildExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-    }
-
-    ur_program_build_exp_params_t params = {&hProgram, &numDevices, &phDevices,
-                                            &pOptions};
-    uint64_t instance = getContext()->notify_begin(
-        UR_FUNCTION_PROGRAM_BUILD_EXP, "urProgramBuildExp", &params);
-
-    auto &logger = getContext()->logger;
-    logger.info("   ---> urProgramBuildExp\n");
-
-    ur_result_t result = pfnBuildExp(hProgram, numDevices, phDevices, pOptions);
-
-    getContext()->notify_end(UR_FUNCTION_PROGRAM_BUILD_EXP, "urProgramBuildExp",
-                             &params, &result, instance);
-
-    if (logger.getLevel() <= logger::Level::INFO) {
-        std::ostringstream args_str;
-        ur::extras::printFunctionParams(args_str, UR_FUNCTION_PROGRAM_BUILD_EXP,
-                                        &params);
-        logger.info("   <--- urProgramBuildExp({}) -> {};\n", args_str.str(),
-                    result);
-    }
-
-    return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urProgramCompileExp
-__urdlllocal ur_result_t UR_APICALL urProgramCompileExp(
-    ur_program_handle_t
-        hProgram,        ///< [in][out] handle of the program to compile.
-    uint32_t numDevices, ///< [in] number of devices
-    ur_device_handle_t *
-        phDevices, ///< [in][range(0, numDevices)] pointer to array of device handles
-    const char *
-        pOptions ///< [in][optional] pointer to build options null-terminated string.
-) {
-    auto pfnCompileExp = getContext()->urDdiTable.ProgramExp.pfnCompileExp;
-
-    if (nullptr == pfnCompileExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-    }
-
-    ur_program_compile_exp_params_t params = {&hProgram, &numDevices,
-                                              &phDevices, &pOptions};
-    uint64_t instance = getContext()->notify_begin(
-        UR_FUNCTION_PROGRAM_COMPILE_EXP, "urProgramCompileExp", &params);
-
-    auto &logger = getContext()->logger;
-    logger.info("   ---> urProgramCompileExp\n");
-
-    ur_result_t result =
-        pfnCompileExp(hProgram, numDevices, phDevices, pOptions);
-
-    getContext()->notify_end(UR_FUNCTION_PROGRAM_COMPILE_EXP,
-                             "urProgramCompileExp", &params, &result, instance);
-
-    if (logger.getLevel() <= logger::Level::INFO) {
-        std::ostringstream args_str;
-        ur::extras::printFunctionParams(
-            args_str, UR_FUNCTION_PROGRAM_COMPILE_EXP, &params);
-        logger.info("   <--- urProgramCompileExp({}) -> {};\n", args_str.str(),
-                    result);
-    }
-
-    return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urProgramLinkExp
-__urdlllocal ur_result_t UR_APICALL urProgramLinkExp(
-    ur_context_handle_t hContext, ///< [in] handle of the context instance.
-    uint32_t numDevices,          ///< [in] number of devices
-    ur_device_handle_t *
-        phDevices, ///< [in][range(0, numDevices)] pointer to array of device handles
-    uint32_t count, ///< [in] number of program handles in `phPrograms`.
-    const ur_program_handle_t *
-        phPrograms, ///< [in][range(0, count)] pointer to array of program handles.
-    const char *
-        pOptions, ///< [in][optional] pointer to linker options null-terminated string.
-    ur_program_handle_t
-        *phProgram ///< [out] pointer to handle of program object created.
-) {
-    if (nullptr != phProgram) {
-        *phProgram = nullptr;
-    }
-    auto pfnLinkExp = getContext()->urDdiTable.ProgramExp.pfnLinkExp;
-
-    if (nullptr == pfnLinkExp) {
-        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-    }
-
-    ur_program_link_exp_params_t params = {&hContext, &numDevices, &phDevices,
-                                           &count,    &phPrograms, &pOptions,
-                                           &phProgram};
-    uint64_t instance = getContext()->notify_begin(UR_FUNCTION_PROGRAM_LINK_EXP,
-                                                   "urProgramLinkExp", &params);
-
-    auto &logger = getContext()->logger;
-    logger.info("   ---> urProgramLinkExp\n");
-
-    ur_result_t result = pfnLinkExp(hContext, numDevices, phDevices, count,
-                                    phPrograms, pOptions, phProgram);
-
-    getContext()->notify_end(UR_FUNCTION_PROGRAM_LINK_EXP, "urProgramLinkExp",
-                             &params, &result, instance);
-
-    if (logger.getLevel() <= logger::Level::INFO) {
-        std::ostringstream args_str;
-        ur::extras::printFunctionParams(args_str, UR_FUNCTION_PROGRAM_LINK_EXP,
-                                        &params);
-        logger.info("   <--- urProgramLinkExp({}) -> {};\n", args_str.str(),
-                    result);
-    }
-
-    return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMImportExp
 __urdlllocal ur_result_t UR_APICALL urUSMImportExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
@@ -9735,45 +9613,6 @@ __urdlllocal ur_result_t UR_APICALL urGetProgramProcAddrTable(
     return result;
 }
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Exported function for filling application's ProgramExp table
-///        with current process' addresses
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetProgramExpProcAddrTable(
-    ur_api_version_t version, ///< [in] API version requested
-    ur_program_exp_dditable_t
-        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
-) {
-    auto &dditable = ur_tracing_layer::getContext()->urDdiTable.ProgramExp;
-
-    if (nullptr == pDdiTable) {
-        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-    }
-
-    if (UR_MAJOR_VERSION(ur_tracing_layer::getContext()->version) !=
-            UR_MAJOR_VERSION(version) ||
-        UR_MINOR_VERSION(ur_tracing_layer::getContext()->version) >
-            UR_MINOR_VERSION(version)) {
-        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
-    }
-
-    ur_result_t result = UR_RESULT_SUCCESS;
-
-    dditable.pfnBuildExp = pDdiTable->pfnBuildExp;
-    pDdiTable->pfnBuildExp = ur_tracing_layer::urProgramBuildExp;
-
-    dditable.pfnCompileExp = pDdiTable->pfnCompileExp;
-    pDdiTable->pfnCompileExp = ur_tracing_layer::urProgramCompileExp;
-
-    dditable.pfnLinkExp = pDdiTable->pfnLinkExp;
-    pDdiTable->pfnLinkExp = ur_tracing_layer::urProgramLinkExp;
-
-    return result;
-}
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's Queue table
 ///        with current process' addresses
 ///
@@ -10205,11 +10044,6 @@ ur_result_t context_t::init(ur_dditable_t *dditable,
     if (UR_RESULT_SUCCESS == result) {
         result = ur_tracing_layer::urGetProgramProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->Program);
-    }
-
-    if (UR_RESULT_SUCCESS == result) {
-        result = ur_tracing_layer::urGetProgramExpProcAddrTable(
-            UR_API_VERSION_CURRENT, &dditable->ProgramExp);
     }
 
     if (UR_RESULT_SUCCESS == result) {

@@ -170,12 +170,15 @@ details:
     - "The application may call this function from simultaneous threads."
     - "Following a successful call to this entry point, the program passed will contain a binary of the $X_PROGRAM_BINARY_TYPE_EXECUTABLE type for each device in `hContext`."
 params:
-    - type: $x_context_handle_t
-      name: hContext
-      desc: "[in] handle of the context instance."
     - type: $x_program_handle_t
       name: hProgram
       desc: "[in] Handle of the program to build."
+    - type: uint32_t
+      name: numDevices
+      desc: "[in] length of `phDevices`"
+    - type: $x_device_handle_t*
+      name: phDevices
+      desc: "[in][range(0, numDevices)] pointer to array of device handles" 
     - type: const char*
       name: pOptions
       desc: "[in][optional] pointer to build options null-terminated string."
@@ -184,6 +187,8 @@ returns:
       - "If `hProgram` isn't a valid program object."
     - $X_RESULT_ERROR_PROGRAM_BUILD_FAILURE:
       - "If an error occurred when building `hProgram`."
+    - $X_RESULT_ERROR_INVALID_SIZE:
+      - "`numDevices == 0`"
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Produces an executable program from one or more programs."
@@ -197,12 +202,15 @@ details:
     - "The application may call this function from simultaneous threads."
     - "Following a successful call to this entry point `hProgram` will contain a binary of the $X_PROGRAM_BINARY_TYPE_COMPILED_OBJECT type for each device in `hContext`."
 params:
-    - type: $x_context_handle_t
-      name: hContext
-      desc: "[in] handle of the context instance."
     - type: $x_program_handle_t
       name: hProgram
       desc: "[in][out] handle of the program to compile."
+    - type: uint32_t
+      name: numDevices
+      desc: "[in] length of `phDevices`"
+    - type: $x_device_handle_t*
+      name: phDevices
+      desc: "[in][range(0, numDevices)] pointer to array of device handles" 
     - type: const char*
       name: pOptions
       desc: "[in][optional] pointer to build options null-terminated string."
@@ -211,6 +219,8 @@ returns:
       - "If `hProgram` isn't a valid program object."
     - $X_RESULT_ERROR_PROGRAM_BUILD_FAILURE:
       - "If an error occurred while compiling `hProgram`."
+    - $X_RESULT_ERROR_INVALID_SIZE:
+      - "`numDevices == 0`"
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Produces an executable program from one or more programs."
@@ -229,6 +239,12 @@ params:
       name: hContext
       desc: "[in] handle of the context instance."
     - type: uint32_t
+      name: numDevices
+      desc: "[in] number of devices"
+    - type: $x_device_handle_t*
+      name: phDevices
+      desc: "[in][range(0, numDevices)] pointer to array of device handles" 
+    - type: uint32_t
       name: count
       desc: "[in] number of program handles in `phPrograms`."
     - type: const $x_program_handle_t*
@@ -244,6 +260,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_PROGRAM:
       - "If one of the programs in `phPrograms` isn't a valid program object."
     - $X_RESULT_ERROR_INVALID_SIZE:
+      - "`numDevices == 0`"
       - "`count == 0`"
     - $X_RESULT_ERROR_PROGRAM_LINK_FAILURE:
       - "If an error occurred while linking `phPrograms`."
