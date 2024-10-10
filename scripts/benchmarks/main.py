@@ -121,7 +121,7 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
                         if bench_result.passed:
                             print(f"complete ({bench_result.label}: {bench_result.value:.3f} {benchmark.unit()}).")
                         else:
-                            print(f"complete ({bench_result.label}: verification FAILED")
+                            print(f"complete ({bench_result.label}: verification FAILED)")
                         iteration_results.append(bench_result)
                 else:
                     print(f"did not finish (OK for sycl-bench).")
@@ -195,8 +195,6 @@ if __name__ == "__main__":
     parser.add_argument("--epsilon", type=float, help='Threshold to consider change of performance significant', default=0.005)
     parser.add_argument("--verbose", help='Print output of all the commands.', action="store_true")
     parser.add_argument("--exit_on_failure", help='Exit on first failure.', action="store_true")
-    # for tests on cluster nodes
-    parser.add_argument("--no-git", help="No git clone or fetch, no build", action="store_true")
 
     args = parser.parse_args()
     additional_env_vars = validate_and_parse_env_args(args.env)
@@ -210,9 +208,6 @@ if __name__ == "__main__":
     options.ur_dir = args.ur_dir
     options.ur_adapter_name = args.ur_adapter_name
     options.exit_on_failure = args.exit_on_failure
-    # for tests on cluster nodes
-    options.no_git = args.no_git
-    if options.no_git: options.rebuild = False
 
     benchmark_filter = re.compile(args.filter) if args.filter else None
 

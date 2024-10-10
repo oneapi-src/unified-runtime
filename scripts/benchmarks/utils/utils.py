@@ -39,10 +39,7 @@ def run(command, env_vars={}, cwd=None, add_sycl=False):
 
 def git_clone(dir, name, repo, commit):
     repo_path = os.path.join(dir, name)
-    # for tests on cluster nodes
-    if options.no_git:
-        return repo_path
-    
+
     if os.path.isdir(repo_path) and os.path.isdir(os.path.join(repo_path, '.git')):
         run("git fetch", cwd=repo_path)
         run("git reset --hard", cwd=repo_path)

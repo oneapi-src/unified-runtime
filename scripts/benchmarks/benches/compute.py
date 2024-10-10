@@ -19,27 +19,26 @@ class ComputeBench:
     def setup(self):
         if self.built:
             return
-        
-        if not options.no_git:
-            repo_path = git_clone(self.directory, "compute-benchmarks-repo", "https://github.com/intel/compute-benchmarks.git", "08c41bb8bc1762ad53c6194df6d36bfcceff4aa2")
-            build_path = create_build_path(self.directory, 'compute-benchmarks-build')
 
-            configure_command = [
-                "cmake",
-                f"-B {build_path}",
-                f"-S {repo_path}",
-                f"-DCMAKE_BUILD_TYPE=Release",
-                f"-DBUILD_SYCL=ON",
-                f"-DSYCL_COMPILER_ROOT={options.sycl}",
-                f"-DALLOW_WARNINGS=ON",
-                f"-DBUILD_UR=ON",
-                f"-Dunified-runtime_DIR={options.ur_dir}/lib/cmake/unified-runtime",
-            ]
-            
-            print(f"{self.__class__.__name__}: Run {configure_command}")
-            run(configure_command, add_sycl=True)
-            print(f"{self.__class__.__name__}: Run cmake --build {build_path} -j")
-            run(f"cmake --build {build_path} -j 10", add_sycl=True)
+        repo_path = git_clone(self.directory, "compute-benchmarks-repo", "https://github.com/intel/compute-benchmarks.git", "08c41bb8bc1762ad53c6194df6d36bfcceff4aa2")
+        build_path = create_build_path(self.directory, 'compute-benchmarks-build')
+
+        configure_command = [
+            "cmake",
+            f"-B {build_path}",
+            f"-S {repo_path}",
+            f"-DCMAKE_BUILD_TYPE=Release",
+            f"-DBUILD_SYCL=ON",
+            f"-DSYCL_COMPILER_ROOT={options.sycl}",
+            f"-DALLOW_WARNINGS=ON",
+            f"-DBUILD_UR=ON",
+            f"-Dunified-runtime_DIR={options.ur_dir}/lib/cmake/unified-runtime",
+        ]
+
+        print(f"{self.__class__.__name__}: Run {configure_command}")
+        run(configure_command, add_sycl=True)
+        print(f"{self.__class__.__name__}: Run cmake --build {build_path} -j")
+        run(f"cmake --build {build_path} -j 10", add_sycl=True)
 
         self.built = True
 

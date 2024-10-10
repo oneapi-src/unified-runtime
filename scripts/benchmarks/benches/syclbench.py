@@ -22,31 +22,23 @@ class SyclBench:
         if self.built:
             return
 
-        build_path = os.path.join(self.directory, 'sycl-bench-build')
-        
-        if not options.no_git:
-            create_build_path(build_path, '')
+        build_path = create_build_path(self.directory, 'sycl-bench-build')
+        repo_path = git_clone(self.directory, "sycl-bench-repo", "https://github.com/mateuszpn/sycl-bench.git", "1e6ab2cfd004a72c5336c26945965017e06eab71")
 
-            repo_path = git_clone(self.directory, "sycl-bench-repo", "https://github.com/mateuszpn/sycl-bench.git", "1e6ab2cfd004a72c5336c26945965017e06eab71")
+        configure_command = [
+            "cmake",
+            f"-B {build_path}",
+            f"-S {repo_path}",
+            f"-DCMAKE_BUILD_TYPE=Release",
+            f"-DCMAKE_CXX_COMPILER={options.sycl}/bin/clang++",
+            f"-DCMAKE_C_COMPILER={options.sycl}/bin/clang",
+            f"-DSYCL_IMPL=dpcpp"
+        ]
 
-            configure_command = [
-                "cmake",
-                f"-B {build_path}",
-                f"-S {repo_path}",
-                f"-DCMAKE_BUILD_TYPE=Release",
-                f"-DCMAKE_CXX_COMPILER={options.sycl}/bin/clang++",
-                f"-DCMAKE_C_COMPILER={options.sycl}/bin/clang",
-                f"-DSYCL_IMPL=dpcpp"
-            ]
-
-            print(f"{self.__class__.__name__}: Run {configure_command}")
-            run(configure_command, add_sycl=True)
-
-            print(f"{self.__class__.__name__}: Run cmake --build {build_path}")
-            run(f"cmake --build {build_path} -j", add_sycl=True)
+        run(configure_command, add_sycl=True)
+        run(f"cmake --build {build_path} -j", add_sycl=True)
 
         self.built = True
-        # self.bins = build_path
 
 class SyclBenchmark(Benchmark):
     def __init__(self, bench, name, test):
@@ -83,10 +75,7 @@ class SyclBenchmark(Benchmark):
 
         command += self.bin_args()
         env_vars.update(self.extra_env_vars())
-        
-        # if options.verbose:
-        print(f"{self.__class__.__name__}: run_bench {command} env {env_vars}")
-        
+
         # no output to stdout, all in outputfile
         self.run_bench(command, env_vars)
 
@@ -163,7 +152,7 @@ class LocalMem(SyclBenchmark):
 class Pattern_L2(SyclBenchmark):
     def __init__(self, bench):
         super().__init__(bench, "pattern_L2", "L2_multi")
-        
+
     def bin_args(self) -> list[str]:
         return [
             f"--size=1024000000",
@@ -172,16 +161,16 @@ class Pattern_L2(SyclBenchmark):
 class Reduction(SyclBenchmark):
     def __init__(self, bench):
         super().__init__(bench, "reduction", "Pattern_Reduction_multi")
-    
+
     def bin_args(self) -> list[str]:
         return [
             f"--size=10240000",
         ]
-        
+
 class ScalarProd(SyclBenchmark):
     def __init__(self, bench):
         super().__init__(bench, "scalar_prod", "ScalarProduct_multi")
-        
+
     def bin_args(self) -> list[str]:
         return [
             f"--size=102400000",
@@ -190,7 +179,7 @@ class ScalarProd(SyclBenchmark):
 class SegmentReduction(SyclBenchmark):
     def __init__(self, bench):
         super().__init__(bench, "segmentedreduction", "Pattern_SegmentedReduction_multi")
-        
+
     def bin_args(self) -> list[str]:
         return [
             f"--size=102400000",
@@ -199,25 +188,25 @@ class SegmentReduction(SyclBenchmark):
 class UsmAccLatency(SyclBenchmark):
     def __init__(self, bench):
         super().__init__(bench, "usm_accessors_latency", "USM_Latency_multi")
-       
+
     def bin_args(self) -> list[str]:
         return [
             f"--size=4096",
         ]
-        
+
 class UsmAllocLatency(SyclBenchmark):
     def __init__(self, bench):
         super().__init__(bench, "usm_allocation_latency", "USM_Allocation_latency_multi")
-      
+
     def bin_args(self) -> list[str]:
         return [
             f"--size=1024000000",
         ]
- 
+
 class UsmInstrMix(SyclBenchmark):
     def __init__(self, bench):
         super().__init__(bench, "usm_instr_mix", "USM_Instr_Mix_multi")
-      
+
     def bin_args(self) -> list[str]:
         return [
             f"--size=8192",

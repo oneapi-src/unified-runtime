@@ -29,10 +29,7 @@ class VelocityBase(Benchmark):
     def setup(self):
         self.download_deps()
         self.benchmark_bin = os.path.join(self.directory, self.bench_name, self.bin_name)
-        
-        if options.no_git:
-            return
-        
+
         build_path = create_build_path(self.directory, self.bench_name)
 
         configure_command = [
