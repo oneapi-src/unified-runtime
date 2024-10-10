@@ -88,9 +88,9 @@ inline std::string create_library_path(const char *name, const char *path) {
 
 //////////////////////////////////////////////////////////////////////////
 #if !defined(_WIN32) && (__GNUC__ >= 4)
-#define __urdlllocal __attribute__((visibility("hidden")))
+#define UR_DLL_LOCAL __attribute__((visibility("hidden")))
 #else
-#define __urdlllocal
+#define UR_DLL_LOCAL
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
