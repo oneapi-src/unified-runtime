@@ -5,6 +5,7 @@
 {{OPT}}urEnqueueKernelLaunchKernelSubGroupTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
 {{OPT}}urEnqueueKernelLaunchUSMLinkedList.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}__UsePoolEnabled
 {{OPT}}urEnqueueKernelLaunchUSMLinkedList.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}__UsePoolDisabled
+{{OPT}}urEnqueueKernelLaunchIncrementMultiDeviceMultiThreadTest.Success/NoUseEventsNoQueuePerThread
 {{OPT}}urEnqueueMemBufferCopyRectTestWithParam.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___copy_2d_3d
 {{OPT}}urEnqueueMemBufferCopyRectTestWithParam.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___copy_3d_2d
 {{OPT}}urEnqueueMemBufferReadRectTestWithParam.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___write_non_zero_offsets_2D
@@ -22,4 +23,20 @@
 {{OPT}}urEnqueueMemImageReadTest.InvalidOrigin1D/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
 {{OPT}}urEnqueueMemImageReadTest.InvalidOrigin2D/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
 {{OPT}}urEnqueueMemImageReadTest.InvalidOrigin3D/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
-{{Segmentation fault|Aborted}}
+urEnqueueMemImageWriteTest.InvalidOrigin1D/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
+urEnqueueMemImageWriteTest.InvalidOrigin2D/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
+urEnqueueMemImageWriteTest.InvalidOrigin3D/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
+urEnqueueUSMFill2DNegativeTest.OutOfBounds/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
+urEnqueueUSMAdviseTest.InvalidSizeTooLarge/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
+urEnqueueUSMMemcpyTest.WaitForDependencies/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
+urEnqueueUSMPrefetchTest.InvalidSizeTooLarge/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
+urEnqueueReadHostPipeTest.InvalidNullHandleQueue/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
+urEnqueueReadHostPipeTest.InvalidNullHandleProgram/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
+urEnqueueReadHostPipeTest.InvalidNullPointerPipeSymbol/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
+urEnqueueReadHostPipeTest.InvalidNullPointerBuffer/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
+urEnqueueReadHostPipeTest.InvalidEventWaitList/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
+urEnqueueWriteHostPipeTest.InvalidNullHandleQueue/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
+urEnqueueWriteHostPipeTest.InvalidNullHandleProgram/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
+urEnqueueWriteHostPipeTest.InvalidNullPointerPipeSymbol/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
+urEnqueueWriteHostPipeTest.InvalidNullPointerBuffer/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
+urEnqueueWriteHostPipeTest.InvalidEventWaitList/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_

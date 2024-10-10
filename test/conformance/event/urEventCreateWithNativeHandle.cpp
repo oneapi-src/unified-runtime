@@ -10,6 +10,9 @@ using urEventCreateWithNativeHandleTest = uur::event::urEventTest;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEventCreateWithNativeHandleTest);
 
 TEST_P(urEventCreateWithNativeHandleTest, Success) {
+    UUR_SKIP_ON_BACKEND(
+        UR_PLATFORM_BACKEND_LEVEL_ZERO,
+        "Crashes: https://github.com/oneapi-src/unified-runtime/issues/2103");
     ur_native_handle_t native_event = 0;
     {
         UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(

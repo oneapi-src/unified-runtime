@@ -30,6 +30,16 @@
         ASSERT_EQ(status, UR_RESULT_SUCCESS);                                  \
     }
 
+#define UUR_SKIP_ON_BACKEND(BACKEND, ...)                                      \
+    do {                                                                       \
+        ur_platform_backend_t backend;                                         \
+        ASSERT_SUCCESS(urPlatformGetInfo(platform, UR_PLATFORM_INFO_BACKEND,   \
+                                         sizeof(backend), &backend, nullptr)); \
+        if (backend == BACKEND) {                                              \
+            GTEST_SKIP() << __VA_ARGS__;                                       \
+        }                                                                      \
+    } while (0);
+
 namespace uur {
 
 struct urPlatformTest : ::testing::Test {

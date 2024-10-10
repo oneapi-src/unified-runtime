@@ -43,6 +43,9 @@ UUR_TEST_SUITE_P(urEnqueueMemBufferCopyTestWithParam,
                  uur::deviceTestWithParamPrinter<size_t>);
 
 TEST_P(urEnqueueMemBufferCopyTestWithParam, Success) {
+    UUR_SKIP_ON_BACKEND(
+        UR_PLATFORM_BACKEND_LEVEL_ZERO,
+        "Crashes: https://github.com/oneapi-src/unified-runtime/issues/2103");
     ASSERT_SUCCESS(urEnqueueMemBufferCopy(queue, src_buffer, dst_buffer, 0, 0,
                                           size, 0, nullptr, nullptr));
     std::vector<uint32_t> output(count, 1);

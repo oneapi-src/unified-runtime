@@ -77,6 +77,9 @@ UUR_TEST_SUITE_P(
 
 TEST_P(urEnqueueMemBufferCopyRectTestWithParam, Success) {
     // Unpack the parameters.
+    UUR_SKIP_ON_BACKEND(
+        UR_PLATFORM_BACKEND_LEVEL_ZERO,
+        "Crashes: https://github.com/oneapi-src/unified-runtime/issues/2103");
     const auto src_buffer_size = getParam().src_size;
     const auto dst_buffer_size = getParam().dst_size;
     const auto src_buffer_origin = getParam().src_origin;

@@ -64,6 +64,9 @@ TEST_P(urEnqueueMemBufferMapTestWithWriteFlagParam, SuccessWrite) {
 }
 
 TEST_P(urEnqueueMemBufferMapTestWithParam, SuccessOffset) {
+    UUR_SKIP_ON_BACKEND(
+        UR_PLATFORM_BACKEND_LEVEL_ZERO,
+        "Crashes: https://github.com/oneapi-src/unified-runtime/issues/2103");
     const std::vector<uint32_t> input(count, 0);
     ASSERT_SUCCESS(urEnqueueMemBufferWrite(queue, buffer, true, 0, size,
                                            input.data(), 0, nullptr, nullptr));
@@ -93,6 +96,9 @@ TEST_P(urEnqueueMemBufferMapTestWithParam, SuccessOffset) {
 }
 
 TEST_P(urEnqueueMemBufferMapTestWithParam, SuccessPartialMap) {
+    UUR_SKIP_ON_BACKEND(
+        UR_PLATFORM_BACKEND_LEVEL_ZERO,
+        "Crashes: https://github.com/oneapi-src/unified-runtime/issues/2103");
     const std::vector<uint32_t> input(count, 0);
     ASSERT_SUCCESS(urEnqueueMemBufferWrite(queue, buffer, true, 0, size,
                                            input.data(), 0, nullptr, nullptr));

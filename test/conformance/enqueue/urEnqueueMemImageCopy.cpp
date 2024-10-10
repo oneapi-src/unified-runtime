@@ -115,6 +115,9 @@ UUR_TEST_SUITE_P(urEnqueueMemImageCopyTest,
                  printImageCopyTestString<urEnqueueMemImageCopyTest>);
 
 TEST_P(urEnqueueMemImageCopyTest, Success) {
+    UUR_SKIP_ON_BACKEND(
+        UR_PLATFORM_BACKEND_LEVEL_ZERO,
+        "Crashes: https://github.com/oneapi-src/unified-runtime/issues/2103");
     ASSERT_SUCCESS(urEnqueueMemImageCopy(queue, srcImage, dstImage, {0, 0, 0},
                                          {0, 0, 0}, size, 0, nullptr, nullptr));
     std::vector<rgba_pixel> output(buffSize, {1, 1, 1, 1});
@@ -125,6 +128,9 @@ TEST_P(urEnqueueMemImageCopyTest, Success) {
 }
 
 TEST_P(urEnqueueMemImageCopyTest, SuccessPartialCopy) {
+    UUR_SKIP_ON_BACKEND(
+        UR_PLATFORM_BACKEND_LEVEL_ZERO,
+        "Crashes: https://github.com/oneapi-src/unified-runtime/issues/2103");
     ASSERT_SUCCESS(urEnqueueMemImageCopy(queue, srcImage, dstImage, {0, 0, 0},
                                          {0, 0, 0}, partialRegion, 0, nullptr,
                                          nullptr));
@@ -149,6 +155,9 @@ TEST_P(urEnqueueMemImageCopyTest, SuccessPartialCopy) {
 }
 
 TEST_P(urEnqueueMemImageCopyTest, SuccessPartialCopyWithSrcOffset) {
+    UUR_SKIP_ON_BACKEND(
+        UR_PLATFORM_BACKEND_LEVEL_ZERO,
+        "Crashes: https://github.com/oneapi-src/unified-runtime/issues/2103");
     ASSERT_SUCCESS(urEnqueueMemImageCopy(queue, srcImage, dstImage,
                                          partialRegionOffset, {0, 0, 0},
                                          partialRegion, 0, nullptr, nullptr));
@@ -173,6 +182,9 @@ TEST_P(urEnqueueMemImageCopyTest, SuccessPartialCopyWithSrcOffset) {
 }
 
 TEST_P(urEnqueueMemImageCopyTest, SuccessPartialCopyWithDstOffset) {
+    UUR_SKIP_ON_BACKEND(
+        UR_PLATFORM_BACKEND_LEVEL_ZERO,
+        "Crashes: https://github.com/oneapi-src/unified-runtime/issues/2103");
     ASSERT_SUCCESS(urEnqueueMemImageCopy(queue, srcImage, dstImage, {0, 0, 0},
                                          partialRegionOffset, partialRegion, 0,
                                          nullptr, nullptr));
