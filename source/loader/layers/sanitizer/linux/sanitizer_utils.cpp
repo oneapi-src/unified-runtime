@@ -21,7 +21,10 @@
 #include <string>
 #include <sys/mman.h>
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-identifier"
 extern "C" __attribute__((weak)) void __asan_init(void);
+#pragma clang diagnostic pop
 
 namespace ur_sanitizer_layer {
 

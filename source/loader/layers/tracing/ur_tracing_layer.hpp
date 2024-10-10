@@ -24,7 +24,7 @@ namespace ur_tracing_layer {
 struct XptiContextManager;
 
 ///////////////////////////////////////////////////////////////////////////////
-class __urdlllocal context_t : public proxy_layer_context_t,
+class UR_DLL_LOCAL context_t : public proxy_layer_context_t,
                                public AtomicSingleton<context_t> {
   public:
     ur_dditable_t urDdiTable = {};

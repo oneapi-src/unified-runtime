@@ -18,7 +18,7 @@
 
 namespace driver {
 ///////////////////////////////////////////////////////////////////////////////
-class __urdlllocal context_t {
+class UR_DLL_LOCAL context_t {
   public:
     ur_api_version_t version = UR_API_VERSION_CURRENT;
 

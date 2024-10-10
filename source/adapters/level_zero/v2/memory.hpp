@@ -14,7 +14,7 @@
 
 #include "common.hpp"
 
-struct ur_mem_handle_t_ : _ur_object {
+struct ur_mem_handle_t_ : ur_object_ {
   ur_mem_handle_t_(ur_context_handle_t hContext, size_t size);
   virtual ~ur_mem_handle_t_() = default;
 
