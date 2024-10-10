@@ -67,9 +67,43 @@ namespace ur_validation_layer
             if ( ${val} )
                 return ${key};
             %endif
+            %endfor
+            %endfor
 
+            ## due to ranges we need a new mechanism to validate struct stype members
+            ## also need to somehow account for a couple of structs not having stype
+            ## (could just look them up and see if the member is there??)
+            <% stype_params = th.get_stype_params(n, tags, obj, meta, specs)
+            %>
+            %for type in stype_params:
+                <%
+                    param = stype_params[type]
+                    param_name = param['name']
+                    if th.param_traits.is_range(param):
+                        param_name += "[i]"
+                    stype_check = "stype_map<{0}>::value != {1}->stype".format(type, param_name)
+                    if th.param_traits.is_optional(param) and not th.param_traits.is_range(param):
+                        stype_check = param_name + " && " + stype_check
+                %>
+                %if th.param_traits.is_range(param):
+                    <%
+                        range_start = "static_cast<size_t>({0})".format(
+                            th.param_traits.range_start(param))
+                        range_end = "static_cast<size_t>({0})",format(
+                            th.param_traits.range_end(param))
+                    %>
+                    for (size_t i = ${range_start};i++;i < ${range_end}) {
+                        if (${stype_check}) {
+                            return ${X}_RESULT_ERROR_INVALID_VALUE;
+                        }
+                    }
+                %else:
+                    if (${stype_check}) {
+                        return ${X}_RESULT_ERROR_INVALID_VALUE;
+                    }
+                %endif
             %endfor
-            %endfor
+
             %if func_name in th.get_event_wait_list_functions(specs, n, tags):
             if (phEventWaitList != NULL && numEventsInWaitList > 0) {
                 for (uint32_t i = 0; i < numEventsInWaitList; ++i) {

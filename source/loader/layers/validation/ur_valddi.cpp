@@ -128,11 +128,9 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGetLastError(
         if (NULL == hAdapter) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == ppMessage) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pError) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -173,19 +171,15 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGetInfo(
         if (NULL == hAdapter) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (propSize != 0 && pPropValue == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pPropValue == NULL && pPropSizeRet == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_ADAPTER_INFO_REFERENCE_COUNT < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (propSize == 0 && pPropValue != NULL) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -230,7 +224,6 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGet(
         if (NULL == phAdapters) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NumEntries == 0 && phPlatforms != NULL) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -267,19 +260,15 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetInfo(
         if (NULL == hPlatform) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (propSize != 0 && pPropValue == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pPropValue == NULL && pPropSizeRet == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_PLATFORM_INFO_BACKEND < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (propSize == 0 && pPropValue != NULL) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -307,7 +296,6 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetApiVersion(
         if (NULL == hPlatform) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pVersion) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -336,7 +324,6 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetNativeHandle(
         if (NULL == hPlatform) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phNativePlatform) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -370,9 +357,13 @@ __urdlllocal ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
         if (NULL == hAdapter) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phPlatform) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (pProperties && stype_map<ur_platform_native_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -408,11 +399,9 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetBackendOption(
         if (NULL == hPlatform) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pFrontendOption) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == ppPlatformOption) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -451,15 +440,12 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGet(
         if (NULL == hPlatform) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NumEntries > 0 && phDevices == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_DEVICE_TYPE_VPU < DeviceType) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (NumEntries == 0 && phDevices != NULL) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -505,19 +491,15 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetInfo(
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (propSize != 0 && pPropValue == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pPropValue == NULL && pPropSizeRet == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_DEVICE_INFO_ENQUEUE_NATIVE_COMMAND_SUPPORT_EXP < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (propSize == 0 && pPropValue != NULL) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -613,13 +595,16 @@ __urdlllocal ur_result_t UR_APICALL urDevicePartition(
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pProperties) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pProperties->pProperties) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (stype_map<ur_device_partition_properties_t>::value !=
+            pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -658,17 +643,18 @@ __urdlllocal ur_result_t UR_APICALL urDeviceSelectBinary(
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pBinaries) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pSelectedBinary) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NumBinaries == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (stype_map<ur_device_binary_t>::value != pBinaries->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -701,7 +687,6 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetNativeHandle(
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phNativeDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -740,9 +725,13 @@ __urdlllocal ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
         if (NULL == hAdapter) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (pProperties && stype_map<ur_device_native_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -817,13 +806,16 @@ __urdlllocal ur_result_t UR_APICALL urContextCreate(
         if (NULL == phDevices) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == phContext) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL != pProperties && UR_CONTEXT_FLAGS_MASK & pProperties->flags) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        }
+
+        if (pProperties &&
+            stype_map<ur_context_properties_t>::value != pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -918,19 +910,15 @@ __urdlllocal ur_result_t UR_APICALL urContextGetInfo(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (propSize != 0 && pPropValue == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pPropValue == NULL && pPropSizeRet == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_CONTEXT_INFO_ATOMIC_FENCE_SCOPE_CAPABILITIES < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (propSize == 0 && pPropValue != NULL) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -965,7 +953,6 @@ __urdlllocal ur_result_t UR_APICALL urContextGetNativeHandle(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phNativeContext) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -1008,9 +995,13 @@ __urdlllocal ur_result_t UR_APICALL urContextCreateWithNativeHandle(
         if (NULL == hAdapter) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phContext) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (pProperties && stype_map<ur_context_native_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -1050,7 +1041,6 @@ __urdlllocal ur_result_t UR_APICALL urContextSetExtendedDeleter(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pfnDeleter) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -1087,53 +1077,46 @@ __urdlllocal ur_result_t UR_APICALL urMemImageCreate(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pImageFormat) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pImageDesc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == phMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_MEM_FLAGS_MASK & flags) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (pImageDesc && UR_MEM_TYPE_IMAGE1D_ARRAY < pImageDesc->type) {
             return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
         }
-
         if (pImageDesc && pImageDesc->numMipLevel != 0) {
             return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
         }
-
         if (pImageDesc && pImageDesc->numSamples != 0) {
             return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
         }
-
         if (pImageDesc && pImageDesc->rowPitch != 0 && pHost == nullptr) {
             return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
         }
-
         if (pImageDesc && pImageDesc->slicePitch != 0 && pHost == nullptr) {
             return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
         }
-
         if (pHost == NULL &&
             (flags & (UR_MEM_FLAG_USE_HOST_POINTER |
                       UR_MEM_FLAG_ALLOC_COPY_HOST_POINTER)) != 0) {
             return UR_RESULT_ERROR_INVALID_HOST_PTR;
         }
-
         if (pHost != NULL &&
             (flags & (UR_MEM_FLAG_USE_HOST_POINTER |
                       UR_MEM_FLAG_ALLOC_COPY_HOST_POINTER)) == 0) {
             return UR_RESULT_ERROR_INVALID_HOST_PTR;
+        }
+
+        if (stype_map<ur_image_desc_t>::value != pImageDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -1173,35 +1156,34 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreate(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_MEM_FLAGS_MASK & flags) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (size == 0) {
             return UR_RESULT_ERROR_INVALID_BUFFER_SIZE;
         }
-
         if (pProperties == NULL &&
             (flags & (UR_MEM_FLAG_USE_HOST_POINTER |
                       UR_MEM_FLAG_ALLOC_COPY_HOST_POINTER)) != 0) {
             return UR_RESULT_ERROR_INVALID_HOST_PTR;
         }
-
         if (pProperties != NULL && pProperties->pHost == NULL &&
             (flags & (UR_MEM_FLAG_USE_HOST_POINTER |
                       UR_MEM_FLAG_ALLOC_COPY_HOST_POINTER)) != 0) {
             return UR_RESULT_ERROR_INVALID_HOST_PTR;
         }
-
         if (pProperties != NULL && pProperties->pHost != NULL &&
             (flags & (UR_MEM_FLAG_USE_HOST_POINTER |
                       UR_MEM_FLAG_ALLOC_COPY_HOST_POINTER)) == 0) {
             return UR_RESULT_ERROR_INVALID_HOST_PTR;
+        }
+
+        if (pProperties &&
+            stype_map<ur_buffer_properties_t>::value != pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -1296,25 +1278,24 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferPartition(
         if (NULL == hBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pRegion) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == phMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_MEM_FLAGS_MASK & flags) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (UR_BUFFER_CREATE_TYPE_REGION < bufferCreateType) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (pRegion && pRegion->size == 0) {
             return UR_RESULT_ERROR_INVALID_BUFFER_SIZE;
+        }
+
+        if (stype_map<ur_buffer_region_t>::value != pRegion->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -1349,7 +1330,6 @@ __urdlllocal ur_result_t UR_APICALL urMemGetNativeHandle(
         if (NULL == hMem) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phNativeMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -1392,9 +1372,13 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (pProperties && stype_map<ur_mem_native_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -1438,17 +1422,23 @@ __urdlllocal ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pImageFormat) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pImageDesc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == phMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (stype_map<ur_image_desc_t>::value != pImageDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
+
+        if (pProperties && stype_map<ur_mem_native_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -1494,19 +1484,15 @@ __urdlllocal ur_result_t UR_APICALL urMemGetInfo(
         if (NULL == hMemory) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (propSize != 0 && pPropValue == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pPropValue == NULL && pPropSizeRet == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_MEM_INFO_CONTEXT < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (propSize == 0 && pPropValue != NULL) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -1549,19 +1535,15 @@ __urdlllocal ur_result_t UR_APICALL urMemImageGetInfo(
         if (NULL == hMemory) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (propSize != 0 && pPropValue == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pPropValue == NULL && pPropSizeRet == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_IMAGE_INFO_DEPTH < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (propSize == 0 && pPropValue != NULL) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -1596,22 +1578,22 @@ __urdlllocal ur_result_t UR_APICALL urSamplerCreate(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pDesc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == phSampler) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_SAMPLER_ADDRESSING_MODE_MIRRORED_REPEAT <
             pDesc->addressingMode) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (UR_SAMPLER_FILTER_MODE_LINEAR < pDesc->filterMode) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        }
+
+        if (stype_map<ur_sampler_desc_t>::value != pDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -1706,19 +1688,15 @@ __urdlllocal ur_result_t UR_APICALL urSamplerGetInfo(
         if (NULL == hSampler) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (propSize != 0 && pPropValue == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pPropValue == NULL && pPropSizeRet == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_SAMPLER_INFO_FILTER_MODE < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (propSize == 0 && pPropValue != NULL) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -1753,7 +1731,6 @@ __urdlllocal ur_result_t UR_APICALL urSamplerGetNativeHandle(
         if (NULL == hSampler) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phNativeSampler) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -1791,9 +1768,13 @@ __urdlllocal ur_result_t UR_APICALL urSamplerCreateWithNativeHandle(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phSampler) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (pProperties && stype_map<ur_sampler_native_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -1834,22 +1815,22 @@ __urdlllocal ur_result_t UR_APICALL urUSMHostAlloc(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == ppMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL != pUSMDesc && UR_USM_ADVICE_FLAGS_MASK & pUSMDesc->hints) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (pUSMDesc && pUSMDesc->align != 0 &&
             ((pUSMDesc->align & (pUSMDesc->align - 1)) != 0)) {
             return UR_RESULT_ERROR_INVALID_VALUE;
         }
-
         if (size == 0) {
             return UR_RESULT_ERROR_INVALID_USM_SIZE;
+        }
+
+        if (pUSMDesc && stype_map<ur_usm_desc_t>::value != pUSMDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -1891,26 +1872,25 @@ __urdlllocal ur_result_t UR_APICALL urUSMDeviceAlloc(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == ppMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL != pUSMDesc && UR_USM_ADVICE_FLAGS_MASK & pUSMDesc->hints) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (pUSMDesc && pUSMDesc->align != 0 &&
             ((pUSMDesc->align & (pUSMDesc->align - 1)) != 0)) {
             return UR_RESULT_ERROR_INVALID_VALUE;
         }
-
         if (size == 0) {
             return UR_RESULT_ERROR_INVALID_USM_SIZE;
+        }
+
+        if (pUSMDesc && stype_map<ur_usm_desc_t>::value != pUSMDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -1958,26 +1938,25 @@ __urdlllocal ur_result_t UR_APICALL urUSMSharedAlloc(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == ppMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL != pUSMDesc && UR_USM_ADVICE_FLAGS_MASK & pUSMDesc->hints) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (pUSMDesc && pUSMDesc->align != 0 &&
             ((pUSMDesc->align & (pUSMDesc->align - 1)) != 0)) {
             return UR_RESULT_ERROR_INVALID_VALUE;
         }
-
         if (size == 0) {
             return UR_RESULT_ERROR_INVALID_USM_SIZE;
+        }
+
+        if (pUSMDesc && stype_map<ur_usm_desc_t>::value != pUSMDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -2018,7 +1997,6 @@ __urdlllocal ur_result_t UR_APICALL urUSMFree(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -2059,11 +2037,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMGetMemAllocInfo(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_USM_ALLOC_INFO_POOL < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
@@ -2099,17 +2075,18 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolCreate(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pPoolDesc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == ppPool) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_USM_POOL_FLAGS_MASK & pPoolDesc->flags) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        }
+
+        if (stype_map<ur_usm_pool_desc_t>::value != pPoolDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -2201,19 +2178,15 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolGetInfo(
         if (NULL == hPool) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (propSize != 0 && pPropValue == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pPropValue == NULL && pPropSizeRet == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_USM_POOL_INFO_CONTEXT < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (propSize == 0 && pPropValue != NULL) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -2260,19 +2233,15 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemGranularityGetInfo(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (propSize != 0 && pPropValue == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pPropValue == NULL && pPropSizeRet == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_VIRTUAL_MEM_GRANULARITY_INFO_RECOMMENDED < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (propSize == 0 && pPropValue != NULL) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -2318,7 +2287,6 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemReserve(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == ppStart) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -2352,7 +2320,6 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemFree(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pStart) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -2392,15 +2359,12 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemMap(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hPhysicalMem) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pStart) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_VIRTUAL_MEM_ACCESS_FLAGS_MASK & flags) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
@@ -2440,7 +2404,6 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemUnmap(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pStart) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -2476,11 +2439,9 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemSetAccess(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pStart) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_VIRTUAL_MEM_ACCESS_FLAGS_MASK & flags) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
@@ -2524,11 +2485,9 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemGetInfo(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pStart) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_VIRTUAL_MEM_INFO_ACCESS_MODE < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
@@ -2568,18 +2527,20 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemCreate(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phPhysicalMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL != pProperties &&
             UR_PHYSICAL_MEM_FLAGS_MASK & pProperties->flags) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        }
+
+        if (pProperties && stype_map<ur_physical_mem_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -2678,27 +2639,27 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithIL(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pIL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == phProgram) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL != pProperties && pProperties->count > 0 &&
             NULL == pProperties->pMetadatas) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL != pProperties && NULL != pProperties->pMetadatas &&
             pProperties->count == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (length == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (pProperties &&
+            stype_map<ur_program_properties_t>::value != pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -2741,27 +2702,27 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithBinary(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pBinary) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == phProgram) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL != pProperties && pProperties->count > 0 &&
             NULL == pProperties->pMetadatas) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL != pProperties && NULL != pProperties->pMetadatas &&
             pProperties->count == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (pProperties &&
+            stype_map<ur_program_properties_t>::value != pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -2803,7 +2764,6 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuild(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hProgram) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
@@ -2843,7 +2803,6 @@ __urdlllocal ur_result_t UR_APICALL urProgramCompile(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hProgram) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
@@ -2889,15 +2848,12 @@ __urdlllocal ur_result_t UR_APICALL urProgramLink(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phPrograms) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == phProgram) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (count == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -2993,15 +2949,12 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetFunctionPointer(
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hProgram) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pFunctionName) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == ppFunctionPointer) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -3049,15 +3002,12 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetGlobalVariablePointer(
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hProgram) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pGlobalVariableName) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == ppGlobalVariablePointerRet) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -3106,19 +3056,15 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetInfo(
         if (NULL == hProgram) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (propSize != 0 && pPropValue == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pPropValue == NULL && pPropSizeRet == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_PROGRAM_INFO_KERNEL_NAMES < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (propSize == 0 && pPropValue != NULL) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -3163,11 +3109,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetBuildInfo(
         if (NULL == hProgram) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (UR_PROGRAM_BUILD_INFO_BINARY_TYPE < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
@@ -3209,11 +3153,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramSetSpecializationConstants(
         if (NULL == hProgram) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pSpecConstants) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (count == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -3248,7 +3190,6 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetNativeHandle(
         if (NULL == hProgram) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phNativeProgram) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -3286,9 +3227,13 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithNativeHandle(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phProgram) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (pProperties && stype_map<ur_program_native_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -3325,11 +3270,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreate(
         if (NULL == hProgram) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pKernelName) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == phKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -3371,9 +3314,13 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgValue(
         if (NULL == hKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pArgValue) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (pProperties && stype_map<ur_kernel_arg_value_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -3407,6 +3354,11 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgLocal(
     if (getContext()->enableParameterValidation) {
         if (NULL == hKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
+        }
+
+        if (pProperties && stype_map<ur_kernel_arg_local_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -3448,19 +3400,15 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetInfo(
         if (NULL == hKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (propSize != 0 && pPropValue == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pPropValue == NULL && pPropSizeRet == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_KERNEL_INFO_NUM_REGS < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (propSize == 0 && pPropValue != NULL) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -3502,11 +3450,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetGroupInfo(
         if (NULL == hKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (UR_KERNEL_GROUP_INFO_COMPILE_MAX_LINEAR_WORK_GROUP_SIZE <
             propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
@@ -3555,11 +3501,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetSubGroupInfo(
         if (NULL == hKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (UR_KERNEL_SUB_GROUP_INFO_SUB_GROUP_SIZE_INTEL < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
@@ -3655,6 +3599,12 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgPointer(
         if (NULL == hKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
+
+        if (pProperties &&
+            stype_map<ur_kernel_arg_pointer_properties_t>::value !=
+                pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -3690,13 +3640,16 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetExecInfo(
         if (NULL == hKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pPropValue) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_KERNEL_EXEC_INFO_CACHE_CONFIG < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        }
+
+        if (pProperties && stype_map<ur_kernel_exec_info_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -3730,9 +3683,14 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgSampler(
         if (NULL == hKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hArgValue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
+        }
+
+        if (pProperties &&
+            stype_map<ur_kernel_arg_sampler_properties_t>::value !=
+                pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -3771,10 +3729,15 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgMemObj(
         if (NULL == hKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL != pProperties &&
             UR_MEM_FLAGS_MASK & pProperties->memoryAccess) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        }
+
+        if (pProperties &&
+            stype_map<ur_kernel_arg_mem_obj_properties_t>::value !=
+                pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -3813,11 +3776,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetSpecializationConstants(
         if (NULL == hKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pSpecConstants) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (count == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -3852,7 +3813,6 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetNativeHandle(
         if (NULL == hKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phNativeKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -3892,9 +3852,13 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (pProperties && stype_map<ur_kernel_native_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -3948,19 +3912,15 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetSuggestedLocalWorkSize(
         if (NULL == hKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pGlobalWorkOffset) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pGlobalWorkSize) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pSuggestedLocalWorkSize) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -4006,19 +3966,15 @@ __urdlllocal ur_result_t UR_APICALL urQueueGetInfo(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (propSize != 0 && pPropValue == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pPropValue == NULL && pPropSizeRet == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_QUEUE_INFO_EMPTY < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (propSize == 0 && pPropValue != NULL) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -4055,29 +4011,29 @@ __urdlllocal ur_result_t UR_APICALL urQueueCreate(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL != pProperties && UR_QUEUE_FLAGS_MASK & pProperties->flags) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (pProperties != NULL &&
             pProperties->flags & UR_QUEUE_FLAG_PRIORITY_HIGH &&
             pProperties->flags & UR_QUEUE_FLAG_PRIORITY_LOW) {
             return UR_RESULT_ERROR_INVALID_QUEUE_PROPERTIES;
         }
-
         if (pProperties != NULL &&
             pProperties->flags & UR_QUEUE_FLAG_SUBMISSION_BATCHED &&
             pProperties->flags & UR_QUEUE_FLAG_SUBMISSION_IMMEDIATE) {
             return UR_RESULT_ERROR_INVALID_QUEUE_PROPERTIES;
+        }
+
+        if (pProperties &&
+            stype_map<ur_queue_properties_t>::value != pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -4173,9 +4129,12 @@ __urdlllocal ur_result_t UR_APICALL urQueueGetNativeHandle(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phNativeQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (pDesc && stype_map<ur_queue_native_desc_t>::value != pDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -4212,9 +4171,13 @@ __urdlllocal ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (pProperties && stype_map<ur_queue_native_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -4313,19 +4276,15 @@ __urdlllocal ur_result_t UR_APICALL urEventGetInfo(
         if (NULL == hEvent) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (propSize != 0 && pPropValue == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pPropValue == NULL && pPropSizeRet == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_EVENT_INFO_REFERENCE_COUNT < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (propSize == 0 && pPropValue != NULL) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -4367,11 +4326,9 @@ __urdlllocal ur_result_t UR_APICALL urEventGetProfilingInfo(
         if (NULL == hEvent) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (UR_PROFILING_INFO_COMMAND_COMPLETE < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (pPropValue && propSize == 0) {
             return UR_RESULT_ERROR_INVALID_VALUE;
         }
@@ -4406,7 +4363,6 @@ __urdlllocal ur_result_t UR_APICALL urEventWait(
         if (NULL == phEventWaitList) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (numEvents == 0) {
             return UR_RESULT_ERROR_INVALID_VALUE;
         }
@@ -4486,7 +4442,6 @@ __urdlllocal ur_result_t UR_APICALL urEventGetNativeHandle(
         if (NULL == hEvent) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phNativeEvent) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -4524,9 +4479,13 @@ __urdlllocal ur_result_t UR_APICALL urEventCreateWithNativeHandle(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phEvent) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (pProperties && stype_map<ur_event_native_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -4564,15 +4523,12 @@ __urdlllocal ur_result_t UR_APICALL urEventSetCallback(
         if (NULL == hEvent) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pfnNotify) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_EXECUTION_INFO_QUEUED < execStatus) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (execStatus == UR_EXECUTION_INFO_QUEUED) {
             return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
         }
@@ -4630,23 +4586,18 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunch(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pGlobalWorkOffset) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pGlobalWorkSize) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
@@ -4702,11 +4653,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWait(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
@@ -4757,11 +4706,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
@@ -4816,23 +4763,18 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferRead(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pDst) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (getContext()->enableBoundsChecking) {
             if (auto boundsError = bounds(hBuffer, offset, size);
                 boundsError != UR_RESULT_SUCCESS) {
@@ -4898,23 +4840,18 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWrite(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pSrc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (getContext()->enableBoundsChecking) {
             if (auto boundsError = bounds(hBuffer, offset, size);
                 boundsError != UR_RESULT_SUCCESS) {
@@ -4991,63 +4928,51 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pDst) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (region.width == 0 || region.height == 0 || region.width == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (bufferRowPitch != 0 && bufferRowPitch < region.width) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (hostRowPitch != 0 && hostRowPitch < region.width) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (bufferSlicePitch != 0 &&
             bufferSlicePitch <
                 region.height *
                     (bufferRowPitch != 0 ? bufferRowPitch : region.width)) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (bufferSlicePitch != 0 &&
             bufferSlicePitch %
                     (bufferRowPitch != 0 ? bufferRowPitch : region.width) !=
                 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (hostSlicePitch != 0 &&
             hostSlicePitch <
                 region.height *
                     (hostRowPitch != 0 ? hostRowPitch : region.width)) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (hostSlicePitch != 0 &&
             hostSlicePitch %
                     (hostRowPitch != 0 ? hostRowPitch : region.width) !=
                 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (getContext()->enableBoundsChecking) {
             if (auto boundsError = bounds(hBuffer, bufferOrigin, region);
                 boundsError != UR_RESULT_SUCCESS) {
@@ -5128,63 +5053,51 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pSrc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (region.width == 0 || region.height == 0 || region.width == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (bufferRowPitch != 0 && bufferRowPitch < region.width) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (hostRowPitch != 0 && hostRowPitch < region.width) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (bufferSlicePitch != 0 &&
             bufferSlicePitch <
                 region.height *
                     (bufferRowPitch != 0 ? bufferRowPitch : region.width)) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (bufferSlicePitch != 0 &&
             bufferSlicePitch %
                     (bufferRowPitch != 0 ? bufferRowPitch : region.width) !=
                 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (hostSlicePitch != 0 &&
             hostSlicePitch <
                 region.height *
                     (hostRowPitch != 0 ? hostRowPitch : region.width)) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (hostSlicePitch != 0 &&
             hostSlicePitch %
                     (hostRowPitch != 0 ? hostRowPitch : region.width) !=
                 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (getContext()->enableBoundsChecking) {
             if (auto boundsError = bounds(hBuffer, bufferOrigin, region);
                 boundsError != UR_RESULT_SUCCESS) {
@@ -5250,30 +5163,24 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopy(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hBufferSrc) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hBufferDst) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (getContext()->enableBoundsChecking) {
             if (auto boundsError = bounds(hBufferSrc, srcOffset, size);
                 boundsError != UR_RESULT_SUCCESS) {
                 return boundsError;
             }
         }
-
         if (getContext()->enableBoundsChecking) {
             if (auto boundsError = bounds(hBufferDst, dstOffset, size);
                 boundsError != UR_RESULT_SUCCESS) {
@@ -5353,66 +5260,53 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hBufferSrc) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hBufferDst) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (region.width == 0 || region.height == 0 || region.depth == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (srcRowPitch != 0 && srcRowPitch < region.width) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (dstRowPitch != 0 && dstRowPitch < region.width) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (srcSlicePitch != 0 &&
             srcSlicePitch < region.height * (srcRowPitch != 0 ? srcRowPitch
                                                               : region.width)) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (srcSlicePitch != 0 &&
             srcSlicePitch % (srcRowPitch != 0 ? srcRowPitch : region.width) !=
                 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (dstSlicePitch != 0 &&
             dstSlicePitch < region.height * (dstRowPitch != 0 ? dstRowPitch
                                                               : region.width)) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (dstSlicePitch != 0 &&
             dstSlicePitch % (dstRowPitch != 0 ? dstRowPitch : region.width) !=
                 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (getContext()->enableBoundsChecking) {
             if (auto boundsError = bounds(hBufferSrc, srcOrigin, region);
                 boundsError != UR_RESULT_SUCCESS) {
                 return boundsError;
             }
         }
-
         if (getContext()->enableBoundsChecking) {
             if (auto boundsError = bounds(hBufferDst, dstOrigin, region);
                 boundsError != UR_RESULT_SUCCESS) {
@@ -5482,43 +5376,33 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferFill(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pPattern) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (patternSize == 0 || size == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (patternSize > size) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if ((patternSize & (patternSize - 1)) != 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (size % patternSize != 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (offset % patternSize != 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (getContext()->enableBoundsChecking) {
             if (auto boundsError = bounds(hBuffer, offset, size);
                 boundsError != UR_RESULT_SUCCESS) {
@@ -5587,27 +5471,21 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageRead(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hImage) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pDst) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (region.width == 0 || region.height == 0 || region.depth == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (getContext()->enableBoundsChecking) {
             if (auto boundsError = boundsImage(hImage, origin, region);
                 boundsError != UR_RESULT_SUCCESS) {
@@ -5677,27 +5555,21 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageWrite(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hImage) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pSrc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (region.width == 0 || region.height == 0 || region.depth == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (getContext()->enableBoundsChecking) {
             if (auto boundsError = boundsImage(hImage, origin, region);
                 boundsError != UR_RESULT_SUCCESS) {
@@ -5768,34 +5640,27 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageCopy(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hImageSrc) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hImageDst) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (region.width == 0 || region.height == 0 || region.depth == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (getContext()->enableBoundsChecking) {
             if (auto boundsError = boundsImage(hImageSrc, srcOrigin, region);
                 boundsError != UR_RESULT_SUCCESS) {
                 return boundsError;
             }
         }
-
         if (getContext()->enableBoundsChecking) {
             if (auto boundsError = boundsImage(hImageDst, dstOrigin, region);
                 boundsError != UR_RESULT_SUCCESS) {
@@ -5866,27 +5731,21 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferMap(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == ppRetMap) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_MAP_FLAGS_MASK & mapFlags) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (getContext()->enableBoundsChecking) {
             if (auto boundsError = bounds(hBuffer, offset, size);
                 boundsError != UR_RESULT_SUCCESS) {
@@ -5947,19 +5806,15 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemUnmap(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hMem) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pMappedPtr) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
@@ -6022,35 +5877,27 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pPattern) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (patternSize == 0 || size == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (patternSize > size) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (size % patternSize != 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (getContext()->enableBoundsChecking) {
             if (auto boundsError = bounds(hQueue, pMem, 0, size);
                 boundsError != UR_RESULT_SUCCESS) {
@@ -6109,34 +5956,27 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pDst) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pSrc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (size == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (getContext()->enableBoundsChecking) {
             if (auto boundsError = bounds(hQueue, pDst, 0, size);
                 boundsError != UR_RESULT_SUCCESS) {
                 return boundsError;
             }
         }
-
         if (getContext()->enableBoundsChecking) {
             if (auto boundsError = bounds(hQueue, pSrc, 0, size);
                 boundsError != UR_RESULT_SUCCESS) {
@@ -6193,27 +6033,21 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMPrefetch(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_USM_MIGRATION_FLAGS_MASK & flags) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (size == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (getContext()->enableBoundsChecking) {
             if (auto boundsError = bounds(hQueue, pMem, 0, size);
                 boundsError != UR_RESULT_SUCCESS) {
@@ -6264,19 +6098,15 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMAdvise(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_USM_ADVICE_FLAGS_MASK & advice) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (size == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (getContext()->enableBoundsChecking) {
             if (auto boundsError = bounds(hQueue, pMem, 0, size);
                 boundsError != UR_RESULT_SUCCESS) {
@@ -6332,55 +6162,42 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill2D(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pPattern) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pitch == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (pitch < width) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (patternSize == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (patternSize > width * height) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (patternSize != 0 && ((patternSize & (patternSize - 1)) != 0)) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (width == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (height == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (width * height % patternSize != 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (getContext()->enableBoundsChecking) {
             if (auto boundsError = bounds(hQueue, pMem, 0, pitch * height);
                 boundsError != UR_RESULT_SUCCESS) {
@@ -6445,50 +6262,39 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pDst) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pSrc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (srcPitch == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (dstPitch == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (srcPitch < width) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (dstPitch < width) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (height == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (getContext()->enableBoundsChecking) {
             if (auto boundsError = bounds(hQueue, pDst, 0, dstPitch * height);
                 boundsError != UR_RESULT_SUCCESS) {
                 return boundsError;
             }
         }
-
         if (getContext()->enableBoundsChecking) {
             if (auto boundsError = bounds(hQueue, pSrc, 0, srcPitch * height);
                 boundsError != UR_RESULT_SUCCESS) {
@@ -6551,23 +6357,18 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hProgram) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == name) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pSrc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
@@ -6632,23 +6433,18 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hProgram) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == name) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pDst) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
@@ -6716,23 +6512,18 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueReadHostPipe(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hProgram) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pipe_symbol) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pDst) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
@@ -6800,23 +6591,18 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueWriteHostPipe(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hProgram) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pipe_symbol) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pSrc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
@@ -6875,30 +6661,28 @@ __urdlllocal ur_result_t UR_APICALL urUSMPitchedAllocExp(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == ppMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pResultPitch) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL != pUSMDesc && UR_USM_ADVICE_FLAGS_MASK & pUSMDesc->hints) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (pUSMDesc && pUSMDesc->align != 0 &&
             ((pUSMDesc->align & (pUSMDesc->align - 1)) != 0)) {
             return UR_RESULT_ERROR_INVALID_VALUE;
         }
-
         if (widthInBytes == 0) {
             return UR_RESULT_ERROR_INVALID_USM_SIZE;
+        }
+
+        if (pUSMDesc && stype_map<ur_usm_desc_t>::value != pUSMDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -6945,7 +6729,6 @@ urBindlessImagesUnsampledImageHandleDestroyExp(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
@@ -6988,7 +6771,6 @@ urBindlessImagesSampledImageHandleDestroyExp(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
@@ -7032,25 +6814,24 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageAllocateExp(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pImageFormat) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pImageDesc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == phImageMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pImageDesc && UR_MEM_TYPE_IMAGE_CUBEMAP_EXP < pImageDesc->type) {
             return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
+        }
+
+        if (stype_map<ur_image_desc_t>::value != pImageDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -7089,7 +6870,6 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageFreeExp(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
@@ -7134,25 +6914,24 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesUnsampledImageCreateExp(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pImageFormat) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pImageDesc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == phImage) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pImageDesc && UR_MEM_TYPE_IMAGE_CUBEMAP_EXP < pImageDesc->type) {
             return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
+        }
+
+        if (stype_map<ur_image_desc_t>::value != pImageDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -7197,29 +6976,27 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesSampledImageCreateExp(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hSampler) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pImageFormat) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pImageDesc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == phImage) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pImageDesc && UR_MEM_TYPE_IMAGE_CUBEMAP_EXP < pImageDesc->type) {
             return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
+        }
+
+        if (stype_map<ur_image_desc_t>::value != pImageDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -7284,47 +7061,46 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageCopyExp(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pSrc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pDst) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pSrcImageDesc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pDstImageDesc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pSrcImageFormat) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pDstImageFormat) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pCopyRegion) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_EXP_IMAGE_COPY_FLAGS_MASK & imageCopyFlags) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (pSrcImageDesc &&
             UR_MEM_TYPE_IMAGE_CUBEMAP_EXP < pSrcImageDesc->type) {
             return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
         }
-
         if (pDstImageDesc &&
             UR_MEM_TYPE_IMAGE_CUBEMAP_EXP < pDstImageDesc->type) {
             return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
+        }
+
+        if (stype_map<ur_image_desc_t>::value != pSrcImageDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
+
+        if (stype_map<ur_exp_image_copy_region_t>::value !=
+            pCopyRegion->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
@@ -7370,11 +7146,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageGetInfoExp(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (pPropValue == NULL && pPropSizeRet == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_IMAGE_INFO_DEPTH < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
@@ -7413,11 +7187,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMipmapGetLevelExp(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phImageMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -7458,7 +7230,6 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMipmapFreeExp(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
@@ -7503,21 +7274,22 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportExternalMemoryExp(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pExternalMemDesc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == phExternalMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_EXP_EXTERNAL_MEM_TYPE_WIN32_NT_DX12_RESOURCE < memHandleType) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        }
+
+        if (stype_map<ur_exp_external_mem_desc_t>::value !=
+            pExternalMemDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -7562,29 +7334,27 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMapExternalArrayExp(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hExternalMem) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pImageFormat) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pImageDesc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == phImageMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pImageDesc && UR_MEM_TYPE_IMAGE_CUBEMAP_EXP < pImageDesc->type) {
             return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
+        }
+
+        if (stype_map<ur_image_desc_t>::value != pImageDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -7627,15 +7397,12 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMapExternalLinearMemoryExp(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hExternalMem) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == ppRetMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -7676,11 +7443,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesReleaseExternalMemoryExp(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hExternalMem) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
@@ -7726,22 +7491,23 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportExternalSemaphoreExp(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pExternalSemaphoreDesc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == phExternalSemaphore) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_EXP_EXTERNAL_SEMAPHORE_TYPE_WIN32_NT_DX12_FENCE <
             semHandleType) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        }
+
+        if (stype_map<ur_exp_external_semaphore_desc_t>::value !=
+            pExternalSemaphoreDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -7782,11 +7548,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesReleaseExternalSemaphoreExp(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hExternalSemaphore) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
@@ -7842,7 +7606,6 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesWaitExternalSemaphoreExp(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hSemaphore) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
@@ -7903,7 +7666,6 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesSignalExternalSemaphoreExp(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hSemaphore) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
@@ -7949,13 +7711,17 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferCreateExp(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phCommandBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (pCommandBufferDesc &&
+            stype_map<ur_exp_command_buffer_desc_t>::value !=
+                pCommandBufferDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -8091,31 +7857,24 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
         if (NULL == hCommandBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pGlobalWorkOffset) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pGlobalWorkSize) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (phKernelAlternatives == NULL && numKernelAlternatives > 0) {
             return UR_RESULT_ERROR_INVALID_VALUE;
         }
-
         if (phKernelAlternatives != NULL && numKernelAlternatives == 0) {
             return UR_RESULT_ERROR_INVALID_VALUE;
         }
-
         if (pSyncPointWaitList == NULL && numSyncPointsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
-
         if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
@@ -8161,23 +7920,18 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMMemcpyExp(
         if (NULL == hCommandBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pDst) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pSrc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (size == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (pSyncPointWaitList == NULL && numSyncPointsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
-
         if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
@@ -8219,31 +7973,24 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMFillExp(
         if (NULL == hCommandBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pMemory) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pPattern) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (patternSize == 0 || size == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (patternSize > size) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (size % patternSize != 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
-
         if (pSyncPointWaitList == NULL && numSyncPointsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
-
         if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
@@ -8285,19 +8032,15 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
         if (NULL == hCommandBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hSrcMem) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDstMem) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (pSyncPointWaitList == NULL && numSyncPointsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
-
         if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
@@ -8349,19 +8092,15 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
         if (NULL == hCommandBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pSrc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pSyncPointWaitList == NULL && numSyncPointsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
-
         if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
@@ -8407,19 +8146,15 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
         if (NULL == hCommandBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pDst) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pSyncPointWaitList == NULL && numSyncPointsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
-
         if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
@@ -8473,19 +8208,15 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
         if (NULL == hCommandBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hSrcMem) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hDstMem) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (pSyncPointWaitList == NULL && numSyncPointsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
-
         if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
@@ -8552,19 +8283,15 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
         if (NULL == hCommandBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pSrc) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pSyncPointWaitList == NULL && numSyncPointsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
-
         if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
@@ -8623,19 +8350,15 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
         if (NULL == hCommandBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pDst) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pSyncPointWaitList == NULL && numSyncPointsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
-
         if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
@@ -8684,19 +8407,15 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
         if (NULL == hCommandBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pPattern) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pSyncPointWaitList == NULL && numSyncPointsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
-
         if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
@@ -8741,23 +8460,18 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMPrefetchExp(
         if (NULL == hCommandBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pMemory) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_USM_MIGRATION_FLAGS_MASK & flags) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (pSyncPointWaitList == NULL && numSyncPointsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
-
         if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
-
         if (size == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -8797,23 +8511,18 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMAdviseExp(
         if (NULL == hCommandBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pMemory) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_USM_ADVICE_FLAGS_MASK & advice) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (pSyncPointWaitList == NULL && numSyncPointsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
-
         if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
-
         if (size == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -8853,15 +8562,12 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
         if (NULL == hCommandBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
@@ -8953,14 +8659,18 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
         if (NULL == hCommand) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pUpdateKernelLaunch) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pUpdateKernelLaunch->newWorkDim < 1 ||
             pUpdateKernelLaunch->newWorkDim > 3) {
             return UR_RESULT_ERROR_INVALID_WORK_DIMENSION;
+        }
+
+        if (stype_map<
+                ur_exp_command_buffer_update_kernel_launch_desc_t>::value !=
+            pUpdateKernelLaunch->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -8996,19 +8706,15 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferGetInfoExp(
         if (NULL == hCommandBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (propSize != 0 && pPropValue == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pPropValue == NULL && pPropSizeRet == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_EXP_COMMAND_BUFFER_INFO_REFERENCE_COUNT < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (propSize == 0 && pPropValue != NULL) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -9046,19 +8752,15 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferCommandGetInfoExp(
         if (NULL == hCommand) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (propSize != 0 && pPropValue == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pPropValue == NULL && pPropSizeRet == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_EXP_COMMAND_BUFFER_COMMAND_INFO_REFERENCE_COUNT < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (propSize == 0 && pPropValue != NULL) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -9112,23 +8814,18 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pGlobalWorkOffset) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == pGlobalWorkSize) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
@@ -9183,7 +8880,6 @@ __urdlllocal ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
         if (NULL == hKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pGroupCountRet) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -9234,15 +8930,12 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phEvent) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (phEventWaitList == NULL && numEventsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
-
         if (phEventWaitList != NULL && numEventsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
         }
@@ -9308,15 +9001,12 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == hKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pGlobalWorkSize) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == launchPropList) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -9368,7 +9058,6 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuildExp(
         if (NULL == hProgram) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phDevices) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -9405,7 +9094,6 @@ __urdlllocal ur_result_t UR_APICALL urProgramCompileExp(
         if (NULL == hProgram) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phDevices) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -9450,19 +9138,15 @@ __urdlllocal ur_result_t UR_APICALL urProgramLinkExp(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == phDevices) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == phPrograms) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL == phProgram) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (count == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -9496,7 +9180,6 @@ __urdlllocal ur_result_t UR_APICALL urUSMImportExp(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -9528,7 +9211,6 @@ __urdlllocal ur_result_t UR_APICALL urUSMReleaseExp(
         if (NULL == hContext) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
@@ -9562,7 +9244,6 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PEnablePeerAccessExp(
         if (NULL == commandDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == peerDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
@@ -9601,7 +9282,6 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PDisablePeerAccessExp(
         if (NULL == commandDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == peerDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
@@ -9651,23 +9331,18 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PPeerAccessGetInfoExp(
         if (NULL == commandDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == peerDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (propSize != 0 && pPropValue == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (pPropValue == NULL && pPropSizeRet == NULL) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (UR_EXP_PEER_INFO_UR_PEER_ATOMICS_SUPPORTED < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
-
         if (propSize == 0 && pPropValue != NULL) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
@@ -9726,14 +9401,18 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueNativeCommandExp(
         if (NULL == hQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
-
         if (NULL == pfnNativeEnqueue) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
-
         if (NULL != pProperties &&
             UR_EXP_ENQUEUE_NATIVE_COMMAND_FLAGS_MASK & pProperties->flags) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        }
+
+        if (pProperties &&
+            stype_map<ur_exp_enqueue_native_command_properties_t>::value !=
+                pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
