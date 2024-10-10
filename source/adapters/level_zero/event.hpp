@@ -122,7 +122,7 @@ struct _ur_ze_event_list_t {
 
 void printZeEventList(const _ur_ze_event_list_t &PiZeEventList);
 
-struct ur_event_handle_t_ : _ur_object {
+struct ur_event_handle_t_ : ur_object_ {
   ur_event_handle_t_(ze_event_handle_t ZeEvent,
                      ze_event_pool_handle_t ZeEventPool,
                      ur_context_handle_t Context, ur_command_t CommandType,
@@ -216,7 +216,7 @@ struct ur_event_handle_t_ : _ur_object {
   uint64_t RecordEventEndTimestamp = 0;
 
   // Besides each PI object keeping a total reference count in
-  // _ur_object::RefCount we keep special track of the event *external*
+  // ur_object_::RefCount we keep special track of the event *external*
   // references. This way we are able to tell when the event is not referenced
   // externally anymore, i.e. it can't be passed as a dependency event to
   // piEnqueue* functions and explicitly waited meaning that we can do some

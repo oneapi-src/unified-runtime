@@ -21,7 +21,16 @@
 #include <string>
 #include <sys/mman.h>
 
+#ifdef __clang__
+// The ifdef __clang__ is necessary to avoid unknown pragma warnings on other
+// implementations.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-identifier"
+#endif
 extern "C" __attribute__((weak)) void __asan_init(void);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 namespace ur_sanitizer_layer {
 

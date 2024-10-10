@@ -23,19 +23,19 @@ using WGSize_t = std::array<uint32_t, 3>;
 
 struct ur_program_handle_t_ : RefCounted {
   ur_program_handle_t_(ur_context_handle_t ctx, const unsigned char *pBinary)
-      : _ctx{ctx}, _ptr{pBinary} {}
+      : ctx{ctx}, ptr{pBinary} {}
 
   uint32_t getReferenceCount() const noexcept { return _refCount; }
 
-  ur_context_handle_t _ctx;
-  const unsigned char *_ptr;
+  ur_context_handle_t ctx;
+  const unsigned char *ptr;
   struct _compare {
     bool operator()(char const *a, char const *b) const {
       return std::strcmp(a, b) < 0;
     }
   };
 
-  std::map<const char *, const unsigned char *, _compare> _kernels;
+  std::map<const char *, const unsigned char *, _compare> kernels;
   std::unordered_map<std::string, native_cpu::WGSize_t>
       KernelReqdWorkGroupSizeMD;
   std::unordered_map<std::string, native_cpu::WGSize_t>

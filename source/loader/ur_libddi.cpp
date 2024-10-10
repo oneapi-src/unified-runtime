@@ -17,7 +17,7 @@
 namespace ur_lib {
 ///////////////////////////////////////////////////////////////////////////////
 
-__urdlllocal ur_result_t context_t::ddiInit() {
+UR_DLL_LOCAL ur_result_t context_t::ddiInit() {
     ur_result_t result = UR_RESULT_SUCCESS;
 
     if (UR_RESULT_SUCCESS == result) {

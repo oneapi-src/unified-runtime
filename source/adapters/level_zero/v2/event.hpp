@@ -22,7 +22,7 @@ namespace v2 {
 class event_pool;
 }
 
-struct ur_event_handle_t_ : _ur_object {
+struct ur_event_handle_t_ : ur_object_ {
 public:
   ur_event_handle_t_(v2::event_allocation eventAllocation,
                      v2::event_pool *pool);

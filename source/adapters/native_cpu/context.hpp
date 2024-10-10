@@ -91,9 +91,9 @@ static usm_alloc_info get_alloc_info(void *ptr) {
 } // namespace native_cpu
 
 struct ur_context_handle_t_ : RefCounted {
-  ur_context_handle_t_(ur_device_handle_t_ *phDevices) : _device{phDevices} {}
+  ur_context_handle_t_(ur_device_handle_t_ *phDevices) : device{phDevices} {}
 
-  ur_device_handle_t _device;
+  ur_device_handle_t device;
 
   ur_result_t remove_alloc(void *ptr) {
     std::lock_guard<std::mutex> lock(alloc_mutex);
@@ -138,7 +138,7 @@ struct ur_context_handle_t_ : RefCounted {
       return nullptr;
     // Do a placement new of the alloc_info to avoid allocation and copy
     auto info = new (info_addr)
-        native_cpu::usm_alloc_info(type, ptr, size, this->_device, pool, alloc);
+        native_cpu::usm_alloc_info(type, ptr, size, this->device, pool, alloc);
     if (!info)
       return nullptr;
     allocations.insert(ptr);

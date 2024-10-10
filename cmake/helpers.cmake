@@ -69,6 +69,7 @@ function(add_ur_target_compile_options name)
             -Wformat
             -Wformat-security
             -Wunused-parameter
+            -Wno-error=unknown-pragmas
 
             # Hardening options
             -fPIC
@@ -87,6 +88,7 @@ function(add_ur_target_compile_options name)
             # Colored output
             $<$<CXX_COMPILER_ID:GNU>:-fdiagnostics-color=always>
             $<$<CXX_COMPILER_ID:Clang,AppleClang>:-fcolor-diagnostics>
+            $<$<AND:$<CXX_COMPILER_ID:Clang>,$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,13>>:-Werror=reserved-identifier>
         )
         if (UR_DEVELOPER_MODE)
             target_compile_options(${name} PRIVATE -Werror)

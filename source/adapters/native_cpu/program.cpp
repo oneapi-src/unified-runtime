@@ -72,10 +72,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
       const auto &mdNode = pProperties->pMetadatas[i];
       std::string mdName(mdNode.pName);
       auto [Prefix, Tag] = splitMetadataName(mdName);
-      if (Tag == __SYCL_UR_PROGRAM_METADATA_TAG_REQD_WORK_GROUP_SIZE ||
-          Tag == __SYCL_UR_PROGRAM_METADATA_TAG_MAX_WORK_GROUP_SIZE) {
-        bool isReqd =
-            Tag == __SYCL_UR_PROGRAM_METADATA_TAG_REQD_WORK_GROUP_SIZE;
+      if (Tag == SYCL_UR_PROGRAM_METADATA_TAG_REQD_WORK_GROUP_SIZE ||
+          Tag == SYCL_UR_PROGRAM_METADATA_TAG_MAX_WORK_GROUP_SIZE) {
+        bool isReqd = Tag == SYCL_UR_PROGRAM_METADATA_TAG_REQD_WORK_GROUP_SIZE;
         native_cpu::WGSize_t wgSizeProp;
         auto res = deserializeWGMetadata(
             mdNode, wgSizeProp,
@@ -87,7 +86,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
                 : hProgram->KernelMaxWorkGroupSizeMD)[Prefix] =
             std::move(wgSizeProp);
       } else if (Tag ==
-                 __SYCL_UR_PROGRAM_METADATA_TAG_MAX_LINEAR_WORK_GROUP_SIZE) {
+                 SYCL_UR_PROGRAM_METADATA_TAG_MAX_LINEAR_WORK_GROUP_SIZE) {
         hProgram->KernelMaxLinearWorkGroupSizeMD[Prefix] = mdNode.value.data64;
       }
     }
@@ -96,7 +95,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
   const nativecpu_entry *nativecpu_it =
       reinterpret_cast<const nativecpu_entry *>(pBinary);
   while (nativecpu_it->kernel_ptr != nullptr) {
-    hProgram->_kernels.insert(
+    hProgram->kernels.insert(
         std::make_pair(nativecpu_it->kernelname, nativecpu_it->kernel_ptr));
     nativecpu_it++;
   }
@@ -214,7 +213,7 @@ urProgramGetInfo(ur_program_handle_t hProgram, ur_program_info_t propName,
   case UR_PROGRAM_INFO_NUM_DEVICES:
     return returnValue(1u);
   case UR_PROGRAM_INFO_DEVICES:
-    return returnValue(hProgram->_ctx->_device);
+    return returnValue(hProgram->ctx->device);
   case UR_PROGRAM_INFO_BINARY_SIZES:
     return returnValue("foo");
   case UR_PROGRAM_INFO_BINARIES:

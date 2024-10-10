@@ -25,7 +25,7 @@ struct command_buffer_profiling_t {
   ze_kernel_timestamp_result_t *Timestamps;
 };
 
-struct ur_exp_command_buffer_handle_t_ : public _ur_object {
+struct ur_exp_command_buffer_handle_t_ : public ur_object_ {
   ur_exp_command_buffer_handle_t_(
       ur_context_handle_t Context, ur_device_handle_t Device,
       ze_command_list_handle_t CommandList,
@@ -122,7 +122,7 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   std::vector<ur_kernel_handle_t> KernelsList;
 };
 
-struct ur_exp_command_buffer_command_handle_t_ : public _ur_object {
+struct ur_exp_command_buffer_command_handle_t_ : public ur_object_ {
   ur_exp_command_buffer_command_handle_t_(ur_exp_command_buffer_handle_t,
                                           uint64_t, uint32_t, bool,
                                           ur_kernel_handle_t);

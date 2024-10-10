@@ -41,20 +41,19 @@ struct ur_kernel_handle_t_ : RefCounted {
 
   ur_kernel_handle_t_(ur_program_handle_t hProgram, const char *name,
                       nativecpu_task_t subhandler)
-      : hProgram(hProgram), _name{name}, _subhandler{std::move(subhandler)} {}
+      : hProgram(hProgram), name{name}, subhandler{std::move(subhandler)} {}
 
   ur_kernel_handle_t_(const ur_kernel_handle_t_ &other)
-      : hProgram(other.hProgram), _name(other._name),
-        _subhandler(other._subhandler), _args(other._args),
-        _localArgInfo(other._localArgInfo), _localMemPool(other._localMemPool),
-        _localMemPoolSize(other._localMemPoolSize),
-        ReqdWGSize(other.ReqdWGSize) {
+      : hProgram(other.hProgram), name(other.name),
+        subhandler(other.subhandler), args(other.args),
+        localArgInfo(other.localArgInfo), localMemPool(other.localMemPool),
+        localMemPoolSize(other.localMemPoolSize), ReqdWGSize(other.ReqdWGSize) {
     incrementReferenceCount();
   }
 
   ~ur_kernel_handle_t_() {
     if (decrementReferenceCount() == 0) {
-      free(_localMemPool);
+      free(localMemPool);
     }
   }
   ur_kernel_handle_t_(ur_program_handle_t hProgram, const char *name,
@@ -62,15 +61,15 @@ struct ur_kernel_handle_t_ : RefCounted {
                       std::optional<native_cpu::WGSize_t> ReqdWGSize,
                       std::optional<native_cpu::WGSize_t> MaxWGSize,
                       std::optional<uint64_t> MaxLinearWGSize)
-      : hProgram(hProgram), _name{name}, _subhandler{std::move(subhandler)},
+      : hProgram(hProgram), name{name}, subhandler{std::move(subhandler)},
         ReqdWGSize(ReqdWGSize), MaxWGSize(MaxWGSize),
         MaxLinearWGSize(MaxLinearWGSize) {}
 
   ur_program_handle_t hProgram;
-  std::string _name;
-  nativecpu_task_t _subhandler;
-  std::vector<native_cpu::NativeCPUArgDesc> _args;
-  std::vector<local_arg_info_t> _localArgInfo;
+  std::string name;
+  nativecpu_task_t subhandler;
+  std::vector<native_cpu::NativeCPUArgDesc> args;
+  std::vector<local_arg_info_t> localArgInfo;
 
   std::optional<native_cpu::WGSize_t> getReqdWGSize() const {
     return ReqdWGSize;
@@ -83,32 +82,32 @@ struct ur_kernel_handle_t_ : RefCounted {
   void updateMemPool(size_t numParallelThreads) {
     // compute requested size.
     size_t reqSize = 0;
-    for (auto &entry : _localArgInfo) {
+    for (auto &entry : localArgInfo) {
       reqSize += entry.argSize * numParallelThreads;
     }
-    if (reqSize == 0 || reqSize == _localMemPoolSize) {
+    if (reqSize == 0 || reqSize == localMemPoolSize) {
       return;
     }
     // realloc handles nullptr case
-    _localMemPool = (char *)realloc(_localMemPool, reqSize);
-    _localMemPoolSize = reqSize;
+    localMemPool = (char *)realloc(localMemPool, reqSize);
+    localMemPoolSize = reqSize;
   }
 
   // To be called before executing a work group
   void handleLocalArgs(size_t numParallelThread, size_t threadId) {
     // For each local argument we have size*numthreads
     size_t offset = 0;
-    for (auto &entry : _localArgInfo) {
-      _args[entry.argIndex].MPtr =
-          _localMemPool + offset + (entry.argSize * threadId);
+    for (auto &entry : localArgInfo) {
+      args[entry.argIndex].MPtr =
+          localMemPool + offset + (entry.argSize * threadId);
       // update offset in the memory pool
       offset += entry.argSize * numParallelThread;
     }
   }
 
 private:
-  char *_localMemPool = nullptr;
-  size_t _localMemPoolSize = 0;
+  char *localMemPool = nullptr;
+  size_t localMemPoolSize = 0;
   std::optional<native_cpu::WGSize_t> ReqdWGSize = std::nullopt;
   std::optional<native_cpu::WGSize_t> MaxWGSize = std::nullopt;
   std::optional<uint64_t> MaxLinearWGSize = std::nullopt;

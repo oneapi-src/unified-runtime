@@ -29,7 +29,7 @@ namespace ur_loader
     %if 'condition' in obj:
     #if ${th.subt(n, tags, obj['condition'])}
     %endif
-    __${x}dlllocal ${x}_result_t ${X}_APICALL
+    ${X}_DLL_LOCAL ${x}_result_t ${X}_APICALL
     ${th.make_func_name(n, tags, obj)}(
         %for line in th.make_param_lines(n, tags, obj):
         ${line}

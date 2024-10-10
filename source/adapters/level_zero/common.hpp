@@ -404,8 +404,8 @@ private:
 };
 
 // Base class to store common data
-struct _ur_object {
-  _ur_object() : RefCount{} {}
+struct ur_object_ {
+  ur_object_() : RefCount{} {}
 
   // Must be atomic to prevent data race when incrementing/decrementing.
   ReferenceCounter RefCount;
@@ -432,7 +432,7 @@ struct _ur_object {
 
 // Record for a memory allocation. This structure is used to keep information
 // for each memory allocation.
-struct MemAllocRecord : _ur_object {
+struct MemAllocRecord : ur_object_ {
   MemAllocRecord(ur_context_handle_t Context, bool OwnZeMemHandle = true)
       : Context(Context) {
     OwnNativeHandle = OwnZeMemHandle;

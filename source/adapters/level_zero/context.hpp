@@ -33,7 +33,7 @@ struct l0_command_list_cache_info {
   bool IsImmediate = false;
 };
 
-struct ur_context_handle_t_ : _ur_object {
+struct ur_context_handle_t_ : ur_object_ {
   ur_context_handle_t_(ze_context_handle_t ZeContext, uint32_t NumDevices,
                        const ur_device_handle_t *Devs, bool OwnZeContext)
       : ZeContext{ZeContext}, Devices{Devs, Devs + NumDevices},
