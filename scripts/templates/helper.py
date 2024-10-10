@@ -266,6 +266,18 @@ class type_traits:
             raise Exception(
                 f"Cannot return members of non-struct type {struct_type}")
         return meta['struct'][struct_type]['members']
+    
+    @staticmethod
+    def is_stype_struct(type_name, specs):
+        print("check " + type_name)
+        for s in specs:
+            for obj in s['objects']:
+                if "struct" in obj['type'] and obj['name'] in type_name:
+                    for m in obj['members']:
+                        print("checking {0} for stype".format(m['name']))
+                        if "stype" in m['name']:
+                            return True
+        return False
 
 """
     Extracts traits from a value name
@@ -690,14 +702,22 @@ def get_loader_functions(specs, meta, n, tags):
     # Process address tables functions
     for tbl in get_pfntables(specs, meta, n, tags):
         func_names.append(tbl['export']['name'])
-
-    # Print functions
+   # Print functions
     api_types_funcs = get_api_types_funcs(specs, meta, n, tags)
     for func in api_types_funcs:
         func_names.append(func.c_name)
     func_names.append(f"{tags['$x']}PrintFunctionParams")
 
     return sorted(func_names)
+
+def get_stype_structs(specs):
+    stype_structs = []
+    structs = extract_objs(specs, "struct")
+    for s in structs:
+        for m in s['members']:
+            if "stype" in m:
+                stype_structs.append(s['name'])
+    return stype_structs
 
 
 """
@@ -1104,7 +1124,6 @@ def get_bounds_check(param, bounds_error):
         # If no `hQueue` parameter exists that should have been caught at spec
         # generation.
         return re.sub(r'bounds\(', 'bounds(hQueue, ', bounds_check)
-
     return bounds_check
 
 """
@@ -1131,6 +1150,24 @@ def make_param_checks(namespace, tags, obj, cpp=False, meta=None):
             checks['boundsError'].append(get_bounds_check(p, 'boundsError'))
 
     return checks
+
+"""
+Public:
+    Returns params of the given function (specifed by `obj`) which are structs
+    that have an stype member.
+    
+    These are returned in the form of a dict mapping the relevant param field
+    from obj['params'] to the base struct type (i.e. stripped of const and
+    pointer designations).
+"""
+def get_stype_params(namespace, tags, obj, meta, specs):
+    params = {}
+    for p in obj.get('params', []):
+        if type_traits.is_stype_struct(p['type'], specs):
+            base_type = subt(namespace, tags, _remove_const_ptr(p['type']))
+            if base_type not in params:
+                params[base_type] = p
+    return params
 
 """
 Public:
