@@ -11,38 +11,32 @@
 #include "program.hpp"
 #include "ur_util.hpp"
 
-bool getMaxRegistersJitOptionValue(const std::string &BuildOptions,
-                                   unsigned int &Value) {
+static void getMaxRegistersJitOptionValue(const std::string &BuildOptions,
+                                          unsigned int &Value) {
   using namespace std::string_view_literals;
   const std::size_t OptionPos = BuildOptions.find_first_of("maxrregcount"sv);
-  if (OptionPos == std::string::npos) {
-    return false;
-  }
+  if (OptionPos == std::string::npos)
+    return;
 
   const std::size_t DelimPos = BuildOptions.find('=', OptionPos + 1u);
-  if (DelimPos == std::string::npos) {
-    return false;
-  }
+  if (DelimPos == std::string::npos)
+    return;
 
   const std::size_t Length = BuildOptions.length();
   const std::size_t StartPos = DelimPos + 1u;
-  if (DelimPos == std::string::npos || StartPos >= Length) {
-    return false;
-  }
+  if (DelimPos == std::string::npos || StartPos >= Length)
+    return;
 
   std::size_t Pos = StartPos;
   while (Pos < Length &&
-         std::isdigit(static_cast<unsigned char>(BuildOptions[Pos]))) {
+         std::isdigit(static_cast<unsigned char>(BuildOptions[Pos])))
     Pos++;
-  }
 
   const std::string ValueString = BuildOptions.substr(StartPos, Pos - StartPos);
-  if (ValueString.empty()) {
-    return false;
-  }
+  if (ValueString.empty())
+    return;
 
   Value = static_cast<unsigned int>(std::stoi(ValueString));
-  return true;
 }
 
 ur_result_t
@@ -126,10 +120,9 @@ ur_result_t ur_program_handle_t_::buildProgram(const char *BuildOptions) {
   OptionVals[3] = (void *)(long)MaxLogSize;
 
   if (!this->BuildOptions.empty()) {
-    unsigned int MaxRegs;
-    const bool Valid =
-        getMaxRegistersJitOptionValue(this->BuildOptions, MaxRegs);
-    if (Valid) {
+    unsigned int MaxRegs{0}; // default if no user-defined limit
+    getMaxRegistersJitOptionValue(this->BuildOptions, MaxRegs);
+    if (MaxRegs) {
       Options.push_back(CU_JIT_MAX_REGISTERS);
       OptionVals.push_back(
           reinterpret_cast<void *>(static_cast<std::uintptr_t>(MaxRegs)));
