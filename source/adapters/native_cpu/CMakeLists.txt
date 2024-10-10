@@ -10,6 +10,7 @@ set(TARGET_NAME ur_adapter_native_cpu)
 add_ur_adapter(${TARGET_NAME}
         SHARED
         ${CMAKE_CURRENT_SOURCE_DIR}/adapter.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/async_alloc.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/command_buffer.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/common.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/common.hpp
