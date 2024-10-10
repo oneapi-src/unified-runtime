@@ -266,6 +266,18 @@ class type_traits:
             raise Exception(
                 f"Cannot return members of non-struct type {struct_type}")
         return meta['struct'][struct_type]['members']
+    
+    @staticmethod
+    def is_stype_struct(type_name, specs):
+        # The stype members added from base structs aren't present in the meta
+        # dict, so we need to search through the specs instead.
+        for s in specs:
+            for obj in s['objects']:
+                if "struct" in obj['type'] and obj['name'] in type_name:
+                    for m in obj['members']:
+                        if "stype" in m['name']:
+                            return True
+        return False
 
 """
     Extracts traits from a value name
@@ -1131,6 +1143,25 @@ def make_param_checks(namespace, tags, obj, cpp=False, meta=None):
             checks['boundsError'].append(get_bounds_check(p, 'boundsError'))
 
     return checks
+
+"""
+Public:
+    Returns params of the given function (specifed by `obj`) which are structs
+    that have an stype member.
+    
+    The type member of each param has const and pointer designations removed.
+"""
+def get_stype_params(namespace, tags, obj, meta, specs):
+    params = []
+    for p in obj.get('params', []):
+        if type_traits.is_stype_struct(p['type'], specs):
+            base_type = subt(namespace, tags, _remove_const_ptr(p['type']))
+            # Perform a shallow copy so that when we update the type the change
+            # doesn't propagate back to obj
+            stype_param = p.copy()
+            stype_param['type'] = base_type
+            params.append(stype_param)
+    return params
 
 """
 Public:

@@ -70,6 +70,42 @@ namespace ur_validation_layer
 
             %endfor
             %endfor
+
+            ## Handling stype validation gets a little intricate due to the
+            ## possibility of range and optional params. Note even this is
+            ## limited as it doesn't check structs recursively.
+            <% stype_params = th.get_stype_params(n, tags, obj, meta, specs) %>
+            %for param in stype_params:
+                <%
+                    param_name = param['name']
+                    if th.param_traits.is_range(param):
+                        param_name += "[i]"
+                        stype_check = "stype_map<{0}>::value != {1}.stype"
+                    else:
+                        stype_check = "stype_map<{0}>::value != {1}->stype"
+                    stype_check = stype_check.format(param['type'], param_name)
+                    if th.param_traits.is_optional(param) and not th.param_traits.is_range(param):
+                        stype_check = param_name + " && " + stype_check
+                %>
+                %if th.param_traits.is_range(param):
+                    <%
+                        range_start = "static_cast<size_t>({0})".format(
+                            th.param_traits.range_start(param))
+                        range_end = "static_cast<size_t>({0})".format(
+                            th.param_traits.range_end(param))
+                    %>
+                    for (size_t i = ${range_start};i < ${range_end};i++) {
+                        if (${stype_check}) {
+                            return ${X}_RESULT_ERROR_INVALID_VALUE;
+                        }
+                    }
+                %else:
+                    if (${stype_check}) {
+                        return ${X}_RESULT_ERROR_INVALID_VALUE;
+                    }
+                %endif
+            %endfor
+
             %if func_name in th.get_event_wait_list_functions(specs, n, tags):
             if (phEventWaitList != NULL && numEventsInWaitList > 0) {
                 for (uint32_t i = 0; i < numEventsInWaitList; ++i) {

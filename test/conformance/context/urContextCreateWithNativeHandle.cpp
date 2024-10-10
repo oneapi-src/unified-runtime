@@ -21,7 +21,8 @@ TEST_P(urContextCreateWithNativeHandleTest, Success) {
     // We can however convert the native_handle back into a unified-runtime handle
     // and perform some query on it to verify that it works.
     ur_context_handle_t ctx = nullptr;
-    ur_context_native_properties_t props{};
+    ur_context_native_properties_t props = {
+        UR_STRUCTURE_TYPE_CONTEXT_NATIVE_PROPERTIES, nullptr, false};
     UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(urContextCreateWithNativeHandle(
         native_context, adapter, 1, &device, &props, &ctx));
     ASSERT_NE(ctx, nullptr);

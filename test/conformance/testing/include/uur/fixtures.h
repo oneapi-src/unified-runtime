@@ -1058,7 +1058,8 @@ struct urUSMDeviceAllocTestWithParam : urQueueTestWithParam<T> {
             GTEST_SKIP() << "Device USM in not supported";
         }
         if (use_pool) {
-            ur_usm_pool_desc_t pool_desc = {};
+            ur_usm_pool_desc_t pool_desc = {UR_STRUCTURE_TYPE_USM_POOL_DESC,
+                                            nullptr, 0};
             ASSERT_SUCCESS(urUSMPoolCreate(this->context, &pool_desc, &pool));
         }
         ASSERT_SUCCESS(urUSMDeviceAlloc(this->context, this->device, nullptr,

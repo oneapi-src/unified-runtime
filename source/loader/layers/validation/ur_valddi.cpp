@@ -374,6 +374,11 @@ __urdlllocal ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
         if (NULL == phPlatform) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
+
+        if (pProperties && stype_map<ur_platform_native_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -621,6 +626,11 @@ __urdlllocal ur_result_t UR_APICALL urDevicePartition(
         if (NULL == pProperties->pProperties) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
+
+        if (stype_map<ur_device_partition_properties_t>::value !=
+            pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -669,6 +679,10 @@ __urdlllocal ur_result_t UR_APICALL urDeviceSelectBinary(
 
         if (NumBinaries == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (stype_map<ur_device_binary_t>::value != pBinaries->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -743,6 +757,11 @@ __urdlllocal ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
 
         if (NULL == phDevice) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (pProperties && stype_map<ur_device_native_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -824,6 +843,11 @@ __urdlllocal ur_result_t UR_APICALL urContextCreate(
 
         if (NULL != pProperties && UR_CONTEXT_FLAGS_MASK & pProperties->flags) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        }
+
+        if (pProperties &&
+            stype_map<ur_context_properties_t>::value != pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -1012,6 +1036,11 @@ __urdlllocal ur_result_t UR_APICALL urContextCreateWithNativeHandle(
         if (NULL == phContext) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
+
+        if (pProperties && stype_map<ur_context_native_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -1135,6 +1164,10 @@ __urdlllocal ur_result_t UR_APICALL urMemImageCreate(
                       UR_MEM_FLAG_ALLOC_COPY_HOST_POINTER)) == 0) {
             return UR_RESULT_ERROR_INVALID_HOST_PTR;
         }
+
+        if (stype_map<ur_image_desc_t>::value != pImageDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -1202,6 +1235,11 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreate(
             (flags & (UR_MEM_FLAG_USE_HOST_POINTER |
                       UR_MEM_FLAG_ALLOC_COPY_HOST_POINTER)) == 0) {
             return UR_RESULT_ERROR_INVALID_HOST_PTR;
+        }
+
+        if (pProperties &&
+            stype_map<ur_buffer_properties_t>::value != pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -1316,6 +1354,10 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferPartition(
         if (pRegion && pRegion->size == 0) {
             return UR_RESULT_ERROR_INVALID_BUFFER_SIZE;
         }
+
+        if (stype_map<ur_buffer_region_t>::value != pRegion->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -1396,6 +1438,11 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
         if (NULL == phMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
+
+        if (pProperties && stype_map<ur_mem_native_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -1449,6 +1496,15 @@ __urdlllocal ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
 
         if (NULL == phMem) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (stype_map<ur_image_desc_t>::value != pImageDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
+
+        if (pProperties && stype_map<ur_mem_native_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -1612,6 +1668,10 @@ __urdlllocal ur_result_t UR_APICALL urSamplerCreate(
 
         if (UR_SAMPLER_FILTER_MODE_LINEAR < pDesc->filterMode) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        }
+
+        if (stype_map<ur_sampler_desc_t>::value != pDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -1795,6 +1855,11 @@ __urdlllocal ur_result_t UR_APICALL urSamplerCreateWithNativeHandle(
         if (NULL == phSampler) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
+
+        if (pProperties && stype_map<ur_sampler_native_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -1850,6 +1915,10 @@ __urdlllocal ur_result_t UR_APICALL urUSMHostAlloc(
 
         if (size == 0) {
             return UR_RESULT_ERROR_INVALID_USM_SIZE;
+        }
+
+        if (pUSMDesc && stype_map<ur_usm_desc_t>::value != pUSMDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -1911,6 +1980,10 @@ __urdlllocal ur_result_t UR_APICALL urUSMDeviceAlloc(
 
         if (size == 0) {
             return UR_RESULT_ERROR_INVALID_USM_SIZE;
+        }
+
+        if (pUSMDesc && stype_map<ur_usm_desc_t>::value != pUSMDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -1978,6 +2051,10 @@ __urdlllocal ur_result_t UR_APICALL urUSMSharedAlloc(
 
         if (size == 0) {
             return UR_RESULT_ERROR_INVALID_USM_SIZE;
+        }
+
+        if (pUSMDesc && stype_map<ur_usm_desc_t>::value != pUSMDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -2110,6 +2187,10 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolCreate(
 
         if (UR_USM_POOL_FLAGS_MASK & pPoolDesc->flags) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        }
+
+        if (stype_map<ur_usm_pool_desc_t>::value != pPoolDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -2581,6 +2662,11 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemCreate(
             UR_PHYSICAL_MEM_FLAGS_MASK & pProperties->flags) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
+
+        if (pProperties && stype_map<ur_physical_mem_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -2700,6 +2786,11 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithIL(
         if (length == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
+
+        if (pProperties &&
+            stype_map<ur_program_properties_t>::value != pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -2762,6 +2853,11 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithBinary(
         if (NULL != pProperties && NULL != pProperties->pMetadatas &&
             pProperties->count == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
+        }
+
+        if (pProperties &&
+            stype_map<ur_program_properties_t>::value != pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -3290,6 +3386,11 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithNativeHandle(
         if (NULL == phProgram) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
+
+        if (pProperties && stype_map<ur_program_native_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -3375,6 +3476,11 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgValue(
         if (NULL == pArgValue) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
+
+        if (pProperties && stype_map<ur_kernel_arg_value_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -3407,6 +3513,11 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgLocal(
     if (getContext()->enableParameterValidation) {
         if (NULL == hKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
+        }
+
+        if (pProperties && stype_map<ur_kernel_arg_local_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -3655,6 +3766,12 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgPointer(
         if (NULL == hKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
+
+        if (pProperties &&
+            stype_map<ur_kernel_arg_pointer_properties_t>::value !=
+                pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -3698,6 +3815,11 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetExecInfo(
         if (UR_KERNEL_EXEC_INFO_CACHE_CONFIG < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
+
+        if (pProperties && stype_map<ur_kernel_exec_info_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -3733,6 +3855,12 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgSampler(
 
         if (NULL == hArgValue) {
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
+        }
+
+        if (pProperties &&
+            stype_map<ur_kernel_arg_sampler_properties_t>::value !=
+                pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -3775,6 +3903,12 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgMemObj(
         if (NULL != pProperties &&
             UR_MEM_FLAGS_MASK & pProperties->memoryAccess) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        }
+
+        if (pProperties &&
+            stype_map<ur_kernel_arg_mem_obj_properties_t>::value !=
+                pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -3895,6 +4029,11 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
 
         if (NULL == phKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (pProperties && stype_map<ur_kernel_native_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -4079,6 +4218,11 @@ __urdlllocal ur_result_t UR_APICALL urQueueCreate(
             pProperties->flags & UR_QUEUE_FLAG_SUBMISSION_IMMEDIATE) {
             return UR_RESULT_ERROR_INVALID_QUEUE_PROPERTIES;
         }
+
+        if (pProperties &&
+            stype_map<ur_queue_properties_t>::value != pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -4177,6 +4321,10 @@ __urdlllocal ur_result_t UR_APICALL urQueueGetNativeHandle(
         if (NULL == phNativeQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
+
+        if (pDesc && stype_map<ur_queue_native_desc_t>::value != pDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -4215,6 +4363,11 @@ __urdlllocal ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
 
         if (NULL == phQueue) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (pProperties && stype_map<ur_queue_native_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -4527,6 +4680,11 @@ __urdlllocal ur_result_t UR_APICALL urEventCreateWithNativeHandle(
 
         if (NULL == phEvent) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (pProperties && stype_map<ur_event_native_properties_t>::value !=
+                               pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -6893,6 +7051,10 @@ __urdlllocal ur_result_t UR_APICALL urUSMPitchedAllocExp(
         if (widthInBytes == 0) {
             return UR_RESULT_ERROR_INVALID_USM_SIZE;
         }
+
+        if (pUSMDesc && stype_map<ur_usm_desc_t>::value != pUSMDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -7045,6 +7207,10 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageAllocateExp(
         if (pImageDesc && UR_MEM_TYPE_IMAGE_CUBEMAP_EXP < pImageDesc->type) {
             return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
         }
+
+        if (stype_map<ur_image_desc_t>::value != pImageDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -7147,6 +7313,10 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesUnsampledImageCreateExp(
         if (pImageDesc && UR_MEM_TYPE_IMAGE_CUBEMAP_EXP < pImageDesc->type) {
             return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
         }
+
+        if (stype_map<ur_image_desc_t>::value != pImageDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -7213,6 +7383,10 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesSampledImageCreateExp(
 
         if (pImageDesc && UR_MEM_TYPE_IMAGE_CUBEMAP_EXP < pImageDesc->type) {
             return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
+        }
+
+        if (stype_map<ur_image_desc_t>::value != pImageDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -7318,6 +7492,19 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageCopyExp(
         if (pDstImageDesc &&
             UR_MEM_TYPE_IMAGE_CUBEMAP_EXP < pDstImageDesc->type) {
             return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
+        }
+
+        if (stype_map<ur_image_desc_t>::value != pSrcImageDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
+
+        if (stype_map<ur_image_desc_t>::value != pDstImageDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
+
+        if (stype_map<ur_exp_image_copy_region_t>::value !=
+            pCopyRegion->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {
@@ -7512,6 +7699,11 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportExternalMemoryExp(
         if (UR_EXP_EXTERNAL_MEM_TYPE_WIN32_NT_DX12_RESOURCE < memHandleType) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
+
+        if (stype_map<ur_exp_external_mem_desc_t>::value !=
+            pExternalMemDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -7578,6 +7770,10 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMapExternalArrayExp(
 
         if (pImageDesc && UR_MEM_TYPE_IMAGE_CUBEMAP_EXP < pImageDesc->type) {
             return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
+        }
+
+        if (stype_map<ur_image_desc_t>::value != pImageDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -7735,6 +7931,11 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportExternalSemaphoreExp(
         if (UR_EXP_EXTERNAL_SEMAPHORE_TYPE_WIN32_NT_DX12_FENCE <
             semHandleType) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        }
+
+        if (stype_map<ur_exp_external_semaphore_desc_t>::value !=
+            pExternalSemaphoreDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -7949,6 +8150,12 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferCreateExp(
 
         if (NULL == phCommandBuffer) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (pCommandBufferDesc &&
+            stype_map<ur_exp_command_buffer_desc_t>::value !=
+                pCommandBufferDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
     }
 
@@ -9289,6 +9496,12 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
             pUpdateKernelLaunch->newWorkDim > 3) {
             return UR_RESULT_ERROR_INVALID_WORK_DIMENSION;
         }
+
+        if (stype_map<
+                ur_exp_command_buffer_update_kernel_launch_desc_t>::value !=
+            pUpdateKernelLaunch->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
     }
 
     ur_result_t result =
@@ -10133,6 +10346,12 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueNativeCommandExp(
         if (NULL != pProperties &&
             UR_EXP_ENQUEUE_NATIVE_COMMAND_FLAGS_MASK & pProperties->flags) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        }
+
+        if (pProperties &&
+            stype_map<ur_exp_enqueue_native_command_properties_t>::value !=
+                pProperties->stype) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
         }
 
         if (phEventWaitList != NULL && numEventsInWaitList > 0) {

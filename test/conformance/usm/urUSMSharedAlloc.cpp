@@ -24,7 +24,8 @@ struct urUSMSharedAllocTest
         }
 
         if (usePool) {
-            ur_usm_pool_desc_t pool_desc = {};
+            ur_usm_pool_desc_t pool_desc{UR_STRUCTURE_TYPE_USM_POOL_DESC,
+                                         nullptr, 0};
             ASSERT_SUCCESS(urUSMPoolCreate(context, &pool_desc, &pool));
         }
     }

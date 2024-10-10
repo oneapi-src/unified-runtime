@@ -220,7 +220,7 @@ TEST_P(urMemImageCreateTest, InvalidImageDescStype) {
     uur::raii::Mem image_handle = nullptr;
     ur_image_desc_t invalid_image_desc = image_desc;
     invalid_image_desc.stype = UR_STRUCTURE_TYPE_FORCE_UINT32;
-    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR,
+    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_VALUE,
                      urMemImageCreate(context, UR_MEM_FLAG_READ_WRITE,
                                       &image_format, &invalid_image_desc,
                                       nullptr, image_handle.ptr()));
