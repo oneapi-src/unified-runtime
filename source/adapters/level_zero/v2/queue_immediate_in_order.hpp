@@ -27,15 +27,9 @@ struct ur_command_list_handler_t {
   ur_command_list_handler_t(ur_context_handle_t hContext,
                             ur_device_handle_t hDevice,
                             const ur_queue_properties_t *pProps,
-                            queue_group_type type, event_pool *eventPool);
+                            queue_group_type type);
 
   raii::cache_borrowed_command_list_t commandList;
-  raii::cache_borrowed_event internalEvent;
-
-  // TODO: do we need to keep ref count of this for user events?
-  // For counter based events, we can reuse them safely and l0 event pool
-  // cannot be destroyed before the queue is released.
-  ze_event_handle_t lastEvent = nullptr;
 };
 
 struct ur_queue_immediate_in_order_t : _ur_object, public ur_queue_handle_t_ {
@@ -46,22 +40,15 @@ private:
 
   raii::cache_borrowed_event_pool eventPool;
 
-  ur_command_list_handler_t copyHandler;
-  ur_command_list_handler_t computeHandler;
-  ur_command_list_handler_t *lastHandler = nullptr;
+  ur_command_list_handler_t handler;
 
   std::vector<ze_event_handle_t> waitList;
 
   std::pair<ze_event_handle_t *, uint32_t>
-  getWaitListView(const ur_event_handle_t *phWaitEvents, uint32_t numWaitEvents,
-                  ur_command_list_handler_t *pHandler);
+  getWaitListView(const ur_event_handle_t *phWaitEvents,
+                  uint32_t numWaitEvents);
 
-  ur_command_list_handler_t *getCommandListHandlerForCompute();
-  ur_command_list_handler_t *getCommandListHandlerForCopy();
-  ur_command_list_handler_t *getCommandListHandlerForFill(size_t patternSize);
-
-  ze_event_handle_t getSignalEvent(ur_command_list_handler_t *handler,
-                                   ur_event_handle_t *hUserEvent);
+  ze_event_handle_t getSignalEvent(ur_event_handle_t *hUserEvent);
 
 public:
   ur_queue_immediate_in_order_t(ur_context_handle_t, ur_device_handle_t,

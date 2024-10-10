@@ -207,7 +207,7 @@ TEST_P(CommandListCacheTest, CommandListsAreReusedByQueues) {
         } // Queues scope
 
         ASSERT_EQ(context->commandListCache.getNumImmediateCommandLists(),
-                  NumUniqueQueueTypes * 2); // * 2 for compute and copy
+                  NumUniqueQueueTypes);
         ASSERT_EQ(context->commandListCache.getNumRegularCommandLists(), 0);
     }
 }
@@ -236,7 +236,7 @@ TEST_P(CommandListCacheTest, CommandListsCacheIsThreadSafe) {
 
                 ASSERT_LE(
                     context->commandListCache.getNumImmediateCommandLists(),
-                    NumThreads * 2); // * 2 for compute and copy
+                    NumThreads);
             }
         });
     }
@@ -246,5 +246,5 @@ TEST_P(CommandListCacheTest, CommandListsCacheIsThreadSafe) {
     }
 
     ASSERT_LE(context->commandListCache.getNumImmediateCommandLists(),
-              NumThreads * 2);
+              NumThreads);
 }
