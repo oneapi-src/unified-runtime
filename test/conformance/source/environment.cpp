@@ -26,8 +26,13 @@ constexpr char ERROR_NO_ADAPTER[] = "Could not load adapter";
 
 PlatformEnvironment *PlatformEnvironment::instance = nullptr;
 
+// TODO: use public API once V2 is exposed
+static constexpr ur_platform_backend_t v2_adapter_backend =
+    static_cast<ur_platform_backend_t>(0x99);
+
 constexpr std::pair<const char *, ur_platform_backend_t> backends[] = {
     {"LEVEL_ZERO", UR_PLATFORM_BACKEND_LEVEL_ZERO},
+    {"LEVEL_ZERO_V2", v2_adapter_backend},
     {"L0", UR_PLATFORM_BACKEND_LEVEL_ZERO},
     {"OPENCL", UR_PLATFORM_BACKEND_OPENCL},
     {"CUDA", UR_PLATFORM_BACKEND_CUDA},
@@ -497,6 +502,10 @@ std::string KernelsEnvironment::getTargetName() {
         error = "native_cpu doesn't support kernel tests yet";
         return {};
     default:
+        if (backend == v2_adapter_backend) {
+            // Do this check here to avoid -Wswitch warning
+            return "spir64";
+        }
         error = "unknown target.";
         return {};
     }

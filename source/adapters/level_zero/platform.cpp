@@ -94,7 +94,11 @@ ur_result_t urPlatformGetInfo(
     //
     return ReturnValue(Platform->ZeDriverApiVersion.c_str());
   case UR_PLATFORM_INFO_BACKEND:
+#ifdef UR_ADAPTER_LEVEL_ZERO_V2
+    return ReturnValue(0x99); /* TODO: update once V2 is exposed */
+#else
     return ReturnValue(UR_PLATFORM_BACKEND_LEVEL_ZERO);
+#endif
   default:
     logger::debug("urPlatformGetInfo: unrecognized ParamName");
     return UR_RESULT_ERROR_INVALID_VALUE;
