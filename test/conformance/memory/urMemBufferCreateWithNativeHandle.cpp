@@ -20,6 +20,28 @@ TEST_P(urMemBufferCreateWithNativeHandleTest, Success) {
     // We can however convert the native_handle back into a unified-runtime handle
     // and perform some query on it to verify that it works.
     ur_mem_handle_t mem = nullptr;
+    UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(
+        urMemBufferCreateWithNativeHandle(hNativeMem, context, nullptr, &mem));
+    ASSERT_NE(mem, nullptr);
+
+    size_t alloc_size = 0;
+    ASSERT_SUCCESS(urMemGetInfo(mem, UR_MEM_INFO_SIZE, sizeof(size_t),
+                                &alloc_size, nullptr));
+
+    ASSERT_SUCCESS(urMemRelease(mem));
+}
+
+TEST_P(urMemBufferCreateWithNativeHandleTest, SuccessWithProperties) {
+    ur_native_handle_t hNativeMem = 0;
+    {
+        UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(
+            urMemGetNativeHandle(buffer, device, &hNativeMem));
+    }
+
+    ur_mem_handle_t mem = nullptr;
+    // We can't pass isNativeHandleOwned = true in the generic tests since
+    // we always get the native handle from a UR object, and transferring
+    // ownership from one UR object to another isn't allowed.
     ur_mem_native_properties_t props = {
         /*.stype =*/UR_STRUCTURE_TYPE_MEM_NATIVE_PROPERTIES,
         /*.pNext =*/nullptr,

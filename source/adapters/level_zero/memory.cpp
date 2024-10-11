@@ -1589,8 +1589,9 @@ ur_result_t urMemImageCreateWithNativeHandle(
     return Res;
   }
 
-  UR_CALL(createUrMemFromZeImage(
-      Context, ZeHImage, Properties->isNativeHandleOwned, ZeImageDesc, Mem));
+  auto OwnNativeHandle = Properties ? Properties->isNativeHandleOwned : false;
+  UR_CALL(createUrMemFromZeImage(Context, ZeHImage, OwnNativeHandle,
+                                 ZeImageDesc, Mem));
 
   return UR_RESULT_SUCCESS;
 }
@@ -1764,7 +1765,7 @@ ur_result_t urMemBufferCreateWithNativeHandle(
     ur_mem_handle_t
         *Mem ///< [out] pointer to handle of buffer memory object created.
 ) {
-  bool OwnNativeHandle = Properties->isNativeHandleOwned;
+  bool OwnNativeHandle = Properties ? Properties->isNativeHandleOwned : false;
 
   std::shared_lock<ur_shared_mutex> Lock(Context->Mutex);
 
