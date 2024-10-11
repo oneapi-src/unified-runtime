@@ -138,13 +138,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
 #else
   bool isLocalSizeOne =
       ndr.LocalSize[0] == 1 && ndr.LocalSize[1] == 1 && ndr.LocalSize[2] == 1;
-  if (isLocalSizeOne && ndr.GlobalSize[0] > numParallelThreads) {
-    // If the local size is one, we make the assumption that we are running a
-    // parallel_for over a sycl::range.
-    // Todo: we could add compiler checks and
-    // kernel properties for this (e.g. check that no barriers are called, no
-    // local memory args).
-
+  if (isLocalSizeOne && !hKernel->isNDRangeKernel()) {
     // Todo: this assumes that dim 0 is the best dimension over which we want to
     // parallelize
 
@@ -153,8 +147,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
     // divide the global range by the number of threads, set that as the local
     // size and peel everything else.
 
-    size_t new_num_work_groups_0 = numParallelThreads;
-    size_t itemsPerThread = ndr.GlobalSize[0] / numParallelThreads;
+    size_t new_num_work_groups_0 =
+        ndr.GlobalSize[0] > numParallelThreads ? numParallelThreads : 1;
+    size_t itemsPerThread = ndr.GlobalSize[0] > numParallelThreads
+                                ? ndr.GlobalSize[0] / numParallelThreads
+                                : ndr.GlobalSize[0];
 
     for (unsigned g2 = 0; g2 < numWG2; g2++) {
       for (unsigned g1 = 0; g1 < numWG1; g1++) {
