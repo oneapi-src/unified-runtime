@@ -94,15 +94,13 @@ urContextRelease(ur_context_handle_t hContext) {
 
   if (hContext->decrementReferenceCount() == 0) {
     delete hContext;
-  } else {
-    CL_RETURN_ON_FAILURE(clReleaseContext(hContext->get()));
   }
+
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urContextRetain(ur_context_handle_t hContext) {
-  CL_RETURN_ON_FAILURE(clRetainContext(hContext->get()));
   hContext->incrementReferenceCount();
   return UR_RESULT_SUCCESS;
 }
@@ -123,11 +121,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextCreateWithNativeHandle(
   cl_context NativeHandle = reinterpret_cast<cl_context>(hNativeContext);
   UR_RETURN_ON_FAILURE(ur_context_handle_t_::makeWithNative(
       NativeHandle, numDevices, phDevices, *phContext));
-
-  if (!pProperties || !pProperties->isNativeHandleOwned) {
-    CL_RETURN_ON_FAILURE(clRetainContext(NativeHandle));
-  }
-
+  (*phContext)->IsNativeHandleOwned =
+      pProperties ? pProperties->isNativeHandleOwned : false;
   return UR_RESULT_SUCCESS;
 }
 

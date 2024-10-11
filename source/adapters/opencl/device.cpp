@@ -1105,7 +1105,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urDevicePartition(
 // Root devices ref count are unchanged through out the program lifetime.
 UR_APIEXPORT ur_result_t UR_APICALL urDeviceRetain(ur_device_handle_t hDevice) {
   if (hDevice->ParentDevice) {
-    CL_RETURN_ON_FAILURE(clRetainDevice(hDevice->get()));
     hDevice->incrementReferenceCount();
   }
 
@@ -1118,8 +1117,6 @@ urDeviceRelease(ur_device_handle_t hDevice) {
   if (hDevice->ParentDevice) {
     if (hDevice->decrementReferenceCount() == 0) {
       delete hDevice;
-    } else {
-      CL_RETURN_ON_FAILURE(clReleaseDevice(hDevice->get()));
     }
   }
   return UR_RESULT_SUCCESS;
@@ -1134,7 +1131,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetNativeHandle(
 
 UR_APIEXPORT ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
     ur_native_handle_t hNativeDevice, ur_adapter_handle_t,
-    const ur_device_native_properties_t *, ur_device_handle_t *phDevice) {
+    const ur_device_native_properties_t *pProperties,
+    ur_device_handle_t *phDevice) {
   cl_device_id NativeHandle = reinterpret_cast<cl_device_id>(hNativeDevice);
 
   uint32_t NumPlatforms = 0;
@@ -1154,6 +1152,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
     for (auto &Device : Devices) {
       if (Device->get() == NativeHandle) {
         *phDevice = Device;
+        (*phDevice)->IsNativeHandleOwned =
+            pProperties ? pProperties->isNativeHandleOwned : false;
         return UR_RESULT_SUCCESS;
       }
     }

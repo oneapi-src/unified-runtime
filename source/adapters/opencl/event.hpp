@@ -19,6 +19,7 @@ struct ur_event_handle_t_ {
   ur_context_handle_t Context;
   ur_queue_handle_t Queue;
   std::atomic<uint32_t> RefCount = 0;
+  bool IsNativeHandleOwned = true;
 
   ur_event_handle_t_(native_type Event, ur_context_handle_t Ctx,
                      ur_queue_handle_t Queue)
@@ -35,7 +36,9 @@ struct ur_event_handle_t_ {
     if (Queue) {
       urQueueRelease(Queue);
     }
-    clReleaseEvent(Event);
+    if (IsNativeHandleOwned) {
+      clReleaseEvent(Event);
+    }
   }
 
   uint32_t incrementReferenceCount() noexcept { return ++RefCount; }

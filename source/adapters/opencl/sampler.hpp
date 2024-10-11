@@ -18,6 +18,7 @@ struct ur_sampler_handle_t_ {
   native_type Sampler;
   ur_context_handle_t Context;
   std::atomic<uint32_t> RefCount = 0;
+  bool IsNativeHandleOwned = false;
 
   ur_sampler_handle_t_(native_type Sampler, ur_context_handle_t Ctx)
       : Sampler(Sampler), Context(Ctx) {
@@ -26,8 +27,10 @@ struct ur_sampler_handle_t_ {
   }
 
   ~ur_sampler_handle_t_() {
-    clReleaseSampler(Sampler);
     urContextRelease(Context);
+    if (IsNativeHandleOwned) {
+      clReleaseSampler(Sampler);
+    }
   }
 
   uint32_t incrementReferenceCount() noexcept { return ++RefCount; }

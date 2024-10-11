@@ -19,6 +19,7 @@ struct ur_program_handle_t_ {
   native_type Program;
   ur_context_handle_t Context;
   std::atomic<uint32_t> RefCount = 0;
+  bool IsNativeHandleOwned = true;
 
   ur_program_handle_t_(native_type Prog, ur_context_handle_t Ctx)
       : Program(Prog), Context(Ctx) {
@@ -27,8 +28,10 @@ struct ur_program_handle_t_ {
   }
 
   ~ur_program_handle_t_() {
-    clReleaseProgram(Program);
     urContextRelease(Context);
+    if (IsNativeHandleOwned) {
+      clReleaseProgram(Program);
+    }
   }
 
   uint32_t incrementReferenceCount() noexcept { return ++RefCount; }

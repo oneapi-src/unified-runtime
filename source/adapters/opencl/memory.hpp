@@ -19,6 +19,7 @@ struct ur_mem_handle_t_ {
   native_type Memory;
   ur_context_handle_t Context;
   std::atomic<uint32_t> RefCount = 0;
+  bool IsNativeHandleOwned = true;
 
   ur_mem_handle_t_(native_type Mem, ur_context_handle_t Ctx)
       : Memory(Mem), Context(Ctx) {
@@ -27,8 +28,10 @@ struct ur_mem_handle_t_ {
   }
 
   ~ur_mem_handle_t_() {
-    clReleaseMemObject(Memory);
     urContextRelease(Context);
+    if (IsNativeHandleOwned) {
+      clReleaseMemObject(Memory);
+    }
   }
 
   uint32_t incrementReferenceCount() noexcept { return ++RefCount; }

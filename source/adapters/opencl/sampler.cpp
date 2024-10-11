@@ -220,7 +220,6 @@ urSamplerGetInfo(ur_sampler_handle_t hSampler, ur_sampler_info_t propName,
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urSamplerRetain(ur_sampler_handle_t hSampler) {
-  CL_RETURN_ON_FAILURE(clRetainSampler(hSampler->get()));
   hSampler->incrementReferenceCount();
   return UR_RESULT_SUCCESS;
 }
@@ -229,8 +228,6 @@ UR_APIEXPORT ur_result_t UR_APICALL
 urSamplerRelease(ur_sampler_handle_t hSampler) {
   if (hSampler->decrementReferenceCount() == 0) {
     delete hSampler;
-  } else {
-    CL_RETURN_ON_FAILURE(clRetainSampler(hSampler->get()));
   }
   return UR_RESULT_SUCCESS;
 }
@@ -249,15 +246,13 @@ UR_APIEXPORT ur_result_t UR_APICALL urSamplerCreateWithNativeHandle(
   try {
     auto URSampler =
         std::make_unique<ur_sampler_handle_t_>(NativeHandle, hContext);
+    URSampler->IsNativeHandleOwned =
+        pProperties ? pProperties->isNativeHandleOwned : false;
     *phSampler = URSampler.release();
   } catch (std::bad_alloc &) {
     return UR_RESULT_ERROR_OUT_OF_RESOURCES;
   } catch (...) {
     return UR_RESULT_ERROR_UNKNOWN;
-  }
-
-  if (!pProperties || !pProperties->isNativeHandleOwned) {
-    CL_RETURN_ON_FAILURE(clRetainSampler(NativeHandle));
   }
 
   return UR_RESULT_SUCCESS;

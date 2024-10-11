@@ -21,12 +21,15 @@ struct ur_queue_handle_t_ {
   ur_context_handle_t Context;
   ur_device_handle_t Device;
   std::atomic<uint32_t> RefCount = 0;
+  bool IsNativeHandleOwned = true;
 
   ur_queue_handle_t_(native_type Queue, ur_context_handle_t Ctx,
                      ur_device_handle_t Dev)
       : Queue(Queue), Context(Ctx), Device(Dev) {
     RefCount = 1;
-    urDeviceRetain(Device);
+    if (Device) {
+      urDeviceRetain(Device);
+    }
     urContextRetain(Context);
   }
 
@@ -45,8 +48,15 @@ struct ur_queue_handle_t_ {
       if (Context->get() != CLContext) {
         return UR_RESULT_ERROR_INVALID_CONTEXT;
       }
-      if (Device->get() != CLDevice) {
-        return UR_RESULT_ERROR_INVALID_DEVICE;
+      if (Device) {
+        if (Device->get() != CLDevice) {
+          return UR_RESULT_ERROR_INVALID_DEVICE;
+        }
+      } else {
+        ur_native_handle_t hNativeHandle =
+            reinterpret_cast<ur_native_handle_t>(CLDevice);
+        UR_RETURN_ON_FAILURE(urDeviceCreateWithNativeHandle(
+            hNativeHandle, nullptr, nullptr, &Device));
       }
       auto URQueue =
           std::make_unique<ur_queue_handle_t_>(NativeQueue, Context, Device);
@@ -60,9 +70,13 @@ struct ur_queue_handle_t_ {
   }
 
   ~ur_queue_handle_t_() {
-    clReleaseCommandQueue(Queue);
-    urDeviceRelease(Device);
+    if (Device) {
+      urDeviceRelease(Device);
+    }
     urContextRelease(Context);
+    if (IsNativeHandleOwned) {
+      clReleaseCommandQueue(Queue);
+    }
   }
 
   uint32_t incrementReferenceCount() noexcept { return ++RefCount; }

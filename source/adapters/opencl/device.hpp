@@ -19,6 +19,7 @@ struct ur_device_handle_t_ {
   cl_device_type Type = 0;
   ur_device_handle_t ParentDevice = nullptr;
   std::atomic<uint32_t> RefCount = 0;
+  bool IsNativeHandleOwned = true;
 
   ur_device_handle_t_(native_type Dev, ur_platform_handle_t Plat,
                       ur_device_handle_t Parent)
@@ -32,7 +33,11 @@ struct ur_device_handle_t_ {
     }
   }
 
-  ~ur_device_handle_t_() {}
+  ~ur_device_handle_t_() {
+    if (ParentDevice && IsNativeHandleOwned) {
+      clReleaseDevice(Device);
+    }
+  }
 
   uint32_t incrementReferenceCount() noexcept { return ++RefCount; }
 

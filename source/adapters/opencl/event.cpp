@@ -119,15 +119,13 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventCreateWithNativeHandle(
   try {
     auto UREvent =
         std::make_unique<ur_event_handle_t_>(NativeHandle, hContext, nullptr);
+    UREvent->IsNativeHandleOwned =
+        pProperties ? pProperties->isNativeHandleOwned : false;
     *phEvent = UREvent.release();
   } catch (std::bad_alloc &) {
     return UR_RESULT_ERROR_OUT_OF_RESOURCES;
   } catch (...) {
     return UR_RESULT_ERROR_UNKNOWN;
-  }
-
-  if (!pProperties || !pProperties->isNativeHandleOwned) {
-    CL_RETURN_ON_FAILURE(clRetainEvent(NativeHandle));
   }
   return UR_RESULT_SUCCESS;
 }
@@ -140,14 +138,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetNativeHandle(
 UR_APIEXPORT ur_result_t UR_APICALL urEventRelease(ur_event_handle_t hEvent) {
   if (hEvent->decrementReferenceCount() == 0) {
     delete hEvent;
-  } else {
-    CL_RETURN_ON_FAILURE(clReleaseEvent(hEvent->get()));
   }
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEventRetain(ur_event_handle_t hEvent) {
-  CL_RETURN_ON_FAILURE(clRetainEvent(hEvent->get()));
   hEvent->incrementReferenceCount();
   return UR_RESULT_SUCCESS;
 }

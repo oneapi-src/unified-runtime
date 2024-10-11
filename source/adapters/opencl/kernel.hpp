@@ -21,19 +21,26 @@ struct ur_kernel_handle_t_ {
   ur_program_handle_t Program;
   ur_context_handle_t Context;
   std::atomic<uint32_t> RefCount = 0;
+  bool IsNativeHandleOwned = true;
 
   ur_kernel_handle_t_(native_type Kernel, ur_program_handle_t Program,
                       ur_context_handle_t Context)
       : Kernel(Kernel), Program(Program), Context(Context) {
     RefCount = 1;
-    urProgramRetain(Program);
+    if (Program) {
+      urProgramRetain(Program);
+    }
     urContextRetain(Context);
   }
 
   ~ur_kernel_handle_t_() {
-    clReleaseKernel(Kernel);
-    urProgramRelease(Program);
+    if (Program) {
+      urProgramRelease(Program);
+    }
     urContextRelease(Context);
+    if (IsNativeHandleOwned) {
+      clReleaseKernel(Kernel);
+    }
   }
 
   uint32_t incrementReferenceCount() noexcept { return ++RefCount; }
@@ -46,9 +53,6 @@ struct ur_kernel_handle_t_ {
                                     ur_program_handle_t Program,
                                     ur_context_handle_t Context,
                                     ur_kernel_handle_t &Kernel) {
-    if (!Program || !Context) {
-      return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-    }
     try {
       cl_context CLContext;
       CL_RETURN_ON_FAILURE(clGetKernelInfo(NativeKernel, CL_KERNEL_CONTEXT,
@@ -62,9 +66,17 @@ struct ur_kernel_handle_t_ {
       if (Context->get() != CLContext) {
         return UR_RESULT_ERROR_INVALID_CONTEXT;
       }
-      if (Program->get() != CLProgram) {
-        return UR_RESULT_ERROR_INVALID_PROGRAM;
+      if (Program) {
+        if (Program->get() != CLProgram) {
+          return UR_RESULT_ERROR_INVALID_PROGRAM;
+        }
+      } else {
+        ur_native_handle_t hNativeHandle =
+            reinterpret_cast<ur_native_handle_t>(CLProgram);
+        UR_RETURN_ON_FAILURE(urProgramCreateWithNativeHandle(
+            hNativeHandle, Context, nullptr, &Program));
       }
+
       auto URKernel =
           std::make_unique<ur_kernel_handle_t_>(NativeKernel, Program, Context);
       Kernel = URKernel.release();

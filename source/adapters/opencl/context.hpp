@@ -20,6 +20,7 @@ struct ur_context_handle_t_ {
   std::vector<ur_device_handle_t> Devices;
   uint32_t DeviceCount;
   std::atomic<uint32_t> RefCount = 0;
+  bool IsNativeHandleOwned = true;
 
   ur_context_handle_t_(native_type Ctx, uint32_t DevCount,
                        const ur_device_handle_t *phDevices)
@@ -49,18 +50,32 @@ struct ur_context_handle_t_ {
       CL_RETURN_ON_FAILURE(clGetContextInfo(Ctx, CL_CONTEXT_DEVICES,
                                             sizeof(CLDevices), CLDevices.data(),
                                             nullptr));
-      if (DevCount != CLDeviceCount) {
-        return UR_RESULT_ERROR_INVALID_CONTEXT;
-      }
-      for (uint32_t i = 0; i < DevCount; i++) {
-        if (phDevices[i]->get() != CLDevices[i]) {
+      std::vector<ur_device_handle_t> URDevices;
+      if (DevCount) {
+        if (DevCount != CLDeviceCount) {
           return UR_RESULT_ERROR_INVALID_CONTEXT;
         }
+        for (uint32_t i = 0; i < DevCount; i++) {
+          if (phDevices[i]->get() != CLDevices[i]) {
+            return UR_RESULT_ERROR_INVALID_CONTEXT;
+          }
+          URDevices.push_back(phDevices[i]);
+        }
+      } else {
+        DevCount = CLDeviceCount;
+        for (uint32_t i = 0; i < CLDeviceCount; i++) {
+          ur_device_handle_t UrDevice = nullptr;
+          ur_native_handle_t hNativeHandle =
+              reinterpret_cast<ur_native_handle_t>(CLDevices[i]);
+          UR_RETURN_ON_FAILURE(urDeviceCreateWithNativeHandle(
+              hNativeHandle, nullptr, nullptr, &UrDevice));
+          URDevices.push_back(UrDevice);
+        }
       }
-      auto URContext =
-          std::make_unique<ur_context_handle_t_>(Ctx, DevCount, phDevices);
+
+      auto URContext = std::make_unique<ur_context_handle_t_>(Ctx, DevCount,
+                                                              URDevices.data());
       Context = URContext.release();
-      CL_RETURN_ON_FAILURE(clRetainContext(Ctx));
     } catch (std::bad_alloc &) {
       return UR_RESULT_ERROR_OUT_OF_RESOURCES;
     } catch (...) {
@@ -74,7 +89,9 @@ struct ur_context_handle_t_ {
     for (uint32_t i = 0; i < DeviceCount; i++) {
       urDeviceRelease(Devices[i]);
     }
-    clReleaseContext(Context);
+    if (IsNativeHandleOwned) {
+      clReleaseContext(Context);
+    }
   }
 
   native_type get() { return Context; }

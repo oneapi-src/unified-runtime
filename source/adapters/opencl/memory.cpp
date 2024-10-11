@@ -368,9 +368,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
   cl_mem NativeHandle = reinterpret_cast<cl_mem>(hNativeMem);
   UR_RETURN_ON_FAILURE(
       ur_mem_handle_t_::makeWithNative(NativeHandle, hContext, *phMem));
-  if (!pProperties || !pProperties->isNativeHandleOwned) {
-    CL_RETURN_ON_FAILURE(clRetainMemObject((*phMem)->get()));
-  }
+  (*phMem)->IsNativeHandleOwned =
+      pProperties ? pProperties->isNativeHandleOwned : false;
   return UR_RESULT_SUCCESS;
 }
 
@@ -382,9 +381,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
   cl_mem NativeHandle = reinterpret_cast<cl_mem>(hNativeMem);
   UR_RETURN_ON_FAILURE(
       ur_mem_handle_t_::makeWithNative(NativeHandle, hContext, *phMem));
-  if (!pProperties || !pProperties->isNativeHandleOwned) {
-    CL_RETURN_ON_FAILURE(clRetainMemObject(NativeHandle));
-  }
+  (*phMem)->IsNativeHandleOwned =
+      pProperties ? pProperties->isNativeHandleOwned : false;
   return UR_RESULT_SUCCESS;
 }
 
@@ -441,7 +439,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemImageGetInfo(ur_mem_handle_t hMemory,
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urMemRetain(ur_mem_handle_t hMem) {
-  CL_RETURN_ON_FAILURE(clRetainMemObject(hMem->get()));
   hMem->incrementReferenceCount();
   return UR_RESULT_SUCCESS;
 }
@@ -449,8 +446,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemRetain(ur_mem_handle_t hMem) {
 UR_APIEXPORT ur_result_t UR_APICALL urMemRelease(ur_mem_handle_t hMem) {
   if (hMem->decrementReferenceCount() == 0) {
     delete hMem;
-  } else {
-    CL_RETURN_ON_FAILURE(clReleaseMemObject(hMem->get()));
   }
   return UR_RESULT_SUCCESS;
 }
