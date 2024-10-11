@@ -17,7 +17,8 @@ jobs:
     strategy:
       matrix:
         adapter: [
-          {name: L0}
+          {name: L0},
+          {name: L0_V2}
         ]
         build_type: [Debug, Release]
         compiler: [{c: gcc, cxx: g++}] # TODO: investigate why memory-adapter-level_zero hangs with clang
@@ -47,6 +48,7 @@ jobs:
         -DUR_DEVELOPER_MODE=ON
         -DUR_BUILD_TESTS=ON
         -DUR_BUILD_ADAPTER_${{matrix.adapter.name}}=ON
+        -DUR_CONFORMANCE_TEST_LOADER=OFF
         -DUR_TEST_DEVICES_COUNT=2
         -DUR_DPCXX=${{github.workspace}}/dpcpp_compiler/bin/clang++
         -DUR_SYCL_LIBRARY_DIR=${{github.workspace}}/dpcpp_compiler/lib
