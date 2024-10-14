@@ -65,7 +65,7 @@ try {
 
     return ${th.make_pfn_name(n, tags, obj)}( ${", ".join(th.make_param_lines(n, tags, obj, format=["name"]))} );
 %endif
-} catch(...) { return exceptionToResult(std::current_exception()); }
+} catch(...) { std::abort(); }
 %if 'condition' in obj:
 #endif // ${th.subt(n, tags, obj['condition'])}
 %endif
