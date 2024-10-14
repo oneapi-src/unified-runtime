@@ -10,13 +10,10 @@ UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urMemImageCreateWithNativeHandleTest);
 
 TEST_P(urMemImageCreateWithNativeHandleTest, Success) {
     ur_native_handle_t native_handle = 0;
-    {
-        UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(
-            urMemGetNativeHandle(image, device, &native_handle));
-    }
+    ASSERT_SUCCESS(urMemGetNativeHandle(image, device, &native_handle));
 
     ur_mem_handle_t mem = nullptr;
-    UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(urMemImageCreateWithNativeHandle(
+    ASSERT_SUCCESS(urMemImageCreateWithNativeHandle(
         native_handle, context, &image_format, &image_desc, nullptr, &mem));
     ASSERT_NE(nullptr, mem);
 
@@ -29,10 +26,7 @@ TEST_P(urMemImageCreateWithNativeHandleTest, Success) {
 
 TEST_P(urMemImageCreateWithNativeHandleTest, SuccessWithOwnedNativeHandle) {
     ur_native_handle_t native_handle = 0;
-    {
-        UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(
-            urMemGetNativeHandle(image, device, &native_handle));
-    }
+    ASSERT_SUCCESS(urMemGetNativeHandle(image, device, &native_handle));
 
     ur_mem_handle_t mem = nullptr;
     ur_mem_native_properties_t props = {
@@ -40,7 +34,7 @@ TEST_P(urMemImageCreateWithNativeHandleTest, SuccessWithOwnedNativeHandle) {
         /*.pNext =*/nullptr,
         /*.isNativeHandleOwned =*/true,
     };
-    UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(urMemImageCreateWithNativeHandle(
+    ASSERT_SUCCESS(urMemImageCreateWithNativeHandle(
         native_handle, context, &image_format, &image_desc, &props, &mem));
     ASSERT_NE(nullptr, mem);
 
@@ -53,10 +47,7 @@ TEST_P(urMemImageCreateWithNativeHandleTest, SuccessWithOwnedNativeHandle) {
 
 TEST_P(urMemImageCreateWithNativeHandleTest, SuccessWithUnOwnedNativeHandle) {
     ur_native_handle_t native_handle = 0;
-    {
-        UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(
-            urMemGetNativeHandle(image, device, &native_handle));
-    }
+    ASSERT_SUCCESS(urMemGetNativeHandle(image, device, &native_handle));
 
     ur_mem_handle_t mem = nullptr;
     ur_mem_native_properties_t props = {
@@ -64,7 +55,7 @@ TEST_P(urMemImageCreateWithNativeHandleTest, SuccessWithUnOwnedNativeHandle) {
         /*.pNext =*/nullptr,
         /*.isNativeHandleOwned =*/false,
     };
-    UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(urMemImageCreateWithNativeHandle(
+    ASSERT_SUCCESS(urMemImageCreateWithNativeHandle(
         native_handle, context, &image_format, &image_desc, &props, &mem));
     ASSERT_NE(nullptr, mem);
 
@@ -77,10 +68,7 @@ TEST_P(urMemImageCreateWithNativeHandleTest, SuccessWithUnOwnedNativeHandle) {
 
 TEST_P(urMemImageCreateWithNativeHandleTest, InvalidNullHandle) {
     ur_native_handle_t native_handle = 0;
-    {
-        UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(
-            urMemGetNativeHandle(image, device, &native_handle));
-    }
+    ASSERT_SUCCESS(urMemGetNativeHandle(image, device, &native_handle));
 
     ur_mem_handle_t mem = nullptr;
     ASSERT_EQ_RESULT(
@@ -91,10 +79,7 @@ TEST_P(urMemImageCreateWithNativeHandleTest, InvalidNullHandle) {
 
 TEST_P(urMemImageCreateWithNativeHandleTest, InvalidNullPointer) {
     ur_native_handle_t native_handle = 0;
-    {
-        UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(
-            urMemGetNativeHandle(image, device, &native_handle));
-    }
+    ASSERT_SUCCESS(urMemGetNativeHandle(image, device, &native_handle));
 
     ASSERT_EQ_RESULT(
         UR_RESULT_ERROR_INVALID_NULL_POINTER,

@@ -23,9 +23,9 @@ TEST_P(urMemBufferPartitionWithFlagsTest, Success) {
 
     ur_buffer_region_t region{UR_STRUCTURE_TYPE_BUFFER_REGION, nullptr, 0, 512};
     uur::raii::Mem partition = nullptr;
-    UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(
-        urMemBufferPartition(buffer, getParam(), UR_BUFFER_CREATE_TYPE_REGION,
-                             &region, partition.ptr()));
+    ASSERT_SUCCESS(urMemBufferPartition(buffer, getParam(),
+                                        UR_BUFFER_CREATE_TYPE_REGION, &region,
+                                        partition.ptr()));
     ASSERT_NE(partition, nullptr);
 }
 

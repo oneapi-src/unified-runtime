@@ -8,8 +8,8 @@ using urMemRetainTest = uur::urMemBufferTest;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urMemRetainTest);
 
 TEST_P(urMemRetainTest, Success) {
-    { UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(urMemRetain(buffer)); }
-    { UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(urMemRelease(buffer)); }
+    ASSERT_SUCCESS(urMemRetain(buffer));
+    ASSERT_SUCCESS(urMemRelease(buffer));
 }
 
 TEST_P(urMemRetainTest, InvalidNullHandleMem) {
@@ -18,14 +18,12 @@ TEST_P(urMemRetainTest, InvalidNullHandleMem) {
 
 TEST_P(urMemRetainTest, CheckReferenceCount) {
     uint32_t referenceCount = 0;
-    {
-        UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(
-            urMemGetInfo(buffer, UR_MEM_INFO_REFERENCE_COUNT,
-                         sizeof(referenceCount), &referenceCount, nullptr));
-    }
+    ASSERT_SUCCESS(urMemGetInfo(buffer, UR_MEM_INFO_REFERENCE_COUNT,
+                                sizeof(referenceCount), &referenceCount,
+                                nullptr));
     ASSERT_EQ(referenceCount, 1);
 
-    { UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(urMemRetain(buffer)); }
+    { ASSERT_SUCCESS(urMemRetain(buffer)); }
 
     ASSERT_SUCCESS(urMemGetInfo(buffer, UR_MEM_INFO_REFERENCE_COUNT,
                                 sizeof(referenceCount), &referenceCount,
