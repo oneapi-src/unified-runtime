@@ -1,4 +1,5 @@
 {{NONDETERMINISTIC}}
+urKernelCreateWithNativeHandleTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}_
 urKernelGetInfoTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_KERNEL_INFO_FUNCTION_NAME
 urKernelGetInfoTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_KERNEL_INFO_NUM_ARGS
 urKernelGetInfoTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_KERNEL_INFO_REFERENCE_COUNT
