@@ -225,4 +225,3 @@ urMemImageCreateTestWithImageFormatParam.Success/Intel_R__OpenCL___{{.*}}__UR_IM
 urMemImageCreateTestWithImageFormatParam.Success/Intel_R__OpenCL___{{.*}}__UR_IMAGE_CHANNEL_ORDER_SRGBA__UR_IMAGE_CHANNEL_TYPE_UNSIGNED_INT32
 urMemImageCreateTestWithImageFormatParam.Success/Intel_R__OpenCL___{{.*}}__UR_IMAGE_CHANNEL_ORDER_SRGBA__UR_IMAGE_CHANNEL_TYPE_HALF_FLOAT
 urMemImageCreateTestWithImageFormatParam.Success/Intel_R__OpenCL___{{.*}}__UR_IMAGE_CHANNEL_ORDER_SRGBA__UR_IMAGE_CHANNEL_TYPE_FLOAT
-
