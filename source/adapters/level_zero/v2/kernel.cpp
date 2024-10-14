@@ -122,7 +122,7 @@ size_t ur_kernel_handle_t_::deviceIndex(ur_device_handle_t hDevice) const {
   }
 
   // root-device's kernel can be submitted to a sub-device's queue
-  if (hDevice->isSubDevice()) {
+  if (hDevice && hDevice->isSubDevice()) {
     hDevice = hDevice->RootDevice;
   }
 
