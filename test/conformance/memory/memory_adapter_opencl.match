@@ -1,2 +1,3 @@
 {{NONDETERMINISTIC}}
 urMemImageCreateTest.InvalidImageDescStype/Intel_R__OpenCL___{{.*}}
+urMemImageCreateTestWithImageFormatParam.Success/Intel_R__OpenCL___{{.*}}

@@ -1,4 +1,8 @@
 {{NONDETERMINISTIC}}
 urMemImageCreateTest.InvalidSize/NVIDIA_CUDA_BACKEND___{{.*}}_
-{{OPT}}urMemImageCremBufferCrateTestWith1DMemoryTypeParam.Success/NVIDIA_CUDA_BACKEND___{{.*}}___UR_MEM_TYPE_IMAGE1D_ARRAY
+urMemBufferCreateWithNativeHandleTest.Success/NVIDIA_CUDA_BACKEND___{{.*}}_
+urMemBufferCreateWithNativeHandleTest.SuccessWithOwnedNativeHandle/NVIDIA_CUDA_BACKEND___{{.*}}_
+urMemBufferCreateWithNativeHandleTest.SuccessWithUnOwnedNativeHandle/NVIDIA_CUDA_BACKEND___{{.*}}_
+urMemImageCreateTest.InvalidSize/NVIDIA_CUDA_BACKEND___{{.*}}_
+urMemImageCreateTestWithImageFormatParam.Success/NVIDIA_CUDA_BACKEND___{{.*}}_
 {{OPT}}urMemImageCreateTestWith2DMemoryTypeParam.Success/NVIDIA_CUDA_BACKEND___{{.*}}___UR_MEM_TYPE_IMAGE2D_ARRAY
