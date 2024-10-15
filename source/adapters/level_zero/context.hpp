@@ -57,13 +57,13 @@ struct ur_context_handle_t_ : _ur_object {
                        const ur_device_handle_t *Devs, bool OwnZeContext)
       : ZeContext{ZeContext}, Devices{Devs, Devs + NumDevices},
         NumDevices{NumDevices}, DefaultPool{this, nullptr},
-        ProxyPool{this, nullptr} {
+        ProxyPool{this, nullptr}, AsyncPool{this, nullptr} {
     OwnNativeHandle = OwnZeContext;
   }
 
   ur_context_handle_t_(ze_context_handle_t ZeContext)
       : ZeContext{ZeContext}, DefaultPool{this, nullptr},
-        ProxyPool{this, nullptr} {}
+        ProxyPool{this, nullptr}, AsyncPool{this, nullptr} {}
 
   // A L0 context handle is primarily used during creation and management of
   // resources that may be used by multiple devices.
@@ -124,6 +124,9 @@ struct ur_context_handle_t_ : _ur_object {
 
   // Allocation-tracking proxy pools for direct allocations. No pooling used.
   ur_usm_pool_handle_t_ ProxyPool;
+
+  // USM pools for async allocations.
+  ur_usm_pool_handle_t_ AsyncPool;
 
   // Map associating pools created with urUsmPoolCreate and internal pools
   std::list<ur_usm_pool_handle_t> UsmPoolHandles{};
