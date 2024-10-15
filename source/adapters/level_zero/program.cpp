@@ -905,8 +905,15 @@ ur_result_t urProgramGetNativeHandle(
 
   std::shared_lock<ur_shared_mutex> Guard(Program->Mutex);
   assert(Program->AssociatedDevices.size() > 0);
-  auto Module =
-      Program->getZeModuleHandle(Program->AssociatedDevices[0]->ZeDevice);
+  // Current API doesn't allow to specify device for which we want to get the
+  // native handle. So, find the first device with a valid module handle.
+  ze_module_handle_t Module = nullptr;
+  for (const auto &Device : Program->AssociatedDevices) {
+    Module = Program->getZeModuleHandle(Device->ZeDevice);
+    if (Module) {
+      break;
+    }
+  }
   if (!Module)
     return UR_RESULT_ERROR_INVALID_OPERATION;
 
@@ -924,7 +931,6 @@ ur_result_t urProgramCreateWithNativeHandle(
     ur_program_handle_t *Program ///< [out] pointer to the handle of the
                                  ///< program object created.
 ) {
-  std::ignore = Properties;
   UR_ASSERT(Context && NativeProgram, UR_RESULT_ERROR_INVALID_NULL_HANDLE);
   UR_ASSERT(Program, UR_RESULT_ERROR_INVALID_NULL_POINTER);
   auto ZeModule = ur_cast<ze_module_handle_t>(NativeProgram);
@@ -934,9 +940,9 @@ ur_result_t urProgramCreateWithNativeHandle(
   // executable (state Object).
 
   try {
-    ur_program_handle_t_ *UrProgram =
-        new ur_program_handle_t_(ur_program_handle_t_::Exe, Context, ZeModule,
-                                 Properties->isNativeHandleOwned);
+    ur_program_handle_t_ *UrProgram = new ur_program_handle_t_(
+        ur_program_handle_t_::Exe, Context, ZeModule,
+        Properties ? Properties->isNativeHandleOwned : false);
     *Program = reinterpret_cast<ur_program_handle_t>(UrProgram);
   } catch (const std::bad_alloc &) {
     return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
