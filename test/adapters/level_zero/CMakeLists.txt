@@ -39,6 +39,14 @@ if(UR_BUILD_ADAPTER_L0)
 
         add_dependencies(test-adapter-level_zero
             generate_device_binaries kernel_names_header)
+
+        add_adapter_test(level_zero_enqueue_alloc
+            FIXTURE KERNELS
+            SOURCES
+                enqueue_alloc.cpp
+            ENVIRONMENT
+                "UR_ADAPTERS_FORCE_LOAD=\"$<TARGET_FILE:ur_adapter_level_zero>\""
+        )
     endif()
 
     if(NOT WIN32 AND NOT UR_STATIC_ADAPTER_L0)
