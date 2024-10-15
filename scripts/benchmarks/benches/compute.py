@@ -38,7 +38,7 @@ class ComputeBench:
         print(f"{self.__class__.__name__}: Run {configure_command}")
         run(configure_command, add_sycl=True)
         print(f"{self.__class__.__name__}: Run cmake --build {build_path} -j")
-        run(f"cmake --build {build_path} -j 10", add_sycl=True)
+        run(f"cmake --build {build_path} -j", add_sycl=True)
 
         self.built = True
 
