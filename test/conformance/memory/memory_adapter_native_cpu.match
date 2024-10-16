@@ -1,4 +1,6 @@
 {{NONDETERMINISTIC}}
+urMemBufferPartitionTest.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}__UR_MEM_FLAG_WRITE_ONLY
+urMemBufferPartitionTest.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}__UR_MEM_FLAG_READ_ONLY
 urMemBufferPartitionTest.InvalidValueCreateType/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 urMemBufferPartitionTest.InvalidValueBufferCreateInfoOutOfBounds/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 urMemGetInfoTestWithParam.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}__UR_MEM_INFO_SIZE
