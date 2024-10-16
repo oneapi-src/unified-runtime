@@ -72,12 +72,6 @@ else()
   )
 endif()
 
-if(UMF_ENABLE_POOL_TRACKING)
-  target_compile_definitions("ur_adapter_cuda" PRIVATE UMF_ENABLE_POOL_TRACKING)
-else()
-  message(WARNING "CUDA adapter USM pools are disabled, set UMF_ENABLE_POOL_TRACKING to enable them")
-endif()
-
 if (UR_ENABLE_TRACING)
   include(FindCUDACupti)
   # The following two ifs can be removed when FindCUDA -> FindCUDAToolkit.
