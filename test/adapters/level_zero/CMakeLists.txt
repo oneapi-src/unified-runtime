@@ -84,6 +84,14 @@ if(UR_BUILD_ADAPTER_L0)
     target_link_libraries(test-adapter-level_zero_ipc PRIVATE
         ur_umf
     )
+
+    add_adapter_test(level_zero_enqueue_alloc
+        FIXTURE DEVICES
+        SOURCES
+            enqueueAlloc.cpp
+        ENVIRONMENT
+            "UR_ADAPTERS_FORCE_LOAD=\"$<TARGET_FILE:ur_adapter_level_zero>\""
+    )
 endif()
 
 if(UR_BUILD_ADAPTER_L0_V2)
