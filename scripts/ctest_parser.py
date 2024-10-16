@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
  Copyright (C) 2022 Intel Corporation
 
@@ -18,9 +18,11 @@ def get_cts_test_suite_names(working_directory):
     process = Popen(["ctest", "--show-only=json-v1"], cwd=working_directory,
                     stdout=PIPE, env=os.environ.copy())
     out,_ = process.communicate()
-    testsuites = json.loads(out)
+    testsuites = json.loads(out)['tests']
+    # Ignore "loader" tests
+    testsuites = filter(lambda test: not test['name'].endswith("-loader"), testsuites)
     return [
-        test['name'][:test['name'].rfind('-')] for test in testsuites['tests']
+        test['name'][:test['name'].rfind('-')] for test in testsuites
     ]
 
 def percent(amount, total):
