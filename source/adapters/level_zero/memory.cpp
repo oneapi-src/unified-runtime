@@ -1881,6 +1881,7 @@ ur_result_t urMemGetInfo(
   }
   case UR_MEM_INFO_SIZE: {
     // Get size of the allocation
+    return ReturnValue(size_t{Buffer->Size});
   }
   case UR_MEM_INFO_REFERENCE_COUNT: {
     return ReturnValue(Buffer->RefCount.load());
