@@ -24,7 +24,7 @@ struct ur_single_device_kernel_t {
   mutable ZeCache<ZeStruct<ze_kernel_properties_t>> zeKernelProperties;
 };
 
-struct ur_kernel_handle_t_ : _ur_object {
+struct ur_kernel_handle_t_ : ur_object_ {
 private:
 public:
   ur_kernel_handle_t_(ur_program_handle_t hProgram, const char *kernelName);

@@ -15,7 +15,7 @@
 
 usm::DisjointPoolAllConfigs InitializeDisjointPoolConfig();
 
-struct ur_usm_pool_handle_t_ : _ur_object {
+struct ur_usm_pool_handle_t_ : ur_object_ {
   bool zeroInit;
 
   usm::DisjointPoolAllConfigs DisjointPoolConfigs =

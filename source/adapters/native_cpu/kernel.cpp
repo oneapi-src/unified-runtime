@@ -22,8 +22,8 @@ urKernelCreate(ur_program_handle_t hProgram, const char *pKernelName,
   UR_ASSERT(hProgram, UR_RESULT_ERROR_INVALID_NULL_HANDLE);
   UR_ASSERT(pKernelName, UR_RESULT_ERROR_INVALID_NULL_POINTER);
 
-  auto kernelEntry = hProgram->_kernels.find(pKernelName);
-  if (kernelEntry == hProgram->_kernels.end())
+  auto kernelEntry = hProgram->kernels.find(pKernelName);
+  if (kernelEntry == hProgram->kernels.end())
     return UR_RESULT_ERROR_INVALID_KERNEL;
 
   auto f = reinterpret_cast<nativecpu_ptr_t>(
@@ -70,7 +70,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelSetArgValue(
   UR_ASSERT(hKernel, UR_RESULT_ERROR_INVALID_NULL_HANDLE);
   UR_ASSERT(argSize, UR_RESULT_ERROR_INVALID_KERNEL_ARGUMENT_SIZE);
 
-  hKernel->_args.emplace_back(const_cast<void *>(pArgValue));
+  hKernel->args.emplace_back(const_cast<void *>(pArgValue));
 
   return UR_RESULT_SUCCESS;
 }
@@ -81,8 +81,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelSetArgLocal(
   std::ignore = pProperties;
   // emplace a placeholder kernel arg, gets replaced with a pointer to the
   // memory pool before enqueueing the kernel.
-  hKernel->_args.emplace_back(nullptr);
-  hKernel->_localArgInfo.emplace_back(argIndex, argSize);
+  hKernel->args.emplace_back(nullptr);
+  hKernel->localArgInfo.emplace_back(argIndex, argSize);
   return UR_RESULT_SUCCESS;
 }
 
@@ -104,7 +104,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelGetInfo(ur_kernel_handle_t hKernel,
     //  case UR_KERNEL_INFO_PROGRAM:
     //    return ReturnValue(ur_program_handle_t{ Kernel->Program });
   case UR_KERNEL_INFO_FUNCTION_NAME:
-    return ReturnValue(hKernel->_name);
+    return ReturnValue(hKernel->name);
   case UR_KERNEL_INFO_REFERENCE_COUNT:
     return ReturnValue(uint32_t{hKernel->getReferenceCount()});
   case UR_KERNEL_INFO_ATTRIBUTES:
@@ -137,7 +137,7 @@ urKernelGetGroupInfo(ur_kernel_handle_t hKernel, ur_device_handle_t hDevice,
   case UR_KERNEL_GROUP_INFO_COMPILE_WORK_GROUP_SIZE: {
     size_t GroupSize[3] = {0, 0, 0};
     const auto &ReqdWGSizeMDMap = hKernel->hProgram->KernelReqdWorkGroupSizeMD;
-    const auto ReqdWGSizeMD = ReqdWGSizeMDMap.find(hKernel->_name);
+    const auto ReqdWGSizeMD = ReqdWGSizeMDMap.find(hKernel->name);
     if (ReqdWGSizeMD != ReqdWGSizeMDMap.end()) {
       const auto ReqdWGSize = ReqdWGSizeMD->second;
       GroupSize[0] = std::get<0>(ReqdWGSize);
@@ -228,7 +228,7 @@ urKernelSetArgPointer(ur_kernel_handle_t hKernel, uint32_t argIndex,
   UR_ASSERT(hKernel, UR_RESULT_ERROR_INVALID_NULL_HANDLE);
   UR_ASSERT(pArgValue, UR_RESULT_ERROR_INVALID_NULL_POINTER);
 
-  hKernel->_args.push_back(const_cast<void *>(pArgValue));
+  hKernel->args.push_back(const_cast<void *>(pArgValue));
 
   return UR_RESULT_SUCCESS;
 }
@@ -271,11 +271,11 @@ urKernelSetArgMemObj(ur_kernel_handle_t hKernel, uint32_t argIndex,
   // Taken from ur/adapters/cuda/kernel.cpp
   // zero-sized buffers are expected to be null.
   if (hArgValue == nullptr) {
-    hKernel->_args.emplace_back(nullptr);
+    hKernel->args.emplace_back(nullptr);
     return UR_RESULT_SUCCESS;
   }
 
-  hKernel->_args.emplace_back(hArgValue->_mem);
+  hKernel->args.emplace_back(hArgValue->mem);
   return UR_RESULT_SUCCESS;
 }
 

@@ -53,7 +53,7 @@ namespace ur {
 } // namespace detail
 
 // Base class to store common data
-struct _ur_object {
+struct ur_object_ {
   ur_shared_mutex Mutex;
 };
 

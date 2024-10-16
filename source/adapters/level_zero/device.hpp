@@ -57,7 +57,7 @@ struct ur_ze_external_memory_data {
   size_t size;
 };
 
-struct ur_device_handle_t_ : _ur_object {
+struct ur_device_handle_t_ : ur_object_ {
   ur_device_handle_t_(ze_device_handle_t Device, ur_platform_handle_t Plt,
                       ur_device_handle_t ParentDevice = nullptr)
       : ZeDevice{Device}, Platform{Plt}, RootDevice{ParentDevice},

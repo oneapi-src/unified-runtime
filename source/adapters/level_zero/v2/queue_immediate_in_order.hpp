@@ -38,7 +38,7 @@ struct ur_command_list_handler_t {
   ze_event_handle_t lastEvent = nullptr;
 };
 
-struct ur_queue_immediate_in_order_t : _ur_object, public ur_queue_handle_t_ {
+struct ur_queue_immediate_in_order_t : ur_object_, public ur_queue_handle_t_ {
 private:
   ur_context_handle_t hContext;
   ur_device_handle_t hDevice;

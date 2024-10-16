@@ -50,14 +50,13 @@ const ur_command_t UR_EXT_COMMAND_TYPE_USER =
 
 /// Program metadata tags recognized by the UR adapters. For kernels the tag
 /// must appear after the kernel name.
-#define __SYCL_UR_PROGRAM_METADATA_TAG_REQD_WORK_GROUP_SIZE                    \
+#define SYCL_UR_PROGRAM_METADATA_TAG_REQD_WORK_GROUP_SIZE                      \
   "@reqd_work_group_size"
-#define __SYCL_UR_PROGRAM_METADATA_GLOBAL_ID_MAPPING "@global_id_mapping"
-#define __SYCL_UR_PROGRAM_METADATA_TAG_MAX_WORK_GROUP_SIZE                     \
-  "@max_work_group_size"
-#define __SYCL_UR_PROGRAM_METADATA_TAG_MAX_LINEAR_WORK_GROUP_SIZE              \
+#define SYCL_UR_PROGRAM_METADATA_GLOBAL_ID_MAPPING "@global_id_mapping"
+#define SYCL_UR_PROGRAM_METADATA_TAG_MAX_WORK_GROUP_SIZE "@max_work_group_size"
+#define SYCL_UR_PROGRAM_METADATA_TAG_MAX_LINEAR_WORK_GROUP_SIZE                \
   "@max_linear_work_group_size"
-#define __SYCL_UR_PROGRAM_METADATA_TAG_NEED_FINALIZATION "Requires finalization"
+#define SYCL_UR_PROGRAM_METADATA_TAG_NEED_FINALIZATION "Requires finalization"
 
 // Terminates the process with a catastrophic error message.
 [[noreturn]] inline void die(const char *Message) {
@@ -192,7 +191,7 @@ template <class T> struct ZeCache : private T {
     return error;
 
 // TODO: populate with target agnostic handling of UR platforms
-struct _ur_platform {};
+struct ur_platform {};
 
 // Controls tracing UR calls from within the UR itself.
 extern bool PrintTrace;
