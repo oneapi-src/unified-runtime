@@ -933,7 +933,8 @@ ur_result_t urProgramGetNativeHandle(
   }
 
   default:
-    return UR_RESULT_ERROR_INVALID_OPERATION;
+    // L0 only supprts returning native handle from built programs.
+    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
   return UR_RESULT_SUCCESS;
@@ -959,9 +960,9 @@ ur_result_t urProgramCreateWithNativeHandle(
   // executable (state Object).
 
   try {
-    ur_program_handle_t_ *UrProgram =
-        new ur_program_handle_t_(ur_program_handle_t_::Exe, Context, ZeModule,
-                                 Properties->isNativeHandleOwned);
+    auto OwnNativeHandle = Properties ? Properties->isNativeHandleOwned : false;
+    ur_program_handle_t_ *UrProgram = new ur_program_handle_t_(
+        ur_program_handle_t_::Exe, Context, ZeModule, OwnNativeHandle);
     *Program = reinterpret_cast<ur_program_handle_t>(UrProgram);
   } catch (const std::bad_alloc &) {
     return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;

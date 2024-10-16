@@ -23,6 +23,7 @@
 {{OPT}}urProgramCreateWithILTest.InvalidNullPointerProgram/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 {{OPT}}urProgramCreateWithILTest.BuildInvalidProgram/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 {{OPT}}urProgramCreateWithNativeHandleTest.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
+{{OPT}}urProgramCreateWithNativeHandleTest.SuccessWithProperties/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 {{OPT}}urProgramCreateWithNativeHandleTest.InvalidNullHandleContext/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 {{OPT}}urProgramCreateWithNativeHandleTest.InvalidNullPointerProgram/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 {{OPT}}urProgramGetBuildInfoTest.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}__UR_PROGRAM_BUILD_INFO_STATUS

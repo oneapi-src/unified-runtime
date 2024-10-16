@@ -25,6 +25,7 @@ urEventReleaseTest.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 urEventGetNativeHandleTest.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 urEventGetNativeHandleTest.InvalidNullPointerNativeEvent/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 urEventCreateWithNativeHandleTest.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
+urEventCreateWithNativeHandleTest.SuccessWithProperties/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 urEventSetCallbackTest.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 urEventSetCallbackTest.ValidateParameters/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 urEventSetCallbackTest.AllStates/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
