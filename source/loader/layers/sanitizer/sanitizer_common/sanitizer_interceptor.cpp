@@ -111,19 +111,21 @@ SanitizerInterceptor::getKernelInfo(ur_kernel_handle_t Kernel) {
 
 ur_result_t DeviceInfo::allocShadowMemory(ur_context_handle_t Context) {
 
-    if (Type == DeviceType::CPU) {
-        // UR_CALL(SetupShadowMemoryOnCPU(ShadowOffset, ShadowOffsetEnd));
-    } else if (Type == DeviceType::GPU_PVC) {
-        Shadow = new MsanShadowMemoryPVC(Context, Handle);
-    } else if (Type == DeviceType::GPU_DG2) {
-        // UR_CALL(SetupShadowMemoryOnDG2(Context, ShadowOffset, ShadowOffsetEnd));
-    } else {
-        getContext()->logger.error("Unsupport device type");
-        return UR_RESULT_ERROR_INVALID_ARGUMENT;
-    }
+    // if (Type == DeviceType::CPU) {
+    //     // UR_CALL(SetupShadowMemoryOnCPU(ShadowOffset, ShadowOffsetEnd));
+    // } else if (Type == DeviceType::GPU_PVC) {
+    Shadow = new MsanShadowMemoryPVC(Context, Handle);
+    auto Result = Shadow->Setup();
+    // } else if (Type == DeviceType::GPU_DG2) {
+    //     // UR_CALL(SetupShadowMemoryOnDG2(Context, ShadowOffset, ShadowOffsetEnd));
+    // } else {
+    //     getContext()->logger.error("Unsupport device type");
+    //     return UR_RESULT_ERROR_INVALID_ARGUMENT;
+    // }
 
     getContext()->logger.info("ShadowMemory(Global): {} - {}",
-                              (void *)ShadowOffset, (void *)ShadowOffsetEnd);
+                              (void *)Shadow->ShadowBegin,
+                              (void *)Shadow->ShadowEnd);
     return UR_RESULT_SUCCESS;
 }
 

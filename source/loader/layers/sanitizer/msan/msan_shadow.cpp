@@ -16,6 +16,7 @@
 #include "sanitizer_common/sanitizer_interceptor.hpp"
 #include "sanitizer_common/sanitizer_utils.hpp"
 
+#include "ur_api.h"
 #include "ur_sanitizer_layer.hpp"
 
 namespace ur_sanitizer_layer {
@@ -95,12 +96,17 @@ ur_result_t MsanShadowMemoryGPU::Setup() {
         // TODO: Protect Bad Zone
         auto Result = getContext()->urDdiTable.VirtualMem.pfnReserve(
             Context, nullptr, ShadowSize, (void **)&Begin);
-        if (Result == UR_RESULT_SUCCESS) {
-            End = Begin + ShadowSize;
-            // Retain the context which reserves shadow memory
-            getContext()->urDdiTable.Context.pfnRetain(Context);
+        if (Result != UR_RESULT_SUCCESS) {
+            getContext()->logger.error("Failed to reserve shadow memory: {}",
+                                       Result);
+            die("Failed to reserve shadow memory");
         }
 
+        // Retain the context which reserves shadow memory
+        Result = getContext()->urDdiTable.Context.pfnRetain(Context);
+        assert(Result == UR_RESULT_SUCCESS && "Failed to retain context");
+
+        End = Begin + ShadowSize;
         ShadowBegin = Begin;
         ShadowEnd = End;
 
@@ -236,10 +242,8 @@ ur_result_t MsanShadowMemoryGPU::ReleaseShadow(std::shared_ptr<AllocInfo> AI) {
 }
 
 uptr MsanShadowMemoryPVC::MemToShadow(uptr Ptr) {
-    if (Ptr & 0xFF00'0000'0000'0000ULL) { // Device USM
-        return ShadowBegin + ((Ptr & 0xFFFF'FFFF'FFFFULL) >> 1);
-    }
-    return 0;
+    assert(Ptr & 0xFF00'0000'0000'0000ULL && "device USM only");
+    return ShadowBegin + ((Ptr & 0x00FF'FFFF'FFFFULL) >> 1);
 }
 
 uptr MsanShadowMemoryDG2::MemToShadow(uptr Ptr) {

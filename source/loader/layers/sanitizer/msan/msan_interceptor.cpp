@@ -16,6 +16,7 @@
 #include "sanitizer_common/sanitizer_stacktrace.hpp"
 #include "sanitizer_common/sanitizer_utils.hpp"
 #include "ur_api.h"
+#include "ur_sanitizer_layer.hpp"
 
 namespace ur_sanitizer_layer {
 
@@ -280,10 +281,8 @@ ur_result_t MsanInterceptor::enqueueAllocInfo(
     //     return UR_RESULT_SUCCESS;
     // }
 
-    int ShadowByte = 0xff;
-
-    UR_CALL(DeviceInfo->Shadow->EnqueuePoisonShadow(
-        Queue, AI->UserBegin, AI->UserEnd - AI->UserBegin, ShadowByte));
+    UR_CALL(DeviceInfo->Shadow->EnqueuePoisonShadow(Queue, AI->UserBegin,
+                                                    AI->AllocSize, 0xff));
 
     return UR_RESULT_SUCCESS;
 }
@@ -520,11 +519,13 @@ ur_result_t MsanInterceptor::prepareLaunch(
 
         // Write shadow memory offset for global memory
         EnqueueWriteGlobal(kSPIR_MsanShadowMemoryGlobalStart,
-                           &DeviceInfo->ShadowOffset,
-                           sizeof(DeviceInfo->ShadowOffset));
+                           &DeviceInfo->Shadow->ShadowBegin,
+                           sizeof(DeviceInfo->Shadow->ShadowBegin));
+        getContext()->logger.debug("kSPIR_MsanShadowMemoryGlobalStart: {}",
+                                   (void *)DeviceInfo->Shadow->ShadowBegin);
         EnqueueWriteGlobal(kSPIR_MsanShadowMemoryGlobalEnd,
-                           &DeviceInfo->ShadowOffsetEnd,
-                           sizeof(DeviceInfo->ShadowOffsetEnd));
+                           &DeviceInfo->Shadow->ShadowEnd,
+                           sizeof(DeviceInfo->Shadow->ShadowEnd));
 
         // Write device type
         EnqueueWriteGlobal(kSPIR_DeviceType, &DeviceInfo->Type,
