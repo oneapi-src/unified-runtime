@@ -161,6 +161,7 @@ add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/fixed_wg_size.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/sequence.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/standard_types.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/subgroup.cpp)
+add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/sampler_read.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/linker_error.cpp)
 
 set(KERNEL_HEADER ${UR_CONFORMANCE_DEVICE_BINARIES_DIR}/kernel_entry_points.h)
