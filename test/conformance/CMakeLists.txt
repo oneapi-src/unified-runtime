@@ -13,8 +13,13 @@ function(add_test_adapter name adapter backend)
     set(TEST_TARGET_NAME test-${name})
     set(TEST_NAME ${name}-${adapter})
 
+    set(BACKEND_STR "")
+    if(backend)
+        set(BACKEND_STR "--backend=${backend}")
+    endif()
+
     set(TEST_COMMAND
-        "${PROJECT_BINARY_DIR}/bin/${TEST_TARGET_NAME} --backend=${backend} --devices_count=${UR_TEST_DEVICES_COUNT} --platforms_count=${UR_TEST_PLATFORMS_COUNT}"
+        "${PROJECT_BINARY_DIR}/bin/${TEST_TARGET_NAME} ${BACKEND_STR} --devices_count=${UR_TEST_DEVICES_COUNT} --platforms_count=${UR_TEST_PLATFORMS_COUNT}"
     )
     set(MATCH_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${name}_${adapter}.match")
 
@@ -48,7 +53,7 @@ function(add_test_adapter name adapter backend)
     endfunction()
 
     do_add_test(${TEST_NAME} UR_ADAPTERS_FORCE_LOAD="$<TARGET_FILE:ur_${adapter}>")
-    if(UR_CONFORMANCE_TEST_LOADER)
+    if(UR_CONFORMANCE_TEST_LOADER AND backend)
         do_add_test(${TEST_NAME}-loader "")
     endif()
 endfunction()
@@ -91,7 +96,7 @@ function(add_conformance_test name)
             OR UR_BUILD_ADAPTER_L0 OR UR_BUILD_ADAPTER_OPENCL
             OR UR_BUILD_ADAPTER_NATIVE_CPU OR UR_BUILD_ADAPTER_L0_V2
             OR UR_BUILD_ADAPTER_ALL))
-        add_test_adapter(${name} adapter_mock MOCK)
+        add_test_adapter(${name} adapter_mock OFF)
     endif()
 endfunction()
 
