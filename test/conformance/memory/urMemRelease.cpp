@@ -16,3 +16,4 @@ TEST_P(urMemReleaseTest, InvalidNullHandleMem) {
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_HANDLE,
                      urMemRelease(nullptr));
 }
+// temp
