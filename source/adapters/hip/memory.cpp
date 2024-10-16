@@ -231,10 +231,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemGetInfo(ur_mem_handle_t hMemory,
                                                  size_t propSize,
                                                  void *pMemInfo,
                                                  size_t *pPropSizeRet) {
-
-  UR_ASSERT(MemInfoType <= UR_MEM_INFO_CONTEXT,
-            UR_RESULT_ERROR_INVALID_ENUMERATION);
-
   // FIXME: Only getting info for the first device in the context. This
   // should be fine in general
   auto Device = hMemory->getContext()->getDevices()[0];
@@ -285,6 +281,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemGetInfo(ur_mem_handle_t hMemory,
   }
   case UR_MEM_INFO_CONTEXT: {
     return ReturnValue(hMemory->getContext());
+  }
+  case UR_MEM_INFO_REFERENCE_COUNT: {
+    return ReturnValue(hMemory->getReferenceCount());
   }
 
   default:
