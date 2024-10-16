@@ -1,10 +1,10 @@
 {{NONDETERMINISTIC}}
 urMemBufferPartitionTest.InvalidValueCreateType/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 urMemBufferPartitionTest.InvalidValueBufferCreateInfoOutOfBounds/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
-urMemGetInfoTest.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}__UR_MEM_INFO_SIZE
-urMemGetInfoTest.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}__UR_MEM_INFO_CONTEXT
-urMemGetInfoTest.InvalidSizeSmall/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}__UR_MEM_INFO_SIZE
-urMemGetInfoTest.InvalidSizeSmall/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}__UR_MEM_INFO_CONTEXT
+urMemGetInfoTestWithParam.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}__UR_MEM_INFO_SIZE
+urMemGetInfoTestWithParam.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}__UR_MEM_INFO_CONTEXT
+urMemGetInfoTestWithParam.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}__UR_MEM_INFO_REFERENCE_COUNT
+urMemGetInfoTest.InvalidSizeSmall/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 urMemImageCreateTestWithImageFormatParam.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}__UR_IMAGE_CHANNEL_ORDER_A__UR_IMAGE_CHANNEL_TYPE_SNORM_INT8
 urMemImageCreateTestWithImageFormatParam.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}__UR_IMAGE_CHANNEL_ORDER_A__UR_IMAGE_CHANNEL_TYPE_SNORM_INT16
 urMemImageCreateTestWithImageFormatParam.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}__UR_IMAGE_CHANNEL_ORDER_A__UR_IMAGE_CHANNEL_TYPE_UNORM_INT8
