@@ -1886,8 +1886,11 @@ ur_result_t urMemGetInfo(
     // Get size of the allocation
     return ReturnValue(size_t{Buffer->Size});
   }
+  case UR_MEM_INFO_REFERENCE_COUNT: {
+    return ReturnValue(Buffer->RefCount.load());
+  }
   default: {
-    die("urMemGetInfo: Parameter is not implemented");
+    return UR_RESULT_ERROR_INVALID_ENUMERATION;
   }
   }
 
