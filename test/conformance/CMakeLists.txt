@@ -27,14 +27,12 @@ function(add_test_adapter name adapter backend)
                 -D MODE=stdout
                 -D MATCH_FILE=${MATCH_FILE}
                 -P ${PROJECT_SOURCE_DIR}/cmake/match.cmake
-                DEPENDS ${TEST_TARGET_NAME}
                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             )
         else()
             separate_arguments(TEST_COMMAND)
             add_test(NAME ${tname}
                 COMMAND ${TEST_COMMAND}
-                DEPENDS ${TEST_TARGET_NAME}
                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             )
         endif()
