@@ -110,6 +110,11 @@ ur_result_t urProgramCreateWithBinary(
   // we could change the PI interface and have the caller pass additional
   // information to distinguish the cases.
   try {
+    for (uint32_t i = 0; i < numDevices; i++) {
+      UR_ASSERT(ppBinaries[i] || !pLengths[0], UR_RESULT_ERROR_INVALID_VALUE);
+      UR_ASSERT(hContext->isValidDevice(phDevices[i]),
+                UR_RESULT_ERROR_INVALID_DEVICE);
+    }
     ur_program_handle_t_ *UrProgram = new ur_program_handle_t_(
         ur_program_handle_t_::Native, hContext, numDevices, phDevices,
         pProperties, ppBinaries, pLengths);
@@ -659,12 +664,15 @@ ur_result_t urProgramGetInfo(
     std::vector<size_t> binarySizes;
     for (auto Device : Program->AssociatedDevices) {
       auto State = Program->getState(Device->ZeDevice);
+      if (State == ur_program_handle_t_::Native) {
+        binarySizes.push_back(Program->getCodeSize(Device->ZeDevice));
+        continue;
+      }
       auto ZeModule = Program->getZeModuleHandle(Device->ZeDevice);
       if (!ZeModule)
         return UR_RESULT_ERROR_INVALID_PROGRAM;
 
       if (State == ur_program_handle_t_::IL ||
-          State == ur_program_handle_t_::Native ||
           State == ur_program_handle_t_::Object) {
         // We don't have a binary for this device, so return size of the spirv
         // code. This is an array of 1 element, initialized as if it were
@@ -701,11 +709,20 @@ ur_result_t urProgramGetInfo(
          deviceIndex < Program->AssociatedDevices.size(); deviceIndex++) {
       auto ZeDevice = Program->AssociatedDevices[deviceIndex]->ZeDevice;
       auto State = Program->getState(ZeDevice);
+      if (State == ur_program_handle_t_::Native) {
+        // If Program was created from Native code then return that code.
+        if (PBinary) {
+          std::memcpy(PBinary[deviceIndex], Program->getCode(ZeDevice),
+                      Program->getCodeSize(ZeDevice));
+        }
+        SzBinary += Program->getCodeSize(ZeDevice);
+        continue;
+      }
       auto ZeModule = Program->getZeModuleHandle(ZeDevice);
       if (!ZeModule) {
         return UR_RESULT_ERROR_INVALID_PROGRAM;
       }
-      // If the caller is using a Program which is IL, Native or an object, then
+      // If the caller is using a Program which is IL or an object, then
       // the program has not been built for multiple devices so a single IL is
       // returned.
       // TODO: currently if program is not compiled for any of the associated
@@ -714,7 +731,6 @@ ur_result_t urProgramGetInfo(
       // that program is compiled for subset of associated devices, so that case
       // probably should be explicitely specified and handled better.
       if (State == ur_program_handle_t_::IL ||
-          State == ur_program_handle_t_::Native ||
           State == ur_program_handle_t_::Object) {
         if (PropSizeRet)
           *PropSizeRet = Program->getCodeSize();
@@ -725,7 +741,7 @@ ur_result_t urProgramGetInfo(
       } else if (State == ur_program_handle_t_::Exe) {
         size_t binarySize = 0;
         if (PBinary) {
-          NativeBinaryPtr = PBinary[deviceIndex++];
+          NativeBinaryPtr = PBinary[deviceIndex];
         }
         // If the caller is using a Program which is a built binary, then
         // the program returned will either be a single module if this is a

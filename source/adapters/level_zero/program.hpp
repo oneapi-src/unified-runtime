@@ -234,7 +234,7 @@ private:
   // In IL and Object states, this contains the SPIR-V representation of the
   // module.
   std::unique_ptr<uint8_t[]> SpirvCode; // Array containing raw IL code.
-  size_t SpirvCodeLength;               // Size (bytes) of the array.
+  size_t SpirvCodeLength = 0;           // Size (bytes) of the array.
 
   // The Level Zero module handle for interoperability.
   // This module handle is either initialized with the handle provided to
