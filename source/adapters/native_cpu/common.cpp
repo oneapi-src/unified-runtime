@@ -19,7 +19,7 @@ thread_local char ErrorMessage[MaxMessageSize];
 [[maybe_unused]] void setErrorMessage(const char *pMessage,
                                       ur_result_t ErrorCode) {
   assert(strlen(pMessage) <= MaxMessageSize);
-  strcpy(ErrorMessage, pMessage);
+  strcpy_s(ErrorMessage, MaxMessageSize, pMessage);
   ErrorMessageCode = ErrorCode;
 }
 
