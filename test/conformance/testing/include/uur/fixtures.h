@@ -205,6 +205,8 @@ struct urMemImageTest : urContextTest {
         if (!imageSupported) {
             GTEST_SKIP();
         }
+        ASSERT_SUCCESS(urMemImageCreate(context, 0, &image_format, &image_desc,
+                                        nullptr, &image));
     }
 
     void TearDown() override {
@@ -214,23 +216,19 @@ struct urMemImageTest : urContextTest {
         UUR_RETURN_ON_FATAL_FAILURE(urContextTest::TearDown());
     }
 
-    ur_image_format_t image_format = {
-        /*.channelOrder =*/UR_IMAGE_CHANNEL_ORDER_ARGB,
-        /*.channelType =*/UR_IMAGE_CHANNEL_TYPE_UNORM_INT8,
-    };
-    ur_image_desc_t image_desc = {
-        /*.stype =*/UR_STRUCTURE_TYPE_IMAGE_DESC,
-        /*.pNext =*/nullptr,
-        /*.type =*/UR_MEM_TYPE_IMAGE2D,
-        /*.width =*/16,
-        /*.height =*/16,
-        /*.depth =*/1,
-        /*.arraySize =*/1,
-        /*.rowPitch =*/16 * sizeof(char[4]),
-        /*.slicePitch =*/16 * 16 * sizeof(char[4]),
-        /*.numMipLevel =*/0,
-        /*.numSamples =*/0,
-    };
+    ur_image_format_t image_format = {UR_IMAGE_CHANNEL_ORDER_RGBA,
+                                      UR_IMAGE_CHANNEL_TYPE_FLOAT};
+    ur_image_desc_t image_desc = {UR_STRUCTURE_TYPE_IMAGE_DESC, // stype
+                                  nullptr,                      // pNext
+                                  UR_MEM_TYPE_IMAGE1D, // mem object type
+                                  1024,                // image width
+                                  1,                   // image height
+                                  1,                   // image depth
+                                  1,                   // array size
+                                  0,                   // row pitch
+                                  0,                   // slice pitch
+                                  0,                   // mip levels
+                                  0};                  // num samples
     ur_mem_handle_t image = nullptr;
 };
 

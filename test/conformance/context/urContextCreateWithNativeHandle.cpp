@@ -21,9 +21,8 @@ TEST_P(urContextCreateWithNativeHandleTest, Success) {
     // We can however convert the native_handle back into a unified-runtime handle
     // and perform some query on it to verify that it works.
     ur_context_handle_t ctx = nullptr;
-    ur_context_native_properties_t props{};
     UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(urContextCreateWithNativeHandle(
-        native_context, adapter, 1, &device, &props, &ctx));
+        native_context, adapter, 1, &device, nullptr, &ctx));
     ASSERT_NE(ctx, nullptr);
 
     uint32_t n_devices = 0;
@@ -33,7 +32,7 @@ TEST_P(urContextCreateWithNativeHandleTest, Success) {
     ASSERT_SUCCESS(urContextRelease(ctx));
 }
 
-TEST_P(urContextCreateWithNativeHandleTest, SuccessWithOwnedNativeHandle) {
+TEST_P(urContextCreateWithNativeHandleTest, SuccessWithProperties) {
     ur_native_handle_t native_context = 0;
     {
         UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(
@@ -41,21 +40,9 @@ TEST_P(urContextCreateWithNativeHandleTest, SuccessWithOwnedNativeHandle) {
     }
 
     ur_context_handle_t ctx = nullptr;
-    ur_context_native_properties_t props{
-        UR_STRUCTURE_TYPE_CONTEXT_NATIVE_PROPERTIES, nullptr, true};
-    UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(urContextCreateWithNativeHandle(
-        native_context, adapter, 1, &device, &props, &ctx));
-    ASSERT_NE(ctx, nullptr);
-}
-
-TEST_P(urContextCreateWithNativeHandleTest, SuccessWithUnOwnedNativeHandle) {
-    ur_native_handle_t native_context = 0;
-    {
-        UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(
-            urContextGetNativeHandle(context, &native_context));
-    }
-
-    ur_context_handle_t ctx = nullptr;
+    // We can't pass isNativeHandleOwned = true in the generic tests since
+    // we always get the native handle from a UR object, and transferring
+    // ownership from one UR object to another isn't allowed.
     ur_context_native_properties_t props{
         UR_STRUCTURE_TYPE_CONTEXT_NATIVE_PROPERTIES, nullptr, false};
     UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(urContextCreateWithNativeHandle(

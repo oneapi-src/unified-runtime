@@ -29,7 +29,7 @@ TEST_F(urDeviceCreateWithNativeHandleTest, Success) {
     }
 }
 
-TEST_F(urDeviceCreateWithNativeHandleTest, SuccessWithOwnedNativeHandle) {
+TEST_F(urDeviceCreateWithNativeHandleTest, SuccessWithProperties) {
     for (auto device : devices) {
         ur_native_handle_t native_handle = 0;
         {
@@ -38,23 +38,9 @@ TEST_F(urDeviceCreateWithNativeHandleTest, SuccessWithOwnedNativeHandle) {
         }
 
         ur_device_handle_t dev = nullptr;
-        ur_device_native_properties_t props{
-            UR_STRUCTURE_TYPE_DEVICE_NATIVE_PROPERTIES, nullptr, true};
-        UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(urDeviceCreateWithNativeHandle(
-            native_handle, adapter, &props, &dev));
-        ASSERT_NE(dev, nullptr);
-    }
-}
-
-TEST_F(urDeviceCreateWithNativeHandleTest, SuccessWithUnOwnedNativeHandle) {
-    for (auto device : devices) {
-        ur_native_handle_t native_handle = 0;
-        {
-            UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(
-                urDeviceGetNativeHandle(device, &native_handle));
-        }
-
-        ur_device_handle_t dev = nullptr;
+        // We can't pass isNativeHandleOwned = true in the generic tests since
+        // we always get the native handle from a UR object, and transferring
+        // ownership from one UR object to another isn't allowed.
         ur_device_native_properties_t props{
             UR_STRUCTURE_TYPE_DEVICE_NATIVE_PROPERTIES, nullptr, false};
         UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(urDeviceCreateWithNativeHandle(

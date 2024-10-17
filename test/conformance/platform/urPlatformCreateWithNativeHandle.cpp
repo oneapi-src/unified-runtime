@@ -30,7 +30,7 @@ TEST_F(urPlatformCreateWithNativeHandleTest, Success) {
     }
 }
 
-TEST_F(urPlatformCreateWithNativeHandleTest, SuccessWithOwnedNativeHandle) {
+TEST_F(urPlatformCreateWithNativeHandleTest, SuccessWithProperties) {
     for (auto platform : platforms) {
         ur_native_handle_t native_handle = 0;
         {
@@ -38,35 +38,9 @@ TEST_F(urPlatformCreateWithNativeHandleTest, SuccessWithOwnedNativeHandle) {
                 urPlatformGetNativeHandle(platform, &native_handle));
         }
 
-        // We cannot assume anything about a native_handle, not even if it's
-        // `nullptr` since this could be a valid representation within a backend.
-        // We can however convert the native_handle back into a unified-runtime
-        // handle and perform some query on it to verify that it works.
-        ur_platform_native_properties_t props = {
-            UR_STRUCTURE_TYPE_PLATFORM_NATIVE_PROPERTIES, nullptr, true};
-        ur_platform_handle_t plat = nullptr;
-        UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(urPlatformCreateWithNativeHandle(
-            native_handle, adapters[0], &props, &plat));
-        ASSERT_NE(plat, nullptr);
-
-        std::string input_platform_name = uur::GetPlatformName(platform);
-        std::string created_platform_name = uur::GetPlatformName(plat);
-        ASSERT_EQ(input_platform_name, created_platform_name);
-    }
-}
-
-TEST_F(urPlatformCreateWithNativeHandleTest, SuccessWithUnOwnedNativeHandle) {
-    for (auto platform : platforms) {
-        ur_native_handle_t native_handle = 0;
-        {
-            UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(
-                urPlatformGetNativeHandle(platform, &native_handle));
-        }
-
-        // We cannot assume anything about a native_handle, not even if it's
-        // `nullptr` since this could be a valid representation within a backend.
-        // We can however convert the native_handle back into a unified-runtime
-        // handle and perform some query on it to verify that it works.
+        // We can't pass isNativeHandleOwned = true in the generic tests since
+        // we always get the native handle from a UR object, and transferring
+        // ownership from one UR object to another isn't allowed.
         ur_platform_native_properties_t props = {
             UR_STRUCTURE_TYPE_PLATFORM_NATIVE_PROPERTIES, nullptr, false};
         ur_platform_handle_t plat = nullptr;
