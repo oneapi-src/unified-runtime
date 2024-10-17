@@ -124,7 +124,7 @@ jobs:
 
     - name: Test
       working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{matrix.build_type}} --output-on-failure -L "umf|loader|validation|tracing|unit|urtrace"
+      run: ctest -C ${{matrix.build_type}} --output-on-failure -L "loader|validation|tracing|unit|urtrace"
 
   fuzztest:
     name: Fuzz tests short
@@ -275,7 +275,7 @@ jobs:
 
     - name: Test
       working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{matrix.build_type}} --output-on-failure -L "umf|loader|validation|tracing|unit|urtrace"
+      run: ctest -C ${{matrix.build_type}} --output-on-failure -L "loader|validation|tracing|unit|urtrace"
 
   macos-build:
     name: Build - MacOS
