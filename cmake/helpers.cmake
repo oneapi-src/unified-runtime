@@ -59,6 +59,7 @@ macro(add_sanitizer_flag flag)
 endmacro()
 
 check_cxx_compiler_flag("-fcf-protection=full" CXX_HAS_FCF_PROTECTION_FULL)
+check_cxx_compiler_flag("-fstack-clash-protection" CXX_HAS_FSTACK_CLASH_PROTECTION)
 
 function(add_ur_target_compile_options name)
     if(NOT MSVC)
@@ -81,9 +82,7 @@ function(add_ur_target_compile_options name)
             # -flto
             # $<$<CXX_COMPILER_ID:Clang,AppleClang>:-fsanitize=cfi>
             $<$<BOOL:${CXX_HAS_FCF_PROTECTION_FULL}>:-fcf-protection=full>
-            # -fstack-clash-protection is not supported in apple clang or GCC < 8
-            $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,8>>:-fstack-clash-protection>
-            $<$<CXX_COMPILER_ID:Clang>:-fstack-clash-protection>
+            $<$<BOOL:${CXX_HAS_FSTACK_CLASH_PROTECTION}>:-fstack-clash-protection>
 
             # Colored output
             $<$<CXX_COMPILER_ID:GNU>:-fdiagnostics-color=always>
