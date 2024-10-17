@@ -331,6 +331,30 @@ def _mako_print_hpp(path, namespace, tags, version, revision, specs, meta):
         meta=meta)
 
 """
+    generates c/c++ files from the specification documents
+"""
+def _mako_exception_sanitizer_layer_cpp(path, namespace, tags, version, specs, meta):
+    dstpath = os.path.join(path, "exception_sanitizer")
+    os.makedirs(dstpath, exist_ok=True)
+
+    template = "exceptionddi.cpp.mako"
+    fin = os.path.join(templates_dir, template)
+
+    name = "%s_exceptionddi"%(namespace)
+    filename = "%s.cpp"%(name)
+    fout = os.path.join(dstpath, filename)
+
+    print("Generating %s..."%fout)
+    return util.makoWrite(
+        fin, fout,
+        name=name,
+        ver=version,
+        namespace=namespace,
+        tags=tags,
+        specs=specs,
+        meta=meta)
+
+"""
 Entry-point:
     generates tools code
 """
@@ -466,6 +490,9 @@ def generate_layers(path, section, namespace, tags, version, specs, meta):
 
     loc = 0
     loc += _mako_tracing_layer_cpp(layer_dstpath, namespace, tags, version, specs, meta)
+    print("TRACING Generated %s lines of code.\n"%loc)
+
+    loc += _mako_exception_sanitizer_layer_cpp(layer_dstpath, namespace, tags, version, specs, meta)
     print("TRACING Generated %s lines of code.\n"%loc)
 
 """
