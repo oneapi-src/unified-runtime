@@ -26,6 +26,9 @@
 #if UR_ENABLE_SANITIZER
 #include "sanitizer/ur_sanitizer_layer.hpp"
 #endif
+#if UR_ENABLE_EXCEPTION_SANITIZER
+#include "exception-sanitizer/ur_exception_sanitizer_layer.hpp"
+#endif
 
 #include <atomic>
 #include <mutex>
@@ -84,6 +87,10 @@ class __urdlllocal context_t : public AtomicSingleton<context_t> {
         {ur_tracing_layer::getContext(),
          ur_tracing_layer::context_t::forceDelete},
 #endif
+#if UR_ENABLE_EXCEPTION_SANITIZER
+        {ur_exception_sanitizer_layer::getContext(),
+         ur_exception_sanitizer_layer::forceDelete},
+#endif
     };
 
     static const std::string availableLayers() {
@@ -94,6 +101,9 @@ class __urdlllocal context_t : public AtomicSingleton<context_t> {
 #endif
 #if UR_ENABLE_SANITIZER
             ur_sanitizer_layer::context_t::getNames(),
+#endif
+#if UR_ENABLE_EXCEPTION_SANITIZER
+            ur_exception_sanitizer_layer::context_t::getNames(),
 #endif
         };
         std::string s;

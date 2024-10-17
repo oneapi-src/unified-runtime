@@ -195,6 +195,15 @@ if(UR_ENABLE_SANITIZER)
         endif()
     endif()
 
+    if(UR_ENABLE_EXCEPTION_SANITIZER)
+        target_sources(ur_loader
+            PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/layers/exception_sanitizer/ur_exception_sanitizer_layer.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/layers/exception_sanitizer/ur_exception_sanitizer_layer.hpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/layers/exception_sanitizer/ur_exceptionddi.cpp
+        )
+    endif()
+
     target_include_directories(ur_loader PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer"
         "${CMAKE_CURRENT_SOURCE_DIR}/../"
