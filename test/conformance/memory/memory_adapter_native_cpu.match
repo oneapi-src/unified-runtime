@@ -232,3 +232,5 @@ urMemImageCreateTestWithImageFormatParam.Success/SYCL_NATIVE_CPU___SYCL_Native_C
 urMemImageCreateTestWithImageFormatParam.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}__UR_IMAGE_CHANNEL_ORDER_SRGBA__UR_IMAGE_CHANNEL_TYPE_FLOAT
 urMemReleaseTest.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 urMemRetainTest.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
+urMemReleaseTest.CheckReferenceCount/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
+urMemRetainTest.CheckReferenceCount/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
