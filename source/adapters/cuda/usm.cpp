@@ -442,8 +442,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMPoolCreate(
                    ///< ::ur_usm_pool_limits_desc_t
     ur_usm_pool_handle_t *Pool ///< [out] pointer to USM memory pool
 ) {
-  // Without pool tracking we can't free pool allocations.
-#ifdef UMF_ENABLE_POOL_TRACKING
   if (PoolDesc->flags & UR_USM_POOL_FLAG_ZERO_INITIALIZE_BLOCK) {
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
@@ -454,12 +452,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMPoolCreate(
     return Ex.getError();
   }
   return UR_RESULT_SUCCESS;
-#else
-  std::ignore = Context;
-  std::ignore = PoolDesc;
-  std::ignore = Pool;
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-#endif
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urUSMPoolRetain(
