@@ -32,10 +32,7 @@ jobs:
       run: pip install -r third_party/requirements.txt
 
     - name: Download DPC++
-      run: |
-        wget -O ${{github.workspace}}/dpcpp_compiler.tar.gz https://github.com/intel/llvm/releases/download/nightly-2024-01-29/sycl_linux.tar.gz
-        mkdir dpcpp_compiler
-        tar -xvf ${{github.workspace}}/dpcpp_compiler.tar.gz -C dpcpp_compiler
+      uses: ./.github/actions/fetch-dpcpp
 
     - name: Configure CMake
       shell: bash -el {0}

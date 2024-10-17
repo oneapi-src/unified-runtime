@@ -72,13 +72,12 @@ jobs:
         sudo make install
         cd ..
 
+    - name: Install ncurses
+      run: sudo apt install libncurses5
+
     - name: Download DPC++
       if: matrix.os == 'ubuntu-22.04'
-      run: |
-        sudo apt install libncurses5
-        wget -O ${{github.workspace}}/dpcpp_compiler.tar.gz https://github.com/intel/llvm/releases/download/nightly-2024-09-27/sycl_linux.tar.gz
-        mkdir -p ${{github.workspace}}/dpcpp_compiler
-        tar -xvf ${{github.workspace}}/dpcpp_compiler.tar.gz -C ${{github.workspace}}/dpcpp_compiler
+      uses: ./.github/actions/fetch-dpcpp
 
     - name: Configure CMake
       if: matrix.os == 'ubuntu-22.04'
