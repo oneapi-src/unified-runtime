@@ -1,4 +1,4 @@
-{{NONDETERMINISTIC}}
+# Note: This file is only for use with cts_exe.py
 {{OPT}}urEnqueueDeviceGetGlobalVariableReadTest.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 {{OPT}}urEnqueueDeviceGetGlobalVariableReadTest.InvalidNullHandleQueue/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 {{OPT}}urEnqueueDeviceGetGlobalVariableReadTest.InvalidNullHandleProgram/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
@@ -376,4 +376,6 @@ urEnqueueEventsWaitWithBarrierOrderingTest.SuccessNonEventDependencies/SYCL_NATI
 {{OPT}}urEnqueueWriteHostPipeTest.InvalidNullPointerPipeSymbol/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 {{OPT}}urEnqueueWriteHostPipeTest.InvalidNullPointerBuffer/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 {{OPT}}urEnqueueWriteHostPipeTest.InvalidEventWaitList/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
-{{OPT}}{{Segmentation fault|Aborted}}
+urEnqueueKernelLaunchIncrementTest.Success/*
+urEnqueueKernelLaunchIncrementMultiDeviceTest.Success/*
+urEnqueueKernelLaunchIncrementMultiDeviceMultiThreadTest.Success/*
