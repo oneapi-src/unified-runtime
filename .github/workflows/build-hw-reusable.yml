@@ -52,7 +52,7 @@ jobs:
           static_adapter: "${{inputs.static_loader}}"
         }]
         build_type: [Debug, Release]
-        compiler: [{c: gcc, cxx: g++}, {c: clang, cxx: clang++}]
+        compiler: [{c: clang, cxx: clang++}]
         # TODO: The latest L0 loader segfaults when built with clang.
         exclude:
          - adapter: {name: L0, platform: ""}
@@ -72,56 +72,26 @@ jobs:
     steps:
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
-    - name: Install pip packages
-      run: pip install -r third_party/requirements.txt
-
-    - name: Download DPC++
+    - name: Target Build
       run: |
-        wget -O ${{github.workspace}}/dpcpp_compiler.tar.gz https://github.com/intel/llvm/releases/download/nightly-2024-01-29/sycl_linux.tar.gz
-        mkdir dpcpp_compiler
-        tar -xvf ${{github.workspace}}/dpcpp_compiler.tar.gz -C dpcpp_compiler
+        BUILDDIR=build2
+        mkdir build2
+        if [ "$(pwd)" = /home/test-user/actions-runner/_work/unified-runtime/unified-runtime ]; then
+          mkdir shared
+          mv testfile.cpp source include build2 shared
+          cd shared
+        fi;
+        /usr/bin/clang++ -DUR_ENABLE_SANITIZER -DUR_ENABLE_TRACING -DUR_VALIDATION_LAYER_SUPPORTED_VERSION="0" -DUR_VERSION="0" -D_FORTIFY_SOURCE=2 -Isource/common -Iinclude -g -Wall -Wpedantic -Wempty-body -Wformat -Wformat-security -Wunused-parameter -fPIC -fstack-protector-strong -fvisibility=hidden -flto -fsanitize=cfi -fno-sanitize=cfi-icall -fdebug-default-version=4 -fcf-protection=full -fstack-clash-protection -fcolor-diagnostics -Werror -Wextra -std=gnu++17 -MD -o ${BUILDDIR}/testfile.cpp.o -c testfile.cpp
+        /usr/bin/clang++ -DUR_ENABLE_SANITIZER -DUR_ENABLE_TRACING -DUR_VALIDATION_LAYER_SUPPORTED_VERSION="0" -DUR_VERSION="0" -D_FORTIFY_SOURCE=2 -Isource/common -Iinclude -g -Wall -Wpedantic -Wempty-body -Wformat -Wformat-security -Wunused-parameter -fPIC -fstack-protector-strong -fvisibility=hidden -flto -fsanitize=cfi -fno-sanitize=cfi-icall -fdebug-default-version=4 -fcf-protection=full -fstack-clash-protection -fcolor-diagnostics -Werror -Wextra -std=gnu++17 -MD -o ${BUILDDIR}/ur_util.cpp.o -c source/common/ur_util.cpp
+        /usr/bin/ar qc ${BUILDDIR}/libur_common.a ${BUILDDIR}/ur_util.cpp.o ${BUILDDIR}/testfile.cpp.o | tee ${BUILDDIR}/arlog
 
-    - name: Configure CMake
-      # CFI sanitization seems to fail on our CUDA nodes
-      # https://github.com/oneapi-src/unified-runtime/issues/2309
-      run: >
-        cmake
-        -B${{github.workspace}}/build
-        -DCMAKE_C_COMPILER=${{matrix.compiler.c}}
-        -DCMAKE_CXX_COMPILER=${{matrix.compiler.cxx}}
-        -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
-        -DUR_ENABLE_TRACING=ON
-        -DUR_DEVELOPER_MODE=ON
-        -DUR_BUILD_TESTS=ON
-        -DUR_BUILD_ADAPTER_${{matrix.adapter.name}}=ON
-        -DUR_CONFORMANCE_TEST_LOADER=${{ matrix.adapter.other_name != '' && 'ON' || 'OFF' }}
-        ${{ matrix.adapter.other_name != '' && format('-DUR_BUILD_ADAPTER_{0}=ON', matrix.adapter.other_name) || '' }}
-        -DUR_USE_CFI=${{ matrix.adapter.name == 'CUDA' && 'OFF' || 'ON' }}
-        -DUR_STATIC_LOADER=${{matrix.adapter.static_Loader}}
-        -DUR_STATIC_ADAPTER_${{matrix.adapter.name}}=${{matrix.adapter.static_adapter}}
-        -DUR_DPCXX=${{github.workspace}}/dpcpp_compiler/bin/clang++
-        -DUR_SYCL_LIBRARY_DIR=${{github.workspace}}/dpcpp_compiler/lib
-        -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
-        ${{ matrix.adapter.name == 'HIP' && '-DUR_CONFORMANCE_AMD_ARCH=gfx1030' || '' }}
-        ${{ matrix.adapter.name == 'HIP' && '-DUR_HIP_PLATFORM=AMD' || '' }}
+        md5sum ${BUILDDIR}/*
+        echo "testfile: "
+        base64 ${BUILDDIR}/testfile.cpp.o
+        echo "ur_util: "
+        base64 ${BUILDDIR}/ur_util.cpp.o
 
-    - name: Build
-      # This is so that device binaries can find the sycl runtime library
-      run: cmake --build ${{github.workspace}}/build -j $(nproc)
-
-    - name: Install
-      # This is to check that install command does not fail
-      run: cmake --install ${{github.workspace}}/build
-
-    - name: Test adapter specific
-      working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{matrix.build_type}} --output-on-failure -L "adapter-specific" --timeout 180
-      # Don't run adapter specific tests when building multiple adapters
-      if: ${{ matrix.adapter.other_name == '' }}
-
-    - name: Test adapters
-      working-directory: ${{github.workspace}}/build
-      run: env UR_CTS_ADAPTER_PLATFORM="${{matrix.adapter.platform}}" ctest -C ${{matrix.build_type}} --output-on-failure -L "conformance" --timeout 180
+        test ! -s ${BUILDDIR}/arlog
 
     - name: Get information about platform
       if: ${{ always() }}

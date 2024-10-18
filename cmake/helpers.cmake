@@ -91,7 +91,7 @@ function(add_ur_target_compile_options name)
             -fvisibility=hidden
             # cfi-icall requires called functions in shared libraries to also be built with cfi-icall, which we can't
             # guarantee. -fsanitize=cfi depends on -flto
-            $<$<BOOL:${CXX_HAS_CFI_SANITIZE}>:-flto -fsanitize=cfi -fno-sanitize=cfi-icall>
+            $<$<BOOL:${CXX_HAS_CFI_SANITIZE}>:-flto -fsanitize=cfi -fno-sanitize=cfi-icall -fdebug-default-version=4>
             $<$<BOOL:${CXX_HAS_FCF_PROTECTION_FULL}>:-fcf-protection=full>
             $<$<BOOL:${CXX_HAS_FSTACK_CLASH_PROTECTION}>:-fstack-clash-protection>
 
@@ -129,7 +129,7 @@ function(add_ur_target_link_options name)
     if(NOT MSVC)
         if (NOT APPLE)
             target_link_options(${name} PRIVATE
-                $<$<BOOL:${CXX_HAS_CFI_SANITIZE}>:-flto -fsanitize=cfi -fno-sanitize=cfi-icall>
+                $<$<BOOL:${CXX_HAS_CFI_SANITIZE}>:-v -flto -fsanitize=cfi -fno-sanitize=cfi-icall -fdebug-default-version=4>
                 "LINKER:-z,relro,-z,now,-z,noexecstack"
             )
             if (UR_DEVELOPER_MODE)

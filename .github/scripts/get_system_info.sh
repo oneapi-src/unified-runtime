@@ -27,60 +27,30 @@ function system_info {
 	echo "**********system_info**********"
 	cat /etc/os-release | grep -oP "PRETTY_NAME=\K.*"
 	cat /proc/version
-	echo "**********SYCL-LS**********"
-	source /opt/intel/oneapi/setvars.sh
-	sycl-ls
-	echo "**********VGA**********"
-	lspci | grep VGA
-	echo "**********CUDA Version**********"
-	if command -v nvidia-smi &> /dev/null; then
-		nvidia-smi
-	else
-		echo "CUDA not installed"
-	fi
-	echo "**********L0 Version**********"
-	check_L0_version
-	echo "**********ROCm Version**********"
-	if command -v rocminfo &> /dev/null; then
-		rocminfo
-	else
-		echo "ROCm not installed"
-	fi
-	echo "**********/proc/cmdline**********"
-	cat /proc/cmdline
-	echo "**********CPU info**********"
-	lscpu
-	echo "**********/proc/meminfo**********"
-	cat /proc/meminfo
-	echo "**********build/bin/urinfo**********"
-	$(dirname "$(readlink -f "$0")")/../../build/bin/urinfo --no-linear-ids --verbose || true
-	echo "******OpenCL*******"
-	# The driver version of OpenCL Graphics is the compute-runtime version
-	clinfo || echo "OpenCL not installed"
-	echo "**********list-environment**********"
-	echo "PATH=$PATH"
-	echo
-	echo "CPATH=$CPATH"
-	echo
-	echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
-	echo
-	echo "LIBRARY_PATH=$LIBRARY_PATH"
-	echo
-	echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH"
-	echo
-	echo "******list-build-system-versions*******"
-	gcc --version 2>/dev/null || true
-	echo
-	clang --version 2>/dev/null || true
-	echo
-	make --version 2>/dev/null || true
-	echo "**********/proc/modules**********"
-	cat /proc/modules
-	echo "***************installed-packages***************"
-	# Instructions below will return some minor errors, as they are dependent on the Linux distribution.
-	zypper se --installed-only 2>/dev/null || true
-	apt list --installed 2>/dev/null || true
-	yum list installed 2>/dev/null || true
+	`which clang` --version
+	md5sum `which clang`
+	`which gold` --version
+	md5sum `which gold`
+	`which ld` --version
+	md5sum /usr/bin/ar
+	/usr/bin/ar --version
+	echo "Archiving:"
+	md5sum build/CMakeFiles/ur_common.dir/ur_util.cpp.o build/CMakeFiles/ur_common.dir/ur_util.cpp.o
+	
+	echo "LibURCommon:"
+	md5sum build/lib/libur_common.a
+	nm build/lib/libur_common.a
+	echo "Deps:"
+	ldd /usr/lib/llvm-14/lib/LLVMgold.so
+	echo "Hashes:"
+	ldd /usr/lib/llvm-14/lib/LLVMgold.so | cut -f3 -d " " | xargs md5sum
+	echo "Deps of deps:"
+	ldd /usr/lib/llvm-14/lib/LLVMgold.so | cut -f3 -d " " | xargs ldd
+	#echo "**********cmake options**********"
+	#cat build/CMakeCache.txt
+	#echo "**********Binaries**********"
+	#find build $(dirname "$(readlink -f "$0")")/../../build/bin -type f | xargs md5sum | sort
+	#find build $(dirname "$(readlink -f "$0")")/../../build/lib -type f | xargs md5sum | sort
 }
 
 # Call the function above to print system info.
