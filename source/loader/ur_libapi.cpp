@@ -31,7 +31,7 @@ ur_result_t UR_APICALL urLoaderConfigCreate(
     ) try {
     return ur_lib::urLoaderConfigCreate(phLoaderConfig);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -56,7 +56,7 @@ ur_result_t UR_APICALL urLoaderConfigRetain(
     ) try {
     return ur_lib::urLoaderConfigRetain(hLoaderConfig);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -81,7 +81,7 @@ ur_result_t UR_APICALL urLoaderConfigRelease(
     ) try {
     return ur_lib::urLoaderConfigRelease(hLoaderConfig);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -129,7 +129,7 @@ ur_result_t UR_APICALL urLoaderConfigGetInfo(
     return ur_lib::urLoaderConfigGetInfo(hLoaderConfig, propName, propSize,
                                          pPropValue, pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -155,7 +155,7 @@ ur_result_t UR_APICALL urLoaderConfigEnableLayer(
     ) try {
     return ur_lib::urLoaderConfigEnableLayer(hLoaderConfig, pLayerName);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -189,7 +189,7 @@ ur_result_t UR_APICALL urLoaderConfigSetCodeLocationCallback(
     return ur_lib::urLoaderConfigSetCodeLocationCallback(hLoaderConfig,
                                                          pfnCodeloc, pUserData);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -217,7 +217,7 @@ ur_result_t UR_APICALL urLoaderConfigSetMockingEnabled(
     ) try {
     return ur_lib::urLoaderConfigSetMockingEnabled(hLoaderConfig, enable);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -253,7 +253,7 @@ ur_result_t UR_APICALL urLoaderInit(
     ) try {
     return ur_lib::urLoaderInit(device_flags, hLoaderConfig);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -268,7 +268,7 @@ ur_result_t UR_APICALL urLoaderInit(
 ur_result_t UR_APICALL urLoaderTearDown(void) try {
     return ur_lib::urLoaderTearDown();
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -313,7 +313,7 @@ ur_result_t UR_APICALL urAdapterGet(
 
     return pfnAdapterGet(NumEntries, phAdapters, pNumAdapters);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -343,7 +343,7 @@ ur_result_t UR_APICALL urAdapterRelease(
 
     return pfnAdapterRelease(hAdapter);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -370,7 +370,7 @@ ur_result_t UR_APICALL urAdapterRetain(
 
     return pfnAdapterRetain(hAdapter);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -433,7 +433,7 @@ ur_result_t UR_APICALL urAdapterGetLastError(
 
     return pfnAdapterGetLastError(hAdapter, ppMessage, pError);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -484,7 +484,7 @@ ur_result_t UR_APICALL urAdapterGetInfo(
     return pfnAdapterGetInfo(hAdapter, propName, propSize, pPropValue,
                              pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -533,7 +533,7 @@ ur_result_t UR_APICALL urPlatformGet(
     return pfnGet(phAdapters, NumAdapters, NumEntries, phPlatforms,
                   pNumPlatforms);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -587,7 +587,7 @@ ur_result_t UR_APICALL urPlatformGetInfo(
 
     return pfnGetInfo(hPlatform, propName, propSize, pPropValue, pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -618,7 +618,7 @@ ur_result_t UR_APICALL urPlatformGetApiVersion(
 
     return pfnGetApiVersion(hPlatform, pVersion);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -657,7 +657,7 @@ ur_result_t UR_APICALL urPlatformGetNativeHandle(
 
     return pfnGetNativeHandle(hPlatform, phNativePlatform);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -699,7 +699,7 @@ ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
     return pfnCreateWithNativeHandle(hNativePlatform, hAdapter, pProperties,
                                      phPlatform);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -743,7 +743,7 @@ ur_result_t UR_APICALL urPlatformGetBackendOption(
 
     return pfnGetBackendOption(hPlatform, pFrontendOption, ppPlatformOption);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -800,7 +800,7 @@ ur_result_t UR_APICALL urDeviceGet(
 
     return pfnGet(hPlatform, DeviceType, NumEntries, phDevices, pNumDevices);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -846,7 +846,7 @@ ur_result_t UR_APICALL urDeviceGetSelected(
     return ur_lib::urDeviceGetSelected(hPlatform, DeviceType, NumEntries,
                                        phDevices, pNumDevices);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -901,7 +901,7 @@ ur_result_t UR_APICALL urDeviceGetInfo(
 
     return pfnGetInfo(hDevice, propName, propSize, pPropValue, pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -941,7 +941,7 @@ ur_result_t UR_APICALL urDeviceRetain(
 
     return pfnRetain(hDevice);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -978,7 +978,7 @@ ur_result_t UR_APICALL urDeviceRelease(
 
     return pfnRelease(hDevice);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1030,7 +1030,7 @@ ur_result_t UR_APICALL urDevicePartition(
     return pfnPartition(hDevice, pProperties, NumDevices, phSubDevices,
                         pNumDevicesRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1079,7 +1079,7 @@ ur_result_t UR_APICALL urDeviceSelectBinary(
 
     return pfnSelectBinary(hDevice, pBinaries, NumBinaries, pSelectedBinary);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1118,7 +1118,7 @@ ur_result_t UR_APICALL urDeviceGetNativeHandle(
 
     return pfnGetNativeHandle(hDevice, phNativeDevice);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1160,7 +1160,7 @@ ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
     return pfnCreateWithNativeHandle(hNativeDevice, hAdapter, pProperties,
                                      phDevice);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1199,7 +1199,7 @@ ur_result_t UR_APICALL urDeviceGetGlobalTimestamps(
 
     return pfnGetGlobalTimestamps(hDevice, pDeviceTimestamp, pHostTimestamp);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1248,7 +1248,7 @@ ur_result_t UR_APICALL urContextCreate(
 
     return pfnCreate(DeviceCount, phDevices, pProperties, phContext);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1284,7 +1284,7 @@ ur_result_t UR_APICALL urContextRetain(
 
     return pfnRetain(hContext);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1317,7 +1317,7 @@ ur_result_t UR_APICALL urContextRelease(
 
     return pfnRelease(hContext);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1373,7 +1373,7 @@ ur_result_t UR_APICALL urContextGetInfo(
 
     return pfnGetInfo(hContext, propName, propSize, pPropValue, pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1412,7 +1412,7 @@ ur_result_t UR_APICALL urContextGetNativeHandle(
 
     return pfnGetNativeHandle(hContext, phNativeContext);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1458,7 +1458,7 @@ ur_result_t UR_APICALL urContextCreateWithNativeHandle(
     return pfnCreateWithNativeHandle(hNativeContext, hAdapter, numDevices,
                                      phDevices, pProperties, phContext);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1498,7 +1498,7 @@ ur_result_t UR_APICALL urContextSetExtendedDeleter(
 
     return pfnSetExtendedDeleter(hContext, pfnDeleter, pUserData);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1569,7 +1569,7 @@ ur_result_t UR_APICALL urMemImageCreate(
     return pfnImageCreate(hContext, flags, pImageFormat, pImageDesc, pHost,
                           phMem);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1620,7 +1620,7 @@ ur_result_t UR_APICALL urMemBufferCreate(
 
     return pfnBufferCreate(hContext, flags, size, pProperties, phBuffer);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1656,7 +1656,7 @@ ur_result_t UR_APICALL urMemRetain(
 
     return pfnRetain(hMem);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1687,7 +1687,7 @@ ur_result_t UR_APICALL urMemRelease(
 
     return pfnRelease(hMem);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1737,7 +1737,7 @@ ur_result_t UR_APICALL urMemBufferPartition(
 
     return pfnBufferPartition(hBuffer, flags, bufferCreateType, pRegion, phMem);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1782,7 +1782,7 @@ ur_result_t UR_APICALL urMemGetNativeHandle(
 
     return pfnGetNativeHandle(hMem, hDevice, phNativeMem);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1822,7 +1822,7 @@ ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
     return pfnBufferCreateWithNativeHandle(hNativeMem, hContext, pProperties,
                                            phMem);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1867,7 +1867,7 @@ ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
     return pfnImageCreateWithNativeHandle(hNativeMem, hContext, pImageFormat,
                                           pImageDesc, pProperties, phMem);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1922,7 +1922,7 @@ ur_result_t UR_APICALL urMemGetInfo(
 
     return pfnGetInfo(hMemory, propName, propSize, pPropValue, pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1977,7 +1977,7 @@ ur_result_t UR_APICALL urMemImageGetInfo(
     return pfnImageGetInfo(hMemory, propName, propSize, pPropValue,
                            pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2024,7 +2024,7 @@ ur_result_t UR_APICALL urSamplerCreate(
 
     return pfnCreate(hContext, pDesc, phSampler);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2056,7 +2056,7 @@ ur_result_t UR_APICALL urSamplerRetain(
 
     return pfnRetain(hSampler);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2088,7 +2088,7 @@ ur_result_t UR_APICALL urSamplerRelease(
 
     return pfnRelease(hSampler);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2136,7 +2136,7 @@ ur_result_t UR_APICALL urSamplerGetInfo(
 
     return pfnGetInfo(hSampler, propName, propSize, pPropValue, pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2175,7 +2175,7 @@ ur_result_t UR_APICALL urSamplerGetNativeHandle(
 
     return pfnGetNativeHandle(hSampler, phNativeSampler);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2216,7 +2216,7 @@ ur_result_t UR_APICALL urSamplerCreateWithNativeHandle(
     return pfnCreateWithNativeHandle(hNativeSampler, hContext, pProperties,
                                      phSampler);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2273,7 +2273,7 @@ ur_result_t UR_APICALL urUSMHostAlloc(
 
     return pfnHostAlloc(hContext, pUSMDesc, pool, size, ppMem);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2332,7 +2332,7 @@ ur_result_t UR_APICALL urUSMDeviceAlloc(
 
     return pfnDeviceAlloc(hContext, hDevice, pUSMDesc, pool, size, ppMem);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2392,7 +2392,7 @@ ur_result_t UR_APICALL urUSMSharedAlloc(
 
     return pfnSharedAlloc(hContext, hDevice, pUSMDesc, pool, size, ppMem);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2420,7 +2420,7 @@ ur_result_t UR_APICALL urUSMFree(
 
     return pfnFree(hContext, pMem);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2463,7 +2463,7 @@ ur_result_t UR_APICALL urUSMGetMemAllocInfo(
     return pfnGetMemAllocInfo(hContext, pMem, propName, propSize, pPropValue,
                               pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2502,7 +2502,7 @@ ur_result_t UR_APICALL urUSMPoolCreate(
 
     return pfnPoolCreate(hContext, pPoolDesc, ppPool);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2525,7 +2525,7 @@ ur_result_t UR_APICALL urUSMPoolRetain(
 
     return pfnPoolRetain(pPool);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2555,7 +2555,7 @@ ur_result_t UR_APICALL urUSMPoolRelease(
 
     return pfnPoolRelease(pPool);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2597,7 +2597,7 @@ ur_result_t UR_APICALL urUSMPoolGetInfo(
 
     return pfnPoolGetInfo(hPool, propName, propSize, pPropValue, pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2651,7 +2651,7 @@ ur_result_t UR_APICALL urVirtualMemGranularityGetInfo(
     return pfnGranularityGetInfo(hContext, hDevice, propName, propSize,
                                  pPropValue, pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2685,7 +2685,7 @@ ur_result_t UR_APICALL urVirtualMemReserve(
 
     return pfnReserve(hContext, pStart, size, ppStart);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2713,7 +2713,7 @@ ur_result_t UR_APICALL urVirtualMemFree(
 
     return pfnFree(hContext, pStart, size);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2750,7 +2750,7 @@ ur_result_t UR_APICALL urVirtualMemMap(
 
     return pfnMap(hContext, pStart, size, hPhysicalMem, offset, flags);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2782,7 +2782,7 @@ ur_result_t UR_APICALL urVirtualMemUnmap(
 
     return pfnUnmap(hContext, pStart, size);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2815,7 +2815,7 @@ ur_result_t UR_APICALL urVirtualMemSetAccess(
 
     return pfnSetAccess(hContext, pStart, size, flags);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2856,7 +2856,7 @@ ur_result_t UR_APICALL urVirtualMemGetInfo(
     return pfnGetInfo(hContext, pStart, size, propName, propSize, pPropValue,
                       pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2894,7 +2894,7 @@ ur_result_t UR_APICALL urPhysicalMemCreate(
 
     return pfnCreate(hContext, hDevice, size, pProperties, phPhysicalMem);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2918,7 +2918,7 @@ ur_result_t UR_APICALL urPhysicalMemRetain(
 
     return pfnRetain(hPhysicalMem);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2942,7 +2942,7 @@ ur_result_t UR_APICALL urPhysicalMemRelease(
 
     return pfnRelease(hPhysicalMem);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2992,7 +2992,7 @@ ur_result_t UR_APICALL urProgramCreateWithIL(
 
     return pfnCreateWithIL(hContext, pIL, length, pProperties, phProgram);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3048,7 +3048,7 @@ ur_result_t UR_APICALL urProgramCreateWithBinary(
     return pfnCreateWithBinary(hContext, hDevice, size, pBinary, pProperties,
                                phProgram);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3090,7 +3090,7 @@ ur_result_t UR_APICALL urProgramBuild(
 
     return pfnBuild(hContext, hProgram, pOptions);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3132,7 +3132,7 @@ ur_result_t UR_APICALL urProgramCompile(
 
     return pfnCompile(hContext, hProgram, pOptions);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3190,7 +3190,7 @@ ur_result_t UR_APICALL urProgramLink(
 
     return pfnLink(hContext, count, phPrograms, pOptions, phProgram);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3224,7 +3224,7 @@ ur_result_t UR_APICALL urProgramRetain(
 
     return pfnRetain(hProgram);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3258,7 +3258,7 @@ ur_result_t UR_APICALL urProgramRelease(
 
     return pfnRelease(hProgram);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3313,7 +3313,7 @@ ur_result_t UR_APICALL urProgramGetFunctionPointer(
     return pfnGetFunctionPointer(hDevice, hProgram, pFunctionName,
                                  ppFunctionPointer);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3365,7 +3365,7 @@ ur_result_t UR_APICALL urProgramGetGlobalVariablePointer(
                                        pGlobalVariableSizeRet,
                                        ppGlobalVariablePointerRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3416,7 +3416,7 @@ ur_result_t UR_APICALL urProgramGetInfo(
 
     return pfnGetInfo(hProgram, propName, propSize, pPropValue, pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3461,7 +3461,7 @@ ur_result_t UR_APICALL urProgramGetBuildInfo(
     return pfnGetBuildInfo(hProgram, hDevice, propName, propSize, pPropValue,
                            pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3507,7 +3507,7 @@ ur_result_t UR_APICALL urProgramSetSpecializationConstants(
 
     return pfnSetSpecializationConstants(hProgram, count, pSpecConstants);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3546,7 +3546,7 @@ ur_result_t UR_APICALL urProgramGetNativeHandle(
 
     return pfnGetNativeHandle(hProgram, phNativeProgram);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3587,7 +3587,7 @@ ur_result_t UR_APICALL urProgramCreateWithNativeHandle(
     return pfnCreateWithNativeHandle(hNativeProgram, hContext, pProperties,
                                      phProgram);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3622,7 +3622,7 @@ ur_result_t UR_APICALL urKernelCreate(
 
     return pfnCreate(hProgram, pKernelName, phKernel);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3662,7 +3662,7 @@ ur_result_t UR_APICALL urKernelSetArgValue(
 
     return pfnSetArgValue(hKernel, argIndex, argSize, pProperties, pArgValue);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3698,7 +3698,7 @@ ur_result_t UR_APICALL urKernelSetArgLocal(
 
     return pfnSetArgLocal(hKernel, argIndex, argSize, pProperties);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3750,7 +3750,7 @@ ur_result_t UR_APICALL urKernelGetInfo(
 
     return pfnGetInfo(hKernel, propName, propSize, pPropValue, pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3792,7 +3792,7 @@ ur_result_t UR_APICALL urKernelGetGroupInfo(
     return pfnGetGroupInfo(hKernel, hDevice, propName, propSize, pPropValue,
                            pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3830,7 +3830,7 @@ ur_result_t UR_APICALL urKernelGetSubGroupInfo(
     return pfnGetSubGroupInfo(hKernel, hDevice, propName, propSize, pPropValue,
                               pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3863,7 +3863,7 @@ ur_result_t UR_APICALL urKernelRetain(
 
     return pfnRetain(hKernel);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3897,7 +3897,7 @@ ur_result_t UR_APICALL urKernelRelease(
 
     return pfnRelease(hKernel);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3938,7 +3938,7 @@ ur_result_t UR_APICALL urKernelSetArgPointer(
 
     return pfnSetArgPointer(hKernel, argIndex, pProperties, pArgValue);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3982,7 +3982,7 @@ ur_result_t UR_APICALL urKernelSetExecInfo(
 
     return pfnSetExecInfo(hKernel, propName, propSize, pProperties, pPropValue);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4017,7 +4017,7 @@ ur_result_t UR_APICALL urKernelSetArgSampler(
 
     return pfnSetArgSampler(hKernel, argIndex, pProperties, hArgValue);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4053,7 +4053,7 @@ ur_result_t UR_APICALL urKernelSetArgMemObj(
 
     return pfnSetArgMemObj(hKernel, argIndex, pProperties, hArgValue);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4105,7 +4105,7 @@ ur_result_t UR_APICALL urKernelSetSpecializationConstants(
 
     return pfnSetSpecializationConstants(hKernel, count, pSpecConstants);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4144,7 +4144,7 @@ ur_result_t UR_APICALL urKernelGetNativeHandle(
 
     return pfnGetNativeHandle(hKernel, phNativeKernel);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4190,7 +4190,7 @@ ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
     return pfnCreateWithNativeHandle(hNativeKernel, hContext, hProgram,
                                      pProperties, phKernel);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4242,7 +4242,7 @@ ur_result_t UR_APICALL urKernelGetSuggestedLocalWorkSize(
                                         pGlobalWorkOffset, pGlobalWorkSize,
                                         pSuggestedLocalWorkSize);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4290,7 +4290,7 @@ ur_result_t UR_APICALL urQueueGetInfo(
 
     return pfnGetInfo(hQueue, propName, propSize, pPropValue, pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4337,7 +4337,7 @@ ur_result_t UR_APICALL urQueueCreate(
 
     return pfnCreate(hContext, hDevice, pProperties, phQueue);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4373,7 +4373,7 @@ ur_result_t UR_APICALL urQueueRetain(
 
     return pfnRetain(hQueue);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4411,7 +4411,7 @@ ur_result_t UR_APICALL urQueueRelease(
 
     return pfnRelease(hQueue);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4452,7 +4452,7 @@ ur_result_t UR_APICALL urQueueGetNativeHandle(
 
     return pfnGetNativeHandle(hQueue, pDesc, phNativeQueue);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4494,7 +4494,7 @@ ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
     return pfnCreateWithNativeHandle(hNativeQueue, hContext, hDevice,
                                      pProperties, phQueue);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4531,7 +4531,7 @@ ur_result_t UR_APICALL urQueueFinish(
 
     return pfnFinish(hQueue);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4567,7 +4567,7 @@ ur_result_t UR_APICALL urQueueFlush(
 
     return pfnFlush(hQueue);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4613,7 +4613,7 @@ ur_result_t UR_APICALL urEventGetInfo(
 
     return pfnGetInfo(hEvent, propName, propSize, pPropValue, pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4661,7 +4661,7 @@ ur_result_t UR_APICALL urEventGetProfilingInfo(
     return pfnGetProfilingInfo(hEvent, propName, propSize, pPropValue,
                                pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4699,7 +4699,7 @@ ur_result_t UR_APICALL urEventWait(
 
     return pfnWait(numEvents, phEventWaitList);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4730,7 +4730,7 @@ ur_result_t UR_APICALL urEventRetain(
 
     return pfnRetain(hEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4761,7 +4761,7 @@ ur_result_t UR_APICALL urEventRelease(
 
     return pfnRelease(hEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4800,7 +4800,7 @@ ur_result_t UR_APICALL urEventGetNativeHandle(
 
     return pfnGetNativeHandle(hEvent, phNativeEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4841,7 +4841,7 @@ ur_result_t UR_APICALL urEventCreateWithNativeHandle(
     return pfnCreateWithNativeHandle(hNativeEvent, hContext, pProperties,
                                      phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4885,7 +4885,7 @@ ur_result_t UR_APICALL urEventSetCallback(
 
     return pfnSetCallback(hEvent, execStatus, pfnNotify, pUserData);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4959,7 +4959,7 @@ ur_result_t UR_APICALL urEnqueueKernelLaunch(
                            pGlobalWorkSize, pLocalWorkSize, numEventsInWaitList,
                            phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -5014,7 +5014,7 @@ ur_result_t UR_APICALL urEnqueueEventsWait(
 
     return pfnEventsWait(hQueue, numEventsInWaitList, phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -5073,7 +5073,7 @@ ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
     return pfnEventsWaitWithBarrier(hQueue, numEventsInWaitList,
                                     phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -5138,7 +5138,7 @@ ur_result_t UR_APICALL urEnqueueMemBufferRead(
     return pfnMemBufferRead(hQueue, hBuffer, blockingRead, offset, size, pDst,
                             numEventsInWaitList, phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -5205,7 +5205,7 @@ ur_result_t UR_APICALL urEnqueueMemBufferWrite(
     return pfnMemBufferWrite(hQueue, hBuffer, blockingWrite, offset, size, pSrc,
                              numEventsInWaitList, phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -5294,7 +5294,7 @@ ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
         bufferRowPitch, bufferSlicePitch, hostRowPitch, hostSlicePitch, pDst,
         numEventsInWaitList, phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -5386,7 +5386,7 @@ ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
         bufferRowPitch, bufferSlicePitch, hostRowPitch, hostSlicePitch, pSrc,
         numEventsInWaitList, phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -5449,7 +5449,7 @@ ur_result_t UR_APICALL urEnqueueMemBufferCopy(
                             dstOffset, size, numEventsInWaitList,
                             phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -5530,7 +5530,7 @@ ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
                                 dstRowPitch, dstSlicePitch, numEventsInWaitList,
                                 phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -5598,7 +5598,7 @@ ur_result_t UR_APICALL urEnqueueMemBufferFill(
                             size, numEventsInWaitList, phEventWaitList,
                             phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -5670,7 +5670,7 @@ ur_result_t UR_APICALL urEnqueueMemImageRead(
                            rowPitch, slicePitch, pDst, numEventsInWaitList,
                            phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -5743,7 +5743,7 @@ ur_result_t UR_APICALL urEnqueueMemImageWrite(
                             rowPitch, slicePitch, pSrc, numEventsInWaitList,
                             phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -5811,7 +5811,7 @@ ur_result_t UR_APICALL urEnqueueMemImageCopy(
                            region, numEventsInWaitList, phEventWaitList,
                            phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -5885,7 +5885,7 @@ ur_result_t UR_APICALL urEnqueueMemBufferMap(
                            numEventsInWaitList, phEventWaitList, phEvent,
                            ppRetMap);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -5941,7 +5941,7 @@ ur_result_t UR_APICALL urEnqueueMemUnmap(
     return pfnMemUnmap(hQueue, hMem, pMappedPtr, numEventsInWaitList,
                        phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -6002,7 +6002,7 @@ ur_result_t UR_APICALL urEnqueueUSMFill(
     return pfnUSMFill(hQueue, pMem, patternSize, pPattern, size,
                       numEventsInWaitList, phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -6059,7 +6059,7 @@ ur_result_t UR_APICALL urEnqueueUSMMemcpy(
     return pfnUSMMemcpy(hQueue, blocking, pDst, pSrc, size, numEventsInWaitList,
                         phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -6121,7 +6121,7 @@ ur_result_t UR_APICALL urEnqueueUSMPrefetch(
     return pfnUSMPrefetch(hQueue, pMem, size, flags, numEventsInWaitList,
                           phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -6168,7 +6168,7 @@ ur_result_t UR_APICALL urEnqueueUSMAdvise(
 
     return pfnUSMAdvise(hQueue, pMem, size, advice, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -6237,7 +6237,7 @@ ur_result_t UR_APICALL urEnqueueUSMFill2D(
     return pfnUSMFill2D(hQueue, pMem, pitch, patternSize, pPattern, width,
                         height, numEventsInWaitList, phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -6305,7 +6305,7 @@ ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
                           width, height, numEventsInWaitList, phEventWaitList,
                           phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -6360,7 +6360,7 @@ ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
         hQueue, hProgram, name, blockingWrite, count, offset, pSrc,
         numEventsInWaitList, phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -6415,7 +6415,7 @@ ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
                                        count, offset, pDst, numEventsInWaitList,
                                        phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -6473,7 +6473,7 @@ ur_result_t UR_APICALL urEnqueueReadHostPipe(
     return pfnReadHostPipe(hQueue, hProgram, pipe_symbol, blocking, pDst, size,
                            numEventsInWaitList, phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -6532,7 +6532,7 @@ ur_result_t UR_APICALL urEnqueueWriteHostPipe(
     return pfnWriteHostPipe(hQueue, hProgram, pipe_symbol, blocking, pSrc, size,
                             numEventsInWaitList, phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -6602,7 +6602,7 @@ ur_result_t UR_APICALL urUSMPitchedAllocExp(
     return pfnPitchedAllocExp(hContext, hDevice, pUSMDesc, pool, widthInBytes,
                               height, elementSizeBytes, ppMem, pResultPitch);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -6637,7 +6637,7 @@ ur_result_t UR_APICALL urBindlessImagesUnsampledImageHandleDestroyExp(
 
     return pfnUnsampledImageHandleDestroyExp(hContext, hDevice, hImage);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -6672,7 +6672,7 @@ ur_result_t UR_APICALL urBindlessImagesSampledImageHandleDestroyExp(
 
     return pfnSampledImageHandleDestroyExp(hContext, hDevice, hImage);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -6719,7 +6719,7 @@ ur_result_t UR_APICALL urBindlessImagesImageAllocateExp(
     return pfnImageAllocateExp(hContext, hDevice, pImageFormat, pImageDesc,
                                phImageMem);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -6753,7 +6753,7 @@ ur_result_t UR_APICALL urBindlessImagesImageFreeExp(
 
     return pfnImageFreeExp(hContext, hDevice, hImageMem);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -6803,7 +6803,7 @@ ur_result_t UR_APICALL urBindlessImagesUnsampledImageCreateExp(
     return pfnUnsampledImageCreateExp(hContext, hDevice, hImageMem,
                                       pImageFormat, pImageDesc, phImage);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -6856,7 +6856,7 @@ ur_result_t UR_APICALL urBindlessImagesSampledImageCreateExp(
     return pfnSampledImageCreateExp(hContext, hDevice, hImageMem, pImageFormat,
                                     pImageDesc, hSampler, phImage);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -6931,7 +6931,7 @@ ur_result_t UR_APICALL urBindlessImagesImageCopyExp(
                            imageCopyFlags, numEventsInWaitList, phEventWaitList,
                            phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -6972,7 +6972,7 @@ ur_result_t UR_APICALL urBindlessImagesImageGetInfoExp(
     return pfnImageGetInfoExp(hContext, hImageMem, propName, pPropValue,
                               pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -7012,7 +7012,7 @@ ur_result_t UR_APICALL urBindlessImagesMipmapGetLevelExp(
     return pfnMipmapGetLevelExp(hContext, hDevice, hImageMem, mipmapLevel,
                                 phImageMem);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -7046,7 +7046,7 @@ ur_result_t UR_APICALL urBindlessImagesMipmapFreeExp(
 
     return pfnMipmapFreeExp(hContext, hDevice, hMem);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -7093,7 +7093,7 @@ ur_result_t UR_APICALL urBindlessImagesImportExternalMemoryExp(
     return pfnImportExternalMemoryExp(hContext, hDevice, size, memHandleType,
                                       pExternalMemDesc, phExternalMem);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -7140,7 +7140,7 @@ ur_result_t UR_APICALL urBindlessImagesMapExternalArrayExp(
     return pfnMapExternalArrayExp(hContext, hDevice, pImageFormat, pImageDesc,
                                   hExternalMem, phImageMem);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -7182,7 +7182,7 @@ ur_result_t UR_APICALL urBindlessImagesMapExternalLinearMemoryExp(
     return pfnMapExternalLinearMemoryExp(hContext, hDevice, offset, size,
                                          hExternalMem, ppRetMem);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -7218,7 +7218,7 @@ ur_result_t UR_APICALL urBindlessImagesReleaseExternalMemoryExp(
 
     return pfnReleaseExternalMemoryExp(hContext, hDevice, hExternalMem);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -7264,7 +7264,7 @@ ur_result_t UR_APICALL urBindlessImagesImportExternalSemaphoreExp(
                                          pExternalSemaphoreDesc,
                                          phExternalSemaphore);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -7301,7 +7301,7 @@ ur_result_t UR_APICALL urBindlessImagesReleaseExternalSemaphoreExp(
     return pfnReleaseExternalSemaphoreExp(hContext, hDevice,
                                           hExternalSemaphore);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -7354,7 +7354,7 @@ ur_result_t UR_APICALL urBindlessImagesWaitExternalSemaphoreExp(
                                        waitValue, numEventsInWaitList,
                                        phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -7408,7 +7408,7 @@ ur_result_t UR_APICALL urBindlessImagesSignalExternalSemaphoreExp(
                                          signalValue, numEventsInWaitList,
                                          phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -7449,7 +7449,7 @@ ur_result_t UR_APICALL urCommandBufferCreateExp(
 
     return pfnCreateExp(hContext, hDevice, pCommandBufferDesc, phCommandBuffer);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -7477,7 +7477,7 @@ ur_result_t UR_APICALL urCommandBufferRetainExp(
 
     return pfnRetainExp(hCommandBuffer);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -7506,7 +7506,7 @@ ur_result_t UR_APICALL urCommandBufferReleaseExp(
 
     return pfnReleaseExp(hCommandBuffer);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -7535,7 +7535,7 @@ ur_result_t UR_APICALL urCommandBufferFinalizeExp(
 
     return pfnFinalizeExp(hCommandBuffer);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -7627,7 +7627,7 @@ ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
         numSyncPointsInWaitList, pSyncPointWaitList, numEventsInWaitList,
         phEventWaitList, pSyncPoint, phEvent, phCommand);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -7697,7 +7697,7 @@ ur_result_t UR_APICALL urCommandBufferAppendUSMMemcpyExp(
                                  numEventsInWaitList, phEventWaitList,
                                  pSyncPoint, phEvent, phCommand);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -7771,7 +7771,7 @@ ur_result_t UR_APICALL urCommandBufferAppendUSMFillExp(
                                pSyncPointWaitList, numEventsInWaitList,
                                phEventWaitList, pSyncPoint, phEvent, phCommand);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -7840,7 +7840,7 @@ ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
         numSyncPointsInWaitList, pSyncPointWaitList, numEventsInWaitList,
         phEventWaitList, pSyncPoint, phEvent, phCommand);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -7910,7 +7910,7 @@ ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
         pSyncPointWaitList, numEventsInWaitList, phEventWaitList, pSyncPoint,
         phEvent, phCommand);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -7979,7 +7979,7 @@ ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
         pSyncPointWaitList, numEventsInWaitList, phEventWaitList, pSyncPoint,
         phEvent, phCommand);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -8056,7 +8056,7 @@ ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
         numSyncPointsInWaitList, pSyncPointWaitList, numEventsInWaitList,
         phEventWaitList, pSyncPoint, phEvent, phCommand);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -8140,7 +8140,7 @@ ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
         numSyncPointsInWaitList, pSyncPointWaitList, numEventsInWaitList,
         phEventWaitList, pSyncPoint, phEvent, phCommand);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -8222,7 +8222,7 @@ ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
         numSyncPointsInWaitList, pSyncPointWaitList, numEventsInWaitList,
         phEventWaitList, pSyncPoint, phEvent, phCommand);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -8295,7 +8295,7 @@ ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
         numSyncPointsInWaitList, pSyncPointWaitList, numEventsInWaitList,
         phEventWaitList, pSyncPoint, phEvent, phCommand);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -8372,7 +8372,7 @@ ur_result_t UR_APICALL urCommandBufferAppendUSMPrefetchExp(
                                    numEventsInWaitList, phEventWaitList,
                                    pSyncPoint, phEvent, phCommand);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -8448,7 +8448,7 @@ ur_result_t UR_APICALL urCommandBufferAppendUSMAdviseExp(
                                  numEventsInWaitList, phEventWaitList,
                                  pSyncPoint, phEvent, phCommand);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -8495,7 +8495,7 @@ ur_result_t UR_APICALL urCommandBufferEnqueueExp(
     return pfnEnqueueExp(hCommandBuffer, hQueue, numEventsInWaitList,
                          phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -8523,7 +8523,7 @@ ur_result_t UR_APICALL urCommandBufferRetainCommandExp(
 
     return pfnRetainCommandExp(hCommand);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -8552,7 +8552,7 @@ ur_result_t UR_APICALL urCommandBufferReleaseCommandExp(
 
     return pfnReleaseCommandExp(hCommand);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -8603,7 +8603,7 @@ ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
 
     return pfnUpdateKernelLaunchExp(hCommand, pUpdateKernelLaunch);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -8740,7 +8740,7 @@ ur_result_t UR_APICALL urCommandBufferGetInfoExp(
     return pfnGetInfoExp(hCommandBuffer, propName, propSize, pPropValue,
                          pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -8788,7 +8788,7 @@ ur_result_t UR_APICALL urCommandBufferCommandGetInfoExp(
     return pfnCommandGetInfoExp(hCommand, propName, propSize, pPropValue,
                                 pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -8856,7 +8856,7 @@ ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
         hQueue, hKernel, workDim, pGlobalWorkOffset, pGlobalWorkSize,
         pLocalWorkSize, numEventsInWaitList, phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -8892,7 +8892,7 @@ ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
     return pfnSuggestMaxCooperativeGroupCountExp(
         hKernel, localWorkSize, dynamicSharedMemorySize, pGroupCountRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -8941,7 +8941,7 @@ ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
     return pfnTimestampRecordingExp(hQueue, blocking, numEventsInWaitList,
                                     phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -9032,7 +9032,7 @@ ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
                                     launchPropList, numEventsInWaitList,
                                     phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -9077,7 +9077,7 @@ ur_result_t UR_APICALL urProgramBuildExp(
 
     return pfnBuildExp(hProgram, numDevices, phDevices, pOptions);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -9123,7 +9123,7 @@ ur_result_t UR_APICALL urProgramCompileExp(
 
     return pfnCompileExp(hProgram, numDevices, phDevices, pOptions);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -9186,7 +9186,7 @@ ur_result_t UR_APICALL urProgramLinkExp(
     return pfnLinkExp(hContext, numDevices, phDevices, count, phPrograms,
                       pOptions, phProgram);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -9218,7 +9218,7 @@ ur_result_t UR_APICALL urUSMImportExp(
 
     return pfnImportExp(hContext, pMem, size);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -9248,7 +9248,7 @@ ur_result_t UR_APICALL urUSMReleaseExp(
 
     return pfnReleaseExp(hContext, pMem);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -9299,7 +9299,7 @@ ur_result_t UR_APICALL urUsmP2PEnablePeerAccessExp(
 
     return pfnEnablePeerAccessExp(commandDevice, peerDevice);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -9351,7 +9351,7 @@ ur_result_t UR_APICALL urUsmP2PDisablePeerAccessExp(
 
     return pfnDisablePeerAccessExp(commandDevice, peerDevice);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -9410,7 +9410,7 @@ ur_result_t UR_APICALL urUsmP2PPeerAccessGetInfoExp(
     return pfnPeerAccessGetInfoExp(commandDevice, peerDevice, propName,
                                    propSize, pPropValue, pPropSizeRet);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -9462,7 +9462,7 @@ ur_result_t UR_APICALL urEnqueueNativeCommandExp(
                                phMemList, pProperties, numEventsInWaitList,
                                phEventWaitList, phEvent);
 } catch (...) {
-    return exceptionToResult(std::current_exception());
+    std::abort();
 }
 
 } // extern "C"
