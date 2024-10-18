@@ -14,7 +14,9 @@
 
 #include <cinttypes>
 
+#if !defined(__SPIR__) && !defined(__SPIRV__)
 namespace ur_sanitizer_layer {
+#endif // !__SPIR__ && !__SPIRV__
 
 enum class DeviceSanitizerErrorType : int32_t {
     UNKNOWN,
@@ -79,6 +81,7 @@ struct LaunchInfo {
     uint32_t NumLocalArgs = 0;
     LocalArgsInfo *LocalArgs = nullptr; // Ordered by ArgIndex
 
+    int ReportFlag = 0;
     DeviceSanitizerReport SanitizerReport[ASAN_MAX_NUM_REPORTS];
 };
 
@@ -160,4 +163,6 @@ inline const char *ToString(DeviceSanitizerErrorType ErrorType) {
     }
 }
 
+#if !defined(__SPIR__) && !defined(__SPIRV__)
 } // namespace ur_sanitizer_layer
+#endif // !__SPIR__ && !__SPIRV__
