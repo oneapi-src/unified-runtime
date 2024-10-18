@@ -158,20 +158,6 @@ extern thread_local char ErrorMessage[MaxMessageSize];
                                       ur_result_t ErrorCode);
 
 [[noreturn]] void die(const char *Message);
-
-template <class To, class From> To cast(From Value) {
-
-  if constexpr (std::is_pointer_v<From>) {
-    static_assert(std::is_pointer_v<From> == std::is_pointer_v<To>,
-                  "Cast failed pointer check");
-    return reinterpret_cast<To>(Value);
-  } else {
-    static_assert(sizeof(From) == sizeof(To), "Cast failed size check");
-    static_assert(std::is_signed_v<From> == std::is_signed_v<To>,
-                  "Cast failed sign check");
-    return static_cast<To>(Value);
-  }
-}
 } // namespace cl_adapter
 
 namespace cl_ext {
@@ -424,3 +410,6 @@ ur_result_t getNativeHandle(void *URObj, ur_native_handle_t *NativeHandle);
 cl_int getDeviceCommandBufferUpdateCapabilities(
     cl_device_id Dev,
     ur_device_command_buffer_update_capability_flags_t &UpdateCapabilities);
+
+template <typename T, typename... Args>
+ur_result_t makeURObject(T *URHandle, Args... args);

@@ -166,3 +166,18 @@ cl_int getDeviceCommandBufferUpdateCapabilities(
 
   return CL_SUCCESS;
 }
+
+template <typename T, typename... Args>
+ur_result_t makeURObject(T *URHandle, Args... args) {
+  if (URHandle) {
+    try {
+      auto URObject = std::make_unique<T>(args...);
+      *URHandle = URObject.release();
+    } catch (std::bad_alloc &) {
+      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+    } catch (...) {
+      return UR_RESULT_ERROR_UNKNOWN;
+    }
+  }
+  return UR_RESULT_SUCCESS;
+}
