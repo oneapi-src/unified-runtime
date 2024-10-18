@@ -16,13 +16,13 @@
 
 struct ur_program_handle_t_ {
   using native_type = cl_program;
-  native_type Program;
+  native_type CLProgram;
   ur_context_handle_t Context;
   std::atomic<uint32_t> RefCount = 0;
   bool IsNativeHandleOwned = true;
 
   ur_program_handle_t_(native_type Prog, ur_context_handle_t Ctx)
-      : Program(Prog), Context(Ctx) {
+      : CLProgram(Prog), Context(Ctx) {
     RefCount = 1;
     urContextRetain(Context);
   }
@@ -30,7 +30,7 @@ struct ur_program_handle_t_ {
   ~ur_program_handle_t_() {
     urContextRelease(Context);
     if (IsNativeHandleOwned) {
-      clReleaseProgram(Program);
+      clReleaseProgram(CLProgram);
     }
   }
 
@@ -42,29 +42,5 @@ struct ur_program_handle_t_ {
 
   static ur_result_t makeWithNative(native_type NativeProg,
                                     ur_context_handle_t Context,
-                                    ur_program_handle_t &Program) {
-    if (!Context) {
-      return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-    }
-    try {
-      cl_context CLContext;
-      CL_RETURN_ON_FAILURE(clGetProgramInfo(NativeProg, CL_PROGRAM_CONTEXT,
-                                            sizeof(CLContext), &CLContext,
-                                            nullptr));
-      if (Context->get() != CLContext) {
-        return UR_RESULT_ERROR_INVALID_CONTEXT;
-      }
-      auto URProgram =
-          std::make_unique<ur_program_handle_t_>(NativeProg, Context);
-      Program = URProgram.release();
-    } catch (std::bad_alloc &) {
-      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-    } catch (...) {
-      return UR_RESULT_ERROR_UNKNOWN;
-    }
-
-    return UR_RESULT_SUCCESS;
-  }
-
-  native_type get() { return Program; }
+                                    ur_program_handle_t &Program);
 };

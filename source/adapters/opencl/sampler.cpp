@@ -146,7 +146,7 @@ ur_result_t urSamplerCreate(ur_context_handle_t hContext,
   try {
     // Always call OpenCL 1.0 API
     cl_sampler Sampler = clCreateSampler(
-        hContext->get(), static_cast<cl_bool>(pDesc->normalizedCoords),
+        hContext->CLContext, static_cast<cl_bool>(pDesc->normalizedCoords),
         AddressingMode, FilterMode, &ErrorCode);
     CL_RETURN_ON_FAILURE(ErrorCode);
     auto URSampler = std::make_unique<ur_sampler_handle_t_>(Sampler, hContext);
@@ -182,7 +182,7 @@ urSamplerGetInfo(ur_sampler_handle_t hSampler, ur_sampler_info_t propName,
   // between them.
   case UR_SAMPLER_INFO_NORMALIZED_COORDS: {
     cl_bool normalized_coords = false;
-    Err = mapCLErrorToUR(clGetSamplerInfo(hSampler->get(), SamplerInfo,
+    Err = mapCLErrorToUR(clGetSamplerInfo(hSampler->CLSampler, SamplerInfo,
                                           sizeof(cl_bool), &normalized_coords,
                                           nullptr));
     if (pPropValue && propSize != sizeof(ur_bool_t)) {
@@ -200,8 +200,9 @@ urSamplerGetInfo(ur_sampler_handle_t hSampler, ur_sampler_info_t propName,
   }
   default: {
     size_t CheckPropSize = 0;
-    ur_result_t Err = mapCLErrorToUR(clGetSamplerInfo(
-        hSampler->get(), SamplerInfo, propSize, pPropValue, &CheckPropSize));
+    ur_result_t Err =
+        mapCLErrorToUR(clGetSamplerInfo(hSampler->CLSampler, SamplerInfo,
+                                        propSize, pPropValue, &CheckPropSize));
     if (pPropValue && CheckPropSize != propSize) {
       return UR_RESULT_ERROR_INVALID_SIZE;
     }
@@ -234,7 +235,7 @@ urSamplerRelease(ur_sampler_handle_t hSampler) {
 
 UR_APIEXPORT ur_result_t UR_APICALL urSamplerGetNativeHandle(
     ur_sampler_handle_t hSampler, ur_native_handle_t *phNativeSampler) {
-  *phNativeSampler = reinterpret_cast<ur_native_handle_t>(hSampler->get());
+  *phNativeSampler = reinterpret_cast<ur_native_handle_t>(hSampler->CLSampler);
   return UR_RESULT_SUCCESS;
 }
 

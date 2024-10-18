@@ -14,7 +14,7 @@
 
 struct ur_device_handle_t_ {
   using native_type = cl_device_id;
-  native_type Device;
+  native_type CLDevice;
   ur_platform_handle_t Platform;
   cl_device_type Type = 0;
   ur_device_handle_t ParentDevice = nullptr;
@@ -23,19 +23,19 @@ struct ur_device_handle_t_ {
 
   ur_device_handle_t_(native_type Dev, ur_platform_handle_t Plat,
                       ur_device_handle_t Parent)
-      : Device(Dev), Platform(Plat), ParentDevice(Parent) {
+      : CLDevice(Dev), Platform(Plat), ParentDevice(Parent) {
     RefCount = 1;
     if (Parent) {
       Type = Parent->Type;
     } else {
-      clGetDeviceInfo(Device, CL_DEVICE_TYPE, sizeof(cl_device_type), &Type,
+      clGetDeviceInfo(CLDevice, CL_DEVICE_TYPE, sizeof(cl_device_type), &Type,
                       nullptr);
     }
   }
 
   ~ur_device_handle_t_() {
     if (ParentDevice && IsNativeHandleOwned) {
-      clReleaseDevice(Device);
+      clReleaseDevice(CLDevice);
     }
   }
 
@@ -45,16 +45,14 @@ struct ur_device_handle_t_ {
 
   uint32_t getReferenceCount() const noexcept { return RefCount; }
 
-  native_type get() { return Device; }
-
   ur_result_t getDeviceVersion(oclv::OpenCLVersion &Version) {
     size_t DevVerSize = 0;
     CL_RETURN_ON_FAILURE(
-        clGetDeviceInfo(Device, CL_DEVICE_VERSION, 0, nullptr, &DevVerSize));
+        clGetDeviceInfo(CLDevice, CL_DEVICE_VERSION, 0, nullptr, &DevVerSize));
 
     std::string DevVer(DevVerSize, '\0');
-    CL_RETURN_ON_FAILURE(clGetDeviceInfo(Device, CL_DEVICE_VERSION, DevVerSize,
-                                         DevVer.data(), nullptr));
+    CL_RETURN_ON_FAILURE(clGetDeviceInfo(CLDevice, CL_DEVICE_VERSION,
+                                         DevVerSize, DevVer.data(), nullptr));
 
     Version = oclv::OpenCLVersion(DevVer);
     if (!Version.isValid()) {
@@ -67,9 +65,9 @@ struct ur_device_handle_t_ {
   bool isIntelFPGAEmuDevice() {
     size_t NameSize = 0;
     CL_RETURN_ON_FAILURE(
-        clGetDeviceInfo(Device, CL_DEVICE_NAME, 0, nullptr, &NameSize));
+        clGetDeviceInfo(CLDevice, CL_DEVICE_NAME, 0, nullptr, &NameSize));
     std::string NameStr(NameSize, '\0');
-    CL_RETURN_ON_FAILURE(clGetDeviceInfo(Device, CL_DEVICE_NAME, NameSize,
+    CL_RETURN_ON_FAILURE(clGetDeviceInfo(CLDevice, CL_DEVICE_NAME, NameSize,
                                          NameStr.data(), nullptr));
 
     return NameStr.find("Intel(R) FPGA Emulation Device") != std::string::npos;
@@ -79,12 +77,12 @@ struct ur_device_handle_t_ {
                                     bool &Supported) {
     size_t ExtSize = 0;
     CL_RETURN_ON_FAILURE(
-        clGetDeviceInfo(Device, CL_DEVICE_EXTENSIONS, 0, nullptr, &ExtSize));
+        clGetDeviceInfo(CLDevice, CL_DEVICE_EXTENSIONS, 0, nullptr, &ExtSize));
 
     std::string ExtStr(ExtSize, '\0');
 
-    CL_RETURN_ON_FAILURE(clGetDeviceInfo(Device, CL_DEVICE_EXTENSIONS, ExtSize,
-                                         ExtStr.data(), nullptr));
+    CL_RETURN_ON_FAILURE(clGetDeviceInfo(CLDevice, CL_DEVICE_EXTENSIONS,
+                                         ExtSize, ExtStr.data(), nullptr));
 
     Supported = true;
     for (const std::string &Ext : Exts) {

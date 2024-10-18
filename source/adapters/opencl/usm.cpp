@@ -111,7 +111,7 @@ urUSMHostAlloc(ur_context_handle_t Context, const ur_usm_desc_t *pUSMDesc,
 
   // First we need to look up the function pointer
   clHostMemAllocINTEL_fn FuncPtr = nullptr;
-  cl_context CLContext = Context->get();
+  cl_context CLContext = Context->CLContext;
   if (auto UrResult = cl_ext::getExtFuncFromContext<clHostMemAllocINTEL_fn>(
           CLContext, cl_ext::ExtFuncPtrCache->clHostMemAllocINTELCache,
           cl_ext::HostMemAllocName, &FuncPtr)) {
@@ -159,7 +159,7 @@ urUSMDeviceAlloc(ur_context_handle_t Context, ur_device_handle_t hDevice,
 
   // First we need to look up the function pointer
   clDeviceMemAllocINTEL_fn FuncPtr = nullptr;
-  cl_context CLContext = Context->get();
+  cl_context CLContext = Context->CLContext;
   if (auto UrResult = cl_ext::getExtFuncFromContext<clDeviceMemAllocINTEL_fn>(
           CLContext, cl_ext::ExtFuncPtrCache->clDeviceMemAllocINTELCache,
           cl_ext::DeviceMemAllocName, &FuncPtr)) {
@@ -168,7 +168,7 @@ urUSMDeviceAlloc(ur_context_handle_t Context, ur_device_handle_t hDevice,
 
   if (FuncPtr) {
     cl_int ClResult = CL_SUCCESS;
-    Ptr = FuncPtr(CLContext, hDevice->get(),
+    Ptr = FuncPtr(CLContext, hDevice->CLDevice,
                   AllocProperties.empty() ? nullptr : AllocProperties.data(),
                   size, Alignment, &ClResult);
     if (ClResult == CL_INVALID_BUFFER_SIZE) {
@@ -207,7 +207,7 @@ urUSMSharedAlloc(ur_context_handle_t Context, ur_device_handle_t hDevice,
 
   // First we need to look up the function pointer
   clSharedMemAllocINTEL_fn FuncPtr = nullptr;
-  cl_context CLContext = Context->get();
+  cl_context CLContext = Context->CLContext;
   if (auto UrResult = cl_ext::getExtFuncFromContext<clSharedMemAllocINTEL_fn>(
           CLContext, cl_ext::ExtFuncPtrCache->clSharedMemAllocINTELCache,
           cl_ext::SharedMemAllocName, &FuncPtr)) {
@@ -216,7 +216,7 @@ urUSMSharedAlloc(ur_context_handle_t Context, ur_device_handle_t hDevice,
 
   if (FuncPtr) {
     cl_int ClResult = CL_SUCCESS;
-    Ptr = FuncPtr(CLContext, hDevice->get(),
+    Ptr = FuncPtr(CLContext, hDevice->CLDevice,
                   AllocProperties.empty() ? nullptr : AllocProperties.data(),
                   size, Alignment, static_cast<cl_int *>(&ClResult));
     if (ClResult == CL_INVALID_BUFFER_SIZE) {
@@ -240,7 +240,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMFree(ur_context_handle_t Context,
   // might be still running.
   clMemBlockingFreeINTEL_fn FuncPtr = nullptr;
 
-  cl_context CLContext = Context->get();
+  cl_context CLContext = Context->CLContext;
   ur_result_t RetVal = UR_RESULT_ERROR_INVALID_OPERATION;
   RetVal = cl_ext::getExtFuncFromContext<clMemBlockingFreeINTEL_fn>(
       CLContext, cl_ext::ExtFuncPtrCache->clMemBlockingFreeINTELCache,
@@ -258,7 +258,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMFill(
     const void *pPattern, size_t size, uint32_t numEventsInWaitList,
     const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent) {
   // Have to look up the context from the kernel
-  cl_context CLContext = hQueue->Context->get();
+  cl_context CLContext = hQueue->Context->CLContext;
 
   if (patternSize <= 128 && isPowerOf2(patternSize)) {
     clEnqueueMemFillINTEL_fn EnqueueMemFill = nullptr;
@@ -269,9 +269,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMFill(
     cl_event Event;
     std::vector<cl_event> CLWaitEvents(numEventsInWaitList);
     for (uint32_t i = 0; i < numEventsInWaitList; i++) {
-      CLWaitEvents[i] = phEventWaitList[i]->get();
+      CLWaitEvents[i] = phEventWaitList[i]->CLEvent;
     }
-    CL_RETURN_ON_FAILURE(EnqueueMemFill(hQueue->get(), ptr, pPattern,
+    CL_RETURN_ON_FAILURE(EnqueueMemFill(hQueue->CLQueue, ptr, pPattern,
                                         patternSize, size, numEventsInWaitList,
                                         CLWaitEvents.data(), &Event));
     if (phEvent) {
@@ -320,9 +320,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMFill(
   cl_event CopyEvent = nullptr;
   std::vector<cl_event> CLWaitEvents(numEventsInWaitList);
   for (uint32_t i = 0; i < numEventsInWaitList; i++) {
-    CLWaitEvents[i] = phEventWaitList[i]->get();
+    CLWaitEvents[i] = phEventWaitList[i]->CLEvent;
   }
-  CL_RETURN_ON_FAILURE(USMMemcpy(hQueue->get(), false, ptr, HostBuffer, size,
+  CL_RETURN_ON_FAILURE(USMMemcpy(hQueue->CLQueue, false, ptr, HostBuffer, size,
                                  numEventsInWaitList, CLWaitEvents.data(),
                                  &CopyEvent));
 
@@ -383,7 +383,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy(
     const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent) {
 
   // Have to look up the context from the kernel
-  cl_context CLContext = hQueue->Context->get();
+  cl_context CLContext = hQueue->Context->CLContext;
 
   clEnqueueMemcpyINTEL_fn FuncPtr = nullptr;
   ur_result_t RetVal = cl_ext::getExtFuncFromContext<clEnqueueMemcpyINTEL_fn>(
@@ -394,9 +394,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy(
     cl_event Event;
     std::vector<cl_event> CLWaitEvents(numEventsInWaitList);
     for (uint32_t i = 0; i < numEventsInWaitList; i++) {
-      CLWaitEvents[i] = phEventWaitList[i]->get();
+      CLWaitEvents[i] = phEventWaitList[i]->CLEvent;
     }
-    RetVal = mapCLErrorToUR(FuncPtr(hQueue->get(), blocking, pDst, pSrc, size,
+    RetVal = mapCLErrorToUR(FuncPtr(hQueue->CLQueue, blocking, pDst, pSrc, size,
                                     numEventsInWaitList, CLWaitEvents.data(),
                                     &Event));
     if (phEvent) {
@@ -424,10 +424,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
   cl_event Event;
   std::vector<cl_event> CLWaitEvents(numEventsInWaitList);
   for (uint32_t i = 0; i < numEventsInWaitList; i++) {
-    CLWaitEvents[i] = phEventWaitList[i]->get();
+    CLWaitEvents[i] = phEventWaitList[i]->CLEvent;
   }
   CL_RETURN_ON_FAILURE(clEnqueueMarkerWithWaitList(
-      hQueue->get(), numEventsInWaitList, CLWaitEvents.data(), &Event));
+      hQueue->CLQueue, numEventsInWaitList, CLWaitEvents.data(), &Event));
   if (phEvent) {
     try {
       auto UREvent =
@@ -454,7 +454,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
     RetVal = Err;
   } else {
     RetVal = map_cl_error_to_ur(
-        FuncPtr(hQueue->get(), pMem, size, flags,
+        FuncPtr(hQueue->CLQueue, pMem, size, flags,
                 numEventsInWaitList,
                 reinterpret_cast<const cl_event *>(phEventWaitList),
                 reinterpret_cast<cl_event *>(phEvent)));
@@ -468,7 +468,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMAdvise(
     ur_event_handle_t *phEvent) {
   cl_event Event;
   CL_RETURN_ON_FAILURE(
-      clEnqueueMarkerWithWaitList(hQueue->get(), 0, nullptr, &Event));
+      clEnqueueMarkerWithWaitList(hQueue->CLQueue, 0, nullptr, &Event));
   if (phEvent) {
     try {
       auto UREvent =
@@ -496,7 +496,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMAdvise(
     RetVal = Err;
   } else {
     RetVal =
-  map_cl_error_to_ur(FuncPtr(hQueue->get(), pMem,
+  map_cl_error_to_ur(FuncPtr(hQueue->CLQueue, pMem,
   size, advice, 0, nullptr, reinterpret_cast<cl_event *>(phEvent)));
   }
   */
@@ -518,7 +518,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
     const void *pSrc, size_t srcPitch, size_t width, size_t height,
     uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
     ur_event_handle_t *phEvent) {
-  cl_context CLContext = hQueue->Context->get();
+  cl_context CLContext = hQueue->Context->CLContext;
 
   clEnqueueMemcpyINTEL_fn FuncPtr = nullptr;
   ur_result_t RetVal = cl_ext::getExtFuncFromContext<clEnqueueMemcpyINTEL_fn>(
@@ -534,10 +534,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
     cl_event Event = nullptr;
     std::vector<cl_event> CLWaitEvents(numEventsInWaitList);
     for (uint32_t i = 0; i < numEventsInWaitList; i++) {
-      CLWaitEvents[i] = phEventWaitList[i]->get();
+      CLWaitEvents[i] = phEventWaitList[i]->CLEvent;
     }
     auto ClResult =
-        FuncPtr(hQueue->get(), false,
+        FuncPtr(hQueue->CLQueue, false,
                 static_cast<uint8_t *>(pDst) + dstPitch * HeightIndex,
                 static_cast<const uint8_t *>(pSrc) + srcPitch * HeightIndex,
                 width, numEventsInWaitList, CLWaitEvents.data(), &Event);
@@ -555,7 +555,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
   }
   if (phEvent && ClResult == CL_SUCCESS) {
     cl_event Event;
-    ClResult = clEnqueueBarrierWithWaitList(hQueue->get(), Events.size(),
+    ClResult = clEnqueueBarrierWithWaitList(hQueue->CLQueue, Events.size(),
                                             Events.data(), &Event);
     if (phEvent) {
       try {
@@ -596,7 +596,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMGetMemAllocInfo(
     size_t propSize, void *pPropValue, size_t *pPropSizeRet) {
 
   clGetMemAllocInfoINTEL_fn GetMemAllocInfo = nullptr;
-  cl_context CLContext = Context->get();
+  cl_context CLContext = Context->CLContext;
   UR_RETURN_ON_FAILURE(cl_ext::getExtFuncFromContext<clGetMemAllocInfoINTEL_fn>(
       CLContext, cl_ext::ExtFuncPtrCache->clGetMemAllocInfoINTELCache,
       cl_ext::GetMemAllocInfoName, &GetMemAllocInfo));
@@ -623,7 +623,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMGetMemAllocInfo(
     return ReturnValue(Context->Devices[0]);
   }
   size_t CheckPropSize = 0;
-  cl_int ClErr = GetMemAllocInfo(Context->get(), pMem, PropNameCL, propSize,
+  cl_int ClErr = GetMemAllocInfo(Context->CLContext, pMem, PropNameCL, propSize,
                                  pPropValue, &CheckPropSize);
   if (pPropValue && CheckPropSize != propSize) {
     return UR_RESULT_ERROR_INVALID_SIZE;

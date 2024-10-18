@@ -16,10 +16,10 @@
 
 struct ur_platform_handle_t_ {
   using native_type = cl_platform_id;
-  native_type Platform = nullptr;
+  native_type CLPlatform = nullptr;
   std::vector<std::unique_ptr<ur_device_handle_t_>> Devices;
 
-  ur_platform_handle_t_(native_type Plat) : Platform(Plat) {}
+  ur_platform_handle_t_(native_type Plat) : CLPlatform(Plat) {}
 
   ~ur_platform_handle_t_() {
     for (auto &Dev : Devices) {
@@ -33,7 +33,7 @@ struct ur_platform_handle_t_ {
     if (!CachedExtFunc) {
       // TODO: check that the function is available
       CachedExtFunc = reinterpret_cast<T>(
-          clGetExtensionFunctionAddressForPlatform(Platform, FuncName));
+          clGetExtensionFunctionAddressForPlatform(CLPlatform, FuncName));
       if (!CachedExtFunc) {
         return UR_RESULT_ERROR_INVALID_VALUE;
       }
@@ -42,17 +42,16 @@ struct ur_platform_handle_t_ {
     return UR_RESULT_SUCCESS;
   }
 
-  native_type get() { return Platform; }
-
   ur_result_t InitDevices() {
     if (Devices.empty()) {
       cl_uint DeviceNum = 0;
-      CL_RETURN_ON_FAILURE(
-          clGetDeviceIDs(Platform, CL_DEVICE_TYPE_ALL, 0, nullptr, &DeviceNum));
+      CL_RETURN_ON_FAILURE(clGetDeviceIDs(CLPlatform, CL_DEVICE_TYPE_ALL, 0,
+                                          nullptr, &DeviceNum));
 
       std::vector<cl_device_id> CLDevices(DeviceNum);
-      CL_RETURN_ON_FAILURE(clGetDeviceIDs(
-          Platform, CL_DEVICE_TYPE_ALL, DeviceNum, CLDevices.data(), nullptr));
+      CL_RETURN_ON_FAILURE(clGetDeviceIDs(CLPlatform, CL_DEVICE_TYPE_ALL,
+                                          DeviceNum, CLDevices.data(),
+                                          nullptr));
 
       try {
         Devices.resize(DeviceNum);
@@ -72,12 +71,12 @@ struct ur_platform_handle_t_ {
 
   ur_result_t getPlatformVersion(oclv::OpenCLVersion &Version) {
     size_t PlatVerSize = 0;
-    CL_RETURN_ON_FAILURE(clGetPlatformInfo(Platform, CL_PLATFORM_VERSION, 0,
+    CL_RETURN_ON_FAILURE(clGetPlatformInfo(CLPlatform, CL_PLATFORM_VERSION, 0,
                                            nullptr, &PlatVerSize));
 
     std::string PlatVer(PlatVerSize, '\0');
     CL_RETURN_ON_FAILURE(clGetPlatformInfo(
-        Platform, CL_PLATFORM_VERSION, PlatVerSize, PlatVer.data(), nullptr));
+        CLPlatform, CL_PLATFORM_VERSION, PlatVerSize, PlatVer.data(), nullptr));
 
     Version = oclv::OpenCLVersion(PlatVer);
     if (!Version.isValid()) {

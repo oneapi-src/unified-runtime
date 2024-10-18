@@ -16,13 +16,13 @@
 
 struct ur_mem_handle_t_ {
   using native_type = cl_mem;
-  native_type Memory;
+  native_type CLMemory;
   ur_context_handle_t Context;
   std::atomic<uint32_t> RefCount = 0;
   bool IsNativeHandleOwned = true;
 
   ur_mem_handle_t_(native_type Mem, ur_context_handle_t Ctx)
-      : Memory(Mem), Context(Ctx) {
+      : CLMemory(Mem), Context(Ctx) {
     RefCount = 1;
     urContextRetain(Context);
   }
@@ -30,7 +30,7 @@ struct ur_mem_handle_t_ {
   ~ur_mem_handle_t_() {
     urContextRelease(Context);
     if (IsNativeHandleOwned) {
-      clReleaseMemObject(Memory);
+      clReleaseMemObject(CLMemory);
     }
   }
 
@@ -42,28 +42,5 @@ struct ur_mem_handle_t_ {
 
   static ur_result_t makeWithNative(native_type NativeMem,
                                     ur_context_handle_t Ctx,
-                                    ur_mem_handle_t &Mem) {
-    if (!Ctx) {
-      return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-    }
-    try {
-      cl_context CLContext;
-      CL_RETURN_ON_FAILURE(clGetMemObjectInfo(
-          NativeMem, CL_MEM_CONTEXT, sizeof(CLContext), &CLContext, nullptr));
-
-      if (Ctx->get() != CLContext) {
-        return UR_RESULT_ERROR_INVALID_CONTEXT;
-      }
-      auto URMem = std::make_unique<ur_mem_handle_t_>(NativeMem, Ctx);
-      Mem = URMem.release();
-    } catch (std::bad_alloc &) {
-      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-    } catch (...) {
-      return UR_RESULT_ERROR_UNKNOWN;
-    }
-
-    return UR_RESULT_SUCCESS;
-  }
-
-  native_type get() { return Memory; }
+                                    ur_mem_handle_t &Mem);
 };
