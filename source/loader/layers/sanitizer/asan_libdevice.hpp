@@ -14,7 +14,9 @@
 
 #include <cinttypes>
 
+#if !defined(__SPIR__) && !defined(__SPIRV__)
 namespace ur_sanitizer_layer {
+#endif // !__SPIR__ && !__SPIRV__
 
 enum class DeviceSanitizerErrorType : int32_t {
     UNKNOWN,
@@ -161,4 +163,6 @@ inline const char *ToString(DeviceSanitizerErrorType ErrorType) {
     }
 }
 
+#if !defined(__SPIR__) && !defined(__SPIRV__)
 } // namespace ur_sanitizer_layer
+#endif // !__SPIR__ && !__SPIRV__
