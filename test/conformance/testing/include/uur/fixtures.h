@@ -1568,7 +1568,7 @@ struct urMultiDeviceProgramTest : urMultiDeviceQueueTest {
         ASSERT_SUCCESS(urPlatformGetInfo(platform, UR_PLATFORM_INFO_BACKEND,
                                          sizeof(backend), &backend, nullptr));
         // Multi-device programs are not supported for AMD and CUDA
-        if (backend == UR_PLATFORM_BACKEND_HIP &&
+        if (backend == UR_PLATFORM_BACKEND_HIP ||
             backend == UR_PLATFORM_BACKEND_CUDA) {
             GTEST_SKIP();
         }
