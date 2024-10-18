@@ -32,6 +32,17 @@ ur_result_t cl_adapter::getDeviceVersion(cl_device_id Dev,
   return UR_RESULT_SUCCESS;
 }
 
+static bool isIntelFPGAEmuDevice(cl_device_id Dev) {
+  size_t NameSize = 0;
+  CL_RETURN_ON_FAILURE(
+      clGetDeviceInfo(Dev, CL_DEVICE_NAME, 0, nullptr, &NameSize));
+  std::string NameStr(NameSize, '\0');
+  CL_RETURN_ON_FAILURE(
+      clGetDeviceInfo(Dev, CL_DEVICE_NAME, NameSize, NameStr.data(), nullptr));
+
+  return NameStr.find("Intel(R) FPGA Emulation Device") != std::string::npos;
+}
+
 ur_result_t cl_adapter::checkDeviceExtensions(
     cl_device_id Dev, const std::vector<std::string> &Exts, bool &Supported) {
   size_t ExtSize = 0;
@@ -46,6 +57,14 @@ ur_result_t cl_adapter::checkDeviceExtensions(
   Supported = true;
   for (const std::string &Ext : Exts) {
     if (!(Supported = (ExtStr.find(Ext) != std::string::npos))) {
+      // The Intel FPGA emulation device does actually support these, even if it
+      // doesn't report them.
+      if (isIntelFPGAEmuDevice(Dev) &&
+          (Ext == "cl_intel_device_attribute_query" ||
+           Ext == "cl_intel_required_subgroup_size")) {
+        Supported = true;
+        continue;
+      }
       break;
     }
   }
@@ -431,15 +450,16 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
       URValue[i].type = static_cast<ur_device_partition_t>(CLValue[0]);
       switch (URValue[i].type) {
       case UR_DEVICE_PARTITION_EQUALLY: {
-        URValue[i].value.equally = CLValue[i + 1];
+        URValue[i].value.equally = static_cast<uint32_t>(CLValue[i + 1]);
         break;
       }
       case UR_DEVICE_PARTITION_BY_COUNTS: {
-        URValue[i].value.count = CLValue[i + 1];
+        URValue[i].value.count = static_cast<uint32_t>(CLValue[i + 1]);
         break;
       }
       case UR_DEVICE_PARTITION_BY_AFFINITY_DOMAIN: {
-        URValue[i].value.affinity_domain = CLValue[i + 1];
+        URValue[i].value.affinity_domain =
+            static_cast<uint32_t>(CLValue[i + 1]);
         break;
       }
       default: {
@@ -1065,13 +1085,15 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     return ReturnValue(ExtStr.find("cl_khr_command_buffer") !=
                        std::string::npos);
   }
-  case UR_DEVICE_INFO_COMMAND_BUFFER_UPDATE_SUPPORT_EXP: {
+  case UR_DEVICE_INFO_COMMAND_BUFFER_UPDATE_CAPABILITIES_EXP: {
     cl_device_id Dev = cl_adapter::cast<cl_device_id>(hDevice);
-    bool Supported = false;
+    ur_device_command_buffer_update_capability_flags_t UpdateCapabilities = 0;
     CL_RETURN_ON_FAILURE(
-        deviceSupportsURCommandBufferKernelUpdate(Dev, Supported));
-    return ReturnValue(Supported);
+        getDeviceCommandBufferUpdateCapabilities(Dev, UpdateCapabilities));
+    return ReturnValue(UpdateCapabilities);
   }
+  case UR_DEVICE_INFO_COMMAND_BUFFER_EVENT_SUPPORT_EXP:
+    return ReturnValue(false);
   default: {
     return UR_RESULT_ERROR_INVALID_ENUMERATION;
   }

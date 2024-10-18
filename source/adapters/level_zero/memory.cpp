@@ -15,6 +15,7 @@
 
 #include "context.hpp"
 #include "event.hpp"
+#include "helpers/memory_helpers.hpp"
 #include "image.hpp"
 #include "logger/ur_logger.hpp"
 #include "queue.hpp"
@@ -79,7 +80,7 @@ ur_result_t enqueueMemCopyHelper(ur_command_t CommandType,
   ur_command_list_ptr_t CommandList{};
   UR_CALL(Queue->Context->getAvailableCommandList(
       Queue, CommandList, UseCopyEngine, NumEventsInWaitList, EventWaitList,
-      OkToBatch));
+      OkToBatch, nullptr /*ForcedCmdQueue*/));
 
   ze_event_handle_t ZeEvent = nullptr;
   ur_event_handle_t InternalEvent;
@@ -132,7 +133,7 @@ ur_result_t enqueueMemCopyRectHelper(
   ur_command_list_ptr_t CommandList{};
   UR_CALL(Queue->Context->getAvailableCommandList(
       Queue, CommandList, UseCopyEngine, NumEventsInWaitList, EventWaitList,
-      OkToBatch));
+      OkToBatch, nullptr /*ForcedCmdQueue*/));
 
   ze_event_handle_t ZeEvent = nullptr;
   ur_event_handle_t InternalEvent;
@@ -153,40 +154,13 @@ ur_result_t enqueueMemCopyRectHelper(
                 ur_cast<std::uintptr_t>(ZeEvent));
   printZeEventList(WaitList);
 
-  uint32_t SrcOriginX = ur_cast<uint32_t>(SrcOrigin.x);
-  uint32_t SrcOriginY = ur_cast<uint32_t>(SrcOrigin.y);
-  uint32_t SrcOriginZ = ur_cast<uint32_t>(SrcOrigin.z);
-
-  uint32_t SrcPitch = SrcRowPitch;
-  if (SrcPitch == 0)
-    SrcPitch = ur_cast<uint32_t>(Region.width);
-
-  if (SrcSlicePitch == 0)
-    SrcSlicePitch = ur_cast<uint32_t>(Region.height) * SrcPitch;
-
-  uint32_t DstOriginX = ur_cast<uint32_t>(DstOrigin.x);
-  uint32_t DstOriginY = ur_cast<uint32_t>(DstOrigin.y);
-  uint32_t DstOriginZ = ur_cast<uint32_t>(DstOrigin.z);
-
-  uint32_t DstPitch = DstRowPitch;
-  if (DstPitch == 0)
-    DstPitch = ur_cast<uint32_t>(Region.width);
-
-  if (DstSlicePitch == 0)
-    DstSlicePitch = ur_cast<uint32_t>(Region.height) * DstPitch;
-
-  uint32_t Width = ur_cast<uint32_t>(Region.width);
-  uint32_t Height = ur_cast<uint32_t>(Region.height);
-  uint32_t Depth = ur_cast<uint32_t>(Region.depth);
-
-  const ze_copy_region_t ZeSrcRegion = {SrcOriginX, SrcOriginY, SrcOriginZ,
-                                        Width,      Height,     Depth};
-  const ze_copy_region_t ZeDstRegion = {DstOriginX, DstOriginY, DstOriginZ,
-                                        Width,      Height,     Depth};
+  auto ZeParams = ur2zeRegionParams(SrcOrigin, DstOrigin, Region, SrcRowPitch,
+                                    DstRowPitch, SrcSlicePitch, DstSlicePitch);
 
   ZE2UR_CALL(zeCommandListAppendMemoryCopyRegion,
-             (ZeCommandList, DstBuffer, &ZeDstRegion, DstPitch, DstSlicePitch,
-              SrcBuffer, &ZeSrcRegion, SrcPitch, SrcSlicePitch, ZeEvent,
+             (ZeCommandList, DstBuffer, &ZeParams.dstRegion, ZeParams.dstPitch,
+              ZeParams.dstSlicePitch, SrcBuffer, &ZeParams.srcRegion,
+              ZeParams.srcPitch, ZeParams.srcSlicePitch, ZeEvent,
               WaitList.Length, WaitList.ZeEventList));
 
   logger::debug("calling zeCommandListAppendMemoryCopyRegion()");
@@ -241,7 +215,7 @@ static ur_result_t enqueueMemFillHelper(ur_command_t CommandType,
   bool OkToBatch = true;
   UR_CALL(Queue->Context->getAvailableCommandList(
       Queue, CommandList, UseCopyEngine, NumEventsInWaitList, EventWaitList,
-      OkToBatch));
+      OkToBatch, nullptr /*ForcedCmdQueue*/));
 
   ze_event_handle_t ZeEvent = nullptr;
   ur_event_handle_t InternalEvent;
@@ -271,7 +245,8 @@ static ur_result_t enqueueMemFillHelper(ur_command_t CommandType,
 
     // Execute command list asynchronously, as the event will be used
     // to track down its completion.
-    UR_CALL(Queue->executeCommandList(CommandList, false, OkToBatch));
+    UR_CALL(Queue->executeCommandList(CommandList, false /*IsBlocking*/,
+                                      OkToBatch));
   } else {
     // Copy pattern into every entry in memory array pointed by Ptr.
     uint32_t NumOfCopySteps = Size / PatternSize;
@@ -291,7 +266,8 @@ static ur_result_t enqueueMemFillHelper(ur_command_t CommandType,
     printZeEventList(WaitList);
 
     // Execute command list synchronously.
-    UR_CALL(Queue->executeCommandList(CommandList, true, OkToBatch));
+    UR_CALL(
+        Queue->executeCommandList(CommandList, true /*IsBlocking*/, OkToBatch));
   }
 
   return UR_RESULT_SUCCESS;
@@ -358,7 +334,7 @@ static ur_result_t enqueueMemImageCommandHelper(
   ur_command_list_ptr_t CommandList{};
   UR_CALL(Queue->Context->getAvailableCommandList(
       Queue, CommandList, UseCopyEngine, NumEventsInWaitList, EventWaitList,
-      OkToBatch));
+      OkToBatch, nullptr /*ForcedCmdQueue*/));
 
   ze_event_handle_t ZeEvent = nullptr;
   ur_event_handle_t InternalEvent;
@@ -406,7 +382,8 @@ static ur_result_t enqueueMemImageCommandHelper(
 
     char *ZeHandleSrc = nullptr;
     UR_CALL(SrcMem->getZeHandle(ZeHandleSrc, ur_mem_handle_t_::read_only,
-                                Queue->Device));
+                                Queue->Device, EventWaitList,
+                                NumEventsInWaitList));
     ZE2UR_CALL(zeCommandListAppendImageCopyToMemory,
                (ZeCommandList, Dst, ur_cast<ze_image_handle_t>(ZeHandleSrc),
                 &ZeSrcRegion, ZeEvent, WaitList.Length, WaitList.ZeEventList));
@@ -439,7 +416,8 @@ static ur_result_t enqueueMemImageCommandHelper(
 
     char *ZeHandleDst = nullptr;
     UR_CALL(DstMem->getZeHandle(ZeHandleDst, ur_mem_handle_t_::write_only,
-                                Queue->Device));
+                                Queue->Device, EventWaitList,
+                                NumEventsInWaitList));
     ZE2UR_CALL(zeCommandListAppendImageCopyFromMemory,
                (ZeCommandList, ur_cast<ze_image_handle_t>(ZeHandleDst), Src,
                 &ZeDstRegion, ZeEvent, WaitList.Length, WaitList.ZeEventList));
@@ -457,9 +435,11 @@ static ur_result_t enqueueMemImageCommandHelper(
     char *ZeHandleSrc = nullptr;
     char *ZeHandleDst = nullptr;
     UR_CALL(SrcImage->getZeHandle(ZeHandleSrc, ur_mem_handle_t_::read_only,
-                                  Queue->Device));
+                                  Queue->Device, EventWaitList,
+                                  NumEventsInWaitList));
     UR_CALL(DstImage->getZeHandle(ZeHandleDst, ur_mem_handle_t_::write_only,
-                                  Queue->Device));
+                                  Queue->Device, EventWaitList,
+                                  NumEventsInWaitList));
     ZE2UR_CALL(zeCommandListAppendImageCopyRegion,
                (ZeCommandList, ur_cast<ze_image_handle_t>(ZeHandleDst),
                 ur_cast<ze_image_handle_t>(ZeHandleSrc), &ZeDstRegion,
@@ -503,7 +483,8 @@ ur_result_t urEnqueueMemBufferRead(
 
   char *ZeHandleSrc = nullptr;
   UR_CALL(Src->getZeHandle(ZeHandleSrc, ur_mem_handle_t_::read_only,
-                           Queue->Device));
+                           Queue->Device, phEventWaitList,
+                           numEventsInWaitList));
   return enqueueMemCopyHelper(UR_COMMAND_MEM_BUFFER_READ, Queue, pDst,
                               blockingRead, size, ZeHandleSrc + offset,
                               numEventsInWaitList, phEventWaitList, phEvent,
@@ -538,7 +519,8 @@ ur_result_t urEnqueueMemBufferWrite(
 
   char *ZeHandleDst = nullptr;
   UR_CALL(Buffer->getZeHandle(ZeHandleDst, ur_mem_handle_t_::write_only,
-                              Queue->Device));
+                              Queue->Device, phEventWaitList,
+                              numEventsInWaitList));
   return enqueueMemCopyHelper(UR_COMMAND_MEM_BUFFER_WRITE, Queue,
                               ZeHandleDst + offset, // dst
                               blockingWrite, size,
@@ -584,7 +566,8 @@ ur_result_t urEnqueueMemBufferReadRect(
 
   char *ZeHandleSrc;
   UR_CALL(Buffer->getZeHandle(ZeHandleSrc, ur_mem_handle_t_::read_only,
-                              Queue->Device));
+                              Queue->Device, phEventWaitList,
+                              numEventsInWaitList));
   return enqueueMemCopyRectHelper(
       UR_COMMAND_MEM_BUFFER_READ_RECT, Queue, ZeHandleSrc, pDst, bufferOffset,
       hostOffset, region, bufferRowPitch, hostRowPitch, bufferSlicePitch,
@@ -630,7 +613,8 @@ ur_result_t urEnqueueMemBufferWriteRect(
 
   char *ZeHandleDst = nullptr;
   UR_CALL(Buffer->getZeHandle(ZeHandleDst, ur_mem_handle_t_::write_only,
-                              Queue->Device));
+                              Queue->Device, phEventWaitList,
+                              numEventsInWaitList));
   return enqueueMemCopyRectHelper(
       UR_COMMAND_MEM_BUFFER_WRITE_RECT, Queue,
       const_cast<char *>(static_cast<const char *>(pSrc)), ZeHandleDst,
@@ -678,10 +662,12 @@ ur_result_t urEnqueueMemBufferCopy(
 
   char *ZeHandleSrc = nullptr;
   UR_CALL(SrcBuffer->getZeHandle(ZeHandleSrc, ur_mem_handle_t_::read_only,
-                                 Queue->Device));
+                                 Queue->Device, EventWaitList,
+                                 NumEventsInWaitList));
   char *ZeHandleDst = nullptr;
   UR_CALL(DstBuffer->getZeHandle(ZeHandleDst, ur_mem_handle_t_::write_only,
-                                 Queue->Device));
+                                 Queue->Device, EventWaitList,
+                                 NumEventsInWaitList));
 
   return enqueueMemCopyHelper(
       UR_COMMAND_MEM_BUFFER_COPY, Queue, ZeHandleDst + DstOffset,
@@ -735,10 +721,12 @@ ur_result_t urEnqueueMemBufferCopyRect(
 
   char *ZeHandleSrc = nullptr;
   UR_CALL(SrcBuffer->getZeHandle(ZeHandleSrc, ur_mem_handle_t_::read_only,
-                                 Queue->Device));
+                                 Queue->Device, EventWaitList,
+                                 NumEventsInWaitList));
   char *ZeHandleDst = nullptr;
   UR_CALL(DstBuffer->getZeHandle(ZeHandleDst, ur_mem_handle_t_::write_only,
-                                 Queue->Device));
+                                 Queue->Device, EventWaitList,
+                                 NumEventsInWaitList));
 
   return enqueueMemCopyRectHelper(
       UR_COMMAND_MEM_BUFFER_COPY_RECT, Queue, ZeHandleSrc, ZeHandleDst,
@@ -773,7 +761,8 @@ ur_result_t urEnqueueMemBufferFill(
   char *ZeHandleDst = nullptr;
   _ur_buffer *UrBuffer = reinterpret_cast<_ur_buffer *>(Buffer);
   UR_CALL(UrBuffer->getZeHandle(ZeHandleDst, ur_mem_handle_t_::write_only,
-                                Queue->Device));
+                                Queue->Device, EventWaitList,
+                                NumEventsInWaitList));
   return enqueueMemFillHelper(
       UR_COMMAND_MEM_BUFFER_FILL, Queue, ZeHandleDst + Offset,
       Pattern,     // It will be interpreted as an 8-bit value,
@@ -971,7 +960,8 @@ ur_result_t urEnqueueMemBufferMap(
     std::scoped_lock<ur_shared_mutex> Guard(Buffer->Mutex);
 
     char *ZeHandleSrc;
-    UR_CALL(Buffer->getZeHandle(ZeHandleSrc, AccessMode, Queue->Device));
+    UR_CALL(Buffer->getZeHandle(ZeHandleSrc, AccessMode, Queue->Device,
+                                EventWaitList, NumEventsInWaitList));
 
     if (Buffer->MapHostPtr) {
       *RetMap = Buffer->MapHostPtr + Offset;
@@ -1018,7 +1008,8 @@ ur_result_t urEnqueueMemBufferMap(
     // For discrete devices we need a command list
     ur_command_list_ptr_t CommandList{};
     UR_CALL(Queue->Context->getAvailableCommandList(
-        Queue, CommandList, UseCopyEngine, NumEventsInWaitList, EventWaitList));
+        Queue, CommandList, UseCopyEngine, NumEventsInWaitList, EventWaitList,
+        false /*AllowBatching*/, nullptr /*ForcedCmdQueue*/));
 
     // Add the event to the command list.
     CommandList->second.append(reinterpret_cast<ur_event_handle_t>(*Event));
@@ -1028,7 +1019,8 @@ ur_result_t urEnqueueMemBufferMap(
     const auto &WaitList = (*Event)->WaitList;
 
     char *ZeHandleSrc;
-    UR_CALL(Buffer->getZeHandle(ZeHandleSrc, AccessMode, Queue->Device));
+    UR_CALL(Buffer->getZeHandle(ZeHandleSrc, AccessMode, Queue->Device,
+                                EventWaitList, NumEventsInWaitList));
 
     UR_CALL(setSignalEvent(Queue, UseCopyEngine, &ZeEvent, Event,
                            NumEventsInWaitList, EventWaitList,
@@ -1038,7 +1030,8 @@ ur_result_t urEnqueueMemBufferMap(
                (ZeCommandList, *RetMap, ZeHandleSrc + Offset, Size, ZeEvent,
                 WaitList.Length, WaitList.ZeEventList));
 
-    UR_CALL(Queue->executeCommandList(CommandList, BlockingMap));
+    UR_CALL(Queue->executeCommandList(CommandList, BlockingMap,
+                                      false /*OKToBatchCommand*/));
   }
 
   auto Res = Buffer->Mappings.insert({*RetMap, {Offset, Size}});
@@ -1125,7 +1118,8 @@ ur_result_t urEnqueueMemUnmap(
 
     char *ZeHandleDst;
     UR_CALL(Buffer->getZeHandle(ZeHandleDst, ur_mem_handle_t_::write_only,
-                                Queue->Device));
+                                Queue->Device, EventWaitList,
+                                NumEventsInWaitList));
 
     std::scoped_lock<ur_shared_mutex> Guard(Buffer->Mutex);
     if (Buffer->MapHostPtr)
@@ -1145,7 +1139,8 @@ ur_result_t urEnqueueMemUnmap(
   ur_command_list_ptr_t CommandList{};
   UR_CALL(Queue->Context->getAvailableCommandList(
       reinterpret_cast<ur_queue_handle_t>(Queue), CommandList, UseCopyEngine,
-      NumEventsInWaitList, EventWaitList));
+      NumEventsInWaitList, EventWaitList, false /*AllowBatching*/,
+      nullptr /*ForcedCmdQueue*/));
 
   CommandList->second.append(reinterpret_cast<ur_event_handle_t>(*Event));
   (*Event)->RefCount.increment();
@@ -1160,7 +1155,8 @@ ur_result_t urEnqueueMemUnmap(
 
   char *ZeHandleDst;
   UR_CALL(Buffer->getZeHandle(ZeHandleDst, ur_mem_handle_t_::write_only,
-                              Queue->Device));
+                              Queue->Device, EventWaitList,
+                              NumEventsInWaitList));
 
   UR_CALL(setSignalEvent(Queue, UseCopyEngine, &ZeEvent, Event,
                          NumEventsInWaitList, EventWaitList,
@@ -1173,7 +1169,8 @@ ur_result_t urEnqueueMemUnmap(
 
   // Execute command list asynchronously, as the event will be used
   // to track down its completion.
-  UR_CALL(Queue->executeCommandList(CommandList));
+  UR_CALL(Queue->executeCommandList(CommandList, false /*IsBlocking*/,
+                                    false /*OKToBatchCommand*/));
 
   return UR_RESULT_SUCCESS;
 }
@@ -1255,7 +1252,8 @@ ur_result_t urEnqueueUSMPrefetch(
   // TODO: Change UseCopyEngine argument to 'true' once L0 backend
   // support is added
   UR_CALL(Queue->Context->getAvailableCommandList(
-      Queue, CommandList, UseCopyEngine, NumEventsInWaitList, EventWaitList));
+      Queue, CommandList, UseCopyEngine, NumEventsInWaitList, EventWaitList,
+      false /*AllowBatching*/, nullptr /*ForcedCmdQueue*/));
 
   // TODO: do we need to create a unique command type for this?
   ze_event_handle_t ZeEvent = nullptr;
@@ -1280,7 +1278,8 @@ ur_result_t urEnqueueUSMPrefetch(
   // so manually add command to signal our event.
   ZE2UR_CALL(zeCommandListAppendSignalEvent, (ZeCommandList, ZeEvent));
 
-  UR_CALL(Queue->executeCommandList(CommandList, false));
+  UR_CALL(Queue->executeCommandList(CommandList, false /*IsBlocking*/,
+                                    false /*OKToBatchCommand*/));
 
   return UR_RESULT_SUCCESS;
 }
@@ -1310,8 +1309,9 @@ ur_result_t urEnqueueUSMAdvise(
   // UseCopyEngine is set to 'false' here.
   // TODO: Additional analysis is required to check if this operation will
   // run faster on copy engines.
-  UR_CALL(Queue->Context->getAvailableCommandList(Queue, CommandList,
-                                                  UseCopyEngine, 0, nullptr));
+  UR_CALL(Queue->Context->getAvailableCommandList(
+      Queue, CommandList, UseCopyEngine, 0, nullptr, false /*AllowBatching*/,
+      nullptr /*ForcedCmdQueue*/));
 
   // TODO: do we need to create a unique command type for this?
   ze_event_handle_t ZeEvent = nullptr;
@@ -1338,7 +1338,8 @@ ur_result_t urEnqueueUSMAdvise(
   // so manually add command to signal our event.
   ZE2UR_CALL(zeCommandListAppendSignalEvent, (ZeCommandList, ZeEvent));
 
-  Queue->executeCommandList(CommandList, false);
+  Queue->executeCommandList(CommandList, false /*IsBlocking*/,
+                            false /*OKToBatchCommand*/);
 
   return UR_RESULT_SUCCESS;
 }
@@ -1433,6 +1434,10 @@ static ur_result_t ur2zeImageDesc(const ur_image_format_t *ImageFormat,
 
   auto [ZeImageFormatType, ZeImageFormatTypeSize] =
       getImageFormatTypeAndSize(ImageFormat);
+
+  if (ZeImageFormatTypeSize == 0) {
+    return UR_RESULT_ERROR_UNSUPPORTED_IMAGE_FORMAT;
+  }
 
   // TODO: populate the layout mapping
   ze_image_format_layout_t ZeImageFormatLayout;
@@ -1599,30 +1604,11 @@ ur_result_t urMemBufferCreate(
     Host = Properties->pHost;
   }
 
-  // If USM Import feature is enabled and hostptr is supplied,
-  // import the hostptr if not already imported into USM.
-  // Data transfer rate is maximized when both source and destination
-  // are USM pointers. Promotion of the host pointer to USM thus
-  // optimizes data transfer performance.
   bool HostPtrImported = false;
-  if (ZeUSMImport.Enabled && Host != nullptr &&
-      (Flags & UR_MEM_FLAG_USE_HOST_POINTER) != 0) {
-    // Query memory type of the host pointer
-    ze_device_handle_t ZeDeviceHandle;
-    ZeStruct<ze_memory_allocation_properties_t> ZeMemoryAllocationProperties;
-    ZE2UR_CALL(zeMemGetAllocProperties,
-               (Context->ZeContext, Host, &ZeMemoryAllocationProperties,
-                &ZeDeviceHandle));
-
-    // If not shared of any type, we can import the ptr
-    if (ZeMemoryAllocationProperties.type == ZE_MEMORY_TYPE_UNKNOWN) {
-      // Promote the host ptr to USM host memory
-      ze_driver_handle_t driverHandle =
-          Context->getPlatform()->ZeDriverHandleExpTranslated;
-      ZeUSMImport.doZeUSMImport(driverHandle, Host, Size);
-      HostPtrImported = true;
-    }
-  }
+  if (Flags & UR_MEM_FLAG_USE_HOST_POINTER)
+    HostPtrImported =
+        maybeImportUSM(Context->getPlatform()->ZeDriverHandleExpTranslated,
+                       Context->ZeContext, Host, Size);
 
   _ur_buffer *Buffer = nullptr;
   auto HostPtrOrNull = (Flags & UR_MEM_FLAG_USE_HOST_POINTER)
@@ -1646,7 +1632,7 @@ ur_result_t urMemBufferCreate(
       // allocation.
       char *ZeHandleDst;
       UR_CALL(Buffer->getZeHandle(ZeHandleDst, ur_mem_handle_t_::write_only,
-                                  Context->Devices[0]));
+                                  Context->Devices[0], nullptr, 0u));
       if (Buffer->OnHost) {
         // Do a host to host copy.
         // For an imported HostPtr the copy is unneeded.
@@ -1688,7 +1674,8 @@ ur_result_t urMemRelease(
     char *ZeHandleImage;
     auto Image = static_cast<_ur_image *>(Mem);
     if (Image->OwnNativeHandle) {
-      UR_CALL(Mem->getZeHandle(ZeHandleImage, ur_mem_handle_t_::write_only));
+      UR_CALL(Mem->getZeHandle(ZeHandleImage, ur_mem_handle_t_::write_only,
+                               nullptr, nullptr, 0u));
       auto ZeResult = ZE_CALL_NOCHECK(
           zeImageDestroy, (ur_cast<ze_image_handle_t>(ZeHandleImage)));
       // Gracefully handle the case that L0 was already unloaded.
@@ -1748,7 +1735,8 @@ ur_result_t urMemGetNativeHandle(
 ) {
   std::shared_lock<ur_shared_mutex> Guard(Mem->Mutex);
   char *ZeHandle = nullptr;
-  UR_CALL(Mem->getZeHandle(ZeHandle, ur_mem_handle_t_::read_write));
+  UR_CALL(Mem->getZeHandle(ZeHandle, ur_mem_handle_t_::read_write, nullptr,
+                           nullptr, 0u));
   *NativeMem = ur_cast<ur_native_handle_t>(ZeHandle);
 
   return UR_RESULT_SUCCESS;
@@ -1839,8 +1827,8 @@ ur_result_t urMemBufferCreateWithNativeHandle(
     // represent the buffer in this context) copy the data to a newly
     // created device allocation.
     char *ZeHandleDst;
-    UR_CALL(
-        Buffer->getZeHandle(ZeHandleDst, ur_mem_handle_t_::write_only, Device));
+    UR_CALL(Buffer->getZeHandle(ZeHandleDst, ur_mem_handle_t_::write_only,
+                                Device, nullptr, 0u));
 
     // Indicate that this buffer has the device buffer mapped to a native buffer
     // and track the native pointer such that the memory is synced later at
@@ -2027,7 +2015,9 @@ static ur_result_t ZeDeviceMemAllocHelper(void **ResultPtr,
 }
 
 ur_result_t _ur_buffer::getZeHandle(char *&ZeHandle, access_mode_t AccessMode,
-                                    ur_device_handle_t Device) {
+                                    ur_device_handle_t Device,
+                                    const ur_event_handle_t *phWaitEvents,
+                                    uint32_t numWaitEvents) {
 
   // NOTE: There might be no valid allocation at all yet and we get
   // here from piEnqueueKernelLaunch that would be doing the buffer
@@ -2042,18 +2032,30 @@ ur_result_t _ur_buffer::getZeHandle(char *&ZeHandle, access_mode_t AccessMode,
 
   auto &Allocation = Allocations[Device];
 
+  if (this->isFreed) {
+    die("getZeHandle() buffer already released, no valid handles.");
+  }
+
   // Sub-buffers don't maintain own allocations but rely on parent buffer.
   if (SubBuffer) {
-    UR_CALL(SubBuffer->Parent->getZeHandle(ZeHandle, AccessMode, Device));
-    ZeHandle += SubBuffer->Origin;
-    // Still store the allocation info in the PI sub-buffer for
-    // getZeHandlePtr to work. At least zeKernelSetArgumentValue needs to
-    // be given a pointer to the allocation handle rather than its value.
-    //
-    Allocation.ZeHandle = ZeHandle;
-    Allocation.ReleaseAction = allocation_t::keep;
-    LastDeviceWithValidAllocation = Device;
-    return UR_RESULT_SUCCESS;
+    // Verify that the Parent Buffer is still valid or if it has been freed.
+    if (SubBuffer->Parent && !SubBuffer->Parent->isFreed) {
+      UR_CALL(SubBuffer->Parent->getZeHandle(ZeHandle, AccessMode, Device,
+                                             phWaitEvents, numWaitEvents));
+      ZeHandle += SubBuffer->Origin;
+      // Still store the allocation info in the PI sub-buffer for
+      // getZeHandlePtr to work. At least zeKernelSetArgumentValue needs to
+      // be given a pointer to the allocation handle rather than its value.
+      //
+      Allocation.ZeHandle = ZeHandle;
+      Allocation.ReleaseAction = allocation_t::keep;
+      LastDeviceWithValidAllocation = Device;
+      return UR_RESULT_SUCCESS;
+    } else {
+      // Return an error if the parent buffer is already gone.
+      die("getZeHandle() SubBuffer's parent already released, no valid "
+          "handles.");
+    }
   }
 
   // First handle case where the buffer is represented by only
@@ -2117,7 +2119,8 @@ ur_result_t _ur_buffer::getZeHandle(char *&ZeHandle, access_mode_t AccessMode,
       // TODO: we can probably generalize this and share root-device
       //       allocations by its own sub-devices even if not all other
       //       devices in the context have the same root.
-      UR_CALL(getZeHandle(ZeHandle, AccessMode, UrContext->SingleRootDevice));
+      UR_CALL(getZeHandle(ZeHandle, AccessMode, UrContext->SingleRootDevice,
+                          phWaitEvents, numWaitEvents));
       Allocation.ReleaseAction = allocation_t::keep;
       Allocation.ZeHandle = ZeHandle;
       Allocation.Valid = true;
@@ -2160,7 +2163,8 @@ ur_result_t _ur_buffer::getZeHandle(char *&ZeHandle, access_mode_t AccessMode,
     char *ZeHandleSrc = nullptr;
     if (NeedCopy) {
       UR_CALL(getZeHandle(ZeHandleSrc, ur_mem_handle_t_::read_only,
-                          LastDeviceWithValidAllocation));
+                          LastDeviceWithValidAllocation, phWaitEvents,
+                          numWaitEvents));
       // It's possible with the single root-device contexts that
       // the buffer is represented by the single root-device
       // allocation and then skip the copy to itself.
@@ -2169,6 +2173,33 @@ ur_result_t _ur_buffer::getZeHandle(char *&ZeHandle, access_mode_t AccessMode,
     }
 
     if (NeedCopy) {
+      // Wait on all dependency events passed in to ensure that the memory which
+      // is being init is updated correctly.
+      _ur_ze_event_list_t waitlist;
+      waitlist.ZeEventList = nullptr;
+      waitlist.Length = 0;
+      uint32_t EventListIndex = 0;
+      for (unsigned i = 0; i < numWaitEvents; ++i) {
+        if (phWaitEvents[i]->HostVisibleEvent) {
+          ZE2UR_CALL(zeEventHostSynchronize,
+                     (phWaitEvents[i]->ZeEvent, UINT64_MAX));
+        } else {
+          // Generate the waitlist for the Copy calls based on the passed in
+          // dependencies, if they exist for device only.
+          if (waitlist.ZeEventList == nullptr) {
+            waitlist.ZeEventList = new ze_event_handle_t[numWaitEvents];
+          }
+          waitlist.ZeEventList[EventListIndex] = phWaitEvents[i]->ZeEvent;
+          waitlist.Length++;
+          EventListIndex++;
+        }
+      }
+      if (waitlist.Length > 0) {
+        ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
+                   (UrContext->ZeCommandListInit, waitlist.Length,
+                    waitlist.ZeEventList));
+      }
+
       // Copy valid buffer data to this allocation.
       // TODO: see if we should better use peer's device allocation used
       // directly, if that capability is reported with zeDeviceCanAccessPeer,
@@ -2206,7 +2237,7 @@ ur_result_t _ur_buffer::getZeHandle(char *&ZeHandle, access_mode_t AccessMode,
         if (!HostAllocation.Valid) {
           ZE2UR_CALL(zeCommandListAppendMemoryCopy,
                      (UrContext->ZeCommandListInit, HostAllocation.ZeHandle,
-                      ZeHandleSrc, Size, nullptr, 0, nullptr));
+                      ZeHandleSrc, Size, nullptr, 0u, nullptr));
           // Mark the host allocation data  as valid so it can be reused.
           // It will be invalidated below if the current access is not
           // read-only.
@@ -2214,13 +2245,16 @@ ur_result_t _ur_buffer::getZeHandle(char *&ZeHandle, access_mode_t AccessMode,
         }
         ZE2UR_CALL(zeCommandListAppendMemoryCopy,
                    (UrContext->ZeCommandListInit, ZeHandle,
-                    HostAllocation.ZeHandle, Size, nullptr, 0, nullptr));
+                    HostAllocation.ZeHandle, Size, nullptr, 0u, nullptr));
       } else {
         // Perform P2P copy.
         std::scoped_lock<ur_mutex> Lock(UrContext->ImmediateCommandListMutex);
         ZE2UR_CALL(zeCommandListAppendMemoryCopy,
                    (UrContext->ZeCommandListInit, ZeHandle, ZeHandleSrc, Size,
-                    nullptr, 0, nullptr));
+                    nullptr, 0u, nullptr));
+      }
+      if (waitlist.ZeEventList) {
+        delete waitlist.ZeEventList;
       }
     }
     Allocation.Valid = true;
@@ -2284,6 +2318,7 @@ ur_result_t _ur_buffer::free() {
       die("_ur_buffer::free(): Unhandled release action");
     }
     ZeHandle = nullptr; // don't leave hanging pointers
+    this->isFreed = true;
   }
   return UR_RESULT_SUCCESS;
 }
@@ -2349,9 +2384,12 @@ _ur_buffer::_ur_buffer(ur_context_handle_t Context, size_t Size,
 
 ur_result_t _ur_buffer::getZeHandlePtr(char **&ZeHandlePtr,
                                        access_mode_t AccessMode,
-                                       ur_device_handle_t Device) {
+                                       ur_device_handle_t Device,
+                                       const ur_event_handle_t *phWaitEvents,
+                                       uint32_t numWaitEvents) {
   char *ZeHandle;
-  UR_CALL(getZeHandle(ZeHandle, AccessMode, Device));
+  UR_CALL(
+      getZeHandle(ZeHandle, AccessMode, Device, phWaitEvents, numWaitEvents));
   ZeHandlePtr = &Allocations[Device].ZeHandle;
   return UR_RESULT_SUCCESS;
 }

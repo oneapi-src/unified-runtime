@@ -512,7 +512,7 @@ ur_result_t ur_context_handle_t_::getFreeSlotInExistingOrNewPool(
   // Create one event ZePool per MaxNumEventsPerPool events
   if (*ZePool == nullptr) {
     ze_event_pool_counter_based_exp_desc_t counterBasedExt = {
-        ZE_STRUCTURE_TYPE_COUNTER_BASED_EVENT_POOL_EXP_DESC};
+        ZE_STRUCTURE_TYPE_COUNTER_BASED_EVENT_POOL_EXP_DESC, nullptr, 0};
     ZeStruct<ze_event_pool_desc_t> ZeEventPoolDesc;
     ZeEventPoolDesc.count = MaxNumEventsPerPool;
     ZeEventPoolDesc.flags = 0;
@@ -530,6 +530,8 @@ ur_result_t ur_context_handle_t_::getFreeSlotInExistingOrNewPool(
         counterBasedExt.flags =
             ZE_EVENT_POOL_COUNTER_BASED_EXP_FLAG_NON_IMMEDIATE;
       }
+      logger::debug("ze_event_pool_desc_t counter based flags set to: {}",
+                    counterBasedExt.flags);
       ZeEventPoolDesc.pNext = &counterBasedExt;
     }
 
@@ -772,7 +774,7 @@ ur_result_t ur_context_handle_t_::getAvailableCommandList(
                 .emplace(ZeCommandList,
                          ur_command_list_info_t(
                              ZeFence, true, false, ZeCommandQueue, ZeQueueDesc,
-                             Queue->useCompletionBatching(), true,
+                             Queue->useCompletionBatching(), true /*CanReuse */,
                              ZeCommandListIt->second.InOrderList,
                              ZeCommandListIt->second.IsImmediate))
                 .first;

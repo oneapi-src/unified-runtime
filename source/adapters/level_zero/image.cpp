@@ -16,6 +16,7 @@
 #include "sampler.hpp"
 #include "ur_interface_loader.hpp"
 #include "ur_level_zero.hpp"
+#include "ze_api.h"
 
 typedef ze_result_t(ZE_APICALL *zeImageGetDeviceOffsetExp_pfn)(
     ze_image_handle_t hImage, uint64_t *pDeviceOffset);
@@ -38,16 +39,19 @@ ur_result_t ze2urImageFormat(const ze_image_desc_t *ZeImageDesc,
   switch (ZeImageFormat.layout) {
   case ZE_IMAGE_FORMAT_LAYOUT_8:
   case ZE_IMAGE_FORMAT_LAYOUT_8_8:
+  case ZE_IMAGE_FORMAT_LAYOUT_8_8_8:
   case ZE_IMAGE_FORMAT_LAYOUT_8_8_8_8:
     ZeImageFormatTypeSize = 8;
     break;
   case ZE_IMAGE_FORMAT_LAYOUT_16:
   case ZE_IMAGE_FORMAT_LAYOUT_16_16:
+  case ZE_IMAGE_FORMAT_LAYOUT_16_16_16:
   case ZE_IMAGE_FORMAT_LAYOUT_16_16_16_16:
     ZeImageFormatTypeSize = 16;
     break;
   case ZE_IMAGE_FORMAT_LAYOUT_32:
   case ZE_IMAGE_FORMAT_LAYOUT_32_32:
+  case ZE_IMAGE_FORMAT_LAYOUT_32_32_32:
   case ZE_IMAGE_FORMAT_LAYOUT_32_32_32_32:
     ZeImageFormatTypeSize = 32;
     break;
@@ -99,7 +103,30 @@ ur_result_t ze2urImageFormat(const ze_image_desc_t *ZeImageDesc,
     default:
       logger::error(
           "ze2urImageFormat: unexpected image format channel y: y = {}\n",
-          ZeImageFormat.x);
+          ZeImageFormat.y);
+      return UR_RESULT_ERROR_INVALID_VALUE;
+    }
+    break;
+  case ZE_IMAGE_FORMAT_LAYOUT_8_8_8:
+  case ZE_IMAGE_FORMAT_LAYOUT_16_16_16:
+  case ZE_IMAGE_FORMAT_LAYOUT_32_32_32:
+    if (ZeImageFormat.x == ZE_IMAGE_FORMAT_SWIZZLE_R &&
+        ZeImageFormat.y == ZE_IMAGE_FORMAT_SWIZZLE_G) {
+      switch (ZeImageFormat.z) {
+      case ZE_IMAGE_FORMAT_SWIZZLE_B:
+        ChannelOrder = UR_IMAGE_CHANNEL_ORDER_RGB;
+        break;
+      case ZE_IMAGE_FORMAT_SWIZZLE_X:
+        ChannelOrder = UR_IMAGE_CHANNEL_ORDER_RGX;
+        break;
+      default:
+        logger::error(
+            "ze2urImageFormat: unexpected image format channel z: z = {}\n",
+            ZeImageFormat.z);
+        return UR_RESULT_ERROR_INVALID_VALUE;
+      }
+    } else {
+      logger::error("ze2urImageFormat: unexpected image format channel");
       return UR_RESULT_ERROR_INVALID_VALUE;
     }
     break;
@@ -244,6 +271,9 @@ ur_result_t ur2zeImageDesc(const ur_image_format_t *ImageFormat,
                            ZeStruct<ze_image_desc_t> &ZeImageDesc) {
   auto [ZeImageFormatType, ZeImageFormatTypeSize] =
       getImageFormatTypeAndSize(ImageFormat);
+  if (ZeImageFormatTypeSize == 0) {
+    return UR_RESULT_ERROR_UNSUPPORTED_IMAGE_FORMAT;
+  }
   // TODO: populate the layout mapping
   ze_image_format_layout_t ZeImageFormatLayout;
   switch (ImageFormat->channelOrder) {
@@ -297,6 +327,24 @@ ur_result_t ur2zeImageDesc(const ur_image_format_t *ImageFormat,
       break;
     case 32:
       ZeImageFormatLayout = ZE_IMAGE_FORMAT_LAYOUT_32_32_32_32;
+      break;
+    default:
+      logger::error("ur2zeImageDesc: unexpected data type size");
+      return UR_RESULT_ERROR_INVALID_VALUE;
+    }
+    break;
+  }
+  case UR_IMAGE_CHANNEL_ORDER_RGB:
+  case UR_IMAGE_CHANNEL_ORDER_RGX: {
+    switch (ZeImageFormatTypeSize) {
+    case 8:
+      ZeImageFormatLayout = ZE_IMAGE_FORMAT_LAYOUT_8_8_8;
+      break;
+    case 16:
+      ZeImageFormatLayout = ZE_IMAGE_FORMAT_LAYOUT_16_16_16;
+      break;
+    case 32:
+      ZeImageFormatLayout = ZE_IMAGE_FORMAT_LAYOUT_32_32_32;
       break;
     default:
       logger::error("ur2zeImageDesc: unexpected data type size");
@@ -445,7 +493,8 @@ ur_result_t bindlessImagesCreateImpl(ur_context_handle_t hContext,
   ze_image_handle_t ZeImage;
 
   ze_memory_allocation_properties_t MemAllocProperties{
-      ZE_STRUCTURE_TYPE_MEMORY_ALLOCATION_PROPERTIES};
+      ZE_STRUCTURE_TYPE_MEMORY_ALLOCATION_PROPERTIES, nullptr,
+      ZE_MEMORY_TYPE_UNKNOWN, 0, 0};
   ZE2UR_CALL(zeMemGetAllocProperties,
              (hContext->ZeContext, reinterpret_cast<const void *>(hImageMem),
               &MemAllocProperties, nullptr));
@@ -627,7 +676,8 @@ getImageFormatTypeAndSize(const ur_image_format_t *ImageFormat) {
     logger::error(
         "urMemImageCreate: unsupported image data type: data type = {}",
         ImageFormat->channelType);
-    ur::unreachable();
+    ZeImageFormatType = ZE_IMAGE_FORMAT_TYPE_FORCE_UINT32;
+    ZeImageFormatTypeSize = 0;
   }
   return {ZeImageFormatType, ZeImageFormatTypeSize};
 }
@@ -806,7 +856,7 @@ ur_result_t urBindlessImagesImageCopyExp(
   ur_command_list_ptr_t CommandList{};
   UR_CALL(hQueue->Context->getAvailableCommandList(
       hQueue, CommandList, UseCopyEngine, numEventsInWaitList, phEventWaitList,
-      OkToBatch));
+      OkToBatch, nullptr /*ForcedCmdQueue*/));
 
   ze_event_handle_t ZeEvent = nullptr;
   ur_event_handle_t InternalEvent;

@@ -113,7 +113,8 @@ ur_result_t urEnqueueKernelLaunch(
     char **ZeHandlePtr = nullptr;
     if (Arg.Value) {
       UR_CALL(Arg.Value->getZeHandlePtr(ZeHandlePtr, Arg.AccessMode,
-                                        Queue->Device));
+                                        Queue->Device, EventWaitList,
+                                        NumEventsInWaitList));
     }
     ZE2UR_CALL(zeKernelSetArgumentValue,
                (ZeKernel, Arg.Index, Arg.Size, ZeHandlePtr));
@@ -138,7 +139,7 @@ ur_result_t urEnqueueKernelLaunch(
   ur_command_list_ptr_t CommandList{};
   UR_CALL(Queue->Context->getAvailableCommandList(
       Queue, CommandList, UseCopyEngine, NumEventsInWaitList, EventWaitList,
-      true /* AllowBatching */));
+      true /* AllowBatching */, nullptr /*ForcedCmdQueue*/));
 
   ze_event_handle_t ZeEvent = nullptr;
   ur_event_handle_t InternalEvent{};
@@ -201,7 +202,8 @@ ur_result_t urEnqueueKernelLaunch(
 
   // Execute command list asynchronously, as the event will be used
   // to track down its completion.
-  UR_CALL(Queue->executeCommandList(CommandList, false, true));
+  UR_CALL(Queue->executeCommandList(CommandList, false /*IsBlocking*/,
+                                    true /*OKToBatchCommand*/));
 
   return UR_RESULT_SUCCESS;
 }
@@ -273,7 +275,8 @@ ur_result_t urEnqueueCooperativeKernelLaunchExp(
     char **ZeHandlePtr = nullptr;
     if (Arg.Value) {
       UR_CALL(Arg.Value->getZeHandlePtr(ZeHandlePtr, Arg.AccessMode,
-                                        Queue->Device));
+                                        Queue->Device, EventWaitList,
+                                        NumEventsInWaitList));
     }
     ZE2UR_CALL(zeKernelSetArgumentValue,
                (ZeKernel, Arg.Index, Arg.Size, ZeHandlePtr));
@@ -402,7 +405,7 @@ ur_result_t urEnqueueCooperativeKernelLaunchExp(
   ur_command_list_ptr_t CommandList{};
   UR_CALL(Queue->Context->getAvailableCommandList(
       Queue, CommandList, UseCopyEngine, NumEventsInWaitList, EventWaitList,
-      true /* AllowBatching */));
+      true /* AllowBatching */, nullptr /*ForcedCmdQueue*/));
 
   ze_event_handle_t ZeEvent = nullptr;
   ur_event_handle_t InternalEvent{};
@@ -465,7 +468,8 @@ ur_result_t urEnqueueCooperativeKernelLaunchExp(
 
   // Execute command list asynchronously, as the event will be used
   // to track down its completion.
-  UR_CALL(Queue->executeCommandList(CommandList, false, true));
+  UR_CALL(Queue->executeCommandList(CommandList, false /*IsBlocking*/,
+                                    true /*OKToBatchCommand*/));
 
   return UR_RESULT_SUCCESS;
 }
@@ -494,11 +498,19 @@ ur_result_t urEnqueueDeviceGlobalVariableWrite(
 ) {
   std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
 
+  ze_module_handle_t ZeModule{};
+  auto It = Program->ZeModuleMap.find(Queue->Device->ZeDevice);
+  if (It != Program->ZeModuleMap.end()) {
+    ZeModule = It->second;
+  } else {
+    ZeModule = Program->ZeModule;
+  }
+
   // Find global variable pointer
   size_t GlobalVarSize = 0;
   void *GlobalVarPtr = nullptr;
   ZE2UR_CALL(zeModuleGetGlobalPointer,
-             (Program->ZeModule, Name, &GlobalVarSize, &GlobalVarPtr));
+             (ZeModule, Name, &GlobalVarSize, &GlobalVarPtr));
   if (GlobalVarSize < Offset + Count) {
     setErrorMessage("Write device global variable is out of range.",
                     UR_RESULT_ERROR_INVALID_VALUE,
@@ -548,11 +560,19 @@ ur_result_t urEnqueueDeviceGlobalVariableRead(
 ) {
   std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
 
+  ze_module_handle_t ZeModule{};
+  auto It = Program->ZeModuleMap.find(Queue->Device->ZeDevice);
+  if (It != Program->ZeModuleMap.end()) {
+    ZeModule = It->second;
+  } else {
+    ZeModule = Program->ZeModule;
+  }
+
   // Find global variable pointer
   size_t GlobalVarSize = 0;
   void *GlobalVarPtr = nullptr;
   ZE2UR_CALL(zeModuleGetGlobalPointer,
-             (Program->ZeModule, Name, &GlobalVarSize, &GlobalVarPtr));
+             (ZeModule, Name, &GlobalVarSize, &GlobalVarPtr));
   if (GlobalVarSize < Offset + Count) {
     setErrorMessage("Read from device global variable is out of range.",
                     UR_RESULT_ERROR_INVALID_VALUE,
@@ -840,6 +860,10 @@ ur_result_t urKernelGetGroupInfo(
   case UR_KERNEL_GROUP_INFO_PRIVATE_MEM_SIZE: {
     return ReturnValue(uint32_t{Kernel->ZeKernelProperties->privateMemSize});
   }
+  case UR_KERNEL_GROUP_INFO_COMPILE_MAX_WORK_GROUP_SIZE:
+  case UR_KERNEL_GROUP_INFO_COMPILE_MAX_LINEAR_WORK_GROUP_SIZE:
+    // No corresponding enumeration in Level Zero
+    return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
   default: {
     logger::error(
         "Unknown ParamName in urKernelGetGroupInfo: ParamName={}(0x{})",

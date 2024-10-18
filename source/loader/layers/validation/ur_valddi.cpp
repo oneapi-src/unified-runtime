@@ -25,7 +25,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGet(
     ur_adapter_handle_t *
         phAdapters, ///< [out][optional][range(0, NumEntries)] array of handle of adapters.
     ///< If NumEntries is less than the number of adapters available, then
-    ///< ::urAdapterGet shall only retrieve that number of platforms.
+    ///< ::urAdapterGet shall only retrieve that number of adapters.
     uint32_t *
         pNumAdapters ///< [out][optional] returns the total number of adapters available.
 ) {
@@ -36,6 +36,9 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGet(
     }
 
     if (getContext()->enableParameterValidation) {
+        if (NumEntries == 0 && phAdapters != NULL) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
     }
 
     ur_result_t result = pfnAdapterGet(NumEntries, phAdapters, pNumAdapters);
@@ -3504,7 +3507,8 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetGroupInfo(
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
 
-        if (UR_KERNEL_GROUP_INFO_PRIVATE_MEM_SIZE < propName) {
+        if (UR_KERNEL_GROUP_INFO_COMPILE_MAX_LINEAR_WORK_GROUP_SIZE <
+            propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
     }
@@ -4604,17 +4608,16 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunch(
         pLocalWorkSize, ///< [in][optional] pointer to an array of workDim unsigned values that
     ///< specify the number of local work-items forming a work-group that will
     ///< execute the kernel function.
-    ///< If nullptr, the runtime implementation will choose the work-group
-    ///< size.
+    ///< If nullptr, the runtime implementation will choose the work-group size.
     uint32_t numEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t *
         phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
     ///< events that must be complete before the kernel execution.
-    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait
-    ///< event.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait event.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< kernel execution instance.
+    ///< kernel execution instance. If phEventWaitList and phEvent are not
+    ///< NULL, phEvent must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnKernelLaunch = getContext()->urDdiTable.Enqueue.pfnKernelLaunch;
 
@@ -4686,7 +4689,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWait(
     ///< must be complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnEventsWait = getContext()->urDdiTable.Enqueue.pfnEventsWait;
 
@@ -4740,7 +4744,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
     ///< must be complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnEventsWaitWithBarrier =
         getContext()->urDdiTable.Enqueue.pfnEventsWaitWithBarrier;
@@ -4800,7 +4805,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferRead(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnMemBufferRead = getContext()->urDdiTable.Enqueue.pfnMemBufferRead;
 
@@ -4882,7 +4888,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWrite(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnMemBufferWrite = getContext()->urDdiTable.Enqueue.pfnMemBufferWrite;
 
@@ -4974,7 +4981,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnMemBufferReadRect =
         getContext()->urDdiTable.Enqueue.pfnMemBufferReadRect;
@@ -5111,7 +5119,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnMemBufferWriteRect =
         getContext()->urDdiTable.Enqueue.pfnMemBufferWriteRect;
@@ -5234,7 +5243,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopy(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnMemBufferCopy = getContext()->urDdiTable.Enqueue.pfnMemBufferCopy;
 
@@ -5336,7 +5346,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnMemBufferCopyRect =
         getContext()->urDdiTable.Enqueue.pfnMemBufferCopyRect;
@@ -5466,7 +5477,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferFill(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnMemBufferFill = getContext()->urDdiTable.Enqueue.pfnMemBufferFill;
 
@@ -5571,7 +5583,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageRead(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnMemImageRead = getContext()->urDdiTable.Enqueue.pfnMemImageRead;
 
@@ -5661,7 +5674,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageWrite(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnMemImageWrite = getContext()->urDdiTable.Enqueue.pfnMemImageWrite;
 
@@ -5752,7 +5766,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageCopy(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnMemImageCopy = getContext()->urDdiTable.Enqueue.pfnMemImageCopy;
 
@@ -5848,7 +5863,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferMap(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent, ///< [out][optional] return an event object that identifies this particular
-                 ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
     void **ppRetMap ///< [out] return mapped pointer.  TODO: move it before
                     ///< numEventsInWaitList?
 ) {
@@ -5931,7 +5947,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemUnmap(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnMemUnmap = getContext()->urDdiTable.Enqueue.pfnMemUnmap;
 
@@ -6006,7 +6023,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnUSMFill = getContext()->urDdiTable.Enqueue.pfnUSMFill;
 
@@ -6093,7 +6111,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnUSMMemcpy = getContext()->urDdiTable.Enqueue.pfnUSMMemcpy;
 
@@ -6177,7 +6196,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMPrefetch(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnUSMPrefetch = getContext()->urDdiTable.Enqueue.pfnUSMPrefetch;
 
@@ -6312,11 +6332,11 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill2D(
     const ur_event_handle_t *
         phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
     ///< events that must be complete before the kernel execution.
-    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait
-    ///< event.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait event.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< kernel execution instance.
+    ///< kernel execution instance. If phEventWaitList and phEvent are not
+    ///< NULL, phEvent must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnUSMFill2D = getContext()->urDdiTable.Enqueue.pfnUSMFill2D;
 
@@ -6425,11 +6445,11 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
     const ur_event_handle_t *
         phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
     ///< events that must be complete before the kernel execution.
-    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait
-    ///< event.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait event.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< kernel execution instance.
+    ///< kernel execution instance. If phEventWaitList and phEvent are not
+    ///< NULL, phEvent must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnUSMMemcpy2D = getContext()->urDdiTable.Enqueue.pfnUSMMemcpy2D;
 
@@ -6530,11 +6550,11 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
     const ur_event_handle_t *
         phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
     ///< events that must be complete before the kernel execution.
-    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait
-    ///< event.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait event.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< kernel execution instance.
+    ///< kernel execution instance. If phEventWaitList and phEvent are not
+    ///< NULL, phEvent must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnDeviceGlobalVariableWrite =
         getContext()->urDdiTable.Enqueue.pfnDeviceGlobalVariableWrite;
@@ -6611,11 +6631,11 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
     const ur_event_handle_t *
         phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
     ///< events that must be complete before the kernel execution.
-    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait
-    ///< event.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait event.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< kernel execution instance.
+    ///< kernel execution instance. If phEventWaitList and phEvent are not
+    ///< NULL, phEvent must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnDeviceGlobalVariableRead =
         getContext()->urDdiTable.Enqueue.pfnDeviceGlobalVariableRead;
@@ -6698,9 +6718,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueReadHostPipe(
     ///< events that must be complete before the host pipe read.
     ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait event.
     ur_event_handle_t *
-        phEvent ///< [out][optional] returns an event object that identifies this read
-                ///< command
+        phEvent ///< [out][optional] returns an event object that identifies this read command
     ///< and can be used to query or queue a wait for this command to complete.
+    ///< If phEventWaitList and phEvent are not NULL, phEvent must not refer to
+    ///< an element of the phEventWaitList array.
 ) {
     auto pfnReadHostPipe = getContext()->urDdiTable.Enqueue.pfnReadHostPipe;
 
@@ -6785,6 +6806,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueWriteHostPipe(
     ur_event_handle_t *
         phEvent ///< [out][optional] returns an event object that identifies this write command
     ///< and can be used to query or queue a wait for this command to complete.
+    ///< If phEventWaitList and phEvent are not NULL, phEvent must not refer to
+    ///< an element of the phEventWaitList array.
 ) {
     auto pfnWriteHostPipe = getContext()->urDdiTable.Enqueue.pfnWriteHostPipe;
 
@@ -7267,7 +7290,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageCopyExp(
     ///< must be complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnImageCopyExp =
         getContext()->urDdiTable.BindlessImagesExp.pfnImageCopyExp;
@@ -7825,7 +7849,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesWaitExternalSemaphoreExp(
     ///< must be complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnWaitExternalSemaphoreExp =
         getContext()->urDdiTable.BindlessImagesExp.pfnWaitExternalSemaphoreExp;
@@ -7885,7 +7910,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesSignalExternalSemaphoreExp(
     ///< must be complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnSignalExternalSemaphoreExp =
         getContext()
@@ -8054,14 +8080,34 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
     const size_t *
         pGlobalWorkSize, ///< [in] Global work size to use when executing kernel.
     const size_t *
-        pLocalWorkSize, ///< [in][optional] Local work size to use when executing kernel.
+        pLocalWorkSize, ///< [in][optional] Local work size to use when executing kernel. If this
+    ///< parameter is nullptr, then a local work size will be generated by the
+    ///< implementation.
+    uint32_t
+        numKernelAlternatives, ///< [in] The number of kernel alternatives provided in
+                               ///< phKernelAlternatives.
+    ur_kernel_handle_t *
+        phKernelAlternatives, ///< [in][optional][range(0, numKernelAlternatives)] List of kernel handles
+    ///< that might be used to update the kernel in this
+    ///< command after the command-buffer is finalized. The default kernel
+    ///< `hKernel` is implicitly marked as an alternative. It's
+    ///< invalid to specify it as part of this list.
     uint32_t
         numSyncPointsInWaitList, ///< [in] The number of sync points in the provided dependency list.
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
         pSyncPoint, ///< [out][optional] Sync point associated with this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
     ur_exp_command_buffer_command_handle_t
         *phCommand ///< [out][optional] Handle to this command.
 ) {
@@ -8089,12 +8135,36 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
 
+        if (phKernelAlternatives == NULL && numKernelAlternatives > 0) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
+
+        if (phKernelAlternatives != NULL && numKernelAlternatives == 0) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
+
         if (pSyncPointWaitList == NULL && numSyncPointsInWaitList > 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
 
         if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
+        }
+
+        if (phEventWaitList == NULL && numEventsInWaitList > 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList == 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList > 0) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
+                if (phEventWaitList[i] == NULL) {
+                    return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+                }
+            }
         }
     }
 
@@ -8105,8 +8175,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
 
     ur_result_t result = pfnAppendKernelLaunchExp(
         hCommandBuffer, hKernel, workDim, pGlobalWorkOffset, pGlobalWorkSize,
-        pLocalWorkSize, numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint,
-        phCommand);
+        pLocalWorkSize, numKernelAlternatives, phKernelAlternatives,
+        numSyncPointsInWaitList, pSyncPointWaitList, numEventsInWaitList,
+        phEventWaitList, pSyncPoint, phEvent, phCommand);
 
     return result;
 }
@@ -8124,8 +8195,19 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMMemcpyExp(
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] Sync point associated with this command.
+        pSyncPoint, ///< [out][optional] Sync point associated with this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
+    ur_exp_command_buffer_command_handle_t
+        *phCommand ///< [out][optional] Handle to this command.
 ) {
     auto pfnAppendUSMMemcpyExp =
         getContext()->urDdiTable.CommandBufferExp.pfnAppendUSMMemcpyExp;
@@ -8158,11 +8240,28 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMMemcpyExp(
         if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
+
+        if (phEventWaitList == NULL && numEventsInWaitList > 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList == 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList > 0) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
+                if (phEventWaitList[i] == NULL) {
+                    return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+                }
+            }
+        }
     }
 
-    ur_result_t result = pfnAppendUSMMemcpyExp(hCommandBuffer, pDst, pSrc, size,
-                                               numSyncPointsInWaitList,
-                                               pSyncPointWaitList, pSyncPoint);
+    ur_result_t result = pfnAppendUSMMemcpyExp(
+        hCommandBuffer, pDst, pSrc, size, numSyncPointsInWaitList,
+        pSyncPointWaitList, numEventsInWaitList, phEventWaitList, pSyncPoint,
+        phEvent, phCommand);
 
     return result;
 }
@@ -8182,8 +8281,19 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMFillExp(
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] sync point associated with this command.
+        pSyncPoint, ///< [out][optional] sync point associated with this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
+    ur_exp_command_buffer_command_handle_t
+        *phCommand ///< [out][optional] Handle to this command.
 ) {
     auto pfnAppendUSMFillExp =
         getContext()->urDdiTable.CommandBufferExp.pfnAppendUSMFillExp;
@@ -8224,11 +8334,28 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMFillExp(
         if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
+
+        if (phEventWaitList == NULL && numEventsInWaitList > 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList == 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList > 0) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
+                if (phEventWaitList[i] == NULL) {
+                    return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+                }
+            }
+        }
     }
 
     ur_result_t result = pfnAppendUSMFillExp(
         hCommandBuffer, pMemory, pPattern, patternSize, size,
-        numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
+        numSyncPointsInWaitList, pSyncPointWaitList, numEventsInWaitList,
+        phEventWaitList, pSyncPoint, phEvent, phCommand);
 
     return result;
 }
@@ -8248,8 +8375,19 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] Sync point associated with this command.
+        pSyncPoint, ///< [out][optional] Sync point associated with this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
+    ur_exp_command_buffer_command_handle_t
+        *phCommand ///< [out][optional] Handle to this command.
 ) {
     auto pfnAppendMemBufferCopyExp =
         getContext()->urDdiTable.CommandBufferExp.pfnAppendMemBufferCopyExp;
@@ -8278,6 +8416,22 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
         if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
+
+        if (phEventWaitList == NULL && numEventsInWaitList > 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList == 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList > 0) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
+                if (phEventWaitList[i] == NULL) {
+                    return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+                }
+            }
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -8292,7 +8446,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
 
     ur_result_t result = pfnAppendMemBufferCopyExp(
         hCommandBuffer, hSrcMem, hDstMem, srcOffset, dstOffset, size,
-        numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
+        numSyncPointsInWaitList, pSyncPointWaitList, numEventsInWaitList,
+        phEventWaitList, pSyncPoint, phEvent, phCommand);
 
     return result;
 }
@@ -8312,8 +8467,19 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] Sync point associated with this command.
+        pSyncPoint, ///< [out][optional] Sync point associated with this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
+    ur_exp_command_buffer_command_handle_t
+        *phCommand ///< [out][optional] Handle to this command.
 ) {
     auto pfnAppendMemBufferWriteExp =
         getContext()->urDdiTable.CommandBufferExp.pfnAppendMemBufferWriteExp;
@@ -8342,6 +8508,22 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
         if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
+
+        if (phEventWaitList == NULL && numEventsInWaitList > 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList == 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList > 0) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
+                if (phEventWaitList[i] == NULL) {
+                    return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+                }
+            }
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -8351,7 +8533,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
 
     ur_result_t result = pfnAppendMemBufferWriteExp(
         hCommandBuffer, hBuffer, offset, size, pSrc, numSyncPointsInWaitList,
-        pSyncPointWaitList, pSyncPoint);
+        pSyncPointWaitList, numEventsInWaitList, phEventWaitList, pSyncPoint,
+        phEvent, phCommand);
 
     return result;
 }
@@ -8370,8 +8553,19 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] Sync point associated with this command.
+        pSyncPoint, ///< [out][optional] Sync point associated with this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
+    ur_exp_command_buffer_command_handle_t
+        *phCommand ///< [out][optional] Handle to this command.
 ) {
     auto pfnAppendMemBufferReadExp =
         getContext()->urDdiTable.CommandBufferExp.pfnAppendMemBufferReadExp;
@@ -8400,6 +8594,22 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
         if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
+
+        if (phEventWaitList == NULL && numEventsInWaitList > 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList == 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList > 0) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
+                if (phEventWaitList[i] == NULL) {
+                    return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+                }
+            }
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -8409,7 +8619,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
 
     ur_result_t result = pfnAppendMemBufferReadExp(
         hCommandBuffer, hBuffer, offset, size, pDst, numSyncPointsInWaitList,
-        pSyncPointWaitList, pSyncPoint);
+        pSyncPointWaitList, numEventsInWaitList, phEventWaitList, pSyncPoint,
+        phEvent, phCommand);
 
     return result;
 }
@@ -8436,8 +8647,19 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] Sync point associated with this command.
+        pSyncPoint, ///< [out][optional] Sync point associated with this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
+    ur_exp_command_buffer_command_handle_t
+        *phCommand ///< [out][optional] Handle to this command.
 ) {
     auto pfnAppendMemBufferCopyRectExp =
         getContext()->urDdiTable.CommandBufferExp.pfnAppendMemBufferCopyRectExp;
@@ -8466,6 +8688,22 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
         if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
+
+        if (phEventWaitList == NULL && numEventsInWaitList > 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList == 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList > 0) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
+                if (phEventWaitList[i] == NULL) {
+                    return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+                }
+            }
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -8481,7 +8719,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
     ur_result_t result = pfnAppendMemBufferCopyRectExp(
         hCommandBuffer, hSrcMem, hDstMem, srcOrigin, dstOrigin, region,
         srcRowPitch, srcSlicePitch, dstRowPitch, dstSlicePitch,
-        numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
+        numSyncPointsInWaitList, pSyncPointWaitList, numEventsInWaitList,
+        phEventWaitList, pSyncPoint, phEvent, phCommand);
 
     return result;
 }
@@ -8514,8 +8753,19 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] Sync point associated with this command.
+        pSyncPoint, ///< [out][optional] Sync point associated with this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
+    ur_exp_command_buffer_command_handle_t
+        *phCommand ///< [out][optional] Handle to this command.
 ) {
     auto pfnAppendMemBufferWriteRectExp =
         getContext()
@@ -8545,6 +8795,22 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
         if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
+
+        if (phEventWaitList == NULL && numEventsInWaitList > 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList == 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList > 0) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
+                if (phEventWaitList[i] == NULL) {
+                    return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+                }
+            }
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -8555,7 +8821,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
     ur_result_t result = pfnAppendMemBufferWriteRectExp(
         hCommandBuffer, hBuffer, bufferOffset, hostOffset, region,
         bufferRowPitch, bufferSlicePitch, hostRowPitch, hostSlicePitch, pSrc,
-        numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
+        numSyncPointsInWaitList, pSyncPointWaitList, numEventsInWaitList,
+        phEventWaitList, pSyncPoint, phEvent, phCommand);
 
     return result;
 }
@@ -8586,8 +8853,19 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] Sync point associated with this command.
+        pSyncPoint, ///< [out][optional] Sync point associated with this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
+    ur_exp_command_buffer_command_handle_t
+        *phCommand ///< [out][optional] Handle to this command.
 ) {
     auto pfnAppendMemBufferReadRectExp =
         getContext()->urDdiTable.CommandBufferExp.pfnAppendMemBufferReadRectExp;
@@ -8616,6 +8894,22 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
         if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
+
+        if (phEventWaitList == NULL && numEventsInWaitList > 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList == 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList > 0) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
+                if (phEventWaitList[i] == NULL) {
+                    return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+                }
+            }
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -8626,7 +8920,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
     ur_result_t result = pfnAppendMemBufferReadRectExp(
         hCommandBuffer, hBuffer, bufferOffset, hostOffset, region,
         bufferRowPitch, bufferSlicePitch, hostRowPitch, hostSlicePitch, pDst,
-        numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
+        numSyncPointsInWaitList, pSyncPointWaitList, numEventsInWaitList,
+        phEventWaitList, pSyncPoint, phEvent, phCommand);
 
     return result;
 }
@@ -8647,8 +8942,19 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] sync point associated with this command.
+        pSyncPoint, ///< [out][optional] sync point associated with this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
+    ur_exp_command_buffer_command_handle_t
+        *phCommand ///< [out][optional] Handle to this command.
 ) {
     auto pfnAppendMemBufferFillExp =
         getContext()->urDdiTable.CommandBufferExp.pfnAppendMemBufferFillExp;
@@ -8677,6 +8983,22 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
         if (pSyncPointWaitList != NULL && numSyncPointsInWaitList == 0) {
             return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_WAIT_LIST_EXP;
         }
+
+        if (phEventWaitList == NULL && numEventsInWaitList > 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList == 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList > 0) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
+                if (phEventWaitList[i] == NULL) {
+                    return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+                }
+            }
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -8686,7 +9008,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
 
     ur_result_t result = pfnAppendMemBufferFillExp(
         hCommandBuffer, hBuffer, pPattern, patternSize, offset, size,
-        numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint);
+        numSyncPointsInWaitList, pSyncPointWaitList, numEventsInWaitList,
+        phEventWaitList, pSyncPoint, phEvent, phCommand);
 
     return result;
 }
@@ -8704,8 +9027,19 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMPrefetchExp(
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] sync point associated with this command.
+        pSyncPoint, ///< [out][optional] sync point associated with this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
+    ur_exp_command_buffer_command_handle_t
+        *phCommand ///< [out][optional] Handle to this command.
 ) {
     auto pfnAppendUSMPrefetchExp =
         getContext()->urDdiTable.CommandBufferExp.pfnAppendUSMPrefetchExp;
@@ -8738,11 +9072,28 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMPrefetchExp(
         if (size == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
+
+        if (phEventWaitList == NULL && numEventsInWaitList > 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList == 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList > 0) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
+                if (phEventWaitList[i] == NULL) {
+                    return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+                }
+            }
+        }
     }
 
     ur_result_t result = pfnAppendUSMPrefetchExp(
         hCommandBuffer, pMemory, size, flags, numSyncPointsInWaitList,
-        pSyncPointWaitList, pSyncPoint);
+        pSyncPointWaitList, numEventsInWaitList, phEventWaitList, pSyncPoint,
+        phEvent, phCommand);
 
     return result;
 }
@@ -8760,8 +9111,19 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMAdviseExp(
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] sync point associated with this command.
+        pSyncPoint, ///< [out][optional] sync point associated with this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
+    ur_exp_command_buffer_command_handle_t
+        *phCommand ///< [out][optional] Handle to this command.
 ) {
     auto pfnAppendUSMAdviseExp =
         getContext()->urDdiTable.CommandBufferExp.pfnAppendUSMAdviseExp;
@@ -8794,11 +9156,28 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMAdviseExp(
         if (size == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
+
+        if (phEventWaitList == NULL && numEventsInWaitList > 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList == 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList > 0) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
+                if (phEventWaitList[i] == NULL) {
+                    return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+                }
+            }
+        }
     }
 
-    ur_result_t result = pfnAppendUSMAdviseExp(hCommandBuffer, pMemory, size,
-                                               advice, numSyncPointsInWaitList,
-                                               pSyncPointWaitList, pSyncPoint);
+    ur_result_t result = pfnAppendUSMAdviseExp(
+        hCommandBuffer, pMemory, size, advice, numSyncPointsInWaitList,
+        pSyncPointWaitList, numEventsInWaitList, phEventWaitList, pSyncPoint,
+        phEvent, phCommand);
 
     return result;
 }
@@ -8817,7 +9196,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
     ///< If nullptr, the numEventsInWaitList must be 0, indicating no wait events.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command-buffer execution instance.
+    ///< command-buffer execution instance. If phEventWaitList and phEvent are
+    ///< not NULL, phEvent must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnEnqueueExp =
         getContext()->urDdiTable.CommandBufferExp.pfnEnqueueExp;
@@ -8934,10 +9314,90 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
         if (NULL == pUpdateKernelLaunch) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
+
+        if (pUpdateKernelLaunch->newWorkDim < 1 ||
+            pUpdateKernelLaunch->newWorkDim > 3) {
+            return UR_RESULT_ERROR_INVALID_WORK_DIMENSION;
+        }
     }
 
     ur_result_t result =
         pfnUpdateKernelLaunchExp(hCommand, pUpdateKernelLaunch);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urCommandBufferUpdateSignalEventExp
+__urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateSignalEventExp(
+    ur_exp_command_buffer_command_handle_t
+        hCommand, ///< [in] Handle of the command-buffer command to update.
+    ur_event_handle_t *phSignalEvent ///< [out] Event to be signaled.
+) {
+    auto pfnUpdateSignalEventExp =
+        getContext()->urDdiTable.CommandBufferExp.pfnUpdateSignalEventExp;
+
+    if (nullptr == pfnUpdateSignalEventExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    if (getContext()->enableParameterValidation) {
+        if (NULL == hCommand) {
+            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
+        }
+
+        if (NULL == phSignalEvent) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+    }
+
+    ur_result_t result = pfnUpdateSignalEventExp(hCommand, phSignalEvent);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urCommandBufferUpdateWaitEventsExp
+__urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateWaitEventsExp(
+    ur_exp_command_buffer_command_handle_t
+        hCommand, ///< [in] Handle of the command-buffer command to update.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
+) {
+    auto pfnUpdateWaitEventsExp =
+        getContext()->urDdiTable.CommandBufferExp.pfnUpdateWaitEventsExp;
+
+    if (nullptr == pfnUpdateWaitEventsExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    if (getContext()->enableParameterValidation) {
+        if (NULL == hCommand) {
+            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
+        }
+
+        if (phEventWaitList == NULL && numEventsInWaitList > 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList == 0) {
+            return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+        }
+
+        if (phEventWaitList != NULL && numEventsInWaitList > 0) {
+            for (uint32_t i = 0; i < numEventsInWaitList; ++i) {
+                if (phEventWaitList[i] == NULL) {
+                    return UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST;
+                }
+            }
+        }
+    }
+
+    ur_result_t result =
+        pfnUpdateWaitEventsExp(hCommand, numEventsInWaitList, phEventWaitList);
 
     return result;
 }
@@ -9061,17 +9521,16 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
         pLocalWorkSize, ///< [in][optional] pointer to an array of workDim unsigned values that
     ///< specify the number of local work-items forming a work-group that will
     ///< execute the kernel function.
-    ///< If nullptr, the runtime implementation will choose the work-group
-    ///< size.
+    ///< If nullptr, the runtime implementation will choose the work-group size.
     uint32_t numEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t *
         phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
     ///< events that must be complete before the kernel execution.
-    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait
-    ///< event.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait event.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< kernel execution instance.
+    ///< kernel execution instance. If phEventWaitList and phEvent are not
+    ///< NULL, phEvent must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnCooperativeKernelLaunchExp =
         getContext()->urDdiTable.EnqueueExp.pfnCooperativeKernelLaunchExp;
@@ -9184,8 +9643,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
     const ur_event_handle_t *
         phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
     ///< events that must be complete before the kernel execution.
-    ///< If nullptr, the numEventsInWaitList must be 0, indicating no wait
-    ///< events.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating no wait events.
     ur_event_handle_t *
         phEvent ///< [in,out] return an event object that identifies this particular kernel
                 ///< execution instance. Profiling information can be queried
@@ -9193,7 +9651,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
     ///< `UR_PROFILING_INFO_COMMAND_QUEUED` or `UR_PROFILING_INFO_COMMAND_SUBMIT`
     ///< reports the timestamp at the time of the call to this function.
     ///< Querying `UR_PROFILING_INFO_COMMAND_START` or `UR_PROFILING_INFO_COMMAND_END`
-    ///< reports the timestamp recorded when the command is executed on the device.
+    ///< reports the timestamp recorded when the command is executed on the
+    ///< device. If phEventWaitList and phEvent are not NULL, phEvent must not
+    ///< refer to an element of the phEventWaitList array.
 ) {
     auto pfnTimestampRecordingExp =
         getContext()->urDdiTable.EnqueueExp.pfnTimestampRecordingExp;
@@ -9267,7 +9727,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
     ///< the numEventsInWaitList must be 0, indicating that no wait event.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< kernel execution instance.
+    ///< kernel execution instance. If phEventWaitList and phEvent are not
+    ///< NULL, phEvent must not refer to an element of the phEventWaitList
+    ///< array.
 ) {
     auto pfnKernelLaunchCustomExp =
         getContext()->urDdiTable.EnqueueExp.pfnKernelLaunchCustomExp;
@@ -9685,7 +10147,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueNativeCommandExp(
     ///< If nullptr, the numEventsInWaitList must be 0, indicating no wait events.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies the work that has
-    ///< been enqueued in nativeEnqueueFunc.
+    ///< been enqueued in nativeEnqueueFunc. If phEventWaitList and phEvent are
+    ///< not NULL, phEvent must not refer to an element of the phEventWaitList array.
 ) {
     auto pfnNativeCommandExp =
         getContext()->urDdiTable.EnqueueExp.pfnNativeCommandExp;
@@ -9994,6 +10457,14 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
     dditable.pfnUpdateKernelLaunchExp = pDdiTable->pfnUpdateKernelLaunchExp;
     pDdiTable->pfnUpdateKernelLaunchExp =
         ur_validation_layer::urCommandBufferUpdateKernelLaunchExp;
+
+    dditable.pfnUpdateSignalEventExp = pDdiTable->pfnUpdateSignalEventExp;
+    pDdiTable->pfnUpdateSignalEventExp =
+        ur_validation_layer::urCommandBufferUpdateSignalEventExp;
+
+    dditable.pfnUpdateWaitEventsExp = pDdiTable->pfnUpdateWaitEventsExp;
+    pDdiTable->pfnUpdateWaitEventsExp =
+        ur_validation_layer::urCommandBufferUpdateWaitEventsExp;
 
     dditable.pfnGetInfoExp = pDdiTable->pfnGetInfoExp;
     pDdiTable->pfnGetInfoExp = ur_validation_layer::urCommandBufferGetInfoExp;
