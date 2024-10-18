@@ -79,6 +79,7 @@ struct LaunchInfo {
     uint32_t NumLocalArgs = 0;
     LocalArgsInfo *LocalArgs = nullptr; // Ordered by ArgIndex
 
+    int ReportFlag = 0;
     DeviceSanitizerReport SanitizerReport[ASAN_MAX_NUM_REPORTS];
 };
 
