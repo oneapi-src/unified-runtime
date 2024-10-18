@@ -35,7 +35,7 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
       ur_event_handle_t ExecutionFinishedEvent, ur_event_handle_t WaitEvent,
       ur_event_handle_t AllResetEvent, ur_event_handle_t CopyFinishedEvent,
       ur_event_handle_t ComputeFinishedEvent,
-      const ur_exp_command_buffer_desc_t *Desc, const bool IsInOrderCmdList);
+      const ur_exp_command_buffer_desc_t *Desc, const bool IsInOrderCmdList, const bool UseImmediateAppendPath);
 
   void registerSyncPoint(ur_exp_command_buffer_sync_point_t SyncPoint,
                          ur_event_handle_t Event);
@@ -74,7 +74,7 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   ur_context_handle_t Context;
   // Device associated with this command buffer
   ur_device_handle_t Device;
-  // Level Zero command list handle that has the compute engine command for this
+  // Level Zero command list handle that has the compute engine commands for this
   // command-buffer.
   ze_command_list_handle_t ZeComputeCommandList;
   // Given a multi driver scenario, the driver handle must be translated to the
@@ -83,7 +83,7 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   // Level Zero command list handle that is responsible for resetting
   // the events after the compute and copy command-lists execute.
   ze_command_list_handle_t ZeCommandListResetEvents;
-  // Level Zero command list handle that has the copy engine command for this
+  // Level Zero command list handle that has the copy engine commands for this
   // command-buffer.
   ze_command_list_handle_t ZeCopyCommandList;
   // Event which will signals the most recent execution of the command-buffer
@@ -134,6 +134,9 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   bool IsProfilingEnabled = false;
   // Command-buffer can be submitted to an in-order command-list.
   bool IsInOrderCmdList = false;
+  // Whether this command-buffer should use the code path that uses
+  // zeCommandListImmediateAppendCommandListsExp during enqueue.
+  bool UseImmediateAppendPath = false;
   // This list is needed to release all kernels retained by the
   // command_buffer.
   std::vector<ur_kernel_handle_t> KernelsList;
