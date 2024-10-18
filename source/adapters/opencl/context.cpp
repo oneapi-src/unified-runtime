@@ -18,45 +18,36 @@ ur_result_t
 ur_context_handle_t_::makeWithNative(native_type Ctx, uint32_t DevCount,
                                      const ur_device_handle_t *phDevices,
                                      ur_context_handle_t &Context) {
-  try {
-    uint32_t CLDeviceCount;
-    CL_RETURN_ON_FAILURE(clGetContextInfo(Ctx, CL_CONTEXT_NUM_DEVICES,
-                                          sizeof(CLDeviceCount), &CLDeviceCount,
-                                          nullptr));
-    std::vector<cl_device_id> CLDevices(CLDeviceCount);
-    CL_RETURN_ON_FAILURE(clGetContextInfo(
-        Ctx, CL_CONTEXT_DEVICES, sizeof(CLDevices), CLDevices.data(), nullptr));
-    std::vector<ur_device_handle_t> URDevices;
-    if (DevCount) {
-      if (DevCount != CLDeviceCount) {
+  uint32_t CLDeviceCount;
+  CL_RETURN_ON_FAILURE(clGetContextInfo(Ctx, CL_CONTEXT_NUM_DEVICES,
+                                        sizeof(CLDeviceCount), &CLDeviceCount,
+                                        nullptr));
+  std::vector<cl_device_id> CLDevices(CLDeviceCount);
+  CL_RETURN_ON_FAILURE(clGetContextInfo(
+      Ctx, CL_CONTEXT_DEVICES, sizeof(CLDevices), CLDevices.data(), nullptr));
+  std::vector<ur_device_handle_t> URDevices;
+  if (DevCount) {
+    if (DevCount != CLDeviceCount) {
+      return UR_RESULT_ERROR_INVALID_CONTEXT;
+    }
+    for (uint32_t i = 0; i < DevCount; i++) {
+      if (phDevices[i]->CLDevice != CLDevices[i]) {
         return UR_RESULT_ERROR_INVALID_CONTEXT;
       }
-      for (uint32_t i = 0; i < DevCount; i++) {
-        if (phDevices[i]->CLDevice != CLDevices[i]) {
-          return UR_RESULT_ERROR_INVALID_CONTEXT;
-        }
-        URDevices.push_back(phDevices[i]);
-      }
-    } else {
-      DevCount = CLDeviceCount;
-      for (uint32_t i = 0; i < CLDeviceCount; i++) {
-        ur_device_handle_t UrDevice = nullptr;
-        ur_native_handle_t hNativeHandle =
-            reinterpret_cast<ur_native_handle_t>(CLDevices[i]);
-        UR_RETURN_ON_FAILURE(urDeviceCreateWithNativeHandle(
-            hNativeHandle, nullptr, nullptr, &UrDevice));
-        URDevices.push_back(UrDevice);
-      }
+      URDevices.push_back(phDevices[i]);
     }
-
-    auto URContext =
-        std::make_unique<ur_context_handle_t_>(Ctx, DevCount, URDevices.data());
-    Context = URContext.release();
-  } catch (std::bad_alloc &) {
-    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-  } catch (...) {
-    return UR_RESULT_ERROR_UNKNOWN;
+  } else {
+    DevCount = CLDeviceCount;
+    for (uint32_t i = 0; i < CLDeviceCount; i++) {
+      ur_device_handle_t UrDevice = nullptr;
+      ur_native_handle_t hNativeHandle =
+          reinterpret_cast<ur_native_handle_t>(CLDevices[i]);
+      UR_RETURN_ON_FAILURE(urDeviceCreateWithNativeHandle(
+          hNativeHandle, nullptr, nullptr, &UrDevice));
+      URDevices.push_back(UrDevice);
+    }
   }
+  UR_RETURN_ON_FAILURE(makeURObject(&Context, Ctx, DevCount, URDevices.data()));
 
   return UR_RESULT_SUCCESS;
 }
@@ -71,20 +62,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urContextCreate(
     CLDevices[i] = phDevices[i]->CLDevice;
   }
 
-  try {
-    cl_context Ctx = clCreateContext(nullptr, static_cast<cl_uint>(DeviceCount),
-                                     CLDevices.data(), nullptr, nullptr,
-                                     static_cast<cl_int *>(&Ret));
-    CL_RETURN_ON_FAILURE(Ret);
-    auto URContext =
-        std::make_unique<ur_context_handle_t_>(Ctx, DeviceCount, phDevices);
-    *phContext = URContext.release();
-  } catch (std::bad_alloc &) {
-    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-  } catch (...) {
-    return UR_RESULT_ERROR_UNKNOWN;
-  }
+  cl_context Ctx = clCreateContext(nullptr, static_cast<cl_uint>(DeviceCount),
+                                   CLDevices.data(), nullptr, nullptr,
+                                   static_cast<cl_int *>(&Ret));
+  CL_RETURN_ON_FAILURE(Ret);
 
+  UR_RETURN_ON_FAILURE(makeURObject(phContext, Ctx, DeviceCount, phDevices));
   return mapCLErrorToUR(Ret);
 }
 

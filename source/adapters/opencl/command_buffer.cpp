@@ -96,15 +96,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferCreateExp(
       clCreateCommandBufferKHR(1, &CLQueue, Properties, &Res);
   CL_RETURN_ON_FAILURE_AND_SET_NULL(Res, phCommandBuffer);
 
-  try {
-    auto URCommandBuffer = std::make_unique<ur_exp_command_buffer_handle_t_>(
-        Queue, hContext, CLCommandBuffer, IsUpdatable);
-    *phCommandBuffer = URCommandBuffer.release();
-  } catch (std::bad_alloc &) {
-    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-  } catch (...) {
-    return UR_RESULT_ERROR_UNKNOWN;
-  }
+  UR_RETURN_ON_FAILURE(makeURObject(phCommandBuffer, Queue, hContext,
+                                    CLCommandBuffer, IsUpdatable));
 
   CL_RETURN_ON_FAILURE(Res);
   return UR_RESULT_SUCCESS;
@@ -187,18 +180,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
       numSyncPointsInWaitList, pSyncPointWaitList, pSyncPoint,
       OutCommandHandle));
 
-  try {
-    auto URCommandHandle =
-        std::make_unique<ur_exp_command_buffer_command_handle_t_>(
-            hCommandBuffer, CommandHandle, hKernel, workDim,
-            pLocalWorkSize != nullptr);
-    ur_exp_command_buffer_command_handle_t Handle = URCommandHandle.release();
-    hCommandBuffer->CommandHandles.push_back(Handle);
-    if (phCommandHandle) {
-      *phCommandHandle = Handle;
-    }
-  } catch (...) {
-    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
+  ur_exp_command_buffer_command_handle_t Handle;
+  UR_RETURN_ON_FAILURE(makeURObject(&Handle, CommandHandle, hKernel, workDim,
+                                    pLocalWorkSize != nullptr));
+  hCommandBuffer->CommandHandles.push_back(Handle);
+  if (phCommandHandle) {
+    *phCommandHandle = Handle;
   }
 
   return UR_RESULT_SUCCESS;
@@ -469,17 +456,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferEnqueueExp(
   CL_RETURN_ON_FAILURE(clEnqueueCommandBufferKHR(
       NumberOfQueues, &CLQueue, hCommandBuffer->CLCommandBuffer,
       numEventsInWaitList, CLWaitEvents.data(), &Event));
-  if (phEvent) {
-    try {
-      auto UREvent =
-          std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
-      *phEvent = UREvent.release();
-    } catch (std::bad_alloc &) {
-      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-    } catch (...) {
-      return UR_RESULT_ERROR_UNKNOWN;
-    }
-  }
+
+  UR_RETURN_ON_FAILURE(makeURObject(phEvent, Event, hQueue->Context, hQueue));
   return UR_RESULT_SUCCESS;
 }
 

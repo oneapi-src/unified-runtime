@@ -274,17 +274,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMFill(
     CL_RETURN_ON_FAILURE(EnqueueMemFill(hQueue->CLQueue, ptr, pPattern,
                                         patternSize, size, numEventsInWaitList,
                                         CLWaitEvents.data(), &Event));
-    if (phEvent) {
-      try {
-        auto UREvent = std::make_unique<ur_event_handle_t_>(
-            Event, hQueue->Context, hQueue);
-        *phEvent = UREvent.release();
-      } catch (std::bad_alloc &) {
-        return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-      } catch (...) {
-        return UR_RESULT_ERROR_UNKNOWN;
-      }
-    }
+    UR_RETURN_ON_FAILURE(makeURObject(phEvent, Event, hQueue->Context, hQueue));
     return UR_RESULT_SUCCESS;
   }
 
@@ -361,15 +351,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMFill(
     CL_RETURN_ON_FAILURE(ClErr);
   }
   if (phEvent) {
-    try {
-      auto UREvent = std::make_unique<ur_event_handle_t_>(
-          CopyEvent, hQueue->Context, hQueue);
-      *phEvent = UREvent.release();
-    } catch (std::bad_alloc &) {
-      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-    } catch (...) {
-      return UR_RESULT_ERROR_UNKNOWN;
-    }
+    UR_RETURN_ON_FAILURE(
+        makeURObject(phEvent, CopyEvent, hQueue->Context, hQueue));
   } else {
     CL_RETURN_ON_FAILURE(clReleaseEvent(CopyEvent));
   }
@@ -399,17 +382,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy(
     RetVal = mapCLErrorToUR(FuncPtr(hQueue->CLQueue, blocking, pDst, pSrc, size,
                                     numEventsInWaitList, CLWaitEvents.data(),
                                     &Event));
-    if (phEvent) {
-      try {
-        auto UREvent = std::make_unique<ur_event_handle_t_>(
-            Event, hQueue->Context, hQueue);
-        *phEvent = UREvent.release();
-      } catch (std::bad_alloc &) {
-        return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-      } catch (...) {
-        return UR_RESULT_ERROR_UNKNOWN;
-      }
-    }
+    UR_RETURN_ON_FAILURE(makeURObject(phEvent, Event, hQueue->Context, hQueue));
   }
 
   return RetVal;
@@ -428,17 +401,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
   }
   CL_RETURN_ON_FAILURE(clEnqueueMarkerWithWaitList(
       hQueue->CLQueue, numEventsInWaitList, CLWaitEvents.data(), &Event));
-  if (phEvent) {
-    try {
-      auto UREvent =
-          std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
-      *phEvent = UREvent.release();
-    } catch (std::bad_alloc &) {
-      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-    } catch (...) {
-      return UR_RESULT_ERROR_UNKNOWN;
-    }
-  }
+  UR_RETURN_ON_FAILURE(makeURObject(phEvent, Event, hQueue->Context, hQueue));
   return UR_RESULT_SUCCESS;
   /*
   // Use this once impls support it.
@@ -469,17 +432,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMAdvise(
   cl_event Event;
   CL_RETURN_ON_FAILURE(
       clEnqueueMarkerWithWaitList(hQueue->CLQueue, 0, nullptr, &Event));
-  if (phEvent) {
-    try {
-      auto UREvent =
-          std::make_unique<ur_event_handle_t_>(Event, hQueue->Context, hQueue);
-      *phEvent = UREvent.release();
-    } catch (std::bad_alloc &) {
-      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-    } catch (...) {
-      return UR_RESULT_ERROR_UNKNOWN;
-    }
-  }
+  UR_RETURN_ON_FAILURE(makeURObject(phEvent, Event, hQueue->Context, hQueue));
   return UR_RESULT_SUCCESS;
   /*
   // Change to use this once drivers support it.
@@ -557,17 +510,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
     cl_event Event;
     ClResult = clEnqueueBarrierWithWaitList(hQueue->CLQueue, Events.size(),
                                             Events.data(), &Event);
-    if (phEvent) {
-      try {
-        auto UREvent = std::make_unique<ur_event_handle_t_>(
-            Event, hQueue->Context, hQueue);
-        *phEvent = UREvent.release();
-      } catch (std::bad_alloc &) {
-        return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-      } catch (...) {
-        return UR_RESULT_ERROR_UNKNOWN;
-      }
-    }
+    UR_RETURN_ON_FAILURE(makeURObject(phEvent, Event, hQueue->Context, hQueue));
   }
   for (const auto &E : Events) {
     CL_RETURN_ON_FAILURE(clReleaseEvent(E));

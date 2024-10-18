@@ -23,38 +23,28 @@ ur_result_t ur_kernel_handle_t_::makeWithNative(native_type NativeKernel,
                                                 ur_program_handle_t Program,
                                                 ur_context_handle_t Context,
                                                 ur_kernel_handle_t &Kernel) {
-  try {
-    cl_context CLContext;
-    CL_RETURN_ON_FAILURE(clGetKernelInfo(NativeKernel, CL_KERNEL_CONTEXT,
-                                         sizeof(CLContext), &CLContext,
-                                         nullptr));
-    cl_program CLProgram;
-    CL_RETURN_ON_FAILURE(clGetKernelInfo(NativeKernel, CL_KERNEL_PROGRAM,
-                                         sizeof(CLProgram), &CLProgram,
-                                         nullptr));
 
-    if (Context->CLContext != CLContext) {
-      return UR_RESULT_ERROR_INVALID_CONTEXT;
-    }
-    if (Program) {
-      if (Program->CLProgram != CLProgram) {
-        return UR_RESULT_ERROR_INVALID_PROGRAM;
-      }
-    } else {
-      ur_native_handle_t hNativeHandle =
-          reinterpret_cast<ur_native_handle_t>(CLProgram);
-      UR_RETURN_ON_FAILURE(urProgramCreateWithNativeHandle(
-          hNativeHandle, Context, nullptr, &Program));
-    }
+  cl_context CLContext;
+  CL_RETURN_ON_FAILURE(clGetKernelInfo(NativeKernel, CL_KERNEL_CONTEXT,
+                                       sizeof(CLContext), &CLContext, nullptr));
+  cl_program CLProgram;
+  CL_RETURN_ON_FAILURE(clGetKernelInfo(NativeKernel, CL_KERNEL_PROGRAM,
+                                       sizeof(CLProgram), &CLProgram, nullptr));
 
-    auto URKernel =
-        std::make_unique<ur_kernel_handle_t_>(NativeKernel, Program, Context);
-    Kernel = URKernel.release();
-  } catch (std::bad_alloc &) {
-    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-  } catch (...) {
-    return UR_RESULT_ERROR_UNKNOWN;
+  if (Context->CLContext != CLContext) {
+    return UR_RESULT_ERROR_INVALID_CONTEXT;
   }
+  if (Program) {
+    if (Program->CLProgram != CLProgram) {
+      return UR_RESULT_ERROR_INVALID_PROGRAM;
+    }
+  } else {
+    ur_native_handle_t hNativeHandle =
+        reinterpret_cast<ur_native_handle_t>(CLProgram);
+    UR_RETURN_ON_FAILURE(urProgramCreateWithNativeHandle(hNativeHandle, Context,
+                                                         nullptr, &Program));
+  }
+  UR_RETURN_ON_FAILURE(makeURObject(&Kernel, NativeKernel, Program, Context));
 
   return UR_RESULT_SUCCESS;
 }
@@ -62,20 +52,13 @@ ur_result_t ur_kernel_handle_t_::makeWithNative(native_type NativeKernel,
 UR_APIEXPORT ur_result_t UR_APICALL
 urKernelCreate(ur_program_handle_t hProgram, const char *pKernelName,
                ur_kernel_handle_t *phKernel) {
-  try {
-    cl_int CLResult;
-    cl_kernel Kernel =
-        clCreateKernel(hProgram->CLProgram, pKernelName, &CLResult);
-    CL_RETURN_ON_FAILURE(CLResult);
-    auto URKernel = std::make_unique<ur_kernel_handle_t_>(Kernel, hProgram,
-                                                          hProgram->Context);
-    *phKernel = URKernel.release();
-  } catch (std::bad_alloc &) {
-    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-  } catch (...) {
-    return UR_RESULT_ERROR_UNKNOWN;
-  }
 
+  cl_int CLResult;
+  cl_kernel Kernel =
+      clCreateKernel(hProgram->CLProgram, pKernelName, &CLResult);
+  CL_RETURN_ON_FAILURE(CLResult);
+  UR_RETURN_ON_FAILURE(
+      makeURObject(phKernel, Kernel, hProgram, hProgram->Context));
   return UR_RESULT_SUCCESS;
 }
 

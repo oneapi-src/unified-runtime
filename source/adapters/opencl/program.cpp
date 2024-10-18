@@ -22,22 +22,13 @@ ur_result_t ur_program_handle_t_::makeWithNative(native_type NativeProg,
   if (!Context) {
     return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
   }
-  try {
-    cl_context CLContext;
-    CL_RETURN_ON_FAILURE(clGetProgramInfo(NativeProg, CL_PROGRAM_CONTEXT,
-                                          sizeof(CLContext), &CLContext,
-                                          nullptr));
-    if (Context->CLContext != CLContext) {
-      return UR_RESULT_ERROR_INVALID_CONTEXT;
-    }
-    auto URProgram =
-        std::make_unique<ur_program_handle_t_>(NativeProg, Context);
-    Program = URProgram.release();
-  } catch (std::bad_alloc &) {
-    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-  } catch (...) {
-    return UR_RESULT_ERROR_UNKNOWN;
+  cl_context CLContext;
+  CL_RETURN_ON_FAILURE(clGetProgramInfo(
+      NativeProg, CL_PROGRAM_CONTEXT, sizeof(CLContext), &CLContext, nullptr));
+  if (Context->CLContext != CLContext) {
+    return UR_RESULT_ERROR_INVALID_CONTEXT;
   }
+  UR_RETURN_ON_FAILURE(makeURObject(&Program, NativeProg, Context));
 
   return UR_RESULT_SUCCESS;
 }
@@ -83,15 +74,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithIL(
     cl_program Program =
         clCreateProgramWithIL(hContext->CLContext, pIL, length, &Err);
     CL_RETURN_ON_FAILURE(Err);
-    try {
-      auto URProgram =
-          std::make_unique<ur_program_handle_t_>(Program, hContext);
-      *phProgram = URProgram.release();
-    } catch (std::bad_alloc &) {
-      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-    } catch (...) {
-      return UR_RESULT_ERROR_UNKNOWN;
-    }
+    UR_RETURN_ON_FAILURE(makeURObject(phProgram, Program, hContext));
   } else {
     /* If none of the devices conform with CL 2.1 or newer make sure they all
      * support the cl_khr_il_program extension.
@@ -114,18 +97,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithIL(
             CurPlatform->CLPlatform, "clCreateProgramWithILKHR"));
 
     assert(FuncPtr != nullptr);
-    try {
-      cl_program Program = FuncPtr(hContext->CLContext, pIL, length, &Err);
-      CL_RETURN_ON_FAILURE(Err);
-      auto URProgram =
-          std::make_unique<ur_program_handle_t_>(Program, hContext);
-      *phProgram = URProgram.release();
-    } catch (std::bad_alloc &) {
-      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-    } catch (...) {
-      return UR_RESULT_ERROR_UNKNOWN;
-    }
+    cl_program Program = FuncPtr(hContext->CLContext, pIL, length, &Err);
     CL_RETURN_ON_FAILURE(Err);
+    UR_RETURN_ON_FAILURE(makeURObject(phProgram, Program, hContext));
   }
 
   return UR_RESULT_SUCCESS;
@@ -140,18 +114,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithBinary(
   const size_t Lengths[1] = {size};
   cl_int BinaryStatus[1];
   cl_int CLResult;
-  try {
-    cl_program Program = clCreateProgramWithBinary(
-        hContext->CLContext, static_cast<cl_uint>(1u), Devices, Lengths,
-        &pBinary, BinaryStatus, &CLResult);
-    CL_RETURN_ON_FAILURE(CLResult);
-    auto URProgram = std::make_unique<ur_program_handle_t_>(Program, hContext);
-    *phProgram = URProgram.release();
-  } catch (std::bad_alloc &) {
-    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-  } catch (...) {
-    return UR_RESULT_ERROR_UNKNOWN;
-  }
+  cl_program Program = clCreateProgramWithBinary(
+      hContext->CLContext, static_cast<cl_uint>(1u), Devices, Lengths, &pBinary,
+      BinaryStatus, &CLResult);
+  CL_RETURN_ON_FAILURE(CLResult);
+  UR_RETURN_ON_FAILURE(makeURObject(phProgram, Program, hContext));
   CL_RETURN_ON_FAILURE(BinaryStatus[0]);
   CL_RETURN_ON_FAILURE(CLResult);
 
@@ -279,14 +246,7 @@ urProgramLink(ur_context_handle_t hContext, uint32_t count,
     CLResult = CL_LINK_PROGRAM_FAILURE;
   }
   CL_RETURN_ON_FAILURE(CLResult);
-  try {
-    auto URProgram = std::make_unique<ur_program_handle_t_>(Program, hContext);
-    *phProgram = URProgram.release();
-  } catch (std::bad_alloc &) {
-    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-  } catch (...) {
-    return UR_RESULT_ERROR_UNKNOWN;
-  }
+  UR_RETURN_ON_FAILURE(makeURObject(phProgram, Program, hContext));
 
   return UR_RESULT_SUCCESS;
 }

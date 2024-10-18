@@ -143,20 +143,12 @@ ur_result_t urSamplerCreate(ur_context_handle_t hContext,
   cl_addressing_mode AddressingMode =
       ur2CLAddressingMode(pDesc->addressingMode);
   cl_filter_mode FilterMode = ur2CLFilterMode(pDesc->filterMode);
-  try {
-    // Always call OpenCL 1.0 API
-    cl_sampler Sampler = clCreateSampler(
-        hContext->CLContext, static_cast<cl_bool>(pDesc->normalizedCoords),
-        AddressingMode, FilterMode, &ErrorCode);
-    CL_RETURN_ON_FAILURE(ErrorCode);
-    auto URSampler = std::make_unique<ur_sampler_handle_t_>(Sampler, hContext);
-    *phSampler = URSampler.release();
-  } catch (std::bad_alloc &) {
-    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-  } catch (...) {
-    return UR_RESULT_ERROR_UNKNOWN;
-  }
-
+  // Always call OpenCL 1.0 API
+  cl_sampler Sampler = clCreateSampler(
+      hContext->CLContext, static_cast<cl_bool>(pDesc->normalizedCoords),
+      AddressingMode, FilterMode, &ErrorCode);
+  CL_RETURN_ON_FAILURE(ErrorCode);
+  UR_RETURN_ON_FAILURE(makeURObject(phSampler, Sampler, hContext));
   return mapCLErrorToUR(ErrorCode);
 }
 
@@ -244,17 +236,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urSamplerCreateWithNativeHandle(
     const ur_sampler_native_properties_t *pProperties,
     ur_sampler_handle_t *phSampler) {
   cl_sampler NativeHandle = reinterpret_cast<cl_sampler>(hNativeSampler);
-  try {
-    auto URSampler =
-        std::make_unique<ur_sampler_handle_t_>(NativeHandle, hContext);
-    URSampler->IsNativeHandleOwned =
-        pProperties ? pProperties->isNativeHandleOwned : false;
-    *phSampler = URSampler.release();
-  } catch (std::bad_alloc &) {
-    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-  } catch (...) {
-    return UR_RESULT_ERROR_UNKNOWN;
-  }
-
+  UR_RETURN_ON_FAILURE(makeURObject(phSampler, NativeHandle, hContext));
+  (*phSampler)->IsNativeHandleOwned =
+      pProperties ? pProperties->isNativeHandleOwned : false;
   return UR_RESULT_SUCCESS;
 }

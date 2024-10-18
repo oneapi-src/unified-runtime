@@ -74,34 +74,27 @@ ur_result_t ur_queue_handle_t_::makeWithNative(native_type NativeQueue,
                                                ur_context_handle_t Context,
                                                ur_device_handle_t Device,
                                                ur_queue_handle_t &Queue) {
-  try {
-    cl_context CLContext;
-    CL_RETURN_ON_FAILURE(clGetCommandQueueInfo(
-        NativeQueue, CL_QUEUE_CONTEXT, sizeof(CLContext), &CLContext, nullptr));
-    cl_device_id CLDevice;
-    CL_RETURN_ON_FAILURE(clGetCommandQueueInfo(
-        NativeQueue, CL_QUEUE_DEVICE, sizeof(CLDevice), &CLDevice, nullptr));
-    if (Context->CLContext != CLContext) {
-      return UR_RESULT_ERROR_INVALID_CONTEXT;
-    }
-    if (Device) {
-      if (Device->CLDevice != CLDevice) {
-        return UR_RESULT_ERROR_INVALID_DEVICE;
-      }
-    } else {
-      ur_native_handle_t hNativeHandle =
-          reinterpret_cast<ur_native_handle_t>(CLDevice);
-      UR_RETURN_ON_FAILURE(urDeviceCreateWithNativeHandle(
-          hNativeHandle, nullptr, nullptr, &Device));
-    }
-    auto URQueue =
-        std::make_unique<ur_queue_handle_t_>(NativeQueue, Context, Device);
-    Queue = URQueue.release();
-  } catch (std::bad_alloc &) {
-    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-  } catch (...) {
-    return UR_RESULT_ERROR_UNKNOWN;
+  cl_context CLContext;
+  CL_RETURN_ON_FAILURE(clGetCommandQueueInfo(
+      NativeQueue, CL_QUEUE_CONTEXT, sizeof(CLContext), &CLContext, nullptr));
+  cl_device_id CLDevice;
+  CL_RETURN_ON_FAILURE(clGetCommandQueueInfo(
+      NativeQueue, CL_QUEUE_DEVICE, sizeof(CLDevice), &CLDevice, nullptr));
+  if (Context->CLContext != CLContext) {
+    return UR_RESULT_ERROR_INVALID_CONTEXT;
   }
+  if (Device) {
+    if (Device->CLDevice != CLDevice) {
+      return UR_RESULT_ERROR_INVALID_DEVICE;
+    }
+  } else {
+    ur_native_handle_t hNativeHandle =
+        reinterpret_cast<ur_native_handle_t>(CLDevice);
+    UR_RETURN_ON_FAILURE(urDeviceCreateWithNativeHandle(hNativeHandle, nullptr,
+                                                        nullptr, &Device));
+  }
+  UR_RETURN_ON_FAILURE(makeURObject(&Queue, NativeQueue, Context, Device));
+
   return UR_RESULT_SUCCESS;
 }
 
@@ -130,16 +123,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreate(
         clCreateCommandQueue(hContext->CLContext, hDevice->CLDevice,
                              CLProperties & SupportByOpenCL, &RetErr);
     CL_RETURN_ON_FAILURE(RetErr);
-    try {
-      auto URQueue =
-          std::make_unique<ur_queue_handle_t_>(Queue, hContext, hDevice);
-      *phQueue = URQueue.release();
-    } catch (std::bad_alloc &) {
-      return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-    } catch (...) {
-      return UR_RESULT_ERROR_UNKNOWN;
-    }
-
+    UR_RETURN_ON_FAILURE(makeURObject(phQueue, Queue, hContext, hDevice));
     return UR_RESULT_SUCCESS;
   }
 
@@ -149,15 +133,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueCreate(
   cl_command_queue Queue = clCreateCommandQueueWithProperties(
       hContext->CLContext, hDevice->CLDevice, CreationFlagProperties, &RetErr);
   CL_RETURN_ON_FAILURE(RetErr);
-  try {
-    auto URQueue =
-        std::make_unique<ur_queue_handle_t_>(Queue, hContext, hDevice);
-    *phQueue = URQueue.release();
-  } catch (std::bad_alloc &) {
-    return UR_RESULT_ERROR_OUT_OF_RESOURCES;
-  } catch (...) {
-    return UR_RESULT_ERROR_UNKNOWN;
-  }
+  UR_RETURN_ON_FAILURE(makeURObject(phQueue, Queue, hContext, hDevice));
+
   return UR_RESULT_SUCCESS;
 }
 
