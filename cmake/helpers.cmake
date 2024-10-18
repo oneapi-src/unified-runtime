@@ -75,11 +75,10 @@ function(add_ur_target_compile_options name)
             # Hardening options
             -fPIC
             -fstack-protector-strong
-            -fvisibility=hidden # Required for -fsanitize=cfi
-            # -fsanitize=cfi requires -flto, which breaks a lot of things
-            # See: https://github.com/oneapi-src/unified-runtime/issues/2120
-            # -flto
-            # $<$<CXX_COMPILER_ID:Clang,AppleClang>:-fsanitize=cfi>
+            -fvisibility=hidden
+            # cfi-icall requires called functions in shared libraries to also be built with cfi-icall, which we can't
+            # guarantee. -fsanitize=cfi depends on -flto
+            $<$<CXX_COMPILER_ID:Clang,AppleClang>:-flto -fsanitize=cfi -fno-sanitize=cfi-icall>
             $<$<BOOL:${CXX_HAS_FCF_PROTECTION_FULL}>:-fcf-protection=full>
             # -fstack-clash-protection is not supported in apple clang or GCC < 8
             $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,8>>:-fstack-clash-protection>
@@ -118,7 +117,10 @@ endfunction()
 function(add_ur_target_link_options name)
     if(NOT MSVC)
         if (NOT APPLE)
-            target_link_options(${name} PRIVATE "LINKER:-z,relro,-z,now,-z,noexecstack")
+            target_link_options(${name} PRIVATE
+                $<$<CXX_COMPILER_ID:Clang,AppleClang>:-flto -fsanitize=cfi -fno-sanitize=cfi-icall>
+                "LINKER:-z,relro,-z,now,-z,noexecstack"
+            )
             if (UR_DEVELOPER_MODE)
                 target_link_options(${name} PRIVATE -Werror -Wextra)
             endif()
