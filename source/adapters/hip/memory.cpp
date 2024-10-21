@@ -315,14 +315,18 @@ urMemGetNativeHandle(ur_mem_handle_t hMem, ur_device_handle_t Device,
       return UR_RESULT_ERROR_INVALID_MEM_OBJECT;
     }
   }
-  *phNativeMem = reinterpret_cast<ur_native_handle_t>(
-      std::get<BufferMem>(hMem->Mem).getPtr(Device));
-#elif defined(__HIP_PLATFORM_AMD__)
-  *phNativeMem = reinterpret_cast<ur_native_handle_t>(
-      std::get<BufferMem>(hMem->Mem).getPtr(Device));
-#else
+#elif !defined(__HIP_PLATFORM_AMD__)
 #error("Must define exactly one of __HIP_PLATFORM_AMD__ or __HIP_PLATFORM_NVIDIA__");
 #endif
+  if (std::holds_alternative<BufferMem>(hMem->Mem)) {
+    *phNativeMem = reinterpret_cast<ur_native_handle_t>(
+        std::get<BufferMem>(hMem->Mem).getPtr(Device));
+  } else if (std::holds_alternative<SurfaceMem>(hMem->Mem)) {
+    *phNativeMem = reinterpret_cast<ur_native_handle_t>(
+        std::get<SurfaceMem>(hMem->Mem).getSurface(Device));
+  } else {
+    return UR_RESULT_ERROR_INVALID_MEM_OBJECT;
+  }
   return UR_RESULT_SUCCESS;
 }
 
