@@ -5,5 +5,3 @@ urMemImageGetInfoTest.Success/AMD_HIP_BACKEND___{{.*}}
 urMemBufferCreateWithNativeHandleTest.Success/AMD_HIP_BACKEND___{{.*}}
 urMemBufferCreateWithNativeHandleTest.SuccessWithOwnedNativeHandle/AMD_HIP_BACKEND___{{.*}}
 urMemBufferCreateWithNativeHandleTest.SuccessWithUnOwnedNativeHandle/AMD_HIP_BACKEND___{{.*}}
-urMemBufferCreateWithNativeHandleTest.InvalidNullHandle/AMD_HIP_BACKEND___{{.*}}
-urMemBufferCreateWithNativeHandleTest.InvalidNullPointer/AMD_HIP_BACKEND___{{.*}}

@@ -5,5 +5,3 @@ urMemImageCreateTest.InvalidSize/NVIDIA_CUDA_BACKEND___{{.*}}_
 urMemBufferCreateWithNativeHandleTest.Success/NVIDIA_CUDA_BACKEND___{{.*}}
 urMemBufferCreateWithNativeHandleTest.SuccessWithOwnedNativeHandle/NVIDIA_CUDA_BACKEND___{{.*}}
 urMemBufferCreateWithNativeHandleTest.SuccessWithUnOwnedNativeHandle/NVIDIA_CUDA_BACKEND___{{.*}}
-urMemBufferCreateWithNativeHandleTest.InvalidNullHandle/NVIDIA_CUDA_BACKEND___{{.*}}
-urMemBufferCreateWithNativeHandleTest.InvalidNullPointer/NVIDIA_CUDA_BACKEND___{{.*}}
