@@ -217,7 +217,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
       auto groupsPerThread = numGroups / numParallelThreads;
       auto remainder = numGroups % numParallelThreads;
       futures.reserve(numParallelThreads + remainder);
-      for (unsigned thread = 0; thread < numParallelThreads; thread++) {
+      for (unsigned thread = 0; groupsPerThread && thread < numParallelThreads;
+           thread++) {
         futures.emplace_back(tp.schedule_task(
             [&groups, thread, groupsPerThread, hKernel](size_t threadId) {
               for (unsigned i = 0; i < groupsPerThread; i++) {
