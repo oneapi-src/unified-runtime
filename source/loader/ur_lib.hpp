@@ -27,7 +27,7 @@
 #include "sanitizer/ur_sanitizer_layer.hpp"
 #endif
 #if UR_ENABLE_EXCEPTION_SANITIZER
-#include "exception-sanitizer/ur_exception_sanitizer_layer.hpp"
+#include "exception_sanitizer/ur_exception_sanitizer_layer.hpp"
 #endif
 
 #include <atomic>
@@ -89,7 +89,7 @@ class __urdlllocal context_t : public AtomicSingleton<context_t> {
 #endif
 #if UR_ENABLE_EXCEPTION_SANITIZER
         {ur_exception_sanitizer_layer::getContext(),
-         ur_exception_sanitizer_layer::forceDelete},
+         ur_exception_sanitizer_layer::context_t::forceDelete},
 #endif
     };
 
