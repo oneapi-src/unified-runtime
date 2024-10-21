@@ -53,7 +53,7 @@ struct ur_loader_config_handle_t_ {
 
 namespace ur_lib {
 ///////////////////////////////////////////////////////////////////////////////
-class __urdlllocal context_t : public AtomicSingleton<context_t> {
+class UR_DLL_LOCAL context_t : public AtomicSingleton<context_t> {
   public:
 #ifdef DYNAMIC_LOAD_LOADER
     HMODULE loader = nullptr;

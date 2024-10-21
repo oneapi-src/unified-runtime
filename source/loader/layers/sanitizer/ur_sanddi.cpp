@@ -54,7 +54,7 @@ ur_result_t setupContext(ur_context_handle_t Context, uint32_t numDevices,
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urAdapterGet
-__urdlllocal ur_result_t UR_APICALL urAdapterGet(
+UR_DLL_LOCAL ur_result_t UR_APICALL urAdapterGet(
     uint32_t
         NumEntries, ///< [in] the number of adapters to be added to phAdapters.
     ///< If phAdapters is not NULL, then NumEntries should be greater than
@@ -86,7 +86,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGet(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMHostAlloc
-__urdlllocal ur_result_t UR_APICALL urUSMHostAlloc(
+UR_DLL_LOCAL ur_result_t UR_APICALL urUSMHostAlloc(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     const ur_usm_desc_t
         *pUSMDesc, ///< [in][optional] USM memory allocation descriptor
@@ -110,7 +110,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMHostAlloc(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMDeviceAlloc
-__urdlllocal ur_result_t UR_APICALL urUSMDeviceAlloc(
+UR_DLL_LOCAL ur_result_t UR_APICALL urUSMDeviceAlloc(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     const ur_usm_desc_t
@@ -135,7 +135,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMDeviceAlloc(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMSharedAlloc
-__urdlllocal ur_result_t UR_APICALL urUSMSharedAlloc(
+UR_DLL_LOCAL ur_result_t UR_APICALL urUSMSharedAlloc(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     const ur_usm_desc_t *
@@ -160,7 +160,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMSharedAlloc(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMFree
-__urdlllocal ur_result_t UR_APICALL urUSMFree(
+UR_DLL_LOCAL ur_result_t UR_APICALL urUSMFree(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     void *pMem                    ///< [in] pointer to USM memory object
 ) {
@@ -283,7 +283,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramRetain(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramBuild
-__urdlllocal ur_result_t UR_APICALL urProgramBuild(
+UR_DLL_LOCAL ur_result_t UR_APICALL urProgramBuild(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_program_handle_t hProgram, ///< [in] handle of the program object
     const char *pOptions          ///< [in] string of build options
@@ -305,7 +305,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuild(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramBuildExp
-__urdlllocal ur_result_t UR_APICALL urProgramBuildExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urProgramBuildExp(
     ur_program_handle_t hProgram, ///< [in] Handle of the program to build.
     uint32_t numDevices,          ///< [in] number of devices
     ur_device_handle_t *
@@ -330,7 +330,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuildExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramLink
-__urdlllocal ur_result_t UR_APICALL urProgramLink(
+UR_DLL_LOCAL ur_result_t UR_APICALL urProgramLink(
     ur_context_handle_t hContext, ///< [in] handle of the context instance.
     uint32_t count, ///< [in] number of program handles in `phPrograms`.
     const ur_program_handle_t *
@@ -414,7 +414,7 @@ ur_result_t UR_APICALL urProgramRelease(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueKernelLaunch
-__urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunch(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueKernelLaunch(
     ur_queue_handle_t hQueue,   ///< [in] handle of the queue object
     ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
     uint32_t
@@ -479,7 +479,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunch(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urContextCreate
-__urdlllocal ur_result_t UR_APICALL urContextCreate(
+UR_DLL_LOCAL ur_result_t UR_APICALL urContextCreate(
     uint32_t numDevices, ///< [in] the number of devices given in phDevices
     const ur_device_handle_t
         *phDevices, ///< [in][range(0, numDevices)] array of handle of devices.
@@ -508,7 +508,7 @@ __urdlllocal ur_result_t UR_APICALL urContextCreate(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urContextCreateWithNativeHandle
-__urdlllocal ur_result_t UR_APICALL urContextCreateWithNativeHandle(
+UR_DLL_LOCAL ur_result_t UR_APICALL urContextCreateWithNativeHandle(
     ur_native_handle_t
         hNativeContext, ///< [in][nocheck] the native handle of the getContext()->
     ur_adapter_handle_t hAdapter,
@@ -542,7 +542,7 @@ __urdlllocal ur_result_t UR_APICALL urContextCreateWithNativeHandle(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urContextRetain
-__urdlllocal ur_result_t UR_APICALL urContextRetain(
+UR_DLL_LOCAL ur_result_t UR_APICALL urContextRetain(
     ur_context_handle_t
         hContext ///< [in] handle of the context to get a reference of.
 ) {
@@ -565,7 +565,7 @@ __urdlllocal ur_result_t UR_APICALL urContextRetain(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urContextRelease
-__urdlllocal ur_result_t UR_APICALL urContextRelease(
+UR_DLL_LOCAL ur_result_t UR_APICALL urContextRelease(
     ur_context_handle_t hContext ///< [in] handle of the context to release.
 ) {
     auto pfnRelease = getContext()->urDdiTable.Context.pfnRelease;
@@ -589,7 +589,7 @@ __urdlllocal ur_result_t UR_APICALL urContextRelease(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urMemBufferCreate
-__urdlllocal ur_result_t UR_APICALL urMemBufferCreate(
+UR_DLL_LOCAL ur_result_t UR_APICALL urMemBufferCreate(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_mem_flags_t flags, ///< [in] allocation and usage information flags
     size_t size, ///< [in] size in bytes of the memory object to be allocated
@@ -642,7 +642,7 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreate(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urMemGetInfo
-__urdlllocal ur_result_t UR_APICALL urMemGetInfo(
+UR_DLL_LOCAL ur_result_t UR_APICALL urMemGetInfo(
     ur_mem_handle_t
         hMemory,            ///< [in] handle to the memory object being queried.
     ur_mem_info_t propName, ///< [in] type of the info to retrieve.
@@ -688,7 +688,7 @@ __urdlllocal ur_result_t UR_APICALL urMemGetInfo(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urMemRetain
-__urdlllocal ur_result_t UR_APICALL urMemRetain(
+UR_DLL_LOCAL ur_result_t UR_APICALL urMemRetain(
     ur_mem_handle_t hMem ///< [in] handle of the memory object to get access
 ) {
     auto pfnRetain = getContext()->urDdiTable.Mem.pfnRetain;
@@ -710,7 +710,7 @@ __urdlllocal ur_result_t UR_APICALL urMemRetain(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urMemRelease
-__urdlllocal ur_result_t UR_APICALL urMemRelease(
+UR_DLL_LOCAL ur_result_t UR_APICALL urMemRelease(
     ur_mem_handle_t hMem ///< [in] handle of the memory object to release
 ) {
     auto pfnRelease = getContext()->urDdiTable.Mem.pfnRelease;
@@ -736,7 +736,7 @@ __urdlllocal ur_result_t UR_APICALL urMemRelease(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urMemBufferPartition
-__urdlllocal ur_result_t UR_APICALL urMemBufferPartition(
+UR_DLL_LOCAL ur_result_t UR_APICALL urMemBufferPartition(
     ur_mem_handle_t
         hBuffer,          ///< [in] handle of the buffer object to allocate from
     ur_mem_flags_t flags, ///< [in] allocation and usage information flags
@@ -772,7 +772,7 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferPartition(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urMemGetNativeHandle
-__urdlllocal ur_result_t UR_APICALL urMemGetNativeHandle(
+UR_DLL_LOCAL ur_result_t UR_APICALL urMemGetNativeHandle(
     ur_mem_handle_t hMem, ///< [in] handle of the mem.
     ur_device_handle_t hDevice,
     ur_native_handle_t
@@ -799,7 +799,7 @@ __urdlllocal ur_result_t UR_APICALL urMemGetNativeHandle(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueMemBufferRead
-__urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferRead(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueMemBufferRead(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_mem_handle_t
         hBuffer, ///< [in][bounds(offset, size)] handle of the buffer object
@@ -843,7 +843,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferRead(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueMemBufferWrite
-__urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWrite(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueMemBufferWrite(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_mem_handle_t
         hBuffer, ///< [in][bounds(offset, size)] handle of the buffer object
@@ -889,7 +889,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWrite(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueMemBufferReadRect
-__urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_mem_handle_t
         hBuffer, ///< [in][bounds(bufferOrigin, region)] handle of the buffer object
@@ -950,7 +950,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueMemBufferWriteRect
-__urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_mem_handle_t
         hBuffer, ///< [in][bounds(bufferOrigin, region)] handle of the buffer object
@@ -1014,7 +1014,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueMemBufferCopy
-__urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopy(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueMemBufferCopy(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_mem_handle_t
         hBufferSrc, ///< [in][bounds(srcOffset, size)] handle of the src buffer object
@@ -1069,7 +1069,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopy(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueMemBufferCopyRect
-__urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_mem_handle_t
         hBufferSrc, ///< [in][bounds(srcOrigin, region)] handle of the source buffer object
@@ -1136,7 +1136,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueMemBufferFill
-__urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferFill(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueMemBufferFill(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_mem_handle_t
         hBuffer, ///< [in][bounds(offset, size)] handle of the buffer object
@@ -1180,7 +1180,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferFill(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueMemBufferMap
-__urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferMap(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueMemBufferMap(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_mem_handle_t
         hBuffer, ///< [in][bounds(offset, size)] handle of the buffer object
@@ -1270,7 +1270,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferMap(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueMemUnmap
-__urdlllocal ur_result_t UR_APICALL urEnqueueMemUnmap(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueMemUnmap(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_mem_handle_t
         hMem,         ///< [in] handle of the memory (buffer or image) object
@@ -1329,7 +1329,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemUnmap(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelCreate
-__urdlllocal ur_result_t UR_APICALL urKernelCreate(
+UR_DLL_LOCAL ur_result_t UR_APICALL urKernelCreate(
     ur_program_handle_t hProgram, ///< [in] handle of the program instance
     const char *pKernelName,      ///< [in] pointer to null-terminated string.
     ur_kernel_handle_t
@@ -1351,7 +1351,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreate(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelRetain
-__urdlllocal ur_result_t UR_APICALL urKernelRetain(
+UR_DLL_LOCAL ur_result_t UR_APICALL urKernelRetain(
     ur_kernel_handle_t hKernel ///< [in] handle for the Kernel to retain
 ) {
     auto pfnRetain = getContext()->urDdiTable.Kernel.pfnRetain;
@@ -1373,7 +1373,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelRetain(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelRelease
-__urdlllocal ur_result_t urKernelRelease(
+UR_DLL_LOCAL ur_result_t urKernelRelease(
     ur_kernel_handle_t hKernel ///< [in] handle for the Kernel to release
 ) {
     auto pfnRelease = getContext()->urDdiTable.Kernel.pfnRelease;
@@ -1396,7 +1396,7 @@ __urdlllocal ur_result_t urKernelRelease(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelSetArgValue
-__urdlllocal ur_result_t UR_APICALL urKernelSetArgValue(
+UR_DLL_LOCAL ur_result_t UR_APICALL urKernelSetArgValue(
     ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
     uint32_t argIndex, ///< [in] argument index in range [0, num args - 1]
     size_t argSize,    ///< [in] size of argument type
@@ -1430,7 +1430,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgValue(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelSetArgMemObj
-__urdlllocal ur_result_t UR_APICALL urKernelSetArgMemObj(
+UR_DLL_LOCAL ur_result_t UR_APICALL urKernelSetArgMemObj(
     ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
     uint32_t argIndex, ///< [in] argument index in range [0, num args - 1]
     const ur_kernel_arg_mem_obj_properties_t
@@ -1458,7 +1458,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgMemObj(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelSetArgLocal
-__urdlllocal ur_result_t UR_APICALL urKernelSetArgLocal(
+UR_DLL_LOCAL ur_result_t UR_APICALL urKernelSetArgLocal(
     ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
     uint32_t argIndex, ///< [in] argument index in range [0, num args - 1]
     size_t
@@ -1494,7 +1494,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgLocal(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelSetArgPointer
-__urdlllocal ur_result_t UR_APICALL urKernelSetArgPointer(
+UR_DLL_LOCAL ur_result_t UR_APICALL urKernelSetArgPointer(
     ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
     uint32_t argIndex, ///< [in] argument index in range [0, num args - 1]
     const ur_kernel_arg_pointer_properties_t
@@ -1533,7 +1533,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgPointer(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetGlobalProcAddrTable(
+UR_DLL_LOCAL ur_result_t UR_APICALL urGetGlobalProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_global_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
@@ -1563,7 +1563,7 @@ __urdlllocal ur_result_t UR_APICALL urGetGlobalProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetContextProcAddrTable(
+UR_DLL_LOCAL ur_result_t UR_APICALL urGetContextProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_context_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
@@ -1598,7 +1598,7 @@ __urdlllocal ur_result_t UR_APICALL urGetContextProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetProgramProcAddrTable(
+UR_DLL_LOCAL ur_result_t UR_APICALL urGetProgramProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_program_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
@@ -1635,7 +1635,7 @@ __urdlllocal ur_result_t UR_APICALL urGetProgramProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetKernelProcAddrTable(
+UR_DLL_LOCAL ur_result_t UR_APICALL urGetKernelProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_kernel_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
@@ -1671,7 +1671,7 @@ __urdlllocal ur_result_t UR_APICALL urGetKernelProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetMemProcAddrTable(
+UR_DLL_LOCAL ur_result_t UR_APICALL urGetMemProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_mem_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
@@ -1705,7 +1705,7 @@ __urdlllocal ur_result_t UR_APICALL urGetMemProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetProgramExpProcAddrTable(
+UR_DLL_LOCAL ur_result_t UR_APICALL urGetProgramExpProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_program_exp_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
@@ -1736,7 +1736,7 @@ __urdlllocal ur_result_t UR_APICALL urGetProgramExpProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetEnqueueProcAddrTable(
+UR_DLL_LOCAL ur_result_t UR_APICALL urGetEnqueueProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_enqueue_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
@@ -1778,7 +1778,7 @@ __urdlllocal ur_result_t UR_APICALL urGetEnqueueProcAddrTable(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetUSMProcAddrTable(
+UR_DLL_LOCAL ur_result_t UR_APICALL urGetUSMProcAddrTable(
     ur_api_version_t version, ///< [in] API version requested
     ur_usm_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers

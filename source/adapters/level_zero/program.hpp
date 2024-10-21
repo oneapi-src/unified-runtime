@@ -11,7 +11,7 @@
 
 #include "common.hpp"
 
-struct ur_program_handle_t_ : _ur_object {
+struct ur_program_handle_t_ : ur_object_ {
   // ur_program_handle_t_() {}
 
   typedef enum {

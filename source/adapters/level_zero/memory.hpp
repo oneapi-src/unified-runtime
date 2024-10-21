@@ -60,7 +60,7 @@ ur_result_t enqueueMemCopyRectHelper(
     uint32_t NumEventsInWaitList, const ur_event_handle_t *EventWaitList,
     ur_event_handle_t *OutEvent, bool PreferCopyEngine = false);
 
-struct ur_mem_handle_t_ : _ur_object {
+struct ur_mem_handle_t_ : ur_object_ {
   // Keeps the PI context of this memory handle.
   ur_context_handle_t UrContext;
 

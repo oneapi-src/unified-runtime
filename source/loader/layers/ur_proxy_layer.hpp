@@ -19,7 +19,7 @@
 #include <set>
 
 ///////////////////////////////////////////////////////////////////////////////
-class __urdlllocal proxy_layer_context_t {
+class UR_DLL_LOCAL proxy_layer_context_t {
   public:
     virtual ~proxy_layer_context_t(){};
     ur_api_version_t version = UR_API_VERSION_CURRENT;

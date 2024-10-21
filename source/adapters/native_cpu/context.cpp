@@ -51,7 +51,7 @@ urContextGetInfo(ur_context_handle_t hContext, ur_context_info_t propName,
   case UR_CONTEXT_INFO_NUM_DEVICES:
     return returnValue(1);
   case UR_CONTEXT_INFO_DEVICES:
-    return returnValue(hContext->_device);
+    return returnValue(hContext->device);
   case UR_CONTEXT_INFO_REFERENCE_COUNT:
     return returnValue(uint32_t{hContext->getReferenceCount()});
   case UR_CONTEXT_INFO_USM_MEMCPY2D_SUPPORT:

@@ -28,7 +28,7 @@ namespace ${x}_lib
     ///////////////////////////////////////////////////////////////////////////////
 
 
-    __${x}dlllocal ${x}_result_t context_t::ddiInit()
+    ${X}_DLL_LOCAL ${x}_result_t context_t::ddiInit()
     {
         ${x}_result_t result = ${X}_RESULT_SUCCESS;
 

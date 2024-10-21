@@ -15,7 +15,7 @@
 namespace ur_loader {
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urAdapterGet
-__urdlllocal ur_result_t UR_APICALL urAdapterGet(
+UR_DLL_LOCAL ur_result_t UR_APICALL urAdapterGet(
     uint32_t
         NumEntries, ///< [in] the number of adapters to be added to phAdapters.
     ///< If phAdapters is not NULL, then NumEntries should be greater than
@@ -65,7 +65,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGet(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urAdapterRelease
-__urdlllocal ur_result_t UR_APICALL urAdapterRelease(
+UR_DLL_LOCAL ur_result_t UR_APICALL urAdapterRelease(
     ur_adapter_handle_t hAdapter ///< [in][release] Adapter handle to release
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
@@ -90,7 +90,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterRelease(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urAdapterRetain
-__urdlllocal ur_result_t UR_APICALL urAdapterRetain(
+UR_DLL_LOCAL ur_result_t UR_APICALL urAdapterRetain(
     ur_adapter_handle_t hAdapter ///< [in][retain] Adapter handle to retain
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
@@ -115,7 +115,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterRetain(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urAdapterGetLastError
-__urdlllocal ur_result_t UR_APICALL urAdapterGetLastError(
+UR_DLL_LOCAL ur_result_t UR_APICALL urAdapterGetLastError(
     ur_adapter_handle_t hAdapter, ///< [in] handle of the adapter instance
     const char **
         ppMessage, ///< [out] pointer to a C string where the adapter specific error message
@@ -146,7 +146,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGetLastError(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urAdapterGetInfo
-__urdlllocal ur_result_t UR_APICALL urAdapterGetInfo(
+UR_DLL_LOCAL ur_result_t UR_APICALL urAdapterGetInfo(
     ur_adapter_handle_t hAdapter, ///< [in] handle of the adapter
     ur_adapter_info_t propName,   ///< [in] type of the info to retrieve
     size_t propSize, ///< [in] the number of bytes pointed to by pPropValue.
@@ -182,7 +182,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGetInfo(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urPlatformGet
-__urdlllocal ur_result_t UR_APICALL urPlatformGet(
+UR_DLL_LOCAL ur_result_t UR_APICALL urPlatformGet(
     ur_adapter_handle_t *
         phAdapters, ///< [in][range(0, NumAdapters)] array of adapters to query for platforms.
     uint32_t NumAdapters, ///< [in] number of adapters pointed to by phAdapters
@@ -261,7 +261,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGet(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urPlatformGetInfo
-__urdlllocal ur_result_t UR_APICALL urPlatformGetInfo(
+UR_DLL_LOCAL ur_result_t UR_APICALL urPlatformGetInfo(
     ur_platform_handle_t hPlatform, ///< [in] handle of the platform
     ur_platform_info_t propName,    ///< [in] type of the info to retrieve
     size_t propSize, ///< [in] the number of bytes pointed to by pPlatformInfo.
@@ -298,7 +298,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetInfo(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urPlatformGetApiVersion
-__urdlllocal ur_result_t UR_APICALL urPlatformGetApiVersion(
+UR_DLL_LOCAL ur_result_t UR_APICALL urPlatformGetApiVersion(
     ur_platform_handle_t hPlatform, ///< [in] handle of the platform
     ur_api_version_t *pVersion      ///< [out] api version
 ) {
@@ -325,7 +325,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetApiVersion(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urPlatformGetNativeHandle
-__urdlllocal ur_result_t UR_APICALL urPlatformGetNativeHandle(
+UR_DLL_LOCAL ur_result_t UR_APICALL urPlatformGetNativeHandle(
     ur_platform_handle_t hPlatform, ///< [in] handle of the platform.
     ur_native_handle_t *
         phNativePlatform ///< [out] a pointer to the native handle of the platform.
@@ -357,7 +357,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetNativeHandle(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urPlatformCreateWithNativeHandle
-__urdlllocal ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
+UR_DLL_LOCAL ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
     ur_native_handle_t
         hNativePlatform, ///< [in][nocheck] the native handle of the platform.
     ur_adapter_handle_t
@@ -404,7 +404,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urPlatformGetBackendOption
-__urdlllocal ur_result_t UR_APICALL urPlatformGetBackendOption(
+UR_DLL_LOCAL ur_result_t UR_APICALL urPlatformGetBackendOption(
     ur_platform_handle_t hPlatform, ///< [in] handle of the platform instance.
     const char
         *pFrontendOption, ///< [in] string containing the frontend option.
@@ -435,7 +435,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetBackendOption(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urDeviceGet
-__urdlllocal ur_result_t UR_APICALL urDeviceGet(
+UR_DLL_LOCAL ur_result_t UR_APICALL urDeviceGet(
     ur_platform_handle_t hPlatform, ///< [in] handle of the platform instance
     ur_device_type_t DeviceType,    ///< [in] the type of the devices.
     uint32_t
@@ -488,7 +488,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGet(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urDeviceGetInfo
-__urdlllocal ur_result_t UR_APICALL urDeviceGetInfo(
+UR_DLL_LOCAL ur_result_t UR_APICALL urDeviceGetInfo(
     ur_device_handle_t hDevice, ///< [in] handle of the device instance
     ur_device_info_t propName,  ///< [in] type of the info to retrieve
     size_t propSize, ///< [in] the number of bytes pointed to by pPropValue.
@@ -593,7 +593,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetInfo(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urDeviceRetain
-__urdlllocal ur_result_t UR_APICALL urDeviceRetain(
+UR_DLL_LOCAL ur_result_t UR_APICALL urDeviceRetain(
     ur_device_handle_t
         hDevice ///< [in][retain] handle of the device to get a reference of.
 ) {
@@ -619,7 +619,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceRetain(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urDeviceRelease
-__urdlllocal ur_result_t UR_APICALL urDeviceRelease(
+UR_DLL_LOCAL ur_result_t UR_APICALL urDeviceRelease(
     ur_device_handle_t
         hDevice ///< [in][release] handle of the device to release.
 ) {
@@ -645,7 +645,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceRelease(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urDevicePartition
-__urdlllocal ur_result_t UR_APICALL urDevicePartition(
+UR_DLL_LOCAL ur_result_t UR_APICALL urDevicePartition(
     ur_device_handle_t hDevice, ///< [in] handle of the device to partition.
     const ur_device_partition_properties_t
         *pProperties,    ///< [in] Device partition properties.
@@ -696,7 +696,7 @@ __urdlllocal ur_result_t UR_APICALL urDevicePartition(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urDeviceSelectBinary
-__urdlllocal ur_result_t UR_APICALL urDeviceSelectBinary(
+UR_DLL_LOCAL ur_result_t UR_APICALL urDeviceSelectBinary(
     ur_device_handle_t
         hDevice, ///< [in] handle of the device to select binary for.
     const ur_device_binary_t
@@ -730,7 +730,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceSelectBinary(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urDeviceGetNativeHandle
-__urdlllocal ur_result_t UR_APICALL urDeviceGetNativeHandle(
+UR_DLL_LOCAL ur_result_t UR_APICALL urDeviceGetNativeHandle(
     ur_device_handle_t hDevice, ///< [in] handle of the device.
     ur_native_handle_t
         *phNativeDevice ///< [out] a pointer to the native handle of the device.
@@ -761,7 +761,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetNativeHandle(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urDeviceCreateWithNativeHandle
-__urdlllocal ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
+UR_DLL_LOCAL ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
     ur_native_handle_t
         hNativeDevice, ///< [in][nocheck] the native handle of the device.
     ur_adapter_handle_t
@@ -808,7 +808,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urDeviceGetGlobalTimestamps
-__urdlllocal ur_result_t UR_APICALL urDeviceGetGlobalTimestamps(
+UR_DLL_LOCAL ur_result_t UR_APICALL urDeviceGetGlobalTimestamps(
     ur_device_handle_t hDevice, ///< [in] handle of the device instance
     uint64_t *
         pDeviceTimestamp, ///< [out][optional] pointer to the Device's global timestamp that
@@ -839,7 +839,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetGlobalTimestamps(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urContextCreate
-__urdlllocal ur_result_t UR_APICALL urContextCreate(
+UR_DLL_LOCAL ur_result_t UR_APICALL urContextCreate(
     uint32_t DeviceCount, ///< [in] the number of devices given in phDevices
     const ur_device_handle_t
         *phDevices, ///< [in][range(0, DeviceCount)] array of handle of devices.
@@ -889,7 +889,7 @@ __urdlllocal ur_result_t UR_APICALL urContextCreate(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urContextRetain
-__urdlllocal ur_result_t UR_APICALL urContextRetain(
+UR_DLL_LOCAL ur_result_t UR_APICALL urContextRetain(
     ur_context_handle_t
         hContext ///< [in][retain] handle of the context to get a reference of.
 ) {
@@ -915,7 +915,7 @@ __urdlllocal ur_result_t UR_APICALL urContextRetain(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urContextRelease
-__urdlllocal ur_result_t UR_APICALL urContextRelease(
+UR_DLL_LOCAL ur_result_t UR_APICALL urContextRelease(
     ur_context_handle_t
         hContext ///< [in][release] handle of the context to release.
 ) {
@@ -941,7 +941,7 @@ __urdlllocal ur_result_t UR_APICALL urContextRelease(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urContextGetInfo
-__urdlllocal ur_result_t UR_APICALL urContextGetInfo(
+UR_DLL_LOCAL ur_result_t UR_APICALL urContextGetInfo(
     ur_context_handle_t hContext, ///< [in] handle of the context
     ur_context_info_t propName,   ///< [in] type of the info to retrieve
     size_t
@@ -1011,7 +1011,7 @@ __urdlllocal ur_result_t UR_APICALL urContextGetInfo(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urContextGetNativeHandle
-__urdlllocal ur_result_t UR_APICALL urContextGetNativeHandle(
+UR_DLL_LOCAL ur_result_t UR_APICALL urContextGetNativeHandle(
     ur_context_handle_t hContext, ///< [in] handle of the context.
     ur_native_handle_t *
         phNativeContext ///< [out] a pointer to the native handle of the context.
@@ -1042,7 +1042,7 @@ __urdlllocal ur_result_t UR_APICALL urContextGetNativeHandle(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urContextCreateWithNativeHandle
-__urdlllocal ur_result_t UR_APICALL urContextCreateWithNativeHandle(
+UR_DLL_LOCAL ur_result_t UR_APICALL urContextCreateWithNativeHandle(
     ur_native_handle_t
         hNativeContext, ///< [in][nocheck] the native handle of the context.
     ur_adapter_handle_t
@@ -1101,7 +1101,7 @@ __urdlllocal ur_result_t UR_APICALL urContextCreateWithNativeHandle(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urContextSetExtendedDeleter
-__urdlllocal ur_result_t UR_APICALL urContextSetExtendedDeleter(
+UR_DLL_LOCAL ur_result_t UR_APICALL urContextSetExtendedDeleter(
     ur_context_handle_t hContext, ///< [in] handle of the context.
     ur_context_extended_deleter_t
         pfnDeleter, ///< [in] Function pointer to extended deleter.
@@ -1130,7 +1130,7 @@ __urdlllocal ur_result_t UR_APICALL urContextSetExtendedDeleter(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urMemImageCreate
-__urdlllocal ur_result_t UR_APICALL urMemImageCreate(
+UR_DLL_LOCAL ur_result_t UR_APICALL urMemImageCreate(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_mem_flags_t flags, ///< [in] allocation and usage information flags
     const ur_image_format_t
@@ -1174,7 +1174,7 @@ __urdlllocal ur_result_t UR_APICALL urMemImageCreate(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urMemBufferCreate
-__urdlllocal ur_result_t UR_APICALL urMemBufferCreate(
+UR_DLL_LOCAL ur_result_t UR_APICALL urMemBufferCreate(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_mem_flags_t flags, ///< [in] allocation and usage information flags
     size_t size, ///< [in] size in bytes of the memory object to be allocated
@@ -1217,7 +1217,7 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreate(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urMemRetain
-__urdlllocal ur_result_t UR_APICALL urMemRetain(
+UR_DLL_LOCAL ur_result_t UR_APICALL urMemRetain(
     ur_mem_handle_t
         hMem ///< [in][retain] handle of the memory object to get access
 ) {
@@ -1243,7 +1243,7 @@ __urdlllocal ur_result_t UR_APICALL urMemRetain(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urMemRelease
-__urdlllocal ur_result_t UR_APICALL urMemRelease(
+UR_DLL_LOCAL ur_result_t UR_APICALL urMemRelease(
     ur_mem_handle_t
         hMem ///< [in][release] handle of the memory object to release
 ) {
@@ -1269,7 +1269,7 @@ __urdlllocal ur_result_t UR_APICALL urMemRelease(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urMemBufferPartition
-__urdlllocal ur_result_t UR_APICALL urMemBufferPartition(
+UR_DLL_LOCAL ur_result_t UR_APICALL urMemBufferPartition(
     ur_mem_handle_t
         hBuffer,          ///< [in] handle of the buffer object to allocate from
     ur_mem_flags_t flags, ///< [in] allocation and usage information flags
@@ -1314,7 +1314,7 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferPartition(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urMemGetNativeHandle
-__urdlllocal ur_result_t UR_APICALL urMemGetNativeHandle(
+UR_DLL_LOCAL ur_result_t UR_APICALL urMemGetNativeHandle(
     ur_mem_handle_t hMem, ///< [in] handle of the mem.
     ur_device_handle_t
         hDevice, ///< [in][optional] handle of the device that the native handle will be
@@ -1353,7 +1353,7 @@ __urdlllocal ur_result_t UR_APICALL urMemGetNativeHandle(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urMemBufferCreateWithNativeHandle
-__urdlllocal ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
+UR_DLL_LOCAL ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
     ur_native_handle_t
         hNativeMem, ///< [in][nocheck] the native handle to the memory.
     ur_context_handle_t hContext, ///< [in] handle of the context object.
@@ -1398,7 +1398,7 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urMemImageCreateWithNativeHandle
-__urdlllocal ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
+UR_DLL_LOCAL ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
     ur_native_handle_t
         hNativeMem, ///< [in][nocheck] the native handle to the memory.
     ur_context_handle_t hContext, ///< [in] handle of the context object.
@@ -1446,7 +1446,7 @@ __urdlllocal ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urMemGetInfo
-__urdlllocal ur_result_t UR_APICALL urMemGetInfo(
+UR_DLL_LOCAL ur_result_t UR_APICALL urMemGetInfo(
     ur_mem_handle_t
         hMemory,            ///< [in] handle to the memory object being queried.
     ur_mem_info_t propName, ///< [in] type of the info to retrieve.
@@ -1516,7 +1516,7 @@ __urdlllocal ur_result_t UR_APICALL urMemGetInfo(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urMemImageGetInfo
-__urdlllocal ur_result_t UR_APICALL urMemImageGetInfo(
+UR_DLL_LOCAL ur_result_t UR_APICALL urMemImageGetInfo(
     ur_mem_handle_t hMemory, ///< [in] handle to the image object being queried.
     ur_image_info_t propName, ///< [in] type of image info to retrieve.
     size_t
@@ -1553,7 +1553,7 @@ __urdlllocal ur_result_t UR_APICALL urMemImageGetInfo(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urSamplerCreate
-__urdlllocal ur_result_t UR_APICALL urSamplerCreate(
+UR_DLL_LOCAL ur_result_t UR_APICALL urSamplerCreate(
     ur_context_handle_t hContext,   ///< [in] handle of the context object
     const ur_sampler_desc_t *pDesc, ///< [in] pointer to the sampler description
     ur_sampler_handle_t
@@ -1594,7 +1594,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerCreate(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urSamplerRetain
-__urdlllocal ur_result_t UR_APICALL urSamplerRetain(
+UR_DLL_LOCAL ur_result_t UR_APICALL urSamplerRetain(
     ur_sampler_handle_t
         hSampler ///< [in][retain] handle of the sampler object to get access
 ) {
@@ -1620,7 +1620,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerRetain(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urSamplerRelease
-__urdlllocal ur_result_t UR_APICALL urSamplerRelease(
+UR_DLL_LOCAL ur_result_t UR_APICALL urSamplerRelease(
     ur_sampler_handle_t
         hSampler ///< [in][release] handle of the sampler object to release
 ) {
@@ -1646,7 +1646,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerRelease(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urSamplerGetInfo
-__urdlllocal ur_result_t UR_APICALL urSamplerGetInfo(
+UR_DLL_LOCAL ur_result_t UR_APICALL urSamplerGetInfo(
     ur_sampler_handle_t hSampler, ///< [in] handle of the sampler object
     ur_sampler_info_t propName, ///< [in] name of the sampler property to query
     size_t
@@ -1712,7 +1712,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerGetInfo(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urSamplerGetNativeHandle
-__urdlllocal ur_result_t UR_APICALL urSamplerGetNativeHandle(
+UR_DLL_LOCAL ur_result_t UR_APICALL urSamplerGetNativeHandle(
     ur_sampler_handle_t hSampler, ///< [in] handle of the sampler.
     ur_native_handle_t *
         phNativeSampler ///< [out] a pointer to the native handle of the sampler.
@@ -1743,7 +1743,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerGetNativeHandle(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urSamplerCreateWithNativeHandle
-__urdlllocal ur_result_t UR_APICALL urSamplerCreateWithNativeHandle(
+UR_DLL_LOCAL ur_result_t UR_APICALL urSamplerCreateWithNativeHandle(
     ur_native_handle_t
         hNativeSampler, ///< [in][nocheck] the native handle of the sampler.
     ur_context_handle_t hContext, ///< [in] handle of the context object
@@ -1789,7 +1789,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerCreateWithNativeHandle(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMHostAlloc
-__urdlllocal ur_result_t UR_APICALL urUSMHostAlloc(
+UR_DLL_LOCAL ur_result_t UR_APICALL urUSMHostAlloc(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     const ur_usm_desc_t
         *pUSMDesc, ///< [in][optional] USM memory allocation descriptor
@@ -1825,7 +1825,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMHostAlloc(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMDeviceAlloc
-__urdlllocal ur_result_t UR_APICALL urUSMDeviceAlloc(
+UR_DLL_LOCAL ur_result_t UR_APICALL urUSMDeviceAlloc(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     const ur_usm_desc_t
@@ -1865,7 +1865,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMDeviceAlloc(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMSharedAlloc
-__urdlllocal ur_result_t UR_APICALL urUSMSharedAlloc(
+UR_DLL_LOCAL ur_result_t UR_APICALL urUSMSharedAlloc(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     const ur_usm_desc_t *
@@ -1905,7 +1905,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMSharedAlloc(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMFree
-__urdlllocal ur_result_t UR_APICALL urUSMFree(
+UR_DLL_LOCAL ur_result_t UR_APICALL urUSMFree(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     void *pMem                    ///< [in] pointer to USM memory object
 ) {
@@ -1931,7 +1931,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMFree(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMGetMemAllocInfo
-__urdlllocal ur_result_t UR_APICALL urUSMGetMemAllocInfo(
+UR_DLL_LOCAL ur_result_t UR_APICALL urUSMGetMemAllocInfo(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     const void *pMem,             ///< [in] pointer to USM memory object
     ur_usm_alloc_info_t
@@ -2012,7 +2012,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMGetMemAllocInfo(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMPoolCreate
-__urdlllocal ur_result_t UR_APICALL urUSMPoolCreate(
+UR_DLL_LOCAL ur_result_t UR_APICALL urUSMPoolCreate(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_usm_pool_desc_t *
         pPoolDesc, ///< [in] pointer to USM pool descriptor. Can be chained with
@@ -2054,7 +2054,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolCreate(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMPoolRetain
-__urdlllocal ur_result_t UR_APICALL urUSMPoolRetain(
+UR_DLL_LOCAL ur_result_t UR_APICALL urUSMPoolRetain(
     ur_usm_pool_handle_t pPool ///< [in][retain] pointer to USM memory pool
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
@@ -2079,7 +2079,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolRetain(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMPoolRelease
-__urdlllocal ur_result_t UR_APICALL urUSMPoolRelease(
+UR_DLL_LOCAL ur_result_t UR_APICALL urUSMPoolRelease(
     ur_usm_pool_handle_t pPool ///< [in][release] pointer to USM memory pool
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
@@ -2104,7 +2104,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolRelease(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMPoolGetInfo
-__urdlllocal ur_result_t UR_APICALL urUSMPoolGetInfo(
+UR_DLL_LOCAL ur_result_t UR_APICALL urUSMPoolGetInfo(
     ur_usm_pool_handle_t hPool,  ///< [in] handle of the USM memory pool
     ur_usm_pool_info_t propName, ///< [in] name of the pool property to query
     size_t propSize, ///< [in] size in bytes of the pool property value provided
@@ -2170,7 +2170,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolGetInfo(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urVirtualMemGranularityGetInfo
-__urdlllocal ur_result_t UR_APICALL urVirtualMemGranularityGetInfo(
+UR_DLL_LOCAL ur_result_t UR_APICALL urVirtualMemGranularityGetInfo(
     ur_context_handle_t hContext, ///< [in] handle of the context object.
     ur_device_handle_t
         hDevice, ///< [in][optional] is the device to get the granularity from, if the
@@ -2215,7 +2215,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemGranularityGetInfo(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urVirtualMemReserve
-__urdlllocal ur_result_t UR_APICALL urVirtualMemReserve(
+UR_DLL_LOCAL ur_result_t UR_APICALL urVirtualMemReserve(
     ur_context_handle_t hContext, ///< [in] handle of the context object.
     const void *
         pStart, ///< [in][optional] pointer to the start of the virtual memory region to
@@ -2249,7 +2249,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemReserve(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urVirtualMemFree
-__urdlllocal ur_result_t UR_APICALL urVirtualMemFree(
+UR_DLL_LOCAL ur_result_t UR_APICALL urVirtualMemFree(
     ur_context_handle_t hContext, ///< [in] handle of the context object.
     const void *
         pStart, ///< [in] pointer to the start of the virtual memory range to free.
@@ -2277,7 +2277,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemFree(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urVirtualMemMap
-__urdlllocal ur_result_t UR_APICALL urVirtualMemMap(
+UR_DLL_LOCAL ur_result_t UR_APICALL urVirtualMemMap(
     ur_context_handle_t hContext, ///< [in] handle to the context object.
     const void
         *pStart, ///< [in] pointer to the start of the virtual memory range.
@@ -2315,7 +2315,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemMap(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urVirtualMemUnmap
-__urdlllocal ur_result_t UR_APICALL urVirtualMemUnmap(
+UR_DLL_LOCAL ur_result_t UR_APICALL urVirtualMemUnmap(
     ur_context_handle_t hContext, ///< [in] handle to the context object.
     const void *
         pStart, ///< [in] pointer to the start of the mapped virtual memory range
@@ -2343,7 +2343,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemUnmap(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urVirtualMemSetAccess
-__urdlllocal ur_result_t UR_APICALL urVirtualMemSetAccess(
+UR_DLL_LOCAL ur_result_t UR_APICALL urVirtualMemSetAccess(
     ur_context_handle_t hContext, ///< [in] handle to the context object.
     const void
         *pStart, ///< [in] pointer to the start of the virtual memory range.
@@ -2373,7 +2373,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemSetAccess(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urVirtualMemGetInfo
-__urdlllocal ur_result_t UR_APICALL urVirtualMemGetInfo(
+UR_DLL_LOCAL ur_result_t UR_APICALL urVirtualMemGetInfo(
     ur_context_handle_t hContext, ///< [in] handle to the context object.
     const void
         *pStart, ///< [in] pointer to the start of the virtual memory range.
@@ -2412,7 +2412,7 @@ __urdlllocal ur_result_t UR_APICALL urVirtualMemGetInfo(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urPhysicalMemCreate
-__urdlllocal ur_result_t UR_APICALL urPhysicalMemCreate(
+UR_DLL_LOCAL ur_result_t UR_APICALL urPhysicalMemCreate(
     ur_context_handle_t hContext, ///< [in] handle of the context object.
     ur_device_handle_t hDevice,   ///< [in] handle of the device object.
     size_t
@@ -2461,7 +2461,7 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemCreate(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urPhysicalMemRetain
-__urdlllocal ur_result_t UR_APICALL urPhysicalMemRetain(
+UR_DLL_LOCAL ur_result_t UR_APICALL urPhysicalMemRetain(
     ur_physical_mem_handle_t
         hPhysicalMem ///< [in][retain] handle of the physical memory object to retain.
 ) {
@@ -2489,7 +2489,7 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemRetain(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urPhysicalMemRelease
-__urdlllocal ur_result_t UR_APICALL urPhysicalMemRelease(
+UR_DLL_LOCAL ur_result_t UR_APICALL urPhysicalMemRelease(
     ur_physical_mem_handle_t
         hPhysicalMem ///< [in][release] handle of the physical memory object to release.
 ) {
@@ -2517,7 +2517,7 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemRelease(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramCreateWithIL
-__urdlllocal ur_result_t UR_APICALL urProgramCreateWithIL(
+UR_DLL_LOCAL ur_result_t UR_APICALL urProgramCreateWithIL(
     ur_context_handle_t hContext, ///< [in] handle of the context instance
     const void *pIL,              ///< [in] pointer to IL binary.
     size_t length,                ///< [in] length of `pIL` in bytes.
@@ -2561,7 +2561,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithIL(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramCreateWithBinary
-__urdlllocal ur_result_t UR_APICALL urProgramCreateWithBinary(
+UR_DLL_LOCAL ur_result_t UR_APICALL urProgramCreateWithBinary(
     ur_context_handle_t hContext, ///< [in] handle of the context instance
     ur_device_handle_t
         hDevice,            ///< [in] handle to device associated with binary.
@@ -2611,7 +2611,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithBinary(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramBuild
-__urdlllocal ur_result_t UR_APICALL urProgramBuild(
+UR_DLL_LOCAL ur_result_t UR_APICALL urProgramBuild(
     ur_context_handle_t hContext, ///< [in] handle of the context instance.
     ur_program_handle_t hProgram, ///< [in] Handle of the program to build.
     const char *
@@ -2642,7 +2642,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuild(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramCompile
-__urdlllocal ur_result_t UR_APICALL urProgramCompile(
+UR_DLL_LOCAL ur_result_t UR_APICALL urProgramCompile(
     ur_context_handle_t hContext, ///< [in] handle of the context instance.
     ur_program_handle_t
         hProgram, ///< [in][out] handle of the program to compile.
@@ -2674,7 +2674,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCompile(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramLink
-__urdlllocal ur_result_t UR_APICALL urProgramLink(
+UR_DLL_LOCAL ur_result_t UR_APICALL urProgramLink(
     ur_context_handle_t hContext, ///< [in] handle of the context instance.
     uint32_t count, ///< [in] number of program handles in `phPrograms`.
     const ur_program_handle_t *
@@ -2728,7 +2728,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramLink(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramRetain
-__urdlllocal ur_result_t UR_APICALL urProgramRetain(
+UR_DLL_LOCAL ur_result_t UR_APICALL urProgramRetain(
     ur_program_handle_t
         hProgram ///< [in][retain] handle for the Program to retain
 ) {
@@ -2754,7 +2754,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramRetain(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramRelease
-__urdlllocal ur_result_t UR_APICALL urProgramRelease(
+UR_DLL_LOCAL ur_result_t UR_APICALL urProgramRelease(
     ur_program_handle_t
         hProgram ///< [in][release] handle for the Program to release
 ) {
@@ -2780,7 +2780,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramRelease(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramGetFunctionPointer
-__urdlllocal ur_result_t UR_APICALL urProgramGetFunctionPointer(
+UR_DLL_LOCAL ur_result_t UR_APICALL urProgramGetFunctionPointer(
     ur_device_handle_t
         hDevice, ///< [in] handle of the device to retrieve pointer for.
     ur_program_handle_t
@@ -2818,7 +2818,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetFunctionPointer(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramGetGlobalVariablePointer
-__urdlllocal ur_result_t UR_APICALL urProgramGetGlobalVariablePointer(
+UR_DLL_LOCAL ur_result_t UR_APICALL urProgramGetGlobalVariablePointer(
     ur_device_handle_t
         hDevice, ///< [in] handle of the device to retrieve the pointer for.
     ur_program_handle_t
@@ -2859,7 +2859,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetGlobalVariablePointer(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramGetInfo
-__urdlllocal ur_result_t UR_APICALL urProgramGetInfo(
+UR_DLL_LOCAL ur_result_t UR_APICALL urProgramGetInfo(
     ur_program_handle_t hProgram, ///< [in] handle of the Program object
     ur_program_info_t propName, ///< [in] name of the Program property to query
     size_t propSize,            ///< [in] the size of the Program property.
@@ -2940,7 +2940,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetInfo(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramGetBuildInfo
-__urdlllocal ur_result_t UR_APICALL urProgramGetBuildInfo(
+UR_DLL_LOCAL ur_result_t UR_APICALL urProgramGetBuildInfo(
     ur_program_handle_t hProgram, ///< [in] handle of the Program object
     ur_device_handle_t hDevice,   ///< [in] handle of the Device object
     ur_program_build_info_t
@@ -2982,7 +2982,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetBuildInfo(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramSetSpecializationConstants
-__urdlllocal ur_result_t UR_APICALL urProgramSetSpecializationConstants(
+UR_DLL_LOCAL ur_result_t UR_APICALL urProgramSetSpecializationConstants(
     ur_program_handle_t hProgram, ///< [in] handle of the Program object
     uint32_t count, ///< [in] the number of elements in the pSpecConstants array
     const ur_specialization_constant_info_t *
@@ -3012,7 +3012,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramSetSpecializationConstants(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramGetNativeHandle
-__urdlllocal ur_result_t UR_APICALL urProgramGetNativeHandle(
+UR_DLL_LOCAL ur_result_t UR_APICALL urProgramGetNativeHandle(
     ur_program_handle_t hProgram, ///< [in] handle of the program.
     ur_native_handle_t *
         phNativeProgram ///< [out] a pointer to the native handle of the program.
@@ -3043,7 +3043,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetNativeHandle(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramCreateWithNativeHandle
-__urdlllocal ur_result_t UR_APICALL urProgramCreateWithNativeHandle(
+UR_DLL_LOCAL ur_result_t UR_APICALL urProgramCreateWithNativeHandle(
     ur_native_handle_t
         hNativeProgram, ///< [in][nocheck] the native handle of the program.
     ur_context_handle_t hContext, ///< [in] handle of the context instance
@@ -3089,7 +3089,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithNativeHandle(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelCreate
-__urdlllocal ur_result_t UR_APICALL urKernelCreate(
+UR_DLL_LOCAL ur_result_t UR_APICALL urKernelCreate(
     ur_program_handle_t hProgram, ///< [in] handle of the program instance
     const char *pKernelName,      ///< [in] pointer to null-terminated string.
     ur_kernel_handle_t
@@ -3130,7 +3130,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreate(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelSetArgValue
-__urdlllocal ur_result_t UR_APICALL urKernelSetArgValue(
+UR_DLL_LOCAL ur_result_t UR_APICALL urKernelSetArgValue(
     ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
     uint32_t argIndex, ///< [in] argument index in range [0, num args - 1]
     size_t argSize,    ///< [in] size of argument type
@@ -3162,7 +3162,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgValue(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelSetArgLocal
-__urdlllocal ur_result_t UR_APICALL urKernelSetArgLocal(
+UR_DLL_LOCAL ur_result_t UR_APICALL urKernelSetArgLocal(
     ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
     uint32_t argIndex, ///< [in] argument index in range [0, num args - 1]
     size_t
@@ -3192,7 +3192,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgLocal(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelGetInfo
-__urdlllocal ur_result_t UR_APICALL urKernelGetInfo(
+UR_DLL_LOCAL ur_result_t UR_APICALL urKernelGetInfo(
     ur_kernel_handle_t hKernel, ///< [in] handle of the Kernel object
     ur_kernel_info_t propName,  ///< [in] name of the Kernel property to query
     size_t propSize,            ///< [in] the size of the Kernel property value.
@@ -3274,7 +3274,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetInfo(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelGetGroupInfo
-__urdlllocal ur_result_t UR_APICALL urKernelGetGroupInfo(
+UR_DLL_LOCAL ur_result_t UR_APICALL urKernelGetGroupInfo(
     ur_kernel_handle_t hKernel, ///< [in] handle of the Kernel object
     ur_device_handle_t hDevice, ///< [in] handle of the Device object
     ur_kernel_group_info_t
@@ -3313,7 +3313,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetGroupInfo(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelGetSubGroupInfo
-__urdlllocal ur_result_t UR_APICALL urKernelGetSubGroupInfo(
+UR_DLL_LOCAL ur_result_t UR_APICALL urKernelGetSubGroupInfo(
     ur_kernel_handle_t hKernel, ///< [in] handle of the Kernel object
     ur_device_handle_t hDevice, ///< [in] handle of the Device object
     ur_kernel_sub_group_info_t
@@ -3352,7 +3352,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetSubGroupInfo(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelRetain
-__urdlllocal ur_result_t UR_APICALL urKernelRetain(
+UR_DLL_LOCAL ur_result_t UR_APICALL urKernelRetain(
     ur_kernel_handle_t hKernel ///< [in][retain] handle for the Kernel to retain
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
@@ -3377,7 +3377,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelRetain(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelRelease
-__urdlllocal ur_result_t UR_APICALL urKernelRelease(
+UR_DLL_LOCAL ur_result_t UR_APICALL urKernelRelease(
     ur_kernel_handle_t
         hKernel ///< [in][release] handle for the Kernel to release
 ) {
@@ -3403,7 +3403,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelRelease(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelSetArgPointer
-__urdlllocal ur_result_t UR_APICALL urKernelSetArgPointer(
+UR_DLL_LOCAL ur_result_t UR_APICALL urKernelSetArgPointer(
     ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
     uint32_t argIndex, ///< [in] argument index in range [0, num args - 1]
     const ur_kernel_arg_pointer_properties_t
@@ -3434,7 +3434,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgPointer(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelSetExecInfo
-__urdlllocal ur_result_t UR_APICALL urKernelSetExecInfo(
+UR_DLL_LOCAL ur_result_t UR_APICALL urKernelSetExecInfo(
     ur_kernel_handle_t hKernel,     ///< [in] handle of the kernel object
     ur_kernel_exec_info_t propName, ///< [in] name of the execution attribute
     size_t propSize,                ///< [in] size in byte the attribute value
@@ -3467,7 +3467,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetExecInfo(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelSetArgSampler
-__urdlllocal ur_result_t UR_APICALL urKernelSetArgSampler(
+UR_DLL_LOCAL ur_result_t UR_APICALL urKernelSetArgSampler(
     ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
     uint32_t argIndex, ///< [in] argument index in range [0, num args - 1]
     const ur_kernel_arg_sampler_properties_t
@@ -3499,7 +3499,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgSampler(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelSetArgMemObj
-__urdlllocal ur_result_t UR_APICALL urKernelSetArgMemObj(
+UR_DLL_LOCAL ur_result_t UR_APICALL urKernelSetArgMemObj(
     ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
     uint32_t argIndex, ///< [in] argument index in range [0, num args - 1]
     const ur_kernel_arg_mem_obj_properties_t
@@ -3533,7 +3533,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgMemObj(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelSetSpecializationConstants
-__urdlllocal ur_result_t UR_APICALL urKernelSetSpecializationConstants(
+UR_DLL_LOCAL ur_result_t UR_APICALL urKernelSetSpecializationConstants(
     ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
     uint32_t count, ///< [in] the number of elements in the pSpecConstants array
     const ur_specialization_constant_info_t *
@@ -3562,7 +3562,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetSpecializationConstants(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelGetNativeHandle
-__urdlllocal ur_result_t UR_APICALL urKernelGetNativeHandle(
+UR_DLL_LOCAL ur_result_t UR_APICALL urKernelGetNativeHandle(
     ur_kernel_handle_t hKernel, ///< [in] handle of the kernel.
     ur_native_handle_t
         *phNativeKernel ///< [out] a pointer to the native handle of the kernel.
@@ -3593,7 +3593,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetNativeHandle(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelCreateWithNativeHandle
-__urdlllocal ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
+UR_DLL_LOCAL ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
     ur_native_handle_t
         hNativeKernel, ///< [in][nocheck] the native handle of the kernel.
     ur_context_handle_t hContext, ///< [in] handle of the context object
@@ -3646,7 +3646,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelGetSuggestedLocalWorkSize
-__urdlllocal ur_result_t UR_APICALL urKernelGetSuggestedLocalWorkSize(
+UR_DLL_LOCAL ur_result_t UR_APICALL urKernelGetSuggestedLocalWorkSize(
     ur_kernel_handle_t hKernel, ///< [in] handle of the kernel
     ur_queue_handle_t hQueue,   ///< [in] handle of the queue object
     uint32_t
@@ -3691,7 +3691,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetSuggestedLocalWorkSize(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urQueueGetInfo
-__urdlllocal ur_result_t UR_APICALL urQueueGetInfo(
+UR_DLL_LOCAL ur_result_t UR_APICALL urQueueGetInfo(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_queue_info_t propName, ///< [in] name of the queue property to query
     size_t
@@ -3781,7 +3781,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueGetInfo(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urQueueCreate
-__urdlllocal ur_result_t UR_APICALL urQueueCreate(
+UR_DLL_LOCAL ur_result_t UR_APICALL urQueueCreate(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     const ur_queue_properties_t
@@ -3827,7 +3827,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueCreate(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urQueueRetain
-__urdlllocal ur_result_t UR_APICALL urQueueRetain(
+UR_DLL_LOCAL ur_result_t UR_APICALL urQueueRetain(
     ur_queue_handle_t
         hQueue ///< [in][retain] handle of the queue object to get access
 ) {
@@ -3853,7 +3853,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueRetain(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urQueueRelease
-__urdlllocal ur_result_t UR_APICALL urQueueRelease(
+UR_DLL_LOCAL ur_result_t UR_APICALL urQueueRelease(
     ur_queue_handle_t
         hQueue ///< [in][release] handle of the queue object to release
 ) {
@@ -3879,7 +3879,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueRelease(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urQueueGetNativeHandle
-__urdlllocal ur_result_t UR_APICALL urQueueGetNativeHandle(
+UR_DLL_LOCAL ur_result_t UR_APICALL urQueueGetNativeHandle(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue.
     ur_queue_native_desc_t
         *pDesc, ///< [in][optional] pointer to native descriptor
@@ -3912,7 +3912,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueGetNativeHandle(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urQueueCreateWithNativeHandle
-__urdlllocal ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
+UR_DLL_LOCAL ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
     ur_native_handle_t
         hNativeQueue, ///< [in][nocheck] the native handle of the queue.
     ur_context_handle_t hContext, ///< [in] handle of the context object
@@ -3964,7 +3964,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urQueueFinish
-__urdlllocal ur_result_t UR_APICALL urQueueFinish(
+UR_DLL_LOCAL ur_result_t UR_APICALL urQueueFinish(
     ur_queue_handle_t hQueue ///< [in] handle of the queue to be finished.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
@@ -3989,7 +3989,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueFinish(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urQueueFlush
-__urdlllocal ur_result_t UR_APICALL urQueueFlush(
+UR_DLL_LOCAL ur_result_t UR_APICALL urQueueFlush(
     ur_queue_handle_t hQueue ///< [in] handle of the queue to be flushed.
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
@@ -4014,7 +4014,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueFlush(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEventGetInfo
-__urdlllocal ur_result_t UR_APICALL urEventGetInfo(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEventGetInfo(
     ur_event_handle_t hEvent, ///< [in] handle of the event object
     ur_event_info_t propName, ///< [in] the name of the event property to query
     size_t propSize, ///< [in] size in bytes of the event property value
@@ -4090,7 +4090,7 @@ __urdlllocal ur_result_t UR_APICALL urEventGetInfo(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEventGetProfilingInfo
-__urdlllocal ur_result_t UR_APICALL urEventGetProfilingInfo(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEventGetProfilingInfo(
     ur_event_handle_t hEvent, ///< [in] handle of the event object
     ur_profiling_info_t
         propName,    ///< [in] the name of the profiling property to query
@@ -4125,7 +4125,7 @@ __urdlllocal ur_result_t UR_APICALL urEventGetProfilingInfo(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEventWait
-__urdlllocal ur_result_t UR_APICALL urEventWait(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEventWait(
     uint32_t numEvents, ///< [in] number of events in the event list
     const ur_event_handle_t *
         phEventWaitList ///< [in][range(0, numEvents)] pointer to a list of events to wait for
@@ -4158,7 +4158,7 @@ __urdlllocal ur_result_t UR_APICALL urEventWait(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEventRetain
-__urdlllocal ur_result_t UR_APICALL urEventRetain(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEventRetain(
     ur_event_handle_t hEvent ///< [in][retain] handle of the event object
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
@@ -4183,7 +4183,7 @@ __urdlllocal ur_result_t UR_APICALL urEventRetain(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEventRelease
-__urdlllocal ur_result_t UR_APICALL urEventRelease(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEventRelease(
     ur_event_handle_t hEvent ///< [in][release] handle of the event object
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
@@ -4208,7 +4208,7 @@ __urdlllocal ur_result_t UR_APICALL urEventRelease(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEventGetNativeHandle
-__urdlllocal ur_result_t UR_APICALL urEventGetNativeHandle(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEventGetNativeHandle(
     ur_event_handle_t hEvent, ///< [in] handle of the event.
     ur_native_handle_t
         *phNativeEvent ///< [out] a pointer to the native handle of the event.
@@ -4239,7 +4239,7 @@ __urdlllocal ur_result_t UR_APICALL urEventGetNativeHandle(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEventCreateWithNativeHandle
-__urdlllocal ur_result_t UR_APICALL urEventCreateWithNativeHandle(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEventCreateWithNativeHandle(
     ur_native_handle_t
         hNativeEvent, ///< [in][nocheck] the native handle of the event.
     ur_context_handle_t hContext, ///< [in] handle of the context object
@@ -4285,7 +4285,7 @@ __urdlllocal ur_result_t UR_APICALL urEventCreateWithNativeHandle(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEventSetCallback
-__urdlllocal ur_result_t UR_APICALL urEventSetCallback(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEventSetCallback(
     ur_event_handle_t hEvent,       ///< [in] handle of the event object
     ur_execution_info_t execStatus, ///< [in] execution status of the event
     ur_event_callback_t pfnNotify,  ///< [in] execution status of the event
@@ -4314,7 +4314,7 @@ __urdlllocal ur_result_t UR_APICALL urEventSetCallback(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueKernelLaunch
-__urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunch(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueKernelLaunch(
     ur_queue_handle_t hQueue,   ///< [in] handle of the queue object
     ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
     uint32_t
@@ -4394,7 +4394,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunch(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueEventsWait
-__urdlllocal ur_result_t UR_APICALL urEnqueueEventsWait(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueEventsWait(
     ur_queue_handle_t hQueue,     ///< [in] handle of the queue object
     uint32_t numEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t *
@@ -4455,7 +4455,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWait(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueEventsWaitWithBarrier
-__urdlllocal ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
     ur_queue_handle_t hQueue,     ///< [in] handle of the queue object
     uint32_t numEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t *
@@ -4517,7 +4517,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueMemBufferRead
-__urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferRead(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueMemBufferRead(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_mem_handle_t
         hBuffer, ///< [in][bounds(offset, size)] handle of the buffer object
@@ -4587,7 +4587,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferRead(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueMemBufferWrite
-__urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWrite(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueMemBufferWrite(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_mem_handle_t
         hBuffer, ///< [in][bounds(offset, size)] handle of the buffer object
@@ -4659,7 +4659,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWrite(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueMemBufferReadRect
-__urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_mem_handle_t
         hBuffer, ///< [in][bounds(bufferOrigin, region)] handle of the buffer object
@@ -4742,7 +4742,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueMemBufferWriteRect
-__urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_mem_handle_t
         hBuffer, ///< [in][bounds(bufferOrigin, region)] handle of the buffer object
@@ -4828,7 +4828,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueMemBufferCopy
-__urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopy(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueMemBufferCopy(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_mem_handle_t
         hBufferSrc, ///< [in][bounds(srcOffset, size)] handle of the src buffer object
@@ -4902,7 +4902,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopy(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueMemBufferCopyRect
-__urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_mem_handle_t
         hBufferSrc, ///< [in][bounds(srcOrigin, region)] handle of the source buffer object
@@ -4986,7 +4986,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueMemBufferFill
-__urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferFill(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueMemBufferFill(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_mem_handle_t
         hBuffer, ///< [in][bounds(offset, size)] handle of the buffer object
@@ -5056,7 +5056,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferFill(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueMemImageRead
-__urdlllocal ur_result_t UR_APICALL urEnqueueMemImageRead(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueMemImageRead(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_mem_handle_t
         hImage, ///< [in][bounds(origin, region)] handle of the image object
@@ -5131,7 +5131,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageRead(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueMemImageWrite
-__urdlllocal ur_result_t UR_APICALL urEnqueueMemImageWrite(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueMemImageWrite(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_mem_handle_t
         hImage, ///< [in][bounds(origin, region)] handle of the image object
@@ -5207,7 +5207,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageWrite(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueMemImageCopy
-__urdlllocal ur_result_t UR_APICALL urEnqueueMemImageCopy(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueMemImageCopy(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_mem_handle_t
         hImageSrc, ///< [in][bounds(srcOrigin, region)] handle of the src image object
@@ -5287,7 +5287,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageCopy(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueMemBufferMap
-__urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferMap(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueMemBufferMap(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_mem_handle_t
         hBuffer, ///< [in][bounds(offset, size)] handle of the buffer object
@@ -5359,7 +5359,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferMap(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueMemUnmap
-__urdlllocal ur_result_t UR_APICALL urEnqueueMemUnmap(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueMemUnmap(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_mem_handle_t
         hMem,         ///< [in] handle of the memory (buffer or image) object
@@ -5425,7 +5425,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemUnmap(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueUSMFill
-__urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueUSMFill(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     void *pMem, ///< [in][bounds(0, size)] pointer to USM memory object
     size_t
@@ -5494,7 +5494,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueUSMMemcpy
-__urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueUSMMemcpy(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     bool blocking,            ///< [in] blocking or non-blocking copy
     void *
@@ -5561,7 +5561,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueUSMPrefetch
-__urdlllocal ur_result_t UR_APICALL urEnqueueUSMPrefetch(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueUSMPrefetch(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     const void
         *pMem,   ///< [in][bounds(0, size)] pointer to the USM memory object
@@ -5625,7 +5625,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMPrefetch(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueUSMAdvise
-__urdlllocal ur_result_t UR_APICALL urEnqueueUSMAdvise(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueUSMAdvise(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     const void
         *pMem,   ///< [in][bounds(0, size)] pointer to the USM memory object
@@ -5673,7 +5673,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMAdvise(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueUSMFill2D
-__urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill2D(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueUSMFill2D(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue to submit to.
     void *
         pMem, ///< [in][bounds(0, pitch * height)] pointer to memory to be filled.
@@ -5746,7 +5746,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill2D(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueUSMMemcpy2D
-__urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue to submit to.
     bool blocking, ///< [in] indicates if this operation should block the host.
     void *
@@ -5818,7 +5818,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueDeviceGlobalVariableWrite
-__urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue to submit to.
     ur_program_handle_t
         hProgram, ///< [in] handle of the program containing the device global variable.
@@ -5891,7 +5891,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueDeviceGlobalVariableRead
-__urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue to submit to.
     ur_program_handle_t
         hProgram, ///< [in] handle of the program containing the device global variable.
@@ -5964,7 +5964,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueReadHostPipe
-__urdlllocal ur_result_t UR_APICALL urEnqueueReadHostPipe(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueReadHostPipe(
     ur_queue_handle_t
         hQueue, ///< [in] a valid host command-queue in which the read command
     ///< will be queued. hQueue and hProgram must be created with the same
@@ -6041,7 +6041,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueReadHostPipe(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueWriteHostPipe
-__urdlllocal ur_result_t UR_APICALL urEnqueueWriteHostPipe(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueWriteHostPipe(
     ur_queue_handle_t
         hQueue, ///< [in] a valid host command-queue in which the write command
     ///< will be queued. hQueue and hProgram must be created with the same
@@ -6119,7 +6119,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueWriteHostPipe(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMPitchedAllocExp
-__urdlllocal ur_result_t UR_APICALL urUSMPitchedAllocExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urUSMPitchedAllocExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     const ur_usm_desc_t *
@@ -6164,7 +6164,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMPitchedAllocExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urBindlessImagesUnsampledImageHandleDestroyExp
-__urdlllocal ur_result_t UR_APICALL
+UR_DLL_LOCAL ur_result_t UR_APICALL
 urBindlessImagesUnsampledImageHandleDestroyExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
@@ -6197,7 +6197,7 @@ urBindlessImagesUnsampledImageHandleDestroyExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urBindlessImagesSampledImageHandleDestroyExp
-__urdlllocal ur_result_t UR_APICALL
+UR_DLL_LOCAL ur_result_t UR_APICALL
 urBindlessImagesSampledImageHandleDestroyExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
@@ -6230,7 +6230,7 @@ urBindlessImagesSampledImageHandleDestroyExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urBindlessImagesImageAllocateExp
-__urdlllocal ur_result_t UR_APICALL urBindlessImagesImageAllocateExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urBindlessImagesImageAllocateExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     const ur_image_format_t
@@ -6270,7 +6270,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageAllocateExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urBindlessImagesImageFreeExp
-__urdlllocal ur_result_t UR_APICALL urBindlessImagesImageFreeExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urBindlessImagesImageFreeExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     ur_exp_image_mem_native_handle_t
@@ -6301,7 +6301,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageFreeExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urBindlessImagesUnsampledImageCreateExp
-__urdlllocal ur_result_t UR_APICALL urBindlessImagesUnsampledImageCreateExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urBindlessImagesUnsampledImageCreateExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     ur_exp_image_mem_native_handle_t
@@ -6343,7 +6343,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesUnsampledImageCreateExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urBindlessImagesSampledImageCreateExp
-__urdlllocal ur_result_t UR_APICALL urBindlessImagesSampledImageCreateExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urBindlessImagesSampledImageCreateExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     ur_exp_image_mem_native_handle_t
@@ -6390,7 +6390,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesSampledImageCreateExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urBindlessImagesImageCopyExp
-__urdlllocal ur_result_t UR_APICALL urBindlessImagesImageCopyExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urBindlessImagesImageCopyExp(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     const void *pSrc,         ///< [in] location the data will be copied from
     void *pDst,               ///< [in] location the data will be copied to
@@ -6465,7 +6465,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageCopyExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urBindlessImagesImageGetInfoExp
-__urdlllocal ur_result_t UR_APICALL urBindlessImagesImageGetInfoExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urBindlessImagesImageGetInfoExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_exp_image_mem_native_handle_t
         hImageMem,            ///< [in] handle to the image memory
@@ -6496,7 +6496,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageGetInfoExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urBindlessImagesMipmapGetLevelExp
-__urdlllocal ur_result_t UR_APICALL urBindlessImagesMipmapGetLevelExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urBindlessImagesMipmapGetLevelExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     ur_exp_image_mem_native_handle_t
@@ -6536,7 +6536,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMipmapGetLevelExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urBindlessImagesMipmapFreeExp
-__urdlllocal ur_result_t UR_APICALL urBindlessImagesMipmapFreeExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urBindlessImagesMipmapFreeExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     ur_exp_image_mem_native_handle_t
@@ -6567,7 +6567,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMipmapFreeExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urBindlessImagesImportExternalMemoryExp
-__urdlllocal ur_result_t UR_APICALL urBindlessImagesImportExternalMemoryExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urBindlessImagesImportExternalMemoryExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     size_t size,                  ///< [in] size of the external memory
@@ -6618,7 +6618,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportExternalMemoryExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urBindlessImagesMapExternalArrayExp
-__urdlllocal ur_result_t UR_APICALL urBindlessImagesMapExternalArrayExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urBindlessImagesMapExternalArrayExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     const ur_image_format_t
@@ -6664,7 +6664,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMapExternalArrayExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urBindlessImagesMapExternalLinearMemoryExp
-__urdlllocal ur_result_t UR_APICALL urBindlessImagesMapExternalLinearMemoryExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urBindlessImagesMapExternalLinearMemoryExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     uint64_t offset,              ///< [in] offset into memory region to map
@@ -6704,7 +6704,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMapExternalLinearMemoryExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urBindlessImagesReleaseExternalMemoryExp
-__urdlllocal ur_result_t UR_APICALL urBindlessImagesReleaseExternalMemoryExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urBindlessImagesReleaseExternalMemoryExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     ur_exp_external_mem_handle_t
@@ -6740,7 +6740,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesReleaseExternalMemoryExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urBindlessImagesImportExternalSemaphoreExp
-__urdlllocal ur_result_t UR_APICALL urBindlessImagesImportExternalSemaphoreExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urBindlessImagesImportExternalSemaphoreExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     ur_exp_external_semaphore_type_t
@@ -6792,7 +6792,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportExternalSemaphoreExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urBindlessImagesReleaseExternalSemaphoreExp
-__urdlllocal ur_result_t UR_APICALL urBindlessImagesReleaseExternalSemaphoreExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urBindlessImagesReleaseExternalSemaphoreExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     ur_exp_external_semaphore_handle_t
@@ -6830,7 +6830,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesReleaseExternalSemaphoreExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urBindlessImagesWaitExternalSemaphoreExp
-__urdlllocal ur_result_t UR_APICALL urBindlessImagesWaitExternalSemaphoreExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urBindlessImagesWaitExternalSemaphoreExp(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_exp_external_semaphore_handle_t
         hSemaphore, ///< [in] external semaphore handle
@@ -6905,7 +6905,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesWaitExternalSemaphoreExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urBindlessImagesSignalExternalSemaphoreExp
-__urdlllocal ur_result_t UR_APICALL urBindlessImagesSignalExternalSemaphoreExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urBindlessImagesSignalExternalSemaphoreExp(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_exp_external_semaphore_handle_t
         hSemaphore, ///< [in] external semaphore handle
@@ -6980,7 +6980,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesSignalExternalSemaphoreExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferCreateExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferCreateExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferCreateExp(
     ur_context_handle_t hContext, ///< [in] Handle of the context object.
     ur_device_handle_t hDevice,   ///< [in] Handle of the device object.
     const ur_exp_command_buffer_desc_t
@@ -7027,7 +7027,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferCreateExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferRetainExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferRetainExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferRetainExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer ///< [in][retain] Handle of the command-buffer object.
 ) {
@@ -7057,7 +7057,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferRetainExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferReleaseExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferReleaseExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer ///< [in][release] Handle of the command-buffer object.
 ) {
@@ -7087,7 +7087,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferFinalizeExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferFinalizeExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferFinalizeExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer ///< [in] Handle of the command-buffer object.
 ) {
@@ -7117,7 +7117,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferFinalizeExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferAppendKernelLaunchExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer,         ///< [in] Handle of the command-buffer object.
     ur_kernel_handle_t hKernel, ///< [in] Kernel to append.
@@ -7236,7 +7236,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferAppendUSMMemcpyExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMMemcpyExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferAppendUSMMemcpyExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer, ///< [in] Handle of the command-buffer object.
     void *pDst,         ///< [in] Location the data will be copied to.
@@ -7326,7 +7326,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMMemcpyExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferAppendUSMFillExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMFillExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferAppendUSMFillExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer,   ///< [in] handle of the command-buffer object.
     void *pMemory,        ///< [in] pointer to USM allocated memory to fill.
@@ -7418,7 +7418,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMFillExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferAppendMemBufferCopyExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer,      ///< [in] Handle of the command-buffer object.
     ur_mem_handle_t hSrcMem, ///< [in] The data to be copied.
@@ -7516,7 +7516,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferAppendMemBufferWriteExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer,      ///< [in] Handle of the command-buffer object.
     ur_mem_handle_t hBuffer, ///< [in] Handle of the buffer object.
@@ -7611,7 +7611,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferAppendMemBufferReadExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer,      ///< [in] Handle of the command-buffer object.
     ur_mem_handle_t hBuffer, ///< [in] Handle of the buffer object.
@@ -7705,7 +7705,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferAppendMemBufferCopyRectExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer,      ///< [in] Handle of the command-buffer object.
     ur_mem_handle_t hSrcMem, ///< [in] The data to be copied.
@@ -7811,7 +7811,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferAppendMemBufferWriteRectExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer,      ///< [in] Handle of the command-buffer object.
     ur_mem_handle_t hBuffer, ///< [in] Handle of the buffer object.
@@ -7920,7 +7920,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferAppendMemBufferReadRectExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer,      ///< [in] Handle of the command-buffer object.
     ur_mem_handle_t hBuffer, ///< [in] Handle of the buffer object.
@@ -8027,7 +8027,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferAppendMemBufferFillExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer,      ///< [in] handle of the command-buffer object.
     ur_mem_handle_t hBuffer, ///< [in] handle of the buffer object.
@@ -8123,7 +8123,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferAppendUSMPrefetchExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMPrefetchExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferAppendUSMPrefetchExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer,  ///< [in] handle of the command-buffer object.
     const void *pMemory, ///< [in] pointer to USM allocated memory to prefetch.
@@ -8213,7 +8213,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMPrefetchExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferAppendUSMAdviseExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMAdviseExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferAppendUSMAdviseExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer,           ///< [in] handle of the command-buffer object.
     const void *pMemory,          ///< [in] pointer to the USM memory object.
@@ -8303,7 +8303,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMAdviseExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferEnqueueExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferEnqueueExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer, ///< [in] Handle of the command-buffer object.
     ur_queue_handle_t
@@ -8371,7 +8371,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferRetainCommandExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferRetainCommandExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferRetainCommandExp(
     ur_exp_command_buffer_command_handle_t
         hCommand ///< [in][retain] Handle of the command-buffer command.
 ) {
@@ -8402,7 +8402,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferRetainCommandExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferReleaseCommandExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseCommandExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferReleaseCommandExp(
     ur_exp_command_buffer_command_handle_t
         hCommand ///< [in][release] Handle of the command-buffer command.
 ) {
@@ -8433,7 +8433,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseCommandExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferUpdateKernelLaunchExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
     ur_exp_command_buffer_command_handle_t
         hCommand, ///< [in] Handle of the command-buffer kernel command to update.
     const ur_exp_command_buffer_update_kernel_launch_desc_t *
@@ -8495,7 +8495,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferUpdateSignalEventExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateSignalEventExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferUpdateSignalEventExp(
     ur_exp_command_buffer_command_handle_t
         hCommand, ///< [in] Handle of the command-buffer command to update.
     ur_event_handle_t *phSignalEvent ///< [out] Event to be signaled.
@@ -8540,7 +8540,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateSignalEventExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferUpdateWaitEventsExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateWaitEventsExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferUpdateWaitEventsExp(
     ur_exp_command_buffer_command_handle_t
         hCommand, ///< [in] Handle of the command-buffer command to update.
     uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
@@ -8585,7 +8585,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateWaitEventsExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferGetInfoExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferGetInfoExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferGetInfoExp(
     ur_exp_command_buffer_handle_t
         hCommandBuffer, ///< [in] handle of the command-buffer object
     ur_exp_command_buffer_info_t
@@ -8625,7 +8625,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferGetInfoExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferCommandGetInfoExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferCommandGetInfoExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urCommandBufferCommandGetInfoExp(
     ur_exp_command_buffer_command_handle_t
         hCommand, ///< [in] handle of the command-buffer command object
     ur_exp_command_buffer_command_info_t
@@ -8666,7 +8666,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferCommandGetInfoExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueCooperativeKernelLaunchExp
-__urdlllocal ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
     ur_queue_handle_t hQueue,   ///< [in] handle of the queue object
     ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
     uint32_t
@@ -8747,7 +8747,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelSuggestMaxCooperativeGroupCountExp
-__urdlllocal ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
     ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
     size_t
         localWorkSize, ///< [in] number of local work-items that will form a work-group when the
@@ -8781,7 +8781,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueTimestampRecordingExp
-__urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     bool
         blocking, ///< [in] indicates whether the call to this function should block until
@@ -8849,7 +8849,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueKernelLaunchCustomExp
-__urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
     ur_queue_handle_t hQueue,   ///< [in] handle of the queue object
     ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
     uint32_t
@@ -8908,7 +8908,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramBuildExp
-__urdlllocal ur_result_t UR_APICALL urProgramBuildExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urProgramBuildExp(
     ur_program_handle_t hProgram, ///< [in] Handle of the program to build.
     uint32_t numDevices,          ///< [in] number of devices
     ur_device_handle_t *
@@ -8945,7 +8945,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuildExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramCompileExp
-__urdlllocal ur_result_t UR_APICALL urProgramCompileExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urProgramCompileExp(
     ur_program_handle_t
         hProgram,        ///< [in][out] handle of the program to compile.
     uint32_t numDevices, ///< [in] number of devices
@@ -8984,7 +8984,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCompileExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramLinkExp
-__urdlllocal ur_result_t UR_APICALL urProgramLinkExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urProgramLinkExp(
     ur_context_handle_t hContext, ///< [in] handle of the context instance.
     uint32_t numDevices,          ///< [in] number of devices
     ur_device_handle_t *
@@ -9048,7 +9048,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramLinkExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMImportExp
-__urdlllocal ur_result_t UR_APICALL urUSMImportExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urUSMImportExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     void *pMem,                   ///< [in] pointer to host memory object
     size_t size ///< [in] size in bytes of the host memory object to be imported
@@ -9075,7 +9075,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMImportExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMReleaseExp
-__urdlllocal ur_result_t UR_APICALL urUSMReleaseExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urUSMReleaseExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     void *pMem                    ///< [in] pointer to host memory object
 ) {
@@ -9101,7 +9101,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMReleaseExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUsmP2PEnablePeerAccessExp
-__urdlllocal ur_result_t UR_APICALL urUsmP2PEnablePeerAccessExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urUsmP2PEnablePeerAccessExp(
     ur_device_handle_t
         commandDevice,            ///< [in] handle of the command device object
     ur_device_handle_t peerDevice ///< [in] handle of the peer device object
@@ -9133,7 +9133,7 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PEnablePeerAccessExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUsmP2PDisablePeerAccessExp
-__urdlllocal ur_result_t UR_APICALL urUsmP2PDisablePeerAccessExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urUsmP2PDisablePeerAccessExp(
     ur_device_handle_t
         commandDevice,            ///< [in] handle of the command device object
     ur_device_handle_t peerDevice ///< [in] handle of the peer device object
@@ -9166,7 +9166,7 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PDisablePeerAccessExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUsmP2PPeerAccessGetInfoExp
-__urdlllocal ur_result_t UR_APICALL urUsmP2PPeerAccessGetInfoExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urUsmP2PPeerAccessGetInfoExp(
     ur_device_handle_t
         commandDevice,             ///< [in] handle of the command device object
     ur_device_handle_t peerDevice, ///< [in] handle of the peer device object
@@ -9211,7 +9211,7 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PPeerAccessGetInfoExp(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueNativeCommandExp
-__urdlllocal ur_result_t UR_APICALL urEnqueueNativeCommandExp(
+UR_DLL_LOCAL ur_result_t UR_APICALL urEnqueueNativeCommandExp(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
     ur_exp_enqueue_native_command_function_t
         pfnNativeEnqueue, ///< [in] function calling the native underlying API, to be executed
