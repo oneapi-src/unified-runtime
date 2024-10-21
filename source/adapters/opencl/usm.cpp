@@ -12,6 +12,13 @@
 
 #include "common.hpp"
 
+namespace umf {
+ur_result_t getProviderNativeError(const char *, int32_t) {
+  // TODO: implement when UMF supports OpenCL
+  return UR_RESULT_ERROR_UNKNOWN;
+}
+} // namespace umf
+
 inline cl_mem_alloc_flags_intel
 hostDescToClFlags(const ur_usm_host_desc_t &desc) {
   cl_mem_alloc_flags_intel allocFlags = 0;
@@ -87,6 +94,11 @@ urUSMHostAlloc(ur_context_handle_t hContext, const ur_usm_desc_t *pUSMDesc,
   void *Ptr = nullptr;
   uint32_t Alignment = pUSMDesc ? pUSMDesc->align : 0;
 
+  if (pUSMDesc && pUSMDesc->align != 0 &&
+      ((pUSMDesc->align & (pUSMDesc->align - 1)) != 0)) {
+    return UR_RESULT_ERROR_INVALID_VALUE;
+  }
+
   std::vector<cl_mem_properties_intel> AllocProperties;
   if (pUSMDesc && pUSMDesc->pNext) {
     UR_RETURN_ON_FAILURE(usmDescToCLMemProperties(
@@ -130,6 +142,11 @@ urUSMDeviceAlloc(ur_context_handle_t hContext, ur_device_handle_t hDevice,
   void *Ptr = nullptr;
   uint32_t Alignment = pUSMDesc ? pUSMDesc->align : 0;
 
+  if (pUSMDesc && pUSMDesc->align != 0 &&
+      ((pUSMDesc->align & (pUSMDesc->align - 1)) != 0)) {
+    return UR_RESULT_ERROR_INVALID_VALUE;
+  }
+
   std::vector<cl_mem_properties_intel> AllocProperties;
   if (pUSMDesc && pUSMDesc->pNext) {
     UR_RETURN_ON_FAILURE(usmDescToCLMemProperties(
@@ -172,6 +189,11 @@ urUSMSharedAlloc(ur_context_handle_t hContext, ur_device_handle_t hDevice,
 
   void *Ptr = nullptr;
   uint32_t Alignment = pUSMDesc ? pUSMDesc->align : 0;
+
+  if (pUSMDesc && pUSMDesc->align != 0 &&
+      ((pUSMDesc->align & (pUSMDesc->align - 1)) != 0)) {
+    return UR_RESULT_ERROR_INVALID_VALUE;
+  }
 
   std::vector<cl_mem_properties_intel> AllocProperties;
   if (pUSMDesc && pUSMDesc->pNext) {
