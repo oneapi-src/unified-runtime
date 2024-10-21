@@ -6,15 +6,14 @@
 from utils.utils import git_clone
 from .base import Benchmark
 from .result import Result
-from utils.utils import run
+from utils.utils import run, create_build_path
+from .options import options
 import os
-import re
 
 class VelocityBench:
     def __init__(self, directory):
         self.directory = directory
-        # TODO: replace with https://github.com/oneapi-src/Velocity-Bench once all fixes land upstream
-        self.repo_path = git_clone(self.directory, "velocity-bench-repo", "https://github.com/pbalcer/Velocity-Bench.git", "ae0ae05c7fd1469779ecea4f36e4741b1d956eb4")
+        self.repo_path = git_clone(self.directory, "velocity-bench-repo", "https://github.com/oneapi-src/Velocity-Bench/", "b22215c16f789100449c34bf4eaa3fb178983d69")
 
 class VelocityBase(Benchmark):
     def __init__(self, name: str, bin_name: str, vb: VelocityBench):
@@ -24,8 +23,14 @@ class VelocityBase(Benchmark):
         self.bin_name = bin_name
         self.code_path = os.path.join(self.vb.repo_path, self.bench_name, 'SYCL')
 
+    def download_deps(self):
+        return
+
     def setup(self):
-        build_path = self.create_build_path(self.bench_name)
+        self.download_deps()
+        self.benchmark_bin = os.path.join(self.directory, self.bench_name, self.bin_name)
+
+        build_path = create_build_path(self.directory, self.bench_name)
 
         configure_command = [
             "cmake",
@@ -35,8 +40,6 @@ class VelocityBase(Benchmark):
         ]
         run(configure_command, {'CC': 'clang', 'CXX':'clang++'}, add_sycl=True)
         run(f"cmake --build {build_path} -j", add_sycl=True)
-
-        self.benchmark_bin = os.path.join(build_path, self.bin_name)
 
     def bin_args(self) -> list[str]:
         return []
@@ -57,7 +60,7 @@ class VelocityBase(Benchmark):
 
         result = self.run_bench(command, env_vars)
 
-        return [Result(label=self.bench_name, value=self.parse_output(result), command=command, env=env_vars, stdout=result)]
+        return [ Result(label=self.name(), value=self.parse_output(result), command=command, env=env_vars, stdout=result, lower_is_better=self.lower_is_better()) ]
 
     def teardown(self):
         return

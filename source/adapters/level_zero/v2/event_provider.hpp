@@ -21,21 +21,27 @@
 
 namespace v2 {
 
-enum event_type { EVENT_REGULAR, EVENT_COUNTER };
-
-using event_borrowed =
-    std::unique_ptr<_ze_event_handle_t, std::function<void(ze_event_handle_t)>>;
-
-struct event_allocation {
-  event_type type;
-  event_borrowed borrow;
+using event_flags_t = uint32_t;
+enum event_flag_t {
+  EVENT_FLAGS_COUNTER = UR_BIT(0),
+  EVENT_FLAGS_PROFILING_ENABLED = UR_BIT(1),
 };
+static constexpr size_t EVENT_FLAGS_USED_BITS = 2;
+
+class event_provider;
+
+namespace raii {
+using cache_borrowed_event =
+    std::unique_ptr<_ze_event_handle_t,
+                    std::function<void(::ze_event_handle_t)>>;
+} // namespace raii
 
 class event_provider {
 public:
   virtual ~event_provider() = default;
-  virtual event_allocation allocate() = 0;
+  virtual raii::cache_borrowed_event allocate() = 0;
   virtual ur_device_handle_t device() = 0;
+  virtual event_flags_t eventFlags() const = 0;
 };
 
 } // namespace v2

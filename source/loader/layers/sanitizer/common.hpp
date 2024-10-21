@@ -127,13 +127,14 @@ inline uint64_t GetSizeAndRedzoneSizeForLocal(uint64_t Size,
             return Result;                                                     \
     }
 
+using BacktraceFrame = void *;
 using BacktraceInfo = std::string;
 
 struct SourceInfo {
     std::string file;
     std::string function;
-    int line;
-    int column;
+    int line = 0;
+    int column = 0;
 };
 
 enum class DeviceType : uint64_t { UNKNOWN = 0, CPU, GPU_PVC, GPU_DG2 };
@@ -157,6 +158,7 @@ bool IsInASanContext();
 
 uptr MmapNoReserve(uptr Addr, uptr Size);
 bool Munmap(uptr Addr, uptr Size);
+bool DontCoredumpRange(uptr Addr, uptr Size);
 
 void *GetMemFunctionPointer(const char *);
 

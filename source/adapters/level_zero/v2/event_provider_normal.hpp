@@ -19,9 +19,11 @@
 #include <ur_api.h>
 #include <ze_api.h>
 
-#include "../device.hpp"
 #include "common.hpp"
 #include "event.hpp"
+
+#include "../device.hpp"
+#include "../ur_interface_loader.hpp"
 
 namespace v2 {
 
@@ -32,35 +34,36 @@ enum queue_type {
 
 class provider_pool {
 public:
-  provider_pool(ur_context_handle_t, ur_device_handle_t, event_type,
-                queue_type);
-  ~provider_pool();
+  provider_pool(ur_context_handle_t, ur_device_handle_t, queue_type,
+                event_flags_t flags);
 
-  event_borrowed allocate();
+  raii::cache_borrowed_event allocate();
   size_t nfree() const;
 
 private:
-  // TODO: use a RAII wrapper for the pool handle
-  ze_event_pool_handle_t pool;
-
-  std::vector<ze_event_handle_t> freelist;
+  raii::ze_event_pool_handle_t pool;
+  std::vector<raii::ze_event_handle_t> freelist;
 };
 
 class provider_normal : public event_provider {
 public:
-  provider_normal(ur_context_handle_t, ur_device_handle_t, event_type,
-                  queue_type);
+  provider_normal(ur_context_handle_t context, ur_device_handle_t device,
+                  queue_type qtype, event_flags_t flags)
+      : queueType(qtype), urContext(context), urDevice(device), flags(flags) {
+    ur::level_zero::urDeviceRetain(device);
+  }
 
-  ~provider_normal() override;
+  ~provider_normal() override { ur::level_zero::urDeviceRelease(urDevice); }
 
-  event_allocation allocate() override;
+  raii::cache_borrowed_event allocate() override;
   ur_device_handle_t device() override;
+  event_flags_t eventFlags() const override;
 
 private:
-  event_type producedType;
   queue_type queueType;
   ur_context_handle_t urContext;
   ur_device_handle_t urDevice;
+  event_flags_t flags;
 
   std::unique_ptr<provider_pool> createProviderPool();
   std::vector<std::unique_ptr<provider_pool>> pools;

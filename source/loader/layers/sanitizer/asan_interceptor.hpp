@@ -15,6 +15,9 @@
 #include "asan_allocator.hpp"
 #include "asan_buffer.hpp"
 #include "asan_libdevice.hpp"
+#include "asan_options.hpp"
+#include "asan_shadow.hpp"
+#include "asan_statistics.hpp"
 #include "common.hpp"
 #include "ur_sanitizer_layer.hpp"
 
@@ -22,6 +25,7 @@
 #include <optional>
 #include <queue>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace ur_sanitizer_layer {
@@ -38,24 +42,19 @@ struct DeviceInfo {
 
     DeviceType Type = DeviceType::UNKNOWN;
     size_t Alignment = 0;
-    uptr ShadowOffset = 0;
-    uptr ShadowOffsetEnd = 0;
+    std::shared_ptr<ShadowMemory> Shadow;
 
+    // Device features
+    bool IsSupportSharedSystemUSM = false;
+
+    // lock this mutex if following fields are accessed
     ur_mutex Mutex;
     std::queue<std::shared_ptr<AllocInfo>> Quarantine;
     size_t QuarantineSize = 0;
 
-    explicit DeviceInfo(ur_device_handle_t Device) : Handle(Device) {
-        [[maybe_unused]] auto Result =
-            getContext()->urDdiTable.Device.pfnRetain(Device);
-        assert(Result == UR_RESULT_SUCCESS);
-    }
-
-    ~DeviceInfo() {
-        [[maybe_unused]] auto Result =
-            getContext()->urDdiTable.Device.pfnRelease(Handle);
-        assert(Result == UR_RESULT_SUCCESS);
-    }
+    // Device handles are special and alive in the whole process lifetime,
+    // so we needn't retain&release here.
+    explicit DeviceInfo(ur_device_handle_t Device) : Handle(Device) {}
 
     ur_result_t allocShadowMemory(ur_context_handle_t Context);
 };
@@ -63,6 +62,7 @@ struct DeviceInfo {
 struct QueueInfo {
     ur_queue_handle_t Handle;
 
+    // lock this mutex if following fields are accessed
     ur_shared_mutex Mutex;
     ur_event_handle_t LastEvent;
 
@@ -82,9 +82,13 @@ struct QueueInfo {
 
 struct KernelInfo {
     ur_kernel_handle_t Handle;
-    ur_shared_mutex Mutex;
     std::atomic<int32_t> RefCount = 1;
+
+    // lock this mutex if following fields are accessed
+    ur_shared_mutex Mutex;
     std::unordered_map<uint32_t, std::shared_ptr<MemBuffer>> BufferArgs;
+    std::unordered_map<uint32_t, std::pair<const void *, StackTrace>>
+        PointerArgs;
 
     // Need preserve the order of local arguments
     std::map<uint32_t, LocalArgsInfo> LocalArgs;
@@ -102,11 +106,35 @@ struct KernelInfo {
     }
 };
 
+struct ProgramInfo {
+    ur_program_handle_t Handle;
+    std::atomic<int32_t> RefCount = 1;
+
+    // lock this mutex if following fields are accessed
+    ur_shared_mutex Mutex;
+    std::unordered_set<std::shared_ptr<AllocInfo>> AllocInfoForGlobals;
+
+    explicit ProgramInfo(ur_program_handle_t Program) : Handle(Program) {
+        [[maybe_unused]] auto Result =
+            getContext()->urDdiTable.Program.pfnRetain(Handle);
+        assert(Result == UR_RESULT_SUCCESS);
+    }
+
+    ~ProgramInfo() {
+        [[maybe_unused]] auto Result =
+            getContext()->urDdiTable.Program.pfnRelease(Handle);
+        assert(Result == UR_RESULT_SUCCESS);
+    }
+};
+
 struct ContextInfo {
     ur_context_handle_t Handle;
+    std::atomic<int32_t> RefCount = 1;
 
     std::vector<ur_device_handle_t> DeviceList;
     std::unordered_map<ur_device_handle_t, AllocInfoList> AllocInfosMap;
+
+    AsanStatsWrapper Stats;
 
     explicit ContextInfo(ur_context_handle_t Context) : Handle(Context) {
         [[maybe_unused]] auto Result =
@@ -114,11 +142,7 @@ struct ContextInfo {
         assert(Result == UR_RESULT_SUCCESS);
     }
 
-    ~ContextInfo() {
-        [[maybe_unused]] auto Result =
-            getContext()->urDdiTable.Context.pfnRelease(Handle);
-        assert(Result == UR_RESULT_SUCCESS);
-    }
+    ~ContextInfo();
 
     void insertAllocInfo(const std::vector<ur_device_handle_t> &Devices,
                          std::shared_ptr<AllocInfo> &AI) {
@@ -164,7 +188,7 @@ struct DeviceGlobalInfo {
 
 class SanitizerInterceptor {
   public:
-    explicit SanitizerInterceptor(logger::Logger &logger);
+    explicit SanitizerInterceptor();
 
     ~SanitizerInterceptor();
 
@@ -175,8 +199,10 @@ class SanitizerInterceptor {
                                AllocType Type, void **ResultPtr);
     ur_result_t releaseMemory(ur_context_handle_t Context, void *Ptr);
 
-    ur_result_t registerDeviceGlobals(ur_context_handle_t Context,
-                                      ur_program_handle_t Program);
+    ur_result_t registerProgram(ur_context_handle_t Context,
+                                ur_program_handle_t Program);
+
+    ur_result_t unregisterProgram(ur_program_handle_t Program);
 
     ur_result_t preLaunchKernel(ur_kernel_handle_t Kernel,
                                 ur_queue_handle_t Queue,
@@ -194,6 +220,9 @@ class SanitizerInterceptor {
                              std::shared_ptr<DeviceInfo> &CI);
     ur_result_t eraseDevice(ur_device_handle_t Device);
 
+    ur_result_t insertProgram(ur_program_handle_t Program);
+    ur_result_t eraseProgram(ur_program_handle_t Program);
+
     ur_result_t insertKernel(ur_kernel_handle_t Kernel);
     ur_result_t eraseKernel(ur_kernel_handle_t Kernel);
 
@@ -201,7 +230,20 @@ class SanitizerInterceptor {
     ur_result_t eraseMemBuffer(ur_mem_handle_t MemHandle);
     std::shared_ptr<MemBuffer> getMemBuffer(ur_mem_handle_t MemHandle);
 
+    ur_result_t holdAdapter(ur_adapter_handle_t Adapter) {
+        std::scoped_lock<ur_shared_mutex> Guard(m_AdaptersMutex);
+        if (m_Adapters.find(Adapter) != m_Adapters.end()) {
+            return UR_RESULT_SUCCESS;
+        }
+        UR_CALL(getContext()->urDdiTable.Global.pfnAdapterRetain(Adapter));
+        m_Adapters.insert(Adapter);
+        return UR_RESULT_SUCCESS;
+    }
+
     std::optional<AllocationIterator> findAllocInfoByAddress(uptr Address);
+
+    std::vector<AllocationIterator>
+    findAllocInfoByContext(ur_context_handle_t Context);
 
     std::shared_ptr<ContextInfo> getContextInfo(ur_context_handle_t Context) {
         std::shared_lock<ur_shared_mutex> Guard(m_ContextMapMutex);
@@ -215,23 +257,31 @@ class SanitizerInterceptor {
         return m_DeviceMap[Device];
     }
 
+    std::shared_ptr<ProgramInfo> getProgramInfo(ur_program_handle_t Program) {
+        std::shared_lock<ur_shared_mutex> Guard(m_ProgramMapMutex);
+        assert(m_ProgramMap.find(Program) != m_ProgramMap.end());
+        return m_ProgramMap[Program];
+    }
+
     std::shared_ptr<KernelInfo> getKernelInfo(ur_kernel_handle_t Kernel) {
         std::shared_lock<ur_shared_mutex> Guard(m_KernelMapMutex);
         assert(m_KernelMap.find(Kernel) != m_KernelMap.end());
         return m_KernelMap[Kernel];
     }
 
+    const AsanOptions &getOptions() { return m_Options; }
+
   private:
     ur_result_t updateShadowMemory(std::shared_ptr<ContextInfo> &ContextInfo,
                                    std::shared_ptr<DeviceInfo> &DeviceInfo,
                                    ur_queue_handle_t Queue);
-    ur_result_t enqueueAllocInfo(ur_context_handle_t Context,
-                                 std::shared_ptr<DeviceInfo> &DeviceInfo,
+
+    ur_result_t enqueueAllocInfo(std::shared_ptr<DeviceInfo> &DeviceInfo,
                                  ur_queue_handle_t Queue,
                                  std::shared_ptr<AllocInfo> &AI);
 
     /// Initialize Global Variables & Kernel Name at first Launch
-    ur_result_t prepareLaunch(ur_context_handle_t Context,
+    ur_result_t prepareLaunch(std::shared_ptr<ContextInfo> &ContextInfo,
                               std::shared_ptr<DeviceInfo> &DeviceInfo,
                               ur_queue_handle_t Queue,
                               ur_kernel_handle_t Kernel,
@@ -248,6 +298,10 @@ class SanitizerInterceptor {
         m_DeviceMap;
     ur_shared_mutex m_DeviceMapMutex;
 
+    std::unordered_map<ur_program_handle_t, std::shared_ptr<ProgramInfo>>
+        m_ProgramMap;
+    ur_shared_mutex m_ProgramMapMutex;
+
     std::unordered_map<ur_kernel_handle_t, std::shared_ptr<KernelInfo>>
         m_KernelMap;
     ur_shared_mutex m_KernelMapMutex;
@@ -261,7 +315,11 @@ class SanitizerInterceptor {
     ur_shared_mutex m_AllocationMapMutex;
 
     std::unique_ptr<Quarantine> m_Quarantine;
-    logger::Logger &logger;
+
+    AsanOptions m_Options;
+
+    std::unordered_set<ur_adapter_handle_t> m_Adapters;
+    ur_shared_mutex m_AdaptersMutex;
 };
 
 } // namespace ur_sanitizer_layer

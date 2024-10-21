@@ -22,6 +22,13 @@
 
 #include <cuda.h>
 
+namespace umf {
+ur_result_t getProviderNativeError(const char *, int32_t) {
+  // TODO: implement when UMF supports CUDA
+  return UR_RESULT_ERROR_UNKNOWN;
+}
+} // namespace umf
+
 /// USM: Implements USM Host allocations using CUDA Pinned Memory
 /// https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#page-locked-host-memory
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -398,7 +405,7 @@ ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t Context,
 
   HostMemPool =
       umf::poolMakeUniqueFromOps(
-          &UMF_DISJOINT_POOL_OPS, std::move(MemProvider),
+          umfDisjointPoolOps(), std::move(MemProvider),
           &this->DisjointPoolConfigs.Configs[usm::DisjointPoolMemType::Host])
           .second;
 
@@ -407,7 +414,7 @@ ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t Context,
         umf::memoryProviderMakeUnique<USMDeviceMemoryProvider>(Context, Device)
             .second;
     DeviceMemPool = umf::poolMakeUniqueFromOps(
-                        &UMF_DISJOINT_POOL_OPS, std::move(MemProvider),
+                        umfDisjointPoolOps(), std::move(MemProvider),
                         &this->DisjointPoolConfigs
                              .Configs[usm::DisjointPoolMemType::Device])
                         .second;
@@ -415,7 +422,7 @@ ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t Context,
         umf::memoryProviderMakeUnique<USMSharedMemoryProvider>(Context, Device)
             .second;
     SharedMemPool = umf::poolMakeUniqueFromOps(
-                        &UMF_DISJOINT_POOL_OPS, std::move(MemProvider),
+                        umfDisjointPoolOps(), std::move(MemProvider),
                         &this->DisjointPoolConfigs
                              .Configs[usm::DisjointPoolMemType::Shared])
                         .second;

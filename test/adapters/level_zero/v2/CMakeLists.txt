@@ -8,8 +8,7 @@ function(add_unittest name)
     add_adapter_test(${name}
         FIXTURE DEVICES
         ENVIRONMENT
-            "UR_ADAPTERS_FORCE_LOAD=\"$<TARGET_FILE:ur_adapter_level_zero>\""
-            "UR_L0_USE_QUEUE_V2=1"
+            "UR_ADAPTERS_FORCE_LOAD=\"$<TARGET_FILE:ur_adapter_level_zero_v2>\""
         SOURCES
             ${PROJECT_SOURCE_DIR}/source/adapters/level_zero/common.cpp
             ${PROJECT_SOURCE_DIR}/source/adapters/level_zero/ur_level_zero.cpp
@@ -17,12 +16,13 @@ function(add_unittest name)
 
     target_include_directories(${target} PUBLIC
         ${PROJECT_SOURCE_DIR}/source
-        ${PROJECT_SOURCE_DIR}/source/adapters/level_zero
+        ${PROJECT_SOURCE_DIR}/source/adapters
         ${PROJECT_SOURCE_DIR}/source/adapters/level_zero/v2
         LevelZeroLoader-Headers)
 
     target_link_libraries(${target} PRIVATE
         ${PROJECT_NAME}::common
+        ${PROJECT_NAME}::umf
         LevelZeroLoader
         LevelZeroLoader-Headers
     )
@@ -35,9 +35,22 @@ add_unittest(level_zero_command_list_cache
 
 add_unittest(level_zero_event_pool
         event_pool_test.cpp
+        ${PROJECT_SOURCE_DIR}/source/ur/ur.cpp
+        ${PROJECT_SOURCE_DIR}/source/adapters/level_zero/adapter.cpp
+        ${PROJECT_SOURCE_DIR}/source/adapters/level_zero/device.cpp
+        ${PROJECT_SOURCE_DIR}/source/adapters/level_zero/platform.cpp
         ${PROJECT_SOURCE_DIR}/source/adapters/level_zero/v2/event_pool.cpp
         ${PROJECT_SOURCE_DIR}/source/adapters/level_zero/v2/event_pool_cache.cpp
         ${PROJECT_SOURCE_DIR}/source/adapters/level_zero/v2/event_provider_normal.cpp
         ${PROJECT_SOURCE_DIR}/source/adapters/level_zero/v2/event_provider_counter.cpp
         ${PROJECT_SOURCE_DIR}/source/adapters/level_zero/v2/event.cpp
+)
+
+add_adapter_test(level_zero_memory_residency
+    FIXTURE DEVICES
+    SOURCES
+        memory_residency.cpp
+    ENVIRONMENT
+        "UR_ADAPTERS_FORCE_LOAD=\"$<TARGET_FILE:ur_adapter_level_zero_v2>\""
+        "ZES_ENABLE_SYSMAN=1"
 )

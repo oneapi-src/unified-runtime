@@ -955,16 +955,16 @@ ur_result_t urPrintExpSamplerCubemapProperties(
 }
 
 ur_result_t
-urPrintExpInteropMemDesc(const struct ur_exp_interop_mem_desc_t params,
-                         char *buffer, const size_t buff_size,
-                         size_t *out_size) {
+urPrintExpExternalMemDesc(const struct ur_exp_external_mem_desc_t params,
+                          char *buffer, const size_t buff_size,
+                          size_t *out_size) {
     std::stringstream ss;
     ss << params;
     return str_copy(&ss, buffer, buff_size, out_size);
 }
 
-ur_result_t urPrintExpInteropSemaphoreDesc(
-    const struct ur_exp_interop_semaphore_desc_t params, char *buffer,
+ur_result_t urPrintExpExternalSemaphoreDesc(
+    const struct ur_exp_external_semaphore_desc_t params, char *buffer,
     const size_t buff_size, size_t *out_size) {
     std::stringstream ss;
     ss << params;
@@ -977,6 +977,14 @@ urPrintExpImageCopyRegion(const struct ur_exp_image_copy_region_t params,
                           size_t *out_size) {
     std::stringstream ss;
     ss << params;
+    return str_copy(&ss, buffer, buff_size, out_size);
+}
+
+ur_result_t urPrintDeviceCommandBufferUpdateCapabilityFlags(
+    enum ur_device_command_buffer_update_capability_flag_t value, char *buffer,
+    const size_t buff_size, size_t *out_size) {
+    std::stringstream ss;
+    ss << value;
     return str_copy(&ss, buffer, buff_size, out_size);
 }
 
@@ -1262,8 +1270,18 @@ ur_result_t urPrintBindlessImagesMapExternalArrayExpParams(
     return str_copy(&ss, buffer, buff_size, out_size);
 }
 
-ur_result_t urPrintBindlessImagesReleaseInteropExpParams(
-    const struct ur_bindless_images_release_interop_exp_params_t *params,
+ur_result_t urPrintBindlessImagesMapExternalLinearMemoryExpParams(
+    const struct ur_bindless_images_map_external_linear_memory_exp_params_t
+        *params,
+    char *buffer, const size_t buff_size, size_t *out_size) {
+    std::stringstream ss;
+    ss << params;
+    return str_copy(&ss, buffer, buff_size, out_size);
+}
+
+ur_result_t urPrintBindlessImagesReleaseExternalMemoryExpParams(
+    const struct ur_bindless_images_release_external_memory_exp_params_t
+        *params,
     char *buffer, const size_t buff_size, size_t *out_size) {
     std::stringstream ss;
     ss << params;
@@ -1463,6 +1481,22 @@ ur_result_t urPrintCommandBufferReleaseCommandExpParams(
 
 ur_result_t urPrintCommandBufferUpdateKernelLaunchExpParams(
     const struct ur_command_buffer_update_kernel_launch_exp_params_t *params,
+    char *buffer, const size_t buff_size, size_t *out_size) {
+    std::stringstream ss;
+    ss << params;
+    return str_copy(&ss, buffer, buff_size, out_size);
+}
+
+ur_result_t urPrintCommandBufferUpdateSignalEventExpParams(
+    const struct ur_command_buffer_update_signal_event_exp_params_t *params,
+    char *buffer, const size_t buff_size, size_t *out_size) {
+    std::stringstream ss;
+    ss << params;
+    return str_copy(&ss, buffer, buff_size, out_size);
+}
+
+ur_result_t urPrintCommandBufferUpdateWaitEventsExpParams(
+    const struct ur_command_buffer_update_wait_events_exp_params_t *params,
     char *buffer, const size_t buff_size, size_t *out_size) {
     std::stringstream ss;
     ss << params;

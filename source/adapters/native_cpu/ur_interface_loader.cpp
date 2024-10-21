@@ -290,6 +290,8 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
   pDdiTable->pfnCommandGetInfoExp = urCommandBufferCommandGetInfoExp;
   pDdiTable->pfnReleaseCommandExp = urCommandBufferReleaseCommandExp;
   pDdiTable->pfnRetainCommandExp = urCommandBufferRetainCommandExp;
+  pDdiTable->pfnUpdateWaitEventsExp = urCommandBufferUpdateWaitEventsExp;
+  pDdiTable->pfnUpdateSignalEventExp = urCommandBufferUpdateSignalEventExp;
 
   return retVal;
 }
@@ -329,7 +331,10 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetBindlessImagesExpProcAddrTable(
   pDdiTable->pfnImportExternalMemoryExp =
       urBindlessImagesImportExternalMemoryExp;
   pDdiTable->pfnMapExternalArrayExp = urBindlessImagesMapExternalArrayExp;
-  pDdiTable->pfnReleaseInteropExp = urBindlessImagesReleaseInteropExp;
+  pDdiTable->pfnMapExternalLinearMemoryExp =
+      urBindlessImagesMapExternalLinearMemoryExp;
+  pDdiTable->pfnReleaseExternalMemoryExp =
+      urBindlessImagesReleaseExternalMemoryExp;
   pDdiTable->pfnImportExternalSemaphoreExp =
       urBindlessImagesImportExternalSemaphoreExp;
   pDdiTable->pfnReleaseExternalSemaphoreExp =

@@ -155,7 +155,7 @@ urEventWait(uint32_t numEvents, const ur_event_handle_t *phEventWaitList) {
   UR_ASSERT(numEvents > 0, UR_RESULT_ERROR_INVALID_VALUE);
 
   try {
-    ScopedContext Active(phEventWaitList[0]->getContext()->getDevices()[0]);
+    ScopedDevice Active(phEventWaitList[0]->getContext()->getDevices()[0]);
     auto WaitFunc = [](ur_event_handle_t Event) -> ur_result_t {
       UR_ASSERT(Event, UR_RESULT_ERROR_INVALID_EVENT);
 
@@ -178,8 +178,18 @@ UR_APIEXPORT ur_result_t UR_APICALL urEventGetInfo(ur_event_handle_t hEvent,
 
   UrReturnHelper ReturnValue(propValueSize, pPropValue, pPropValueSizeRet);
   switch (propName) {
-  case UR_EVENT_INFO_COMMAND_QUEUE:
+  case UR_EVENT_INFO_COMMAND_QUEUE: {
+    // If the runtime owns the native handle, we have reference to the queue.
+    // Otherwise, the event handle comes from an interop API with no RT refs.
+    if (!hEvent->getQueue()) {
+      setErrorMessage("Command queue info cannot be queried for the event. The "
+                      "event object was created from a native event and has no "
+                      "valid reference to a command queue.",
+                      UR_RESULT_ERROR_INVALID_VALUE);
+      return UR_RESULT_ERROR_ADAPTER_SPECIFIC;
+    }
     return ReturnValue(hEvent->getQueue());
+  }
   case UR_EVENT_INFO_COMMAND_TYPE:
     return ReturnValue(hEvent->getCommandType());
   case UR_EVENT_INFO_REFERENCE_COUNT:

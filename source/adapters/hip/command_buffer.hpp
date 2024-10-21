@@ -15,6 +15,7 @@
 #include "context.hpp"
 #include <hip/hip_runtime.h>
 #include <memory>
+#include <unordered_set>
 
 // Trace an internal UR call
 #define UR_TRACE(Call)                                                         \
@@ -41,9 +42,10 @@
 struct ur_exp_command_buffer_command_handle_t_ {
   ur_exp_command_buffer_command_handle_t_(
       ur_exp_command_buffer_handle_t CommandBuffer, ur_kernel_handle_t Kernel,
-      std::shared_ptr<hipGraphNode_t> &&Node, hipKernelNodeParams Params,
-      uint32_t WorkDim, const size_t *GlobalWorkOffsetPtr,
-      const size_t *GlobalWorkSizePtr, const size_t *LocalWorkSizePtr);
+      hipGraphNode_t Node, hipKernelNodeParams Params, uint32_t WorkDim,
+      const size_t *GlobalWorkOffsetPtr, const size_t *GlobalWorkSizePtr,
+      const size_t *LocalWorkSizePtr, uint32_t NumKernelAlternatives,
+      ur_kernel_handle_t *KernelAlternatives);
 
   void setGlobalOffset(const size_t *GlobalWorkOffsetPtr) {
     const size_t CopySize = sizeof(size_t) * WorkDim;
@@ -72,6 +74,10 @@ struct ur_exp_command_buffer_command_handle_t_ {
     }
   }
 
+  void setNullLocalSize() noexcept {
+    std::memset(LocalWorkSize, 0, sizeof(size_t) * 3);
+  }
+
   bool isNullLocalSize() const noexcept {
     const size_t Zeros[3] = {0, 0, 0};
     return 0 == std::memcmp(LocalWorkSize, Zeros, sizeof(LocalWorkSize));
@@ -95,8 +101,14 @@ struct ur_exp_command_buffer_command_handle_t_ {
   }
 
   ur_exp_command_buffer_handle_t CommandBuffer;
+
+  // The currently active kernel handle for this command.
   ur_kernel_handle_t Kernel;
-  std::shared_ptr<hipGraphNode_t> Node;
+
+  // Set of all the kernel handles that can be used when updating this command.
+  std::unordered_set<ur_kernel_handle_t> ValidKernelHandles;
+
+  hipGraphNode_t Node;
   hipKernelNodeParams Params;
 
   uint32_t WorkDim;
@@ -117,7 +129,7 @@ struct ur_exp_command_buffer_handle_t_ {
   ~ur_exp_command_buffer_handle_t_();
 
   void registerSyncPoint(ur_exp_command_buffer_sync_point_t SyncPoint,
-                         std::shared_ptr<hipGraphNode_t> &&HIPNode) {
+                         hipGraphNode_t HIPNode) {
     SyncPoints[SyncPoint] = std::move(HIPNode);
     NextSyncPoint++;
   }
@@ -129,8 +141,7 @@ struct ur_exp_command_buffer_handle_t_ {
   // Helper to register next sync point
   // @param HIPNode Node to register as next sync point
   // @return Pointer to the sync that registers the Node
-  ur_exp_command_buffer_sync_point_t
-  addSyncPoint(std::shared_ptr<hipGraphNode_t> HIPNode) {
+  ur_exp_command_buffer_sync_point_t addSyncPoint(hipGraphNode_t HIPNode) {
     ur_exp_command_buffer_sync_point_t SyncPoint = NextSyncPoint;
     registerSyncPoint(SyncPoint, std::move(HIPNode));
     return SyncPoint;
@@ -171,8 +182,7 @@ struct ur_exp_command_buffer_handle_t_ {
   std::atomic_uint32_t RefCountExternal;
 
   // Map of sync_points to ur_events
-  std::unordered_map<ur_exp_command_buffer_sync_point_t,
-                     std::shared_ptr<hipGraphNode_t>>
+  std::unordered_map<ur_exp_command_buffer_sync_point_t, hipGraphNode_t>
       SyncPoints;
   // Next sync_point value (may need to consider ways to reuse values if 32-bits
   // is not enough)

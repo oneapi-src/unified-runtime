@@ -24,7 +24,7 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGet(
     ur_adapter_handle_t *
         phAdapters, ///< [out][optional][range(0, NumEntries)] array of handle of adapters.
     ///< If NumEntries is less than the number of adapters available, then
-    ///< ::urAdapterGet shall only retrieve that number of platforms.
+    ///< ::urAdapterGet shall only retrieve that number of adapters.
     uint32_t *
         pNumAdapters ///< [out][optional] returns the total number of adapters available.
     ) try {
@@ -921,7 +921,8 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetNativeHandle(
 __urdlllocal ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
     ur_native_handle_t
         hNativeDevice, ///< [in][nocheck] the native handle of the device.
-    ur_platform_handle_t hPlatform, ///< [in] handle of the platform instance
+    ur_adapter_handle_t
+        hAdapter, ///< [in] handle of the adapter to which `hNativeDevice` belongs
     const ur_device_native_properties_t *
         pProperties, ///< [in][optional] pointer to native device properties struct.
     ur_device_handle_t
@@ -930,7 +931,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
     ur_result_t result = UR_RESULT_SUCCESS;
 
     ur_device_create_with_native_handle_params_t params = {
-        &hNativeDevice, &hPlatform, &pProperties, &phDevice};
+        &hNativeDevice, &hAdapter, &pProperties, &phDevice};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
         mock::getCallbacks().get_before_callback(
@@ -3864,6 +3865,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgValue(
         *pProperties, ///< [in][optional] pointer to value properties.
     const void
         *pArgValue ///< [in] argument value represented as matching arg type.
+    ///< The data pointed to will be copied and therefore can be reused on return.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -5375,17 +5377,16 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunch(
         pLocalWorkSize, ///< [in][optional] pointer to an array of workDim unsigned values that
     ///< specify the number of local work-items forming a work-group that will
     ///< execute the kernel function.
-    ///< If nullptr, the runtime implementation will choose the work-group
-    ///< size.
+    ///< If nullptr, the runtime implementation will choose the work-group size.
     uint32_t numEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t *
         phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
     ///< events that must be complete before the kernel execution.
-    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait
-    ///< event.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait event.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< kernel execution instance.
+    ///< kernel execution instance. If phEventWaitList and phEvent are not
+    ///< NULL, phEvent must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -5449,7 +5450,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWait(
     ///< must be complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -5506,7 +5508,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
     ///< must be complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -5571,7 +5574,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferRead(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -5637,7 +5641,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWrite(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -5713,7 +5718,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -5803,7 +5809,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -5880,7 +5887,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopy(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -5953,7 +5961,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -6019,7 +6028,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferFill(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -6093,7 +6103,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageRead(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -6164,7 +6175,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageWrite(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -6236,7 +6248,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageCopy(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -6299,7 +6312,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferMap(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent, ///< [out][optional] return an event object that identifies this particular
-                 ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
     void **ppRetMap ///< [out] return mapped pointer.  TODO: move it before
                     ///< numEventsInWaitList?
     ) try {
@@ -6365,7 +6379,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemUnmap(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -6430,7 +6445,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -6494,7 +6510,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -6555,7 +6572,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMPrefetch(
     ///< command does not wait on any event to complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -6675,11 +6693,11 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill2D(
     const ur_event_handle_t *
         phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
     ///< events that must be complete before the kernel execution.
-    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait
-    ///< event.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait event.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< kernel execution instance.
+    ///< kernel execution instance. If phEventWaitList and phEvent are not
+    ///< NULL, phEvent must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -6745,11 +6763,11 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
     const ur_event_handle_t *
         phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
     ///< events that must be complete before the kernel execution.
-    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait
-    ///< event.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait event.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< kernel execution instance.
+    ///< kernel execution instance. If phEventWaitList and phEvent are not
+    ///< NULL, phEvent must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -6813,11 +6831,11 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
     const ur_event_handle_t *
         phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
     ///< events that must be complete before the kernel execution.
-    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait
-    ///< event.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait event.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< kernel execution instance.
+    ///< kernel execution instance. If phEventWaitList and phEvent are not
+    ///< NULL, phEvent must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -6883,11 +6901,11 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
     const ur_event_handle_t *
         phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
     ///< events that must be complete before the kernel execution.
-    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait
-    ///< event.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait event.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< kernel execution instance.
+    ///< kernel execution instance. If phEventWaitList and phEvent are not
+    ///< NULL, phEvent must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -6959,9 +6977,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueReadHostPipe(
     ///< events that must be complete before the host pipe read.
     ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait event.
     ur_event_handle_t *
-        phEvent ///< [out][optional] returns an event object that identifies this read
-                ///< command
+        phEvent ///< [out][optional] returns an event object that identifies this read command
     ///< and can be used to query or queue a wait for this command to complete.
+    ///< If phEventWaitList and phEvent are not NULL, phEvent must not refer to
+    ///< an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -7033,6 +7052,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueWriteHostPipe(
     ur_event_handle_t *
         phEvent ///< [out][optional] returns an event object that identifies this write command
     ///< and can be used to query or queue a wait for this command to complete.
+    ///< If phEventWaitList and phEvent are not NULL, phEvent must not refer to
+    ///< an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -7479,7 +7500,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageCopyExp(
     ///< must be complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -7699,16 +7721,16 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportExternalMemoryExp(
     size_t size,                  ///< [in] size of the external memory
     ur_exp_external_mem_type_t
         memHandleType, ///< [in] type of external memory handle
-    ur_exp_interop_mem_desc_t
-        *pInteropMemDesc, ///< [in] the interop memory descriptor
-    ur_exp_interop_mem_handle_t
-        *phInteropMem ///< [out] interop memory handle to the external memory
+    ur_exp_external_mem_desc_t
+        *pExternalMemDesc, ///< [in] the external memory descriptor
+    ur_exp_external_mem_handle_t
+        *phExternalMem ///< [out] external memory handle to the external memory
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
     ur_bindless_images_import_external_memory_exp_params_t params = {
-        &hContext,      &hDevice,         &size,
-        &memHandleType, &pInteropMemDesc, &phInteropMem};
+        &hContext,      &hDevice,          &size,
+        &memHandleType, &pExternalMemDesc, &phExternalMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
         mock::getCallbacks().get_before_callback(
@@ -7727,7 +7749,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportExternalMemoryExp(
         result = replaceCallback(&params);
     } else {
 
-        *phInteropMem = mock::createDummyHandle<ur_exp_interop_mem_handle_t>();
+        *phExternalMem =
+            mock::createDummyHandle<ur_exp_external_mem_handle_t>();
         result = UR_RESULT_SUCCESS;
     }
 
@@ -7755,16 +7778,16 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMapExternalArrayExp(
     const ur_image_format_t
         *pImageFormat, ///< [in] pointer to image format specification
     const ur_image_desc_t *pImageDesc, ///< [in] pointer to image description
-    ur_exp_interop_mem_handle_t
-        hInteropMem, ///< [in] interop memory handle to the external memory
+    ur_exp_external_mem_handle_t
+        hExternalMem, ///< [in] external memory handle to the external memory
     ur_exp_image_mem_native_handle_t *
         phImageMem ///< [out] image memory handle to the externally allocated memory
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
     ur_bindless_images_map_external_array_exp_params_t params = {
-        &hContext,   &hDevice,     &pImageFormat,
-        &pImageDesc, &hInteropMem, &phImageMem};
+        &hContext,   &hDevice,      &pImageFormat,
+        &pImageDesc, &hExternalMem, &phImageMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
         mock::getCallbacks().get_before_callback(
@@ -7805,21 +7828,24 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesMapExternalArrayExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urBindlessImagesReleaseInteropExp
-__urdlllocal ur_result_t UR_APICALL urBindlessImagesReleaseInteropExp(
+/// @brief Intercept function for urBindlessImagesMapExternalLinearMemoryExp
+__urdlllocal ur_result_t UR_APICALL urBindlessImagesMapExternalLinearMemoryExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
-    ur_exp_interop_mem_handle_t
-        hInteropMem ///< [in][release] handle of interop memory to be destroyed
+    uint64_t offset,              ///< [in] offset into memory region to map
+    uint64_t size,                ///< [in] size of memory region to map
+    ur_exp_external_mem_handle_t
+        hExternalMem, ///< [in] external memory handle to the external memory
+    void **ppRetMem   ///< [out] pointer of the externally allocated memory
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
-    ur_bindless_images_release_interop_exp_params_t params = {
-        &hContext, &hDevice, &hInteropMem};
+    ur_bindless_images_map_external_linear_memory_exp_params_t params = {
+        &hContext, &hDevice, &offset, &size, &hExternalMem, &ppRetMem};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
         mock::getCallbacks().get_before_callback(
-            "urBindlessImagesReleaseInteropExp"));
+            "urBindlessImagesMapExternalLinearMemoryExp"));
     if (beforeCallback) {
         result = beforeCallback(&params);
         if (result != UR_RESULT_SUCCESS) {
@@ -7829,12 +7855,11 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesReleaseInteropExp(
 
     auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
         mock::getCallbacks().get_replace_callback(
-            "urBindlessImagesReleaseInteropExp"));
+            "urBindlessImagesMapExternalLinearMemoryExp"));
     if (replaceCallback) {
         result = replaceCallback(&params);
     } else {
 
-        mock::releaseDummyHandle(hInteropMem);
         result = UR_RESULT_SUCCESS;
     }
 
@@ -7844,7 +7869,57 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesReleaseInteropExp(
 
     auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
         mock::getCallbacks().get_after_callback(
-            "urBindlessImagesReleaseInteropExp"));
+            "urBindlessImagesMapExternalLinearMemoryExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
+
+    return result;
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urBindlessImagesReleaseExternalMemoryExp
+__urdlllocal ur_result_t UR_APICALL urBindlessImagesReleaseExternalMemoryExp(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    ur_device_handle_t hDevice,   ///< [in] handle of the device object
+    ur_exp_external_mem_handle_t
+        hExternalMem ///< [in][release] handle of external memory to be destroyed
+    ) try {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    ur_bindless_images_release_external_memory_exp_params_t params = {
+        &hContext, &hDevice, &hExternalMem};
+
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_before_callback(
+            "urBindlessImagesReleaseExternalMemoryExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
+
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_replace_callback(
+            "urBindlessImagesReleaseExternalMemoryExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
+
+        mock::releaseDummyHandle(hExternalMem);
+        result = UR_RESULT_SUCCESS;
+    }
+
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
+            "urBindlessImagesReleaseExternalMemoryExp"));
     if (afterCallback) {
         return afterCallback(&params);
     }
@@ -7861,16 +7936,16 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportExternalSemaphoreExp(
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
     ur_exp_external_semaphore_type_t
         semHandleType, ///< [in] type of external memory handle
-    ur_exp_interop_semaphore_desc_t
-        *pInteropSemaphoreDesc, ///< [in] the interop semaphore descriptor
-    ur_exp_interop_semaphore_handle_t *
-        phInteropSemaphore ///< [out] interop semaphore handle to the external semaphore
+    ur_exp_external_semaphore_desc_t
+        *pExternalSemaphoreDesc, ///< [in] the external semaphore descriptor
+    ur_exp_external_semaphore_handle_t *
+        phExternalSemaphore ///< [out] external semaphore handle to the external semaphore
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
     ur_bindless_images_import_external_semaphore_exp_params_t params = {
-        &hContext, &hDevice, &semHandleType, &pInteropSemaphoreDesc,
-        &phInteropSemaphore};
+        &hContext, &hDevice, &semHandleType, &pExternalSemaphoreDesc,
+        &phExternalSemaphore};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
         mock::getCallbacks().get_before_callback(
@@ -7889,8 +7964,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportExternalSemaphoreExp(
         result = replaceCallback(&params);
     } else {
 
-        *phInteropSemaphore =
-            mock::createDummyHandle<ur_exp_interop_semaphore_handle_t>();
+        *phExternalSemaphore =
+            mock::createDummyHandle<ur_exp_external_semaphore_handle_t>();
         result = UR_RESULT_SUCCESS;
     }
 
@@ -7915,13 +7990,13 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportExternalSemaphoreExp(
 __urdlllocal ur_result_t UR_APICALL urBindlessImagesReleaseExternalSemaphoreExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
-    ur_exp_interop_semaphore_handle_t
-        hInteropSemaphore ///< [in][release] handle of interop semaphore to be destroyed
+    ur_exp_external_semaphore_handle_t
+        hExternalSemaphore ///< [in][release] handle of external semaphore to be destroyed
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
     ur_bindless_images_release_external_semaphore_exp_params_t params = {
-        &hContext, &hDevice, &hInteropSemaphore};
+        &hContext, &hDevice, &hExternalSemaphore};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
         mock::getCallbacks().get_before_callback(
@@ -7940,7 +8015,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesReleaseExternalSemaphoreExp(
         result = replaceCallback(&params);
     } else {
 
-        mock::releaseDummyHandle(hInteropSemaphore);
+        mock::releaseDummyHandle(hExternalSemaphore);
         result = UR_RESULT_SUCCESS;
     }
 
@@ -7964,8 +8039,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesReleaseExternalSemaphoreExp(
 /// @brief Intercept function for urBindlessImagesWaitExternalSemaphoreExp
 __urdlllocal ur_result_t UR_APICALL urBindlessImagesWaitExternalSemaphoreExp(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
-    ur_exp_interop_semaphore_handle_t
-        hSemaphore, ///< [in] interop semaphore handle
+    ur_exp_external_semaphore_handle_t
+        hSemaphore, ///< [in] external semaphore handle
     bool
         hasWaitValue, ///< [in] indicates whether the samephore is capable and should wait on a
                       ///< certain value.
@@ -7981,7 +8056,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesWaitExternalSemaphoreExp(
     ///< must be complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -8034,8 +8110,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesWaitExternalSemaphoreExp(
 /// @brief Intercept function for urBindlessImagesSignalExternalSemaphoreExp
 __urdlllocal ur_result_t UR_APICALL urBindlessImagesSignalExternalSemaphoreExp(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
-    ur_exp_interop_semaphore_handle_t
-        hSemaphore, ///< [in] interop semaphore handle
+    ur_exp_external_semaphore_handle_t
+        hSemaphore, ///< [in] external semaphore handle
     bool
         hasSignalValue, ///< [in] indicates whether the samephore is capable and should signal on a
                         ///< certain value.
@@ -8051,7 +8127,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesSignalExternalSemaphoreExp(
     ///< must be complete.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command instance.
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -8294,16 +8371,37 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
     const size_t *
         pGlobalWorkSize, ///< [in] Global work size to use when executing kernel.
     const size_t *
-        pLocalWorkSize, ///< [in][optional] Local work size to use when executing kernel.
+        pLocalWorkSize, ///< [in][optional] Local work size to use when executing kernel. If this
+    ///< parameter is nullptr, then a local work size will be generated by the
+    ///< implementation.
+    uint32_t
+        numKernelAlternatives, ///< [in] The number of kernel alternatives provided in
+                               ///< phKernelAlternatives.
+    ur_kernel_handle_t *
+        phKernelAlternatives, ///< [in][optional][range(0, numKernelAlternatives)] List of kernel handles
+    ///< that might be used to update the kernel in this
+    ///< command after the command-buffer is finalized. The default kernel
+    ///< `hKernel` is implicitly marked as an alternative. It's
+    ///< invalid to specify it as part of this list.
     uint32_t
         numSyncPointsInWaitList, ///< [in] The number of sync points in the provided dependency list.
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
         pSyncPoint, ///< [out][optional] Sync point associated with this command.
-    ur_exp_command_buffer_command_handle_t
-        *phCommand ///< [out][optional] Handle to this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
+    ur_exp_command_buffer_command_handle_t *
+        phCommand ///< [out][optional] Handle to this command. Only available if the
+                  ///< command-buffer is updatable.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -8314,9 +8412,14 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
         &pGlobalWorkOffset,
         &pGlobalWorkSize,
         &pLocalWorkSize,
+        &numKernelAlternatives,
+        &phKernelAlternatives,
         &numSyncPointsInWaitList,
         &pSyncPointWaitList,
+        &numEventsInWaitList,
+        &phEventWaitList,
         &pSyncPoint,
+        &phEvent,
         &phCommand};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
@@ -8336,6 +8439,10 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
         result = replaceCallback(&params);
     } else {
 
+        // optional output handle
+        if (phEvent) {
+            *phEvent = mock::createDummyHandle<ur_event_handle_t>();
+        }
         // optional output handle
         if (phCommand) {
             *phCommand = mock::createDummyHandle<
@@ -8373,14 +8480,34 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMMemcpyExp(
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] Sync point associated with this command.
+        pSyncPoint, ///< [out][optional] Sync point associated with this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
+    ur_exp_command_buffer_command_handle_t
+        *phCommand ///< [out][optional] Handle to this command.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
     ur_command_buffer_append_usm_memcpy_exp_params_t params = {
-        &hCommandBuffer,     &pDst,      &pSrc, &size, &numSyncPointsInWaitList,
-        &pSyncPointWaitList, &pSyncPoint};
+        &hCommandBuffer,
+        &pDst,
+        &pSrc,
+        &size,
+        &numSyncPointsInWaitList,
+        &pSyncPointWaitList,
+        &numEventsInWaitList,
+        &phEventWaitList,
+        &pSyncPoint,
+        &phEvent,
+        &phCommand};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
         mock::getCallbacks().get_before_callback(
@@ -8399,6 +8526,15 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMMemcpyExp(
         result = replaceCallback(&params);
     } else {
 
+        // optional output handle
+        if (phEvent) {
+            *phEvent = mock::createDummyHandle<ur_event_handle_t>();
+        }
+        // optional output handle
+        if (phCommand) {
+            *phCommand = mock::createDummyHandle<
+                ur_exp_command_buffer_command_handle_t>();
+        }
         result = UR_RESULT_SUCCESS;
     }
 
@@ -8433,15 +8569,35 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMFillExp(
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] sync point associated with this command.
+        pSyncPoint, ///< [out][optional] sync point associated with this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
+    ur_exp_command_buffer_command_handle_t
+        *phCommand ///< [out][optional] Handle to this command.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
     ur_command_buffer_append_usm_fill_exp_params_t params = {
-        &hCommandBuffer,     &pMemory,   &pPattern,
-        &patternSize,        &size,      &numSyncPointsInWaitList,
-        &pSyncPointWaitList, &pSyncPoint};
+        &hCommandBuffer,
+        &pMemory,
+        &pPattern,
+        &patternSize,
+        &size,
+        &numSyncPointsInWaitList,
+        &pSyncPointWaitList,
+        &numEventsInWaitList,
+        &phEventWaitList,
+        &pSyncPoint,
+        &phEvent,
+        &phCommand};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
         mock::getCallbacks().get_before_callback(
@@ -8460,6 +8616,15 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMFillExp(
         result = replaceCallback(&params);
     } else {
 
+        // optional output handle
+        if (phEvent) {
+            *phEvent = mock::createDummyHandle<ur_event_handle_t>();
+        }
+        // optional output handle
+        if (phCommand) {
+            *phCommand = mock::createDummyHandle<
+                ur_exp_command_buffer_command_handle_t>();
+        }
         result = UR_RESULT_SUCCESS;
     }
 
@@ -8494,8 +8659,19 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] Sync point associated with this command.
+        pSyncPoint, ///< [out][optional] Sync point associated with this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
+    ur_exp_command_buffer_command_handle_t
+        *phCommand ///< [out][optional] Handle to this command.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -8508,7 +8684,11 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
         &size,
         &numSyncPointsInWaitList,
         &pSyncPointWaitList,
-        &pSyncPoint};
+        &numEventsInWaitList,
+        &phEventWaitList,
+        &pSyncPoint,
+        &phEvent,
+        &phCommand};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
         mock::getCallbacks().get_before_callback(
@@ -8527,6 +8707,15 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
         result = replaceCallback(&params);
     } else {
 
+        // optional output handle
+        if (phEvent) {
+            *phEvent = mock::createDummyHandle<ur_event_handle_t>();
+        }
+        // optional output handle
+        if (phCommand) {
+            *phCommand = mock::createDummyHandle<
+                ur_exp_command_buffer_command_handle_t>();
+        }
         result = UR_RESULT_SUCCESS;
     }
 
@@ -8561,8 +8750,19 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] Sync point associated with this command.
+        pSyncPoint, ///< [out][optional] Sync point associated with this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
+    ur_exp_command_buffer_command_handle_t
+        *phCommand ///< [out][optional] Handle to this command.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -8574,7 +8774,11 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
         &pSrc,
         &numSyncPointsInWaitList,
         &pSyncPointWaitList,
-        &pSyncPoint};
+        &numEventsInWaitList,
+        &phEventWaitList,
+        &pSyncPoint,
+        &phEvent,
+        &phCommand};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
         mock::getCallbacks().get_before_callback(
@@ -8593,6 +8797,15 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
         result = replaceCallback(&params);
     } else {
 
+        // optional output handle
+        if (phEvent) {
+            *phEvent = mock::createDummyHandle<ur_event_handle_t>();
+        }
+        // optional output handle
+        if (phCommand) {
+            *phCommand = mock::createDummyHandle<
+                ur_exp_command_buffer_command_handle_t>();
+        }
         result = UR_RESULT_SUCCESS;
     }
 
@@ -8626,8 +8839,19 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] Sync point associated with this command.
+        pSyncPoint, ///< [out][optional] Sync point associated with this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
+    ur_exp_command_buffer_command_handle_t
+        *phCommand ///< [out][optional] Handle to this command.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -8639,7 +8863,11 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
         &pDst,
         &numSyncPointsInWaitList,
         &pSyncPointWaitList,
-        &pSyncPoint};
+        &numEventsInWaitList,
+        &phEventWaitList,
+        &pSyncPoint,
+        &phEvent,
+        &phCommand};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
         mock::getCallbacks().get_before_callback(
@@ -8658,6 +8886,15 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
         result = replaceCallback(&params);
     } else {
 
+        // optional output handle
+        if (phEvent) {
+            *phEvent = mock::createDummyHandle<ur_event_handle_t>();
+        }
+        // optional output handle
+        if (phCommand) {
+            *phCommand = mock::createDummyHandle<
+                ur_exp_command_buffer_command_handle_t>();
+        }
         result = UR_RESULT_SUCCESS;
     }
 
@@ -8699,8 +8936,19 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] Sync point associated with this command.
+        pSyncPoint, ///< [out][optional] Sync point associated with this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
+    ur_exp_command_buffer_command_handle_t
+        *phCommand ///< [out][optional] Handle to this command.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -8717,7 +8965,11 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
         &dstSlicePitch,
         &numSyncPointsInWaitList,
         &pSyncPointWaitList,
-        &pSyncPoint};
+        &numEventsInWaitList,
+        &phEventWaitList,
+        &pSyncPoint,
+        &phEvent,
+        &phCommand};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
         mock::getCallbacks().get_before_callback(
@@ -8736,6 +8988,15 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
         result = replaceCallback(&params);
     } else {
 
+        // optional output handle
+        if (phEvent) {
+            *phEvent = mock::createDummyHandle<ur_event_handle_t>();
+        }
+        // optional output handle
+        if (phCommand) {
+            *phCommand = mock::createDummyHandle<
+                ur_exp_command_buffer_command_handle_t>();
+        }
         result = UR_RESULT_SUCCESS;
     }
 
@@ -8783,8 +9044,19 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] Sync point associated with this command.
+        pSyncPoint, ///< [out][optional] Sync point associated with this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
+    ur_exp_command_buffer_command_handle_t
+        *phCommand ///< [out][optional] Handle to this command.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -8801,7 +9073,11 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
         &pSrc,
         &numSyncPointsInWaitList,
         &pSyncPointWaitList,
-        &pSyncPoint};
+        &numEventsInWaitList,
+        &phEventWaitList,
+        &pSyncPoint,
+        &phEvent,
+        &phCommand};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
         mock::getCallbacks().get_before_callback(
@@ -8820,6 +9096,15 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
         result = replaceCallback(&params);
     } else {
 
+        // optional output handle
+        if (phEvent) {
+            *phEvent = mock::createDummyHandle<ur_event_handle_t>();
+        }
+        // optional output handle
+        if (phCommand) {
+            *phCommand = mock::createDummyHandle<
+                ur_exp_command_buffer_command_handle_t>();
+        }
         result = UR_RESULT_SUCCESS;
     }
 
@@ -8865,8 +9150,19 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] Sync point associated with this command.
+        pSyncPoint, ///< [out][optional] Sync point associated with this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
+    ur_exp_command_buffer_command_handle_t
+        *phCommand ///< [out][optional] Handle to this command.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -8883,7 +9179,11 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
         &pDst,
         &numSyncPointsInWaitList,
         &pSyncPointWaitList,
-        &pSyncPoint};
+        &numEventsInWaitList,
+        &phEventWaitList,
+        &pSyncPoint,
+        &phEvent,
+        &phCommand};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
         mock::getCallbacks().get_before_callback(
@@ -8902,6 +9202,15 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
         result = replaceCallback(&params);
     } else {
 
+        // optional output handle
+        if (phEvent) {
+            *phEvent = mock::createDummyHandle<ur_event_handle_t>();
+        }
+        // optional output handle
+        if (phCommand) {
+            *phCommand = mock::createDummyHandle<
+                ur_exp_command_buffer_command_handle_t>();
+        }
         result = UR_RESULT_SUCCESS;
     }
 
@@ -8937,8 +9246,19 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] sync point associated with this command.
+        pSyncPoint, ///< [out][optional] sync point associated with this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
+    ur_exp_command_buffer_command_handle_t
+        *phCommand ///< [out][optional] Handle to this command.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -8951,7 +9271,11 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
         &size,
         &numSyncPointsInWaitList,
         &pSyncPointWaitList,
-        &pSyncPoint};
+        &numEventsInWaitList,
+        &phEventWaitList,
+        &pSyncPoint,
+        &phEvent,
+        &phCommand};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
         mock::getCallbacks().get_before_callback(
@@ -8970,6 +9294,15 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
         result = replaceCallback(&params);
     } else {
 
+        // optional output handle
+        if (phEvent) {
+            *phEvent = mock::createDummyHandle<ur_event_handle_t>();
+        }
+        // optional output handle
+        if (phCommand) {
+            *phCommand = mock::createDummyHandle<
+                ur_exp_command_buffer_command_handle_t>();
+        }
         result = UR_RESULT_SUCCESS;
     }
 
@@ -9002,8 +9335,19 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMPrefetchExp(
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] sync point associated with this command.
+        pSyncPoint, ///< [out][optional] sync point associated with this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
+    ur_exp_command_buffer_command_handle_t
+        *phCommand ///< [out][optional] Handle to this command.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -9014,7 +9358,11 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMPrefetchExp(
         &flags,
         &numSyncPointsInWaitList,
         &pSyncPointWaitList,
-        &pSyncPoint};
+        &numEventsInWaitList,
+        &phEventWaitList,
+        &pSyncPoint,
+        &phEvent,
+        &phCommand};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
         mock::getCallbacks().get_before_callback(
@@ -9033,6 +9381,15 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMPrefetchExp(
         result = replaceCallback(&params);
     } else {
 
+        // optional output handle
+        if (phEvent) {
+            *phEvent = mock::createDummyHandle<ur_event_handle_t>();
+        }
+        // optional output handle
+        if (phCommand) {
+            *phCommand = mock::createDummyHandle<
+                ur_exp_command_buffer_command_handle_t>();
+        }
         result = UR_RESULT_SUCCESS;
     }
 
@@ -9065,8 +9422,19 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMAdviseExp(
     const ur_exp_command_buffer_sync_point_t *
         pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                             ///< be ignored if command-buffer is in-order.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
     ur_exp_command_buffer_sync_point_t *
-        pSyncPoint ///< [out][optional] sync point associated with this command.
+        pSyncPoint, ///< [out][optional] sync point associated with this command.
+    ur_event_handle_t *
+        phEvent, ///< [out][optional] return an event object that will be signaled by the
+                 ///< completion of this command in the next execution of the
+                 ///< command-buffer.
+    ur_exp_command_buffer_command_handle_t
+        *phCommand ///< [out][optional] Handle to this command.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -9077,7 +9445,11 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMAdviseExp(
         &advice,
         &numSyncPointsInWaitList,
         &pSyncPointWaitList,
-        &pSyncPoint};
+        &numEventsInWaitList,
+        &phEventWaitList,
+        &pSyncPoint,
+        &phEvent,
+        &phCommand};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
         mock::getCallbacks().get_before_callback(
@@ -9096,6 +9468,15 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMAdviseExp(
         result = replaceCallback(&params);
     } else {
 
+        // optional output handle
+        if (phEvent) {
+            *phEvent = mock::createDummyHandle<ur_event_handle_t>();
+        }
+        // optional output handle
+        if (phCommand) {
+            *phCommand = mock::createDummyHandle<
+                ur_exp_command_buffer_command_handle_t>();
+        }
         result = UR_RESULT_SUCCESS;
     }
 
@@ -9129,7 +9510,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
     ///< If nullptr, the numEventsInWaitList must be 0, indicating no wait events.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< command-buffer execution instance.
+    ///< command-buffer execution instance. If phEventWaitList and phEvent are
+    ///< not NULL, phEvent must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -9318,6 +9700,107 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urCommandBufferUpdateSignalEventExp
+__urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateSignalEventExp(
+    ur_exp_command_buffer_command_handle_t
+        hCommand, ///< [in] Handle of the command-buffer command to update.
+    ur_event_handle_t *phSignalEvent ///< [out] Event to be signaled.
+    ) try {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    ur_command_buffer_update_signal_event_exp_params_t params = {
+        &hCommand, &phSignalEvent};
+
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_before_callback(
+            "urCommandBufferUpdateSignalEventExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
+
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_replace_callback(
+            "urCommandBufferUpdateSignalEventExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
+
+        *phSignalEvent = mock::createDummyHandle<ur_event_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
+            "urCommandBufferUpdateSignalEventExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
+
+    return result;
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urCommandBufferUpdateWaitEventsExp
+__urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateWaitEventsExp(
+    ur_exp_command_buffer_command_handle_t
+        hCommand, ///< [in] Handle of the command-buffer command to update.
+    uint32_t numEventsInWaitList, ///< [in] Size of the event wait list.
+    const ur_event_handle_t *
+        phEventWaitList ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before the command execution. If nullptr,
+    ///< the numEventsInWaitList must be 0, indicating no wait events.
+    ) try {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    ur_command_buffer_update_wait_events_exp_params_t params = {
+        &hCommand, &numEventsInWaitList, &phEventWaitList};
+
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_before_callback(
+            "urCommandBufferUpdateWaitEventsExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
+
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_replace_callback(
+            "urCommandBufferUpdateWaitEventsExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
+
+        result = UR_RESULT_SUCCESS;
+    }
+
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback(
+            "urCommandBufferUpdateWaitEventsExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
+
+    return result;
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferGetInfoExp
 __urdlllocal ur_result_t UR_APICALL urCommandBufferGetInfoExp(
     ur_exp_command_buffer_handle_t
@@ -9445,17 +9928,16 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
         pLocalWorkSize, ///< [in][optional] pointer to an array of workDim unsigned values that
     ///< specify the number of local work-items forming a work-group that will
     ///< execute the kernel function.
-    ///< If nullptr, the runtime implementation will choose the work-group
-    ///< size.
+    ///< If nullptr, the runtime implementation will choose the work-group size.
     uint32_t numEventsInWaitList, ///< [in] size of the event wait list
     const ur_event_handle_t *
         phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
     ///< events that must be complete before the kernel execution.
-    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait
-    ///< event.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating that no wait event.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< kernel execution instance.
+    ///< kernel execution instance. If phEventWaitList and phEvent are not
+    ///< NULL, phEvent must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -9575,8 +10057,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
     const ur_event_handle_t *
         phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
     ///< events that must be complete before the kernel execution.
-    ///< If nullptr, the numEventsInWaitList must be 0, indicating no wait
-    ///< events.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating no wait events.
     ur_event_handle_t *
         phEvent ///< [in,out] return an event object that identifies this particular kernel
                 ///< execution instance. Profiling information can be queried
@@ -9584,7 +10065,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
     ///< `UR_PROFILING_INFO_COMMAND_QUEUED` or `UR_PROFILING_INFO_COMMAND_SUBMIT`
     ///< reports the timestamp at the time of the call to this function.
     ///< Querying `UR_PROFILING_INFO_COMMAND_START` or `UR_PROFILING_INFO_COMMAND_END`
-    ///< reports the timestamp recorded when the command is executed on the device.
+    ///< reports the timestamp recorded when the command is executed on the
+    ///< device. If phEventWaitList and phEvent are not NULL, phEvent must not
+    ///< refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -9656,7 +10139,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
     ///< the numEventsInWaitList must be 0, indicating that no wait event.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies this particular
-                ///< kernel execution instance.
+    ///< kernel execution instance. If phEventWaitList and phEvent are not
+    ///< NULL, phEvent must not refer to an element of the phEventWaitList
+    ///< array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -10123,7 +10608,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueNativeCommandExp(
     ///< If nullptr, the numEventsInWaitList must be 0, indicating no wait events.
     ur_event_handle_t *
         phEvent ///< [out][optional] return an event object that identifies the work that has
-    ///< been enqueued in nativeEnqueueFunc.
+    ///< been enqueued in nativeEnqueueFunc. If phEventWaitList and phEvent are
+    ///< not NULL, phEvent must not refer to an element of the phEventWaitList array.
     ) try {
     ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -10437,7 +10923,11 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetBindlessImagesExpProcAddrTable(
     pDdiTable->pfnMapExternalArrayExp =
         driver::urBindlessImagesMapExternalArrayExp;
 
-    pDdiTable->pfnReleaseInteropExp = driver::urBindlessImagesReleaseInteropExp;
+    pDdiTable->pfnMapExternalLinearMemoryExp =
+        driver::urBindlessImagesMapExternalLinearMemoryExp;
+
+    pDdiTable->pfnReleaseExternalMemoryExp =
+        driver::urBindlessImagesReleaseExternalMemoryExp;
 
     pDdiTable->pfnImportExternalSemaphoreExp =
         driver::urBindlessImagesImportExternalSemaphoreExp;
@@ -10530,6 +11020,12 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
 
     pDdiTable->pfnUpdateKernelLaunchExp =
         driver::urCommandBufferUpdateKernelLaunchExp;
+
+    pDdiTable->pfnUpdateSignalEventExp =
+        driver::urCommandBufferUpdateSignalEventExp;
+
+    pDdiTable->pfnUpdateWaitEventsExp =
+        driver::urCommandBufferUpdateWaitEventsExp;
 
     pDdiTable->pfnGetInfoExp = driver::urCommandBufferGetInfoExp;
 

@@ -11,8 +11,12 @@
  */
 
 #include "asan_interceptor.hpp"
+#include "asan_options.hpp"
+#include "stacktrace.hpp"
 #include "ur_sanitizer_layer.hpp"
 #include "ur_sanitizer_utils.hpp"
+
+#include <memory>
 
 namespace ur_sanitizer_layer {
 
@@ -31,9 +35,13 @@ ur_result_t setupContext(ur_context_handle_t Context, uint32_t numDevices,
             getContext()->logger.error("Unsupport device");
             return UR_RESULT_ERROR_INVALID_DEVICE;
         }
-        getContext()->logger.info("Add {} into context {}", ToString(DI->Type),
+        getContext()->logger.info(
+            "DeviceInfo {} (Type={}, IsSupportSharedSystemUSM={})",
+            (void *)DI->Handle, ToString(DI->Type),
+            DI->IsSupportSharedSystemUSM);
+        getContext()->logger.info("Add {} into context {}", (void *)DI->Handle,
                                   (void *)Context);
-        if (!DI->ShadowOffset) {
+        if (!DI->Shadow) {
             UR_CALL(DI->allocShadowMemory(Context));
         }
         CI->DeviceList.emplace_back(hDevice);
@@ -43,6 +51,38 @@ ur_result_t setupContext(ur_context_handle_t Context, uint32_t numDevices,
 }
 
 } // namespace
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urAdapterGet
+__urdlllocal ur_result_t UR_APICALL urAdapterGet(
+    uint32_t
+        NumEntries, ///< [in] the number of adapters to be added to phAdapters.
+    ///< If phAdapters is not NULL, then NumEntries should be greater than
+    ///< zero, otherwise ::UR_RESULT_ERROR_INVALID_SIZE,
+    ///< will be returned.
+    ur_adapter_handle_t *
+        phAdapters, ///< [out][optional][range(0, NumEntries)] array of handle of adapters.
+    ///< If NumEntries is less than the number of adapters available, then
+    ///< ::urAdapterGet shall only retrieve that number of platforms.
+    uint32_t *
+        pNumAdapters ///< [out][optional] returns the total number of adapters available.
+) {
+    auto pfnAdapterGet = getContext()->urDdiTable.Global.pfnAdapterGet;
+
+    if (nullptr == pfnAdapterGet) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    ur_result_t result = pfnAdapterGet(NumEntries, phAdapters, pNumAdapters);
+    if (result == UR_RESULT_SUCCESS && phAdapters) {
+        const uint32_t NumAdapters = pNumAdapters ? *pNumAdapters : NumEntries;
+        for (uint32_t i = 0; i < NumAdapters; ++i) {
+            UR_CALL(getContext()->interceptor->holdAdapter(phAdapters[i]));
+        }
+    }
+
+    return result;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMHostAlloc
@@ -136,6 +176,112 @@ __urdlllocal ur_result_t UR_APICALL urUSMFree(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urProgramCreateWithIL
+__urdlllocal ur_result_t UR_APICALL urProgramCreateWithIL(
+    ur_context_handle_t hContext, ///< [in] handle of the context instance
+    const void *pIL,              ///< [in] pointer to IL binary.
+    size_t length,                ///< [in] length of `pIL` in bytes.
+    const ur_program_properties_t *
+        pProperties, ///< [in][optional] pointer to program creation properties.
+    ur_program_handle_t
+        *phProgram ///< [out] pointer to handle of program object created.
+) {
+    auto pfnProgramCreateWithIL =
+        getContext()->urDdiTable.Program.pfnCreateWithIL;
+
+    if (nullptr == pfnProgramCreateWithIL) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    getContext()->logger.debug("==== urProgramCreateWithIL");
+
+    UR_CALL(
+        pfnProgramCreateWithIL(hContext, pIL, length, pProperties, phProgram));
+    UR_CALL(getContext()->interceptor->insertProgram(*phProgram));
+
+    return UR_RESULT_SUCCESS;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urProgramCreateWithBinary
+__urdlllocal ur_result_t UR_APICALL urProgramCreateWithBinary(
+    ur_context_handle_t hContext, ///< [in] handle of the context instance
+    ur_device_handle_t
+        hDevice,            ///< [in] handle to device associated with binary.
+    size_t size,            ///< [in] size in bytes.
+    const uint8_t *pBinary, ///< [in] pointer to binary.
+    const ur_program_properties_t *
+        pProperties, ///< [in][optional] pointer to program creation properties.
+    ur_program_handle_t
+        *phProgram ///< [out] pointer to handle of Program object created.
+) {
+    auto pfnProgramCreateWithBinary =
+        getContext()->urDdiTable.Program.pfnCreateWithBinary;
+
+    if (nullptr == pfnProgramCreateWithBinary) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    getContext()->logger.debug("==== urProgramCreateWithBinary");
+
+    UR_CALL(pfnProgramCreateWithBinary(hContext, hDevice, size, pBinary,
+                                       pProperties, phProgram));
+    UR_CALL(getContext()->interceptor->insertProgram(*phProgram));
+
+    return UR_RESULT_SUCCESS;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urProgramCreateWithNativeHandle
+__urdlllocal ur_result_t UR_APICALL urProgramCreateWithNativeHandle(
+    ur_native_handle_t
+        hNativeProgram, ///< [in][nocheck] the native handle of the program.
+    ur_context_handle_t hContext, ///< [in] handle of the context instance
+    const ur_program_native_properties_t *
+        pProperties, ///< [in][optional] pointer to native program properties struct.
+    ur_program_handle_t *
+        phProgram ///< [out] pointer to the handle of the program object created.
+) {
+    auto pfnProgramCreateWithNativeHandle =
+        getContext()->urDdiTable.Program.pfnCreateWithNativeHandle;
+
+    if (nullptr == pfnProgramCreateWithNativeHandle) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    getContext()->logger.debug("==== urProgramCreateWithNativeHandle");
+
+    UR_CALL(pfnProgramCreateWithNativeHandle(hNativeProgram, hContext,
+                                             pProperties, phProgram));
+    UR_CALL(getContext()->interceptor->insertProgram(*phProgram));
+
+    return UR_RESULT_SUCCESS;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urProgramRetain
+__urdlllocal ur_result_t UR_APICALL urProgramRetain(
+    ur_program_handle_t
+        hProgram ///< [in][retain] handle for the Program to retain
+) {
+    auto pfnRetain = getContext()->urDdiTable.Program.pfnRetain;
+
+    if (nullptr == pfnRetain) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    getContext()->logger.debug("==== urProgramRetain");
+
+    UR_CALL(pfnRetain(hProgram));
+
+    auto ProgramInfo = getContext()->interceptor->getProgramInfo(hProgram);
+    UR_ASSERT(ProgramInfo != nullptr, UR_RESULT_ERROR_INVALID_VALUE);
+    ProgramInfo->RefCount++;
+
+    return UR_RESULT_SUCCESS;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramBuild
 __urdlllocal ur_result_t UR_APICALL urProgramBuild(
     ur_context_handle_t hContext, ///< [in] handle of the context object
@@ -152,8 +298,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuild(
 
     UR_CALL(pfnProgramBuild(hContext, hProgram, pOptions));
 
-    UR_CALL(
-        getContext()->interceptor->registerDeviceGlobals(hContext, hProgram));
+    UR_CALL(getContext()->interceptor->registerProgram(hContext, hProgram));
 
     return UR_RESULT_SUCCESS;
 }
@@ -177,8 +322,8 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuildExp(
     getContext()->logger.debug("==== urProgramBuildExp");
 
     UR_CALL(pfnBuildExp(hProgram, numDevices, phDevices, pOptions));
-    UR_CALL(getContext()->interceptor->registerDeviceGlobals(
-        GetContext(hProgram), hProgram));
+    UR_CALL(getContext()->interceptor->registerProgram(GetContext(hProgram),
+                                                       hProgram));
 
     return UR_RESULT_SUCCESS;
 }
@@ -205,8 +350,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramLink(
 
     UR_CALL(pfnProgramLink(hContext, count, phPrograms, pOptions, phProgram));
 
-    UR_CALL(
-        getContext()->interceptor->registerDeviceGlobals(hContext, *phProgram));
+    UR_CALL(getContext()->interceptor->registerProgram(hContext, *phProgram));
 
     return UR_RESULT_SUCCESS;
 }
@@ -237,8 +381,33 @@ ur_result_t UR_APICALL urProgramLinkExp(
     UR_CALL(pfnProgramLinkExp(hContext, numDevices, phDevices, count,
                               phPrograms, pOptions, phProgram));
 
-    UR_CALL(
-        getContext()->interceptor->registerDeviceGlobals(hContext, *phProgram));
+    UR_CALL(getContext()->interceptor->registerProgram(hContext, *phProgram));
+
+    return UR_RESULT_SUCCESS;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urProgramRelease
+ur_result_t UR_APICALL urProgramRelease(
+    ur_program_handle_t
+        hProgram ///< [in][release] handle for the Program to release
+) {
+    auto pfnProgramRelease = getContext()->urDdiTable.Program.pfnRelease;
+
+    if (nullptr == pfnProgramRelease) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    getContext()->logger.debug("==== urProgramRelease");
+
+    UR_CALL(pfnProgramRelease(hProgram));
+
+    auto ProgramInfo = getContext()->interceptor->getProgramInfo(hProgram);
+    UR_ASSERT(ProgramInfo != nullptr, UR_RESULT_ERROR_INVALID_VALUE);
+    if (--ProgramInfo->RefCount == 0) {
+        UR_CALL(getContext()->interceptor->unregisterProgram(hProgram));
+        UR_CALL(getContext()->interceptor->eraseProgram(hProgram));
+    }
 
     return UR_RESULT_SUCCESS;
 }
@@ -372,6 +541,29 @@ __urdlllocal ur_result_t UR_APICALL urContextCreateWithNativeHandle(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urContextRetain
+__urdlllocal ur_result_t UR_APICALL urContextRetain(
+    ur_context_handle_t
+        hContext ///< [in] handle of the context to get a reference of.
+) {
+    auto pfnRetain = getContext()->urDdiTable.Context.pfnRetain;
+
+    if (nullptr == pfnRetain) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    getContext()->logger.debug("==== urContextRetain");
+
+    UR_CALL(pfnRetain(hContext));
+
+    auto ContextInfo = getContext()->interceptor->getContextInfo(hContext);
+    UR_ASSERT(ContextInfo != nullptr, UR_RESULT_ERROR_INVALID_VALUE);
+    ContextInfo->RefCount++;
+
+    return UR_RESULT_SUCCESS;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urContextRelease
 __urdlllocal ur_result_t UR_APICALL urContextRelease(
     ur_context_handle_t hContext ///< [in] handle of the context to release.
@@ -384,10 +576,15 @@ __urdlllocal ur_result_t UR_APICALL urContextRelease(
 
     getContext()->logger.debug("==== urContextRelease");
 
-    UR_CALL(getContext()->interceptor->eraseContext(hContext));
-    ur_result_t result = pfnRelease(hContext);
+    UR_CALL(pfnRelease(hContext));
 
-    return result;
+    auto ContextInfo = getContext()->interceptor->getContextInfo(hContext);
+    UR_ASSERT(ContextInfo != nullptr, UR_RESULT_ERROR_INVALID_VALUE);
+    if (--ContextInfo->RefCount == 0) {
+        UR_CALL(getContext()->interceptor->eraseContext(hContext));
+    }
+
+    return UR_RESULT_SUCCESS;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -424,6 +621,19 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreate(
 
     std::shared_ptr<MemBuffer> pMemBuffer =
         std::make_shared<MemBuffer>(hContext, size, hostPtrOrNull);
+
+    if (Host && (flags & UR_MEM_FLAG_ALLOC_COPY_HOST_POINTER)) {
+        std::shared_ptr<ContextInfo> CtxInfo =
+            getContext()->interceptor->getContextInfo(hContext);
+        for (const auto &hDevice : CtxInfo->DeviceList) {
+            ManagedQueue InternalQueue(hContext, hDevice);
+            char *Handle = nullptr;
+            UR_CALL(pMemBuffer->getHandle(hDevice, Handle));
+            UR_CALL(getContext()->urDdiTable.Enqueue.pfnUSMMemcpy(
+                InternalQueue, true, Handle, Host, size, 0, nullptr, nullptr));
+        }
+    }
+
     ur_result_t result = getContext()->interceptor->insertMemBuffer(pMemBuffer);
     *phBuffer = ur_cast<ur_mem_handle_t>(pMemBuffer.get());
 
@@ -1154,9 +1364,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelRetain(
 
     UR_CALL(pfnRetain(hKernel));
 
-    if (auto KernelInfo = getContext()->interceptor->getKernelInfo(hKernel)) {
-        KernelInfo->RefCount++;
-    }
+    auto KernelInfo = getContext()->interceptor->getKernelInfo(hKernel);
+    UR_ASSERT(KernelInfo != nullptr, UR_RESULT_ERROR_INVALID_VALUE);
+    KernelInfo->RefCount++;
 
     return UR_RESULT_SUCCESS;
 }
@@ -1175,10 +1385,9 @@ __urdlllocal ur_result_t urKernelRelease(
     getContext()->logger.debug("==== urKernelRelease");
     UR_CALL(pfnRelease(hKernel));
 
-    if (auto KernelInfo = getContext()->interceptor->getKernelInfo(hKernel)) {
-        if (--KernelInfo->RefCount != 0) {
-            return UR_RESULT_SUCCESS;
-        }
+    auto KernelInfo = getContext()->interceptor->getKernelInfo(hKernel);
+    UR_ASSERT(KernelInfo != nullptr, UR_RESULT_ERROR_INVALID_VALUE);
+    if (--KernelInfo->RefCount == 0) {
         UR_CALL(getContext()->interceptor->eraseKernel(hKernel));
     }
 
@@ -1284,6 +1493,69 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgLocal(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urKernelSetArgPointer
+__urdlllocal ur_result_t UR_APICALL urKernelSetArgPointer(
+    ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
+    uint32_t argIndex, ///< [in] argument index in range [0, num args - 1]
+    const ur_kernel_arg_pointer_properties_t
+        *pProperties, ///< [in][optional] pointer to USM pointer properties.
+    const void *
+        pArgValue ///< [in][optional] Pointer obtained by USM allocation or virtual memory
+    ///< mapping operation. If null then argument value is considered null.
+) {
+    auto pfnSetArgPointer = getContext()->urDdiTable.Kernel.pfnSetArgPointer;
+
+    if (nullptr == pfnSetArgPointer) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    getContext()->logger.debug(
+        "==== urKernelSetArgPointer (argIndex={}, pArgValue={})", argIndex,
+        pArgValue);
+
+    if (getContext()->interceptor->getOptions().DetectKernelArguments) {
+        auto KI = getContext()->interceptor->getKernelInfo(hKernel);
+        std::scoped_lock<ur_shared_mutex> Guard(KI->Mutex);
+        KI->PointerArgs[argIndex] = {pArgValue, GetCurrentBacktrace()};
+    }
+
+    ur_result_t result =
+        pfnSetArgPointer(hKernel, argIndex, pProperties, pArgValue);
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Exported function for filling application's Global table
+///        with current process' addresses
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+__urdlllocal ur_result_t UR_APICALL urGetGlobalProcAddrTable(
+    ur_api_version_t version, ///< [in] API version requested
+    ur_global_dditable_t
+        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
+) {
+    if (nullptr == pDdiTable) {
+        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    if (UR_MAJOR_VERSION(ur_sanitizer_layer::getContext()->version) !=
+            UR_MAJOR_VERSION(version) ||
+        UR_MINOR_VERSION(ur_sanitizer_layer::getContext()->version) >
+            UR_MINOR_VERSION(version)) {
+        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+    }
+
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    pDdiTable->pfnAdapterGet = ur_sanitizer_layer::urAdapterGet;
+
+    return result;
+}
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's Context table
 ///        with current process' addresses
 ///
@@ -1310,6 +1582,7 @@ __urdlllocal ur_result_t UR_APICALL urGetContextProcAddrTable(
     ur_result_t result = UR_RESULT_SUCCESS;
 
     pDdiTable->pfnCreate = ur_sanitizer_layer::urContextCreate;
+    pDdiTable->pfnRetain = ur_sanitizer_layer::urContextRetain;
     pDdiTable->pfnRelease = ur_sanitizer_layer::urContextRelease;
 
     pDdiTable->pfnCreateWithNativeHandle =
@@ -1341,8 +1614,15 @@ __urdlllocal ur_result_t UR_APICALL urGetProgramProcAddrTable(
         return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
     }
 
+    pDdiTable->pfnCreateWithIL = ur_sanitizer_layer::urProgramCreateWithIL;
+    pDdiTable->pfnCreateWithBinary =
+        ur_sanitizer_layer::urProgramCreateWithBinary;
+    pDdiTable->pfnCreateWithNativeHandle =
+        ur_sanitizer_layer::urProgramCreateWithNativeHandle;
     pDdiTable->pfnBuild = ur_sanitizer_layer::urProgramBuild;
     pDdiTable->pfnLink = ur_sanitizer_layer::urProgramLink;
+    pDdiTable->pfnRetain = ur_sanitizer_layer::urProgramRetain;
+    pDdiTable->pfnRelease = ur_sanitizer_layer::urProgramRelease;
 
     return UR_RESULT_SUCCESS;
 }
@@ -1379,6 +1659,7 @@ __urdlllocal ur_result_t UR_APICALL urGetKernelProcAddrTable(
     pDdiTable->pfnSetArgValue = ur_sanitizer_layer::urKernelSetArgValue;
     pDdiTable->pfnSetArgMemObj = ur_sanitizer_layer::urKernelSetArgMemObj;
     pDdiTable->pfnSetArgLocal = ur_sanitizer_layer::urKernelSetArgLocal;
+    pDdiTable->pfnSetArgPointer = ur_sanitizer_layer::urKernelSetArgPointer;
 
     return result;
 }
@@ -1530,7 +1811,7 @@ ur_result_t context_t::init(ur_dditable_t *dditable,
 
     if (enabledLayerNames.count("UR_LAYER_ASAN")) {
         enabledType = SanitizerType::AddressSanitizer;
-        interceptor = std::make_unique<SanitizerInterceptor>(logger);
+        interceptor = std::make_unique<SanitizerInterceptor>();
     } else if (enabledLayerNames.count("UR_LAYER_MSAN")) {
         enabledType = SanitizerType::MemorySanitizer;
     } else if (enabledLayerNames.count("UR_LAYER_TSAN")) {
@@ -1554,6 +1835,11 @@ ur_result_t context_t::init(ur_dditable_t *dditable,
     }
 
     urDdiTable = *dditable;
+
+    if (UR_RESULT_SUCCESS == result) {
+        result = ur_sanitizer_layer::urGetGlobalProcAddrTable(
+            UR_API_VERSION_CURRENT, &dditable->Global);
+    }
 
     if (UR_RESULT_SUCCESS == result) {
         result = ur_sanitizer_layer::urGetContextProcAddrTable(

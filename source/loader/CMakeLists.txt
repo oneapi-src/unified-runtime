@@ -19,6 +19,7 @@ add_ur_library(ur_loader
     ""
     ${CMAKE_CURRENT_BINARY_DIR}/UrLoaderVersion.rc
 )
+install_ur_library(ur_loader)
 
 if (MSVC)
     set(TARGET_LIBNAME ur_loader)
@@ -47,6 +48,7 @@ add_library(${PROJECT_NAME}::loader ALIAS ur_loader)
 
 target_include_directories(ur_loader PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
     ${CMAKE_CURRENT_SOURCE_DIR}/layers
 )
 
@@ -59,6 +61,13 @@ target_link_libraries(ur_loader PRIVATE
     ${PROJECT_NAME}::common
     ${PROJECT_NAME}::headers
 )
+
+if(UR_STATIC_ADAPTER_L0)
+    target_link_libraries(ur_loader PRIVATE
+        ur_adapter_level_zero
+    )
+    target_compile_definitions(ur_loader PRIVATE UR_STATIC_ADAPTER_LEVEL_ZERO)
+endif()
 
 if(UR_ENABLE_TRACING)
     target_link_libraries(ur_loader PRIVATE ${TARGET_XPTI})
@@ -92,13 +101,6 @@ if(UNIX)
         @ONLY)
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libur_loader.pc" DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}/pkgconfig" COMPONENT unified-runtime)
 endif()
-
-install(TARGETS ur_loader
-    EXPORT ${PROJECT_NAME}-targets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT unified-runtime
-)
 
 target_sources(ur_loader
     PRIVATE
@@ -136,12 +138,18 @@ if(UR_ENABLE_SANITIZER)
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_interceptor.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_interceptor.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_libdevice.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_options.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_options.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_quarantine.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_quarantine.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_report.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_report.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_shadow_setup.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_shadow_setup.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_shadow.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_shadow.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_statistics.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_statistics.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_validator.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_validator.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/common.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/stacktrace.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/stacktrace.hpp
@@ -157,6 +165,35 @@ if(UR_ENABLE_SANITIZER)
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/linux/backtrace.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/linux/sanitizer_utils.cpp
     )
+
+    if(UR_ENABLE_SYMBOLIZER)
+        target_sources(ur_loader
+            PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/linux/symbolizer.cpp
+        )
+        target_include_directories(ur_loader PRIVATE ${LLVM_INCLUDE_DIRS})
+        target_link_libraries(ur_loader PRIVATE LLVMSupport LLVMSymbolize)
+        # In in-tree build, if LLVM is built with libc++, we also need to build
+        # symbolizer.cpp with libc++ abi and link libc++ in.
+        if(NOT UR_STANDALONE_BUILD AND LLVM_LIBCXX_USED)
+            execute_process(
+                COMMAND ${CMAKE_CXX_COMPILER} --print-file-name=libc++.a
+                OUTPUT_VARIABLE LIBCXX_PATH
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+            execute_process(
+                COMMAND ${CMAKE_CXX_COMPILER} --print-file-name=libc++abi.a
+                OUTPUT_VARIABLE LIBCXX_ABI_PATH
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+            set_property(SOURCE
+                ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/linux/symbolizer.cpp
+                APPEND_STRING PROPERTY COMPILE_FLAGS
+                " -stdlib=libc++ ")
+            if(NOT EXISTS ${LIBCXX_PATH} OR NOT EXISTS ${LIBCXX_ABI_PATH})
+                message(FATAL_ERROR "libc++ is required but can't find the libraries")
+            endif()
+            target_link_libraries(ur_loader PRIVATE ${LIBCXX_PATH} ${LIBCXX_ABI_PATH})
+        endif()
+    endif()
 
     target_include_directories(ur_loader PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer"

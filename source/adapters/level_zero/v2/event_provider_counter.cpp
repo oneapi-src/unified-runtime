@@ -7,14 +7,16 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+#include <ur_api.h>
+#include <ze_api.h>
+
+#include "context.hpp"
+#include "event_provider.hpp"
 #include "event_provider_counter.hpp"
-#include "../context.hpp"
+#include "loader/ze_loader.h"
+
 #include "../device.hpp"
 #include "../platform.hpp"
-#include "event_provider.hpp"
-#include "loader/ze_loader.h"
-#include "ur_api.h"
-#include "ze_api.h"
 
 namespace v2 {
 
@@ -25,25 +27,19 @@ provider_counter::provider_counter(ur_platform_handle_t platform,
   ZE2UR_CALL_THROWS(zeDriverGetExtensionFunctionAddress,
                     (platform->ZeDriver, "zexCounterBasedEventCreate",
                      (void **)&this->eventCreateFunc));
-  ZE2UR_CALL_THROWS(
-      zelLoaderTranslateHandle,
-      (ZEL_HANDLE_CONTEXT, context->ZeContext, (void **)&translatedContext));
+  ZE2UR_CALL_THROWS(zelLoaderTranslateHandle,
+                    (ZEL_HANDLE_CONTEXT, context->getZeHandle(),
+                     (void **)&translatedContext));
   ZE2UR_CALL_THROWS(
       zelLoaderTranslateHandle,
       (ZEL_HANDLE_DEVICE, device->ZeDevice, (void **)&translatedDevice));
 }
 
-provider_counter::~provider_counter() {
-  for (auto &e : freelist) {
-    ZE_CALL_NOCHECK(zeEventDestroy, (e));
-  }
-}
-
-event_allocation provider_counter::allocate() {
+raii::cache_borrowed_event provider_counter::allocate() {
   if (freelist.empty()) {
     ZeStruct<ze_event_desc_t> desc;
     desc.index = 0;
-    desc.signal = 0;
+    desc.signal = ZE_EVENT_SCOPE_FLAG_HOST;
     desc.wait = 0;
     ze_event_handle_t handle;
 
@@ -54,15 +50,18 @@ event_allocation provider_counter::allocate() {
     freelist.emplace_back(handle);
   }
 
-  auto event = freelist.back();
+  auto event = std::move(freelist.back());
   freelist.pop_back();
 
-  return {event_type::EVENT_COUNTER,
-          event_borrowed(event, [this](ze_event_handle_t handle) {
-            freelist.push_back(handle);
-          })};
+  return raii::cache_borrowed_event(
+      event.release(),
+      [this](ze_event_handle_t handle) { freelist.push_back(handle); });
 }
 
 ur_device_handle_t provider_counter::device() { return urDevice; }
+
+event_flags_t provider_counter::eventFlags() const {
+  return EVENT_FLAGS_COUNTER;
+}
 
 } // namespace v2

@@ -42,6 +42,7 @@ add_ur_adapter(${TARGET_NAME}
         ${CMAKE_CURRENT_SOURCE_DIR}/../../ur/ur.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../ur/ur.hpp
 )
+install_ur_library(${TARGET_NAME})
 
 set_target_properties(${TARGET_NAME} PROPERTIES
         VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
@@ -53,6 +54,7 @@ find_package(Threads REQUIRED)
 target_link_libraries(${TARGET_NAME} PRIVATE
         ${PROJECT_NAME}::headers
         ${PROJECT_NAME}::common
+        ${PROJECT_NAME}::umf
         Threads::Threads
 )
 

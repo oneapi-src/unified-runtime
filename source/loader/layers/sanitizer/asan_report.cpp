@@ -11,15 +11,31 @@
  */
 
 #include "asan_report.hpp"
-#include "asan_options.hpp"
-
 #include "asan_allocator.hpp"
 #include "asan_interceptor.hpp"
 #include "asan_libdevice.hpp"
+#include "asan_options.hpp"
+#include "asan_validator.hpp"
 #include "ur_sanitizer_layer.hpp"
 #include "ur_sanitizer_utils.hpp"
 
 namespace ur_sanitizer_layer {
+
+namespace {
+
+void PrintAllocateInfo(uptr Addr, const AllocInfo *AI) {
+    getContext()->logger.always("{} is located inside of {} region [{}, {})",
+                                (void *)Addr, ToString(AI->Type),
+                                (void *)AI->UserBegin, (void *)AI->UserEnd);
+    getContext()->logger.always("allocated here:");
+    AI->AllocStack.print();
+    if (AI->IsReleased) {
+        getContext()->logger.always("freed here:");
+        AI->ReleaseStack.print();
+    }
+}
+
+} // namespace
 
 void ReportBadFree(uptr Addr, const StackTrace &stack,
                    const std::shared_ptr<AllocInfo> &AI) {
@@ -32,13 +48,9 @@ void ReportBadFree(uptr Addr, const StackTrace &stack,
                                     (void *)Addr);
     }
 
-    assert(!AI->IsReleased && "Chunk must be not released");
+    assert(AI && !AI->IsReleased && "Chunk must be not released");
 
-    getContext()->logger.always("{} is located inside of {} region [{}, {})",
-                                (void *)Addr, ToString(AI->Type),
-                                (void *)AI->UserBegin, (void *)AI->UserEnd);
-    getContext()->logger.always("allocated here:");
-    AI->AllocStack.print();
+    PrintAllocateInfo(Addr, AI.get());
 }
 
 void ReportBadContext(uptr Addr, const StackTrace &stack,
@@ -48,16 +60,7 @@ void ReportBadContext(uptr Addr, const StackTrace &stack,
         (void *)Addr);
     stack.print();
 
-    getContext()->logger.always("{} is located inside of {} region [{}, {})",
-                                (void *)Addr, ToString(AI->Type),
-                                (void *)AI->UserBegin, (void *)AI->UserEnd);
-    getContext()->logger.always("allocated here:");
-    AI->AllocStack.print();
-
-    if (AI->IsReleased) {
-        getContext()->logger.always("freed here:");
-        AI->ReleaseStack.print();
-    }
+    PrintAllocateInfo(Addr, AI.get());
 }
 
 void ReportDoubleFree(uptr Addr, const StackTrace &Stack,
@@ -73,6 +76,16 @@ void ReportDoubleFree(uptr Addr, const StackTrace &Stack,
     getContext()->logger.always("freed here:");
     AI->ReleaseStack.print();
     getContext()->logger.always("previously allocated here:");
+    AI->AllocStack.print();
+}
+
+void ReportMemoryLeak(const std::shared_ptr<AllocInfo> &AI) {
+    getContext()->logger.always(
+        "\n====ERROR: DeviceSanitizer: detected memory leaks of {}",
+        ToString(AI->Type));
+    getContext()->logger.always(
+        "Direct leak of {} byte(s) at {} allocated from:",
+        AI->UserEnd - AI->UserBegin, (void *)AI->UserBegin);
     AI->AllocStack.print();
 }
 
@@ -124,7 +137,7 @@ void ReportUseAfterFree(const DeviceSanitizerReport &Report,
     getContext()->logger.always("  #0 {} {}:{}", Func, File, Report.Line);
     getContext()->logger.always("");
 
-    if (Options(getContext()->logger).MaxQuarantineSizeMB > 0) {
+    if (getContext()->interceptor->getOptions().MaxQuarantineSizeMB > 0) {
         auto AllocInfoItOp =
             getContext()->interceptor->findAllocInfoByAddress(Report.Address);
 
@@ -139,21 +152,60 @@ void ReportUseAfterFree(const DeviceSanitizerReport &Report,
                     "Failed to find which chunck {} is allocated",
                     (void *)Report.Address);
             }
-            assert(AllocInfo->IsReleased);
+            assert(AllocInfo->IsReleased &&
+                   "It must be released since it's use-after-free");
 
-            getContext()->logger.always(
-                "{} is located inside of {} region [{}, {})",
-                (void *)Report.Address, ToString(AllocInfo->Type),
-                (void *)AllocInfo->UserBegin, (void *)AllocInfo->UserEnd);
-            getContext()->logger.always("allocated here:");
-            AllocInfo->AllocStack.print();
-            getContext()->logger.always("released here:");
-            AllocInfo->ReleaseStack.print();
+            PrintAllocateInfo(Report.Address, AllocInfo.get());
         }
     } else {
         getContext()->logger.always(
             "Please enable quarantine to get more information like memory "
             "chunck's kind and where the chunck was allocated and released.");
+    }
+}
+
+void ReportInvalidKernelArgument(ur_kernel_handle_t Kernel, uint32_t ArgIndex,
+                                 uptr Addr, const ValidateUSMResult &VR,
+                                 StackTrace Stack) {
+    getContext()->logger.always("\n====ERROR: DeviceSanitizer: "
+                                "invalid-argument on kernel <{}>",
+                                DemangleName(GetKernelName(Kernel)));
+    Stack.print();
+    auto &AI = VR.AI;
+    ArgIndex = ArgIndex + 1;
+    switch (VR.Type) {
+    case ValidateUSMResult::MAYBE_HOST_POINTER:
+        getContext()->logger.always("The {}th argument {} is not a USM pointer",
+                                    ArgIndex, (void *)Addr);
+        break;
+    case ValidateUSMResult::RELEASED_POINTER:
+        getContext()->logger.always(
+            "The {}th argument {} is a released USM pointer", ArgIndex + 1,
+            (void *)Addr);
+        PrintAllocateInfo(Addr, AI.get());
+        break;
+    case ValidateUSMResult::BAD_CONTEXT:
+        getContext()->logger.always(
+            "The {}th argument {} is allocated in other context", ArgIndex + 1,
+            (void *)Addr);
+        PrintAllocateInfo(Addr, AI.get());
+        break;
+    case ValidateUSMResult::BAD_DEVICE:
+        getContext()->logger.always(
+            "The {}th argument {} is allocated in other device", ArgIndex + 1,
+            (void *)Addr);
+        PrintAllocateInfo(Addr, AI.get());
+        break;
+    case ValidateUSMResult::OUT_OF_BOUNDS:
+        getContext()->logger.always(
+            "The {}th argument {} is located outside of its region [{}, {})",
+            ArgIndex + 1, (void *)Addr, (void *)AI->UserBegin,
+            (void *)AI->UserEnd);
+        getContext()->logger.always("allocated here:");
+        AI->AllocStack.print();
+        break;
+    default:
+        break;
     }
 }
 

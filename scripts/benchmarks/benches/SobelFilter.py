@@ -12,7 +12,10 @@ import re
 class SobelFilter(VelocityBase):
     def __init__(self, vb: VelocityBench):
         super().__init__("sobel_filter", "sobel_filter", vb)
+
+    def download_deps(self):
         self.download_untar("sobel_filter", "https://github.com/oneapi-src/Velocity-Bench/raw/main/sobel_filter/res/sobel_filter_data.tgz?download=", "sobel_filter_data.tgz")
+        return
 
     def name(self):
         return "Velocity-Bench Sobel Filter"
@@ -32,5 +35,5 @@ class SobelFilter(VelocityBase):
         if match:
             return round(float(match.group(1)) * 1000, 3)
         else:
-            raise ValueError("Failed to parse benchmark output.")
+            raise ValueError("{self.__class__.__name__}: Failed to parse benchmark output.")
 
