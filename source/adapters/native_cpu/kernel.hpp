@@ -20,7 +20,7 @@ namespace native_cpu {
 struct NativeCPUArgDesc {
   void *MPtr;
 
-  NativeCPUArgDesc(void *Ptr) : MPtr(Ptr){};
+  inline NativeCPUArgDesc(void *Ptr) : MPtr(Ptr){};
 };
 
 } // namespace native_cpu
@@ -33,17 +33,17 @@ using nativecpu_task_t = std::function<nativecpu_kernel_t>;
 struct local_arg_info_t {
   uint32_t argIndex;
   size_t argSize;
-  local_arg_info_t(uint32_t argIndex, size_t argSize)
+  inline local_arg_info_t(uint32_t argIndex, size_t argSize)
       : argIndex(argIndex), argSize(argSize) {}
 };
 
 struct ur_kernel_handle_t_ : RefCounted {
 
-  ur_kernel_handle_t_(ur_program_handle_t hProgram, const char *name,
+  inline ur_kernel_handle_t_(ur_program_handle_t hProgram, const char *name,
                       nativecpu_task_t subhandler)
       : hProgram(hProgram), _name{name}, _subhandler{std::move(subhandler)} {}
 
-  ur_kernel_handle_t_(const ur_kernel_handle_t_ &other)
+  inline ur_kernel_handle_t_(const ur_kernel_handle_t_ &other)
       : hProgram(other.hProgram), _name(other._name),
         _subhandler(other._subhandler), _args(other._args),
         _localArgInfo(other._localArgInfo), _localMemPool(other._localMemPool),
@@ -52,12 +52,12 @@ struct ur_kernel_handle_t_ : RefCounted {
     incrementReferenceCount();
   }
 
-  ~ur_kernel_handle_t_() {
+  inline ~ur_kernel_handle_t_() {
     if (decrementReferenceCount() == 0) {
       free(_localMemPool);
     }
   }
-  ur_kernel_handle_t_(ur_program_handle_t hProgram, const char *name,
+  inline ur_kernel_handle_t_(ur_program_handle_t hProgram, const char *name,
                       nativecpu_task_t subhandler,
                       std::optional<native_cpu::WGSize_t> ReqdWGSize,
                       std::optional<native_cpu::WGSize_t> MaxWGSize,
