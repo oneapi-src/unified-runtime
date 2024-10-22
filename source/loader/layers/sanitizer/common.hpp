@@ -137,11 +137,6 @@ struct SourceInfo {
     int column = 0;
 };
 
-struct ModuleInfo {
-    std::string name;
-    uptr addr;
-};
-
 enum class DeviceType : uint64_t { UNKNOWN = 0, CPU, GPU_PVC, GPU_DG2 };
 
 inline const char *ToString(DeviceType Type) {

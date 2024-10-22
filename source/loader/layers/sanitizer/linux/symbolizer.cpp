@@ -8,9 +8,9 @@
  *
  */
 #include "common.hpp"
-#include "link.h"
 #include "llvm/DebugInfo/Symbolize/DIPrinter.h"
 #include "llvm/DebugInfo/Symbolize/Symbolize.h"
+#include <link.h>
 
 namespace ur_sanitizer_layer {
 
@@ -30,17 +30,25 @@ llvm::symbolize::PrinterConfig GetPrinterConfig() {
 }
 
 uptr GetModuleBase(const char *ModuleName) {
-    ModuleInfo Data{ModuleName, 0};
-    dl_iterate_phdr(
+    uptr Data = (uptr)ModuleName;
+    int Result = dl_iterate_phdr(
         [](struct dl_phdr_info *Info, size_t, void *Arg) {
-            ModuleInfo *Data = (ModuleInfo *)Arg;
-            if (strstr(Info->dlpi_name, Data->name.c_str())) {
-                Data->addr = (uptr)Info->dlpi_addr;
+            uptr *Data = (uptr *)Arg;
+            const char *ModuleName = (const char *)(*Data);
+            if (strstr(Info->dlpi_name, ModuleName)) {
+                *Data = (uptr)Info->dlpi_addr;
+                return 1;
             }
             return 0;
         },
         (void *)&Data);
-    return Data.addr;
+
+    // If dl_iterate_phdr return 0, it means the module is main executable,
+    // its base address should be 0.
+    if (!Result) {
+        return 0;
+    }
+    return Data;
 }
 
 } // namespace ur_sanitizer_layer
