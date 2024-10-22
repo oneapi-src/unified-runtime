@@ -7,6 +7,8 @@
  * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
  *
  */
+#include "common.hpp"
+#include "link.h"
 #include "llvm/DebugInfo/Symbolize/DIPrinter.h"
 #include "llvm/DebugInfo/Symbolize/Symbolize.h"
 
@@ -25,6 +27,20 @@ llvm::symbolize::PrinterConfig GetPrinterConfig() {
     Config.SourceContextLines = 0;
     Config.Verbose = false;
     return Config;
+}
+
+uptr GetModuleBase(const char *ModuleName) {
+    ModuleInfo Data{ModuleName, 0};
+    dl_iterate_phdr(
+        [](struct dl_phdr_info *Info, size_t, void *Arg) {
+            ModuleInfo *Data = (ModuleInfo *)Arg;
+            if (strstr(Info->dlpi_name, Data->name.c_str())) {
+                Data->addr = (uptr)Info->dlpi_addr;
+            }
+            return 0;
+        },
+        (void *)&Data);
+    return Data.addr;
 }
 
 } // namespace ur_sanitizer_layer
@@ -49,7 +65,8 @@ void SymbolizeCode(const char *ModuleName, uint64_t ModuleOffset,
 
     auto ResOrErr = ur_sanitizer_layer::GetSymbolizer()->symbolizeInlinedCode(
         ModuleName,
-        {ModuleOffset, llvm::object::SectionedAddress::UndefSection});
+        {ModuleOffset - ur_sanitizer_layer::GetModuleBase(ModuleName),
+         llvm::object::SectionedAddress::UndefSection});
 
     if (!ResOrErr) {
         return;
