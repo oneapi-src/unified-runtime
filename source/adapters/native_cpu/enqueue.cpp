@@ -26,7 +26,7 @@ struct NDRDescT {
   RangeT GlobalSize;
   RangeT LocalSize;
   inline NDRDescT(uint32_t WorkDim, const size_t *GlobalWorkOffset,
-           const size_t *GlobalWorkSize, const size_t *LocalWorkSize)
+                  const size_t *GlobalWorkSize, const size_t *LocalWorkSize)
       : WorkDim(WorkDim) {
     for (uint32_t I = 0; I < WorkDim; I++) {
       GlobalOffset[I] = GlobalWorkOffset[I];
@@ -53,7 +53,7 @@ struct NDRDescT {
 
 #ifdef NATIVECPU_USE_OCK
 static inline native_cpu::state getResizedState(const native_cpu::NDRDescT &ndr,
-                                         size_t itemsPerThread) {
+                                                size_t itemsPerThread) {
   native_cpu::state resized_state(
       ndr.GlobalSize[0], ndr.GlobalSize[1], ndr.GlobalSize[2], itemsPerThread,
       ndr.LocalSize[1], ndr.LocalSize[2], ndr.GlobalOffset[0],
@@ -179,20 +179,22 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
 
   } else {
     // We are running a parallel_for over an nd_range
-
+    size_t threadId = 0;
     if (numWG1 * numWG2 >= numParallelThreads) {
       // Dimensions 1 and 2 have enough work, split them across the threadpool
       for (unsigned g2 = 0; g2 < numWG2; g2++) {
         for (unsigned g1 = 0; g1 < numWG1; g1++) {
-          futures.emplace_back(
-              tp.schedule_task([state, kernel = *hKernel, numWG0, g1, g2,
-                                numParallelThreads](size_t threadId) mutable {
+          futures.emplace_back(tp.schedule_task(
+              [state, kernel = *hKernel, numWG0, g1, g2, numParallelThreads,
+               threadId](size_t /*threadId*/) mutable {
                 for (unsigned g0 = 0; g0 < numWG0; g0++) {
                   kernel.handleLocalArgs(numParallelThreads, threadId);
                   state.update(g0, g1, g2);
                   kernel._subhandler(kernel._args.data(), &state);
                 }
               }));
+          if (++threadId == numParallelThreads)
+            threadId = 0;
         }
       }
     } else {
@@ -220,20 +222,21 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
       for (unsigned thread = 0; groupsPerThread && thread < numParallelThreads;
            thread++) {
         futures.emplace_back(tp.schedule_task(
-            [&groups, thread, groupsPerThread, hKernel](size_t threadId) {
+            [&groups, thread, groupsPerThread, hKernel](size_t /*threadId*/) {
               for (unsigned i = 0; i < groupsPerThread; i++) {
                 auto index = thread * groupsPerThread + i;
-                groups[index](threadId, *hKernel);
+                groups[index](thread /*Id*/, *hKernel);
               }
             }));
       }
 
       // schedule the remaining tasks
       if (remainder) {
+        const size_t threadId = futures.size();
         futures.emplace_back(
-            tp.schedule_task([&groups, remainder,
+            tp.schedule_task([&groups, remainder, threadId,
                               scheduled = numParallelThreads * groupsPerThread,
-                              hKernel](size_t threadId) {
+                              hKernel](size_t /* threadId*/) {
               for (unsigned i = 0; i < remainder; i++) {
                 auto index = scheduled + i;
                 groups[index](threadId, *hKernel);
