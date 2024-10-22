@@ -252,7 +252,8 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueKernelLaunch(
       hKernel->Mutex, hKernel->getProgramHandle()->Mutex, this->Mutex);
 
   if (pGlobalWorkOffset != NULL) {
-    UR_CALL(setKernelGlobalOffset(hContext, hZeKernel, pGlobalWorkOffset));
+    UR_CALL(
+        setKernelGlobalOffset(hContext, hZeKernel, workDim, pGlobalWorkOffset));
   }
 
   ze_group_count_t zeThreadGroupDimensions{1, 1, 1};
@@ -847,15 +848,9 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueDeviceGlobalVariableWrite(
     ur_program_handle_t hProgram, const char *name, bool blockingWrite,
     size_t count, size_t offset, const void *pSrc, uint32_t numEventsInWaitList,
     const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent) {
-  // TODO: implement program->getZeModuleMap() to be sure that
-  // it's thread-safe
-  ze_module_handle_t zeModule{};
-  auto It = hProgram->ZeModuleMap.find(this->hDevice->ZeDevice);
-  if (It != hProgram->ZeModuleMap.end()) {
-    zeModule = It->second;
-  } else {
-    zeModule = hProgram->ZeModule;
-  }
+  // TODO: make getZeModuleHandle thread-safe
+  ze_module_handle_t zeModule =
+      hProgram->getZeModuleHandle(this->hDevice->ZeDevice);
 
   // Find global variable pointer
   auto globalVarPtr = getGlobalPointerFromModule(zeModule, offset, count, name);
@@ -869,15 +864,9 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueDeviceGlobalVariableRead(
     ur_program_handle_t hProgram, const char *name, bool blockingRead,
     size_t count, size_t offset, void *pDst, uint32_t numEventsInWaitList,
     const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent) {
-  // TODO: implement program->getZeModule() to be sure that
-  // it's thread-safe
-  ze_module_handle_t zeModule{};
-  auto It = hProgram->ZeModuleMap.find(this->hDevice->ZeDevice);
-  if (It != hProgram->ZeModuleMap.end()) {
-    zeModule = It->second;
-  } else {
-    zeModule = hProgram->ZeModule;
-  }
+  // TODO: make getZeModuleHandle thread-safe
+  ze_module_handle_t zeModule =
+      hProgram->getZeModuleHandle(this->hDevice->ZeDevice);
 
   // Find global variable pointer
   auto globalVarPtr = getGlobalPointerFromModule(zeModule, offset, count, name);
