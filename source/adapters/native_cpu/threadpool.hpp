@@ -247,7 +247,7 @@ template <> class Scheduler<TBB_threadpool> {
 
 public:
   inline void schedule(worker_task_t &&task) {
-    tasks.run([&]() { task(0); });
+    tasks.run(std::function<void()>([=]() mutable { task(0); }));
   }
   inline void wait() { tasks.wait(); }
 };
