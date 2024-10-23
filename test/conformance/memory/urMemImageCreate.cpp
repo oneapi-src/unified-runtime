@@ -288,7 +288,8 @@ TEST_P(urMemImageCreateTest, InvalidImageDescSlicePitch) {
 
 TEST_P(urMemImageCreateTest, InvalidHostPtrNullHost) {
     uur::raii::Mem image_handle = nullptr;
-    ur_mem_flags_t flags = UR_MEM_FLAG_USE_HOST_POINTER | UR_MEM_FLAG_ALLOC_COPY_HOST_POINTER;
+    ur_mem_flags_t flags =
+        UR_MEM_FLAG_USE_HOST_POINTER | UR_MEM_FLAG_ALLOC_COPY_HOST_POINTER;
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_HOST_PTR,
                      urMemImageCreate(context, flags, &image_format,
                                       &image_desc, nullptr,
@@ -301,8 +302,7 @@ TEST_P(urMemImageCreateTest, InvalidHostPtrValidHost) {
     int data = 42;
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_HOST_PTR,
                      urMemImageCreate(context, flags, &image_format,
-                                      &image_desc, &data,
-                                      image_handle.ptr()));
+                                      &image_desc, &data, image_handle.ptr()));
 }
 
 using urMemImageCreateWithHostPtrFlagsTest =
@@ -325,4 +325,3 @@ TEST_P(urMemImageCreateWithHostPtrFlagsTest, Success) {
                                     image_handle.ptr()));
     ASSERT_NE(nullptr, image_handle.ptr());
 }
-
