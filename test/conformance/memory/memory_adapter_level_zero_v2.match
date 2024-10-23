@@ -286,6 +286,6 @@ urMemBufferCreateWithNativeHandleTest.SuccessWithOwnedNativeHandle/Intel_R__oneA
 urMemBufferCreateWithNativeHandleTest.SuccessWithUnOwnedNativeHandle/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}
 urMemBufferCreateWithNativeHandleTest.InvalidNullHandle/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}
 urMemBufferCreateWithNativeHandleTest.InvalidNullPointer/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}
-urMemImageCreateWithNativeHandleTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}
-urMemImageCreateWithNativeHandleTest.InvalidNullHandle/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}
-urMemImageCreateWithNativeHandleTest.InvalidNullPointer/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}
+{{OPT}}urMemImageCreateWithNativeHandleTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}
+{{OPT}}urMemImageCreateWithNativeHandleTest.InvalidNullHandle/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}
+{{OPT}}urMemImageCreateWithNativeHandleTest.InvalidNullPointer/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}
