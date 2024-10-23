@@ -22,6 +22,48 @@ extern "C" {
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for urAdapterSetLoggerCallback
+typedef ur_result_t(UR_APICALL *ur_pfnAdapterSetLoggerCallback_t)(
+    ur_adapter_handle_t,
+    ur_logger_callback_t,
+    void *,
+    ur_logger_level_t);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for urAdapterSetLoggerCallbackLevel
+typedef ur_result_t(UR_APICALL *ur_pfnAdapterSetLoggerCallbackLevel_t)(
+    ur_adapter_handle_t,
+    ur_logger_level_t);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Table of Adapter functions pointers
+typedef struct ur_adapter_dditable_t {
+    ur_pfnAdapterSetLoggerCallback_t pfnSetLoggerCallback;
+    ur_pfnAdapterSetLoggerCallbackLevel_t pfnSetLoggerCallbackLevel;
+} ur_adapter_dditable_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Exported function for filling application's Adapter table
+///        with current process' addresses
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+UR_DLLEXPORT ur_result_t UR_APICALL
+urGetAdapterProcAddrTable(
+    ur_api_version_t version,        ///< [in] API version requested
+    ur_adapter_dditable_t *pDdiTable ///< [in,out] pointer to table of DDI function pointers
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for urGetAdapterProcAddrTable
+typedef ur_result_t(UR_APICALL *ur_pfnGetAdapterProcAddrTable_t)(
+    ur_api_version_t,
+    ur_adapter_dditable_t *);
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Function-pointer for urPlatformGet
 typedef ur_result_t(UR_APICALL *ur_pfnPlatformGet_t)(
     ur_adapter_handle_t *,
@@ -2487,6 +2529,7 @@ typedef ur_result_t(UR_APICALL *ur_pfnGetDeviceProcAddrTable_t)(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Container for all DDI tables
 typedef struct ur_dditable_t {
+    ur_adapter_dditable_t Adapter;
     ur_platform_dditable_t Platform;
     ur_context_dditable_t Context;
     ur_event_dditable_t Event;
