@@ -21,26 +21,25 @@ function(add_test_adapter name adapter backend)
     function(do_add_test tname env)
         if(${UR_CONFORMANCE_ENABLE_MATCH_FILES} AND EXISTS ${MATCH_FILE})
             add_test(NAME ${tname}
-                COMMAND ${CMAKE_COMMAND}
-                -D TEST_FILE=${Python3_EXECUTABLE}
-                -D TEST_ARGS="${UR_CONFORMANCE_TEST_DIR}/cts_exe.py --test_command ${TEST_COMMAND}"
-                -D MODE=stdout
-                -D MATCH_FILE=${MATCH_FILE}
-                -P ${PROJECT_SOURCE_DIR}/cmake/match.cmake
-                DEPENDS ${TEST_TARGET_NAME}
+                COMMAND ${Python3_EXECUTABLE} ${UR_CONFORMANCE_TEST_DIR}/cts_exe.py
+                    --failslist ${MATCH_FILE}
+                    --test_command ${PROJECT_BINARY_DIR}/bin/${TEST_TARGET_NAME}
+                    --
+                    --backend=${backend}
+                    --devices_count=${UR_TEST_DEVICES_COUNT}
+                    --platforms_count=${UR_TEST_PLATFORMS_COUNT}
                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             )
         else()
             separate_arguments(TEST_COMMAND)
             add_test(NAME ${tname}
                 COMMAND ${TEST_COMMAND}
-                DEPENDS ${TEST_TARGET_NAME}
                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             )
         endif()
 
         if(UR_CONFORMANCE_ENABLE_MATCH_FILES)
-            list(APPEND env GTEST_COLOR=no)
+            list(APPEND env GTEST_COLOR=yes)
         endif()
         set_tests_properties(${tname} PROPERTIES
             ENVIRONMENT "${env}"
@@ -85,13 +84,6 @@ function(add_conformance_test name)
     endif()
     if(UR_BUILD_ADAPTER_NATIVE_CPU OR UR_BUILD_ADAPTER_ALL)
         add_test_adapter(${name} adapter_native_cpu NATIVE_CPU)
-    endif()
-
-    if(NOT (UR_BUILD_ADAPTER_CUDA OR UR_BUILD_ADAPTER_HIP
-            OR UR_BUILD_ADAPTER_L0 OR UR_BUILD_ADAPTER_OPENCL
-            OR UR_BUILD_ADAPTER_NATIVE_CPU OR UR_BUILD_ADAPTER_L0_V2
-            OR UR_BUILD_ADAPTER_ALL))
-        add_test_adapter(${name} adapter_mock MOCK)
     endif()
 endfunction()
 

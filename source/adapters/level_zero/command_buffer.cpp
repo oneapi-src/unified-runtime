@@ -628,32 +628,6 @@ urCommandBufferFinalizeExp(ur_exp_command_buffer_handle_t CommandBuffer) {
 }
 
 /**
- * Sets the global offset for a kernel command that will be appended to the
- * command buffer.
- * @param[in] CommandBuffer The CommandBuffer where the command will be
- * appended.
- * @param[in] Kernel The handle to the kernel that will be appended.
- * @param[in] GlobalWorkOffset The global offset value.
- * @return UR_RESULT_SUCCESS or an error code on failure
- */
-ur_result_t setKernelGlobalOffset(ur_exp_command_buffer_handle_t CommandBuffer,
-                                  ur_kernel_handle_t Kernel,
-                                  const size_t *GlobalWorkOffset) {
-
-  if (!CommandBuffer->Context->getPlatform()
-           ->ZeDriverGlobalOffsetExtensionFound) {
-    logger::debug("No global offset extension found on this driver");
-    return UR_RESULT_ERROR_INVALID_VALUE;
-  }
-
-  ZE2UR_CALL(zeKernelSetGlobalOffsetExp,
-             (Kernel->ZeKernel, GlobalWorkOffset[0], GlobalWorkOffset[1],
-              GlobalWorkOffset[2]));
-
-  return UR_RESULT_SUCCESS;
-}
-
-/**
  * Sets the kernel arguments for a kernel command that will be appended to the
  * command buffer.
  * @param[in] CommandBuffer The CommandBuffer where the command will be
@@ -745,13 +719,17 @@ ur_result_t urCommandBufferAppendKernelLaunchExp(
   std::ignore = Event;
 
   UR_ASSERT(Kernel->Program, UR_RESULT_ERROR_INVALID_NULL_POINTER);
+  // Command handles can only be obtained from updatable command-buffers
+  UR_ASSERT(!(Command && !CommandBuffer->IsUpdatable),
+            UR_RESULT_ERROR_INVALID_OPERATION);
 
   // Lock automatically releases when this goes out of scope.
   std::scoped_lock<ur_shared_mutex, ur_shared_mutex, ur_shared_mutex> Lock(
       Kernel->Mutex, Kernel->Program->Mutex, CommandBuffer->Mutex);
 
   if (GlobalWorkOffset != NULL) {
-    UR_CALL(setKernelGlobalOffset(CommandBuffer, Kernel, GlobalWorkOffset));
+    UR_CALL(setKernelGlobalOffset(CommandBuffer->Context, Kernel->ZeKernel,
+                                  WorkDim, GlobalWorkOffset));
   }
 
   // If there are any pending arguments set them now.
@@ -775,7 +753,7 @@ ur_result_t urCommandBufferAppendKernelLaunchExp(
   // reference count on the kernel, using the kernel saved in CommandData.
   UR_CALL(ur::level_zero::urKernelRetain(Kernel));
 
-  if (Command && CommandBuffer->IsUpdatable) {
+  if (Command) {
     UR_CALL(createCommandHandle(CommandBuffer, Kernel, WorkDim, LocalWorkSize,
                                 *Command));
   }
@@ -1676,14 +1654,14 @@ ur_result_t updateKernelCommand(
 ur_result_t urCommandBufferUpdateKernelLaunchExp(
     ur_exp_command_buffer_command_handle_t Command,
     const ur_exp_command_buffer_update_kernel_launch_desc_t *CommandDesc) {
+  UR_ASSERT(Command->CommandBuffer->IsUpdatable,
+            UR_RESULT_ERROR_INVALID_OPERATION);
   UR_ASSERT(Command->Kernel, UR_RESULT_ERROR_INVALID_NULL_HANDLE);
 
   // Lock command, kernel and command buffer for update.
   std::scoped_lock<ur_shared_mutex, ur_shared_mutex, ur_shared_mutex> Guard(
       Command->Mutex, Command->CommandBuffer->Mutex, Command->Kernel->Mutex);
 
-  UR_ASSERT(Command->CommandBuffer->IsUpdatable,
-            UR_RESULT_ERROR_INVALID_OPERATION);
   UR_ASSERT(Command->CommandBuffer->IsFinalized,
             UR_RESULT_ERROR_INVALID_OPERATION);
 
@@ -1728,6 +1706,16 @@ urCommandBufferGetInfoExp(ur_exp_command_buffer_handle_t hCommandBuffer,
   switch (propName) {
   case UR_EXP_COMMAND_BUFFER_INFO_REFERENCE_COUNT:
     return ReturnValue(uint32_t{hCommandBuffer->RefCount.load()});
+  case UR_EXP_COMMAND_BUFFER_INFO_DESCRIPTOR: {
+    ur_exp_command_buffer_desc_t Descriptor{};
+    Descriptor.stype = UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_DESC;
+    Descriptor.pNext = nullptr;
+    Descriptor.isUpdatable = hCommandBuffer->IsUpdatable;
+    Descriptor.isInOrder = hCommandBuffer->IsInOrderCmdList;
+    Descriptor.enableProfiling = hCommandBuffer->IsProfilingEnabled;
+
+    return ReturnValue(Descriptor);
+  }
   default:
     assert(!"Command-buffer info request not implemented");
   }
