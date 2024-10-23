@@ -12,11 +12,8 @@
 
 #pragma once
 
-#include "common.hpp"
-#include "stacktrace.hpp"
-
-#include <map>
-#include <memory>
+#include "sanitizer_common/sanitizer_common.hpp"
+#include "sanitizer_common/sanitizer_stacktrace.hpp"
 
 namespace ur_sanitizer_layer {
 

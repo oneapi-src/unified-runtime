@@ -16,8 +16,8 @@
 #include "asan_libdevice.hpp"
 #include "asan_options.hpp"
 #include "asan_validator.hpp"
+#include "sanitizer_common/sanitizer_utils.hpp"
 #include "ur_sanitizer_layer.hpp"
-#include "ur_sanitizer_utils.hpp"
 
 namespace ur_sanitizer_layer {
 

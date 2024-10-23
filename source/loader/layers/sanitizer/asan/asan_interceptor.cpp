@@ -17,12 +17,12 @@
 #include "asan_report.hpp"
 #include "asan_shadow.hpp"
 #include "asan_validator.hpp"
-#include "stacktrace.hpp"
-#include "ur_sanitizer_utils.hpp"
+#include "sanitizer_common/sanitizer_stacktrace.hpp"
+#include "sanitizer_common/sanitizer_utils.hpp"
 
 namespace ur_sanitizer_layer {
 
-SanitizerInterceptor::SanitizerInterceptor() {
+AsanInterceptor::AsanInterceptor() {
     if (getOptions().MaxQuarantineSizeMB) {
         m_Quarantine = std::make_unique<Quarantine>(
             static_cast<uint64_t>(getOptions().MaxQuarantineSizeMB) * 1024 *
@@ -30,7 +30,7 @@ SanitizerInterceptor::SanitizerInterceptor() {
     }
 }
 
-SanitizerInterceptor::~SanitizerInterceptor() {
+AsanInterceptor::~AsanInterceptor() {
     // We must release these objects before releasing adapters, since
     // they may use the adapter in their destructor
     for (const auto &[_, DeviceInfo] : m_DeviceMap) {
@@ -55,10 +55,12 @@ SanitizerInterceptor::~SanitizerInterceptor() {
 ///   R -- right redzone (0 or more bytes)
 ///
 /// ref: "compiler-rt/lib/asan/asan_allocator.cpp" Allocator::Allocate
-ur_result_t SanitizerInterceptor::allocateMemory(
-    ur_context_handle_t Context, ur_device_handle_t Device,
-    const ur_usm_desc_t *Properties, ur_usm_pool_handle_t Pool, size_t Size,
-    AllocType Type, void **ResultPtr) {
+ur_result_t AsanInterceptor::allocateMemory(ur_context_handle_t Context,
+                                            ur_device_handle_t Device,
+                                            const ur_usm_desc_t *Properties,
+                                            ur_usm_pool_handle_t Pool,
+                                            size_t Size, AllocType Type,
+                                            void **ResultPtr) {
 
     auto ContextInfo = getContextInfo(Context);
     std::shared_ptr<DeviceInfo> DeviceInfo =
@@ -150,8 +152,8 @@ ur_result_t SanitizerInterceptor::allocateMemory(
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t SanitizerInterceptor::releaseMemory(ur_context_handle_t Context,
-                                                void *Ptr) {
+ur_result_t AsanInterceptor::releaseMemory(ur_context_handle_t Context,
+                                           void *Ptr) {
     auto ContextInfo = getContextInfo(Context);
 
     auto Addr = reinterpret_cast<uptr>(Ptr);
@@ -241,9 +243,9 @@ ur_result_t SanitizerInterceptor::releaseMemory(ur_context_handle_t Context,
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t SanitizerInterceptor::preLaunchKernel(ur_kernel_handle_t Kernel,
-                                                  ur_queue_handle_t Queue,
-                                                  USMLaunchInfo &LaunchInfo) {
+ur_result_t AsanInterceptor::preLaunchKernel(ur_kernel_handle_t Kernel,
+                                             ur_queue_handle_t Queue,
+                                             USMLaunchInfo &LaunchInfo) {
     auto Context = GetContext(Queue);
     auto Device = GetDevice(Queue);
     auto ContextInfo = getContextInfo(Context);
@@ -266,9 +268,9 @@ ur_result_t SanitizerInterceptor::preLaunchKernel(ur_kernel_handle_t Kernel,
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t SanitizerInterceptor::postLaunchKernel(ur_kernel_handle_t Kernel,
-                                                   ur_queue_handle_t Queue,
-                                                   USMLaunchInfo &LaunchInfo) {
+ur_result_t AsanInterceptor::postLaunchKernel(ur_kernel_handle_t Kernel,
+                                              ur_queue_handle_t Queue,
+                                              USMLaunchInfo &LaunchInfo) {
     // FIXME: We must use block operation here, until we support urEventSetCallback
     auto Result = getContext()->urDdiTable.Queue.pfnFinish(Queue);
 
@@ -316,9 +318,9 @@ ur_result_t DeviceInfo::allocShadowMemory(ur_context_handle_t Context) {
 ///
 /// ref: https://github.com/google/sanitizers/wiki/AddressSanitizerAlgorithm#mapping
 ur_result_t
-SanitizerInterceptor::enqueueAllocInfo(std::shared_ptr<DeviceInfo> &DeviceInfo,
-                                       ur_queue_handle_t Queue,
-                                       std::shared_ptr<AllocInfo> &AI) {
+AsanInterceptor::enqueueAllocInfo(std::shared_ptr<DeviceInfo> &DeviceInfo,
+                                  ur_queue_handle_t Queue,
+                                  std::shared_ptr<AllocInfo> &AI) {
     if (AI->IsReleased) {
         int ShadowByte;
         switch (AI->Type) {
@@ -391,9 +393,10 @@ SanitizerInterceptor::enqueueAllocInfo(std::shared_ptr<DeviceInfo> &DeviceInfo,
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t SanitizerInterceptor::updateShadowMemory(
-    std::shared_ptr<ContextInfo> &ContextInfo,
-    std::shared_ptr<DeviceInfo> &DeviceInfo, ur_queue_handle_t Queue) {
+ur_result_t
+AsanInterceptor::updateShadowMemory(std::shared_ptr<ContextInfo> &ContextInfo,
+                                    std::shared_ptr<DeviceInfo> &DeviceInfo,
+                                    ur_queue_handle_t Queue) {
     auto &AllocInfos = ContextInfo->AllocInfosMap[DeviceInfo->Handle];
     std::scoped_lock<ur_shared_mutex> Guard(AllocInfos.Mutex);
 
@@ -405,8 +408,8 @@ ur_result_t SanitizerInterceptor::updateShadowMemory(
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t SanitizerInterceptor::registerProgram(ur_context_handle_t Context,
-                                                  ur_program_handle_t Program) {
+ur_result_t AsanInterceptor::registerProgram(ur_context_handle_t Context,
+                                             ur_program_handle_t Program) {
     std::vector<ur_device_handle_t> Devices = GetDevices(Program);
 
     auto ContextInfo = getContextInfo(Context);
@@ -500,8 +503,7 @@ ur_result_t SanitizerInterceptor::registerProgram(ur_context_handle_t Context,
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t
-SanitizerInterceptor::unregisterProgram(ur_program_handle_t Program) {
+ur_result_t AsanInterceptor::unregisterProgram(ur_program_handle_t Program) {
     auto ProgramInfo = getProgramInfo(Program);
 
     std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Guard(
@@ -515,9 +517,8 @@ SanitizerInterceptor::unregisterProgram(ur_program_handle_t Program) {
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t
-SanitizerInterceptor::insertContext(ur_context_handle_t Context,
-                                    std::shared_ptr<ContextInfo> &CI) {
+ur_result_t AsanInterceptor::insertContext(ur_context_handle_t Context,
+                                           std::shared_ptr<ContextInfo> &CI) {
     std::scoped_lock<ur_shared_mutex> Guard(m_ContextMapMutex);
 
     if (m_ContextMap.find(Context) != m_ContextMap.end()) {
@@ -533,7 +534,7 @@ SanitizerInterceptor::insertContext(ur_context_handle_t Context,
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t SanitizerInterceptor::eraseContext(ur_context_handle_t Context) {
+ur_result_t AsanInterceptor::eraseContext(ur_context_handle_t Context) {
     std::scoped_lock<ur_shared_mutex> Guard(m_ContextMapMutex);
     assert(m_ContextMap.find(Context) != m_ContextMap.end());
     m_ContextMap.erase(Context);
@@ -541,9 +542,8 @@ ur_result_t SanitizerInterceptor::eraseContext(ur_context_handle_t Context) {
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t
-SanitizerInterceptor::insertDevice(ur_device_handle_t Device,
-                                   std::shared_ptr<DeviceInfo> &DI) {
+ur_result_t AsanInterceptor::insertDevice(ur_device_handle_t Device,
+                                          std::shared_ptr<DeviceInfo> &DI) {
     std::scoped_lock<ur_shared_mutex> Guard(m_DeviceMapMutex);
 
     if (m_DeviceMap.find(Device) != m_DeviceMap.end()) {
@@ -567,7 +567,7 @@ SanitizerInterceptor::insertDevice(ur_device_handle_t Device,
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t SanitizerInterceptor::eraseDevice(ur_device_handle_t Device) {
+ur_result_t AsanInterceptor::eraseDevice(ur_device_handle_t Device) {
     std::scoped_lock<ur_shared_mutex> Guard(m_DeviceMapMutex);
     assert(m_DeviceMap.find(Device) != m_DeviceMap.end());
     m_DeviceMap.erase(Device);
@@ -575,7 +575,7 @@ ur_result_t SanitizerInterceptor::eraseDevice(ur_device_handle_t Device) {
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t SanitizerInterceptor::insertProgram(ur_program_handle_t Program) {
+ur_result_t AsanInterceptor::insertProgram(ur_program_handle_t Program) {
     std::scoped_lock<ur_shared_mutex> Guard(m_ProgramMapMutex);
     if (m_ProgramMap.find(Program) != m_ProgramMap.end()) {
         return UR_RESULT_SUCCESS;
@@ -584,14 +584,14 @@ ur_result_t SanitizerInterceptor::insertProgram(ur_program_handle_t Program) {
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t SanitizerInterceptor::eraseProgram(ur_program_handle_t Program) {
+ur_result_t AsanInterceptor::eraseProgram(ur_program_handle_t Program) {
     std::scoped_lock<ur_shared_mutex> Guard(m_ProgramMapMutex);
     assert(m_ProgramMap.find(Program) != m_ProgramMap.end());
     m_ProgramMap.erase(Program);
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t SanitizerInterceptor::insertKernel(ur_kernel_handle_t Kernel) {
+ur_result_t AsanInterceptor::insertKernel(ur_kernel_handle_t Kernel) {
     std::scoped_lock<ur_shared_mutex> Guard(m_KernelMapMutex);
     if (m_KernelMap.find(Kernel) != m_KernelMap.end()) {
         return UR_RESULT_SUCCESS;
@@ -600,7 +600,7 @@ ur_result_t SanitizerInterceptor::insertKernel(ur_kernel_handle_t Kernel) {
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t SanitizerInterceptor::eraseKernel(ur_kernel_handle_t Kernel) {
+ur_result_t AsanInterceptor::eraseKernel(ur_kernel_handle_t Kernel) {
     std::scoped_lock<ur_shared_mutex> Guard(m_KernelMapMutex);
     assert(m_KernelMap.find(Kernel) != m_KernelMap.end());
     m_KernelMap.erase(Kernel);
@@ -608,7 +608,7 @@ ur_result_t SanitizerInterceptor::eraseKernel(ur_kernel_handle_t Kernel) {
 }
 
 ur_result_t
-SanitizerInterceptor::insertMemBuffer(std::shared_ptr<MemBuffer> MemBuffer) {
+AsanInterceptor::insertMemBuffer(std::shared_ptr<MemBuffer> MemBuffer) {
     std::scoped_lock<ur_shared_mutex> Guard(m_MemBufferMapMutex);
     assert(m_MemBufferMap.find(ur_cast<ur_mem_handle_t>(MemBuffer.get())) ==
            m_MemBufferMap.end());
@@ -617,7 +617,7 @@ SanitizerInterceptor::insertMemBuffer(std::shared_ptr<MemBuffer> MemBuffer) {
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t SanitizerInterceptor::eraseMemBuffer(ur_mem_handle_t MemHandle) {
+ur_result_t AsanInterceptor::eraseMemBuffer(ur_mem_handle_t MemHandle) {
     std::scoped_lock<ur_shared_mutex> Guard(m_MemBufferMapMutex);
     assert(m_MemBufferMap.find(MemHandle) != m_MemBufferMap.end());
     m_MemBufferMap.erase(MemHandle);
@@ -625,7 +625,7 @@ ur_result_t SanitizerInterceptor::eraseMemBuffer(ur_mem_handle_t MemHandle) {
 }
 
 std::shared_ptr<MemBuffer>
-SanitizerInterceptor::getMemBuffer(ur_mem_handle_t MemHandle) {
+AsanInterceptor::getMemBuffer(ur_mem_handle_t MemHandle) {
     std::shared_lock<ur_shared_mutex> Guard(m_MemBufferMapMutex);
     if (m_MemBufferMap.find(MemHandle) != m_MemBufferMap.end()) {
         return m_MemBufferMap[MemHandle];
@@ -633,7 +633,7 @@ SanitizerInterceptor::getMemBuffer(ur_mem_handle_t MemHandle) {
     return nullptr;
 }
 
-ur_result_t SanitizerInterceptor::prepareLaunch(
+ur_result_t AsanInterceptor::prepareLaunch(
     std::shared_ptr<ContextInfo> &ContextInfo,
     std::shared_ptr<DeviceInfo> &DeviceInfo, ur_queue_handle_t Queue,
     ur_kernel_handle_t Kernel, USMLaunchInfo &LaunchInfo) {
@@ -834,7 +834,7 @@ ur_result_t SanitizerInterceptor::prepareLaunch(
 }
 
 std::optional<AllocationIterator>
-SanitizerInterceptor::findAllocInfoByAddress(uptr Address) {
+AsanInterceptor::findAllocInfoByAddress(uptr Address) {
     std::shared_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
     auto It = m_AllocationMap.upper_bound(Address);
     if (It == m_AllocationMap.begin()) {
@@ -849,7 +849,7 @@ SanitizerInterceptor::findAllocInfoByAddress(uptr Address) {
 }
 
 std::vector<AllocationIterator>
-SanitizerInterceptor::findAllocInfoByContext(ur_context_handle_t Context) {
+AsanInterceptor::findAllocInfoByContext(ur_context_handle_t Context) {
     std::shared_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
     std::vector<AllocationIterator> AllocInfos;
     for (auto It = m_AllocationMap.begin(); It != m_AllocationMap.end(); It++) {

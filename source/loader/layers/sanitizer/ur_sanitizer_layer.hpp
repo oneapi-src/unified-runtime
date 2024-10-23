@@ -13,14 +13,13 @@
 #pragma once
 
 #include "logger/ur_logger.hpp"
-#include "ur/ur.hpp"
 #include "ur_proxy_layer.hpp"
 
 #define SANITIZER_COMP_NAME "sanitizer layer"
 
 namespace ur_sanitizer_layer {
 
-class SanitizerInterceptor;
+class AsanInterceptor;
 
 enum class SanitizerType {
     None,
@@ -35,7 +34,7 @@ class __urdlllocal context_t : public proxy_layer_context_t,
   public:
     ur_dditable_t urDdiTable = {};
     logger::Logger logger;
-    std::unique_ptr<SanitizerInterceptor> interceptor;
+    std::unique_ptr<AsanInterceptor> interceptor;
     SanitizerType enabledType = SanitizerType::None;
 
     context_t();
@@ -52,4 +51,5 @@ class __urdlllocal context_t : public proxy_layer_context_t,
 };
 
 context_t *getContext();
+
 } // namespace ur_sanitizer_layer

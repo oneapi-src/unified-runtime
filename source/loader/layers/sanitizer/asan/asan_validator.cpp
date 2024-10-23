@@ -12,7 +12,7 @@
 
 #include "asan_validator.hpp"
 #include "asan_interceptor.hpp"
-#include "ur_sanitizer_utils.hpp"
+#include "sanitizer_common/sanitizer_utils.hpp"
 
 namespace ur_sanitizer_layer {
 

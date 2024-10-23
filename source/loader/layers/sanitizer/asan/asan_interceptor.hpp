@@ -18,7 +18,7 @@
 #include "asan_options.hpp"
 #include "asan_shadow.hpp"
 #include "asan_statistics.hpp"
-#include "common.hpp"
+#include "sanitizer_common/sanitizer_common.hpp"
 #include "ur_sanitizer_layer.hpp"
 
 #include <memory>
@@ -186,11 +186,11 @@ struct DeviceGlobalInfo {
     uptr Addr;
 };
 
-class SanitizerInterceptor {
+class AsanInterceptor {
   public:
-    explicit SanitizerInterceptor();
+    explicit AsanInterceptor();
 
-    ~SanitizerInterceptor();
+    ~AsanInterceptor();
 
     ur_result_t allocateMemory(ur_context_handle_t Context,
                                ur_device_handle_t Device,

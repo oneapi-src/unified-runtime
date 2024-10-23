@@ -1,0 +1,19 @@
+/*
+ *
+ * Copyright (C) 2024 Intel Corporation
+ *
+ * Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
+ * See LICENSE.TXT
+ * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+ *
+ * @file asan_ddi.hpp
+ *
+ */
+
+#include "ur_ddi.h"
+
+namespace ur_sanitizer_layer {
+
+ur_result_t asan_ddi_init(ur_dditable_t *dditable);
+
+} // namespace ur_sanitizer_layer

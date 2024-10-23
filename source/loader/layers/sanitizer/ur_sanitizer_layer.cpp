@@ -11,7 +11,7 @@
  */
 
 #include "ur_sanitizer_layer.hpp"
-#include "asan_interceptor.hpp"
+#include "asan/asan_interceptor.hpp"
 
 namespace ur_sanitizer_layer {
 context_t *getContext() { return context_t::get_direct(); }

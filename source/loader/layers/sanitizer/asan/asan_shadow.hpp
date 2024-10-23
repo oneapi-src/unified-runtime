@@ -12,8 +12,7 @@
 
 #pragma once
 
-#include "asan_allocator.hpp"
-#include "common.hpp"
+#include "asan/asan_allocator.hpp"
 #include <unordered_set>
 
 namespace ur_sanitizer_layer {
