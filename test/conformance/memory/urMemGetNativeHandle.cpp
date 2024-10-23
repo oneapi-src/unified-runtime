@@ -9,9 +9,7 @@ UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urMemGetNativeHandleTest);
 
 TEST_P(urMemGetNativeHandleTest, Success) {
     ur_native_handle_t hNativeMem = 0;
-    if (auto error = urMemGetNativeHandle(buffer, device, &hNativeMem)) {
-        ASSERT_EQ_RESULT(UR_RESULT_ERROR_UNSUPPORTED_FEATURE, error);
-    }
+    ASSERT_SUCCESS(urMemGetNativeHandle(buffer, device, &hNativeMem));
 }
 
 TEST_P(urMemGetNativeHandleTest, InvalidNullHandleMem) {
