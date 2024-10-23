@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <cinttypes>
+#include <cstdint>
 
 namespace ur_sanitizer_layer {
 
@@ -158,6 +158,21 @@ inline const char *ToString(DeviceSanitizerErrorType ErrorType) {
         return "null-pointer-access";
     default:
         return "unknown-error";
+    }
+}
+
+inline const char *ToString(DeviceType Type) {
+    switch (Type) {
+    case DeviceType::UNKNOWN:
+        return "UNKNOWN";
+    case DeviceType::CPU:
+        return "CPU";
+    case DeviceType::GPU_PVC:
+        return "PVC";
+    case DeviceType::GPU_DG2:
+        return "DG2";
+    default:
+        return "UNKNOWN";
     }
 }
 
