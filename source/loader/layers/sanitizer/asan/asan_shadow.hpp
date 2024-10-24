@@ -13,6 +13,8 @@
 #pragma once
 
 #include "asan/asan_allocator.hpp"
+#include "sanitizer_common/sanitizer_libdevice.hpp"
+
 #include <unordered_set>
 
 namespace ur_sanitizer_layer {

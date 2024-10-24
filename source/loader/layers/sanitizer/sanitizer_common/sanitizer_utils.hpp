@@ -12,7 +12,11 @@
 
 #pragma once
 
-#include "sanitizer_common.hpp"
+#include "sanitizer_libdevice.hpp"
+#include "ur_api.h"
+
+#include <string>
+#include <vector>
 
 namespace ur_sanitizer_layer {
 
