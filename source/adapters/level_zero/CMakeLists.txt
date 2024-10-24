@@ -27,6 +27,7 @@ if(UR_BUILD_ADAPTER_L0)
         ${CMAKE_CURRENT_SOURCE_DIR}/program.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/queue.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/sampler.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tensor_map.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/helpers/kernel_helpers.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/helpers/memory_helpers.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ur_level_zero.cpp
@@ -129,6 +130,7 @@ if(UR_BUILD_ADAPTER_L0_V2)
         ${CMAKE_CURRENT_SOURCE_DIR}/helpers/kernel_helpers.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/helpers/memory_helpers.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/adapter.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tensor_map.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/common.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/device.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ur_interface_loader.cpp
