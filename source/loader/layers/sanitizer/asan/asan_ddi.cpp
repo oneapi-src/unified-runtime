@@ -1823,7 +1823,7 @@ __urdlllocal ur_result_t UR_APICALL urGetUSMProcAddrTable(
 
 } // namespace asan
 
-ur_result_t asan_ddi_init(ur_dditable_t *dditable) {
+ur_result_t initAsanDDITable(ur_dditable_t *dditable) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
     if (UR_RESULT_SUCCESS == result) {

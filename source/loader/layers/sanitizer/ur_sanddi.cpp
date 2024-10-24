@@ -39,7 +39,7 @@ ur_result_t context_t::init(ur_dditable_t *dditable,
     urDdiTable = *dditable;
 
     initAsanInterceptor();
-    result = asan_ddi_init(dditable);
+    result = initAsanDDITable(dditable);
 
     return result;
 }
