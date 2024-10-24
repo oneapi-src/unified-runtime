@@ -205,6 +205,11 @@ else()
     endif()
 endif()
 
+if(UR_DEVELOPER_MODE AND CMAKE_SYSTEM_NAME STREQUAL Linux)
+    set(UR_ENABLE_EXCEPTION_SANITIZER ON)
+    add_compile_definitions(UR_ENABLE_EXCEPTION_SANITIZER)
+endif()
+
 if(UR_USE_ASAN)
     add_sanitizer_flag(address)
 endif()
