@@ -12,9 +12,21 @@
 
 namespace ur_sanitizer_layer {
 
+static llvm::symbolize::LLVMSymbolizer *Symbolizer = nullptr;
+
 llvm::symbolize::LLVMSymbolizer *GetSymbolizer() {
-    static llvm::symbolize::LLVMSymbolizer Symbolizer;
-    return &Symbolizer;
+    static auto *Instance = []() {
+        Symbolizer = new llvm::symbolize::LLVMSymbolizer{};
+        return Symbolizer;
+    }();
+    return Instance;
+}
+
+// Let's destruct the symbolizer at the very end of exit process, at least
+// should be after the destructors of the SanitizerLayer since we may print
+// some symbolized information in the SanitizerLayer destructor.
+__attribute__((destructor(101))) void DestructSymbolizer() {
+    delete Symbolizer;
 }
 
 llvm::symbolize::PrinterConfig GetPrinterConfig() {
