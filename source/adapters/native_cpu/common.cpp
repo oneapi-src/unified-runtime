@@ -9,7 +9,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "common.hpp"
-#include  <string.h>
 
 // Global variables for UR_RESULT_ADAPTER_SPECIFIC_ERROR
 // See urGetLastResult
@@ -20,7 +19,7 @@ thread_local char ErrorMessage[MaxMessageSize];
 [[maybe_unused]] void setErrorMessage(const char *pMessage,
                                       ur_result_t ErrorCode) {
   assert(strlen(pMessage) <= MaxMessageSize);
-  strcpy_s(ErrorMessage, MaxMessageSize, pMessage);
+  strcpy(ErrorMessage, pMessage);
   ErrorMessageCode = ErrorCode;
 }
 
