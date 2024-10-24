@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "common.hpp"
+#include <cstdint>
 
 namespace ur_sanitizer_layer {
 

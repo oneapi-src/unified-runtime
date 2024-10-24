@@ -1,22 +1,20 @@
 /*
  *
- * Copyright (C) 2023 Intel Corporation
+ * Copyright (C) 2024 Intel Corporation
  *
  * Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
  * See LICENSE.TXT
  * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
  *
- * @file device_sanitizer_report.hpp
+ * @file asan_libdevice.hpp
  *
  */
 
 #pragma once
 
-#include <cinttypes>
+#include "sanitizer_common/sanitizer_libdevice.hpp"
 
 namespace ur_sanitizer_layer {
-
-enum class DeviceType : uint32_t { UNKNOWN = 0, CPU, GPU_PVC, GPU_DG2 };
 
 enum class DeviceSanitizerErrorType : int32_t {
     UNKNOWN,

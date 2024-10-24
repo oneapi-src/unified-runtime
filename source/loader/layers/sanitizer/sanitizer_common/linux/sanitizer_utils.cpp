@@ -11,7 +11,7 @@
  *
  */
 
-#include "common.hpp"
+#include "sanitizer_common/sanitizer_common.hpp"
 #include "ur_sanitizer_layer.hpp"
 
 #include <asm/param.h>

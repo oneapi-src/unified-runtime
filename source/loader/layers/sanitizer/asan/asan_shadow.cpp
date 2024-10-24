@@ -13,8 +13,8 @@
 #include "asan_shadow.hpp"
 #include "asan_interceptor.hpp"
 #include "asan_libdevice.hpp"
+#include "sanitizer_common/sanitizer_utils.hpp"
 #include "ur_sanitizer_layer.hpp"
-#include "ur_sanitizer_utils.hpp"
 
 namespace ur_sanitizer_layer {
 
@@ -201,7 +201,7 @@ ur_result_t ShadowMemoryGPU::EnqueuePoisonShadow(ur_queue_handle_t Queue,
             }
 
             auto AllocInfoIt =
-                getContext()->interceptor->findAllocInfoByAddress(Ptr);
+                getAsanInterceptor()->findAllocInfoByAddress(Ptr);
             assert(AllocInfoIt);
             VirtualMemMaps[MappedPtr].second.insert((*AllocInfoIt)->second);
         }

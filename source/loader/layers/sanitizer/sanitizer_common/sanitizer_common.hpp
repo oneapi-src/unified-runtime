@@ -12,7 +12,6 @@
 
 #pragma once
 
-#include "asan_libdevice.hpp"
 #include "ur/ur.hpp"
 #include "ur_ddi.h"
 
@@ -137,21 +136,6 @@ struct SourceInfo {
     int line = 0;
     int column = 0;
 };
-
-inline const char *ToString(DeviceType Type) {
-    switch (Type) {
-    case DeviceType::UNKNOWN:
-        return "UNKNOWN";
-    case DeviceType::CPU:
-        return "CPU";
-    case DeviceType::GPU_PVC:
-        return "PVC";
-    case DeviceType::GPU_DG2:
-        return "DG2";
-    default:
-        return "UNKNOWN";
-    }
-}
 
 bool IsInASanContext();
 

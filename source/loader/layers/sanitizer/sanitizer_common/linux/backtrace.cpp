@@ -7,7 +7,7 @@
  * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
  *
  */
-#include "stacktrace.hpp"
+#include "sanitizer_common/sanitizer_stacktrace.hpp"
 
 #include <execinfo.h>
 #include <string>

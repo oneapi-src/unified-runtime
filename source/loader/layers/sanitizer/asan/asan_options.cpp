@@ -11,6 +11,8 @@
  */
 
 #include "asan_options.hpp"
+
+#include "ur/ur.hpp"
 #include "ur_sanitizer_layer.hpp"
 
 #include <algorithm>

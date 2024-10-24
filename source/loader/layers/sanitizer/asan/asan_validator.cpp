@@ -12,7 +12,7 @@
 
 #include "asan_validator.hpp"
 #include "asan_interceptor.hpp"
-#include "ur_sanitizer_utils.hpp"
+#include "sanitizer_common/sanitizer_utils.hpp"
 
 namespace ur_sanitizer_layer {
 
@@ -38,9 +38,9 @@ ValidateUSMResult ValidateUSMPointer(ur_context_handle_t Context,
                                      ur_device_handle_t Device, uptr Ptr) {
     assert(Ptr != 0 && "Don't validate nullptr here");
 
-    auto AllocInfoItOp = getContext()->interceptor->findAllocInfoByAddress(Ptr);
+    auto AllocInfoItOp = getAsanInterceptor()->findAllocInfoByAddress(Ptr);
     if (!AllocInfoItOp) {
-        auto DI = getContext()->interceptor->getDeviceInfo(Device);
+        auto DI = getAsanInterceptor()->getDeviceInfo(Device);
         bool IsSupportSharedSystemUSM = DI->IsSupportSharedSystemUSM;
         if (IsSupportSharedSystemUSM) {
             // maybe it's host pointer
