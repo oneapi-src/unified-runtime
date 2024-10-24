@@ -11,7 +11,7 @@
  */
 
 #include "ur_sanitizer_layer.hpp"
-#include "asan/asan_interceptor.hpp"
+#include "asan/asan_ddi.hpp"
 
 namespace ur_sanitizer_layer {
 context_t *getContext() { return context_t::get_direct(); }
@@ -21,7 +21,17 @@ context_t::context_t()
     : logger(logger::create_logger("sanitizer", false, false,
                                    logger::Level::WARN)) {}
 
-ur_result_t context_t::tearDown() { return UR_RESULT_SUCCESS; }
+ur_result_t context_t::tearDown() {
+    switch (enabledType) {
+    case SanitizerType::AddressSanitizer:
+        destroyAsanInterceptor();
+        break;
+    default:
+        break;
+    }
+
+    return UR_RESULT_SUCCESS;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 context_t::~context_t() {}

@@ -25,7 +25,6 @@ ur_result_t context_t::init(ur_dditable_t *dditable,
 
     if (enabledLayerNames.count("UR_LAYER_ASAN")) {
         enabledType = SanitizerType::AddressSanitizer;
-        interceptor = std::make_unique<AsanInterceptor>();
     } else if (enabledLayerNames.count("UR_LAYER_MSAN")) {
         enabledType = SanitizerType::MemorySanitizer;
     } else if (enabledLayerNames.count("UR_LAYER_TSAN")) {
@@ -39,6 +38,7 @@ ur_result_t context_t::init(ur_dditable_t *dditable,
 
     urDdiTable = *dditable;
 
+    initAsanInterceptor();
     result = asan_ddi_init(dditable);
 
     return result;

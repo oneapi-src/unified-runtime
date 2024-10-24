@@ -91,7 +91,7 @@ ur_result_t MemBuffer::getHandle(ur_device_handle_t Device, char *&Handle) {
         ur_usm_desc_t USMDesc{};
         USMDesc.align = getAlignment();
         ur_usm_pool_handle_t Pool{};
-        URes = getContext()->interceptor->allocateMemory(
+        URes = getAsanInterceptor()->allocateMemory(
             Context, Device, &USMDesc, Pool, Size, AllocType::MEM_BUFFER,
             ur_cast<void **>(&Allocation));
         if (URes != UR_RESULT_SUCCESS) {
@@ -129,7 +129,7 @@ ur_result_t MemBuffer::getHandle(ur_device_handle_t Device, char *&Handle) {
             ur_usm_desc_t USMDesc{};
             USMDesc.align = getAlignment();
             ur_usm_pool_handle_t Pool{};
-            URes = getContext()->interceptor->allocateMemory(
+            URes = getAsanInterceptor()->allocateMemory(
                 Context, nullptr, &USMDesc, Pool, Size, AllocType::HOST_USM,
                 ur_cast<void **>(&HostAllocation));
             if (URes != UR_RESULT_SUCCESS) {
@@ -174,8 +174,7 @@ ur_result_t MemBuffer::getHandle(ur_device_handle_t Device, char *&Handle) {
 
 ur_result_t MemBuffer::free() {
     for (const auto &[_, Ptr] : Allocations) {
-        ur_result_t URes =
-            getContext()->interceptor->releaseMemory(Context, Ptr);
+        ur_result_t URes = getAsanInterceptor()->releaseMemory(Context, Ptr);
         if (URes != UR_RESULT_SUCCESS) {
             getContext()->logger.error("Failed to free buffer handle {}", Ptr);
             return URes;

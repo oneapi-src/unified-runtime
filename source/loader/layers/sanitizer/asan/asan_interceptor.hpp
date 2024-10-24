@@ -322,4 +322,6 @@ class AsanInterceptor {
     ur_shared_mutex m_AdaptersMutex;
 };
 
+AsanInterceptor *getAsanInterceptor();
+
 } // namespace ur_sanitizer_layer

@@ -12,6 +12,7 @@
  */
 
 #include "asan_interceptor.hpp"
+#include "asan_ddi.hpp"
 #include "asan_options.hpp"
 #include "asan_quarantine.hpp"
 #include "asan_report.hpp"
@@ -839,7 +840,7 @@ ContextInfo::~ContextInfo() {
 
     // check memory leaks
     std::vector<AllocationIterator> AllocInfos =
-        getContext()->interceptor->findAllocInfoByContext(Handle);
+        getAsanInterceptor()->findAllocInfoByContext(Handle);
     for (const auto &It : AllocInfos) {
         const auto &[_, AI] = *It;
         if (!AI->IsReleased) {
@@ -879,7 +880,7 @@ USMLaunchInfo::~USMLaunchInfo() {
     [[maybe_unused]] ur_result_t Result;
     if (Data) {
         auto Type = GetDeviceType(Context, Device);
-        auto ContextInfo = getContext()->interceptor->getContextInfo(Context);
+        auto ContextInfo = getAsanInterceptor()->getContextInfo(Context);
         if (Type == DeviceType::GPU_PVC || Type == DeviceType::GPU_DG2) {
             if (Data->PrivateShadowOffset) {
                 ContextInfo->Stats.UpdateShadowFreed(
@@ -909,6 +910,22 @@ USMLaunchInfo::~USMLaunchInfo() {
     assert(Result == UR_RESULT_SUCCESS);
     Result = getContext()->urDdiTable.Device.pfnRelease(Device);
     assert(Result == UR_RESULT_SUCCESS);
+}
+
+static AsanInterceptor *interceptor;
+
+AsanInterceptor *getAsanInterceptor() { return interceptor; }
+
+void initAsanInterceptor() {
+    if (interceptor) {
+        return;
+    }
+    interceptor = new AsanInterceptor();
+}
+
+void destroyAsanInterceptor() {
+    delete interceptor;
+    interceptor = nullptr;
 }
 
 } // namespace ur_sanitizer_layer

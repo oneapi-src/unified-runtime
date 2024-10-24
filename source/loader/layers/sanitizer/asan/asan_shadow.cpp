@@ -201,7 +201,7 @@ ur_result_t ShadowMemoryGPU::EnqueuePoisonShadow(ur_queue_handle_t Queue,
             }
 
             auto AllocInfoIt =
-                getContext()->interceptor->findAllocInfoByAddress(Ptr);
+                getAsanInterceptor()->findAllocInfoByAddress(Ptr);
             assert(AllocInfoIt);
             VirtualMemMaps[MappedPtr].second.insert((*AllocInfoIt)->second);
         }
