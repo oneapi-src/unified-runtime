@@ -156,9 +156,9 @@ function(add_ur_library name)
     add_library(${name} ${ARGN})
     add_ur_target_compile_options(${name})
     add_ur_target_link_options(${name})
-    if(MSVC)
+    if(CMAKE_LINKER MATCHES link.exe)
         target_link_options(${name} PRIVATE
-            $<$<STREQUAL:$<TARGET_LINKER_FILE_NAME:${name}>,link.exe>:/DEPENDENTLOADFLAG:0x2000>
+            LINKER:/DEPENDENTLOADFLAG:${UR_DEPENDENTLOADFLAG}
         )
     endif()
 endfunction()
