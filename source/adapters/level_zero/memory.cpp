@@ -1746,28 +1746,15 @@ ur_result_t urMemBufferCreateWithNativeHandle(
   std::shared_lock<ur_shared_mutex> Lock(Context->Mutex);
 
   // Get base of the allocation
-  void *Base = nullptr;
-  size_t Size = 0;
   void *Ptr = ur_cast<void *>(NativeMem);
-  ZE2UR_CALL(zeMemGetAddressRange, (Context->ZeContext, Ptr, &Base, &Size));
+
+  auto [Base, Size] = getMemoryBaseAddressAndSize(Context->ZeContext, Ptr);
   UR_ASSERT(Ptr == Base, UR_RESULT_ERROR_INVALID_VALUE);
 
-  ZeStruct<ze_memory_allocation_properties_t> ZeMemProps;
-  ze_device_handle_t ZeDevice = nullptr;
-  ZE2UR_CALL(zeMemGetAllocProperties,
-             (Context->ZeContext, Ptr, &ZeMemProps, &ZeDevice));
-
-  // Check type of the allocation
-  switch (ZeMemProps.type) {
-  case ZE_MEMORY_TYPE_HOST:
-  case ZE_MEMORY_TYPE_SHARED:
-  case ZE_MEMORY_TYPE_DEVICE:
-    break;
-  case ZE_MEMORY_TYPE_UNKNOWN:
-    // Memory allocation is unrelated to the context
-    return UR_RESULT_ERROR_INVALID_CONTEXT;
-  default:
-    die("Unexpected memory type");
+  ze_device_handle_t ZeDevice;
+  auto MemoryAttrs = getMemoryAttrs(Context->ZeContext, Ptr, &ZeDevice);
+  if (MemoryAttrs.type == ZE_MEMORY_TYPE_UNKNOWN) {
+    return UR_RESULT_ERROR_INVALID_VALUE;
   }
 
   ur_device_handle_t Device{};

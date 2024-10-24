@@ -12,6 +12,8 @@
 #include <ur_api.h>
 #include <ze_api.h>
 
+#include <utility>
+
 // If USM Import feature is enabled and hostptr is supplied,
 // import the hostptr if not already imported into USM.
 // Data transfer rate is maximized when both source and destination
@@ -20,7 +22,12 @@
 bool maybeImportUSM(ze_driver_handle_t hTranslatedDriver,
                     ze_context_handle_t hContext, void *ptr, size_t size);
 
-ze_memory_type_t getMemoryType(ze_context_handle_t hContext, void *ptr);
+ze_memory_allocation_properties_t getMemoryAttrs(ze_context_handle_t hContext,
+                                                 void *ptr,
+                                                 ze_device_handle_t *hDevice);
+
+std::pair<void *, size_t>
+getMemoryBaseAddressAndSize(ze_context_handle_t hContext, void *ptr);
 
 struct ze_region_params {
   const ze_copy_region_t dstRegion;

@@ -15,6 +15,7 @@
 #include "memory.hpp"
 
 #include "../device.hpp"
+#include "../helpers/kernel_helpers.hpp"
 #include "../platform.hpp"
 #include "../program.hpp"
 #include "../ur_interface_loader.hpp"
@@ -71,14 +72,17 @@ ur_kernel_handle_t_::ur_kernel_handle_t_(
     ur_native_handle_t hNativeKernel, ur_program_handle_t hProgram,
     const ur_kernel_native_properties_t *pProperties)
     : hProgram(hProgram), deviceKernels(1) {
+  ur::level_zero::urProgramRetain(hProgram);
+
+  auto ownZeHandle = pProperties ? pProperties->isNativeHandleOwned : false;
+
   ze_kernel_handle_t zeKernel = ur_cast<ze_kernel_handle_t>(hNativeKernel);
 
   if (!zeKernel) {
     throw UR_RESULT_ERROR_INVALID_KERNEL;
   }
 
-  deviceKernels.back().emplace(nullptr, zeKernel,
-                               pProperties->isNativeHandleOwned);
+  deviceKernels.back().emplace(nullptr, zeKernel, ownZeHandle);
   completeInitialization();
 }
 
@@ -112,10 +116,9 @@ void ur_kernel_handle_t_::completeInitialization() {
   };
 }
 
-ze_kernel_handle_t
-ur_kernel_handle_t_::getZeHandle(ur_device_handle_t hDevice) {
+size_t ur_kernel_handle_t_::deviceIndex(ur_device_handle_t hDevice) const {
   // root-device's kernel can be submitted to a sub-device's queue
-  if (hDevice->isSubDevice()) {
+  if (hDevice && hDevice->isSubDevice()) {
     hDevice = hDevice->RootDevice;
   }
 
@@ -126,11 +129,17 @@ ur_kernel_handle_t_::getZeHandle(ur_device_handle_t hDevice) {
     auto &kernel = deviceKernels[0].value();
 
     // hDevice is nullptr for native handle
-    if ((kernel.hDevice != nullptr && kernel.hDevice != hDevice)) {
+    if ((kernel.hDevice != nullptr && hDevice != nullptr &&
+         kernel.hDevice != hDevice)) {
       throw UR_RESULT_ERROR_INVALID_DEVICE;
     }
 
-    return kernel.hKernel.get();
+    return 0;
+  }
+
+  // hDevice cannot be nullptr unless kernel was created from native handle
+  if (!hDevice) {
+    throw UR_RESULT_ERROR_INVALID_DEVICE;
   }
 
   if (!deviceKernels[hDevice->Id.value()].has_value()) {
@@ -139,7 +148,13 @@ ur_kernel_handle_t_::getZeHandle(ur_device_handle_t hDevice) {
 
   assert(deviceKernels[hDevice->Id.value()].value().hKernel.get());
 
-  return deviceKernels[hDevice->Id.value()].value().hKernel.get();
+  return hDevice->Id.value();
+}
+
+ze_kernel_handle_t
+ur_kernel_handle_t_::getZeHandle(ur_device_handle_t hDevice) {
+  auto &deviceKernel = deviceKernels[deviceIndex(hDevice)].value();
+  return deviceKernel.hKernel.get();
 }
 
 const std::string &ur_kernel_handle_t_::getName() const {
@@ -148,16 +163,8 @@ const std::string &ur_kernel_handle_t_::getName() const {
 
 const ze_kernel_properties_t &
 ur_kernel_handle_t_::getProperties(ur_device_handle_t hDevice) const {
-  if (!deviceKernels[hDevice->Id.value()].has_value()) {
-    throw UR_RESULT_ERROR_INVALID_DEVICE;
-  }
-
-  assert(deviceKernels[hDevice->Id.value()].value().hKernel.get());
-
-  return *deviceKernels[hDevice->Id.value()]
-              .value()
-              .zeKernelProperties.
-              operator->();
+  auto &deviceKernel = deviceKernels[deviceIndex(hDevice)].value();
+  return *deviceKernel.zeKernelProperties.operator->();
 }
 
 ur_result_t ur_kernel_handle_t_::setArgValue(
@@ -177,8 +184,6 @@ ur_result_t ur_kernel_handle_t_::setArgValue(
       *(void **)(const_cast<void *>(pArgValue)) == nullptr) {
     pArgValue = nullptr;
   }
-
-  std::scoped_lock<ur_shared_mutex> guard(Mutex);
 
   for (auto &singleDeviceKernel : deviceKernels) {
     if (!singleDeviceKernel.has_value()) {
@@ -207,8 +212,6 @@ ur_program_handle_t ur_kernel_handle_t_::getProgramHandle() const {
 
 ur_result_t ur_kernel_handle_t_::setExecInfo(ur_kernel_exec_info_t propName,
                                              const void *pPropValue) {
-  std::scoped_lock<ur_shared_mutex> Guard(Mutex);
-
   for (auto &kernel : deviceKernels) {
     if (!kernel.has_value())
       continue;
@@ -247,14 +250,33 @@ ur_result_t ur_kernel_handle_t_::setExecInfo(ur_kernel_exec_info_t propName,
   return UR_RESULT_SUCCESS;
 }
 
-std::vector<ur_device_handle_t> ur_kernel_handle_t_::getDevices() const {
-  std::vector<ur_device_handle_t> devices;
-  for (size_t i = 0; i < deviceKernels.size(); ++i) {
-    if (deviceKernels[i].has_value()) {
-      devices.push_back(deviceKernels[i].value().hDevice);
-    }
+// Perform any required allocations and set the kernel arguments.
+ur_result_t ur_kernel_handle_t_::prepareForSubmission(
+    ur_context_handle_t hContext, ur_device_handle_t hDevice,
+    const size_t *pGlobalWorkOffset, uint32_t workDim, uint32_t groupSizeX,
+    uint32_t groupSizeY, uint32_t groupSizeZ,
+    std::function<void(void *, void *, size_t)> migrate) {
+  auto hZeKernel = getZeHandle(hDevice);
+
+  if (pGlobalWorkOffset != NULL) {
+    UR_CALL(
+        setKernelGlobalOffset(hContext, hZeKernel, workDim, pGlobalWorkOffset));
   }
-  return devices;
+
+  ZE2UR_CALL(zeKernelSetGroupSize,
+             (hZeKernel, groupSizeX, groupSizeY, groupSizeZ));
+
+  for (auto &pending : pending_allocations) {
+    auto zePtr = pending.hMem->getDevicePtr(hDevice, pending.mode, 0,
+                                            pending.hMem->getSize(), migrate);
+    UR_CALL(setArgPointer(pending.argIndex, nullptr, zePtr));
+  }
+  return UR_RESULT_SUCCESS;
+}
+
+void ur_kernel_handle_t_::addPendingMemoryAllocation(
+    pending_memory_allocation_t allocation) {
+  pending_allocations.push_back(allocation);
 }
 
 namespace ur::level_zero {
@@ -262,6 +284,25 @@ ur_result_t urKernelCreate(ur_program_handle_t hProgram,
                            const char *pKernelName,
                            ur_kernel_handle_t *phKernel) {
   *phKernel = new ur_kernel_handle_t_(hProgram, pKernelName);
+  return UR_RESULT_SUCCESS;
+}
+
+ur_result_t urKernelGetNativeHandle(ur_kernel_handle_t hKernel,
+                                    ur_native_handle_t *phNativeKernel) {
+  // Return the handle of the kernel for the first device
+  *phNativeKernel =
+      reinterpret_cast<ur_native_handle_t>(hKernel->getZeHandle(nullptr));
+  return UR_RESULT_SUCCESS;
+}
+
+ur_result_t
+urKernelCreateWithNativeHandle(ur_native_handle_t hNativeKernel,
+                               ur_context_handle_t hContext,
+                               ur_program_handle_t hProgram,
+                               const ur_kernel_native_properties_t *pProperties,
+                               ur_kernel_handle_t *phKernel) {
+  std::ignore = hContext;
+  *phKernel = new ur_kernel_handle_t_(hNativeKernel, hProgram, pProperties);
   return UR_RESULT_SUCCESS;
 }
 
@@ -294,6 +335,8 @@ ur_result_t urKernelSetArgValue(
         *pArgValue ///< [in] argument value represented as matching arg type.
 ) {
   TRACK_SCOPE_LATENCY("ur_kernel_handle_t_::setArgValue");
+
+  std::scoped_lock<ur_shared_mutex> guard(hKernel->Mutex);
   return hKernel->setArgValue(argIndex, argSize, pProperties, pArgValue);
 }
 
@@ -306,7 +349,26 @@ ur_result_t urKernelSetArgPointer(
         *pArgValue ///< [in] argument value represented as matching arg type.
 ) {
   TRACK_SCOPE_LATENCY("ur_kernel_handle_t_::setArgPointer");
+
+  std::scoped_lock<ur_shared_mutex> guard(hKernel->Mutex);
   return hKernel->setArgPointer(argIndex, pProperties, pArgValue);
+}
+
+static ur_mem_handle_t_::device_access_mode_t memAccessFromKernelProperties(
+    const ur_kernel_arg_mem_obj_properties_t *pProperties) {
+  if (pProperties) {
+    switch (pProperties->memoryAccess) {
+    case UR_MEM_FLAG_READ_WRITE:
+      return ur_mem_handle_t_::device_access_mode_t::read_write;
+    case UR_MEM_FLAG_WRITE_ONLY:
+      return ur_mem_handle_t_::device_access_mode_t::write_only;
+    case UR_MEM_FLAG_READ_ONLY:
+      return ur_mem_handle_t_::device_access_mode_t::read_only;
+    default:
+      return ur_mem_handle_t_::device_access_mode_t::read_write;
+    }
+  }
+  return ur_mem_handle_t_::device_access_mode_t::read_write;
 }
 
 ur_result_t
@@ -315,29 +377,10 @@ urKernelSetArgMemObj(ur_kernel_handle_t hKernel, uint32_t argIndex,
                      ur_mem_handle_t hArgValue) {
   TRACK_SCOPE_LATENCY("ur_kernel_handle_t_::setArgMemObj");
 
-  // TODO: support properties
-  std::ignore = pProperties;
+  hKernel->addPendingMemoryAllocation(
+      {hArgValue, memAccessFromKernelProperties(pProperties), argIndex});
 
-  auto kernelDevices = hKernel->getDevices();
-  if (kernelDevices.size() == 1) {
-    auto zePtr = hArgValue->getDevicePtr(
-        kernelDevices.front(), ur_mem_handle_t_::access_mode_t::read_write, 0,
-        hArgValue->getSize(), nullptr);
-    return hKernel->setArgPointer(argIndex, nullptr, zePtr);
-  } else {
-    // TODO: if devices do not have p2p capabilities, we need to have allocation
-    // on each device. Do this the same way as in legacy (keep a pending Args
-    // vector and do actual allocation on kernel submission) or allocate the
-    // memory immediately (only for small allocations?).
-
-    // Get memory that is accessible by the first device.
-    // If kernel is submitted to a different device the memory
-    // will be accessed trough the link or migrated in enqueueKernelLaunch.
-    auto zePtr = hArgValue->getDevicePtr(
-        kernelDevices.front(), ur_mem_handle_t_::access_mode_t::read_write, 0,
-        hArgValue->getSize(), nullptr);
-    return hKernel->setArgPointer(argIndex, nullptr, zePtr);
-  }
+  return UR_RESULT_SUCCESS;
 }
 
 ur_result_t
@@ -345,6 +388,8 @@ urKernelSetArgLocal(ur_kernel_handle_t hKernel, uint32_t argIndex,
                     size_t argSize,
                     const ur_kernel_arg_local_properties_t *pProperties) {
   TRACK_SCOPE_LATENCY("ur_kernel_handle_t_::setArgLocal");
+
+  std::scoped_lock<ur_shared_mutex> guard(hKernel->Mutex);
 
   std::ignore = pProperties;
 
@@ -363,6 +408,8 @@ ur_result_t urKernelSetExecInfo(
   std::ignore = propSize;
   std::ignore = pProperties;
 
+  std::scoped_lock<ur_shared_mutex> guard(hKernel->Mutex);
+
   return hKernel->setExecInfo(propName, pPropValue);
 }
 
@@ -380,7 +427,7 @@ ur_result_t urKernelGetGroupInfo(
 ) {
   UrReturnHelper returnValue(paramValueSize, pParamValue, pParamValueSizeRet);
 
-  std::shared_lock<ur_shared_mutex> Guard(hKernel->Mutex);
+  // No locking needed here, we only read const members
   switch (paramName) {
   case UR_KERNEL_GROUP_INFO_GLOBAL_WORK_SIZE: {
     // TODO: To revisit after level_zero/issues/262 is resolved
@@ -456,13 +503,11 @@ ur_result_t urKernelGetSubGroupInfo(
     size_t *pPropSizeRet ///< [out][optional] pointer to the actual size in
                          ///< bytes of data being queried by propName.
 ) {
-  std::ignore = hDevice;
-
   UrReturnHelper returnValue(propSize, pPropValue, pPropSizeRet);
 
   auto props = hKernel->getProperties(hDevice);
 
-  std::shared_lock<ur_shared_mutex> Guard(hKernel->Mutex);
+  // No locking needed here, we only read const members
   if (propName == UR_KERNEL_SUB_GROUP_INFO_MAX_SUB_GROUP_SIZE) {
     returnValue(uint32_t{props.maxSubgroupSize});
   } else if (propName == UR_KERNEL_SUB_GROUP_INFO_MAX_NUM_SUB_GROUPS) {
