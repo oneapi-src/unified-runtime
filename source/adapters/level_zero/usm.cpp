@@ -787,6 +787,255 @@ ur_result_t urUSMReleaseExp(ur_context_handle_t Context, void *HostPtr) {
         Context->getPlatform()->ZeDriverHandleExpTranslated, HostPtr);
   return UR_RESULT_SUCCESS;
 }
+
+enum class USMAllocType { Host = 0, Device = 1, Shared = 2 };
+
+static ur_result_t USMAllocHelper(ur_context_handle_t Context,
+                                  ur_device_handle_t Device, size_t Size,
+                                  void **RetMem, USMAllocType Type) {
+  auto &Platform = Device->Platform;
+
+  // TODO: Should alignemnt be passed in 'ur_exp_async_usm_alloc_properties_t'?
+  uint32_t Alignment = 0;
+
+  std::shared_lock<ur_shared_mutex> ContextLock(Context->Mutex,
+                                                std::defer_lock);
+  std::unique_lock<ur_shared_mutex> IndirectAccessTrackingLock(
+      Platform->ContextsMutex, std::defer_lock);
+  if (IndirectAccessTrackingEnabled) {
+    IndirectAccessTrackingLock.lock();
+    UR_CALL(ur::level_zero::urContextRetain(Context));
+  } else {
+    ContextLock.lock();
+  }
+
+  umf_memory_pool_handle_t hPoolInternal = nullptr;
+  switch (Type) {
+  case USMAllocType::Host:
+    hPoolInternal = Context->HostMemPool.get();
+    break;
+  case USMAllocType::Device: {
+    auto It = Context->DeviceMemPools.find(Device->ZeDevice);
+    if (It == Context->DeviceMemPools.end()) {
+      return UR_RESULT_ERROR_INVALID_VALUE;
+    }
+    hPoolInternal = It->second.get();
+  } break;
+  case USMAllocType::Shared: {
+    auto It = Context->SharedMemPools.find(Device->ZeDevice);
+    if (It == Context->SharedMemPools.end()) {
+      return UR_RESULT_ERROR_INVALID_VALUE;
+    }
+    hPoolInternal = It->second.get();
+  } break;
+  };
+
+  *RetMem = umfPoolAlignedMalloc(hPoolInternal, Size, Alignment);
+  if (*RetMem == nullptr) {
+    auto umfRet = umfPoolGetLastAllocationError(hPoolInternal);
+    return umf2urResult(umfRet);
+  }
+
+  if (IndirectAccessTrackingEnabled) {
+    // Keep track of all memory allocations in the context
+    Context->MemAllocs.emplace(std::piecewise_construct,
+                               std::forward_as_tuple(*RetMem),
+                               std::forward_as_tuple(Context));
+  }
+
+  return UR_RESULT_SUCCESS;
+}
+
+static ur_result_t enqueueUSMAllocHelper(
+    ur_queue_handle_t Queue, ur_usm_pool_handle_t Pool, const size_t Size,
+    const ur_exp_async_usm_alloc_properties_t *Properties,
+    uint32_t NumEventsInWaitList, const ur_event_handle_t *EventWaitList,
+    void **RetMem, ur_event_handle_t *OutEvent, USMAllocType Type) {
+  std::ignore = Pool;
+  std::ignore = Properties;
+
+  std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
+
+  bool UseCopyEngine = false;
+  _ur_ze_event_list_t TmpWaitList;
+  UR_CALL(TmpWaitList.createAndRetainUrZeEventList(
+      NumEventsInWaitList, EventWaitList, Queue, UseCopyEngine));
+
+  // Get a new command list to be used on this call
+  ur_command_list_ptr_t CommandList{};
+  UR_CALL(Queue->Context->getAvailableCommandList(
+      Queue, CommandList, UseCopyEngine, NumEventsInWaitList, EventWaitList));
+
+  ze_event_handle_t ZeEvent = nullptr;
+  ur_event_handle_t InternalEvent{};
+  bool IsInternal = OutEvent == nullptr;
+  ur_event_handle_t *Event = OutEvent ? OutEvent : &InternalEvent;
+
+  ur_command_t CommandType = UR_COMMAND_FORCE_UINT32;
+  switch (Type) {
+  case USMAllocType::Host:
+    CommandType = UR_COMMAND_ENQUEUE_USM_HOST_ALLOC_EXP;
+    break;
+  case USMAllocType::Device:
+    CommandType = UR_COMMAND_ENQUEUE_USM_DEVICE_ALLOC_EXP;
+    break;
+  case USMAllocType::Shared:
+    CommandType = UR_COMMAND_ENQUEUE_USM_SHARED_ALLOC_EXP;
+    break;
+  }
+  UR_CALL(createEventAndAssociateQueue(Queue, Event, CommandType, CommandList,
+                                       IsInternal, false));
+  ZeEvent = (*Event)->ZeEvent;
+  (*Event)->WaitList = TmpWaitList;
+
+  // Allocate USM memory
+  auto Ret = USMAllocHelper(Queue->Context, Queue->Device, Size, RetMem, Type);
+  if (Ret) {
+    return Ret;
+  }
+
+  // Signal that USM allocation event was finished
+  ZE2UR_CALL(zeCommandListAppendSignalEvent, (CommandList->first, ZeEvent));
+
+  UR_CALL(Queue->executeCommandList(CommandList, false));
+
+  return UR_RESULT_SUCCESS;
+}
+
+ur_result_t urEnqueueUSMDeviceAllocExp(
+    ur_queue_handle_t Queue,   ///< [in] handle of the queue object
+    ur_usm_pool_handle_t Pool, ///< [in][optional] USM pool descriptor
+    const size_t Size, ///< [in] minimum size in bytes of the USM memory object
+                       ///< to be allocated
+    const ur_exp_async_usm_alloc_properties_t
+        *Properties, ///< [in][optional] pointer to the enqueue async alloc
+                     ///< properties
+    uint32_t NumEventsInWaitList, ///< [in] size of the event wait list
+    const ur_event_handle_t
+        *EventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                        ///< pointer to a list of events that must be complete
+                        ///< before the kernel execution. If nullptr, the
+                        ///< numEventsInWaitList must be 0, indicating no wait
+                        ///< events.
+    void **Mem,         ///< [out] pointer to USM memory object
+    ur_event_handle_t *OutEvent ///< [out][optional] return an event object that
+                                ///< identifies the async alloc
+) {
+  return enqueueUSMAllocHelper(Queue, Pool, Size, Properties,
+                               NumEventsInWaitList, EventWaitList, Mem,
+                               OutEvent, USMAllocType::Device);
+}
+
+ur_result_t urEnqueueUSMSharedAllocExp(
+    ur_queue_handle_t Queue,   ///< [in] handle of the queue object
+    ur_usm_pool_handle_t Pool, ///< [in][optional] USM pool descriptor
+    const size_t Size, ///< [in] minimum size in bytes of the USM memory object
+                       ///< to be allocated
+    const ur_exp_async_usm_alloc_properties_t
+        *Properties, ///< [in][optional] pointer to the enqueue async alloc
+                     ///< properties
+    uint32_t NumEventsInWaitList, ///< [in] size of the event wait list
+    const ur_event_handle_t
+        *EventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                        ///< pointer to a list of events that must be complete
+                        ///< before the kernel execution. If nullptr, the
+                        ///< numEventsInWaitList must be 0, indicating no wait
+                        ///< events.
+    void **Mem,         ///< [out] pointer to USM memory object
+    ur_event_handle_t *OutEvent ///< [out][optional] return an event object that
+                                ///< identifies the async alloc
+) {
+  return enqueueUSMAllocHelper(Queue, Pool, Size, Properties,
+                               NumEventsInWaitList, EventWaitList, Mem,
+                               OutEvent, USMAllocType::Shared);
+}
+
+ur_result_t urEnqueueUSMHostAllocExp(
+    ur_queue_handle_t Queue,   ///< [in] handle of the queue object
+    ur_usm_pool_handle_t Pool, ///< [in][optional] USM pool descriptor
+    const size_t Size, ///< [in] minimum size in bytes of the USM memory object
+                       ///< to be allocated
+    const ur_exp_async_usm_alloc_properties_t
+        *Properties, ///< [in][optional] pointer to the enqueue async alloc
+                     ///< properties
+    uint32_t NumEventsInWaitList, ///< [in] size of the event wait list
+    const ur_event_handle_t
+        *EventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                        ///< pointer to a list of events that must be complete
+                        ///< before the kernel execution. If nullptr, the
+                        ///< numEventsInWaitList must be 0, indicating no wait
+                        ///< events.
+    void **Mem,         ///< [out] pointer to USM memory object
+    ur_event_handle_t *OutEvent ///< [out][optional] return an event object that
+                                ///< identifies the async alloc
+) {
+  return enqueueUSMAllocHelper(Queue, Pool, Size, Properties,
+                               NumEventsInWaitList, EventWaitList, Mem,
+                               OutEvent, USMAllocType::Host);
+}
+
+ur_result_t urEnqueueUSMFreeExp(
+    ur_queue_handle_t Queue,      ///< [in] handle of the queue object
+    ur_usm_pool_handle_t Pool,    ///< [in][optional] USM pool descriptor
+    void *Mem,                    ///< [in] pointer to USM memory object
+    uint32_t NumEventsInWaitList, ///< [in] size of the event wait list
+    const ur_event_handle_t
+        *EventWaitList, ///< [in][optional][range(0, numEventsInWaitList)]
+                        ///< pointer to a list of events that must be complete
+                        ///< before the kernel execution. If nullptr, the
+                        ///< numEventsInWaitList must be 0, indicating no wait
+                        ///< events.
+    ur_event_handle_t *OutEvent ///< [out][optional] return an event object that
+                                ///< identifies the async alloc
+) {
+  std::ignore = Pool;
+
+  std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
+
+  bool UseCopyEngine = false;
+  _ur_ze_event_list_t TmpWaitList;
+  UR_CALL(TmpWaitList.createAndRetainUrZeEventList(
+      NumEventsInWaitList, EventWaitList, Queue, UseCopyEngine));
+
+  // Get a new command list to be used on this call
+  ur_command_list_ptr_t CommandList{};
+  UR_CALL(Queue->Context->getAvailableCommandList(
+      Queue, CommandList, UseCopyEngine, NumEventsInWaitList, EventWaitList));
+
+  ze_event_handle_t ZeEvent = nullptr;
+  ur_event_handle_t InternalEvent{};
+  bool IsInternal = OutEvent == nullptr;
+  ur_event_handle_t *Event = OutEvent ? OutEvent : &InternalEvent;
+
+  UR_CALL(createEventAndAssociateQueue(Queue, Event,
+                                       UR_COMMAND_ENQUEUE_USM_FREE_EXP,
+                                       CommandList, IsInternal, false));
+  ZeEvent = (*Event)->ZeEvent;
+  (*Event)->WaitList = TmpWaitList;
+
+  const auto &ZeCommandList = CommandList->first;
+  const auto &WaitList = (*Event)->WaitList;
+  if (WaitList.Length) {
+    ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
+               (ZeCommandList, WaitList.Length, WaitList.ZeEventList));
+  }
+
+  // Wait for commands execution until USM can be freed
+  UR_CALL(Queue->executeCommandList(CommandList, true)); // Blocking
+
+  // Free USM memory
+  auto Ret = USMFreeHelper(Queue->Context, Mem);
+  if (Ret) {
+    return Ret;
+  }
+
+  // Signal that USM free event was finished
+  ZE2UR_CALL(zeCommandListAppendSignalEvent, (ZeCommandList, ZeEvent));
+
+  UR_CALL(Queue->executeCommandList(CommandList, false));
+
+  return UR_RESULT_SUCCESS;
+}
 } // namespace ur::level_zero
 
 static ur_result_t USMFreeImpl(ur_context_handle_t Context, void *Ptr) {

@@ -15,6 +15,8 @@
 
 usm::DisjointPoolAllConfigs InitializeDisjointPoolConfig();
 
+// A ur_usm_pool_handle_t can represent different types of memory pools. It may
+// sit on top of a UMF pool or a CUmemoryPool, but not both.
 struct ur_usm_pool_handle_t_ {
   std::atomic_uint32_t RefCount = 1;
 
@@ -27,6 +29,8 @@ struct ur_usm_pool_handle_t_ {
   umf::pool_unique_handle_t SharedMemPool;
   umf::pool_unique_handle_t HostMemPool;
 
+  CUmemoryPool CUmemPool{0};
+
   ur_usm_pool_handle_t_(ur_context_handle_t Context,
                         ur_usm_pool_desc_t *PoolDesc);
 
@@ -37,6 +41,10 @@ struct ur_usm_pool_handle_t_ {
   uint32_t getReferenceCount() const noexcept { return RefCount; }
 
   bool hasUMFPool(umf_memory_pool_t *umf_pool);
+
+  // To be used if ur_usm_pool_handle_t represents a CUmemoryPool
+  bool usesCudaPool() const { return CUmemPool != CUmemoryPool{0}; };
+  CUmemoryPool getCudaPool() { return CUmemPool; };
 };
 
 // Exception type to pass allocation errors

@@ -879,6 +879,23 @@ ur_result_t urPrintUsmMigrationFlags(enum ur_usm_migration_flag_t value,
     return str_copy(&ss, buffer, buff_size, out_size);
 }
 
+ur_result_t
+urPrintExpAsyncUsmAllocFlags(enum ur_exp_async_usm_alloc_flag_t value,
+                             char *buffer, const size_t buff_size,
+                             size_t *out_size) {
+    std::stringstream ss;
+    ss << value;
+    return str_copy(&ss, buffer, buff_size, out_size);
+}
+
+ur_result_t urPrintExpAsyncUsmAllocProperties(
+    const struct ur_exp_async_usm_alloc_properties_t params, char *buffer,
+    const size_t buff_size, size_t *out_size) {
+    std::stringstream ss;
+    ss << params;
+    return str_copy(&ss, buffer, buff_size, out_size);
+}
+
 ur_result_t urPrintExpImageCopyFlags(enum ur_exp_image_copy_flag_t value,
                                      char *buffer, const size_t buff_size,
                                      size_t *out_size) {
@@ -1741,6 +1758,38 @@ ur_result_t urPrintEnqueueWriteHostPipeParams(
 ur_result_t urPrintEnqueueKernelLaunchCustomExpParams(
     const struct ur_enqueue_kernel_launch_custom_exp_params_t *params,
     char *buffer, const size_t buff_size, size_t *out_size) {
+    std::stringstream ss;
+    ss << params;
+    return str_copy(&ss, buffer, buff_size, out_size);
+}
+
+ur_result_t urPrintEnqueueUsmDeviceAllocExpParams(
+    const struct ur_enqueue_usm_device_alloc_exp_params_t *params, char *buffer,
+    const size_t buff_size, size_t *out_size) {
+    std::stringstream ss;
+    ss << params;
+    return str_copy(&ss, buffer, buff_size, out_size);
+}
+
+ur_result_t urPrintEnqueueUsmSharedAllocExpParams(
+    const struct ur_enqueue_usm_shared_alloc_exp_params_t *params, char *buffer,
+    const size_t buff_size, size_t *out_size) {
+    std::stringstream ss;
+    ss << params;
+    return str_copy(&ss, buffer, buff_size, out_size);
+}
+
+ur_result_t urPrintEnqueueUsmHostAllocExpParams(
+    const struct ur_enqueue_usm_host_alloc_exp_params_t *params, char *buffer,
+    const size_t buff_size, size_t *out_size) {
+    std::stringstream ss;
+    ss << params;
+    return str_copy(&ss, buffer, buff_size, out_size);
+}
+
+ur_result_t urPrintEnqueueUsmFreeExpParams(
+    const struct ur_enqueue_usm_free_exp_params_t *params, char *buffer,
+    const size_t buff_size, size_t *out_size) {
     std::stringstream ss;
     ss << params;
     return str_copy(&ss, buffer, buff_size, out_size);
