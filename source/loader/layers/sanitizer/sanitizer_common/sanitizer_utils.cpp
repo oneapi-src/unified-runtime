@@ -11,6 +11,7 @@
  */
 
 #include "sanitizer_utils.hpp"
+#include "sanitizer_common/sanitizer_common.hpp"
 #include "ur_sanitizer_layer.hpp"
 
 namespace ur_sanitizer_layer {
