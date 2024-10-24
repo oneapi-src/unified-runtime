@@ -70,6 +70,6 @@ ur_result_t urUsmP2PPeerAccessGetInfoExp(ur_device_handle_t commandDevice,
   }
   }
 
-  return ReturnValue(propertyValue);
+  return ReturnValue(uint32_t{propertyValue});
 }
 } // namespace ur::level_zero
