@@ -50,7 +50,8 @@ ur_result_t ShadowMemoryCPU::Setup() {
         ShadowEnd = ShadowBegin + ShadowSize;
 
         // Set shadow memory for null pointer
-        auto URes = EnqueuePoisonShadow({}, 0, 1, kNullPointerRedzoneMagic);
+        auto URes = EnqueuePoisonShadow({}, 0, NULLPTR_REDZONE_SIZE,
+                                        kNullPointerRedzoneMagic);
         if (URes != UR_RESULT_SUCCESS) {
             getContext()->logger.error("EnqueuePoisonShadow(NullPointerRZ): {}",
                                        URes);
@@ -113,7 +114,8 @@ ur_result_t ShadowMemoryGPU::Setup() {
         // Set shadow memory for null pointer
         ManagedQueue Queue(Context, Device);
 
-        Result = EnqueuePoisonShadow(Queue, 0, 1, kNullPointerRedzoneMagic);
+        Result = EnqueuePoisonShadow(Queue, 0, NULLPTR_REDZONE_SIZE,
+                                     kNullPointerRedzoneMagic);
         if (Result != UR_RESULT_SUCCESS) {
             getContext()->logger.error("EnqueuePoisonShadow(NullPointerRZ): {}",
                                        Result);

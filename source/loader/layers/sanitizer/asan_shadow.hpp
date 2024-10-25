@@ -16,6 +16,8 @@
 #include "common.hpp"
 #include <unordered_set>
 
+#define NULLPTR_REDZONE_SIZE (4096)
+
 namespace ur_sanitizer_layer {
 
 struct ShadowMemory {
