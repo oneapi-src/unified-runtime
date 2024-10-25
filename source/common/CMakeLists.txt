@@ -26,12 +26,12 @@ target_include_directories(ur_common PUBLIC
 
 message(STATUS "Download Unified Memory Framework from github.com")
 if (NOT DEFINED UMF_REPO)
-    set(UMF_REPO "https://github.com/oneapi-src/unified-memory-framework.git")
+    set(UMF_REPO "https://github.com/ldorau/unified-memory-framework.git")
 endif()
 
 if (NOT DEFINED UMF_TAG)
-    # main 03.10.2024: Add umfIsFreeOpDefault(hProvider)
-    set(UMF_TAG fa006eea503a58e79fa197891f1391c9dcda73e1)
+    # Fix fetching L0 and CUDA headers and add UMF_CUDA_INCLUDE_DIR
+    set(UMF_TAG f2615bc42c01fb72dcd91340a697c3852c0a3574)
 endif()
 
 message(STATUS "Will fetch Unified Memory Framework from ${UMF_REPO}")
