@@ -90,6 +90,14 @@ uur::PlatformEnvironment::PlatformEnvironment(int argc, char **argv)
             error = "Failed to enable validation layer";
             return;
         }
+#ifdef UR_ENABLE_EXCEPTION_SANITIZER
+        if (urLoaderConfigEnableLayer(config, "UR_LAYER_EXCEPTION_SANITIZER") !=
+            UR_RESULT_SUCCESS) {
+            urLoaderConfigRelease(config);
+            error = "Failed to enable exception sanitizer layer";
+            return;
+        }
+#endif
     } else {
         error = "Failed to create loader config handle";
         return;
