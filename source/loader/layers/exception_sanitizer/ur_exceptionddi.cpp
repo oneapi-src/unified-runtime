@@ -7578,7 +7578,7 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetDeviceProcAddrTable(
 }
 
 ur_result_t context_t::init(ur_dditable_t *dditable,
-                            const std::set<std::string> &enabledLayersNames,
+                            const std::set<std::string> &enabledLayerNames,
                             codeloc_data) {
     ur_result_t result = UR_RESULT_SUCCESS;
     if (!enabledLayerNames.count(name)) {

@@ -35,9 +35,10 @@ class __urdlllocal context_t : public proxy_layer_context_t,
                      const std::set<std::string> &enabledLayerNames,
                      codeloc_data codelocData) override;
     ur_result_t tearDown() override { return UR_RESULT_SUCCESS; }
-    static std::vector<std::string> getNames() {
-        return {"UR_LAYER_EXCEPTION_SANITIZER"};
-    }
+    static std::vector<std::string> getNames() { return {name}; }
+
+  private:
+    inline static const std::string name = "UR_LAYER_EXCEPTION_SANITIZER";
 };
 
 context_t *getContext();
