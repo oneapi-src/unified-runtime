@@ -223,15 +223,28 @@ ur_adapter_handle_t_::ur_adapter_handle_t_()
 #else
     HMODULE processHandle = nullptr;
 #endif
-    GlobalAdapter->getDeviceByUUIdFunctionPtr =
-        (zes_pfnDriverGetDeviceByUuidExp_t)ur_loader::LibLoader::getFunctionPtr(
-            processHandle, "zesDriverGetDeviceByUuidExp");
-    GlobalAdapter->getSysManDriversFunctionPtr =
-        (zes_pfnDriverGet_t)ur_loader::LibLoader::getFunctionPtr(
-            processHandle, "zesDriverGet");
-    GlobalAdapter->sysManInitFunctionPtr =
-        (zes_pfnInit_t)ur_loader::LibLoader::getFunctionPtr(processHandle,
-                                                            "zesInit");
+
+    // Provide a Fallback to the old L0 SysMan APIs if the user deems it is
+    // needed.
+    const int UrSysManDefaultDisabled = [] {
+      const char *UrRet = std::getenv("UR_L0_DISABLE_SYSMAN_DEFAULT");
+      if (!UrRet)
+        return 0;
+      return std::atoi(UrRet);
+    }();
+
+    if (!UrSysManDefaultDisabled) {
+      GlobalAdapter->getDeviceByUUIdFunctionPtr =
+          (zes_pfnDriverGetDeviceByUuidExp_t)
+              ur_loader::LibLoader::getFunctionPtr(
+                  processHandle, "zesDriverGetDeviceByUuidExp");
+      GlobalAdapter->getSysManDriversFunctionPtr =
+          (zes_pfnDriverGet_t)ur_loader::LibLoader::getFunctionPtr(
+              processHandle, "zesDriverGet");
+      GlobalAdapter->sysManInitFunctionPtr =
+          (zes_pfnInit_t)ur_loader::LibLoader::getFunctionPtr(processHandle,
+                                                              "zesInit");
+    }
     if (GlobalAdapter->getDeviceByUUIdFunctionPtr &&
         GlobalAdapter->getSysManDriversFunctionPtr &&
         GlobalAdapter->sysManInitFunctionPtr) {
