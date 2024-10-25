@@ -68,7 +68,7 @@ set(UR_CONFORMANCE_TARGET_TRIPLES "" CACHE STRING
     "List of sycl targets to build CTS device binaries for")
 set(UR_CONFORMANCE_AMD_ARCH "" CACHE STRING "AMD device target ID to build CTS binaries for")
 option(UR_CONFORMANCE_ENABLE_MATCH_FILES "Enable CTS match files" ON)
-option(UR_CONFORMANCE_TEST_LOADER "Also test the loader in the conformance tests" ON)
+option(UR_CONFORMANCE_TEST_LOADER "Also test the loader in the conformance tests" OFF)
 set(UR_ADAPTER_LEVEL_ZERO_SOURCE_DIR "" CACHE PATH
     "Path to external 'level_zero' adapter source dir")
 set(UR_ADAPTER_OPENCL_SOURCE_DIR "" CACHE PATH
@@ -223,6 +223,14 @@ if(UR_USE_MSAN)
         See https://github.com/google/sanitizers/wiki/MemorySanitizerLibcxxHowTo#instrumented-libc
         for details")
     add_sanitizer_flag(memory)
+endif()
+
+if(NOT (UR_BUILD_ADAPTER_CUDA OR UR_BUILD_ADAPTER_HIP
+    OR UR_BUILD_ADAPTER_L0 OR UR_BUILD_ADAPTER_OPENCL
+    OR UR_BUILD_ADAPTER_NATIVE_CPU OR UR_BUILD_ADAPTER_L0_V2
+    OR UR_BUILD_ADAPTER_ALL))
+    message(WARNING "No adapters have been enabled; conformance tests will not be ran")
+    message(STATUS "Consider setting UR_BUILD_ADAPTER_*")
 endif()
 
 # Check if clang-format (in correct version) is available for Cpp code formatting.

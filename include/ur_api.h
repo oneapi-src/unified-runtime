@@ -4202,17 +4202,19 @@ urProgramCreateWithIL(
 );
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Create a program object from device native binary.
+/// @brief Create a program object from native binaries for the specified
+///        devices.
 ///
 /// @details
 ///     - The application may call this function from simultaneous threads.
 ///     - Following a successful call to this entry point, `phProgram` will
-///       contain a binary of type ::UR_PROGRAM_BINARY_TYPE_COMPILED_OBJECT or
-///       ::UR_PROGRAM_BINARY_TYPE_LIBRARY for `hDevice`.
-///     - The device specified by `hDevice` must be device associated with
+///       contain binaries of type ::UR_PROGRAM_BINARY_TYPE_COMPILED_OBJECT or
+///       ::UR_PROGRAM_BINARY_TYPE_LIBRARY for the specified devices in
+///       `phDevices`.
+///     - The devices specified by `phDevices` must be associated with the
 ///       context.
 ///     - The adapter may (but is not required to) perform validation of the
-///       provided module during this call.
+///       provided modules during this call.
 ///
 /// @remarks
 ///   _Analogues_
@@ -4225,21 +4227,27 @@ urProgramCreateWithIL(
 ///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
-///         + `NULL == hDevice`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///         + `NULL == pBinary`
+///         + `NULL == phDevices`
+///         + `NULL == pLengths`
+///         + `NULL == ppBinaries`
 ///         + `NULL == phProgram`
 ///         + `NULL != pProperties && pProperties->count > 0 && NULL == pProperties->pMetadatas`
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         + `NULL != pProperties && NULL != pProperties->pMetadatas && pProperties->count == 0`
+///         + `numDevices == 0`
 ///     - ::UR_RESULT_ERROR_INVALID_NATIVE_BINARY
-///         + If `pBinary` isn't a valid binary for `hDevice.`
+///         + If any binary in `ppBinaries` isn't a valid binary for the corresponding device in `phDevices.`
 UR_APIEXPORT ur_result_t UR_APICALL
 urProgramCreateWithBinary(
     ur_context_handle_t hContext,               ///< [in] handle of the context instance
-    ur_device_handle_t hDevice,                 ///< [in] handle to device associated with binary.
-    size_t size,                                ///< [in] size in bytes.
-    const uint8_t *pBinary,                     ///< [in] pointer to binary.
+    uint32_t numDevices,                        ///< [in] number of devices
+    ur_device_handle_t *phDevices,              ///< [in][range(0, numDevices)] a pointer to a list of device handles. The
+                                                ///< binaries are loaded for devices specified in this list.
+    size_t *pLengths,                           ///< [in][range(0, numDevices)] array of sizes of program binaries
+                                                ///< specified by `pBinaries` (in bytes).
+    const uint8_t **ppBinaries,                 ///< [in][range(0, numDevices)] pointer to program binaries to be loaded
+                                                ///< for devices specified by `phDevices`.
     const ur_program_properties_t *pProperties, ///< [in][optional] pointer to program creation properties.
     ur_program_handle_t *phProgram              ///< [out] pointer to handle of Program object created.
 );
@@ -8233,6 +8241,10 @@ typedef enum ur_exp_command_buffer_info_t {
                                                     ///< The reference count returned should be considered immediately stale.
                                                     ///< It is unsuitable for general use in applications. This feature is
                                                     ///< provided for identifying memory leaks.
+    UR_EXP_COMMAND_BUFFER_INFO_DESCRIPTOR = 1,      ///< [::ur_exp_command_buffer_desc_t] Returns a ::ur_exp_command_buffer_desc_t
+                                                    ///< with the properties of the command-buffer. Returned values may differ
+                                                    ///< from those passed on construction if the property was ignored by the
+                                                    ///< adapter.
     /// @cond
     UR_EXP_COMMAND_BUFFER_INFO_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -8489,6 +8501,7 @@ urCommandBufferFinalizeExp(
 ///         + If the device associated with `hCommandBuffer` does not support UR_DEVICE_INFO_COMMAND_BUFFER_EVENT_SUPPORT_EXP and either `phEvent` or `phEventWaitList` are not NULL.
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+///     - ::UR_RESULT_ERROR_INVALID_OPERATION - "phCommand is not NULL and hCommandBuffer is not updatable."
 UR_APIEXPORT ur_result_t UR_APICALL
 urCommandBufferAppendKernelLaunchExp(
     ur_exp_command_buffer_handle_t hCommandBuffer,                ///< [in] Handle of the command-buffer object.
@@ -8517,7 +8530,8 @@ urCommandBufferAppendKernelLaunchExp(
     ur_event_handle_t *phEvent,                                   ///< [out][optional] return an event object that will be signaled by the
                                                                   ///< completion of this command in the next execution of the
                                                                   ///< command-buffer.
-    ur_exp_command_buffer_command_handle_t *phCommand             ///< [out][optional] Handle to this command.
+    ur_exp_command_buffer_command_handle_t *phCommand             ///< [out][optional] Handle to this command. Only available if the
+                                                                  ///< command-buffer is updatable.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -9289,7 +9303,7 @@ urCommandBufferUpdateWaitEventsExp(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hCommandBuffer`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_EXP_COMMAND_BUFFER_INFO_REFERENCE_COUNT < propName`
+///         + `::UR_EXP_COMMAND_BUFFER_INFO_DESCRIPTOR < propName`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
 ///         + If `propName` is not supported by the adapter.
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
@@ -10319,9 +10333,10 @@ typedef struct ur_program_create_with_il_params_t {
 ///     allowing the callback the ability to modify the parameter's value
 typedef struct ur_program_create_with_binary_params_t {
     ur_context_handle_t *phContext;
-    ur_device_handle_t *phDevice;
-    size_t *psize;
-    const uint8_t **ppBinary;
+    uint32_t *pnumDevices;
+    ur_device_handle_t **pphDevices;
+    size_t **ppLengths;
+    const uint8_t ***pppBinaries;
     const ur_program_properties_t **ppProperties;
     ur_program_handle_t **pphProgram;
 } ur_program_create_with_binary_params_t;

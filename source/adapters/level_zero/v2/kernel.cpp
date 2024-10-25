@@ -40,7 +40,14 @@ ur_kernel_handle_t_::ur_kernel_handle_t_(ur_program_handle_t hProgram,
       deviceKernels(hProgram->Context->getPlatform()->getNumDevices()) {
   ur::level_zero::urProgramRetain(hProgram);
 
-  for (auto [zeDevice, zeModule] : hProgram->ZeModuleMap) {
+  for (auto &Dev : hProgram->AssociatedDevices) {
+    auto zeDevice = Dev->ZeDevice;
+    // Program may be associated with all devices from the context but built
+    // only for subset of devices.
+    if (hProgram->getState(zeDevice) != ur_program_handle_t_::state::Exe)
+      continue;
+
+    auto zeModule = hProgram->getZeModuleHandle(zeDevice);
     ZeStruct<ze_kernel_desc_t> zeKernelDesc;
     zeKernelDesc.pKernelName = kernelName;
 
@@ -313,7 +320,9 @@ urKernelSetArgMemObj(ur_kernel_handle_t hKernel, uint32_t argIndex,
 
   auto kernelDevices = hKernel->getDevices();
   if (kernelDevices.size() == 1) {
-    auto zePtr = hArgValue->getPtr(kernelDevices.front());
+    auto zePtr = hArgValue->getDevicePtr(
+        kernelDevices.front(), ur_mem_handle_t_::access_mode_t::read_write, 0,
+        hArgValue->getSize(), nullptr);
     return hKernel->setArgPointer(argIndex, nullptr, zePtr);
   } else {
     // TODO: if devices do not have p2p capabilities, we need to have allocation
@@ -324,7 +333,9 @@ urKernelSetArgMemObj(ur_kernel_handle_t hKernel, uint32_t argIndex,
     // Get memory that is accessible by the first device.
     // If kernel is submitted to a different device the memory
     // will be accessed trough the link or migrated in enqueueKernelLaunch.
-    auto zePtr = hArgValue->getPtr(kernelDevices.front());
+    auto zePtr = hArgValue->getDevicePtr(
+        kernelDevices.front(), ur_mem_handle_t_::access_mode_t::read_write, 0,
+        hArgValue->getSize(), nullptr);
     return hKernel->setArgPointer(argIndex, nullptr, zePtr);
   }
 }
@@ -391,16 +402,14 @@ ur_result_t urKernelGetGroupInfo(
     kernelProperties.pNext = &workGroupProperties;
 
     auto zeDevice = hKernel->getZeHandle(hDevice);
-    if (zeDevice) {
-      auto zeResult =
-          ZE_CALL_NOCHECK(zeKernelGetProperties, (zeDevice, &kernelProperties));
-      if (zeResult == ZE_RESULT_SUCCESS &&
-          workGroupProperties.maxGroupSize != 0) {
-        return returnValue(workGroupProperties.maxGroupSize);
-      }
-      return returnValue(
-          uint64_t{hDevice->ZeDeviceComputeProperties->maxTotalGroupSize});
+    auto zeResult =
+        ZE_CALL_NOCHECK(zeKernelGetProperties, (zeDevice, &kernelProperties));
+    if (zeResult == ZE_RESULT_SUCCESS &&
+        workGroupProperties.maxGroupSize != 0) {
+      return returnValue(workGroupProperties.maxGroupSize);
     }
+    return returnValue(
+        uint64_t{hDevice->ZeDeviceComputeProperties->maxTotalGroupSize});
   }
   case UR_KERNEL_GROUP_INFO_COMPILE_WORK_GROUP_SIZE: {
     auto props = hKernel->getProperties(hDevice);
