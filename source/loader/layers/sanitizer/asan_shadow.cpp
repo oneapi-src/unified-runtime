@@ -16,6 +16,10 @@
 #include "ur_sanitizer_layer.hpp"
 #include "ur_sanitizer_utils.hpp"
 
+// The bigger the redzone size, the better we can detect this error.
+// But if the redzone is too big, then it can cause false positives.
+#define NULLPTR_REDZONE_SIZE (4096)
+
 namespace ur_sanitizer_layer {
 
 std::shared_ptr<ShadowMemory> GetShadowMemory(ur_context_handle_t Context,
