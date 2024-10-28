@@ -115,7 +115,8 @@ ur_result_t ShadowMemoryGPU::Setup() {
 
         // Set shadow memory for null pointer
         // For GPU, wu use up to 1 page of shadow memory
-        const size_t NullptrRedzoneSize = GetVirtualMemGranularity(Context, Device) << ASAN_SHADOW_SCALE;
+        const size_t NullptrRedzoneSize =
+            GetVirtualMemGranularity(Context, Device) << ASAN_SHADOW_SCALE;
         ManagedQueue Queue(Context, Device);
         Result = EnqueuePoisonShadow(Queue, 0, NullptrRedzoneSize,
                                      kNullPointerRedzoneMagic);
