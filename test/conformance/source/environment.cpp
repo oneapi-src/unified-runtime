@@ -34,7 +34,6 @@ constexpr std::pair<const char *, ur_platform_backend_t> backends[] = {
     {"HIP", UR_PLATFORM_BACKEND_HIP},
     {"NATIVE_CPU", UR_PLATFORM_BACKEND_NATIVE_CPU},
     {"UNKNOWN", UR_PLATFORM_BACKEND_UNKNOWN},
-    {"MOCK", UR_PLATFORM_BACKEND_UNKNOWN},
 };
 
 namespace {
@@ -570,9 +569,11 @@ ur_result_t KernelsEnvironment::CreateProgram(
         backend == UR_PLATFORM_BACKEND_CUDA) {
         // The CUDA and HIP adapters do not support urProgramCreateWithIL so we
         // need to use urProgramCreateWithBinary instead.
+        auto size = binary.size();
+        auto data = binary.data();
         if (auto error = urProgramCreateWithBinary(
-                hContext, hDevice, binary.size(),
-                reinterpret_cast<const uint8_t *>(binary.data()), properties,
+                hContext, 1, &hDevice, &size,
+                reinterpret_cast<const uint8_t **>(&data), properties,
                 phProgram)) {
             return error;
         }

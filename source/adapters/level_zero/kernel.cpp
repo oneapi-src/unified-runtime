@@ -96,14 +96,8 @@ ur_result_t urEnqueueKernelLaunch(
   std::scoped_lock<ur_shared_mutex, ur_shared_mutex, ur_shared_mutex> Lock(
       Queue->Mutex, Kernel->Mutex, Kernel->Program->Mutex);
   if (GlobalWorkOffset != NULL) {
-    if (!Queue->Device->Platform->ZeDriverGlobalOffsetExtensionFound) {
-      logger::error("No global offset extension found on this driver");
-      return UR_RESULT_ERROR_INVALID_VALUE;
-    }
-
-    ZE2UR_CALL(zeKernelSetGlobalOffsetExp,
-               (ZeKernel, GlobalWorkOffset[0], GlobalWorkOffset[1],
-                GlobalWorkOffset[2]));
+    UR_CALL(setKernelGlobalOffset(Queue->Context, ZeKernel, WorkDim,
+                                  GlobalWorkOffset));
   }
 
   // If there are any pending arguments set them now.
@@ -139,7 +133,7 @@ ur_result_t urEnqueueKernelLaunch(
   ur_command_list_ptr_t CommandList{};
   UR_CALL(Queue->Context->getAvailableCommandList(
       Queue, CommandList, UseCopyEngine, NumEventsInWaitList, EventWaitList,
-      true /* AllowBatching */, nullptr /*ForcedCmdQueue*/));
+      true /* AllowBatching */));
 
   ze_event_handle_t ZeEvent = nullptr;
   ur_event_handle_t InternalEvent{};
@@ -202,8 +196,7 @@ ur_result_t urEnqueueKernelLaunch(
 
   // Execute command list asynchronously, as the event will be used
   // to track down its completion.
-  UR_CALL(Queue->executeCommandList(CommandList, false /*IsBlocking*/,
-                                    true /*OKToBatchCommand*/));
+  UR_CALL(Queue->executeCommandList(CommandList, false, true));
 
   return UR_RESULT_SUCCESS;
 }
@@ -258,14 +251,8 @@ ur_result_t urEnqueueCooperativeKernelLaunchExp(
   std::scoped_lock<ur_shared_mutex, ur_shared_mutex, ur_shared_mutex> Lock(
       Queue->Mutex, Kernel->Mutex, Kernel->Program->Mutex);
   if (GlobalWorkOffset != NULL) {
-    if (!Queue->Device->Platform->ZeDriverGlobalOffsetExtensionFound) {
-      logger::error("No global offset extension found on this driver");
-      return UR_RESULT_ERROR_INVALID_VALUE;
-    }
-
-    ZE2UR_CALL(zeKernelSetGlobalOffsetExp,
-               (ZeKernel, GlobalWorkOffset[0], GlobalWorkOffset[1],
-                GlobalWorkOffset[2]));
+    UR_CALL(setKernelGlobalOffset(Queue->Context, ZeKernel, WorkDim,
+                                  GlobalWorkOffset));
   }
 
   // If there are any pending arguments set them now.
@@ -405,7 +392,7 @@ ur_result_t urEnqueueCooperativeKernelLaunchExp(
   ur_command_list_ptr_t CommandList{};
   UR_CALL(Queue->Context->getAvailableCommandList(
       Queue, CommandList, UseCopyEngine, NumEventsInWaitList, EventWaitList,
-      true /* AllowBatching */, nullptr /*ForcedCmdQueue*/));
+      true /* AllowBatching */));
 
   ze_event_handle_t ZeEvent = nullptr;
   ur_event_handle_t InternalEvent{};
@@ -468,8 +455,7 @@ ur_result_t urEnqueueCooperativeKernelLaunchExp(
 
   // Execute command list asynchronously, as the event will be used
   // to track down its completion.
-  UR_CALL(Queue->executeCommandList(CommandList, false /*IsBlocking*/,
-                                    true /*OKToBatchCommand*/));
+  UR_CALL(Queue->executeCommandList(CommandList, false, true));
 
   return UR_RESULT_SUCCESS;
 }
@@ -497,18 +483,11 @@ ur_result_t urEnqueueDeviceGlobalVariableWrite(
                ///< this particular kernel execution instance.
 ) {
   std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
-
-  ze_module_handle_t ZeModule{};
-  auto It = Program->ZeModuleMap.find(Queue->Device->ZeDevice);
-  if (It != Program->ZeModuleMap.end()) {
-    ZeModule = It->second;
-  } else {
-    ZeModule = Program->ZeModule;
-  }
-
   // Find global variable pointer
   size_t GlobalVarSize = 0;
   void *GlobalVarPtr = nullptr;
+  ze_module_handle_t ZeModule =
+      Program->getZeModuleHandle(Queue->Device->ZeDevice);
   ZE2UR_CALL(zeModuleGetGlobalPointer,
              (ZeModule, Name, &GlobalVarSize, &GlobalVarPtr));
   if (GlobalVarSize < Offset + Count) {
@@ -559,15 +538,8 @@ ur_result_t urEnqueueDeviceGlobalVariableRead(
                ///< this particular kernel execution instance.
 ) {
   std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
-
-  ze_module_handle_t ZeModule{};
-  auto It = Program->ZeModuleMap.find(Queue->Device->ZeDevice);
-  if (It != Program->ZeModuleMap.end()) {
-    ZeModule = It->second;
-  } else {
-    ZeModule = Program->ZeModule;
-  }
-
+  ze_module_handle_t ZeModule =
+      Program->getZeModuleHandle(Queue->Device->ZeDevice);
   // Find global variable pointer
   size_t GlobalVarSize = 0;
   void *GlobalVarPtr = nullptr;
@@ -605,10 +577,6 @@ ur_result_t urKernelCreate(
         *RetKernel ///< [out] pointer to handle of kernel object created.
 ) {
   std::shared_lock<ur_shared_mutex> Guard(Program->Mutex);
-  if (Program->State != ur_program_handle_t_::state::Exe) {
-    return UR_RESULT_ERROR_INVALID_PROGRAM_EXECUTABLE;
-  }
-
   try {
     ur_kernel_handle_t_ *UrKernel = new ur_kernel_handle_t_(true, Program);
     *RetKernel = reinterpret_cast<ur_kernel_handle_t>(UrKernel);
@@ -618,8 +586,14 @@ ur_result_t urKernelCreate(
     return UR_RESULT_ERROR_UNKNOWN;
   }
 
-  for (auto It : Program->ZeModuleMap) {
-    auto ZeModule = It.second;
+  for (auto &Dev : Program->AssociatedDevices) {
+    auto ZeDevice = Dev->ZeDevice;
+    // Program may be associated with all devices from the context but built
+    // only for subset of devices.
+    if (Program->getState(ZeDevice) != ur_program_handle_t_::state::Exe)
+      continue;
+
+    auto ZeModule = Program->getZeModuleHandle(ZeDevice);
     ZeStruct<ze_kernel_desc_t> ZeKernelDesc;
     ZeKernelDesc.flags = 0;
     ZeKernelDesc.pKernelName = KernelName;
@@ -633,8 +607,6 @@ ur_result_t urKernelCreate(
       *RetKernel = nullptr;
       return ze2urResult(ZeResult);
     }
-
-    auto ZeDevice = It.first;
 
     // Store the kernel in the ZeKernelMap so the correct
     // kernel can be retrieved later for a specific device
@@ -653,6 +625,9 @@ ur_result_t urKernelCreate(
       (*RetKernel)->ZeKernelMap[ZeSubDevice] = ZeKernel;
     }
   }
+  // There is no any successfully built executable for program.
+  if ((*RetKernel)->ZeKernelMap.empty())
+    return UR_RESULT_ERROR_INVALID_PROGRAM_EXECUTABLE;
 
   (*RetKernel)->ZeKernel = (*RetKernel)->ZeKernelMap.begin()->second;
 
