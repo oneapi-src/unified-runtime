@@ -537,13 +537,10 @@ SanitizerInterceptor::registerDeviceGlobals(ur_program_handle_t Program) {
                           {}});
 
             ContextInfo->insertAllocInfo({Device}, AI);
+            ProgramInfo->AllocInfoForGlobals.emplace(AI);
 
-            {
-                std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Guard(
-                    m_AllocationMapMutex, ProgramInfo->Mutex);
-                ProgramInfo->AllocInfoForGlobals.emplace(AI);
-                m_AllocationMap.emplace(AI->AllocBegin, std::move(AI));
-            }
+            std::scoped_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
+            m_AllocationMap.emplace(AI->AllocBegin, std::move(AI));
         }
     }
 

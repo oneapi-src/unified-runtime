@@ -110,11 +110,9 @@ struct ProgramInfo {
     ur_program_handle_t Handle;
     std::atomic<int32_t> RefCount = 1;
 
-    std::unordered_set<std::string> InstrumentedKernels;
-
-    // lock this mutex if following fields are accessed
-    ur_shared_mutex Mutex;
+    // Program is likely built only once, so we don't need to lock it
     std::unordered_set<std::shared_ptr<AllocInfo>> AllocInfoForGlobals;
+    std::unordered_set<std::string> InstrumentedKernels;
 
     explicit ProgramInfo(ur_program_handle_t Program) : Handle(Program) {
         [[maybe_unused]] auto Result =
