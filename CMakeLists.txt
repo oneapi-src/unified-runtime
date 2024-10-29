@@ -34,7 +34,7 @@ option(UR_BUILD_EXAMPLES "Build example applications." ON)
 option(UR_BUILD_TESTS "Build unit tests." ON)
 option(UR_BUILD_TOOLS "build ur tools" ON)
 option(UR_FORMAT_CPP_STYLE "format code style of C++ sources" OFF)
-option(UR_DEVELOPER_MODE "enable developer checks, treats warnings as errors" OFF)
+option(UR_DEVELOPER_MODE "treats warnings as errors" OFF)
 option(UR_ENABLE_FAST_SPEC_MODE "enable fast specification generation mode" OFF)
 option(UR_USE_ASAN "enable AddressSanitizer" OFF)
 option(UR_USE_UBSAN "enable UndefinedBehaviorSanitizer" OFF)
@@ -52,6 +52,7 @@ option(UR_BUILD_ADAPTER_HIP "Build the HIP adapter" OFF)
 option(UR_BUILD_ADAPTER_NATIVE_CPU "Build the Native-CPU adapter" OFF)
 option(UR_BUILD_ADAPTER_ALL "Build all currently supported adapters" OFF)
 option(UR_BUILD_ADAPTER_L0_V2 "Build the (experimental) Level-Zero v2 adapter" OFF)
+option(UR_STATIC_ADAPTER_L0 "Build the Level-Zero adapter as static and embed in the loader" OFF)
 option(UR_BUILD_EXAMPLE_CODEGEN "Build the codegen example." OFF)
 option(VAL_USE_LIBBACKTRACE_BACKTRACE "enable libbacktrace validation backtrace for linux" OFF)
 option(UR_ENABLE_ASSERTIONS "Enable assertions for all build types" OFF)
@@ -67,6 +68,7 @@ set(UR_CONFORMANCE_TARGET_TRIPLES "" CACHE STRING
     "List of sycl targets to build CTS device binaries for")
 set(UR_CONFORMANCE_AMD_ARCH "" CACHE STRING "AMD device target ID to build CTS binaries for")
 option(UR_CONFORMANCE_ENABLE_MATCH_FILES "Enable CTS match files" ON)
+option(UR_CONFORMANCE_TEST_LOADER "Also test the loader in the conformance tests" OFF)
 set(UR_ADAPTER_LEVEL_ZERO_SOURCE_DIR "" CACHE PATH
     "Path to external 'level_zero' adapter source dir")
 set(UR_ADAPTER_OPENCL_SOURCE_DIR "" CACHE PATH
@@ -160,6 +162,12 @@ if(UR_ENABLE_TRACING)
             LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
         )
 
+        if (NOT MSVC)
+            # Hardening flags cause issues on Windows
+            add_ur_target_compile_options(xptifw)
+            add_ur_target_link_options(xptifw)
+        endif()
+
         if (UR_STATIC_LOADER)
             install(TARGETS xpti xptifw
                 EXPORT ${PROJECT_NAME}-targets
@@ -217,6 +225,14 @@ if(UR_USE_MSAN)
     add_sanitizer_flag(memory)
 endif()
 
+if(NOT (UR_BUILD_ADAPTER_CUDA OR UR_BUILD_ADAPTER_HIP
+    OR UR_BUILD_ADAPTER_L0 OR UR_BUILD_ADAPTER_OPENCL
+    OR UR_BUILD_ADAPTER_NATIVE_CPU OR UR_BUILD_ADAPTER_L0_V2
+    OR UR_BUILD_ADAPTER_ALL))
+    message(WARNING "No adapters have been enabled; conformance tests will not be ran")
+    message(STATUS "Consider setting UR_BUILD_ADAPTER_*")
+endif()
+
 # Check if clang-format (in correct version) is available for Cpp code formatting.
 if(UR_FORMAT_CPP_STYLE)
     find_program(CLANG_FORMAT NAMES clang-format-15 clang-format-15.0 clang-format)
@@ -266,6 +282,13 @@ add_custom_target(verify-licenses
         "${PROJECT_SOURCE_DIR}/scripts/verify_license.py"
         "--files" ${format_src} ${license_src}
     COMMENT "Verify all files contain a license."
+)
+
+# Add hardening check
+add_custom_target(verify-hardening
+    COMMAND "${PROJECT_SOURCE_DIR}/scripts/check-hardening.sh"
+        ${CMAKE_BINARY_DIR}
+    COMMENT "Check hardening settings on built binaries and libraries"
 )
 
 # Add code formatter target
