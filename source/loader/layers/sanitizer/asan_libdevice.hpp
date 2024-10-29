@@ -123,7 +123,7 @@ const int kPrivateRightRedzoneMagic = (char)0xf3;
 
 constexpr auto kSPIR_AsanDeviceGlobalCount = "__AsanDeviceGlobalCount";
 constexpr auto kSPIR_AsanDeviceGlobalMetadata = "__AsanDeviceGlobalMetadata";
-constexpr auto kSPIR_AsanSpirKernelMetadata = "__AsanSpirKernelMetadata";
+constexpr auto kSPIR_AsanSpirKernelMetadata = "__AsanKernelMetadata";
 
 inline const char *ToString(DeviceSanitizerMemoryType MemoryType) {
     switch (MemoryType) {

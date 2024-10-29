@@ -440,51 +440,55 @@ SanitizerInterceptor::registerSpirKernels(ur_program_handle_t Program) {
     auto Context = GetContext(Program);
     std::vector<ur_device_handle_t> Devices = GetDevices(Program);
 
-    size_t MetadataSize;
-    void *MetadataPtr;
-    ur_result_t Result =
-        getContext()->urDdiTable.Program.pfnGetGlobalVariablePointer(
-            Devices[0], Program, kSPIR_AsanSpirKernelMetadata, &MetadataSize,
-            &MetadataPtr);
-    if (Result != UR_RESULT_SUCCESS) {
-        getContext()->logger.error("Can't get the pointer of <{}>: {}",
-                                   kSPIR_AsanSpirKernelMetadata, Result);
-        return Result;
-    }
-
-    const uint64_t NumOfSpirKernel = MetadataSize / sizeof(SpirKernelInfo);
-    assert((MetadataSize % sizeof(SpirKernelInfo) == 0) &&
-           "SpirKernelMetadata size is not correct");
-    ManagedQueue Queue(Context, Devices[0]);
-
-    std::vector<SpirKernelInfo> SKInfo(NumOfSpirKernel);
-    Result = getContext()->urDdiTable.Enqueue.pfnUSMMemcpy(
-        Queue, true, &SKInfo[0], MetadataPtr,
-        sizeof(SpirKernelInfo) * NumOfSpirKernel, 0, nullptr, nullptr);
-    if (Result != UR_RESULT_SUCCESS) {
-        getContext()->logger.error("Can't read the value of <{}>: {}",
-                                   kSPIR_AsanSpirKernelMetadata, Result);
-        return Result;
-    }
-
-    auto PI = getProgramInfo(Program);
-    for (const auto &SKI : SKInfo) {
-        std::vector<char> KernelNameV(SKI.Size);
-        Result = getContext()->urDdiTable.Enqueue.pfnUSMMemcpy(
-            Queue, true, KernelNameV.data(), (void *)SKI.KernelName,
-            sizeof(char) * SKI.Size, 0, nullptr, nullptr);
+    for (auto Device : Devices) {
+        size_t MetadataSize;
+        void *MetadataPtr;
+        ur_result_t Result =
+            getContext()->urDdiTable.Program.pfnGetGlobalVariablePointer(
+                Device, Program, kSPIR_AsanSpirKernelMetadata, &MetadataSize,
+                &MetadataPtr);
         if (Result != UR_RESULT_SUCCESS) {
-            getContext()->logger.error("Can't read kernel name: {}", Result);
+            getContext()->logger.warning(
+                "Can't get the pointer of <{}> under device {}: {}",
+                kSPIR_AsanSpirKernelMetadata, (void *)Device, Result);
+            continue;
+        }
+
+        const uint64_t NumOfSpirKernel = MetadataSize / sizeof(SpirKernelInfo);
+        assert((MetadataSize % sizeof(SpirKernelInfo) == 0) &&
+               "SpirKernelMetadata size is not correct");
+        ManagedQueue Queue(Context, Devices[0]);
+
+        std::vector<SpirKernelInfo> SKInfo(NumOfSpirKernel);
+        Result = getContext()->urDdiTable.Enqueue.pfnUSMMemcpy(
+            Queue, true, &SKInfo[0], MetadataPtr,
+            sizeof(SpirKernelInfo) * NumOfSpirKernel, 0, nullptr, nullptr);
+        if (Result != UR_RESULT_SUCCESS) {
+            getContext()->logger.error("Can't read the value of <{}>: {}",
+                                       kSPIR_AsanSpirKernelMetadata, Result);
             return Result;
         }
 
-        std::string KernelName =
-            std::string(KernelNameV.begin(), KernelNameV.end());
+        auto PI = getProgramInfo(Program);
+        for (const auto &SKI : SKInfo) {
+            std::vector<char> KernelNameV(SKI.Size);
+            Result = getContext()->urDdiTable.Enqueue.pfnUSMMemcpy(
+                Queue, true, KernelNameV.data(), (void *)SKI.KernelName,
+                sizeof(char) * SKI.Size, 0, nullptr, nullptr);
+            if (Result != UR_RESULT_SUCCESS) {
+                getContext()->logger.error("Can't read kernel name: {}",
+                                           Result);
+                return Result;
+            }
 
-        getContext()->logger.info("SpirKernel(name='{}', isInstrumented={})",
-                                  KernelName, true);
+            std::string KernelName =
+                std::string(KernelNameV.begin(), KernelNameV.end());
 
-        PI->InstrumentedKernels.insert(KernelName);
+            getContext()->logger.info(
+                "SpirKernel(name='{}', isInstrumented={})", KernelName, true);
+
+            PI->InstrumentedKernels.insert(KernelName);
+        }
     }
 
     return UR_RESULT_SUCCESS;

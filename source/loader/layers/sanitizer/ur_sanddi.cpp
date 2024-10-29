@@ -1385,8 +1385,9 @@ __urdlllocal ur_result_t UR_APICALL urKernelRetain(
     UR_CALL(pfnRetain(hKernel));
 
     auto KernelInfo = getContext()->interceptor->getKernelInfo(hKernel);
-    UR_ASSERT(KernelInfo != nullptr, UR_RESULT_ERROR_INVALID_VALUE);
-    KernelInfo->RefCount++;
+    if (KernelInfo) {
+        KernelInfo->RefCount++;
+    }
 
     return UR_RESULT_SUCCESS;
 }
@@ -1406,9 +1407,10 @@ __urdlllocal ur_result_t urKernelRelease(
     UR_CALL(pfnRelease(hKernel));
 
     auto KernelInfo = getContext()->interceptor->getKernelInfo(hKernel);
-    UR_ASSERT(KernelInfo != nullptr, UR_RESULT_ERROR_INVALID_VALUE);
-    if (--KernelInfo->RefCount == 0) {
-        UR_CALL(getContext()->interceptor->eraseKernel(hKernel));
+    if (KernelInfo) {
+        if (--KernelInfo->RefCount == 0) {
+            UR_CALL(getContext()->interceptor->eraseKernel(hKernel));
+        }
     }
 
     return UR_RESULT_SUCCESS;
