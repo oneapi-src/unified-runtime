@@ -127,6 +127,8 @@ struct ProgramInfo {
             getContext()->urDdiTable.Program.pfnRelease(Handle);
         assert(Result == UR_RESULT_SUCCESS);
     }
+
+    bool isKernelInstrumented(ur_kernel_handle_t Kernel) const;
 };
 
 struct ContextInfo {
@@ -137,10 +139,6 @@ struct ContextInfo {
     std::unordered_map<ur_device_handle_t, AllocInfoList> AllocInfosMap;
 
     AsanStatsWrapper Stats;
-
-    // lock this mutex if following fields are accessed
-    ur_shared_mutex Mutex;
-    std::unordered_map<ur_program_handle_t, ProgramInfo> ProgramInfoMap;
 
     explicit ContextInfo(ur_context_handle_t Context) : Handle(Context) {
         [[maybe_unused]] auto Result =
@@ -158,13 +156,6 @@ struct ContextInfo {
             AllocInfos.List.emplace_back(AI);
         }
     }
-
-    ProgramInfo &getProgramInfo(ur_program_handle_t Program) {
-        std::scoped_lock<ur_shared_mutex> Guard(Mutex);
-        return ProgramInfoMap[Program];
-    }
-
-    bool isKernelInstrumented(ur_kernel_handle_t Kernel);
 };
 
 struct USMLaunchInfo {
@@ -217,8 +208,7 @@ class SanitizerInterceptor {
                                AllocType Type, void **ResultPtr);
     ur_result_t releaseMemory(ur_context_handle_t Context, void *Ptr);
 
-    ur_result_t registerProgram(ur_context_handle_t Context,
-                                ur_program_handle_t Program);
+    ur_result_t registerProgram(ur_program_handle_t Program);
 
     ur_result_t unregisterProgram(ur_program_handle_t Program);
 
@@ -309,6 +299,9 @@ class SanitizerInterceptor {
 
     ur_result_t allocShadowMemory(ur_context_handle_t Context,
                                   std::shared_ptr<DeviceInfo> &DeviceInfo);
+
+    ur_result_t registerDeviceGlobals(ur_program_handle_t Program);
+    ur_result_t registerSpirKernels(ur_program_handle_t Program);
 
   private:
     std::unordered_map<ur_context_handle_t, std::shared_ptr<ContextInfo>>

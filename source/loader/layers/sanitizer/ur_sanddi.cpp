@@ -51,9 +51,9 @@ ur_result_t setupContext(ur_context_handle_t Context, uint32_t numDevices,
 }
 
 bool isInstrumentedKernel(ur_kernel_handle_t hKernel) {
-    auto hContext = GetContext(hKernel);
-    auto CI = getContext()->interceptor->getContextInfo(hContext);
-    return CI->isKernelInstrumented(hKernel);
+    auto hProgram = GetProgram(hKernel);
+    auto PI = getContext()->interceptor->getProgramInfo(hProgram);
+    return PI->isKernelInstrumented(hKernel);
 }
 
 } // namespace
@@ -311,7 +311,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuild(
 
     UR_CALL(pfnProgramBuild(hContext, hProgram, pOptions));
 
-    UR_CALL(getContext()->interceptor->registerProgram(hContext, hProgram));
+    UR_CALL(getContext()->interceptor->registerProgram(hProgram));
 
     return UR_RESULT_SUCCESS;
 }
@@ -335,8 +335,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuildExp(
     getContext()->logger.debug("==== urProgramBuildExp");
 
     UR_CALL(pfnBuildExp(hProgram, numDevices, phDevices, pOptions));
-    UR_CALL(getContext()->interceptor->registerProgram(GetContext(hProgram),
-                                                       hProgram));
+    UR_CALL(getContext()->interceptor->registerProgram(hProgram));
 
     return UR_RESULT_SUCCESS;
 }
@@ -363,7 +362,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramLink(
 
     UR_CALL(pfnProgramLink(hContext, count, phPrograms, pOptions, phProgram));
 
-    UR_CALL(getContext()->interceptor->registerProgram(hContext, *phProgram));
+    UR_CALL(getContext()->interceptor->registerProgram(*phProgram));
 
     return UR_RESULT_SUCCESS;
 }
@@ -394,7 +393,7 @@ ur_result_t UR_APICALL urProgramLinkExp(
     UR_CALL(pfnProgramLinkExp(hContext, numDevices, phDevices, count,
                               phPrograms, pOptions, phProgram));
 
-    UR_CALL(getContext()->interceptor->registerProgram(hContext, *phProgram));
+    UR_CALL(getContext()->interceptor->registerProgram(*phProgram));
 
     return UR_RESULT_SUCCESS;
 }

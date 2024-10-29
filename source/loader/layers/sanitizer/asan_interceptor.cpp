@@ -405,8 +405,39 @@ ur_result_t SanitizerInterceptor::updateShadowMemory(
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t SanitizerInterceptor::registerProgram(ur_context_handle_t Context,
-                                                  ur_program_handle_t Program) {
+ur_result_t SanitizerInterceptor::registerProgram(ur_program_handle_t Program) {
+    ur_result_t Result = UR_RESULT_SUCCESS;
+    do {
+        Result = registerSpirKernels(Program);
+        if (Result != UR_RESULT_SUCCESS) {
+            break;
+        }
+        Result = registerDeviceGlobals(Program);
+        if (Result != UR_RESULT_SUCCESS) {
+            break;
+        }
+    } while (false);
+    return Result;
+}
+
+ur_result_t
+SanitizerInterceptor::unregisterProgram(ur_program_handle_t Program) {
+    auto ProgramInfo = getProgramInfo(Program);
+
+    std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Guard(
+        m_AllocationMapMutex, ProgramInfo->Mutex);
+    for (auto AI : ProgramInfo->AllocInfoForGlobals) {
+        UR_CALL(getDeviceInfo(AI->Device)->Shadow->ReleaseShadow(AI));
+        m_AllocationMap.erase(AI->AllocBegin);
+    }
+    ProgramInfo->AllocInfoForGlobals.clear();
+
+    return UR_RESULT_SUCCESS;
+}
+
+ur_result_t
+SanitizerInterceptor::registerSpirKernels(ur_program_handle_t Program) {
+    auto Context = GetContext(Program);
     std::vector<ur_device_handle_t> Devices = GetDevices(Program);
 
     size_t MetadataSize;
@@ -436,7 +467,7 @@ ur_result_t SanitizerInterceptor::registerProgram(ur_context_handle_t Context,
         return Result;
     }
 
-    ProgramInfo &PI = CI->getProgramInfo(Program);
+    auto PI = getProgramInfo(Program);
     for (const auto &SKI : SKInfo) {
         std::vector<char> KernelNameV(SKI.Size);
         Result = getContext()->urDdiTable.Enqueue.pfnUSMMemcpy(
@@ -453,83 +484,68 @@ ur_result_t SanitizerInterceptor::registerProgram(ur_context_handle_t Context,
         getContext()->logger.info("SpirKernel(name='{}', isInstrumented={})",
                                   KernelName, true);
 
-        PI.InstrumentedKernels.insert(KernelName);
+        PI->InstrumentedKernels.insert(KernelName);
     }
 
     return UR_RESULT_SUCCESS;
 }
 
-// ur_result_t
-// SanitizerInterceptor::registerDeviceGlobals(ur_program_handle_t Program) {
-//     std::vector<ur_device_handle_t> Devices = GetProgramDevices(Program);
-//     assert(Devices.size() != 0 && "No devices in registerDeviceGlobals");
-//     auto Context = GetContext(Program);
-//     auto ContextInfo = getContextInfo(Context);
-//     auto ProgramInfo = getProgramInfo(Program);
-
-//     for (auto Device : Devices) {
-//         ManagedQueue Queue(Context, Device);
-
-//         uint64_t NumOfDeviceGlobal;
-//         auto Result =
-//             getContext()->urDdiTable.Enqueue.pfnDeviceGlobalVariableRead(
-//                 Queue, Program, kSPIR_AsanDeviceGlobalCount, true,
-//                 sizeof(NumOfDeviceGlobal), 0, &NumOfDeviceGlobal, 0, nullptr,
-//                 nullptr);
-//         if (Result != UR_RESULT_SUCCESS) {
-//             getContext()->logger.info("No device globals");
-//             continue;
-//         }
-
-//         std::vector<DeviceGlobalInfo> GVInfos(NumOfDeviceGlobal);
-//         Result = getContext()->urDdiTable.Enqueue.pfnDeviceGlobalVariableRead(
-//             Queue, Program, kSPIR_AsanDeviceGlobalMetadata, true,
-//             sizeof(DeviceGlobalInfo) * NumOfDeviceGlobal, 0, &GVInfos[0], 0,
-//             nullptr, nullptr);
-//         if (Result != UR_RESULT_SUCCESS) {
-//             getContext()->logger.error("Device Global[{}] Read Failed: {}",
-//                                        kSPIR_AsanDeviceGlobalMetadata, Result);
-//             return Result;
-//         }
-
-//         for (size_t i = 0; i < NumOfDeviceGlobal; i++) {
-//             auto AI = std::make_shared<AllocInfo>(
-//                 AllocInfo{GVInfos[i].Addr,
-//                           GVInfos[i].Addr,
-//                           GVInfos[i].Addr + GVInfos[i].Size,
-//                           GVInfos[i].SizeWithRedZone,
-//                           AllocType::DEVICE_GLOBAL,
-//                           false,
-//                           Context,
-//                           Device,
-//                           GetCurrentBacktrace(),
-//                           {}});
-
-//             ContextInfo->insertAllocInfo({Device}, AI);
-
-//             {
-//                 std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Guard(
-//                     m_AllocationMapMutex, ProgramInfo->Mutex);
-//                 ProgramInfo->AllocInfoForGlobals.emplace(AI);
-//                 m_AllocationMap.emplace(AI->AllocBegin, std::move(AI));
-//             }
-//         }
-//     }
-
-//     return UR_RESULT_SUCCESS;
-// }
-
 ur_result_t
-SanitizerInterceptor::unregisterProgram(ur_program_handle_t Program) {
+SanitizerInterceptor::registerDeviceGlobals(ur_program_handle_t Program) {
+    std::vector<ur_device_handle_t> Devices = GetDevices(Program);
+    assert(Devices.size() != 0 && "No devices in registerDeviceGlobals");
+    auto Context = GetContext(Program);
+    auto ContextInfo = getContextInfo(Context);
     auto ProgramInfo = getProgramInfo(Program);
 
-    std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Guard(
-        m_AllocationMapMutex, ProgramInfo->Mutex);
-    for (auto AI : ProgramInfo->AllocInfoForGlobals) {
-        UR_CALL(getDeviceInfo(AI->Device)->Shadow->ReleaseShadow(AI));
-        m_AllocationMap.erase(AI->AllocBegin);
+    for (auto Device : Devices) {
+        ManagedQueue Queue(Context, Device);
+
+        uint64_t NumOfDeviceGlobal;
+        auto Result =
+            getContext()->urDdiTable.Enqueue.pfnDeviceGlobalVariableRead(
+                Queue, Program, kSPIR_AsanDeviceGlobalCount, true,
+                sizeof(NumOfDeviceGlobal), 0, &NumOfDeviceGlobal, 0, nullptr,
+                nullptr);
+        if (Result != UR_RESULT_SUCCESS) {
+            getContext()->logger.info("No device globals");
+            continue;
+        }
+
+        std::vector<DeviceGlobalInfo> GVInfos(NumOfDeviceGlobal);
+        Result = getContext()->urDdiTable.Enqueue.pfnDeviceGlobalVariableRead(
+            Queue, Program, kSPIR_AsanDeviceGlobalMetadata, true,
+            sizeof(DeviceGlobalInfo) * NumOfDeviceGlobal, 0, &GVInfos[0], 0,
+            nullptr, nullptr);
+        if (Result != UR_RESULT_SUCCESS) {
+            getContext()->logger.error("Device Global[{}] Read Failed: {}",
+                                       kSPIR_AsanDeviceGlobalMetadata, Result);
+            return Result;
+        }
+
+        for (size_t i = 0; i < NumOfDeviceGlobal; i++) {
+            auto AI = std::make_shared<AllocInfo>(
+                AllocInfo{GVInfos[i].Addr,
+                          GVInfos[i].Addr,
+                          GVInfos[i].Addr + GVInfos[i].Size,
+                          GVInfos[i].SizeWithRedZone,
+                          AllocType::DEVICE_GLOBAL,
+                          false,
+                          Context,
+                          Device,
+                          GetCurrentBacktrace(),
+                          {}});
+
+            ContextInfo->insertAllocInfo({Device}, AI);
+
+            {
+                std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Guard(
+                    m_AllocationMapMutex, ProgramInfo->Mutex);
+                ProgramInfo->AllocInfoForGlobals.emplace(AI);
+                m_AllocationMap.emplace(AI->AllocBegin, std::move(AI));
+            }
+        }
     }
-    ProgramInfo->AllocInfoForGlobals.clear();
 
     return UR_RESULT_SUCCESS;
 }
@@ -885,6 +901,11 @@ SanitizerInterceptor::findAllocInfoByContext(ur_context_handle_t Context) {
     return AllocInfos;
 }
 
+bool ProgramInfo::isKernelInstrumented(ur_kernel_handle_t Kernel) const {
+    const auto Name = GetKernelName(Kernel);
+    return InstrumentedKernels.find(Name) != InstrumentedKernels.end();
+}
+
 ContextInfo::~ContextInfo() {
     Stats.Print(Handle);
 
@@ -901,13 +922,6 @@ ContextInfo::~ContextInfo() {
             ReportMemoryLeak(AI);
         }
     }
-}
-
-bool ContextInfo::isKernelInstrumented(ur_kernel_handle_t Kernel) {
-    auto Program = GetProgram(Kernel);
-    auto Name = GetKernelName(Kernel);
-    const auto &PI = getProgramInfo(Program);
-    return PI.InstrumentedKernels.find(Name) != PI.InstrumentedKernels.end();
 }
 
 ur_result_t USMLaunchInfo::initialize() {
