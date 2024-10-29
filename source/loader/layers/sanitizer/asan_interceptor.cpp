@@ -424,13 +424,13 @@ ur_result_t
 SanitizerInterceptor::unregisterProgram(ur_program_handle_t Program) {
     auto ProgramInfo = getProgramInfo(Program);
 
-    std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Guard(
-        m_AllocationMapMutex, ProgramInfo->Mutex);
     for (auto AI : ProgramInfo->AllocInfoForGlobals) {
         UR_CALL(getDeviceInfo(AI->Device)->Shadow->ReleaseShadow(AI));
         m_AllocationMap.erase(AI->AllocBegin);
     }
     ProgramInfo->AllocInfoForGlobals.clear();
+
+    ProgramInfo->InstrumentedKernels.clear();
 
     return UR_RESULT_SUCCESS;
 }
