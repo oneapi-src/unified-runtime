@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 cmake_minimum_required(VERSION 3.20.0 FATAL_ERROR)
-project(unified-runtime VERSION 0.10.10)
+project(unified-runtime VERSION 0.10.11)
 
 # Check if unified runtime is built as a standalone project.
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR OR UR_STANDALONE_BUILD)
@@ -133,7 +133,7 @@ if(UR_ENABLE_TRACING)
 
     if (UR_BUILD_XPTI_LIBS)
         # fetch xpti proxy library for the tracing layer
-        FetchContentSparse_Declare(xpti https://github.com/intel/llvm.git "sycl-nightly/20230703" "xpti")
+        FetchContentSparse_Declare(xpti https://github.com/intel/llvm.git "nightly-2024-10-22" "xpti")
         FetchContent_MakeAvailable(xpti)
 
         # set -fPIC for xpti since we are linking it with a shared library
@@ -145,7 +145,7 @@ if(UR_ENABLE_TRACING)
         set(XPTI_DIR ${xpti_SOURCE_DIR})
         set(XPTI_ENABLE_TESTS OFF CACHE INTERNAL "Turn off xptifw tests")
 
-        FetchContentSparse_Declare(xptifw https://github.com/intel/llvm.git "sycl-nightly/20230703" "xptifw")
+        FetchContentSparse_Declare(xptifw https://github.com/intel/llvm.git "nightly-2024-10-22" "xptifw")
 
         FetchContent_MakeAvailable(xptifw)
 
