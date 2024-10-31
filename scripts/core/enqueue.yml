@@ -847,13 +847,16 @@ etors:
       value: "$X_BIT(2)"
 --- #--------------------------------------------------------------------------
 type: enum
-desc: "Map flags"
+desc: "USM migration flags, indicating the direction data is migrated in"
 class: $xDevice
 name: $x_usm_migration_flags_t
 etors:
-    - name: DEFAULT
-      desc: "Default migration TODO: Add more enums! "
+    - name: HOST_TO_DEVICE
+      desc: "Migrate data from host to device"
       value: "$X_BIT(0)"
+    - name: DEVICE_TO_HOST
+      desc: "Migrate data from device to host"
+      value: "$X_BIT(1)"
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Enqueue a command to map a region of the buffer object into the host address space and return a pointer to the mapped region"
@@ -1141,7 +1144,7 @@ params:
       desc: "[in] size in bytes to be fetched"
     - type: $x_usm_migration_flags_t
       name: flags
-      desc: "[in] USM prefetch flags"
+      desc: "[in] USM migration flags"
     - type: uint32_t
       name: numEventsInWaitList
       desc: "[in] size of the event wait list"

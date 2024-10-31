@@ -6837,17 +6837,18 @@ typedef enum ur_map_flag_t {
 #define UR_MAP_FLAGS_MASK 0xfffffff8
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Map flags
+/// @brief USM migration flags, indicating the direction data is migrated in
 typedef uint32_t ur_usm_migration_flags_t;
 typedef enum ur_usm_migration_flag_t {
-    UR_USM_MIGRATION_FLAG_DEFAULT = UR_BIT(0), ///< Default migration TODO: Add more enums!
+    UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE = UR_BIT(0), ///< Migrate data from host to device
+    UR_USM_MIGRATION_FLAG_DEVICE_TO_HOST = UR_BIT(1), ///< Migrate data from device to host
     /// @cond
     UR_USM_MIGRATION_FLAG_FORCE_UINT32 = 0x7fffffff
     /// @endcond
 
 } ur_usm_migration_flag_t;
 /// @brief Bit Mask for validating ur_usm_migration_flags_t
-#define UR_USM_MIGRATION_FLAGS_MASK 0xfffffffe
+#define UR_USM_MIGRATION_FLAGS_MASK 0xfffffffc
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Enqueue a command to map a region of the buffer object into the host
@@ -7082,7 +7083,7 @@ urEnqueueUSMPrefetch(
     ur_queue_handle_t hQueue,                 ///< [in] handle of the queue object
     const void *pMem,                         ///< [in][bounds(0, size)] pointer to the USM memory object
     size_t size,                              ///< [in] size in bytes to be fetched
-    ur_usm_migration_flags_t flags,           ///< [in] USM prefetch flags
+    ur_usm_migration_flags_t flags,           ///< [in] USM migration flags
     uint32_t numEventsInWaitList,             ///< [in] size of the event wait list
     const ur_event_handle_t *phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
                                               ///< events that must be complete before this command can be executed.
@@ -9032,7 +9033,7 @@ urCommandBufferAppendUSMPrefetchExp(
     ur_exp_command_buffer_handle_t hCommandBuffer,                ///< [in] handle of the command-buffer object.
     const void *pMemory,                                          ///< [in] pointer to USM allocated memory to prefetch.
     size_t size,                                                  ///< [in] size in bytes to be fetched.
-    ur_usm_migration_flags_t flags,                               ///< [in] USM prefetch flags
+    ur_usm_migration_flags_t flags,                               ///< [in] USM migration flags
     uint32_t numSyncPointsInWaitList,                             ///< [in] The number of sync points in the provided dependency list.
     const ur_exp_command_buffer_sync_point_t *pSyncPointWaitList, ///< [in][optional] A list of sync points that this command depends on. May
                                                                   ///< be ignored if command-buffer is in-order.
