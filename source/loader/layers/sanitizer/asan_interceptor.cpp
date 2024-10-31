@@ -408,10 +408,12 @@ ur_result_t SanitizerInterceptor::updateShadowMemory(
 ur_result_t SanitizerInterceptor::registerProgram(ur_program_handle_t Program) {
     ur_result_t Result = UR_RESULT_SUCCESS;
     do {
+        getContext()->logger.info("registerSpirKernels");
         Result = registerSpirKernels(Program);
         if (Result != UR_RESULT_SUCCESS) {
             break;
         }
+        getContext()->logger.info("registerDeviceGlobals");
         Result = registerDeviceGlobals(Program);
         if (Result != UR_RESULT_SUCCESS) {
             break;
@@ -457,7 +459,9 @@ SanitizerInterceptor::registerSpirKernels(ur_program_handle_t Program) {
         const uint64_t NumOfSpirKernel = MetadataSize / sizeof(SpirKernelInfo);
         assert((MetadataSize % sizeof(SpirKernelInfo) == 0) &&
                "SpirKernelMetadata size is not correct");
-        ManagedQueue Queue(Context, Devices[0]);
+        getContext()->logger.debug("NumOfSpirKernel: {}", NumOfSpirKernel);
+
+        ManagedQueue Queue(Context, Device);
 
         std::vector<SpirKernelInfo> SKInfo(NumOfSpirKernel);
         Result = getContext()->urDdiTable.Enqueue.pfnUSMMemcpy(
@@ -471,6 +475,9 @@ SanitizerInterceptor::registerSpirKernels(ur_program_handle_t Program) {
 
         auto PI = getProgramInfo(Program);
         for (const auto &SKI : SKInfo) {
+            if (SKI.Size == 0) {
+                continue;
+            }
             std::vector<char> KernelNameV(SKI.Size);
             Result = getContext()->urDdiTable.Enqueue.pfnUSMMemcpy(
                 Queue, true, KernelNameV.data(), (void *)SKI.KernelName,
