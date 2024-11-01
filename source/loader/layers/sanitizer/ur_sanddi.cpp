@@ -11,7 +11,7 @@
  */
 
 #include "asan/asan_ddi.hpp"
-#include "asan/asan_interceptor.hpp"
+#include "msan/msan_ddi.hpp"
 #include "ur_sanitizer_layer.hpp"
 
 #include <memory>
@@ -32,14 +32,25 @@ ur_result_t context_t::init(ur_dditable_t *dditable,
     }
 
     // Only support AddressSanitizer now
-    if (enabledType != SanitizerType::AddressSanitizer) {
+    if (enabledType != SanitizerType::AddressSanitizer &&
+        enabledType != SanitizerType::MemorySanitizer) {
         return result;
     }
 
     urDdiTable = *dditable;
 
-    initAsanInterceptor();
-    result = initAsanDDITable(dditable);
+    switch (enabledType) {
+    case SanitizerType::AddressSanitizer:
+        initAsanInterceptor();
+        result = initAsanDDITable(dditable);
+        break;
+    case SanitizerType::MemorySanitizer:
+        initMsanInterceptor();
+        result = initMsanDDITable(dditable);
+        break;
+    default:
+        break;
+    }
 
     return result;
 }

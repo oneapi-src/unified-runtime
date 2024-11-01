@@ -151,6 +151,21 @@ if(UR_ENABLE_SANITIZER)
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_statistics.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_validator.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_validator.hpp
+        # ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_allocator.cpp
+        # ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_allocator.hpp
+        # ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_buffer.cpp
+        # ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_buffer.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_ddi.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_ddi.hpp
+        # ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_interceptor.cpp
+        # ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_interceptor.hpp
+        # ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_libdevice.hpp
+        # ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_options.cpp
+        # ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_options.hpp
+        # ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_report.cpp
+        # ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_report.hpp
+        # ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_shadow.cpp
+        # ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_shadow.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/sanitizer_common/linux/backtrace.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/sanitizer_common/linux/sanitizer_utils.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/sanitizer_common/sanitizer_common.hpp
