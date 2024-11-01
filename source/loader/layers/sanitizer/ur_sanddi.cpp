@@ -73,6 +73,12 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGet(
         return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
     }
 
+    // Set env AllocateHostAllocationsInHeapExtendedHost to 0, then host and
+    // shared usm will have same allocation range on GPU device. This will
+    // simplify shadow memory mapping logic on GPU device.
+    setenv("NEOReadDebugKeys", "1", 1);
+    setenv("AllocateHostAllocationsInHeapExtendedHost", "0", 1);
+
     ur_result_t result = pfnAdapterGet(NumEntries, phAdapters, pNumAdapters);
     if (result == UR_RESULT_SUCCESS && phAdapters) {
         const uint32_t NumAdapters = pNumAdapters ? *pNumAdapters : NumEntries;

@@ -256,12 +256,9 @@ ur_result_t ShadowMemoryGPU::ReleaseShadow(std::shared_ptr<AllocInfo> AI) {
 }
 
 uptr ShadowMemoryPVC::MemToShadow(uptr Ptr) {
-    if (Ptr & 0xFF00000000000000ULL) { // Device USM
-        return ShadowBegin + 0x80000000000ULL +
-               ((Ptr & 0xFFFFFFFFFFFFULL) >> ASAN_SHADOW_SCALE);
-    } else { // Only consider 47bit VA
-        return ShadowBegin + ((Ptr & 0x7FFFFFFFFFFFULL) >> ASAN_SHADOW_SCALE);
-    }
+    return ShadowBegin + (((((Ptr & 0x8000'0000'0000'0000) >> 16) + Ptr) &
+                           0xf'ffff'ffff'ffff) >>
+                          ASAN_SHADOW_SCALE);
 }
 
 uptr ShadowMemoryDG2::MemToShadow(uptr Ptr) {
