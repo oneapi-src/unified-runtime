@@ -726,7 +726,7 @@ ur_result_t urKernelGetInfo(
     return ReturnValue(ur_program_handle_t{Kernel->Program});
   case UR_KERNEL_INFO_FUNCTION_NAME:
     try {
-      std::string &KernelName = *Kernel->ZeKernelName.operator->();
+      std::string &KernelName = Kernel->ZeKernelName.get();
       return ReturnValue(static_cast<const char *>(KernelName.c_str()));
     } catch (const std::bad_alloc &) {
       return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
@@ -746,7 +746,7 @@ ur_result_t urKernelGetInfo(
       char *attributes = new char[Size];
       ZE2UR_CALL(zeKernelGetSourceAttributes,
                  (Kernel->ZeKernel, &Size, &attributes));
-      auto Res = ReturnValue(attributes);
+      auto Res = ReturnValue(static_cast<const char *>(attributes));
       delete[] attributes;
       return Res;
     } catch (const std::bad_alloc &) {
