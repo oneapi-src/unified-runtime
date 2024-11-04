@@ -20,7 +20,7 @@
 #include <memory>
 
 namespace ur_sanitizer_layer {
-namespace asan {
+namespace msan {
 
 namespace {
 
@@ -1558,7 +1558,7 @@ __urdlllocal ur_result_t UR_APICALL urGetGlobalProcAddrTable(
 
     ur_result_t result = UR_RESULT_SUCCESS;
 
-    pDdiTable->pfnAdapterGet = ur_sanitizer_layer::asan::urAdapterGet;
+    pDdiTable->pfnAdapterGet = ur_sanitizer_layer::msan::urAdapterGet;
 
     return result;
 }
@@ -1588,12 +1588,12 @@ __urdlllocal ur_result_t UR_APICALL urGetContextProcAddrTable(
 
     ur_result_t result = UR_RESULT_SUCCESS;
 
-    pDdiTable->pfnCreate = ur_sanitizer_layer::asan::urContextCreate;
-    pDdiTable->pfnRetain = ur_sanitizer_layer::asan::urContextRetain;
-    pDdiTable->pfnRelease = ur_sanitizer_layer::asan::urContextRelease;
+    pDdiTable->pfnCreate = ur_sanitizer_layer::msan::urContextCreate;
+    pDdiTable->pfnRetain = ur_sanitizer_layer::msan::urContextRetain;
+    pDdiTable->pfnRelease = ur_sanitizer_layer::msan::urContextRelease;
 
     pDdiTable->pfnCreateWithNativeHandle =
-        ur_sanitizer_layer::asan::urContextCreateWithNativeHandle;
+        ur_sanitizer_layer::msan::urContextCreateWithNativeHandle;
 
     return result;
 }
@@ -1622,15 +1622,15 @@ __urdlllocal ur_result_t UR_APICALL urGetProgramProcAddrTable(
     }
 
     pDdiTable->pfnCreateWithIL =
-        ur_sanitizer_layer::asan::urProgramCreateWithIL;
+        ur_sanitizer_layer::msan::urProgramCreateWithIL;
     pDdiTable->pfnCreateWithBinary =
-        ur_sanitizer_layer::asan::urProgramCreateWithBinary;
+        ur_sanitizer_layer::msan::urProgramCreateWithBinary;
     pDdiTable->pfnCreateWithNativeHandle =
-        ur_sanitizer_layer::asan::urProgramCreateWithNativeHandle;
-    pDdiTable->pfnBuild = ur_sanitizer_layer::asan::urProgramBuild;
-    pDdiTable->pfnLink = ur_sanitizer_layer::asan::urProgramLink;
-    pDdiTable->pfnRetain = ur_sanitizer_layer::asan::urProgramRetain;
-    pDdiTable->pfnRelease = ur_sanitizer_layer::asan::urProgramRelease;
+        ur_sanitizer_layer::msan::urProgramCreateWithNativeHandle;
+    pDdiTable->pfnBuild = ur_sanitizer_layer::msan::urProgramBuild;
+    pDdiTable->pfnLink = ur_sanitizer_layer::msan::urProgramLink;
+    pDdiTable->pfnRetain = ur_sanitizer_layer::msan::urProgramRetain;
+    pDdiTable->pfnRelease = ur_sanitizer_layer::msan::urProgramRelease;
 
     return UR_RESULT_SUCCESS;
 }
@@ -1661,14 +1661,14 @@ __urdlllocal ur_result_t UR_APICALL urGetKernelProcAddrTable(
 
     ur_result_t result = UR_RESULT_SUCCESS;
 
-    pDdiTable->pfnCreate = ur_sanitizer_layer::asan::urKernelCreate;
-    pDdiTable->pfnRetain = ur_sanitizer_layer::asan::urKernelRetain;
-    pDdiTable->pfnRelease = ur_sanitizer_layer::asan::urKernelRelease;
-    pDdiTable->pfnSetArgValue = ur_sanitizer_layer::asan::urKernelSetArgValue;
-    pDdiTable->pfnSetArgMemObj = ur_sanitizer_layer::asan::urKernelSetArgMemObj;
-    pDdiTable->pfnSetArgLocal = ur_sanitizer_layer::asan::urKernelSetArgLocal;
+    pDdiTable->pfnCreate = ur_sanitizer_layer::msan::urKernelCreate;
+    pDdiTable->pfnRetain = ur_sanitizer_layer::msan::urKernelRetain;
+    pDdiTable->pfnRelease = ur_sanitizer_layer::msan::urKernelRelease;
+    pDdiTable->pfnSetArgValue = ur_sanitizer_layer::msan::urKernelSetArgValue;
+    pDdiTable->pfnSetArgMemObj = ur_sanitizer_layer::msan::urKernelSetArgMemObj;
+    pDdiTable->pfnSetArgLocal = ur_sanitizer_layer::msan::urKernelSetArgLocal;
     pDdiTable->pfnSetArgPointer =
-        ur_sanitizer_layer::asan::urKernelSetArgPointer;
+        ur_sanitizer_layer::msan::urKernelSetArgPointer;
 
     return result;
 }
@@ -1698,14 +1698,14 @@ __urdlllocal ur_result_t UR_APICALL urGetMemProcAddrTable(
 
     ur_result_t result = UR_RESULT_SUCCESS;
 
-    pDdiTable->pfnBufferCreate = ur_sanitizer_layer::asan::urMemBufferCreate;
-    pDdiTable->pfnRetain = ur_sanitizer_layer::asan::urMemRetain;
-    pDdiTable->pfnRelease = ur_sanitizer_layer::asan::urMemRelease;
+    pDdiTable->pfnBufferCreate = ur_sanitizer_layer::msan::urMemBufferCreate;
+    pDdiTable->pfnRetain = ur_sanitizer_layer::msan::urMemRetain;
+    pDdiTable->pfnRelease = ur_sanitizer_layer::msan::urMemRelease;
     pDdiTable->pfnBufferPartition =
-        ur_sanitizer_layer::asan::urMemBufferPartition;
+        ur_sanitizer_layer::msan::urMemBufferPartition;
     pDdiTable->pfnGetNativeHandle =
-        ur_sanitizer_layer::asan::urMemGetNativeHandle;
-    pDdiTable->pfnGetInfo = ur_sanitizer_layer::asan::urMemGetInfo;
+        ur_sanitizer_layer::msan::urMemGetNativeHandle;
+    pDdiTable->pfnGetInfo = ur_sanitizer_layer::msan::urMemGetInfo;
 
     return result;
 }
@@ -1734,8 +1734,8 @@ __urdlllocal ur_result_t UR_APICALL urGetProgramExpProcAddrTable(
 
     ur_result_t result = UR_RESULT_SUCCESS;
 
-    pDdiTable->pfnBuildExp = ur_sanitizer_layer::asan::urProgramBuildExp;
-    pDdiTable->pfnLinkExp = ur_sanitizer_layer::asan::urProgramLinkExp;
+    pDdiTable->pfnBuildExp = ur_sanitizer_layer::msan::urProgramBuildExp;
+    pDdiTable->pfnLinkExp = ur_sanitizer_layer::msan::urProgramLinkExp;
 
     return result;
 }
@@ -1766,24 +1766,24 @@ __urdlllocal ur_result_t UR_APICALL urGetEnqueueProcAddrTable(
     ur_result_t result = UR_RESULT_SUCCESS;
 
     pDdiTable->pfnMemBufferRead =
-        ur_sanitizer_layer::asan::urEnqueueMemBufferRead;
+        ur_sanitizer_layer::msan::urEnqueueMemBufferRead;
     pDdiTable->pfnMemBufferWrite =
-        ur_sanitizer_layer::asan::urEnqueueMemBufferWrite;
+        ur_sanitizer_layer::msan::urEnqueueMemBufferWrite;
     pDdiTable->pfnMemBufferReadRect =
-        ur_sanitizer_layer::asan::urEnqueueMemBufferReadRect;
+        ur_sanitizer_layer::msan::urEnqueueMemBufferReadRect;
     pDdiTable->pfnMemBufferWriteRect =
-        ur_sanitizer_layer::asan::urEnqueueMemBufferWriteRect;
+        ur_sanitizer_layer::msan::urEnqueueMemBufferWriteRect;
     pDdiTable->pfnMemBufferCopy =
-        ur_sanitizer_layer::asan::urEnqueueMemBufferCopy;
+        ur_sanitizer_layer::msan::urEnqueueMemBufferCopy;
     pDdiTable->pfnMemBufferCopyRect =
-        ur_sanitizer_layer::asan::urEnqueueMemBufferCopyRect;
+        ur_sanitizer_layer::msan::urEnqueueMemBufferCopyRect;
     pDdiTable->pfnMemBufferFill =
-        ur_sanitizer_layer::asan::urEnqueueMemBufferFill;
+        ur_sanitizer_layer::msan::urEnqueueMemBufferFill;
     pDdiTable->pfnMemBufferMap =
-        ur_sanitizer_layer::asan::urEnqueueMemBufferMap;
-    pDdiTable->pfnMemUnmap = ur_sanitizer_layer::asan::urEnqueueMemUnmap;
+        ur_sanitizer_layer::msan::urEnqueueMemBufferMap;
+    pDdiTable->pfnMemUnmap = ur_sanitizer_layer::msan::urEnqueueMemUnmap;
     pDdiTable->pfnKernelLaunch =
-        ur_sanitizer_layer::asan::urEnqueueKernelLaunch;
+        ur_sanitizer_layer::msan::urEnqueueKernelLaunch;
 
     return result;
 }
@@ -1813,61 +1813,61 @@ __urdlllocal ur_result_t UR_APICALL urGetUSMProcAddrTable(
 
     ur_result_t result = UR_RESULT_SUCCESS;
 
-    pDdiTable->pfnDeviceAlloc = ur_sanitizer_layer::asan::urUSMDeviceAlloc;
-    pDdiTable->pfnHostAlloc = ur_sanitizer_layer::asan::urUSMHostAlloc;
-    pDdiTable->pfnSharedAlloc = ur_sanitizer_layer::asan::urUSMSharedAlloc;
-    pDdiTable->pfnFree = ur_sanitizer_layer::asan::urUSMFree;
+    pDdiTable->pfnDeviceAlloc = ur_sanitizer_layer::msan::urUSMDeviceAlloc;
+    pDdiTable->pfnHostAlloc = ur_sanitizer_layer::msan::urUSMHostAlloc;
+    pDdiTable->pfnSharedAlloc = ur_sanitizer_layer::msan::urUSMSharedAlloc;
+    pDdiTable->pfnFree = ur_sanitizer_layer::msan::urUSMFree;
 
     return result;
 }
 
-} // namespace asan
+} // namespace msan
 
 ur_result_t initAsanDDITable(ur_dditable_t *dditable) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_sanitizer_layer::asan::urGetGlobalProcAddrTable(
+        result = ur_sanitizer_layer::msan::urGetGlobalProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->Global);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_sanitizer_layer::asan::urGetContextProcAddrTable(
+        result = ur_sanitizer_layer::msan::urGetContextProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->Context);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_sanitizer_layer::asan::urGetKernelProcAddrTable(
+        result = ur_sanitizer_layer::msan::urGetKernelProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->Kernel);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_sanitizer_layer::asan::urGetProgramProcAddrTable(
+        result = ur_sanitizer_layer::msan::urGetProgramProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->Program);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_sanitizer_layer::asan::urGetKernelProcAddrTable(
+        result = ur_sanitizer_layer::msan::urGetKernelProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->Kernel);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_sanitizer_layer::asan::urGetMemProcAddrTable(
+        result = ur_sanitizer_layer::msan::urGetMemProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->Mem);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_sanitizer_layer::asan::urGetProgramExpProcAddrTable(
+        result = ur_sanitizer_layer::msan::urGetProgramExpProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->ProgramExp);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_sanitizer_layer::asan::urGetEnqueueProcAddrTable(
+        result = ur_sanitizer_layer::msan::urGetEnqueueProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->Enqueue);
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_sanitizer_layer::asan::urGetUSMProcAddrTable(
+        result = ur_sanitizer_layer::msan::urGetUSMProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->USM);
     }
 

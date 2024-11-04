@@ -14,12 +14,11 @@
 #include "msan_interceptor.hpp"
 #include "msan_ddi.hpp"
 #include "msan_options.hpp"
-#include "msan_quarantine.hpp"
 #include "msan_report.hpp"
 #include "msan_shadow.hpp"
-#include "msan_validator.hpp"
 #include "sanitizer_common/sanitizer_stacktrace.hpp"
 #include "sanitizer_common/sanitizer_utils.hpp"
+#include "ur_api.h"
 
 namespace ur_sanitizer_layer {
 
@@ -53,89 +52,50 @@ ur_result_t MsanInterceptor::allocateMemory(ur_context_handle_t Context,
                                             ur_device_handle_t Device,
                                             const ur_usm_desc_t *Properties,
                                             ur_usm_pool_handle_t Pool,
-                                            size_t Size, AllocType Type,
+                                            size_t Size, MsanAllocType Type,
                                             void **ResultPtr) {
 
     auto ContextInfo = getContextInfo(Context);
     std::shared_ptr<DeviceInfo> DeviceInfo =
         Device ? getDeviceInfo(Device) : nullptr;
 
-    /// Modified from llvm/compiler-rt/lib/asan/msan_allocator.cpp
-    uint32_t Alignment = Properties ? Properties->align : 0;
-    // Alignment must be zero or a power-of-two
-    if (0 != (Alignment & (Alignment - 1))) {
-        return UR_RESULT_ERROR_INVALID_ARGUMENT;
-    }
-
-    const uint32_t MinAlignment = msan_SHADOW_GRANULARITY;
-    if (Alignment == 0) {
-        Alignment = DeviceInfo ? DeviceInfo->Alignment : MinAlignment;
-    }
-    if (Alignment < MinAlignment) {
-        Alignment = MinAlignment;
-    }
-
-    uptr RZLog =
-        ComputeRZLog(Size, getOptions().MinRZSize, getOptions().MaxRZSize);
-    uptr RZSize = RZLog2Size(RZLog);
-    uptr RoundedSize = RoundUpTo(Size, Alignment);
-    uptr NeededSize = RoundedSize + RZSize * 2;
-    if (Alignment > MinAlignment) {
-        NeededSize += Alignment;
-    }
-
     void *Allocated = nullptr;
 
-    if (Type == AllocType::DEVICE_USM) {
+    if (Type == MsanAllocType::DEVICE_USM) {
         UR_CALL(getContext()->urDdiTable.USM.pfnDeviceAlloc(
-            Context, Device, Properties, Pool, NeededSize, &Allocated));
-    } else if (Type == AllocType::HOST_USM) {
+            Context, Device, Properties, Pool, Size, &Allocated));
+    } else if (Type == MsanAllocType::HOST_USM) {
         UR_CALL(getContext()->urDdiTable.USM.pfnHostAlloc(
-            Context, Properties, Pool, NeededSize, &Allocated));
-    } else if (Type == AllocType::SHARED_USM) {
+            Context, Properties, Pool, Size, &Allocated));
+    } else if (Type == MsanAllocType::SHARED_USM) {
         UR_CALL(getContext()->urDdiTable.USM.pfnSharedAlloc(
-            Context, Device, Properties, Pool, NeededSize, &Allocated));
-    } else if (Type == AllocType::MEM_BUFFER) {
+            Context, Device, Properties, Pool, Size, &Allocated));
+    } else if (Type == MsanAllocType::MEM_BUFFER) {
         UR_CALL(getContext()->urDdiTable.USM.pfnDeviceAlloc(
-            Context, Device, Properties, Pool, NeededSize, &Allocated));
+            Context, Device, Properties, Pool, Size, &Allocated));
     } else {
         getContext()->logger.error("Unsupport memory type");
         return UR_RESULT_ERROR_INVALID_ARGUMENT;
     }
 
-    // Udpate statistics
-    ContextInfo->Stats.UpdateUSMMalloced(NeededSize, NeededSize - Size);
-
-    uptr AllocBegin = reinterpret_cast<uptr>(Allocated);
-    [[maybe_unused]] uptr AllocEnd = AllocBegin + NeededSize;
-    uptr UserBegin = AllocBegin + RZSize;
-    if (!IsAligned(UserBegin, Alignment)) {
-        UserBegin = RoundUpTo(UserBegin, Alignment);
+    if (Type != MsanAllocType::DEVICE_USM) {
+        return UR_RESULT_SUCCESS;
     }
-    uptr UserEnd = UserBegin + Size;
-    assert(UserEnd <= AllocEnd);
 
-    *ResultPtr = reinterpret_cast<void *>(UserBegin);
-
-    auto AI = std::make_shared<AllocInfo>(AllocInfo{AllocBegin,
-                                                    UserBegin,
-                                                    UserEnd,
-                                                    NeededSize,
-                                                    Type,
-                                                    false,
-                                                    Context,
-                                                    Device,
-                                                    GetCurrentBacktrace(),
-                                                    {}});
+    auto AI =
+        std::make_shared<MsanAllocInfo>(MsanAllocInfo{(uptr)Allocated,
+                                                      Size,
+                                                      Type,
+                                                      false,
+                                                      Context,
+                                                      Device,
+                                                      GetCurrentBacktrace(),
+                                                      {}});
 
     AI->print();
 
     // For updating shadow memory
-    if (Device) { // Device/Shared USM
-        ContextInfo->insertAllocInfo({Device}, AI);
-    } else { // Host USM
-        ContextInfo->insertAllocInfo(ContextInfo->DeviceList, AI);
-    }
+    ContextInfo->insertAllocInfo({Device}, AI);
 
     // For memory release
     {
@@ -186,7 +146,7 @@ ur_result_t MsanInterceptor::releaseMemory(ur_context_handle_t Context,
     AllocInfo->IsReleased = true;
     AllocInfo->ReleaseStack = GetCurrentBacktrace();
 
-    if (AllocInfo->Type == AllocType::HOST_USM) {
+    if (AllocInfo->Type == MsanAllocType::HOST_USM) {
         ContextInfo->insertAllocInfo(ContextInfo->DeviceList, AllocInfo);
     } else {
         ContextInfo->insertAllocInfo({AllocInfo->Device}, AllocInfo);
@@ -218,7 +178,7 @@ ur_result_t MsanInterceptor::releaseMemory(ur_context_handle_t Context,
                                                   AllocInfo->getRedzoneSize());
 
             m_AllocationMap.erase(It);
-            if (AllocInfo->Type == AllocType::HOST_USM) {
+            if (AllocInfo->Type == MsanAllocType::HOST_USM) {
                 for (auto &Device : ContextInfo->DeviceList) {
                     UR_CALL(getDeviceInfo(Device)->Shadow->ReleaseShadow(
                         AllocInfo));
@@ -318,16 +278,16 @@ MsanInterceptor::enqueueAllocInfo(std::shared_ptr<DeviceInfo> &DeviceInfo,
     if (AI->IsReleased) {
         int ShadowByte;
         switch (AI->Type) {
-        case AllocType::HOST_USM:
+        case MsanAllocType::HOST_USM:
             ShadowByte = kUsmHostDeallocatedMagic;
             break;
-        case AllocType::DEVICE_USM:
+        case MsanAllocType::DEVICE_USM:
             ShadowByte = kUsmDeviceDeallocatedMagic;
             break;
-        case AllocType::SHARED_USM:
+        case MsanAllocType::SHARED_USM:
             ShadowByte = kUsmSharedDeallocatedMagic;
             break;
-        case AllocType::MEM_BUFFER:
+        case MsanAllocType::MEM_BUFFER:
             ShadowByte = kMemBufferDeallocatedMagic;
             break;
         default:
@@ -356,19 +316,19 @@ MsanInterceptor::enqueueAllocInfo(std::shared_ptr<DeviceInfo> &DeviceInfo,
 
     int ShadowByte;
     switch (AI->Type) {
-    case AllocType::HOST_USM:
+    case MsanAllocType::HOST_USM:
         ShadowByte = kUsmHostRedzoneMagic;
         break;
-    case AllocType::DEVICE_USM:
+    case MsanAllocType::DEVICE_USM:
         ShadowByte = kUsmDeviceRedzoneMagic;
         break;
-    case AllocType::SHARED_USM:
+    case MsanAllocType::SHARED_USM:
         ShadowByte = kUsmSharedRedzoneMagic;
         break;
-    case AllocType::MEM_BUFFER:
+    case MsanAllocType::MEM_BUFFER:
         ShadowByte = kMemBufferRedzoneMagic;
         break;
-    case AllocType::DEVICE_GLOBAL:
+    case MsanAllocType::DEVICE_GLOBAL:
         ShadowByte = kDeviceGlobalRedzoneMagic;
         break;
     default:
@@ -440,7 +400,7 @@ ur_result_t MsanInterceptor::registerProgram(ur_context_handle_t Context,
                           GVInfos[i].Addr,
                           GVInfos[i].Addr + GVInfos[i].Size,
                           GVInfos[i].SizeWithRedZone,
-                          AllocType::DEVICE_GLOBAL,
+                          MsanAllocType::DEVICE_GLOBAL,
                           false,
                           Context,
                           Device,
@@ -796,12 +756,12 @@ ur_result_t MsanInterceptor::prepareLaunch(
     return UR_RESULT_SUCCESS;
 }
 
-std::optional<AllocationIterator>
+std::optional<MsanAllocationIterator>
 MsanInterceptor::findAllocInfoByAddress(uptr Address) {
     std::shared_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
     auto It = m_AllocationMap.upper_bound(Address);
     if (It == m_AllocationMap.begin()) {
-        return std::optional<AllocationIterator>{};
+        return std::optional<MsanAllocationIterator>{};
     }
     --It;
     // Make sure we got the right AllocInfo
@@ -811,10 +771,10 @@ MsanInterceptor::findAllocInfoByAddress(uptr Address) {
     return It;
 }
 
-std::vector<AllocationIterator>
+std::vector<MsanAllocationIterator>
 MsanInterceptor::findAllocInfoByContext(ur_context_handle_t Context) {
     std::shared_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
-    std::vector<AllocationIterator> AllocInfos;
+    std::vector<MsanAllocationIterator> AllocInfos;
     for (auto It = m_AllocationMap.begin(); It != m_AllocationMap.end(); It++) {
         const auto &[_, AI] = *It;
         if (AI->Context == Context) {
@@ -830,16 +790,6 @@ ContextInfo::~ContextInfo() {
     [[maybe_unused]] auto Result =
         getContext()->urDdiTable.Context.pfnRelease(Handle);
     assert(Result == UR_RESULT_SUCCESS);
-
-    // check memory leaks
-    std::vector<AllocationIterator> AllocInfos =
-        getMsanInterceptor()->findAllocInfoByContext(Handle);
-    for (const auto &It : AllocInfos) {
-        const auto &[_, AI] = *It;
-        if (!AI->IsReleased) {
-            ReportMemoryLeak(AI);
-        }
-    }
 }
 
 ur_result_t USMLaunchInfo::initialize() {
