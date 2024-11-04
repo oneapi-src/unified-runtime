@@ -262,12 +262,8 @@ uptr ShadowMemoryPVC::MemToShadow(uptr Ptr) {
 }
 
 uptr ShadowMemoryDG2::MemToShadow(uptr Ptr) {
-    if (Ptr & 0xFFFF000000000000ULL) { // Device USM
-        return ShadowBegin + 0x80000000000ULL +
-               ((Ptr & 0x7FFFFFFFFFFFULL) >> ASAN_SHADOW_SCALE);
-    } else { // Host/Shared USM
-        return ShadowBegin + (Ptr >> ASAN_SHADOW_SCALE);
-    }
+    return ShadowBegin +
+           ((Ptr & 0x0000'FFFF'FFFF'FFFFULL) >> ASAN_SHADOW_SCALE);
 }
 
 } // namespace ur_sanitizer_layer
