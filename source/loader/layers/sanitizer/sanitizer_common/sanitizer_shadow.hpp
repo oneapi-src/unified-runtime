@@ -6,20 +6,14 @@
  * See LICENSE.TXT
  * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
  *
- * @file msan_options.hpp
+ * @file sanitizer_stacktrace.hpp
  *
  */
 
 #pragma once
 
-#include <cstdint>
+#include "sanitizer_common.hpp"
 
-namespace ur_sanitizer_layer {
+#include <vector>
 
-struct MsanOptions {
-    bool Debug = false;
-
-    explicit MsanOptions();
-};
-
-} // namespace ur_sanitizer_layer
+namespace ur_sanitizer_layer {} // namespace ur_sanitizer_layer

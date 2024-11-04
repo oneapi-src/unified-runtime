@@ -92,7 +92,7 @@ ur_result_t MemBuffer::getHandle(ur_device_handle_t Device, char *&Handle) {
         USMDesc.align = getAlignment();
         ur_usm_pool_handle_t Pool{};
         URes = getMsanInterceptor()->allocateMemory(
-            Context, Device, &USMDesc, Pool, Size, AllocType::MEM_BUFFER,
+            Context, Device, &USMDesc, Pool, Size, MsanAllocType::MEM_BUFFER,
             ur_cast<void **>(&Allocation));
         if (URes != UR_RESULT_SUCCESS) {
             getContext()->logger.error(
@@ -130,7 +130,7 @@ ur_result_t MemBuffer::getHandle(ur_device_handle_t Device, char *&Handle) {
             USMDesc.align = getAlignment();
             ur_usm_pool_handle_t Pool{};
             URes = getMsanInterceptor()->allocateMemory(
-                Context, nullptr, &USMDesc, Pool, Size, AllocType::HOST_USM,
+                Context, nullptr, &USMDesc, Pool, Size, MsanAllocType::HOST_USM,
                 ur_cast<void **>(&HostAllocation));
             if (URes != UR_RESULT_SUCCESS) {
                 getContext()->logger.error("Failed to allocate {} bytes host "

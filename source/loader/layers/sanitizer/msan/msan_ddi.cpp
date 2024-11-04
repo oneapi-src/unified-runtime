@@ -106,8 +106,9 @@ __urdlllocal ur_result_t UR_APICALL urUSMHostAlloc(
 
     getContext()->logger.debug("==== urUSMHostAlloc");
 
-    return getMsanInterceptor()->allocateMemory(
-        hContext, nullptr, pUSMDesc, pool, size, AllocType::HOST_USM, ppMem);
+    return getMsanInterceptor()->allocateMemory(hContext, nullptr, pUSMDesc,
+                                                pool, size,
+                                                MsanAllocType::HOST_USM, ppMem);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -132,7 +133,8 @@ __urdlllocal ur_result_t UR_APICALL urUSMDeviceAlloc(
     getContext()->logger.debug("==== urUSMDeviceAlloc");
 
     return getMsanInterceptor()->allocateMemory(
-        hContext, hDevice, pUSMDesc, pool, size, AllocType::DEVICE_USM, ppMem);
+        hContext, hDevice, pUSMDesc, pool, size, MsanAllocType::DEVICE_USM,
+        ppMem);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -157,7 +159,8 @@ __urdlllocal ur_result_t UR_APICALL urUSMSharedAlloc(
     getContext()->logger.debug("==== urUSMSharedAlloc");
 
     return getMsanInterceptor()->allocateMemory(
-        hContext, hDevice, pUSMDesc, pool, size, AllocType::SHARED_USM, ppMem);
+        hContext, hDevice, pUSMDesc, pool, size, MsanAllocType::SHARED_USM,
+        ppMem);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1247,7 +1250,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferMap(
             USMDesc.align = MemBuffer->getAlignment();
             ur_usm_pool_handle_t Pool{};
             UR_CALL(getMsanInterceptor()->allocateMemory(
-                Context, nullptr, &USMDesc, Pool, size, AllocType::HOST_USM,
+                Context, nullptr, &USMDesc, Pool, size, MsanAllocType::HOST_USM,
                 ppRetMap));
         }
 
@@ -1420,17 +1423,16 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgValue(
 
     getContext()->logger.debug("==== urKernelSetArgValue");
 
-    std::shared_ptr<MemBuffer> MemBuffer;
-    if (argSize == sizeof(ur_mem_handle_t) &&
-        (MemBuffer = getMsanInterceptor()->getMemBuffer(
-             *ur_cast<const ur_mem_handle_t *>(pArgValue)))) {
-        auto KernelInfo = getMsanInterceptor()->getKernelInfo(hKernel);
-        std::scoped_lock<ur_shared_mutex> Guard(KernelInfo->Mutex);
-        KernelInfo->BufferArgs[argIndex] = std::move(MemBuffer);
-    } else {
-        UR_CALL(
-            pfnSetArgValue(hKernel, argIndex, argSize, pProperties, pArgValue));
-    }
+    // std::shared_ptr<MemBuffer> MemBuffer;
+    // if (argSize == sizeof(ur_mem_handle_t) &&
+    //     (MemBuffer = getMsanInterceptor()->getMemBuffer(
+    //          *ur_cast<const ur_mem_handle_t *>(pArgValue)))) {
+    //     auto KernelInfo = getMsanInterceptor()->getKernelInfo(hKernel);
+    //     std::scoped_lock<ur_shared_mutex> Guard(KernelInfo->Mutex);
+    //     KernelInfo->BufferArgs[argIndex] = std::move(MemBuffer);
+    // } else {
+    UR_CALL(pfnSetArgValue(hKernel, argIndex, argSize, pProperties, pArgValue));
+    // }
 
     return UR_RESULT_SUCCESS;
 }
@@ -1452,13 +1454,13 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgMemObj(
 
     getContext()->logger.debug("==== urKernelSetArgMemObj");
 
-    if (auto MemBuffer = getMsanInterceptor()->getMemBuffer(hArgValue)) {
-        auto KernelInfo = getMsanInterceptor()->getKernelInfo(hKernel);
-        std::scoped_lock<ur_shared_mutex> Guard(KernelInfo->Mutex);
-        KernelInfo->BufferArgs[argIndex] = std::move(MemBuffer);
-    } else {
-        UR_CALL(pfnSetArgMemObj(hKernel, argIndex, pProperties, hArgValue));
-    }
+    // if (auto MemBuffer = getMsanInterceptor()->getMemBuffer(hArgValue)) {
+    //     auto KernelInfo = getMsanInterceptor()->getKernelInfo(hKernel);
+    //     std::scoped_lock<ur_shared_mutex> Guard(KernelInfo->Mutex);
+    //     KernelInfo->BufferArgs[argIndex] = std::move(MemBuffer);
+    // } else {
+    UR_CALL(pfnSetArgMemObj(hKernel, argIndex, pProperties, hArgValue));
+    // }
 
     return UR_RESULT_SUCCESS;
 }
@@ -1487,10 +1489,10 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgLocal(
         auto KI = getMsanInterceptor()->getKernelInfo(hKernel);
         std::scoped_lock<ur_shared_mutex> Guard(KI->Mutex);
         // TODO: get local variable alignment
-        auto argSizeWithRZ = GetSizeAndRedzoneSizeForLocal(
-            argSize, msan_SHADOW_GRANULARITY, msan_SHADOW_GRANULARITY);
-        KI->LocalArgs[argIndex] = LocalArgsInfo{argSize, argSizeWithRZ};
-        argSize = argSizeWithRZ;
+        // auto argSizeWithRZ = GetSizeAndRedzoneSizeForLocal(
+        //     argSize, msan_SHADOW_GRANULARITY, msan_SHADOW_GRANULARITY);
+        // KI->LocalArgs[argIndex] = LocalArgsInfo{argSize, argSizeWithRZ};
+        // argSize = argSizeWithRZ;
     }
 
     ur_result_t result =
@@ -1520,11 +1522,11 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgPointer(
         "==== urKernelSetArgPointer (argIndex={}, pArgValue={})", argIndex,
         pArgValue);
 
-    if (getMsanInterceptor()->getOptions().DetectKernelArguments) {
-        auto KI = getMsanInterceptor()->getKernelInfo(hKernel);
-        std::scoped_lock<ur_shared_mutex> Guard(KI->Mutex);
-        KI->PointerArgs[argIndex] = {pArgValue, GetCurrentBacktrace()};
-    }
+    // if (getMsanInterceptor()->getOptions().DetectKernelArguments) {
+    //     auto KI = getMsanInterceptor()->getKernelInfo(hKernel);
+    //     std::scoped_lock<ur_shared_mutex> Guard(KI->Mutex);
+    //     KI->PointerArgs[argIndex] = {pArgValue, GetCurrentBacktrace()};
+    // }
 
     ur_result_t result =
         pfnSetArgPointer(hKernel, argIndex, pProperties, pArgValue);
@@ -1823,7 +1825,7 @@ __urdlllocal ur_result_t UR_APICALL urGetUSMProcAddrTable(
 
 } // namespace msan
 
-ur_result_t initAsanDDITable(ur_dditable_t *dditable) {
+ur_result_t initMsanDDITable(ur_dditable_t *dditable) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
     if (UR_RESULT_SUCCESS == result) {

@@ -21,7 +21,7 @@
 
 namespace ur_sanitizer_layer {
 
-AsanOptions::AsanOptions() {
+MsanOptions::MsanOptions() {
     std::optional<EnvVarMap> OptionsEnvMap;
     try {
         OptionsEnvMap = getenv_to_map("UR_LAYER_msan_OPTIONS");
@@ -83,62 +83,6 @@ AsanOptions::AsanOptions() {
     };
 
     SetBoolOption("debug", Debug);
-    SetBoolOption("detect_kernel_arguments", DetectKernelArguments);
-    SetBoolOption("detect_locals", DetectLocals);
-    SetBoolOption("detect_privates", DetectPrivates);
-    SetBoolOption("print_stats", PrintStats);
-
-    auto KV = OptionsEnvMap->find("quarantine_size_mb");
-    if (KV != OptionsEnvMap->end()) {
-        const auto &Value = KV->second.front();
-        try {
-            auto temp_long = std::stoul(Value);
-            if (temp_long > UINT32_MAX) {
-                throw std::out_of_range("");
-            }
-            MaxQuarantineSizeMB = temp_long;
-        } catch (...) {
-            getContext()->logger.error("\"quarantine_size_mb\" should be "
-                                       "an integer in range[0, {}].",
-                                       UINT32_MAX);
-            die("Sanitizer failed to parse options.\n");
-        }
-    }
-
-    KV = OptionsEnvMap->find("redzone");
-    if (KV != OptionsEnvMap->end()) {
-        const auto &Value = KV->second.front();
-        try {
-            MinRZSize = std::stoul(Value);
-            if (MinRZSize < 16) {
-                MinRZSize = 16;
-                getContext()->logger.warning("Trying to set redzone size to a "
-                                             "value less than 16 is ignored.");
-            }
-        } catch (...) {
-            getContext()->logger.error(
-                "\"redzone\" should be an integer in range[0, 16].");
-            die("Sanitizer failed to parse options.\n");
-        }
-    }
-
-    KV = OptionsEnvMap->find("max_redzone");
-    if (KV != OptionsEnvMap->end()) {
-        const auto &Value = KV->second.front();
-        try {
-            MaxRZSize = std::stoul(Value);
-            if (MaxRZSize > 2048) {
-                MaxRZSize = 2048;
-                getContext()->logger.warning(
-                    "Trying to set max redzone size to a "
-                    "value greater than 2048 is ignored.");
-            }
-        } catch (...) {
-            getContext()->logger.error(
-                "\"max_redzone\" should be an integer in range[0, 2048].");
-            die("Sanitizer failed to parse options.\n");
-        }
-    }
 }
 
 } // namespace ur_sanitizer_layer

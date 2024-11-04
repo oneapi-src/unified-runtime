@@ -14,24 +14,25 @@
 #include "msan_interceptor.hpp"
 #include "msan_libdevice.hpp"
 #include "sanitizer_common/sanitizer_utils.hpp"
+#include "ur_api.h"
 #include "ur_sanitizer_layer.hpp"
 
 namespace ur_sanitizer_layer {
 
-std::shared_ptr<ShadowMemory> GetShadowMemory(ur_context_handle_t Context,
-                                              ur_device_handle_t Device,
-                                              DeviceType Type) {
+std::shared_ptr<MsanShadowMemory>
+GetMsanShadowMemory(ur_context_handle_t Context, ur_device_handle_t Device,
+                    DeviceType Type) {
     if (Type == DeviceType::CPU) {
-        static std::shared_ptr<ShadowMemory> ShadowCPU =
-            std::make_shared<ShadowMemoryCPU>(Context, Device);
+        static std::shared_ptr<MsanShadowMemory> ShadowCPU =
+            std::make_shared<MsanShadowMemoryCPU>(Context, Device);
         return ShadowCPU;
     } else if (Type == DeviceType::GPU_PVC) {
-        static std::shared_ptr<ShadowMemory> ShadowPVC =
-            std::make_shared<ShadowMemoryPVC>(Context, Device);
+        static std::shared_ptr<MsanShadowMemory> ShadowPVC =
+            std::make_shared<MsanShadowMemoryPVC>(Context, Device);
         return ShadowPVC;
     } else if (Type == DeviceType::GPU_DG2) {
-        static std::shared_ptr<ShadowMemory> ShadowDG2 =
-            std::make_shared<ShadowMemoryDG2>(Context, Device);
+        static std::shared_ptr<MsanShadowMemory> ShadowDG2 =
+            std::make_shared<MsanShadowMemoryDG2>(Context, Device);
         return ShadowDG2;
     } else {
         getContext()->logger.error("Unsupport device type");
@@ -39,7 +40,7 @@ std::shared_ptr<ShadowMemory> GetShadowMemory(ur_context_handle_t Context,
     }
 }
 
-ur_result_t ShadowMemoryCPU::Setup() {
+ur_result_t MsanShadowMemoryCPU::Setup() {
     static ur_result_t Result = [this]() {
         size_t ShadowSize = GetShadowSize();
         ShadowBegin = MmapNoReserve(0, ShadowSize);
@@ -48,20 +49,12 @@ ur_result_t ShadowMemoryCPU::Setup() {
         }
         DontCoredumpRange(ShadowBegin, ShadowSize);
         ShadowEnd = ShadowBegin + ShadowSize;
-
-        // Set shadow memory for null pointer
-        auto URes = EnqueuePoisonShadow({}, 0, 1, kNullPointerRedzoneMagic);
-        if (URes != UR_RESULT_SUCCESS) {
-            getContext()->logger.error("EnqueuePoisonShadow(NullPointerRZ): {}",
-                                       URes);
-            return URes;
-        }
-        return URes;
+        return UR_RESULT_SUCCESS;
     }();
     return Result;
 }
 
-ur_result_t ShadowMemoryCPU::Destory() {
+ur_result_t MsanShadowMemoryCPU::Destory() {
     if (ShadowBegin == 0) {
         return UR_RESULT_SUCCESS;
     }
@@ -74,12 +67,11 @@ ur_result_t ShadowMemoryCPU::Destory() {
     return Result;
 }
 
-uptr ShadowMemoryCPU::MemToShadow(uptr Ptr) {
-    return ShadowBegin + (Ptr >> msan_SHADOW_SCALE);
-}
+uptr MsanShadowMemoryCPU::MemToShadow(uptr Ptr) { return ShadowBegin + Ptr; }
 
-ur_result_t ShadowMemoryCPU::EnqueuePoisonShadow(ur_queue_handle_t, uptr Ptr,
-                                                 uptr Size, u8 Value) {
+ur_result_t MsanShadowMemoryCPU::EnqueuePoisonShadow(ur_queue_handle_t,
+                                                     uptr Ptr, uptr Size,
+                                                     u8 Value) {
     if (Size == 0) {
         return UR_RESULT_SUCCESS;
     }
@@ -95,7 +87,7 @@ ur_result_t ShadowMemoryCPU::EnqueuePoisonShadow(ur_queue_handle_t, uptr Ptr,
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t ShadowMemoryGPU::Setup() {
+ur_result_t MsanShadowMemoryGPU::Setup() {
     // Currently, Level-Zero doesn't create independent VAs for each contexts, if we reserve
     // shadow memory for each contexts, this will cause out-of-resource error when user uses
     // multiple contexts. Therefore, we just create one shadow memory here.
@@ -112,19 +104,12 @@ ur_result_t ShadowMemoryGPU::Setup() {
 
         // Set shadow memory for null pointer
         ManagedQueue Queue(Context, Device);
-
-        Result = EnqueuePoisonShadow(Queue, 0, 1, kNullPointerRedzoneMagic);
-        if (Result != UR_RESULT_SUCCESS) {
-            getContext()->logger.error("EnqueuePoisonShadow(NullPointerRZ): {}",
-                                       Result);
-            return Result;
-        }
-        return Result;
+        return UR_RESULT_SUCCESS;
     }();
     return Result;
 }
 
-ur_result_t ShadowMemoryGPU::Destory() {
+ur_result_t MsanShadowMemoryGPU::Destory() {
     if (ShadowBegin == 0) {
         return UR_RESULT_SUCCESS;
     }
@@ -137,9 +122,9 @@ ur_result_t ShadowMemoryGPU::Destory() {
     return Result;
 }
 
-ur_result_t ShadowMemoryGPU::EnqueuePoisonShadow(ur_queue_handle_t Queue,
-                                                 uptr Ptr, uptr Size,
-                                                 u8 Value) {
+ur_result_t MsanShadowMemoryGPU::EnqueuePoisonShadow(ur_queue_handle_t Queue,
+                                                     uptr Ptr, uptr Size,
+                                                     u8 Value) {
     if (Size == 0) {
         return UR_RESULT_SUCCESS;
     }
@@ -221,7 +206,8 @@ ur_result_t ShadowMemoryGPU::EnqueuePoisonShadow(ur_queue_handle_t Queue,
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t ShadowMemoryGPU::ReleaseShadow(std::shared_ptr<AllocInfo> AI) {
+ur_result_t
+MsanShadowMemoryGPU::ReleaseShadow(std::shared_ptr<MsanAllocInfo> AI) {
     uptr ShadowBegin = MemToShadow(AI->AllocBegin);
     uptr ShadowEnd = MemToShadow(AI->AllocBegin + AI->AllocSize);
     assert(ShadowBegin <= ShadowEnd);
@@ -249,22 +235,14 @@ ur_result_t ShadowMemoryGPU::ReleaseShadow(std::shared_ptr<AllocInfo> AI) {
     return UR_RESULT_SUCCESS;
 }
 
-uptr ShadowMemoryPVC::MemToShadow(uptr Ptr) {
-    if (Ptr & 0xFF00000000000000ULL) { // Device USM
-        return ShadowBegin + 0x80000000000ULL +
-               ((Ptr & 0xFFFFFFFFFFFFULL) >> msan_SHADOW_SCALE);
-    } else { // Only consider 47bit VA
-        return ShadowBegin + ((Ptr & 0x7FFFFFFFFFFFULL) >> msan_SHADOW_SCALE);
-    }
+uptr MsanShadowMemoryPVC::MemToShadow(uptr Ptr) {
+    assert(Ptr & 0xFF00000000000000ULL && "Ptr must be device USM");
+    return ShadowBegin + 0x80000000000ULL + ((Ptr & 0xFFFFFFFFFFFFULL));
 }
 
-uptr ShadowMemoryDG2::MemToShadow(uptr Ptr) {
-    if (Ptr & 0xFFFF000000000000ULL) { // Device USM
-        return ShadowBegin + 0x80000000000ULL +
-               ((Ptr & 0x7FFFFFFFFFFFULL) >> msan_SHADOW_SCALE);
-    } else { // Host/Shared USM
-        return ShadowBegin + (Ptr >> msan_SHADOW_SCALE);
-    }
+uptr MsanShadowMemoryDG2::MemToShadow(uptr Ptr) {
+    assert(Ptr & 0xFFFF000000000000ULL && "Ptr must be device USM");
+    return ShadowBegin + 0x80000000000ULL + ((Ptr & 0x7FFFFFFFFFFFULL));
 }
 
 } // namespace ur_sanitizer_layer

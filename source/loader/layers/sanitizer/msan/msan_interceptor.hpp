@@ -22,14 +22,13 @@
 
 #include <memory>
 #include <optional>
-#include <queue>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
 namespace ur_sanitizer_layer {
 
-class Quarantine;
+namespace msan {
 
 struct AllocInfoList {
     std::vector<std::shared_ptr<MsanAllocInfo>> List;
@@ -41,7 +40,7 @@ struct DeviceInfo {
 
     DeviceType Type = DeviceType::UNKNOWN;
     size_t Alignment = 0;
-    std::shared_ptr<ShadowMemory> Shadow;
+    std::shared_ptr<MsanShadowMemory> Shadow;
 
     // Device features
     bool IsSupportSharedSystemUSM = false;
@@ -80,12 +79,12 @@ struct KernelInfo {
 
     // lock this mutex if following fields are accessed
     ur_shared_mutex Mutex;
-    std::unordered_map<uint32_t, std::shared_ptr<MemBuffer>> BufferArgs;
-    std::unordered_map<uint32_t, std::pair<const void *, StackTrace>>
-        PointerArgs;
+    // std::unordered_map<uint32_t, std::shared_ptr<MemBuffer>> BufferArgs;
+    // std::unordered_map<uint32_t, std::pair<const void *, StackTrace>>
+    //     PointerArgs;
 
     // Need preserve the order of local arguments
-    std::map<uint32_t, LocalArgsInfo> LocalArgs;
+    // std::map<uint32_t, MsanLocalArgsInfo> LocalArgs;
 
     explicit KernelInfo(ur_kernel_handle_t Kernel) : Handle(Kernel) {
         [[maybe_unused]] auto Result =
@@ -105,8 +104,8 @@ struct ProgramInfo {
     std::atomic<int32_t> RefCount = 1;
 
     // lock this mutex if following fields are accessed
-    ur_shared_mutex Mutex;
-    std::unordered_set<std::shared_ptr<MsanAllocInfo>> AllocInfoForGlobals;
+    // ur_shared_mutex Mutex;
+    // std::unordered_set<std::shared_ptr<MsanAllocInfo>> AllocInfoForGlobals;
 
     explicit ProgramInfo(ur_program_handle_t Program) : Handle(Program) {
         [[maybe_unused]] auto Result =
@@ -147,7 +146,7 @@ struct ContextInfo {
 };
 
 struct USMLaunchInfo {
-    LaunchInfo *Data = nullptr;
+    MsanLaunchInfo *Data = nullptr;
 
     ur_context_handle_t Context = nullptr;
     ur_device_handle_t Device = nullptr;
@@ -178,6 +177,8 @@ struct DeviceGlobalInfo {
     uptr Addr;
 };
 
+} // namespace msan
+
 class MsanInterceptor {
   public:
     explicit MsanInterceptor();
@@ -198,18 +199,18 @@ class MsanInterceptor {
 
     ur_result_t preLaunchKernel(ur_kernel_handle_t Kernel,
                                 ur_queue_handle_t Queue,
-                                USMLaunchInfo &LaunchInfo);
+                                msan::USMLaunchInfo &LaunchInfo);
 
     ur_result_t postLaunchKernel(ur_kernel_handle_t Kernel,
                                  ur_queue_handle_t Queue,
-                                 USMLaunchInfo &LaunchInfo);
+                                 msan::USMLaunchInfo &LaunchInfo);
 
     ur_result_t insertContext(ur_context_handle_t Context,
-                              std::shared_ptr<ContextInfo> &CI);
+                              std::shared_ptr<msan::ContextInfo> &CI);
     ur_result_t eraseContext(ur_context_handle_t Context);
 
     ur_result_t insertDevice(ur_device_handle_t Device,
-                             std::shared_ptr<DeviceInfo> &CI);
+                             std::shared_ptr<msan::DeviceInfo> &CI);
     ur_result_t eraseDevice(ur_device_handle_t Device);
 
     ur_result_t insertProgram(ur_program_handle_t Program);
@@ -237,64 +238,68 @@ class MsanInterceptor {
     std::vector<MsanAllocationIterator>
     findAllocInfoByContext(ur_context_handle_t Context);
 
-    std::shared_ptr<ContextInfo> getContextInfo(ur_context_handle_t Context) {
+    std::shared_ptr<msan::ContextInfo>
+    getContextInfo(ur_context_handle_t Context) {
         std::shared_lock<ur_shared_mutex> Guard(m_ContextMapMutex);
         assert(m_ContextMap.find(Context) != m_ContextMap.end());
         return m_ContextMap[Context];
     }
 
-    std::shared_ptr<DeviceInfo> getDeviceInfo(ur_device_handle_t Device) {
+    std::shared_ptr<msan::DeviceInfo> getDeviceInfo(ur_device_handle_t Device) {
         std::shared_lock<ur_shared_mutex> Guard(m_DeviceMapMutex);
         assert(m_DeviceMap.find(Device) != m_DeviceMap.end());
         return m_DeviceMap[Device];
     }
 
-    std::shared_ptr<ProgramInfo> getProgramInfo(ur_program_handle_t Program) {
+    std::shared_ptr<msan::ProgramInfo>
+    getProgramInfo(ur_program_handle_t Program) {
         std::shared_lock<ur_shared_mutex> Guard(m_ProgramMapMutex);
         assert(m_ProgramMap.find(Program) != m_ProgramMap.end());
         return m_ProgramMap[Program];
     }
 
-    std::shared_ptr<KernelInfo> getKernelInfo(ur_kernel_handle_t Kernel) {
+    std::shared_ptr<msan::KernelInfo> getKernelInfo(ur_kernel_handle_t Kernel) {
         std::shared_lock<ur_shared_mutex> Guard(m_KernelMapMutex);
         assert(m_KernelMap.find(Kernel) != m_KernelMap.end());
         return m_KernelMap[Kernel];
     }
 
-    const AsanOptions &getOptions() { return m_Options; }
+    const MsanOptions &getOptions() { return m_Options; }
 
   private:
-    ur_result_t updateShadowMemory(std::shared_ptr<ContextInfo> &ContextInfo,
-                                   std::shared_ptr<DeviceInfo> &DeviceInfo,
-                                   ur_queue_handle_t Queue);
+    ur_result_t
+    updateShadowMemory(std::shared_ptr<msan::ContextInfo> &ContextInfo,
+                       std::shared_ptr<msan::DeviceInfo> &DeviceInfo,
+                       ur_queue_handle_t Queue);
 
-    ur_result_t enqueueAllocInfo(std::shared_ptr<DeviceInfo> &DeviceInfo,
+    ur_result_t enqueueAllocInfo(std::shared_ptr<msan::DeviceInfo> &DeviceInfo,
                                  ur_queue_handle_t Queue,
                                  std::shared_ptr<MsanAllocInfo> &AI);
 
     /// Initialize Global Variables & Kernel Name at first Launch
-    ur_result_t prepareLaunch(std::shared_ptr<ContextInfo> &ContextInfo,
-                              std::shared_ptr<DeviceInfo> &DeviceInfo,
+    ur_result_t prepareLaunch(std::shared_ptr<msan::ContextInfo> &ContextInfo,
+                              std::shared_ptr<msan::DeviceInfo> &DeviceInfo,
                               ur_queue_handle_t Queue,
                               ur_kernel_handle_t Kernel,
-                              USMLaunchInfo &LaunchInfo);
+                              msan::USMLaunchInfo &LaunchInfo);
 
-    ur_result_t allocShadowMemory(ur_context_handle_t Context,
-                                  std::shared_ptr<DeviceInfo> &DeviceInfo);
+    ur_result_t
+    allocShadowMemory(ur_context_handle_t Context,
+                      std::shared_ptr<msan::DeviceInfo> &DeviceInfo);
 
   private:
-    std::unordered_map<ur_context_handle_t, std::shared_ptr<ContextInfo>>
+    std::unordered_map<ur_context_handle_t, std::shared_ptr<msan::ContextInfo>>
         m_ContextMap;
     ur_shared_mutex m_ContextMapMutex;
-    std::unordered_map<ur_device_handle_t, std::shared_ptr<DeviceInfo>>
+    std::unordered_map<ur_device_handle_t, std::shared_ptr<msan::DeviceInfo>>
         m_DeviceMap;
     ur_shared_mutex m_DeviceMapMutex;
 
-    std::unordered_map<ur_program_handle_t, std::shared_ptr<ProgramInfo>>
+    std::unordered_map<ur_program_handle_t, std::shared_ptr<msan::ProgramInfo>>
         m_ProgramMap;
     ur_shared_mutex m_ProgramMapMutex;
 
-    std::unordered_map<ur_kernel_handle_t, std::shared_ptr<KernelInfo>>
+    std::unordered_map<ur_kernel_handle_t, std::shared_ptr<msan::KernelInfo>>
         m_KernelMap;
     ur_shared_mutex m_KernelMapMutex;
 
@@ -306,7 +311,7 @@ class MsanInterceptor {
     MsanAllocationMap m_AllocationMap;
     ur_shared_mutex m_AllocationMapMutex;
 
-    AsanOptions m_Options;
+    MsanOptions m_Options;
 
     std::unordered_set<ur_adapter_handle_t> m_Adapters;
     ur_shared_mutex m_AdaptersMutex;

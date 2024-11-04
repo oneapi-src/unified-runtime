@@ -22,6 +22,8 @@
 
 namespace ur_sanitizer_layer {
 
+using namespace msan;
+
 MsanInterceptor::MsanInterceptor() {}
 
 MsanInterceptor::~MsanInterceptor() {
@@ -108,91 +110,91 @@ ur_result_t MsanInterceptor::allocateMemory(ur_context_handle_t Context,
 
 ur_result_t MsanInterceptor::releaseMemory(ur_context_handle_t Context,
                                            void *Ptr) {
-    auto ContextInfo = getContextInfo(Context);
+    // auto ContextInfo = getContextInfo(Context);
 
-    auto Addr = reinterpret_cast<uptr>(Ptr);
-    auto AllocInfoItOp = findAllocInfoByAddress(Addr);
+    // auto Addr = reinterpret_cast<uptr>(Ptr);
+    // auto AllocInfoItOp = findAllocInfoByAddress(Addr);
 
-    if (!AllocInfoItOp) {
-        // "Addr" might be a host pointer
-        ReportBadFree(Addr, GetCurrentBacktrace(), nullptr);
-        return UR_RESULT_ERROR_INVALID_ARGUMENT;
-    }
+    // if (!AllocInfoItOp) {
+    //     // "Addr" might be a host pointer
+    //     ReportBadFree(Addr, GetCurrentBacktrace(), nullptr);
+    //     return UR_RESULT_ERROR_INVALID_ARGUMENT;
+    // }
 
-    auto AllocInfoIt = *AllocInfoItOp;
-    // NOTE: AllocInfoIt will be erased later, so "AllocInfo" must be a new reference here
-    auto AllocInfo = AllocInfoIt->second;
+    // auto AllocInfoIt = *AllocInfoItOp;
+    // // NOTE: AllocInfoIt will be erased later, so "MsanAllocInfo" must be a new reference here
+    // auto MsanAllocInfo = AllocInfoIt->second;
 
-    if (AllocInfo->Context != Context) {
-        if (AllocInfo->UserBegin == Addr) {
-            ReportBadContext(Addr, GetCurrentBacktrace(), AllocInfo);
-        } else {
-            // "Addr" might be a host pointer
-            ReportBadFree(Addr, GetCurrentBacktrace(), nullptr);
-        }
-        return UR_RESULT_ERROR_INVALID_ARGUMENT;
-    }
+    // if (MsanAllocInfo->Context != Context) {
+    //     if (MsanAllocInfo->UserBegin == Addr) {
+    //         ReportBadContext(Addr, GetCurrentBacktrace(), MsanAllocInfo);
+    //     } else {
+    //         // "Addr" might be a host pointer
+    //         ReportBadFree(Addr, GetCurrentBacktrace(), nullptr);
+    //     }
+    //     return UR_RESULT_ERROR_INVALID_ARGUMENT;
+    // }
 
-    if (Addr != AllocInfo->UserBegin) {
-        ReportBadFree(Addr, GetCurrentBacktrace(), AllocInfo);
-        return UR_RESULT_ERROR_INVALID_ARGUMENT;
-    }
+    // if (Addr != MsanAllocInfo->UserBegin) {
+    //     ReportBadFree(Addr, GetCurrentBacktrace(), MsanAllocInfo);
+    //     return UR_RESULT_ERROR_INVALID_ARGUMENT;
+    // }
 
-    if (AllocInfo->IsReleased) {
-        ReportDoubleFree(Addr, GetCurrentBacktrace(), AllocInfo);
-        return UR_RESULT_ERROR_INVALID_ARGUMENT;
-    }
+    // if (MsanAllocInfo->IsReleased) {
+    //     ReportDoubleFree(Addr, GetCurrentBacktrace(), MsanAllocInfo);
+    //     return UR_RESULT_ERROR_INVALID_ARGUMENT;
+    // }
 
-    AllocInfo->IsReleased = true;
-    AllocInfo->ReleaseStack = GetCurrentBacktrace();
+    // MsanAllocInfo->IsReleased = true;
+    // MsanAllocInfo->ReleaseStack = GetCurrentBacktrace();
 
-    if (AllocInfo->Type == MsanAllocType::HOST_USM) {
-        ContextInfo->insertAllocInfo(ContextInfo->DeviceList, AllocInfo);
-    } else {
-        ContextInfo->insertAllocInfo({AllocInfo->Device}, AllocInfo);
-    }
+    // if (MsanAllocInfo->Type == MsanAllocType::HOST_USM) {
+    //     ContextInfo->insertAllocInfo(ContextInfo->DeviceList, MsanAllocInfo);
+    // } else {
+    //     ContextInfo->insertAllocInfo({MsanAllocInfo->Device}, MsanAllocInfo);
+    // }
 
-    // If quarantine is disabled, USM is freed immediately
-    if (!m_Quarantine) {
-        getContext()->logger.debug("Free: {}", (void *)AllocInfo->AllocBegin);
+    // // If quarantine is disabled, USM is freed immediately
+    // if (!m_Quarantine) {
+    //     getContext()->logger.debug("Free: {}", (void *)MsanAllocInfo->AllocBegin);
 
-        ContextInfo->Stats.UpdateUSMRealFreed(AllocInfo->AllocSize,
-                                              AllocInfo->getRedzoneSize());
+    //     ContextInfo->Stats.UpdateUSMRealFreed(MsanAllocInfo->AllocSize,
+    //                                           MsanAllocInfo->getRedzoneSize());
 
-        std::scoped_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
-        m_AllocationMap.erase(AllocInfoIt);
+    //     std::scoped_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
+    //     m_AllocationMap.erase(AllocInfoIt);
 
-        return getContext()->urDdiTable.USM.pfnFree(
-            Context, (void *)(AllocInfo->AllocBegin));
-    }
+    //     return getContext()->urDdiTable.USM.pfnFree(
+    //         Context, (void *)(MsanAllocInfo->AllocBegin));
+    // }
 
-    // If quarantine is enabled, cache it
-    auto ReleaseList = m_Quarantine->put(AllocInfo->Device, AllocInfoIt);
-    if (ReleaseList.size()) {
-        std::scoped_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
-        for (auto &It : ReleaseList) {
-            getContext()->logger.info("Quarantine Free: {}",
-                                      (void *)It->second->AllocBegin);
+    // // If quarantine is enabled, cache it
+    // auto ReleaseList = m_Quarantine->put(MsanAllocInfo->Device, AllocInfoIt);
+    // if (ReleaseList.size()) {
+    //     std::scoped_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
+    //     for (auto &It : ReleaseList) {
+    //         getContext()->logger.info("Quarantine Free: {}",
+    //                                   (void *)It->second->AllocBegin);
 
-            ContextInfo->Stats.UpdateUSMRealFreed(AllocInfo->AllocSize,
-                                                  AllocInfo->getRedzoneSize());
+    //         ContextInfo->Stats.UpdateUSMRealFreed(MsanAllocInfo->AllocSize,
+    //                                               MsanAllocInfo->getRedzoneSize());
 
-            m_AllocationMap.erase(It);
-            if (AllocInfo->Type == MsanAllocType::HOST_USM) {
-                for (auto &Device : ContextInfo->DeviceList) {
-                    UR_CALL(getDeviceInfo(Device)->Shadow->ReleaseShadow(
-                        AllocInfo));
-                }
-            } else {
-                UR_CALL(getDeviceInfo(AllocInfo->Device)
-                            ->Shadow->ReleaseShadow(AllocInfo));
-            }
+    //         m_AllocationMap.erase(It);
+    //         if (MsanAllocInfo->Type == MsanAllocType::HOST_USM) {
+    //             for (auto &Device : ContextInfo->DeviceList) {
+    //                 UR_CALL(getDeviceInfo(Device)->Shadow->ReleaseShadow(
+    //                     MsanAllocInfo));
+    //             }
+    //         } else {
+    //             UR_CALL(getDeviceInfo(MsanAllocInfo->Device)
+    //                         ->Shadow->ReleaseShadow(MsanAllocInfo));
+    //         }
 
-            UR_CALL(getContext()->urDdiTable.USM.pfnFree(
-                Context, (void *)(It->second->AllocBegin)));
-        }
-    }
-    ContextInfo->Stats.UpdateUSMFreed(AllocInfo->AllocSize);
+    //         UR_CALL(getContext()->urDdiTable.USM.pfnFree(
+    //             Context, (void *)(It->second->AllocBegin)));
+    //     }
+    // }
+    // ContextInfo->Stats.UpdateUSMFreed(MsanAllocInfo->AllocSize);
 
     return UR_RESULT_SUCCESS;
 }
@@ -229,122 +231,37 @@ ur_result_t MsanInterceptor::postLaunchKernel(ur_kernel_handle_t Kernel,
     auto Result = getContext()->urDdiTable.Queue.pfnFinish(Queue);
 
     if (Result == UR_RESULT_SUCCESS) {
-        for (const auto &AH : LaunchInfo.Data->SanitizerReport) {
-            if (!AH.Flag) {
-                continue;
-            }
-            switch (AH.ErrorType) {
-            case DeviceSanitizerErrorType::USE_AFTER_FREE:
-                ReportUseAfterFree(AH, Kernel, GetContext(Queue));
-                break;
-            case DeviceSanitizerErrorType::OUT_OF_BOUNDS:
-            case DeviceSanitizerErrorType::MISALIGNED:
-            case DeviceSanitizerErrorType::NULL_POINTER:
-                ReportGenericError(AH, Kernel);
-                break;
-            default:
-                ReportFatalError(AH);
-            }
-            if (!AH.IsRecover) {
-                exit(1);
-            }
-        }
+        // for (const auto &AH : LaunchInfo.Data->SanitizerReport) {
+        //     if (!AH.Flag) {
+        //         continue;
+        //     }
+        //     switch (AH.ErrorType) {
+        //     case DeviceSanitizerErrorType::USE_AFTER_FREE:
+        //         ReportUseAfterFree(AH, Kernel, GetContext(Queue));
+        //         break;
+        //     case DeviceSanitizerErrorType::OUT_OF_BOUNDS:
+        //     case DeviceSanitizerErrorType::MISALIGNED:
+        //     case DeviceSanitizerErrorType::NULL_POINTER:
+        //         ReportGenericError(AH, Kernel);
+        //         break;
+        //     default:
+        //         ReportFatalError(AH);
+        //     }
+        //     if (!AH.IsRecover) {
+        //         exit(1);
+        //     }
+        // }
     }
 
     return Result;
 }
 
-ur_result_t DeviceInfo::allocShadowMemory(ur_context_handle_t Context) {
-    Shadow = GetShadowMemory(Context, Handle, Type);
-    assert(Shadow && "Failed to get shadow memory");
-    UR_CALL(Shadow->Setup());
-    getContext()->logger.info("ShadowMemory(Global): {} - {}",
-                              (void *)Shadow->ShadowBegin,
-                              (void *)Shadow->ShadowEnd);
-    return UR_RESULT_SUCCESS;
-}
-
-/// Each 8 bytes of application memory are mapped into one byte of shadow memory
-/// The meaning of that byte:
-///  - Negative: All bytes are not accessible (poisoned)
-///  - 0: All bytes are accessible
-///  - 1 <= k <= 7: Only the first k bytes is accessible
-///
-/// ref: https://github.com/google/sanitizers/wiki/AddressSanitizerAlgorithm#mapping
 ur_result_t
 MsanInterceptor::enqueueAllocInfo(std::shared_ptr<DeviceInfo> &DeviceInfo,
                                   ur_queue_handle_t Queue,
-                                  std::shared_ptr<AllocInfo> &AI) {
-    if (AI->IsReleased) {
-        int ShadowByte;
-        switch (AI->Type) {
-        case MsanAllocType::HOST_USM:
-            ShadowByte = kUsmHostDeallocatedMagic;
-            break;
-        case MsanAllocType::DEVICE_USM:
-            ShadowByte = kUsmDeviceDeallocatedMagic;
-            break;
-        case MsanAllocType::SHARED_USM:
-            ShadowByte = kUsmSharedDeallocatedMagic;
-            break;
-        case MsanAllocType::MEM_BUFFER:
-            ShadowByte = kMemBufferDeallocatedMagic;
-            break;
-        default:
-            ShadowByte = 0xff;
-            assert(false && "Unknow AllocInfo Type");
-        }
-        UR_CALL(DeviceInfo->Shadow->EnqueuePoisonShadow(
-            Queue, AI->AllocBegin, AI->AllocSize, ShadowByte));
-        return UR_RESULT_SUCCESS;
-    }
-
-    // Init zero
-    UR_CALL(DeviceInfo->Shadow->EnqueuePoisonShadow(Queue, AI->AllocBegin,
-                                                    AI->AllocSize, 0));
-
-    uptr TailBegin = RoundUpTo(AI->UserEnd, msan_SHADOW_GRANULARITY);
-    uptr TailEnd = AI->AllocBegin + AI->AllocSize;
-
-    // User tail
-    if (TailBegin != AI->UserEnd) {
-        auto Value =
-            AI->UserEnd - RoundDownTo(AI->UserEnd, msan_SHADOW_GRANULARITY);
-        UR_CALL(DeviceInfo->Shadow->EnqueuePoisonShadow(
-            Queue, AI->UserEnd, 1, static_cast<u8>(Value)));
-    }
-
-    int ShadowByte;
-    switch (AI->Type) {
-    case MsanAllocType::HOST_USM:
-        ShadowByte = kUsmHostRedzoneMagic;
-        break;
-    case MsanAllocType::DEVICE_USM:
-        ShadowByte = kUsmDeviceRedzoneMagic;
-        break;
-    case MsanAllocType::SHARED_USM:
-        ShadowByte = kUsmSharedRedzoneMagic;
-        break;
-    case MsanAllocType::MEM_BUFFER:
-        ShadowByte = kMemBufferRedzoneMagic;
-        break;
-    case MsanAllocType::DEVICE_GLOBAL:
-        ShadowByte = kDeviceGlobalRedzoneMagic;
-        break;
-    default:
-        ShadowByte = 0xff;
-        assert(false && "Unknow AllocInfo Type");
-    }
-
-    // Left red zone
-    UR_CALL(DeviceInfo->Shadow->EnqueuePoisonShadow(
-        Queue, AI->AllocBegin, AI->UserBegin - AI->AllocBegin, ShadowByte));
-
-    // Right red zone
-    UR_CALL(DeviceInfo->Shadow->EnqueuePoisonShadow(
-        Queue, TailBegin, TailEnd - TailBegin, ShadowByte));
-
-    return UR_RESULT_SUCCESS;
+                                  std::shared_ptr<MsanAllocInfo> &AI) {
+    return DeviceInfo->Shadow->EnqueuePoisonShadow(Queue, AI->AllocBegin,
+                                                   AI->AllocSize, 0xff);
 }
 
 ur_result_t
@@ -364,73 +281,73 @@ MsanInterceptor::updateShadowMemory(std::shared_ptr<ContextInfo> &ContextInfo,
 
 ur_result_t MsanInterceptor::registerProgram(ur_context_handle_t Context,
                                              ur_program_handle_t Program) {
-    std::vector<ur_device_handle_t> Devices = GetDevices(Program);
+    // std::vector<ur_device_handle_t> Devices = GetDevices(Program);
 
-    auto ContextInfo = getContextInfo(Context);
-    auto ProgramInfo = getProgramInfo(Program);
+    // auto ContextInfo = getContextInfo(Context);
+    // auto ProgramInfo = getProgramInfo(Program);
 
-    for (auto Device : Devices) {
-        ManagedQueue Queue(Context, Device);
+    // for (auto Device : Devices) {
+    //     ManagedQueue Queue(Context, Device);
 
-        uint64_t NumOfDeviceGlobal;
-        auto Result =
-            getContext()->urDdiTable.Enqueue.pfnDeviceGlobalVariableRead(
-                Queue, Program, kSPIR_AsanDeviceGlobalCount, true,
-                sizeof(NumOfDeviceGlobal), 0, &NumOfDeviceGlobal, 0, nullptr,
-                nullptr);
-        if (Result != UR_RESULT_SUCCESS) {
-            getContext()->logger.info("No device globals");
-            continue;
-        }
+    //     uint64_t NumOfDeviceGlobal;
+    //     auto Result =
+    //         getContext()->urDdiTable.Enqueue.pfnDeviceGlobalVariableRead(
+    //             Queue, Program, kSPIR_MsanDeviceGlobalCount, true,
+    //             sizeof(NumOfDeviceGlobal), 0, &NumOfDeviceGlobal, 0, nullptr,
+    //             nullptr);
+    //     if (Result != UR_RESULT_SUCCESS) {
+    //         getContext()->logger.info("No device globals");
+    //         continue;
+    //     }
 
-        std::vector<DeviceGlobalInfo> GVInfos(NumOfDeviceGlobal);
-        Result = getContext()->urDdiTable.Enqueue.pfnDeviceGlobalVariableRead(
-            Queue, Program, kSPIR_AsanDeviceGlobalMetadata, true,
-            sizeof(DeviceGlobalInfo) * NumOfDeviceGlobal, 0, &GVInfos[0], 0,
-            nullptr, nullptr);
-        if (Result != UR_RESULT_SUCCESS) {
-            getContext()->logger.error("Device Global[{}] Read Failed: {}",
-                                       kSPIR_AsanDeviceGlobalMetadata, Result);
-            return Result;
-        }
+    //     std::vector<DeviceGlobalInfo> GVInfos(NumOfDeviceGlobal);
+    //     Result = getContext()->urDdiTable.Enqueue.pfnDeviceGlobalVariableRead(
+    //         Queue, Program, kSPIR_MsanDeviceGlobalMetadata, true,
+    //         sizeof(DeviceGlobalInfo) * NumOfDeviceGlobal, 0, &GVInfos[0], 0,
+    //         nullptr, nullptr);
+    //     if (Result != UR_RESULT_SUCCESS) {
+    //         getContext()->logger.error("Device Global[{}] Read Failed: {}",
+    //                                    kSPIR_MsanDeviceGlobalMetadata, Result);
+    //         return Result;
+    //     }
 
-        for (size_t i = 0; i < NumOfDeviceGlobal; i++) {
-            auto AI = std::make_shared<AllocInfo>(
-                AllocInfo{GVInfos[i].Addr,
-                          GVInfos[i].Addr,
-                          GVInfos[i].Addr + GVInfos[i].Size,
-                          GVInfos[i].SizeWithRedZone,
-                          MsanAllocType::DEVICE_GLOBAL,
-                          false,
-                          Context,
-                          Device,
-                          GetCurrentBacktrace(),
-                          {}});
+    // for (size_t i = 0; i < NumOfDeviceGlobal; i++) {
+    //     auto AI = std::make_shared<MsanAllocInfo>(
+    //         MsanAllocInfo{GVInfos[i].Addr,
+    //                       GVInfos[i].Addr,
+    //                       GVInfos[i].Addr + GVInfos[i].Size,
+    //                       GVInfos[i].SizeWithRedZone,
+    //                       MsanAllocType::DEVICE_GLOBAL,
+    //                       false,
+    //                       Context,
+    //                       Device,
+    //                       GetCurrentBacktrace(),
+    //                       {}});
 
-            ContextInfo->insertAllocInfo({Device}, AI);
+    //     ContextInfo->insertAllocInfo({Device}, AI);
 
-            {
-                std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Guard(
-                    m_AllocationMapMutex, ProgramInfo->Mutex);
-                ProgramInfo->AllocInfoForGlobals.emplace(AI);
-                m_AllocationMap.emplace(AI->AllocBegin, std::move(AI));
-            }
-        }
-    }
+    //     {
+    //         std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Guard(
+    //             m_AllocationMapMutex, ProgramInfo->Mutex);
+    //         ProgramInfo->AllocInfoForGlobals.emplace(AI);
+    //         m_AllocationMap.emplace(AI->AllocBegin, std::move(AI));
+    //     }
+    // }
+    // }
 
     return UR_RESULT_SUCCESS;
 }
 
 ur_result_t MsanInterceptor::unregisterProgram(ur_program_handle_t Program) {
-    auto ProgramInfo = getProgramInfo(Program);
+    // auto ProgramInfo = getProgramInfo(Program);
 
-    std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Guard(
-        m_AllocationMapMutex, ProgramInfo->Mutex);
-    for (auto AI : ProgramInfo->AllocInfoForGlobals) {
-        UR_CALL(getDeviceInfo(AI->Device)->Shadow->ReleaseShadow(AI));
-        m_AllocationMap.erase(AI->AllocBegin);
-    }
-    ProgramInfo->AllocInfoForGlobals.clear();
+    // std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Guard(
+    //     m_AllocationMapMutex, ProgramInfo->Mutex);
+    // for (auto AI : ProgramInfo->AllocInfoForGlobals) {
+    //     UR_CALL(getDeviceInfo(AI->Device)->Shadow->ReleaseShadow(AI));
+    //     m_AllocationMap.erase(AI->AllocBegin);
+    // }
+    // ProgramInfo->AllocInfoForGlobals.clear();
 
     return UR_RESULT_SUCCESS;
 }
@@ -560,34 +477,34 @@ ur_result_t MsanInterceptor::prepareLaunch(
         auto KernelInfo = getKernelInfo(Kernel);
 
         // Validate pointer arguments
-        if (getOptions().DetectKernelArguments) {
-            for (const auto &[ArgIndex, PtrPair] : KernelInfo->PointerArgs) {
-                auto Ptr = PtrPair.first;
-                if (Ptr == nullptr) {
-                    continue;
-                }
-                if (auto ValidateResult = ValidateUSMPointer(
-                        ContextInfo->Handle, DeviceInfo->Handle, (uptr)Ptr)) {
-                    ReportInvalidKernelArgument(Kernel, ArgIndex, (uptr)Ptr,
-                                                ValidateResult, PtrPair.second);
-                    exit(1);
-                }
-            }
-        }
+        // if (getOptions().DetectKernelArguments) {
+        //     for (const auto &[ArgIndex, PtrPair] : KernelInfo->PointerArgs) {
+        //         auto Ptr = PtrPair.first;
+        //         if (Ptr == nullptr) {
+        //             continue;
+        //         }
+        //         if (auto ValidateResult = ValidateUSMPointer(
+        //                 ContextInfo->Handle, DeviceInfo->Handle, (uptr)Ptr)) {
+        //             ReportInvalidKernelArgument(Kernel, ArgIndex, (uptr)Ptr,
+        //                                         ValidateResult, PtrPair.second);
+        //             exit(1);
+        //         }
+        //     }
+        // }
 
-        // Set membuffer arguments
-        for (const auto &[ArgIndex, MemBuffer] : KernelInfo->BufferArgs) {
-            char *ArgPointer = nullptr;
-            UR_CALL(MemBuffer->getHandle(DeviceInfo->Handle, ArgPointer));
-            ur_result_t URes = getContext()->urDdiTable.Kernel.pfnSetArgPointer(
-                Kernel, ArgIndex, nullptr, ArgPointer);
-            if (URes != UR_RESULT_SUCCESS) {
-                getContext()->logger.error(
-                    "Failed to set buffer {} as the {} arg to kernel {}: {}",
-                    ur_cast<ur_mem_handle_t>(MemBuffer.get()), ArgIndex, Kernel,
-                    URes);
-            }
-        }
+        // // Set membuffer arguments
+        // for (const auto &[ArgIndex, MemBuffer] : KernelInfo->BufferArgs) {
+        //     char *ArgPointer = nullptr;
+        //     UR_CALL(MemBuffer->getHandle(DeviceInfo->Handle, ArgPointer));
+        //     ur_result_t URes = getContext()->urDdiTable.Kernel.pfnSetArgPointer(
+        //         Kernel, ArgIndex, nullptr, ArgPointer);
+        //     if (URes != UR_RESULT_SUCCESS) {
+        //         getContext()->logger.error(
+        //             "Failed to set buffer {} as the {} arg to kernel {}: {}",
+        //             ur_cast<ur_mem_handle_t>(MemBuffer.get()), ArgIndex, Kernel,
+        //             URes);
+        //     }
+        // }
 
         // Set launch info argument
         auto ArgNums = GetKernelNumArgs(Kernel);
@@ -674,8 +591,7 @@ ur_result_t MsanInterceptor::prepareLaunch(
                 DeviceInfo->Type == DeviceType::GPU_DG2) {
                 const size_t LocalMemorySize =
                     GetDeviceLocalMemorySize(DeviceInfo->Handle);
-                const size_t LocalShadowMemorySize =
-                    (NumWG * LocalMemorySize) >> msan_SHADOW_SCALE;
+                const size_t LocalShadowMemorySize = NumWG * LocalMemorySize;
 
                 getContext()->logger.debug(
                     "LocalMemory(WorkGroup={}, LocalMemorySize={}, "
@@ -699,8 +615,8 @@ ur_result_t MsanInterceptor::prepareLaunch(
                         LaunchInfo.Data->LocalShadowOffset +
                         LocalShadowMemorySize - 1;
 
-                    ContextInfo->Stats.UpdateShadowMalloced(
-                        LocalShadowMemorySize);
+                    // ContextInfo->Stats.UpdateShadowMalloced(
+                    //     LocalShadowMemorySize);
 
                     getContext()->logger.info(
                         "ShadowMemory(Local, {} - {})",
@@ -718,7 +634,7 @@ ur_result_t MsanInterceptor::prepareLaunch(
             } else if (DeviceInfo->Type == DeviceType::GPU_PVC ||
                        DeviceInfo->Type == DeviceType::GPU_DG2) {
                 const size_t PrivateShadowMemorySize =
-                    (NumWG * msan_PRIVATE_SIZE) >> msan_SHADOW_SCALE;
+                    NumWG * MSAN_PRIVATE_SIZE;
 
                 getContext()->logger.debug("PrivateMemory(WorkGroup={}, "
                                            "PrivateShadowMemorySize={})",
@@ -741,8 +657,8 @@ ur_result_t MsanInterceptor::prepareLaunch(
                         LaunchInfo.Data->PrivateShadowOffset +
                         PrivateShadowMemorySize - 1;
 
-                    ContextInfo->Stats.UpdateShadowMalloced(
-                        PrivateShadowMemorySize);
+                    // ContextInfo->Stats.UpdateShadowMalloced(
+                    //     PrivateShadowMemorySize);
 
                     getContext()->logger.info(
                         "ShadowMemory(Private, {} - {})",
@@ -764,10 +680,10 @@ MsanInterceptor::findAllocInfoByAddress(uptr Address) {
         return std::optional<MsanAllocationIterator>{};
     }
     --It;
-    // Make sure we got the right AllocInfo
+    // Make sure we got the right MsanAllocInfo
     assert(Address >= It->second->AllocBegin &&
            Address < It->second->AllocBegin + It->second->AllocSize &&
-           "Wrong AllocInfo for the address");
+           "Wrong MsanAllocInfo for the address");
     return It;
 }
 
@@ -784,8 +700,20 @@ MsanInterceptor::findAllocInfoByContext(ur_context_handle_t Context) {
     return AllocInfos;
 }
 
+namespace msan {
+
+ur_result_t DeviceInfo::allocShadowMemory(ur_context_handle_t Context) {
+    Shadow = GetMsanShadowMemory(Context, Handle, Type);
+    assert(Shadow && "Failed to get shadow memory");
+    UR_CALL(Shadow->Setup());
+    getContext()->logger.info("ShadowMemory(Global): {} - {}",
+                              (void *)Shadow->ShadowBegin,
+                              (void *)Shadow->ShadowEnd);
+    return UR_RESULT_SUCCESS;
+}
+
 ContextInfo::~ContextInfo() {
-    Stats.Print(Handle);
+    // Stats.Print(Handle);
 
     [[maybe_unused]] auto Result =
         getContext()->urDdiTable.Context.pfnRelease(Handle);
@@ -796,26 +724,27 @@ ur_result_t USMLaunchInfo::initialize() {
     UR_CALL(getContext()->urDdiTable.Context.pfnRetain(Context));
     UR_CALL(getContext()->urDdiTable.Device.pfnRetain(Device));
     UR_CALL(getContext()->urDdiTable.USM.pfnSharedAlloc(
-        Context, Device, nullptr, nullptr, sizeof(LaunchInfo), (void **)&Data));
-    *Data = LaunchInfo{};
+        Context, Device, nullptr, nullptr, sizeof(MsanLaunchInfo),
+        (void **)&Data));
+    *Data = MsanLaunchInfo{};
     return UR_RESULT_SUCCESS;
 }
 
 ur_result_t USMLaunchInfo::updateKernelInfo(const KernelInfo &KI) {
-    auto NumArgs = KI.LocalArgs.size();
-    if (NumArgs) {
-        Data->NumLocalArgs = NumArgs;
-        UR_CALL(getContext()->urDdiTable.USM.pfnSharedAlloc(
-            Context, Device, nullptr, nullptr, sizeof(LocalArgsInfo) * NumArgs,
-            (void **)&Data->LocalArgs));
-        uint32_t i = 0;
-        for (auto [ArgIndex, ArgInfo] : KI.LocalArgs) {
-            Data->LocalArgs[i++] = ArgInfo;
-            getContext()->logger.debug(
-                "local_args (argIndex={}, size={}, sizeWithRZ={})", ArgIndex,
-                ArgInfo.Size, ArgInfo.SizeWithRedZone);
-        }
-    }
+    // auto NumArgs = KI.LocalArgs.size();
+    // if (NumArgs) {
+    //     Data->NumLocalArgs = NumArgs;
+    //     UR_CALL(getContext()->urDdiTable.USM.pfnSharedAlloc(
+    //         Context, Device, nullptr, nullptr,
+    //         sizeof(MsanLocalArgsInfo) * NumArgs, (void **)&Data->LocalArgs));
+    //     uint32_t i = 0;
+    //     for (auto [ArgIndex, ArgInfo] : KI.LocalArgs) {
+    //         Data->LocalArgs[i++] = ArgInfo;
+    //         getContext()->logger.debug(
+    //             "local_args (argIndex={}, size={}, sizeWithRZ={})", ArgIndex,
+    //             ArgInfo.Size, ArgInfo.SizeWithRedZone);
+    //     }
+    // }
     return UR_RESULT_SUCCESS;
 }
 
@@ -826,16 +755,16 @@ USMLaunchInfo::~USMLaunchInfo() {
         auto ContextInfo = getMsanInterceptor()->getContextInfo(Context);
         if (Type == DeviceType::GPU_PVC || Type == DeviceType::GPU_DG2) {
             if (Data->PrivateShadowOffset) {
-                ContextInfo->Stats.UpdateShadowFreed(
-                    Data->PrivateShadowOffsetEnd - Data->PrivateShadowOffset +
-                    1);
+                // ContextInfo->Stats.UpdateShadowFreed(
+                //     Data->PrivateShadowOffsetEnd - Data->PrivateShadowOffset +
+                //     1);
                 Result = getContext()->urDdiTable.USM.pfnFree(
                     Context, (void *)Data->PrivateShadowOffset);
                 assert(Result == UR_RESULT_SUCCESS);
             }
             if (Data->LocalShadowOffset) {
-                ContextInfo->Stats.UpdateShadowFreed(
-                    Data->LocalShadowOffsetEnd - Data->LocalShadowOffset + 1);
+                // ContextInfo->Stats.UpdateShadowFreed(
+                //     Data->LocalShadowOffsetEnd - Data->LocalShadowOffset + 1);
                 Result = getContext()->urDdiTable.USM.pfnFree(
                     Context, (void *)Data->LocalShadowOffset);
                 assert(Result == UR_RESULT_SUCCESS);
@@ -854,6 +783,8 @@ USMLaunchInfo::~USMLaunchInfo() {
     Result = getContext()->urDdiTable.Device.pfnRelease(Device);
     assert(Result == UR_RESULT_SUCCESS);
 }
+
+} // namespace msan
 
 static MsanInterceptor *interceptor;
 

@@ -19,11 +19,11 @@
 
 namespace ur_sanitizer_layer {
 
-struct ShadowMemory {
-    ShadowMemory(ur_context_handle_t Context, ur_device_handle_t Device)
+struct MsanShadowMemory {
+    MsanShadowMemory(ur_context_handle_t Context, ur_device_handle_t Device)
         : Context(Context), Device(Device) {}
 
-    virtual ~ShadowMemory() {}
+    virtual ~MsanShadowMemory() {}
 
     virtual ur_result_t Setup() = 0;
 
@@ -49,9 +49,9 @@ struct ShadowMemory {
     uptr ShadowEnd = 0;
 };
 
-struct ShadowMemoryCPU final : public ShadowMemory {
-    ShadowMemoryCPU(ur_context_handle_t Context, ur_device_handle_t Device)
-        : ShadowMemory(Context, Device) {}
+struct MsanShadowMemoryCPU final : public MsanShadowMemory {
+    MsanShadowMemoryCPU(ur_context_handle_t Context, ur_device_handle_t Device)
+        : MsanShadowMemory(Context, Device) {}
 
     ur_result_t Setup() override;
 
@@ -65,9 +65,9 @@ struct ShadowMemoryCPU final : public ShadowMemory {
     size_t GetShadowSize() override { return 0x80000000000ULL; }
 };
 
-struct ShadowMemoryGPU : public ShadowMemory {
-    ShadowMemoryGPU(ur_context_handle_t Context, ur_device_handle_t Device)
-        : ShadowMemory(Context, Device) {}
+struct MsanShadowMemoryGPU : public MsanShadowMemory {
+    MsanShadowMemoryGPU(ur_context_handle_t Context, ur_device_handle_t Device)
+        : MsanShadowMemory(Context, Device) {}
 
     ur_result_t Setup() override;
 
@@ -101,9 +101,9 @@ struct ShadowMemoryGPU : public ShadowMemory {
 ///   Host/Shared USM : 0x0              ~ 0x07ff_ffff_ffff
 ///   Device USM      : 0x0800_0000_0000 ~ 0x17ff_ffff_ffff
 ///
-struct ShadowMemoryPVC final : public ShadowMemoryGPU {
-    ShadowMemoryPVC(ur_context_handle_t Context, ur_device_handle_t Device)
-        : ShadowMemoryGPU(Context, Device) {}
+struct MsanShadowMemoryPVC final : public MsanShadowMemoryGPU {
+    MsanShadowMemoryPVC(ur_context_handle_t Context, ur_device_handle_t Device)
+        : MsanShadowMemoryGPU(Context, Device) {}
 
     uptr MemToShadow(uptr Ptr) override;
 
@@ -120,17 +120,17 @@ struct ShadowMemoryPVC final : public ShadowMemoryGPU {
 ///   Host/Shared USM : 0x0              ~ 0x07ff_ffff_ffff
 ///   Device      USM : 0x0800_0000_0000 ~ 0x0fff_ffff_ffff
 ///
-struct ShadowMemoryDG2 final : public ShadowMemoryGPU {
-    ShadowMemoryDG2(ur_context_handle_t Context, ur_device_handle_t Device)
-        : ShadowMemoryGPU(Context, Device) {}
+struct MsanShadowMemoryDG2 final : public MsanShadowMemoryGPU {
+    MsanShadowMemoryDG2(ur_context_handle_t Context, ur_device_handle_t Device)
+        : MsanShadowMemoryGPU(Context, Device) {}
 
     uptr MemToShadow(uptr Ptr) override;
 
     size_t GetShadowSize() override { return 0x100000000000ULL; }
 };
 
-std::shared_ptr<ShadowMemory> GetShadowMemory(ur_context_handle_t Context,
-                                              ur_device_handle_t Device,
-                                              DeviceType Type);
+std::shared_ptr<MsanShadowMemory>
+GetMsanShadowMemory(ur_context_handle_t Context, ur_device_handle_t Device,
+                    DeviceType Type);
 
 } // namespace ur_sanitizer_layer

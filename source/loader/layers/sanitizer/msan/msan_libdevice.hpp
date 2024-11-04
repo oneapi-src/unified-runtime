@@ -16,17 +16,12 @@
 
 namespace ur_sanitizer_layer {
 
-enum class DeviceSanitizerErrorType : int32_t {
+enum class MsanErrorType : int32_t {
     UNKNOWN,
-    OUT_OF_BOUNDS,
-    MISALIGNED,
-    USE_AFTER_FREE,
-    OUT_OF_SHADOW_BOUNDS,
-    UNKNOWN_DEVICE,
-    NULL_POINTER,
+    USES_OF_UNINITIALIZED_VALUE,
 };
 
-enum class DeviceSanitizerMemoryType : int32_t {
+enum class MsanMemoryType : int32_t {
     UNKNOWN,
     USM_DEVICE,
     USM_HOST,
@@ -37,7 +32,7 @@ enum class DeviceSanitizerMemoryType : int32_t {
     DEVICE_GLOBAL,
 };
 
-struct DeviceSanitizerReport {
+struct MsanErrorReport {
     int Flag = 0;
 
     char File[256 + 1] = {};
@@ -56,20 +51,20 @@ struct DeviceSanitizerReport {
     uintptr_t Address = 0;
     bool IsWrite = false;
     uint32_t AccessSize = 0;
-    DeviceSanitizerMemoryType MemoryType = DeviceSanitizerMemoryType::UNKNOWN;
-    DeviceSanitizerErrorType ErrorType = DeviceSanitizerErrorType::UNKNOWN;
+    MsanMemoryType MemoryType = MsanMemoryType::UNKNOWN;
+    MsanErrorType ErrorType = MsanErrorType::UNKNOWN;
 
     bool IsRecover = false;
 };
 
-struct LocalArgsInfo {
+struct MsanLocalArgsInfo {
     uint64_t Size = 0;
     uint64_t SizeWithRedZone = 0;
 };
 
-constexpr std::size_t msan_MAX_NUM_REPORTS = 10;
+constexpr std::size_t MSAN_MAX_NUM_REPORTS = 10;
 
-struct LaunchInfo {
+struct MsanLaunchInfo {
     uintptr_t GlobalShadowOffset = 0;
     uintptr_t GlobalShadowOffsetEnd = 0;
 
@@ -79,81 +74,47 @@ struct LaunchInfo {
     uintptr_t LocalShadowOffset = 0;
     uintptr_t LocalShadowOffsetEnd = 0;
 
-    LocalArgsInfo *LocalArgs = nullptr; // Ordered by ArgIndex
+    MsanLocalArgsInfo *LocalArgs = nullptr; // Ordered by ArgIndex
     uint32_t NumLocalArgs = 0;
 
     DeviceType DeviceTy = DeviceType::UNKNOWN;
     uint32_t Debug = 0;
 
-    DeviceSanitizerReport SanitizerReport[msan_MAX_NUM_REPORTS];
+    MsanErrorReport SanitizerReport[MSAN_MAX_NUM_REPORTS];
 };
-
-constexpr unsigned msan_SHADOW_SCALE = 4;
-constexpr unsigned msan_SHADOW_GRANULARITY = 1ULL << msan_SHADOW_SCALE;
 
 // Based on the observation, only the last 24 bits of the address of the private
 // variable have changed
-constexpr std::size_t msan_PRIVATE_SIZE = 0xffffffULL + 1;
+constexpr std::size_t MSAN_PRIVATE_SIZE = 0xffffffULL + 1;
 
-// These magic values are written to shadow for better error
-// reporting.
-constexpr int kUsmDeviceRedzoneMagic = (char)0x81;
-constexpr int kUsmHostRedzoneMagic = (char)0x82;
-constexpr int kUsmSharedRedzoneMagic = (char)0x83;
-constexpr int kMemBufferRedzoneMagic = (char)0x84;
-constexpr int kDeviceGlobalRedzoneMagic = (char)0x85;
-constexpr int kNullPointerRedzoneMagic = (char)0x86;
+constexpr auto kSPIR_MsanDeviceGlobalCount = "__MsanDeviceGlobalCount";
+constexpr auto kSPIR_MsanDeviceGlobalMetadata = "__MsanDeviceGlobalMetadata";
 
-constexpr int kUsmDeviceDeallocatedMagic = (char)0x91;
-constexpr int kUsmHostDeallocatedMagic = (char)0x92;
-constexpr int kUsmSharedDeallocatedMagic = (char)0x93;
-constexpr int kMemBufferDeallocatedMagic = (char)0x93;
-
-constexpr int kSharedLocalRedzoneMagic = (char)0xa1;
-
-// Same with host ASan stack
-const int kPrivateLeftRedzoneMagic = (char)0xf1;
-const int kPrivateMidRedzoneMagic = (char)0xf2;
-const int kPrivateRightRedzoneMagic = (char)0xf3;
-
-constexpr auto kSPIR_AsanDeviceGlobalCount = "__AsanDeviceGlobalCount";
-constexpr auto kSPIR_AsanDeviceGlobalMetadata = "__AsanDeviceGlobalMetadata";
-
-inline const char *ToString(DeviceSanitizerMemoryType MemoryType) {
+inline const char *ToString(MsanMemoryType MemoryType) {
     switch (MemoryType) {
-    case DeviceSanitizerMemoryType::USM_DEVICE:
+    case MsanMemoryType::USM_DEVICE:
         return "Device USM";
-    case DeviceSanitizerMemoryType::USM_HOST:
+    case MsanMemoryType::USM_HOST:
         return "Host USM";
-    case DeviceSanitizerMemoryType::USM_SHARED:
+    case MsanMemoryType::USM_SHARED:
         return "Shared USM";
-    case DeviceSanitizerMemoryType::LOCAL:
+    case MsanMemoryType::LOCAL:
         return "Local Memory";
-    case DeviceSanitizerMemoryType::PRIVATE:
+    case MsanMemoryType::PRIVATE:
         return "Private Memory";
-    case DeviceSanitizerMemoryType::MEM_BUFFER:
+    case MsanMemoryType::MEM_BUFFER:
         return "Memory Buffer";
-    case DeviceSanitizerMemoryType::DEVICE_GLOBAL:
+    case MsanMemoryType::DEVICE_GLOBAL:
         return "Device Global";
     default:
         return "Unknown Memory";
     }
 }
 
-inline const char *ToString(DeviceSanitizerErrorType ErrorType) {
+inline const char *ToString(MsanErrorType ErrorType) {
     switch (ErrorType) {
-    case DeviceSanitizerErrorType::OUT_OF_BOUNDS:
-        return "out-of-bounds-access";
-    case DeviceSanitizerErrorType::MISALIGNED:
-        return "misaligned-access";
-    case DeviceSanitizerErrorType::USE_AFTER_FREE:
-        return "use-after-free";
-    case DeviceSanitizerErrorType::OUT_OF_SHADOW_BOUNDS:
-        return "out-of-shadow-bounds-access";
-    case DeviceSanitizerErrorType::UNKNOWN_DEVICE:
-        return "unknown-device";
-    case DeviceSanitizerErrorType::NULL_POINTER:
-        return "null-pointer-access";
+    case MsanErrorType::USES_OF_UNINITIALIZED_VALUE:
+        return "out-of-uninitialized-value";
     default:
         return "unknown-error";
     }
