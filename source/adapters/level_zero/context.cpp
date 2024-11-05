@@ -561,9 +561,6 @@ ur_context_handle_t_::getEventFromContextCache(ur_event_flags_t Flags,
                                                ur_device_handle_t Device) {
   std::scoped_lock<ur_mutex> Lock(EventCacheMutex);
   auto Cache = getEventCache(Flags, Device);
-  if (Flags & COUNTER_BASED) {
-    Cache = getCounterBasedEventCache(Flags, Device);
-  }
   if (Cache->empty())
     return nullptr;
 
@@ -593,13 +590,8 @@ void ur_context_handle_t_::addEventToContextCache(ur_event_handle_t Event) {
   if (Event->isProfilingEnabled())
     Flags |= ENABLE_PROFILER;
 
-  if (Event->CounterBasedEventsEnabled) {
-    auto Cache = getCounterBasedEventCache(Flags, Device);
-    Cache->emplace_back(Event);
-  } else {
-    auto Cache = getEventCache(Flags, Device);
-    Cache->emplace_back(Event);
-  }
+  auto Cache = getEventCache(Flags, Device);
+  Cache->emplace_back(Event);
 }
 
 ur_result_t

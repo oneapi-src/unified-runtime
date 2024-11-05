@@ -325,34 +325,6 @@ private:
       }
     }
   };
-  auto getCounterBasedEventCache(ur_event_flags_t Flags,
-                                 ur_device_handle_t Device) {
-    if (Flags & USING_IMM_CMDLIST) {
-      if (Device) {
-        auto EventCachesMap =
-            (Flags & ENABLE_PROFILER)
-                ? &EventCachesDeviceMap[CounterBasedImmediateProfilingCacheType]
-                : &EventCachesDeviceMap[CounterBasedImmediateCacheType];
-        return &EventCaches[(*EventCachesMap)[Device]];
-      } else {
-        return (Flags & ENABLE_PROFILER)
-                   ? &EventCaches[CounterBasedImmediateProfilingCacheType]
-                   : &EventCaches[CounterBasedImmediateCacheType];
-      }
-    } else {
-      if (Device) {
-        auto EventCachesMap =
-            (Flags & ENABLE_PROFILER)
-                ? &EventCachesDeviceMap[CounterBasedRegularProfilingCacheType]
-                : &EventCachesDeviceMap[CounterBasedRegularCacheType];
-        return &EventCaches[(*EventCachesMap)[Device]];
-      } else {
-        return (Flags & ENABLE_PROFILER)
-                   ? &EventCaches[CounterBasedRegularProfilingCacheType]
-                   : &EventCaches[CounterBasedRegularCacheType];
-      }
-    }
-  }
 };
 
 // Helper function to release the context, a caller must lock the platform-level
