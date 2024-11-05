@@ -1559,13 +1559,21 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
     ur_queue_handle_t hQueue, const void *pMem, size_t size,
     ur_usm_migration_flags_t flags, uint32_t numEventsInWaitList,
     const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent) {
-  std::ignore = flags;
+  ur_device_handle_t Device = hQueue->getDevice();
+  CUdevice TargetDevice;
+  if (flags == UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE) {
+    TargetDevice = Device->get();
+  } else if (flags == UR_USM_MIGRATION_FLAG_DEVICE_TO_HOST) {
+    TargetDevice = CU_DEVICE_CPU;
+  } else {
+    setErrorMessage("Invalid USM migration flag", UR_RESULT_ERROR_INVALID_ENUMERATION);
+    return UR_RESULT_ERROR_INVALID_ENUMERATION;
+  }
 
   size_t PointerRangeSize = 0;
   UR_CHECK_ERROR(cuPointerGetAttribute(
       &PointerRangeSize, CU_POINTER_ATTRIBUTE_RANGE_SIZE, (CUdeviceptr)pMem));
   UR_ASSERT(size <= PointerRangeSize, UR_RESULT_ERROR_INVALID_SIZE);
-  ur_device_handle_t Device = hQueue->getDevice();
 
   // Certain cuda devices and Windows do not have support for some Unified
   // Memory features. cuMemPrefetchAsync requires concurrent memory access
@@ -1602,7 +1610,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
       UR_CHECK_ERROR(EventPtr->start());
     }
     UR_CHECK_ERROR(
-        cuMemPrefetchAsync((CUdeviceptr)pMem, size, Device->get(), CuStream));
+        cuMemPrefetchAsync((CUdeviceptr)pMem, size, TargetDevice, CuStream));
     if (phEvent) {
       UR_CHECK_ERROR(EventPtr->record());
       *phEvent = EventPtr.release();
