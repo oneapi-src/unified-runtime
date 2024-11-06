@@ -191,8 +191,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
               kernel._subhandler(kernel._args.data(), &state);
             }
           });
-          if (++threadId == numParallelThreads)
+          if (++threadId == numParallelThreads) {
             threadId = 0;
+            if (!hKernel->_localArgInfo.empty())
+              Tasks.wait();
+          }
         }
       }
     } else {
@@ -226,9 +229,13 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
               }
             });
       }
-
       // schedule the remaining tasks
       if (remainder) {
+        if (thread) {
+          thread = 0;
+          if (!hKernel->_localArgInfo.empty())
+            Tasks.wait();
+        }
         Tasks.schedule([&groups, remainder, thread,
                         scheduled = numParallelThreads * groupsPerThread,
                         hKernel](size_t /*threadId*/) {
