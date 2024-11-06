@@ -68,12 +68,6 @@ struct MsanLaunchInfo {
     uintptr_t GlobalShadowOffset = 0;
     uintptr_t GlobalShadowOffsetEnd = 0;
 
-    uintptr_t PrivateShadowOffset = 0;
-    uintptr_t PrivateShadowOffsetEnd = 0;
-
-    uintptr_t LocalShadowOffset = 0;
-    uintptr_t LocalShadowOffsetEnd = 0;
-
     MsanLocalArgsInfo *LocalArgs = nullptr; // Ordered by ArgIndex
     uint32_t NumLocalArgs = 0;
 

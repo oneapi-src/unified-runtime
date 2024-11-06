@@ -1871,6 +1871,8 @@ ur_result_t initAsanDDITable(ur_dditable_t *dditable) {
             UR_API_VERSION_CURRENT, &dditable->USM);
     }
 
+    getContext()->logger.info("initMsanDDITable: {}", result);
+
     return result;
 }
 

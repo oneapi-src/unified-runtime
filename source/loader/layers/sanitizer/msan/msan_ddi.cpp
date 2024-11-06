@@ -1873,6 +1873,9 @@ ur_result_t initMsanDDITable(ur_dditable_t *dditable) {
             UR_API_VERSION_CURRENT, &dditable->USM);
     }
 
+    getContext()->logger.info("Initialize MemorySanitizer DDI Table: {}",
+                              result);
+
     return result;
 }
 
