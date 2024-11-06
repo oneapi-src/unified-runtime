@@ -332,15 +332,8 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuildExp(
         return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
     }
 
-    pOptions = pOptions == nullptr ? "" : pOptions;
-    getContext()->logger.debug("==== urProgramBuildExp: options='{}'",
-                               pOptions);
+    getContext()->logger.debug("==== urProgramBuildExp");
 
-    std::string options(pOptions);
-    // kSPIR_AsanSpirKernelMetadata needs this
-    options += " -ze-take-global-address";
-
-    // UR_CALL(pfnBuildExp(hProgram, numDevices, phDevices, options.c_str()));
     UR_CALL(pfnBuildExp(hProgram, numDevices, phDevices, pOptions));
     UR_CALL(getContext()->interceptor->registerProgram(hProgram));
 
