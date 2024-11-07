@@ -223,7 +223,6 @@ template <class TP> struct Scheduler : SchedulerBase<TP> {
   inline void wait() {
     for (auto &f : futures)
       f.get();
-    futures.clear();
   }
 
 private:
