@@ -3,6 +3,8 @@
 # See LICENSE.TXT
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
+include(CheckLinkerFlag)
+
 if(UR_BUILD_ADAPTER_L0)
     set(ADAPTER_LIB_TYPE SHARED)
     if(UR_STATIC_ADAPTER_L0)
@@ -99,7 +101,8 @@ if(UR_BUILD_ADAPTER_L0)
         SOVERSION "${PROJECT_VERSION_MAJOR}"
     )
 
-    if(CMAKE_CXX_COMPILER_LINKER_ID MATCHES MSVC)
+    check_linker_flag(CXX "LINKER:/DEPENDENTLOADFLAG:0x800" CXX_LINKER_SUPPORTS_DEPENDENTLOADFLAG)
+    if(CXX_LINKER_SUPPORTS_DEPENDENTLOADFLAG)
         # 0x800: Search for the DLL only in the System32 folder
         target_link_options(ur_adapter_level_zero PRIVATE LINKER:/DEPENDENTLOADFLAG:0x800)
     endif()
@@ -194,7 +197,8 @@ if(UR_BUILD_ADAPTER_L0_V2)
         SOVERSION "${PROJECT_VERSION_MAJOR}"
     )
 
-    if(CMAKE_CXX_COMPILER_LINKER_ID MATCHES MSVC)
+    check_linker_flag(CXX "LINKER:/DEPENDENTLOADFLAG:0x800" CXX_LINKER_SUPPORTS_DEPENDENTLOADFLAG)
+    if(CXX_LINKER_SUPPORTS_DEPENDENTLOADFLAG)
         # 0x800: Search for the DLL only in the System32 folder
         target_link_options(ur_adapter_level_zero_v2 PUBLIC LINKER:/DEPENDENTLOADFLAG:0x800)
     endif()
