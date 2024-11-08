@@ -9,7 +9,7 @@ using urEnqueueUSMPrefetchWithParamTest =
     uur::urUSMDeviceAllocTestWithParam<ur_usm_migration_flag_t>;
 
 UUR_TEST_SUITE_P(urEnqueueUSMPrefetchWithParamTest,
-                 ::testing::Values(UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE),
+                 ::testing::Values(UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE, UR_USM_MIGRATION_FLAG_DEVICE_TO_HOST),
                  uur::deviceTestWithParamPrinter<ur_usm_migration_flag_t>);
 
 TEST_P(urEnqueueUSMPrefetchWithParamTest, Success) {

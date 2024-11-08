@@ -5,7 +5,7 @@ urEnqueueKernelLaunchKernelSubGroupTest.Success/NVIDIA_CUDA_BACKEND___{{.*}}_
 urEnqueueMemBufferMapTestWithWriteFlagParam.SuccessWrite/NVIDIA_CUDA_BACKEND___{{.*}}___UR_MAP_FLAG_WRITE_INVALIDATE_REGION
 urEnqueueUSMAdviseWithParamTest.Success/NVIDIA_CUDA_BACKEND___{{.*}}___UR_USM_ADVICE_FLAG_DEFAULT
 urEnqueueUSMAdviseTest.MultipleParamsSuccess/NVIDIA_CUDA_BACKEND___{{.*}}_
-urEnqueueUSMPrefetchWithParamTest.Success/NVIDIA_CUDA_BACKEND___{{.*}}___UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE
-urEnqueueUSMPrefetchWithParamTest.CheckWaitEvent/NVIDIA_CUDA_BACKEND___{{.*}}___UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE
+urEnqueueUSMPrefetchWithParamTest.Success/NVIDIA_CUDA_BACKEND___{{.*}}___UR_USM_MIGRATION_FLAG_{{.*}}
+urEnqueueUSMPrefetchWithParamTest.CheckWaitEvent/NVIDIA_CUDA_BACKEND___{{.*}}___UR_USM_MIGRATION_FLAG_{{.*}}
 urEnqueueTimestampRecordingExpTest.Success/NVIDIA_CUDA_BACKEND___{{.*}}_
 urEnqueueTimestampRecordingExpTest.SuccessBlocking/NVIDIA_CUDA_BACKEND___{{.*}}_
