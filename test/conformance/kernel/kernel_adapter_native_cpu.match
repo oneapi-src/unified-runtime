@@ -5,6 +5,7 @@ urKernelCreateTest.InvalidNullPointerName/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.
 urKernelCreateTest.InvalidNullPointerKernel/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 urKernelCreateTest.InvalidKernelName/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 urKernelCreateWithNativeHandleTest.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
+urKernelCreateWithNativeHandleTest.SuccessWithProperties/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 urKernelCreateWithNativeHandleTest.InvalidNullHandleContext/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 urKernelCreateWithNativeHandleTest.InvalidNullPointerNativeKernel/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}
 urKernelGetGroupInfoTest.Success/SYCL_NATIVE_CPU___SYCL_Native_CPU__{{.*}}__UR_KERNEL_GROUP_INFO_GLOBAL_WORK_SIZE

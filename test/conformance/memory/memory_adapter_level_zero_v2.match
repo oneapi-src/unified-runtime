@@ -232,6 +232,8 @@
 {{OPT}}urMemImageCreateTestWithImageFormatParam.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_IMAGE_CHANNEL_ORDER_SRGBA__UR_IMAGE_CHANNEL_TYPE_UNSIGNED_INT32
 {{OPT}}urMemImageCreateTestWithImageFormatParam.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_IMAGE_CHANNEL_ORDER_SRGBA__UR_IMAGE_CHANNEL_TYPE_HALF_FLOAT
 {{OPT}}urMemImageCreateTestWithImageFormatParam.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_IMAGE_CHANNEL_ORDER_SRGBA__UR_IMAGE_CHANNEL_TYPE_FLOAT
+{{OPT}}urMemImageCreateWithNativeHandleTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}
+{{OPT}}urMemImageCreateWithNativeHandleTest.SuccessWithProperties/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}
 {{OPT}}urMemImageGetInfoTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_IMAGE_INFO_FORMAT
 {{OPT}}urMemImageGetInfoTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_IMAGE_INFO_ELEMENT_SIZE
 {{OPT}}urMemImageGetInfoTest.Success/Intel_R__oneAPI_Unified_Runtime_over_Level_Zero___{{.*}}___UR_IMAGE_INFO_ROW_PITCH
