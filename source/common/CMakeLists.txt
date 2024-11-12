@@ -23,8 +23,8 @@ if (NOT DEFINED UMF_REPO)
 endif()
 
 if (NOT DEFINED UMF_TAG)
-    # v0.9.x 12.09.2024: 0.9.0 release
-    set(UMF_TAG v0.9.0)
+    # v0.9.x 12.11.2024: 0.9.1 release
+    set(UMF_TAG v0.9.1)
 endif()
 
 message(STATUS "Will fetch Unified Memory Framework from ${UMF_REPO}")
