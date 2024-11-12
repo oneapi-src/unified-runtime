@@ -1338,17 +1338,20 @@ ur_queue_handle_t_::executeCommandList(ur_command_list_ptr_t CommandList,
   }
 
   if (!UsingImmCmdLists) {
-    int numCompleted = 0;
-    for (auto &Event : CommandList->second.EventList) {
-      if (Event->ZeEvent) {
-        ze_result_t ZeResult =
-            ZE_CALL_NOCHECK(zeEventQueryStatus, (Event->ZeEvent));
-        if (ZeResult == ZE_RESULT_SUCCESS)
+    if (this->CounterBasedEventsEnabled) {
+      size_t numCompleted = 0;
+      for (auto &Event : CommandList->second.EventList) {
+        if (Event->ZeEvent) {
+          ze_result_t ZeResult =
+              ZE_CALL_NOCHECK(zeEventQueryStatus, (Event->ZeEvent));
+          if (ZeResult != ZE_RESULT_SUCCESS)
+            break;
           numCompleted++;
+        }
       }
+      if (numCompleted == CommandList->second.EventList.size())
+        return UR_RESULT_SUCCESS;
     }
-    if (numCompleted == CommandList->second.EventList.size())
-      return UR_RESULT_SUCCESS;
     // In this mode all inner-batch events have device visibility only,
     // and we want the last command in the batch to signal a host-visible
     // event that anybody waiting for any event in the batch will
