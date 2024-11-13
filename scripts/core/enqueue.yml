@@ -848,7 +848,7 @@ etors:
 --- #--------------------------------------------------------------------------
 type: enum
 desc: "USM migration flags, indicating the direction data is migrated in"
-class: $xDevice
+class: $xEnqueue
 name: $x_usm_migration_flags_t
 etors:
     - name: HOST_TO_DEVICE
