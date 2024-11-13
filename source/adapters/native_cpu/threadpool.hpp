@@ -209,32 +209,36 @@ public:
   }
 };
 
-template <class TP> struct SchedulerBase {
-  TP &TPref;
-  SchedulerBase(TP &ref) : TPref(ref) {}
-};
-
-template <class TP> struct Scheduler : SchedulerBase<TP> {
-  using SchedulerBase<TP>::SchedulerBase;
-
-  inline void schedule(worker_task_t &&task) {
-    futures.emplace_back(this->TPref.schedule_task(std::move(task)));
-  }
+class TasksInfo_TP {
+  using FType = std::future<void>;
+  std::vector<FType> futures;
+public:
+  inline void schedule(FType &&f) { futures.emplace_back(std::move(f)); }
   inline void wait() {
     for (auto &f : futures)
-      f.get();
+      f.wait();
   }
+};
 
-private:
-  std::vector<std::future<void>> futures;
+template <class TP, class TaskInfo> struct Scheduler_base {
+  TP &ref;
+  TaskInfo ti;
+  Scheduler_base(TP &ref_) : ref(ref_) {}
+  TaskInfo getTaskInfo() { return std::move(ti); }
+};
+
+template <class TP> struct Scheduler : Scheduler_base<TP, TasksInfo_TP> {
+  using Scheduler_base<TP, TasksInfo_TP>::Scheduler_base;
+
+  inline void schedule(worker_task_t &&task) {
+    ti.schedule(this->ref.schedule_task(std::move(task)));
+  }
 };
 
 using simple_threadpool_t = threadpool_interface<detail::simple_thread_pool>;
 template <class TPType> inline Scheduler<TPType> getScheduler(TPType &tp) {
   return Scheduler<TPType>(tp);
 }
-
-using threadpool_t = simple_threadpool_t;
 
 } // namespace native_cpu
 
@@ -249,19 +253,32 @@ struct TBB_threadpool {
     return oneapi::tbb::info::default_concurrency();
   }
 };
-template <> struct Scheduler<TBB_threadpool> : SchedulerBase<TBB_threadpool> {
-  using SchedulerBase<TBB_threadpool>::SchedulerBase;
+
+struct TBB_TasksInfo {
+  TBB_threadpool *tp;
+  inline void wait() { tp->tasks.wait(); }
+};
+
+template <> struct Scheduler<TBB_threadpool> :  Scheduler_base<TBB_threadpool, TBB_TasksInfo> {
+  using Scheduler_base<TBB_threadpool, TBB_TasksInfo>::Scheduler_base;
   template <class T> inline void schedule(T &&task) {
-    TPref.tasks.run(std::function<void()>([=]() mutable {
+    ref.tasks.run(std::function<void()>([=]() mutable {
       auto thread_id = tbb::this_task_arena::current_thread_index();
       assert(thread_id >= 0 &&
              thread_id < oneapi::tbb::info::default_concurrency());
       task(thread_id);
     }));
   }
-  inline void wait() { TPref.tasks.wait(); }
 };
 
+using TasksInfoType = TBB_TasksInfo;
+using ThreadPoolType = TBB_threadpool;
 } // namespace native_cpu
 
+#else
+// The default backend
+namespace native_cpu {
+using TasksInfoType = TasksInfo_TP;
+using ThreadPoolType = simple_threadpool_t;
+}
 #endif
