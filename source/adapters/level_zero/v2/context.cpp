@@ -49,13 +49,12 @@ ur_context_handle_t_::ur_context_handle_t_(ze_context_handle_t hContext,
                                            bool ownZeContext)
     : commandListCache(hContext),
       eventPoolCache(phDevices[0]->Platform->getNumDevices(),
-                     [context = this,
-                      platform = phDevices[0]->Platform](DeviceId deviceId) {
+                     [context = this, platform = phDevices[0]->Platform](
+                         DeviceId deviceId, v2::event_flags_t flags) {
                        auto device = platform->getDeviceById(deviceId);
                        // TODO: just use per-context id?
                        return std::make_unique<v2::provider_normal>(
-                           context, device, v2::EVENT_COUNTER,
-                           v2::QUEUE_IMMEDIATE);
+                           context, device, v2::QUEUE_IMMEDIATE, flags);
                      }),
       hContext(hContext, ownZeContext),
       hDevices(phDevices, phDevices + numDevices),
@@ -121,6 +120,27 @@ ur_result_t urContextCreate(uint32_t deviceCount,
   return UR_RESULT_SUCCESS;
 }
 
+ur_result_t urContextGetNativeHandle(ur_context_handle_t hContext,
+                                     ur_native_handle_t *phNativeContext) {
+  *phNativeContext =
+      reinterpret_cast<ur_native_handle_t>(hContext->getZeHandle());
+  return UR_RESULT_SUCCESS;
+}
+
+ur_result_t urContextCreateWithNativeHandle(
+    ur_native_handle_t hNativeContext, ur_adapter_handle_t, uint32_t numDevices,
+    const ur_device_handle_t *phDevices,
+    const ur_context_native_properties_t *pProperties,
+    ur_context_handle_t *phContext) {
+  auto zeContext = reinterpret_cast<ze_context_handle_t>(hNativeContext);
+
+  auto ownZeHandle = pProperties ? pProperties->isNativeHandleOwned : false;
+
+  *phContext =
+      new ur_context_handle_t_(zeContext, numDevices, phDevices, ownZeHandle);
+  return UR_RESULT_SUCCESS;
+}
+
 ur_result_t urContextRetain(ur_context_handle_t hContext) {
   return hContext->retain();
 }
@@ -135,7 +155,8 @@ ur_result_t urContextGetInfo(ur_context_handle_t hContext,
                              void *pContextInfo,
 
                              size_t *pPropSizeRet) {
-  std::shared_lock<ur_shared_mutex> Lock(hContext->Mutex);
+  // No locking needed here, we only read const members
+
   UrReturnHelper ReturnValue(propSize, pContextInfo, pPropSizeRet);
   switch (
       (uint32_t)contextInfoType) { // cast to avoid warnings on EXT enum values
@@ -152,8 +173,14 @@ ur_result_t urContextGetInfo(ur_context_handle_t hContext,
   case UR_CONTEXT_INFO_USM_FILL2D_SUPPORT:
     // 2D USM fill is not supported.
     return ReturnValue(uint8_t{false});
+  case UR_CONTEXT_INFO_ATOMIC_MEMORY_ORDER_CAPABILITIES:
+  case UR_CONTEXT_INFO_ATOMIC_MEMORY_SCOPE_CAPABILITIES:
+  case UR_CONTEXT_INFO_ATOMIC_FENCE_ORDER_CAPABILITIES:
+  case UR_CONTEXT_INFO_ATOMIC_FENCE_SCOPE_CAPABILITIES: {
+    return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
+  }
   default:
-    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    return UR_RESULT_ERROR_INVALID_ENUMERATION;
   }
 }
 } // namespace ur::level_zero

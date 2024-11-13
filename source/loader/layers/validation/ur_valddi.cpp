@@ -234,6 +234,10 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGet(
         if (NumEntries == 0 && phPlatforms != NULL) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
+
+        if (pNumPlatforms == NULL && phPlatforms == NULL) {
+            return UR_RESULT_ERROR_INVALID_VALUE;
+        }
     }
 
     ur_result_t result =
@@ -1104,6 +1108,10 @@ __urdlllocal ur_result_t UR_APICALL urMemImageCreate(
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
 
+        if (pImageDesc && UR_STRUCTURE_TYPE_IMAGE_DESC != pImageDesc->stype) {
+            return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
+        }
+
         if (pImageDesc && UR_MEM_TYPE_IMAGE1D_ARRAY < pImageDesc->type) {
             return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
         }
@@ -1503,7 +1511,7 @@ __urdlllocal ur_result_t UR_APICALL urMemGetInfo(
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
 
-        if (UR_MEM_INFO_CONTEXT < propName) {
+        if (UR_MEM_INFO_REFERENCE_COUNT < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
 
@@ -2721,10 +2729,16 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithIL(
 /// @brief Intercept function for urProgramCreateWithBinary
 __urdlllocal ur_result_t UR_APICALL urProgramCreateWithBinary(
     ur_context_handle_t hContext, ///< [in] handle of the context instance
-    ur_device_handle_t
-        hDevice,            ///< [in] handle to device associated with binary.
-    size_t size,            ///< [in] size in bytes.
-    const uint8_t *pBinary, ///< [in] pointer to binary.
+    uint32_t numDevices,          ///< [in] number of devices
+    ur_device_handle_t *
+        phDevices, ///< [in][range(0, numDevices)] a pointer to a list of device handles. The
+                   ///< binaries are loaded for devices specified in this list.
+    size_t *
+        pLengths, ///< [in][range(0, numDevices)] array of sizes of program binaries
+                  ///< specified by `pBinaries` (in bytes).
+    const uint8_t **
+        ppBinaries, ///< [in][range(0, numDevices)] pointer to program binaries to be loaded
+                    ///< for devices specified by `phDevices`.
     const ur_program_properties_t *
         pProperties, ///< [in][optional] pointer to program creation properties.
     ur_program_handle_t
@@ -2742,11 +2756,15 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithBinary(
             return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
         }
 
-        if (NULL == hDevice) {
-            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
+        if (NULL == phDevices) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
 
-        if (NULL == pBinary) {
+        if (NULL == pLengths) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (NULL == ppBinaries) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
 
@@ -2763,6 +2781,10 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithBinary(
             pProperties->count == 0) {
             return UR_RESULT_ERROR_INVALID_SIZE;
         }
+
+        if (numDevices == 0) {
+            return UR_RESULT_ERROR_INVALID_SIZE;
+        }
     }
 
     if (getContext()->enableLifetimeValidation &&
@@ -2770,13 +2792,9 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithBinary(
         getContext()->refCountContext->logInvalidReference(hContext);
     }
 
-    if (getContext()->enableLifetimeValidation &&
-        !getContext()->refCountContext->isReferenceValid(hDevice)) {
-        getContext()->refCountContext->logInvalidReference(hDevice);
-    }
-
-    ur_result_t result = pfnCreateWithBinary(hContext, hDevice, size, pBinary,
-                                             pProperties, phProgram);
+    ur_result_t result =
+        pfnCreateWithBinary(hContext, numDevices, phDevices, pLengths,
+                            ppBinaries, pProperties, phProgram);
 
     if (getContext()->enableLeakChecking && result == UR_RESULT_SUCCESS) {
         getContext()->refCountContext->createRefCount(*phProgram);
@@ -8108,8 +8126,9 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
         phEvent, ///< [out][optional] return an event object that will be signaled by the
                  ///< completion of this command in the next execution of the
                  ///< command-buffer.
-    ur_exp_command_buffer_command_handle_t
-        *phCommand ///< [out][optional] Handle to this command.
+    ur_exp_command_buffer_command_handle_t *
+        phCommand ///< [out][optional] Handle to this command. Only available if the
+                  ///< command-buffer is updatable.
 ) {
     auto pfnAppendKernelLaunchExp =
         getContext()->urDdiTable.CommandBufferExp.pfnAppendKernelLaunchExp;
@@ -9437,7 +9456,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferGetInfoExp(
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
 
-        if (UR_EXP_COMMAND_BUFFER_INFO_REFERENCE_COUNT < propName) {
+        if (UR_EXP_COMMAND_BUFFER_INFO_DESCRIPTOR < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
 

@@ -14,7 +14,11 @@
 
 #include <cinttypes>
 
+#if !defined(__SPIR__) && !defined(__SPIRV__)
 namespace ur_sanitizer_layer {
+#endif // !__SPIR__ && !__SPIRV__
+
+enum class DeviceType : uint32_t { UNKNOWN = 0, CPU, GPU_PVC, GPU_DG2 };
 
 enum class DeviceSanitizerErrorType : int32_t {
     UNKNOWN,
@@ -67,18 +71,25 @@ struct LocalArgsInfo {
     uint64_t SizeWithRedZone = 0;
 };
 
-constexpr std::size_t ASAN_MAX_NUM_REPORTS = 10;
+constexpr uint64_t ASAN_MAX_NUM_REPORTS = 10;
 
 struct LaunchInfo {
+    uintptr_t GlobalShadowOffset = 0;
+    uintptr_t GlobalShadowOffsetEnd = 0;
+
     uintptr_t PrivateShadowOffset = 0;
     uintptr_t PrivateShadowOffsetEnd = 0;
 
     uintptr_t LocalShadowOffset = 0;
     uintptr_t LocalShadowOffsetEnd = 0;
 
-    uint32_t NumLocalArgs = 0;
     LocalArgsInfo *LocalArgs = nullptr; // Ordered by ArgIndex
+    uint32_t NumLocalArgs = 0;
 
+    DeviceType DeviceTy = DeviceType::UNKNOWN;
+    uint32_t Debug = 0;
+
+    int ReportFlag = 0;
     DeviceSanitizerReport SanitizerReport[ASAN_MAX_NUM_REPORTS];
 };
 
@@ -87,7 +98,7 @@ constexpr unsigned ASAN_SHADOW_GRANULARITY = 1ULL << ASAN_SHADOW_SCALE;
 
 // Based on the observation, only the last 24 bits of the address of the private
 // variable have changed
-constexpr std::size_t ASAN_PRIVATE_SIZE = 0xffffffULL + 1;
+constexpr uint64_t ASAN_PRIVATE_SIZE = 0xffffffULL + 1;
 
 // These magic values are written to shadow for better error
 // reporting.
@@ -109,13 +120,6 @@ constexpr int kSharedLocalRedzoneMagic = (char)0xa1;
 const int kPrivateLeftRedzoneMagic = (char)0xf1;
 const int kPrivateMidRedzoneMagic = (char)0xf2;
 const int kPrivateRightRedzoneMagic = (char)0xf3;
-
-constexpr auto kSPIR_AsanShadowMemoryGlobalStart =
-    "__AsanShadowMemoryGlobalStart";
-constexpr auto kSPIR_AsanShadowMemoryGlobalEnd = "__AsanShadowMemoryGlobalEnd";
-
-constexpr auto kSPIR_DeviceType = "__DeviceType";
-constexpr auto kSPIR_AsanDebug = "__AsanDebug";
 
 constexpr auto kSPIR_AsanDeviceGlobalCount = "__AsanDeviceGlobalCount";
 constexpr auto kSPIR_AsanDeviceGlobalMetadata = "__AsanDeviceGlobalMetadata";
@@ -160,4 +164,6 @@ inline const char *ToString(DeviceSanitizerErrorType ErrorType) {
     }
 }
 
+#if !defined(__SPIR__) && !defined(__SPIRV__)
 } // namespace ur_sanitizer_layer
+#endif // !__SPIR__ && !__SPIRV__

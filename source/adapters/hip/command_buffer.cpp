@@ -330,6 +330,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
   std::ignore = phEventWaitList;
   std::ignore = phEvent;
   // Preconditions
+  // Command handles can only be obtained from updatable command-buffers
+  UR_ASSERT(!(phCommand && !hCommandBuffer->IsUpdatable),
+            UR_RESULT_ERROR_INVALID_OPERATION);
   UR_ASSERT(hCommandBuffer->Context == hKernel->getContext(),
             UR_RESULT_ERROR_INVALID_KERNEL);
   UR_ASSERT(workDim > 0, UR_RESULT_ERROR_INVALID_WORK_DIMENSION);
@@ -948,18 +951,19 @@ validateCommandDesc(ur_exp_command_buffer_command_handle_t Command,
 }
 
 /**
- * Updates the arguments of CommandDesc->hNewKernel
- * @param[in] Device The device associated with the kernel being updated.
- * @param[in] UpdateCommandDesc The update command description that contains
- * the new kernel and its arguments.
+ * Updates the arguments of a kernel command.
+ * @param[in] Command The command associated with the kernel node being updated.
+ * @param[in] UpdateCommandDesc The update command description that contains the
+ * new arguments.
  * @return UR_RESULT_SUCCESS or an error code on failure
  */
 ur_result_t
-updateKernelArguments(ur_device_handle_t Device,
+updateKernelArguments(ur_exp_command_buffer_command_handle_t Command,
                       const ur_exp_command_buffer_update_kernel_launch_desc_t
                           *UpdateCommandDesc) {
 
-  ur_kernel_handle_t NewKernel = UpdateCommandDesc->hNewKernel;
+  ur_kernel_handle_t Kernel = Command->Kernel;
+  ur_device_handle_t Device = Command->CommandBuffer->Device;
 
   // Update pointer arguments to the kernel
   uint32_t NumPointerArgs = UpdateCommandDesc->numNewPointerArgs;
@@ -971,7 +975,7 @@ updateKernelArguments(ur_device_handle_t Device,
     const void *ArgValue = PointerArgDesc.pNewPointerArg;
 
     try {
-      NewKernel->setKernelArg(ArgIndex, sizeof(ArgValue), ArgValue);
+      Kernel->setKernelArg(ArgIndex, sizeof(ArgValue), ArgValue);
     } catch (ur_result_t Err) {
       return Err;
     }
@@ -988,10 +992,10 @@ updateKernelArguments(ur_device_handle_t Device,
 
     try {
       if (ArgValue == nullptr) {
-        NewKernel->setKernelArg(ArgIndex, 0, nullptr);
+        Kernel->setKernelArg(ArgIndex, 0, nullptr);
       } else {
         void *HIPPtr = std::get<BufferMem>(ArgValue->Mem).getVoid(Device);
-        NewKernel->setKernelArg(ArgIndex, sizeof(void *), (void *)&HIPPtr);
+        Kernel->setKernelArg(ArgIndex, sizeof(void *), (void *)&HIPPtr);
       }
     } catch (ur_result_t Err) {
       return Err;
@@ -1009,7 +1013,12 @@ updateKernelArguments(ur_device_handle_t Device,
     const void *ArgValue = ValueArgDesc.pNewValueArg;
 
     try {
-      NewKernel->setKernelArg(ArgIndex, ArgSize, ArgValue);
+      // Local memory args are passed as value args with nullptr value
+      if (ArgValue) {
+        Kernel->setKernelArg(ArgIndex, ArgSize, ArgValue);
+      } else {
+        Kernel->setKernelLocalArg(ArgIndex, ArgSize);
+      }
     } catch (ur_result_t Err) {
       return Err;
     }
@@ -1064,9 +1073,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
   ur_exp_command_buffer_handle_t CommandBuffer = hCommand->CommandBuffer;
 
   UR_CHECK_ERROR(validateCommandDesc(hCommand, pUpdateKernelLaunch));
-  UR_CHECK_ERROR(
-      updateKernelArguments(CommandBuffer->Device, pUpdateKernelLaunch));
   UR_CHECK_ERROR(updateCommand(hCommand, pUpdateKernelLaunch));
+  UR_CHECK_ERROR(updateKernelArguments(hCommand, pUpdateKernelLaunch));
 
   // If no worksize is provided make sure we pass nullptr to setKernelParams
   // so it can guess the local work size.
@@ -1128,6 +1136,15 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferGetInfoExp(
   switch (propName) {
   case UR_EXP_COMMAND_BUFFER_INFO_REFERENCE_COUNT:
     return ReturnValue(hCommandBuffer->getExternalReferenceCount());
+  case UR_EXP_COMMAND_BUFFER_INFO_DESCRIPTOR: {
+    ur_exp_command_buffer_desc_t Descriptor{};
+    Descriptor.stype = UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_DESC;
+    Descriptor.pNext = nullptr;
+    Descriptor.isUpdatable = hCommandBuffer->IsUpdatable;
+    Descriptor.isInOrder = false, Descriptor.enableProfiling = false;
+
+    return ReturnValue(Descriptor);
+  }
   default:
     assert(!"Command-buffer info request not implemented");
   }

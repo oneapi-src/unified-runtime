@@ -1054,6 +1054,8 @@ typedef enum ur_adapter_backend_t {
 ///         + `NULL == phAdapters`
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         + `NumEntries == 0 && phPlatforms != NULL`
+///     - ::UR_RESULT_ERROR_INVALID_VALUE
+///         + `pNumPlatforms == NULL && phPlatforms == NULL`
 UR_APIEXPORT ur_result_t UR_APICALL
 urPlatformGet(
     ur_adapter_handle_t *phAdapters,   ///< [in][range(0, NumAdapters)] array of adapters to query for platforms.
@@ -1637,6 +1639,9 @@ typedef enum ur_device_info_t {
     UR_DEVICE_INFO_GLOBAL_VARIABLE_SUPPORT = 118,                    ///< [::ur_bool_t] return true if the device supports the
                                                                      ///< `EnqueueDeviceGlobalVariableWrite` and
                                                                      ///< `EnqueueDeviceGlobalVariableRead` entry points.
+    UR_DEVICE_INFO_USM_POOL_SUPPORT = 119,                           ///< [::ur_bool_t] return true if the device supports USM pooling. Pertains
+                                                                     ///< to the `USMPool` entry points and usage of the `pool` parameter of the
+                                                                     ///< USM alloc entry points.
     UR_DEVICE_INFO_COMMAND_BUFFER_SUPPORT_EXP = 0x1000,              ///< [::ur_bool_t] Returns true if the device supports the use of
                                                                      ///< command-buffers.
     UR_DEVICE_INFO_COMMAND_BUFFER_UPDATE_CAPABILITIES_EXP = 0x1001,  ///< [::ur_device_command_buffer_update_capability_flags_t] Command-buffer
@@ -2510,8 +2515,12 @@ typedef enum ur_mem_type_t {
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Memory Information type
 typedef enum ur_mem_info_t {
-    UR_MEM_INFO_SIZE = 0,    ///< [size_t] actual size of of memory object in bytes
-    UR_MEM_INFO_CONTEXT = 1, ///< [::ur_context_handle_t] context in which the memory object was created
+    UR_MEM_INFO_SIZE = 0,            ///< [size_t] actual size of of memory object in bytes
+    UR_MEM_INFO_CONTEXT = 1,         ///< [::ur_context_handle_t] context in which the memory object was created
+    UR_MEM_INFO_REFERENCE_COUNT = 2, ///< [uint32_t] Reference count of the memory object.
+                                     ///< The reference count returned should be considered immediately stale.
+                                     ///< It is unsuitable for general use in applications. This feature is
+                                     ///< provided for identifying memory leaks.
     /// @cond
     UR_MEM_INFO_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -2645,6 +2654,7 @@ typedef struct ur_image_desc_t {
 ///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
 ///     - ::UR_RESULT_ERROR_INVALID_VALUE
 ///     - ::UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR
+///         + `pImageDesc && UR_STRUCTURE_TYPE_IMAGE_DESC != pImageDesc->stype`
 ///         + `pImageDesc && UR_MEM_TYPE_IMAGE1D_ARRAY < pImageDesc->type`
 ///         + `pImageDesc && pImageDesc->numMipLevel != 0`
 ///         + `pImageDesc && pImageDesc->numSamples != 0`
@@ -2985,7 +2995,7 @@ urMemImageCreateWithNativeHandle(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hMemory`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_MEM_INFO_CONTEXT < propName`
+///         + `::UR_MEM_INFO_REFERENCE_COUNT < propName`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
 ///         + If `propName` is not supported by the adapter.
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
@@ -3501,7 +3511,6 @@ typedef struct ur_usm_pool_limits_desc_t {
 /// @brief USM allocate host memory
 ///
 /// @details
-///     - This function must support memory pooling.
 ///     - If pUSMDesc is not NULL and pUSMDesc->pool is not NULL the allocation
 ///       will be served from a specified memory pool.
 ///     - Otherwise, the behavior is implementation-defined.
@@ -3534,6 +3543,8 @@ typedef struct ur_usm_pool_limits_desc_t {
 ///         + `size` is greater than ::UR_DEVICE_INFO_MAX_MEM_ALLOC_SIZE.
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
+///         + If any device associated with `hContext` reports `false` for ::UR_DEVICE_INFO_USM_POOL_SUPPORT
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMHostAlloc(
     ur_context_handle_t hContext,  ///< [in] handle of the context object
@@ -3547,7 +3558,6 @@ urUSMHostAlloc(
 /// @brief USM allocate device memory
 ///
 /// @details
-///     - This function must support memory pooling.
 ///     - If pUSMDesc is not NULL and pUSMDesc->pool is not NULL the allocation
 ///       will be served from a specified memory pool.
 ///     - Otherwise, the behavior is implementation-defined.
@@ -3581,6 +3591,8 @@ urUSMHostAlloc(
 ///         + `size` is greater than ::UR_DEVICE_INFO_MAX_MEM_ALLOC_SIZE.
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
+///         + If any device associated with `hContext` reports `false` for ::UR_DEVICE_INFO_USM_POOL_SUPPORT
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMDeviceAlloc(
     ur_context_handle_t hContext,  ///< [in] handle of the context object
@@ -3595,7 +3607,6 @@ urUSMDeviceAlloc(
 /// @brief USM allocate shared memory
 ///
 /// @details
-///     - This function must support memory pooling.
 ///     - If pUSMDesc is not NULL and pUSMDesc->pool is not NULL the allocation
 ///       will be served from a specified memory pool.
 ///     - Otherwise, the behavior is implementation-defined.
@@ -3630,6 +3641,8 @@ urUSMDeviceAlloc(
 ///         + If `UR_DEVICE_INFO_USM_SINGLE_SHARED_SUPPORT` and `UR_DEVICE_INFO_USM_CROSS_SHARED_SUPPORT` are both false.
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
+///         + If any device associated with `hContext` reports `false` for ::UR_DEVICE_INFO_USM_POOL_SUPPORT
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMSharedAlloc(
     ur_context_handle_t hContext,  ///< [in] handle of the context object
@@ -3711,6 +3724,8 @@ urUSMGetMemAllocInfo(
 ///         + `::UR_USM_POOL_FLAGS_MASK & pPoolDesc->flags`
 ///     - ::UR_RESULT_ERROR_INVALID_VALUE
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
+///         + If any device associated with `hContext` reports `false` for ::UR_DEVICE_INFO_USM_POOL_SUPPORT
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMPoolCreate(
     ur_context_handle_t hContext,  ///< [in] handle of the context object
@@ -3729,6 +3744,7 @@ urUSMPoolCreate(
 ///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == pPool`
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMPoolRetain(
     ur_usm_pool_handle_t pPool ///< [in][retain] pointer to USM memory pool
@@ -3751,6 +3767,7 @@ urUSMPoolRetain(
 ///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == pPool`
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMPoolRelease(
     ur_usm_pool_handle_t pPool ///< [in][release] pointer to USM memory pool
@@ -3792,6 +3809,7 @@ typedef enum ur_usm_pool_info_t {
 ///         + `pPropValue == NULL && pPropSizeRet == NULL`
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMPoolGetInfo(
     ur_usm_pool_handle_t hPool,  ///< [in] handle of the USM memory pool
@@ -4202,17 +4220,19 @@ urProgramCreateWithIL(
 );
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Create a program object from device native binary.
+/// @brief Create a program object from native binaries for the specified
+///        devices.
 ///
 /// @details
 ///     - The application may call this function from simultaneous threads.
 ///     - Following a successful call to this entry point, `phProgram` will
-///       contain a binary of type ::UR_PROGRAM_BINARY_TYPE_COMPILED_OBJECT or
-///       ::UR_PROGRAM_BINARY_TYPE_LIBRARY for `hDevice`.
-///     - The device specified by `hDevice` must be device associated with
+///       contain binaries of type ::UR_PROGRAM_BINARY_TYPE_COMPILED_OBJECT or
+///       ::UR_PROGRAM_BINARY_TYPE_LIBRARY for the specified devices in
+///       `phDevices`.
+///     - The devices specified by `phDevices` must be associated with the
 ///       context.
 ///     - The adapter may (but is not required to) perform validation of the
-///       provided module during this call.
+///       provided modules during this call.
 ///
 /// @remarks
 ///   _Analogues_
@@ -4225,21 +4245,27 @@ urProgramCreateWithIL(
 ///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
-///         + `NULL == hDevice`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///         + `NULL == pBinary`
+///         + `NULL == phDevices`
+///         + `NULL == pLengths`
+///         + `NULL == ppBinaries`
 ///         + `NULL == phProgram`
 ///         + `NULL != pProperties && pProperties->count > 0 && NULL == pProperties->pMetadatas`
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         + `NULL != pProperties && NULL != pProperties->pMetadatas && pProperties->count == 0`
+///         + `numDevices == 0`
 ///     - ::UR_RESULT_ERROR_INVALID_NATIVE_BINARY
-///         + If `pBinary` isn't a valid binary for `hDevice.`
+///         + If any binary in `ppBinaries` isn't a valid binary for the corresponding device in `phDevices.`
 UR_APIEXPORT ur_result_t UR_APICALL
 urProgramCreateWithBinary(
     ur_context_handle_t hContext,               ///< [in] handle of the context instance
-    ur_device_handle_t hDevice,                 ///< [in] handle to device associated with binary.
-    size_t size,                                ///< [in] size in bytes.
-    const uint8_t *pBinary,                     ///< [in] pointer to binary.
+    uint32_t numDevices,                        ///< [in] number of devices
+    ur_device_handle_t *phDevices,              ///< [in][range(0, numDevices)] a pointer to a list of device handles. The
+                                                ///< binaries are loaded for devices specified in this list.
+    size_t *pLengths,                           ///< [in][range(0, numDevices)] array of sizes of program binaries
+                                                ///< specified by `pBinaries` (in bytes).
+    const uint8_t **ppBinaries,                 ///< [in][range(0, numDevices)] pointer to program binaries to be loaded
+                                                ///< for devices specified by `phDevices`.
     const ur_program_properties_t *pProperties, ///< [in][optional] pointer to program creation properties.
     ur_program_handle_t *phProgram              ///< [out] pointer to handle of Program object created.
 );
@@ -8234,6 +8260,10 @@ typedef enum ur_exp_command_buffer_info_t {
                                                     ///< The reference count returned should be considered immediately stale.
                                                     ///< It is unsuitable for general use in applications. This feature is
                                                     ///< provided for identifying memory leaks.
+    UR_EXP_COMMAND_BUFFER_INFO_DESCRIPTOR = 1,      ///< [::ur_exp_command_buffer_desc_t] Returns a ::ur_exp_command_buffer_desc_t
+                                                    ///< with the properties of the command-buffer. Returned values may differ
+                                                    ///< from those passed on construction if the property was ignored by the
+                                                    ///< adapter.
     /// @cond
     UR_EXP_COMMAND_BUFFER_INFO_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -8305,7 +8335,7 @@ typedef struct ur_exp_command_buffer_update_value_arg_desc_t {
                                                          ///< ::UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_VALUE_ARG_DESC
     const void *pNext;                                   ///< [in][optional] pointer to extension-specific structure
     uint32_t argIndex;                                   ///< [in] Argument index.
-    uint32_t argSize;                                    ///< [in] Argument size.
+    size_t argSize;                                      ///< [in] Argument size.
     const ur_kernel_arg_value_properties_t *pProperties; ///< [in][optional] Pointer to value properties.
     const void *pNewValueArg;                            ///< [in][optional] Argument value representing matching kernel arg type to
                                                          ///< set at argument index.
@@ -8490,6 +8520,7 @@ urCommandBufferFinalizeExp(
 ///         + If the device associated with `hCommandBuffer` does not support UR_DEVICE_INFO_COMMAND_BUFFER_EVENT_SUPPORT_EXP and either `phEvent` or `phEventWaitList` are not NULL.
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+///     - ::UR_RESULT_ERROR_INVALID_OPERATION - "phCommand is not NULL and hCommandBuffer is not updatable."
 UR_APIEXPORT ur_result_t UR_APICALL
 urCommandBufferAppendKernelLaunchExp(
     ur_exp_command_buffer_handle_t hCommandBuffer,                ///< [in] Handle of the command-buffer object.
@@ -8518,7 +8549,8 @@ urCommandBufferAppendKernelLaunchExp(
     ur_event_handle_t *phEvent,                                   ///< [out][optional] return an event object that will be signaled by the
                                                                   ///< completion of this command in the next execution of the
                                                                   ///< command-buffer.
-    ur_exp_command_buffer_command_handle_t *phCommand             ///< [out][optional] Handle to this command.
+    ur_exp_command_buffer_command_handle_t *phCommand             ///< [out][optional] Handle to this command. Only available if the
+                                                                  ///< command-buffer is updatable.
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -9290,7 +9322,7 @@ urCommandBufferUpdateWaitEventsExp(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hCommandBuffer`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_EXP_COMMAND_BUFFER_INFO_REFERENCE_COUNT < propName`
+///         + `::UR_EXP_COMMAND_BUFFER_INFO_DESCRIPTOR < propName`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
 ///         + If `propName` is not supported by the adapter.
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
@@ -9804,9 +9836,9 @@ urUSMReleaseExp(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Supported peer info
 typedef enum ur_exp_peer_info_t {
-    UR_EXP_PEER_INFO_UR_PEER_ACCESS_SUPPORTED = 0,  ///< [uint32_t] 1 if P2P access is supported otherwise P2P access is not
+    UR_EXP_PEER_INFO_UR_PEER_ACCESS_SUPPORTED = 0,  ///< [int] 1 if P2P access is supported otherwise P2P access is not
                                                     ///< supported.
-    UR_EXP_PEER_INFO_UR_PEER_ATOMICS_SUPPORTED = 1, ///< [uint32_t] 1 if atomic operations are supported over the P2P link,
+    UR_EXP_PEER_INFO_UR_PEER_ATOMICS_SUPPORTED = 1, ///< [int] 1 if atomic operations are supported over the P2P link,
                                                     ///< otherwise such operations are not supported.
     /// @cond
     UR_EXP_PEER_INFO_FORCE_UINT32 = 0x7fffffff
@@ -10320,9 +10352,10 @@ typedef struct ur_program_create_with_il_params_t {
 ///     allowing the callback the ability to modify the parameter's value
 typedef struct ur_program_create_with_binary_params_t {
     ur_context_handle_t *phContext;
-    ur_device_handle_t *phDevice;
-    size_t *psize;
-    const uint8_t **ppBinary;
+    uint32_t *pnumDevices;
+    ur_device_handle_t **pphDevices;
+    size_t **ppLengths;
+    const uint8_t ***pppBinaries;
     const ur_program_properties_t **ppProperties;
     ur_program_handle_t **pphProgram;
 } ur_program_create_with_binary_params_t;

@@ -58,7 +58,10 @@ macro(add_sanitizer_flag flag)
     set(CMAKE_REQUIRED_LIBRARIES ${SAVED_CMAKE_REQUIRED_LIBRARIES})
 endmacro()
 
-check_cxx_compiler_flag("-fcf-protection=full" CXX_HAS_FCF_PROTECTION_FULL)
+if(CMAKE_SYSTEM_NAME STREQUAL Linux)
+    check_cxx_compiler_flag("-fcf-protection=full" CXX_HAS_FCF_PROTECTION_FULL)
+    check_cxx_compiler_flag("-fstack-clash-protection" CXX_HAS_FSTACK_CLASH_PROTECTION)
+endif()
 
 function(add_ur_target_compile_options name)
     if(NOT MSVC)
@@ -81,16 +84,14 @@ function(add_ur_target_compile_options name)
             # -flto
             # $<$<CXX_COMPILER_ID:Clang,AppleClang>:-fsanitize=cfi>
             $<$<BOOL:${CXX_HAS_FCF_PROTECTION_FULL}>:-fcf-protection=full>
-            # -fstack-clash-protection is not supported in apple clang or GCC < 8
-            $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,8>>:-fstack-clash-protection>
-            $<$<CXX_COMPILER_ID:Clang>:-fstack-clash-protection>
+            $<$<BOOL:${CXX_HAS_FSTACK_CLASH_PROTECTION}>:-fstack-clash-protection>
 
             # Colored output
             $<$<CXX_COMPILER_ID:GNU>:-fdiagnostics-color=always>
             $<$<CXX_COMPILER_ID:Clang,AppleClang>:-fcolor-diagnostics>
         )
         if (UR_DEVELOPER_MODE)
-            target_compile_options(${name} PRIVATE -Werror)
+            target_compile_options(${name} PRIVATE -Werror -Wextra)
         endif()
         if (CMAKE_BUILD_TYPE STREQUAL "Release")
             target_compile_options(${name} PRIVATE -fvisibility=hidden)
@@ -120,7 +121,7 @@ function(add_ur_target_link_options name)
         if (NOT APPLE)
             target_link_options(${name} PRIVATE "LINKER:-z,relro,-z,now,-z,noexecstack")
             if (UR_DEVELOPER_MODE)
-                target_link_options(${name} PRIVATE -Werror)
+                target_link_options(${name} PRIVATE -Werror -Wextra)
             endif()
             if (CMAKE_BUILD_TYPE STREQUAL "Release")
                 target_link_options(${name} PRIVATE
@@ -130,9 +131,9 @@ function(add_ur_target_link_options name)
         endif()
     elseif(MSVC)
         target_link_options(${name} PRIVATE
-            /DYNAMICBASE
-            /HIGHENTROPYVA
-            /NXCOMPAT
+            LINKER:/DYNAMICBASE
+            LINKER:/HIGHENTROPYVA
+            LINKER:/NXCOMPAT
         )
     endif()
 endfunction()
@@ -140,7 +141,7 @@ endfunction()
 function(add_ur_target_exec_options name)
     if(MSVC)
         target_link_options(${name} PRIVATE
-            /ALLOWISOLATION
+            LINKER:/ALLOWISOLATION
         )
     endif()
 endfunction()
@@ -158,7 +159,7 @@ function(add_ur_library name)
     add_ur_target_link_options(${name})
     if(MSVC)
         target_link_options(${name} PRIVATE
-            $<$<STREQUAL:$<TARGET_LINKER_FILE_NAME:${name}>,link.exe>:/DEPENDENTLOADFLAG:0x2000>
+            $<$<STREQUAL:$<TARGET_LINKER_FILE_NAME:${name}>,link.exe>:LINKER:/DEPENDENTLOADFLAG:0x2000>
         )
     endif()
 endfunction()

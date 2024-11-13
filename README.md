@@ -8,6 +8,7 @@
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/oneapi-src/unified-runtime/badge)](https://securityscorecards.dev/viewer/?uri=github.com/oneapi-src/unified-runtime)
 [![Trivy](https://github.com/oneapi-src/unified-runtime/actions/workflows/trivy.yml/badge.svg)](https://github.com/oneapi-src/unified-runtime/actions/workflows/trivy.yml)
 [![Deploy documentation to Pages](https://github.com/oneapi-src/unified-runtime/actions/workflows/docs.yml/badge.svg)](https://github.com/oneapi-src/unified-runtime/actions/workflows/docs.yml)
+[![Compute Benchmarks Nightly](https://github.com/oneapi-src/unified-runtime/actions/workflows/benchmarks-nightly.yml/badge.svg)](https://github.com/oneapi-src/unified-runtime/actions/workflows/benchmarks-nightly.yml)
 
 <!-- TODO: add general description and purpose of the project -->
 
@@ -133,7 +134,7 @@ List of options provided by CMake:
 | UR_CONFORMANCE_TARGET_TRIPLES | SYCL triples to build CTS device binaries for | Comma-separated list | spir64 |
 | UR_CONFORMANCE_AMD_ARCH | AMD device target ID to build CTS binaries for | string | `""` |
 | UR_CONFORMANCE_ENABLE_MATCH_FILES | Enable CTS match files | ON/OFF | ON |
-| UR_CONFORMANCE_TEST_LOADER | Build and run "loader" tests for the CTS | ON/OFF | ON |
+| UR_CONFORMANCE_TEST_LOADER | Additionally build and run "loader" tests for the CTS | ON/OFF | OFF |
 | UR_BUILD_ADAPTER_L0     | Build the Level-Zero adapter            | ON/OFF     | OFF     |
 | UR_BUILD_ADAPTER_OPENCL | Build the OpenCL adapter                | ON/OFF     | OFF     |
 | UR_BUILD_ADAPTER_CUDA   | Build the CUDA adapter                  | ON/OFF     | OFF     |
@@ -154,6 +155,13 @@ List of options provided by CMake:
 | UR_HIP_LIB_DIR | Path of the ROCm HIP library directory | Directory path | `${UR_HIP_ROCM_DIR}/lib` |
 
 ### Additional make targets
+
+To run tests, do the following:
+
+```bash
+$ make
+$ make test
+```
 
 To run automated code formatting, configure CMake with `UR_FORMAT_CPP_STYLE` option
 and then run a custom `cppformat` target:

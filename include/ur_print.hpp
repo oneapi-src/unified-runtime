@@ -3316,6 +3316,9 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_device_binary_
                 case UR_DEVICE_INFO_GLOBAL_VARIABLE_SUPPORT:
                     os << "UR_DEVICE_INFO_GLOBAL_VARIABLE_SUPPORT";
                     break;
+                case UR_DEVICE_INFO_USM_POOL_SUPPORT:
+                    os << "UR_DEVICE_INFO_USM_POOL_SUPPORT";
+                    break;
                 case UR_DEVICE_INFO_COMMAND_BUFFER_SUPPORT_EXP:
                     os << "UR_DEVICE_INFO_COMMAND_BUFFER_SUPPORT_EXP";
                     break;
@@ -5009,6 +5012,20 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_device_binary_
                     os << ")";
                 } break;
                 case UR_DEVICE_INFO_GLOBAL_VARIABLE_SUPPORT: {
+                    const ur_bool_t *tptr = (const ur_bool_t *)ptr;
+                    if (sizeof(ur_bool_t) > size) {
+                        os << "invalid size (is: " << size << ", expected: >=" << sizeof(ur_bool_t) << ")";
+                        return UR_RESULT_ERROR_INVALID_SIZE;
+                    }
+                    os << (const void *)(tptr) << " (";
+                    
+        os << 
+                        *tptr
+                    ;
+
+                    os << ")";
+                } break;
+                case UR_DEVICE_INFO_USM_POOL_SUPPORT: {
                     const ur_bool_t *tptr = (const ur_bool_t *)ptr;
                     if (sizeof(ur_bool_t) > size) {
                         os << "invalid size (is: " << size << ", expected: >=" << sizeof(ur_bool_t) << ")";
@@ -6739,6 +6756,9 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_context_native
                 case UR_MEM_INFO_CONTEXT:
                     os << "UR_MEM_INFO_CONTEXT";
                     break;
+                case UR_MEM_INFO_REFERENCE_COUNT:
+                    os << "UR_MEM_INFO_REFERENCE_COUNT";
+                    break;
                 default:
                     os << "unknown enumerator";
                     break;
@@ -6780,6 +6800,20 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_context_native
         ur::details::printPtr(os, 
                         *tptr
                     );
+
+                    os << ")";
+                } break;
+                case UR_MEM_INFO_REFERENCE_COUNT: {
+                    const uint32_t *tptr = (const uint32_t *)ptr;
+                    if (sizeof(uint32_t) > size) {
+                        os << "invalid size (is: " << size << ", expected: >=" << sizeof(uint32_t) << ")";
+                        return UR_RESULT_ERROR_INVALID_SIZE;
+                    }
+                    os << (const void *)(tptr) << " (";
+                    
+        os << 
+                        *tptr
+                    ;
 
                     os << ")";
                 } break;
@@ -11734,6 +11768,9 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_exp_image_copy
                 case UR_EXP_COMMAND_BUFFER_INFO_REFERENCE_COUNT:
                     os << "UR_EXP_COMMAND_BUFFER_INFO_REFERENCE_COUNT";
                     break;
+                case UR_EXP_COMMAND_BUFFER_INFO_DESCRIPTOR:
+                    os << "UR_EXP_COMMAND_BUFFER_INFO_DESCRIPTOR";
+                    break;
                 default:
                     os << "unknown enumerator";
                     break;
@@ -11754,6 +11791,20 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_exp_image_copy
                     const uint32_t *tptr = (const uint32_t *)ptr;
                     if (sizeof(uint32_t) > size) {
                         os << "invalid size (is: " << size << ", expected: >=" << sizeof(uint32_t) << ")";
+                        return UR_RESULT_ERROR_INVALID_SIZE;
+                    }
+                    os << (const void *)(tptr) << " (";
+                    
+        os << 
+                        *tptr
+                    ;
+
+                    os << ")";
+                } break;
+                case UR_EXP_COMMAND_BUFFER_INFO_DESCRIPTOR: {
+                    const ur_exp_command_buffer_desc_t *tptr = (const ur_exp_command_buffer_desc_t *)ptr;
+                    if (sizeof(ur_exp_command_buffer_desc_t) > size) {
+                        os << "invalid size (is: " << size << ", expected: >=" << sizeof(ur_exp_command_buffer_desc_t) << ")";
                         return UR_RESULT_ERROR_INVALID_SIZE;
                     }
                     os << (const void *)(tptr) << " (";
@@ -12363,9 +12414,9 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_exp_launch_pro
 
         switch (value) {
                 case UR_EXP_PEER_INFO_UR_PEER_ACCESS_SUPPORTED: {
-                    const uint32_t *tptr = (const uint32_t *)ptr;
-                    if (sizeof(uint32_t) > size) {
-                        os << "invalid size (is: " << size << ", expected: >=" << sizeof(uint32_t) << ")";
+                    const int *tptr = (const int *)ptr;
+                    if (sizeof(int) > size) {
+                        os << "invalid size (is: " << size << ", expected: >=" << sizeof(int) << ")";
                         return UR_RESULT_ERROR_INVALID_SIZE;
                     }
                     os << (const void *)(tptr) << " (";
@@ -12377,9 +12428,9 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_exp_launch_pro
                     os << ")";
                 } break;
                 case UR_EXP_PEER_INFO_UR_PEER_ATOMICS_SUPPORTED: {
-                    const uint32_t *tptr = (const uint32_t *)ptr;
-                    if (sizeof(uint32_t) > size) {
-                        os << "invalid size (is: " << size << ", expected: >=" << sizeof(uint32_t) << ")";
+                    const int *tptr = (const int *)ptr;
+                    if (sizeof(int) > size) {
+                        os << "invalid size (is: " << size << ", expected: >=" << sizeof(int) << ")";
                         return UR_RESULT_ERROR_INVALID_SIZE;
                     }
                     os << (const void *)(tptr) << " (";
@@ -13643,32 +13694,60 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
         
     
         os << ", ";
-        os << ".hDevice = ";
-        
-        ur::details::printPtr(os, 
-            *(params->phDevice)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".size = ";
+        os << ".numDevices = ";
         
         os << 
-            *(params->psize)
+            *(params->pnumDevices)
         ;
 
 
         
     
         os << ", ";
-        os << ".pBinary = ";
-        
+        os << ".phDevices = {";
+        for (size_t i = 0; *(params->pphDevices) != NULL && i < *params->pnumDevices; ++i) {
+            if (i != 0) {
+                os << ", ";
+            }
+            
         ur::details::printPtr(os, 
-            *(params->ppBinary)
-        );
+                (*(params->pphDevices))[i]
+            );
 
+        }
+        os << "}";
+
+        
+    
+        os << ", ";
+        os << ".pLengths = {";
+        for (size_t i = 0; *(params->ppLengths) != NULL && i < *params->pnumDevices; ++i) {
+            if (i != 0) {
+                os << ", ";
+            }
+            
+        os << 
+                (*(params->ppLengths))[i]
+            ;
+
+        }
+        os << "}";
+
+        
+    
+        os << ", ";
+        os << ".ppBinaries = {";
+        for (size_t i = 0; *(params->pppBinaries) != NULL && i < *params->pnumDevices; ++i) {
+            if (i != 0) {
+                os << ", ";
+            }
+            
+        ur::details::printPtr(os, 
+                (*(params->pppBinaries))[i]
+            );
+
+        }
+        os << "}";
 
         
     

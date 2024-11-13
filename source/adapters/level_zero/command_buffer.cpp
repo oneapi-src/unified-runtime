@@ -147,8 +147,10 @@ ur_result_t createSyncPointAndGetZeEvents(
   UR_CALL(getEventsFromSyncPoints(CommandBuffer, NumSyncPointsInWaitList,
                                   SyncPointWaitList, ZeEventList));
   ur_event_handle_t LaunchEvent;
-  UR_CALL(EventCreate(CommandBuffer->Context, nullptr, false, HostVisible,
-                      &LaunchEvent, false, !CommandBuffer->IsProfilingEnabled));
+  UR_CALL(EventCreate(CommandBuffer->Context, nullptr /*Queue*/,
+                      false /*IsMultiDevice*/, HostVisible, &LaunchEvent,
+                      false /*CounterBasedEventEnabled*/,
+                      !CommandBuffer->IsProfilingEnabled));
   LaunchEvent->CommandType = CommandType;
   ZeLaunchEvent = LaunchEvent->ZeEvent;
 
@@ -326,22 +328,26 @@ void ur_exp_command_buffer_handle_t_::cleanupCommandBufferResources() {
 
   // Release additional signal and wait events used by command_buffer
   if (SignalEvent) {
-    CleanupCompletedEvent(SignalEvent, false);
+    CleanupCompletedEvent(SignalEvent, false /*QueueLocked*/,
+                          false /*SetEventCompleted*/);
     urEventReleaseInternal(SignalEvent);
   }
   if (WaitEvent) {
-    CleanupCompletedEvent(WaitEvent, false);
+    CleanupCompletedEvent(WaitEvent, false /*QueueLocked*/,
+                          false /*SetEventCompleted*/);
     urEventReleaseInternal(WaitEvent);
   }
   if (AllResetEvent) {
-    CleanupCompletedEvent(AllResetEvent, false);
+    CleanupCompletedEvent(AllResetEvent, false /*QueueLocked*/,
+                          false /*SetEventCompleted*/);
     urEventReleaseInternal(AllResetEvent);
   }
 
   // Release events added to the command_buffer
   for (auto &Sync : SyncPoints) {
     auto &Event = Sync.second;
-    CleanupCompletedEvent(Event, false);
+    CleanupCompletedEvent(Event, false /*QueueLocked*/,
+                          false /*SetEventCompleted*/);
     urEventReleaseInternal(Event);
   }
 
@@ -514,12 +520,15 @@ urCommandBufferCreateExp(ur_context_handle_t Context, ur_device_handle_t Device,
   ur_event_handle_t WaitEvent;
   ur_event_handle_t AllResetEvent;
 
-  UR_CALL(EventCreate(Context, nullptr, false, false, &SignalEvent, false,
-                      !EnableProfiling));
-  UR_CALL(EventCreate(Context, nullptr, false, false, &WaitEvent, false,
-                      !EnableProfiling));
-  UR_CALL(EventCreate(Context, nullptr, false, false, &AllResetEvent, false,
-                      !EnableProfiling));
+  UR_CALL(EventCreate(Context, nullptr /*Queue*/, false /*IsMultiDevice*/,
+                      false /*HostVisible*/, &SignalEvent,
+                      false /*CounterBasedEventEnabled*/, !EnableProfiling));
+  UR_CALL(EventCreate(Context, nullptr /*Queue*/, false /*IsMultiDevice*/,
+                      false /*HostVisible*/, &WaitEvent,
+                      false /*CounterBasedEventEnabled*/, !EnableProfiling));
+  UR_CALL(EventCreate(Context, nullptr /*Queue*/, false /*IsMultiDevice*/,
+                      false /*HostVisible*/, &AllResetEvent,
+                      false /*CounterBasedEventEnabled*/, !EnableProfiling));
   std::vector<ze_event_handle_t> PrecondEvents = {WaitEvent->ZeEvent,
                                                   AllResetEvent->ZeEvent};
 
@@ -628,32 +637,6 @@ urCommandBufferFinalizeExp(ur_exp_command_buffer_handle_t CommandBuffer) {
 }
 
 /**
- * Sets the global offset for a kernel command that will be appended to the
- * command buffer.
- * @param[in] CommandBuffer The CommandBuffer where the command will be
- * appended.
- * @param[in] Kernel The handle to the kernel that will be appended.
- * @param[in] GlobalWorkOffset The global offset value.
- * @return UR_RESULT_SUCCESS or an error code on failure
- */
-ur_result_t setKernelGlobalOffset(ur_exp_command_buffer_handle_t CommandBuffer,
-                                  ur_kernel_handle_t Kernel,
-                                  const size_t *GlobalWorkOffset) {
-
-  if (!CommandBuffer->Context->getPlatform()
-           ->ZeDriverGlobalOffsetExtensionFound) {
-    logger::debug("No global offset extension found on this driver");
-    return UR_RESULT_ERROR_INVALID_VALUE;
-  }
-
-  ZE2UR_CALL(zeKernelSetGlobalOffsetExp,
-             (Kernel->ZeKernel, GlobalWorkOffset[0], GlobalWorkOffset[1],
-              GlobalWorkOffset[2]));
-
-  return UR_RESULT_SUCCESS;
-}
-
-/**
  * Sets the kernel arguments for a kernel command that will be appended to the
  * command buffer.
  * @param[in] CommandBuffer The CommandBuffer where the command will be
@@ -745,13 +728,17 @@ ur_result_t urCommandBufferAppendKernelLaunchExp(
   std::ignore = Event;
 
   UR_ASSERT(Kernel->Program, UR_RESULT_ERROR_INVALID_NULL_POINTER);
+  // Command handles can only be obtained from updatable command-buffers
+  UR_ASSERT(!(Command && !CommandBuffer->IsUpdatable),
+            UR_RESULT_ERROR_INVALID_OPERATION);
 
   // Lock automatically releases when this goes out of scope.
   std::scoped_lock<ur_shared_mutex, ur_shared_mutex, ur_shared_mutex> Lock(
       Kernel->Mutex, Kernel->Program->Mutex, CommandBuffer->Mutex);
 
   if (GlobalWorkOffset != NULL) {
-    UR_CALL(setKernelGlobalOffset(CommandBuffer, Kernel, GlobalWorkOffset));
+    UR_CALL(setKernelGlobalOffset(CommandBuffer->Context, Kernel->ZeKernel,
+                                  WorkDim, GlobalWorkOffset));
   }
 
   // If there are any pending arguments set them now.
@@ -775,7 +762,7 @@ ur_result_t urCommandBufferAppendKernelLaunchExp(
   // reference count on the kernel, using the kernel saved in CommandData.
   UR_CALL(ur::level_zero::urKernelRetain(Kernel));
 
-  if (Command && CommandBuffer->IsUpdatable) {
+  if (Command) {
     UR_CALL(createCommandHandle(CommandBuffer, Kernel, WorkDim, LocalWorkSize,
                                 *Command));
   }
@@ -806,19 +793,10 @@ ur_result_t urCommandBufferAppendUSMMemcpyExp(
   std::ignore = Event;
   std::ignore = Command;
 
-  bool PreferCopyEngine = !IsDevicePointer(CommandBuffer->Context, Src) ||
-                          !IsDevicePointer(CommandBuffer->Context, Dst);
-  // For better performance, Copy Engines are not preferred given Shared
-  // pointers on DG2.
-  if (CommandBuffer->Device->isDG2() &&
-      (IsSharedPointer(CommandBuffer->Context, Src) ||
-       IsSharedPointer(CommandBuffer->Context, Dst))) {
-    PreferCopyEngine = false;
-  }
-  PreferCopyEngine |= UseCopyEngineForD2DCopy;
-
   return enqueueCommandBufferMemCopyHelper(
-      UR_COMMAND_USM_MEMCPY, CommandBuffer, Dst, Src, Size, PreferCopyEngine,
+      UR_COMMAND_USM_MEMCPY, CommandBuffer, Dst, Src, Size,
+      PreferCopyEngineUsage(CommandBuffer->Device, CommandBuffer->Context, Src,
+                            Dst),
       NumSyncPointsInWaitList, SyncPointWaitList, SyncPoint);
 }
 
@@ -1219,14 +1197,15 @@ ur_result_t waitForDependencies(ur_exp_command_buffer_handle_t CommandBuffer,
       // when `EventWaitList` dependencies are complete.
       ur_command_list_ptr_t WaitCommandList{};
       UR_CALL(Queue->Context->getAvailableCommandList(
-          Queue, WaitCommandList, false, NumEventsInWaitList, EventWaitList,
-          false));
+          Queue, WaitCommandList, false /*UseCopyEngine*/, NumEventsInWaitList,
+          EventWaitList, false /*AllowBatching*/, nullptr /*ForcedCmdQueue*/));
 
       ZE2UR_CALL(zeCommandListAppendBarrier,
                  (WaitCommandList->first, CommandBuffer->WaitEvent->ZeEvent,
                   CommandBuffer->WaitEvent->WaitList.Length,
                   CommandBuffer->WaitEvent->WaitList.ZeEventList));
-      Queue->executeCommandList(WaitCommandList, false, false);
+      Queue->executeCommandList(WaitCommandList, false /*IsBlocking*/,
+                                false /*OKToBatchCommand*/);
       MustSignalWaitEvent = false;
     }
   }
@@ -1338,9 +1317,9 @@ urCommandBufferEnqueueExp(ur_exp_command_buffer_handle_t CommandBuffer,
 
   // Create a command-list to signal the Event on completion
   ur_command_list_ptr_t SignalCommandList{};
-  UR_CALL(Queue->Context->getAvailableCommandList(Queue, SignalCommandList,
-                                                  false, NumEventsInWaitList,
-                                                  EventWaitList, false));
+  UR_CALL(Queue->Context->getAvailableCommandList(
+      Queue, SignalCommandList, false /*UseCopyEngine*/, NumEventsInWaitList,
+      EventWaitList, false /*AllowBatching*/, nullptr /*ForcedCmdQueue*/));
 
   // Reset the wait-event for the UR command-buffer that is signaled when its
   // submission dependencies have been satisfied.
@@ -1355,7 +1334,8 @@ urCommandBufferEnqueueExp(ur_exp_command_buffer_handle_t CommandBuffer,
   // parameter with signal command-list completing.
   UR_CALL(createUserEvent(CommandBuffer, Queue, SignalCommandList, Event));
 
-  UR_CALL(Queue->executeCommandList(SignalCommandList, false, false));
+  UR_CALL(Queue->executeCommandList(SignalCommandList, false /*IsBlocking*/,
+                                    false /*OKToBatchCommand*/));
 
   return UR_RESULT_SUCCESS;
 }
@@ -1392,7 +1372,7 @@ ur_result_t validateCommandDesc(
   logger::debug("Mutable features supported by device {}", SupportedFeatures);
 
   // Kernel handle updates are not yet supported.
-  if (CommandDesc->hNewKernel != Command->Kernel) {
+  if (CommandDesc->hNewKernel && CommandDesc->hNewKernel != Command->Kernel) {
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
@@ -1676,14 +1656,14 @@ ur_result_t updateKernelCommand(
 ur_result_t urCommandBufferUpdateKernelLaunchExp(
     ur_exp_command_buffer_command_handle_t Command,
     const ur_exp_command_buffer_update_kernel_launch_desc_t *CommandDesc) {
+  UR_ASSERT(Command->CommandBuffer->IsUpdatable,
+            UR_RESULT_ERROR_INVALID_OPERATION);
   UR_ASSERT(Command->Kernel, UR_RESULT_ERROR_INVALID_NULL_HANDLE);
 
   // Lock command, kernel and command buffer for update.
   std::scoped_lock<ur_shared_mutex, ur_shared_mutex, ur_shared_mutex> Guard(
       Command->Mutex, Command->CommandBuffer->Mutex, Command->Kernel->Mutex);
 
-  UR_ASSERT(Command->CommandBuffer->IsUpdatable,
-            UR_RESULT_ERROR_INVALID_OPERATION);
   UR_ASSERT(Command->CommandBuffer->IsFinalized,
             UR_RESULT_ERROR_INVALID_OPERATION);
 
@@ -1728,6 +1708,16 @@ urCommandBufferGetInfoExp(ur_exp_command_buffer_handle_t hCommandBuffer,
   switch (propName) {
   case UR_EXP_COMMAND_BUFFER_INFO_REFERENCE_COUNT:
     return ReturnValue(uint32_t{hCommandBuffer->RefCount.load()});
+  case UR_EXP_COMMAND_BUFFER_INFO_DESCRIPTOR: {
+    ur_exp_command_buffer_desc_t Descriptor{};
+    Descriptor.stype = UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_DESC;
+    Descriptor.pNext = nullptr;
+    Descriptor.isUpdatable = hCommandBuffer->IsUpdatable;
+    Descriptor.isInOrder = hCommandBuffer->IsInOrderCmdList;
+    Descriptor.enableProfiling = hCommandBuffer->IsProfilingEnabled;
+
+    return ReturnValue(Descriptor);
+  }
   default:
     assert(!"Command-buffer info request not implemented");
   }
