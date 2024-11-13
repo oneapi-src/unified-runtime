@@ -231,7 +231,7 @@ template <class TP> struct Scheduler : Scheduler_base<TP, TasksInfo_TP> {
   using Scheduler_base<TP, TasksInfo_TP>::Scheduler_base;
 
   inline void schedule(worker_task_t &&task) {
-    ti.schedule(this->ref.schedule_task(std::move(task)));
+    this->ti.schedule(this->ref.schedule_task(std::move(task)));
   }
 };
 
