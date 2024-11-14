@@ -213,6 +213,6 @@ TEST_P(urCommandBufferAppendKernelLaunchExpTest, FinalizeTwice) {
 
     ASSERT_SUCCESS(urCommandBufferFinalizeExp(cmd_buf_handle));
     EXPECT_EQ_RESULT(urCommandBufferFinalizeExp(cmd_buf_handle),
-                     UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_EXP);
+                     UR_RESULT_ERROR_INVALID_OPERATION);
 
 }
