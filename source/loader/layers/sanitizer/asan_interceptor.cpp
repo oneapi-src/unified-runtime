@@ -461,7 +461,6 @@ SanitizerInterceptor::registerSpirKernels(ur_program_handle_t Program) {
         const uint64_t NumOfSpirKernel = MetadataSize / sizeof(SpirKernelInfo);
         assert((MetadataSize % sizeof(SpirKernelInfo) == 0) &&
                "SpirKernelMetadata size is not correct");
-        getContext()->logger.debug("NumOfSpirKernel: {}", NumOfSpirKernel);
 
         ManagedQueue Queue(Context, Device);
 
@@ -498,6 +497,8 @@ SanitizerInterceptor::registerSpirKernels(ur_program_handle_t Program) {
 
             PI->InstrumentedKernels.insert(KernelName);
         }
+        getContext()->logger.info("Number of sanitized kernel: {}",
+                                  PI->InstrumentedKernels.size());
     }
 
     return UR_RESULT_SUCCESS;
