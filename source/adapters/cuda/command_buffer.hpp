@@ -352,6 +352,8 @@ struct ur_exp_command_buffer_handle_t_ {
   ur_device_handle_t Device;
   // Whether commands in the command-buffer can be updated
   bool IsUpdatable;
+  // Keep track of whether command buffer is finalized
+  bool IsFinalized = false;
   // Cuda Graph handle
   CUgraph CudaGraph;
   // Cuda Graph Exec handle

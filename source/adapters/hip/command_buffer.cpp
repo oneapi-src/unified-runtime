@@ -306,6 +306,8 @@ urCommandBufferReleaseExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urCommandBufferFinalizeExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
+  UR_ASSERT(!hCommandBuffer->IsFinalized,
+            UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_EXP);
   try {
     const unsigned long long flags = 0;
     UR_CHECK_ERROR(hipGraphInstantiateWithFlags(
@@ -313,6 +315,7 @@ urCommandBufferFinalizeExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
   } catch (...) {
     return UR_RESULT_ERROR_UNKNOWN;
   }
+  hCommandBuffer->IsFinalized = true;
   return UR_RESULT_SUCCESS;
 }
 

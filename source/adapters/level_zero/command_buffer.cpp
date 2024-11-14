@@ -737,6 +737,7 @@ urCommandBufferReleaseExp(ur_exp_command_buffer_handle_t CommandBuffer) {
  * enqueueImmediateAppendPath() which uses the
  * zeCommandListImmediateAppendCommandListsExp API. */
 ur_result_t
+<<<<<<< HEAD
 finalizeImmediateAppendPath(ur_exp_command_buffer_handle_t CommandBuffer) {
 
   // Wait for the Copy Queue to finish at the end of the compute command list.
@@ -838,6 +839,8 @@ finalizeWaitEventPath(ur_exp_command_buffer_handle_t CommandBuffer) {
 ur_result_t
 urCommandBufferFinalizeExp(ur_exp_command_buffer_handle_t CommandBuffer) {
   UR_ASSERT(CommandBuffer, UR_RESULT_ERROR_INVALID_NULL_POINTER);
+  UR_ASSERT(!CommandBuffer->IsFinalized,
+            UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_EXP);
 
   // It is not allowed to append to command list from multiple threads.
   std::scoped_lock<ur_shared_mutex> Guard(CommandBuffer->Mutex);
