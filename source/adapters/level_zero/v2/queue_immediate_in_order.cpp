@@ -62,8 +62,7 @@ ur_command_list_handler_t::ur_command_list_handler_t(
     ur_context_handle_t hContext, ur_device_handle_t hDevice,
     const ur_queue_properties_t *pProps)
     : commandList(hContext->commandListCache.getImmediateCommandList(
-          hDevice->ZeDevice, true, getZeOrdinal(hDevice),
-          true /* always enable copy offload */,
+          hDevice->ZeDevice, true, getZeOrdinal(hDevice), false,
           ZE_COMMAND_QUEUE_MODE_ASYNCHRONOUS,
           getZePriority(pProps ? pProps->flags : ur_queue_flags_t{}),
           getZeIndex(pProps))) {}
