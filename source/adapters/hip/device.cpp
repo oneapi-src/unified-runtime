@@ -543,12 +543,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     return ReturnValue("");
   }
   case UR_DEVICE_INFO_EXTENSIONS: {
-    // TODO: Remove comment when HIP support native asserts.
-    // DEVICELIB_ASSERT extension is set so fallback assert
-    // postprocessing is NOP. HIP 4.3 docs indicate support for
-    // native asserts are in progress
     std::string SupportedExtensions = "";
-    SupportedExtensions += "cl_intel_devicelib_assert ";
     SupportedExtensions += "ur_exp_usm_p2p ";
 
     int RuntimeVersion = 0;
@@ -935,6 +930,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   }
   case UR_DEVICE_INFO_COMMAND_BUFFER_EVENT_SUPPORT_EXP:
     return ReturnValue(false);
+  case UR_DEVICE_INFO_USE_NATIVE_ASSERT:
+    return ReturnValue(true);
   default:
     break;
   }
