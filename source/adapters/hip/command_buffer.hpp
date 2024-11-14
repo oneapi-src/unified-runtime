@@ -172,12 +172,10 @@ struct ur_exp_command_buffer_handle_t_ {
   ur_device_handle_t Device;
   // Whether commands in the command-buffer can be updated
   bool IsUpdatable;
-  // Keep track of whether command buffer is finalized
-  bool IsFinalized = false;
   // HIP Graph handle
   hipGraph_t HIPGraph;
   // HIP Graph Exec handle
-  hipGraphExec_t HIPGraphExec;
+  hipGraphExec_t HIPGraphExec = nullptr;
   // Atomic variable counting the number of reference to this command_buffer
   // using std::atomic prevents data race when incrementing/decrementing.
   std::atomic_uint32_t RefCountInternal;
