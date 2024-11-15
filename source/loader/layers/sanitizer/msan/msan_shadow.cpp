@@ -237,12 +237,12 @@ MsanShadowMemoryGPU::ReleaseShadow(std::shared_ptr<MsanAllocInfo> AI) {
 
 uptr MsanShadowMemoryPVC::MemToShadow(uptr Ptr) {
     assert(Ptr & 0xFF00000000000000ULL && "Ptr must be device USM");
-    return ShadowBegin + 0x80000000000ULL + ((Ptr & 0xFFFFFFFFFFFFULL));
+    return ShadowBegin + (Ptr & 0x3FFF'FFFF'FFFFULL);
 }
 
 uptr MsanShadowMemoryDG2::MemToShadow(uptr Ptr) {
     assert(Ptr & 0xFFFF000000000000ULL && "Ptr must be device USM");
-    return ShadowBegin + 0x80000000000ULL + ((Ptr & 0x7FFFFFFFFFFFULL));
+    return ShadowBegin + (Ptr & 0x3FFF'FFFF'FFFFULL);
 }
 
 } // namespace ur_sanitizer_layer

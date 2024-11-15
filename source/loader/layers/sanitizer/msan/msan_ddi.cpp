@@ -75,6 +75,11 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGet(
         return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
     }
 
+    setenv("NEOReadDebugKeys", "1", 1);
+    setenv("AllocateHostAllocationsInHeapExtendedHost", "0", 1);
+    setenv("UseHighAlignmentForHeapExtended", "0", 1);
+    // setenv("EnableReservingInSvmRange", "0", 1);
+
     ur_result_t result = pfnAdapterGet(NumEntries, phAdapters, pNumAdapters);
     if (result == UR_RESULT_SUCCESS && phAdapters) {
         const uint32_t NumAdapters = pNumAdapters ? *pNumAdapters : NumEntries;

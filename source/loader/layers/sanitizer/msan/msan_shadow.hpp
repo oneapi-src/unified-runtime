@@ -107,7 +107,7 @@ struct MsanShadowMemoryPVC final : public MsanShadowMemoryGPU {
 
     uptr MemToShadow(uptr Ptr) override;
 
-    size_t GetShadowSize() override { return 0x180000000000ULL; }
+    size_t GetShadowSize() override { return 0x8000'0000'0000ULL; }
 };
 
 /// Shadow Memory layout of GPU PVC device
