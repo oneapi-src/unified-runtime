@@ -803,7 +803,22 @@ urEventWait(uint32_t NumEvents, ///< [in] number of events in the event list
           } else {
             ZE2UR_CALL(zeHostSynchronize, (ZeEvent));
           }
-          Event->Completed = true;
+          if (Event->CounterBasedEventsEnabled &&
+              Event->CommandList.value()->second.ZeFence &&
+              Event->CommandList.value()->second.ZeFenceInUse) {
+            while (true) {
+              logger::debug("Event completed, checking fence status");
+              ze_result_t ZeResult =
+                  ZE_CALL_NOCHECK(zeFenceQueryStatus,
+                                  (Event->CommandList.value()->second.ZeFence));
+              if (ZeResult == ZE_RESULT_SUCCESS) {
+                Event->Completed = true;
+                break;
+              }
+            }
+          } else {
+            Event->Completed = true;
+          }
         }
       }
       if (auto Q = Event->UrQueue) {
