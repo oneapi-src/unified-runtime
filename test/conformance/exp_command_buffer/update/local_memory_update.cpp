@@ -39,40 +39,46 @@ struct LocalMemoryUpdateTestBase
         }
         size_t current_index = 0;
         // Index 0 is local_mem arg
-        ASSERT_SUCCESS(urKernelSetArgLocal(kernel, current_index++,
-                                           local_mem_size, nullptr));
+        ASSERT_SUCCESS(
+            urKernelSetArgLocal(kernel, static_cast<uint32_t>(current_index++),
+                                local_mem_size, nullptr));
 
         //Hip has extr args for local mem at index 1-3
         if (backend == UR_PLATFORM_BACKEND_HIP) {
-            ASSERT_SUCCESS(urKernelSetArgValue(kernel, current_index++,
-                                               sizeof(local_size), nullptr,
-                                               &local_size));
-            ASSERT_SUCCESS(urKernelSetArgValue(kernel, current_index++,
-                                               sizeof(local_size), nullptr,
-                                               &local_size));
-            ASSERT_SUCCESS(urKernelSetArgValue(kernel, current_index++,
-                                               sizeof(local_size), nullptr,
-                                               &local_size));
+            ASSERT_SUCCESS(urKernelSetArgValue(
+                kernel, static_cast<uint32_t>(current_index++),
+                sizeof(local_size), nullptr, &local_size));
+            ASSERT_SUCCESS(urKernelSetArgValue(
+                kernel, static_cast<uint32_t>(current_index++),
+                sizeof(local_size), nullptr, &local_size));
+            ASSERT_SUCCESS(urKernelSetArgValue(
+                kernel, static_cast<uint32_t>(current_index++),
+                sizeof(local_size), nullptr, &local_size));
         }
 
         // Index 1 is output
-        ASSERT_SUCCESS(urKernelSetArgPointer(kernel, current_index++, nullptr,
-                                             shared_ptrs[0]));
+        ASSERT_SUCCESS(urKernelSetArgPointer(
+            kernel, static_cast<uint32_t>(current_index++), nullptr,
+            shared_ptrs[0]));
         // Index 2 is A
-        ASSERT_SUCCESS(urKernelSetArgValue(kernel, current_index++, sizeof(A),
-                                           nullptr, &A));
+        ASSERT_SUCCESS(
+            urKernelSetArgValue(kernel, static_cast<uint32_t>(current_index++),
+                                sizeof(A), nullptr, &A));
         // Index 3 is X
-        ASSERT_SUCCESS(urKernelSetArgPointer(kernel, current_index++, nullptr,
-                                             shared_ptrs[1]));
+        ASSERT_SUCCESS(urKernelSetArgPointer(
+            kernel, static_cast<uint32_t>(current_index++), nullptr,
+            shared_ptrs[1]));
         // Index 4 is Y
-        ASSERT_SUCCESS(urKernelSetArgPointer(kernel, current_index++, nullptr,
-                                             shared_ptrs[2]));
+        ASSERT_SUCCESS(urKernelSetArgPointer(
+            kernel, static_cast<uint32_t>(current_index++), nullptr,
+            shared_ptrs[2]));
     }
 
     void Validate(uint32_t *output, uint32_t *X, uint32_t *Y, uint32_t A,
                   size_t length, size_t local_size) {
         for (size_t i = 0; i < length; i++) {
-            uint32_t result = A * X[i] + Y[i] + i + local_size;
+            uint32_t result = A * X[i] + Y[i] + static_cast<uint32_t>(i) +
+                              static_cast<uint32_t>(local_size);
             ASSERT_EQ(result, output[i]);
         }
     }

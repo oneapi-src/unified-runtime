@@ -29,8 +29,8 @@ TEST_F(urMultiDeviceProgramTest, urMultiDeviceProgramGetInfo) {
     auto subset = std::vector<ur_device_handle_t>(
         associated_devices.begin(),
         associated_devices.begin() + associated_devices.size() / 2);
-    ASSERT_SUCCESS(
-        urProgramBuildExp(program, subset.size(), subset.data(), nullptr));
+    ASSERT_SUCCESS(urProgramBuildExp(
+        program, static_cast<uint32_t>(subset.size()), subset.data(), nullptr));
 
     std::vector<size_t> binary_sizes(associated_devices.size());
     ASSERT_SUCCESS(urProgramGetInfo(program, UR_PROGRAM_INFO_BINARY_SIZES,
