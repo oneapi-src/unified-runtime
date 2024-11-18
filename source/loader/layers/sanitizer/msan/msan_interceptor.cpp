@@ -19,6 +19,7 @@
 #include "sanitizer_common/sanitizer_stacktrace.hpp"
 #include "sanitizer_common/sanitizer_utils.hpp"
 #include "ur_api.h"
+#include "ur_sanitizer_layer.hpp"
 
 namespace ur_sanitizer_layer {
 
@@ -233,25 +234,27 @@ ur_result_t MsanInterceptor::postLaunchKernel(ur_kernel_handle_t Kernel,
     auto Result = getContext()->urDdiTable.Queue.pfnFinish(Queue);
 
     if (Result == UR_RESULT_SUCCESS) {
-        // for (const auto &AH : LaunchInfo.Data->SanitizerReport) {
-        //     if (!AH.Flag) {
-        //         continue;
-        //     }
-        //     switch (AH.ErrorType) {
-        //     case DeviceSanitizerErrorType::USE_AFTER_FREE:
-        //         ReportUseAfterFree(AH, Kernel, GetContext(Queue));
-        //         break;
-        //     case DeviceSanitizerErrorType::OUT_OF_BOUNDS:
-        //     case DeviceSanitizerErrorType::MISALIGNED:
-        //     case DeviceSanitizerErrorType::NULL_POINTER:
-        //         ReportGenericError(AH, Kernel);
-        //         break;
-        //     default:
-        //         ReportFatalError(AH);
-        //     }
-        //     if (!AH.IsRecover) {
-        //         exit(1);
-        //     }
+        const auto &AH = LaunchInfo.Data->Report;
+
+        if (!AH.Flag) {
+            return Result;
+        }
+
+        // getContext()->logger.always();
+        // switch (AH.ErrorType) {
+        // case DeviceSanitizerErrorType::USE_AFTER_FREE:
+        //     ReportUseAfterFree(AH, Kernel, GetContext(Queue));
+        //     break;
+        // case DeviceSanitizerErrorType::OUT_OF_BOUNDS:
+        // case DeviceSanitizerErrorType::MISALIGNED:
+        // case DeviceSanitizerErrorType::NULL_POINTER:
+        //     ReportGenericError(AH, Kernel);
+        //     break;
+        // default:
+        //     ReportFatalError(AH);
+        // }
+        // if (!AH.IsRecover) {
+        //     exit(1);
         // }
     }
 

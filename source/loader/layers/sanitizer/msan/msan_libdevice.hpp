@@ -55,16 +55,12 @@ struct MsanErrorReport {
     uint32_t AccessSize = 0;
     MsanMemoryType MemoryType = MsanMemoryType::UNKNOWN;
     MsanErrorType ErrorType = MsanErrorType::UNKNOWN;
-
-    bool IsRecover = false;
 };
 
 struct MsanLocalArgsInfo {
     uint64_t Size = 0;
     uint64_t SizeWithRedZone = 0;
 };
-
-constexpr std::size_t MSAN_MAX_NUM_REPORTS = 10;
 
 struct MsanLaunchInfo {
     uintptr_t GlobalShadowOffset = 0;
@@ -75,8 +71,9 @@ struct MsanLaunchInfo {
 
     DeviceType DeviceTy = DeviceType::UNKNOWN;
     uint32_t Debug = 0;
+    uint32_t IsRecover = 0;
 
-    MsanErrorReport SanitizerReport[MSAN_MAX_NUM_REPORTS];
+    MsanErrorReport Report;
 };
 
 // Based on the observation, only the last 24 bits of the address of the private
