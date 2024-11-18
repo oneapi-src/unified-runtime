@@ -80,6 +80,8 @@ ur_result_t MsanInterceptor::allocateMemory(ur_context_handle_t Context,
         return UR_RESULT_ERROR_INVALID_ARGUMENT;
     }
 
+    *ResultPtr = Allocated;
+
     if (Type != MsanAllocType::DEVICE_USM) {
         return UR_RESULT_SUCCESS;
     }
@@ -472,30 +474,38 @@ ur_result_t MsanInterceptor::prepareLaunch(
     std::shared_ptr<ContextInfo> &ContextInfo,
     std::shared_ptr<DeviceInfo> &DeviceInfo, ur_queue_handle_t Queue,
     ur_kernel_handle_t Kernel, USMLaunchInfo &LaunchInfo) {
+    auto Program = GetProgram(Kernel);
 
     do {
         auto KernelInfo = getKernelInfo(Kernel);
 
-        // Set launch info argument
-        auto ArgNums = GetKernelNumArgs(Kernel);
-        if (ArgNums) {
-            getContext()->logger.debug(
-                "launch_info {} (numLocalArgs={}, localArgs={})",
-                (void *)LaunchInfo.Data, LaunchInfo.Data->NumLocalArgs,
-                (void *)LaunchInfo.Data->LocalArgs);
-            ur_result_t URes = getContext()->urDdiTable.Kernel.pfnSetArgPointer(
-                Kernel, ArgNums - 1, nullptr, LaunchInfo.Data);
-            if (URes != UR_RESULT_SUCCESS) {
-                getContext()->logger.error("Failed to set launch info: {}",
-                                           URes);
-                return URes;
+        auto EnqueueWriteGlobal = [&Queue, &Program](
+                                      const char *Name, const void *Value,
+                                      size_t Size, bool ReportWarning = true) {
+            auto Result =
+                getContext()->urDdiTable.Enqueue.pfnDeviceGlobalVariableWrite(
+                    Queue, Program, Name, false, Size, 0, Value, 0, nullptr,
+                    nullptr);
+            if (ReportWarning && Result != UR_RESULT_SUCCESS) {
+                getContext()->logger.warning(
+                    "Failed to write device global \"{}\": {}", Name, Result);
+                return false;
             }
-        }
+            return true;
+        };
 
         LaunchInfo.Data->GlobalShadowOffset = DeviceInfo->Shadow->ShadowBegin;
         LaunchInfo.Data->GlobalShadowOffsetEnd = DeviceInfo->Shadow->ShadowEnd;
         LaunchInfo.Data->DeviceTy = DeviceInfo->Type;
         LaunchInfo.Data->Debug = getOptions().Debug ? 1 : 0;
+
+        getContext()->logger.debug(
+            "launch_info {} (numLocalArgs={}, localArgs={})",
+            (void *)LaunchInfo.Data, LaunchInfo.Data->NumLocalArgs,
+            (void *)LaunchInfo.Data->LocalArgs);
+
+        EnqueueWriteGlobal("__MsanLaunchInfo", &LaunchInfo.Data,
+                                   sizeof(uptr));
     } while (false);
 
     return UR_RESULT_SUCCESS;
