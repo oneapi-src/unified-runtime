@@ -509,6 +509,8 @@ ur_result_t UR_APICALL urAdapterGetInfo(
 ///         + `NULL == phAdapters`
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         + `NumEntries == 0 && phPlatforms != NULL`
+///     - ::UR_RESULT_ERROR_INVALID_VALUE
+///         + `pNumPlatforms == NULL && phPlatforms == NULL`
 ur_result_t UR_APICALL urPlatformGet(
     ur_adapter_handle_t *
         phAdapters, ///< [in][range(0, NumAdapters)] array of adapters to query for platforms.
@@ -868,7 +870,7 @@ ur_result_t UR_APICALL urDeviceGetSelected(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hDevice`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_DEVICE_INFO_ENQUEUE_NATIVE_COMMAND_SUPPORT_EXP < propName`
+///         + `::UR_DEVICE_INFO_LOW_POWER_EVENTS_EXP < propName`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
 ///         + If `propName` is not supported by the adapter.
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
@@ -1539,6 +1541,7 @@ ur_result_t UR_APICALL urContextSetExtendedDeleter(
 ///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
 ///     - ::UR_RESULT_ERROR_INVALID_VALUE
 ///     - ::UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR
+///         + `pImageDesc && UR_STRUCTURE_TYPE_IMAGE_DESC != pImageDesc->stype`
 ///         + `pImageDesc && UR_MEM_TYPE_IMAGE1D_ARRAY < pImageDesc->type`
 ///         + `pImageDesc && pImageDesc->numMipLevel != 0`
 ///         + `pImageDesc && pImageDesc->numSamples != 0`
@@ -1888,7 +1891,7 @@ ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hMemory`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_MEM_INFO_CONTEXT < propName`
+///         + `::UR_MEM_INFO_REFERENCE_COUNT < propName`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
 ///         + If `propName` is not supported by the adapter.
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
@@ -2223,7 +2226,6 @@ ur_result_t UR_APICALL urSamplerCreateWithNativeHandle(
 /// @brief USM allocate host memory
 ///
 /// @details
-///     - This function must support memory pooling.
 ///     - If pUSMDesc is not NULL and pUSMDesc->pool is not NULL the allocation
 ///       will be served from a specified memory pool.
 ///     - Otherwise, the behavior is implementation-defined.
@@ -2256,6 +2258,8 @@ ur_result_t UR_APICALL urSamplerCreateWithNativeHandle(
 ///         + `size` is greater than ::UR_DEVICE_INFO_MAX_MEM_ALLOC_SIZE.
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
+///         + If any device associated with `hContext` reports `false` for ::UR_DEVICE_INFO_USM_POOL_SUPPORT
 ur_result_t UR_APICALL urUSMHostAlloc(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     const ur_usm_desc_t
@@ -2280,7 +2284,6 @@ ur_result_t UR_APICALL urUSMHostAlloc(
 /// @brief USM allocate device memory
 ///
 /// @details
-///     - This function must support memory pooling.
 ///     - If pUSMDesc is not NULL and pUSMDesc->pool is not NULL the allocation
 ///       will be served from a specified memory pool.
 ///     - Otherwise, the behavior is implementation-defined.
@@ -2314,6 +2317,8 @@ ur_result_t UR_APICALL urUSMHostAlloc(
 ///         + `size` is greater than ::UR_DEVICE_INFO_MAX_MEM_ALLOC_SIZE.
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
+///         + If any device associated with `hContext` reports `false` for ::UR_DEVICE_INFO_USM_POOL_SUPPORT
 ur_result_t UR_APICALL urUSMDeviceAlloc(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
@@ -2339,7 +2344,6 @@ ur_result_t UR_APICALL urUSMDeviceAlloc(
 /// @brief USM allocate shared memory
 ///
 /// @details
-///     - This function must support memory pooling.
 ///     - If pUSMDesc is not NULL and pUSMDesc->pool is not NULL the allocation
 ///       will be served from a specified memory pool.
 ///     - Otherwise, the behavior is implementation-defined.
@@ -2374,6 +2378,8 @@ ur_result_t UR_APICALL urUSMDeviceAlloc(
 ///         + If `UR_DEVICE_INFO_USM_SINGLE_SHARED_SUPPORT` and `UR_DEVICE_INFO_USM_CROSS_SHARED_SUPPORT` are both false.
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
+///         + If any device associated with `hContext` reports `false` for ::UR_DEVICE_INFO_USM_POOL_SUPPORT
 ur_result_t UR_APICALL urUSMSharedAlloc(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
@@ -2488,6 +2494,8 @@ ur_result_t UR_APICALL urUSMGetMemAllocInfo(
 ///         + `::UR_USM_POOL_FLAGS_MASK & pPoolDesc->flags`
 ///     - ::UR_RESULT_ERROR_INVALID_VALUE
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
+///         + If any device associated with `hContext` reports `false` for ::UR_DEVICE_INFO_USM_POOL_SUPPORT
 ur_result_t UR_APICALL urUSMPoolCreate(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_usm_pool_desc_t *
@@ -2515,6 +2523,7 @@ ur_result_t UR_APICALL urUSMPoolCreate(
 ///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == pPool`
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
 ur_result_t UR_APICALL urUSMPoolRetain(
     ur_usm_pool_handle_t pPool ///< [in][retain] pointer to USM memory pool
     ) try {
@@ -2545,6 +2554,7 @@ ur_result_t UR_APICALL urUSMPoolRetain(
 ///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == pPool`
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
 ur_result_t UR_APICALL urUSMPoolRelease(
     ur_usm_pool_handle_t pPool ///< [in][release] pointer to USM memory pool
     ) try {
@@ -2580,6 +2590,7 @@ ur_result_t UR_APICALL urUSMPoolRelease(
 ///         + `pPropValue == NULL && pPropSizeRet == NULL`
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
 ur_result_t UR_APICALL urUSMPoolGetInfo(
     ur_usm_pool_handle_t hPool,  ///< [in] handle of the USM memory pool
     ur_usm_pool_info_t propName, ///< [in] name of the pool property to query
@@ -9421,6 +9432,69 @@ ur_result_t UR_APICALL urUsmP2PPeerAccessGetInfoExp(
 
     return pfnPeerAccessGetInfoExp(commandDevice, peerDevice, propName,
                                    propSize, pPropValue, pPropSizeRet);
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Enqueue a barrier command which waits a list of events to complete
+///        before it completes, with optional extended properties
+///
+/// @details
+///     - If the event list is empty, it waits for all previously enqueued
+///       commands to complete.
+///     - It blocks command execution - any following commands enqueued after it
+///       do not execute until it completes.
+///     - It returns an event which can be waited on.
+///
+/// @remarks
+///   _Analogues_
+///     - **clEnqueueBarrierWithWaitList**
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hQueue`
+///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
+///         + `NULL != pProperties && ::UR_EXP_ENQUEUE_EXT_FLAGS_MASK & pProperties->flags`
+///     - ::UR_RESULT_ERROR_INVALID_QUEUE
+///     - ::UR_RESULT_ERROR_INVALID_EVENT
+///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
+///         + `phEventWaitList == NULL && numEventsInWaitList > 0`
+///         + `phEventWaitList != NULL && numEventsInWaitList == 0`
+///         + If event objects in phEventWaitList are not valid events.
+///     - ::UR_RESULT_ERROR_IN_EVENT_LIST_EXEC_STATUS
+///         + An event in `phEventWaitList` has ::UR_EVENT_STATUS_ERROR.
+///     - ::UR_RESULT_ERROR_INVALID_VALUE
+///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
+///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrierExt(
+    ur_queue_handle_t hQueue, ///< [in] handle of the queue object
+    const ur_exp_enqueue_ext_properties_t *
+        pProperties, ///< [in][optional] pointer to the extended enqueue properties
+    uint32_t numEventsInWaitList, ///< [in] size of the event wait list
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before this command can be executed.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating that all
+    ///< previously enqueued commands
+    ///< must be complete.
+    ur_event_handle_t *
+        phEvent ///< [out][optional] return an event object that identifies this particular
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
+    ) try {
+    auto pfnEventsWaitWithBarrierExt =
+        ur_lib::getContext()->urDdiTable.Enqueue.pfnEventsWaitWithBarrierExt;
+    if (nullptr == pfnEventsWaitWithBarrierExt) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    return pfnEventsWaitWithBarrierExt(hQueue, pProperties, numEventsInWaitList,
+                                       phEventWaitList, phEvent);
 } catch (...) {
     return exceptionToResult(std::current_exception());
 }

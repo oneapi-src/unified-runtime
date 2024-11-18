@@ -8,6 +8,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "adapter.hpp"
 #include "common.hpp"
 #include "context.hpp"
 #include "device.hpp"
@@ -81,7 +82,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithIL(
 
     *phProgram = cl_adapter::cast<ur_program_handle_t>(clCreateProgramWithIL(
         cl_adapter::cast<cl_context>(hContext), pIL, length, &Err));
-    CL_RETURN_ON_FAILURE(Err);
   } else {
 
     /* If none of the devices conform with CL 2.1 or newer make sure they all
@@ -109,6 +109,24 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramCreateWithIL(
 
     *phProgram = cl_adapter::cast<ur_program_handle_t>(
         FuncPtr(cl_adapter::cast<cl_context>(hContext), pIL, length, &Err));
+  }
+
+  // INVALID_VALUE is only returned in three circumstances according to the cl
+  // spec:
+  // * pIL == NULL
+  // * length == 0
+  // * pIL is not a well-formed binary
+  // UR has a unique error code for each of these, so here we figure out which
+  // to return
+  if (Err == CL_INVALID_VALUE) {
+    if (pIL == nullptr) {
+      return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+    if (length == 0) {
+      return UR_RESULT_ERROR_INVALID_SIZE;
+    }
+    return UR_RESULT_ERROR_INVALID_BINARY;
+  } else {
     CL_RETURN_ON_FAILURE(Err);
   }
 
@@ -375,50 +393,17 @@ UR_APIEXPORT ur_result_t UR_APICALL urProgramSetSpecializationConstants(
                                        sizeof(cl_platform_id), &CurPlatform,
                                        nullptr));
 
-  oclv::OpenCLVersion PlatVer;
-  cl_adapter::getPlatformVersion(CurPlatform, PlatVer);
-
-  bool UseExtensionLookup = false;
-  if (PlatVer < oclv::V2_2) {
-    UseExtensionLookup = true;
-  } else {
-    for (cl_device_id Dev : *DevicesInCtx) {
-      oclv::OpenCLVersion DevVer;
-
-      UR_RETURN_ON_FAILURE(cl_adapter::getDeviceVersion(Dev, DevVer));
-
-      if (DevVer < oclv::V2_2) {
-        UseExtensionLookup = true;
-        break;
-      }
-    }
-  }
-
-  if (UseExtensionLookup == false) {
+  if (ur::cl::getAdapter()->clSetProgramSpecializationConstant) {
     for (uint32_t i = 0; i < count; ++i) {
-      CL_RETURN_ON_FAILURE(clSetProgramSpecializationConstant(
-          CLProg, pSpecConstants[i].id, pSpecConstants[i].size,
-          pSpecConstants[i].pValue));
+      CL_RETURN_ON_FAILURE(
+          ur::cl::getAdapter()->clSetProgramSpecializationConstant(
+              CLProg, pSpecConstants[i].id, pSpecConstants[i].size,
+              pSpecConstants[i].pValue));
     }
   } else {
-    cl_ext::clSetProgramSpecializationConstant_fn
-        SetProgramSpecializationConstant = nullptr;
-    const ur_result_t URResult = cl_ext::getExtFuncFromContext<
-        decltype(SetProgramSpecializationConstant)>(
-        Ctx, cl_ext::ExtFuncPtrCache->clSetProgramSpecializationConstantCache,
-        cl_ext::SetProgramSpecializationConstantName,
-        &SetProgramSpecializationConstant);
-
-    if (URResult != UR_RESULT_SUCCESS) {
-      return URResult;
-    }
-
-    for (uint32_t i = 0; i < count; ++i) {
-      CL_RETURN_ON_FAILURE(SetProgramSpecializationConstant(
-          CLProg, pSpecConstants[i].id, pSpecConstants[i].size,
-          pSpecConstants[i].pValue));
-    }
+    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
+
   return UR_RESULT_SUCCESS;
 }
 

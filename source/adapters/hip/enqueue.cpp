@@ -436,6 +436,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
   }
 }
 
+UR_APIEXPORT ur_result_t urEnqueueEventsWaitWithBarrierExt(
+    ur_queue_handle_t hQueue, const ur_exp_enqueue_ext_properties_t *,
+    uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
+    ur_event_handle_t *phEvent) {
+  return urEnqueueEventsWaitWithBarrier(hQueue, numEventsInWaitList,
+                                        phEventWaitList, phEvent);
+}
+
 /// General 3D memory copy operation.
 /// This function requires the corresponding HIP context to be at the top of
 /// the context stack
@@ -1561,8 +1569,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
     // which makes the HIP runtime not correctly derive the copy kind
     // (direction) for the copies since ROCm 5.6.0+. See:
     // https://github.com/ROCm/clr/issues/40
-    // TODO: Add maximum HIP_VERSION when bug has been fixed.
-#if HIP_VERSION >= 50600000
+    // Fixed by commit
+    // https://github.com/ROCm/clr/commit/d3bfb55d7a934355257a72fab538a0a634b43cad
+    // included in releases starting from ROCm 6.1.0.
+#if HIP_VERSION >= 50600000 && HIP_VERSION < 60100000
     hipPointerAttribute_t srcAttribs{};
     hipPointerAttribute_t dstAttribs{};
 
