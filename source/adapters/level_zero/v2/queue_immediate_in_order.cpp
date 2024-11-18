@@ -758,8 +758,8 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueUSMPrefetch(
                                             numWaitEvents, pWaitEvents));
   }
   // TODO: figure out how to translate "flags"
-  ZE2UR_CALL(zeCommandListAppendMemoryPrefetch,
-             (handler.commandList.get(), pMem, size));
+  //ZE2UR_CALL(zeCommandListAppendMemoryPrefetch,
+  //           (handler.commandList.get(), pMem, size));
 
   if (signalEvent) {
     ZE2UR_CALL(zeCommandListAppendSignalEvent,
