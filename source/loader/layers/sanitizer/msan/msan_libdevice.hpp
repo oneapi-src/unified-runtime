@@ -14,7 +14,9 @@
 
 #include "sanitizer_common/sanitizer_libdevice.hpp"
 
+#if !defined(__SPIR__) && !defined(__SPIRV__)
 namespace ur_sanitizer_layer {
+#endif // !__SPIR__ && !__SPIRV__
 
 enum class MsanErrorType : int32_t {
     UNKNOWN,
@@ -114,4 +116,6 @@ inline const char *ToString(MsanErrorType ErrorType) {
     }
 }
 
+#if !defined(__SPIR__) && !defined(__SPIRV__)
 } // namespace ur_sanitizer_layer
+#endif // !__SPIR__ && !__SPIRV__
