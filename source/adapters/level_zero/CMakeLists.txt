@@ -125,6 +125,7 @@ if(UR_BUILD_ADAPTER_L0_V2)
         ${CMAKE_CURRENT_SOURCE_DIR}/common.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/device.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/platform.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/physical_mem.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/program.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/helpers/kernel_helpers.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/helpers/memory_helpers.hpp
@@ -133,10 +134,12 @@ if(UR_BUILD_ADAPTER_L0_V2)
         ${CMAKE_CURRENT_SOURCE_DIR}/device.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ur_interface_loader.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/platform.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/physical_mem.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/program.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/helpers/kernel_helpers.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/helpers/memory_helpers.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/usm_p2p.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/virtual_mem.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../ur/ur.cpp
         # v2-only sources
         ${CMAKE_CURRENT_SOURCE_DIR}/v2/command_list_cache.hpp
