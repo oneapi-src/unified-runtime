@@ -42,32 +42,65 @@ GetMsanShadowMemory(ur_context_handle_t Context, ur_device_handle_t Device,
 
 ur_result_t MsanShadowMemoryCPU::Setup() {
     static ur_result_t Result = [this]() {
-        size_t ShadowSize = GetShadowSize();
-        ShadowBegin = MmapNoReserve(0, ShadowSize);
-        if (ShadowBegin == 0) {
+        if (MmapFixedNoReserve(CPU_SHADOW1_BEGIN,
+                               CPU_SHADOW1_END - CPU_SHADOW1_BEGIN) == 0) {
             return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
         }
-        DontCoredumpRange(ShadowBegin, ShadowSize);
-        ShadowEnd = ShadowBegin + ShadowSize;
+        if (ProtectMemoryRange(CPU_SHADOW1_END,
+                               CPU_SHADOW2_BEGIN - CPU_SHADOW1_END) == 0) {
+            return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
+        }
+        if (MmapFixedNoReserve(CPU_SHADOW2_BEGIN,
+                               CPU_SHADOW2_END - CPU_SHADOW2_BEGIN) == 0) {
+            return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
+        }
+        if (ProtectMemoryRange(CPU_SHADOW2_END,
+                               CPU_SHADOW3_BEGIN - CPU_SHADOW2_END) == 0) {
+            return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
+        }
+        if (MmapFixedNoReserve(CPU_SHADOW3_BEGIN,
+                               CPU_SHADOW3_END - CPU_SHADOW3_BEGIN) == 0) {
+            return UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
+        }
+        ShadowBegin = CPU_SHADOW1_BEGIN;
+        ShadowEnd = CPU_SHADOW3_END;
+        DontCoredumpRange(ShadowBegin, ShadowEnd - ShadowBegin);
         return UR_RESULT_SUCCESS;
     }();
     return Result;
 }
 
 ur_result_t MsanShadowMemoryCPU::Destory() {
-    if (ShadowBegin == 0) {
+    if (ShadowBegin == 0 && ShadowEnd == 0) {
         return UR_RESULT_SUCCESS;
     }
     static ur_result_t Result = [this]() {
-        if (!Munmap(ShadowBegin, GetShadowSize())) {
+        if (!Munmap(CPU_SHADOW1_BEGIN, CPU_SHADOW1_END - CPU_SHADOW1_BEGIN)) {
             return UR_RESULT_ERROR_UNKNOWN;
         }
+        if (!Munmap(CPU_SHADOW1_END, CPU_SHADOW2_BEGIN - CPU_SHADOW1_END)) {
+            return UR_RESULT_ERROR_UNKNOWN;
+        }
+        if (!Munmap(CPU_SHADOW2_BEGIN, CPU_SHADOW2_END - CPU_SHADOW2_BEGIN) ==
+            0) {
+            return UR_RESULT_ERROR_UNKNOWN;
+        }
+        if (!Munmap(CPU_SHADOW2_END, CPU_SHADOW3_BEGIN - CPU_SHADOW2_END)) {
+            return UR_RESULT_ERROR_UNKNOWN;
+        }
+        if (!Munmap(CPU_SHADOW3_BEGIN, CPU_SHADOW3_END - CPU_SHADOW3_BEGIN) ==
+            0) {
+            return UR_RESULT_ERROR_UNKNOWN;
+        }
+        ShadowBegin = ShadowEnd = 0;
         return UR_RESULT_SUCCESS;
     }();
     return Result;
 }
 
-uptr MsanShadowMemoryCPU::MemToShadow(uptr Ptr) { return ShadowBegin + Ptr; }
+uptr MsanShadowMemoryCPU::MemToShadow(uptr Ptr) {
+    return Ptr ^ 0x500000000000ULL;
+}
 
 ur_result_t MsanShadowMemoryCPU::EnqueuePoisonShadow(ur_queue_handle_t,
                                                      uptr Ptr, uptr Size,

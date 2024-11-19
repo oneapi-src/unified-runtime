@@ -17,6 +17,7 @@
 
 #include <unordered_set>
 
+
 namespace ur_sanitizer_layer {
 
 struct MsanShadowMemory {
@@ -49,6 +50,29 @@ struct MsanShadowMemory {
     uptr ShadowEnd = 0;
 };
 
+
+// Shadow Memory layout of CPU PVC device
+//
+// 0x000000000000 ~ 0x010000000000 "app-1"
+// 0x010000000000 ~ 0x100000000000 "shadow-2"
+// 0x100000000000 ~ 0x110000000000 "invalid"
+// 0x110000000000 ~ 0x200000000000 "origin-2"
+// 0x200000000000 ~ 0x300000000000 "shadow-3"
+// 0x300000000000 ~ 0x400000000000 "origin-3"
+// 0x400000000000 ~ 0x500000000000 "invalid"
+// 0x500000000000 ~ 0x510000000000 "shadow-1"
+// 0x510000000000 ~ 0x600000000000 "app-2"
+// 0x600000000000 ~ 0x610000000000 "origin-1"
+// 0x610000000000 ~ 0x700000000000 "invalid"
+// 0x700000000000 ~ 0x740000000000 "allocator"
+// 0x740000000000 ~ 0x800000000000 "app-3"
+#define CPU_SHADOW1_BEGIN 0x010000000000ULL
+#define CPU_SHADOW1_END 0x100000000000ULL
+#define CPU_SHADOW2_BEGIN 0x200000000000ULL
+#define CPU_SHADOW2_END 0x300000000000ULL
+#define CPU_SHADOW3_BEGIN 0x500000000000ULL
+#define CPU_SHADOW3_END 0x510000000000ULL
+
 struct MsanShadowMemoryCPU final : public MsanShadowMemory {
     MsanShadowMemoryCPU(ur_context_handle_t Context, ur_device_handle_t Device)
         : MsanShadowMemory(Context, Device) {}
@@ -62,7 +86,9 @@ struct MsanShadowMemoryCPU final : public MsanShadowMemory {
     ur_result_t EnqueuePoisonShadow(ur_queue_handle_t Queue, uptr Ptr,
                                     uptr Size, u8 Value) override;
 
-    size_t GetShadowSize() override { return 0x80000000000ULL; }
+    size_t GetShadowSize() override {
+        return CPU_SHADOW3_END - CPU_SHADOW1_BEGIN;
+    }
 };
 
 struct MsanShadowMemoryGPU : public MsanShadowMemory {
