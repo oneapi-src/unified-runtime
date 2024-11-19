@@ -7836,18 +7836,18 @@ urUsmP2PPeerAccessGetInfoExp(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Enqueue a barrier command which waits a list of events to complete
 ///        before it completes, with optional extended properties
-///
+/// 
 /// @details
 ///     - If the event list is empty, it waits for all previously enqueued
 ///       commands to complete.
 ///     - It blocks command execution - any following commands enqueued after it
 ///       do not execute until it completes.
 ///     - It returns an event which can be waited on.
-///
+/// 
 /// @remarks
 ///   _Analogues_
 ///     - **clEnqueueBarrierWithWaitList**
-///
+/// 
 /// @returns
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
@@ -7868,22 +7868,21 @@ urUsmP2PPeerAccessGetInfoExp(
 ///     - ::UR_RESULT_ERROR_INVALID_VALUE
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
-ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrierExt(
-    ur_queue_handle_t hQueue, ///< [in] handle of the queue object
-    const ur_exp_enqueue_ext_properties_t *
-        pProperties, ///< [in][optional] pointer to the extended enqueue properties
-    uint32_t numEventsInWaitList, ///< [in] size of the event wait list
-    const ur_event_handle_t *
-        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
-    ///< events that must be complete before this command can be executed.
-    ///< If nullptr, the numEventsInWaitList must be 0, indicating that all
-    ///< previously enqueued commands
-    ///< must be complete.
-    ur_event_handle_t *
-        phEvent ///< [out][optional] return an event object that identifies this particular
-    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
-    ///< must not refer to an element of the phEventWaitList array.
-) {
+ur_result_t UR_APICALL
+urEnqueueEventsWaitWithBarrierExt(
+    ur_queue_handle_t hQueue,                       ///< [in] handle of the queue object
+    const ur_exp_enqueue_ext_properties_t* pProperties, ///< [in][optional] pointer to the extended enqueue properties
+    uint32_t numEventsInWaitList,                   ///< [in] size of the event wait list
+    const ur_event_handle_t* phEventWaitList,       ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+                                                    ///< events that must be complete before this command can be executed.
+                                                    ///< If nullptr, the numEventsInWaitList must be 0, indicating that all
+                                                    ///< previously enqueued commands
+                                                    ///< must be complete.
+    ur_event_handle_t* phEvent                      ///< [out][optional] return an event object that identifies this particular
+                                                    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+                                                    ///< must not refer to an element of the phEventWaitList array.
+    )
+{
     ur_result_t result = UR_RESULT_SUCCESS;
     return result;
 }

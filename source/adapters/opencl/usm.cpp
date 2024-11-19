@@ -493,13 +493,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
     uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
     ur_event_handle_t *phEvent) {
 
-  return mapCLErrorToUR(clEnqueueMarkerWithWaitList(
-      cl_adapter::cast<cl_command_queue>(hQueue), numEventsInWaitList,
-      cl_adapter::cast<const cl_event *>(phEventWaitList),
-      cl_adapter::cast<cl_event *>(phEvent)));
+  //return mapCLErrorToUR(clEnqueueMarkerWithWaitList(
+  //    cl_adapter::cast<cl_command_queue>(hQueue), numEventsInWaitList,
+  //    cl_adapter::cast<const cl_event *>(phEventWaitList),
+  //    cl_adapter::cast<cl_event *>(phEvent)));
 
-  /*
-  // Use this once impls support it.
   // Have to look up the context from the kernel
   cl_context CLContext;
   cl_int CLErr =
@@ -524,7 +522,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
                 reinterpret_cast<const cl_event *>(phEventWaitList),
                 reinterpret_cast<cl_event *>(phEvent)));
   }
-  */
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMAdvise(
