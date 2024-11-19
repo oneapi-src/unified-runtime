@@ -50,8 +50,6 @@ struct MsanErrorReport {
     uint64_t LID1 = 0;
     uint64_t LID2 = 0;
 
-    uintptr_t Address = 0;
-    bool IsWrite = false;
     uint32_t AccessSize = 0;
     MsanMemoryType MemoryType = MsanMemoryType::UNKNOWN;
     MsanErrorType ErrorType = MsanErrorType::UNKNOWN;

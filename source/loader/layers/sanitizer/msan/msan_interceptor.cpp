@@ -234,28 +234,13 @@ ur_result_t MsanInterceptor::postLaunchKernel(ur_kernel_handle_t Kernel,
     auto Result = getContext()->urDdiTable.Queue.pfnFinish(Queue);
 
     if (Result == UR_RESULT_SUCCESS) {
-        const auto &AH = LaunchInfo.Data->Report;
+        const auto &Report = LaunchInfo.Data->Report;
 
-        if (!AH.Flag) {
+        if (!Report.Flag) {
             return Result;
         }
 
-        // getContext()->logger.always();
-        // switch (AH.ErrorType) {
-        // case DeviceSanitizerErrorType::USE_AFTER_FREE:
-        //     ReportUseAfterFree(AH, Kernel, GetContext(Queue));
-        //     break;
-        // case DeviceSanitizerErrorType::OUT_OF_BOUNDS:
-        // case DeviceSanitizerErrorType::MISALIGNED:
-        // case DeviceSanitizerErrorType::NULL_POINTER:
-        //     ReportGenericError(AH, Kernel);
-        //     break;
-        // default:
-        //     ReportFatalError(AH);
-        // }
-        // if (!AH.IsRecover) {
-        //     exit(1);
-        // }
+        ReportUsesUninitializedValue(LaunchInfo.Data->Report, Kernel);
     }
 
     return Result;

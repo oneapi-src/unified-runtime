@@ -28,15 +28,13 @@ void ReportUsesUninitializedValue(const MsanErrorReport &Report,
     // Try to demangle the kernel name
     KernelName = DemangleName(KernelName);
 
-    getContext()->logger.always("\n====ERROR: DeviceSanitizer: {} on {}",
-                                ToString(Report.ErrorType),
-                                ToString(Report.MemoryType));
     getContext()->logger.always(
-        "{} of size {} at kernel <{}> LID({}, {}, {}) GID({}, "
+        "====WARNING: MemorySanitizer: use-of-uninitialized-value");
+    getContext()->logger.always(
+        "use of size {} at kernel <{}> LID({}, {}, {}) GID({}, "
         "{}, {})",
-        Report.IsWrite ? "WRITE" : "READ", Report.AccessSize,
-        KernelName.c_str(), Report.LID0, Report.LID1, Report.LID2, Report.GID0,
-        Report.GID1, Report.GID2);
+        Report.AccessSize, KernelName.c_str(), Report.LID0, Report.LID1,
+        Report.LID2, Report.GID0, Report.GID1, Report.GID2);
     getContext()->logger.always("  #0 {} {}:{}", Func, File, Report.Line);
 }
 
