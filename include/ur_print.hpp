@@ -874,6 +874,13 @@ template <typename T> inline ur_result_t printTagged(std::ostream &os, const voi
 
 
 
+    template<> inline ur_result_t printFlag<ur_exp_enqueue_ext_flag_t>(std::ostream &os, uint32_t flag);
+
+
+
+
+
+
     template<> inline ur_result_t printFlag<ur_exp_enqueue_native_command_flag_t>(std::ostream &os, uint32_t flag);
 
 
@@ -1013,6 +1020,8 @@ template <typename T> inline ur_result_t printTagged(std::ostream &os, const voi
     inline std::ostream &operator<<(std::ostream &os, enum ur_exp_launch_property_id_t value);
     inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_exp_launch_property_t params);
     inline std::ostream &operator<<(std::ostream &os, enum ur_exp_peer_info_t value);
+    inline std::ostream &operator<<(std::ostream &os, enum ur_exp_enqueue_ext_flag_t value);
+    inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_exp_enqueue_ext_properties_t params);
     inline std::ostream &operator<<(std::ostream &os, enum ur_exp_enqueue_native_command_flag_t value);
     inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_exp_enqueue_native_command_properties_t params);
 
@@ -1619,6 +1628,9 @@ template <typename T> inline ur_result_t printTagged(std::ostream &os, const voi
                 case UR_FUNCTION_BINDLESS_IMAGES_MAP_EXTERNAL_LINEAR_MEMORY_EXP:
                     os << "UR_FUNCTION_BINDLESS_IMAGES_MAP_EXTERNAL_LINEAR_MEMORY_EXP";
                     break;
+                case UR_FUNCTION_ENQUEUE_EVENTS_WAIT_WITH_BARRIER_EXT:
+                    os << "UR_FUNCTION_ENQUEUE_EVENTS_WAIT_WITH_BARRIER_EXT";
+                    break;
                 default:
                     os << "unknown enumerator";
                     break;
@@ -1777,6 +1789,9 @@ template <typename T> inline ur_result_t printTagged(std::ostream &os, const voi
                     break;
                 case UR_STRUCTURE_TYPE_EXP_ENQUEUE_NATIVE_COMMAND_PROPERTIES:
                     os << "UR_STRUCTURE_TYPE_EXP_ENQUEUE_NATIVE_COMMAND_PROPERTIES";
+                    break;
+                case UR_STRUCTURE_TYPE_EXP_ENQUEUE_EXT_PROPERTIES:
+                    os << "UR_STRUCTURE_TYPE_EXP_ENQUEUE_EXT_PROPERTIES";
                     break;
                 default:
                     os << "unknown enumerator";
@@ -2037,6 +2052,11 @@ template <typename T> inline ur_result_t printTagged(std::ostream &os, const voi
                 
                 case UR_STRUCTURE_TYPE_EXP_ENQUEUE_NATIVE_COMMAND_PROPERTIES: {
                     const ur_exp_enqueue_native_command_properties_t *pstruct = (const ur_exp_enqueue_native_command_properties_t *)ptr;
+                    printPtr(os, pstruct);
+                } break;
+                
+                case UR_STRUCTURE_TYPE_EXP_ENQUEUE_EXT_PROPERTIES: {
+                    const ur_exp_enqueue_ext_properties_t *pstruct = (const ur_exp_enqueue_ext_properties_t *)ptr;
                     printPtr(os, pstruct);
                 } break;
                 default:
@@ -3411,6 +3431,9 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_device_binary_
                     break;
                 case UR_DEVICE_INFO_ENQUEUE_NATIVE_COMMAND_SUPPORT_EXP:
                     os << "UR_DEVICE_INFO_ENQUEUE_NATIVE_COMMAND_SUPPORT_EXP";
+                    break;
+                case UR_DEVICE_INFO_LOW_POWER_EVENTS_EXP:
+                    os << "UR_DEVICE_INFO_LOW_POWER_EVENTS_EXP";
                     break;
                 default:
                     os << "unknown enumerator";
@@ -5460,6 +5483,20 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_device_binary_
                     os << ")";
                 } break;
                 case UR_DEVICE_INFO_ENQUEUE_NATIVE_COMMAND_SUPPORT_EXP: {
+                    const ur_bool_t *tptr = (const ur_bool_t *)ptr;
+                    if (sizeof(ur_bool_t) > size) {
+                        os << "invalid size (is: " << size << ", expected: >=" << sizeof(ur_bool_t) << ")";
+                        return UR_RESULT_ERROR_INVALID_SIZE;
+                    }
+                    os << (const void *)(tptr) << " (";
+                    
+        os << 
+                        *tptr
+                    ;
+
+                    os << ")";
+                } break;
+                case UR_DEVICE_INFO_LOW_POWER_EVENTS_EXP: {
                     const ur_bool_t *tptr = (const ur_bool_t *)ptr;
                     if (sizeof(ur_bool_t) > size) {
                         os << "invalid size (is: " << size << ", expected: >=" << sizeof(ur_bool_t) << ")";
@@ -10327,6 +10364,9 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_kernel_native_
                 case UR_QUEUE_FLAG_SYNC_WITH_DEFAULT_STREAM:
                     os << "UR_QUEUE_FLAG_SYNC_WITH_DEFAULT_STREAM";
                     break;
+                case UR_QUEUE_FLAG_LOW_POWER_EVENTS_EXP:
+                    os << "UR_QUEUE_FLAG_LOW_POWER_EVENTS_EXP";
+                    break;
                 default:
                     os << "unknown enumerator";
                     break;
@@ -10450,6 +10490,16 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_kernel_native_
                     first = false;
                 }
                 os << UR_QUEUE_FLAG_SYNC_WITH_DEFAULT_STREAM;
+            }
+            
+            if ((val & UR_QUEUE_FLAG_LOW_POWER_EVENTS_EXP) == (uint32_t)UR_QUEUE_FLAG_LOW_POWER_EVENTS_EXP) {
+                val ^= (uint32_t)UR_QUEUE_FLAG_LOW_POWER_EVENTS_EXP;
+                if (!first) {
+                    os << " | ";
+                } else {
+                    first = false;
+                }
+                os << UR_QUEUE_FLAG_LOW_POWER_EVENTS_EXP;
             }
         if (val != 0) {
             std::bitset<32> bits(val);
@@ -12449,6 +12499,90 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_exp_launch_pro
     }
     } // namespace ur::details
 
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Print operator for the ur_exp_enqueue_ext_flag_t type
+    /// @returns
+    ///     std::ostream &
+    inline std::ostream &operator<<(std::ostream &os, enum ur_exp_enqueue_ext_flag_t value) {
+        switch (value) {
+                case UR_EXP_ENQUEUE_EXT_FLAG_LOW_POWER_EVENTS:
+                    os << "UR_EXP_ENQUEUE_EXT_FLAG_LOW_POWER_EVENTS";
+                    break;
+                default:
+                    os << "unknown enumerator";
+                    break;
+        }
+        return os;
+    }
+
+    namespace ur::details {
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Print ur_exp_enqueue_ext_flag_t flag
+    template<>
+    inline ur_result_t printFlag<ur_exp_enqueue_ext_flag_t>(std::ostream &os, uint32_t flag) {
+        uint32_t val = flag;
+        bool first = true;
+            
+            if ((val & UR_EXP_ENQUEUE_EXT_FLAG_LOW_POWER_EVENTS) == (uint32_t)UR_EXP_ENQUEUE_EXT_FLAG_LOW_POWER_EVENTS) {
+                val ^= (uint32_t)UR_EXP_ENQUEUE_EXT_FLAG_LOW_POWER_EVENTS;
+                if (!first) {
+                    os << " | ";
+                } else {
+                    first = false;
+                }
+                os << UR_EXP_ENQUEUE_EXT_FLAG_LOW_POWER_EVENTS;
+            }
+        if (val != 0) {
+            std::bitset<32> bits(val);
+            if (!first) {
+                os << " | ";
+            }
+            os << "unknown bit flags " << bits;
+        } else if (first) {
+            os << "0";
+        }
+        return UR_RESULT_SUCCESS;
+    }
+    } // namespace ur::details
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_exp_enqueue_ext_properties_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, const struct ur_exp_enqueue_ext_properties_t params) {
+    os << "(struct ur_exp_enqueue_ext_properties_t){";
+    
+        
+    
+        os << ".stype = ";
+        
+        os << 
+            (params.stype)
+        ;
+
+
+        
+    
+        os << ", ";
+        os << ".pNext = ";
+        
+        ur::details::printStruct(os, 
+            (params.pNext)
+        );
+
+
+        
+    
+        os << ", ";
+        os << ".flags = ";
+        
+        ur::details::printFlag<ur_exp_enqueue_ext_flag_t>(os, 
+            (params.flags)
+        );
+
+
+    os << "}";
+    return os;
+}
     ///////////////////////////////////////////////////////////////////////////////
     /// @brief Print operator for the ur_exp_enqueue_native_command_flag_t type
     /// @returns
@@ -19348,6 +19482,71 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
 
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_enqueue_events_wait_with_barrier_ext_params_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_enqueue_events_wait_with_barrier_ext_params_t *params) {
+    
+        
+    
+        os << ".hQueue = ";
+        
+        ur::details::printPtr(os, 
+            *(params->phQueue)
+        );
+
+
+        
+    
+        os << ", ";
+        os << ".pProperties = ";
+        
+        ur::details::printPtr(os, 
+            *(params->ppProperties)
+        );
+
+
+        
+    
+        os << ", ";
+        os << ".numEventsInWaitList = ";
+        
+        os << 
+            *(params->pnumEventsInWaitList)
+        ;
+
+
+        
+    
+        os << ", ";
+        os << ".phEventWaitList = {";
+        for (size_t i = 0; *(params->pphEventWaitList) != NULL && i < *params->pnumEventsInWaitList; ++i) {
+            if (i != 0) {
+                os << ", ";
+            }
+            
+        ur::details::printPtr(os, 
+                (*(params->pphEventWaitList))[i]
+            );
+
+        }
+        os << "}";
+
+        
+    
+        os << ", ";
+        os << ".phEvent = ";
+        
+        ur::details::printPtr(os, 
+            *(params->pphEvent)
+        );
+
+
+    return os;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Print operator for the ur_enqueue_cooperative_kernel_launch_exp_params_t type
 /// @returns
 ///     std::ostream &
@@ -24971,6 +25170,9 @@ inline ur_result_t UR_APICALL printFunctionParams(std::ostream &os, ur_function_
         } break;
         case UR_FUNCTION_ENQUEUE_KERNEL_LAUNCH_CUSTOM_EXP: {
             os << (const struct ur_enqueue_kernel_launch_custom_exp_params_t *)params;
+        } break;
+        case UR_FUNCTION_ENQUEUE_EVENTS_WAIT_WITH_BARRIER_EXT: {
+            os << (const struct ur_enqueue_events_wait_with_barrier_ext_params_t *)params;
         } break;
         case UR_FUNCTION_ENQUEUE_COOPERATIVE_KERNEL_LAUNCH_EXP: {
             os << (const struct ur_enqueue_cooperative_kernel_launch_exp_params_t *)params;
