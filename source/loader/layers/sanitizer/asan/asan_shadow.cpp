@@ -17,6 +17,7 @@
 #include "ur_sanitizer_layer.hpp"
 
 namespace ur_sanitizer_layer {
+namespace asan {
 
 std::shared_ptr<ShadowMemory> GetShadowMemory(ur_context_handle_t Context,
                                               ur_device_handle_t Device,
@@ -273,4 +274,5 @@ uptr ShadowMemoryDG2::MemToShadow(uptr Ptr) {
     }
 }
 
+} // namespace asan
 } // namespace ur_sanitizer_layer

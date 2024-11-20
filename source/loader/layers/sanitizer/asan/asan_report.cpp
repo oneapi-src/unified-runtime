@@ -20,6 +20,7 @@
 #include "ur_sanitizer_layer.hpp"
 
 namespace ur_sanitizer_layer {
+namespace asan {
 
 namespace {
 
@@ -210,4 +211,5 @@ void ReportInvalidKernelArgument(ur_kernel_handle_t Kernel, uint32_t ArgIndex,
     }
 }
 
+} // namespace asan
 } // namespace ur_sanitizer_layer

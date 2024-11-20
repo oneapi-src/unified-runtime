@@ -22,6 +22,7 @@
 #include "sanitizer_common/sanitizer_utils.hpp"
 
 namespace ur_sanitizer_layer {
+namespace asan {
 
 AsanInterceptor::AsanInterceptor() {
     if (getOptions().MaxQuarantineSizeMB) {
@@ -932,4 +933,5 @@ void destroyAsanInterceptor() {
     interceptor = nullptr;
 }
 
+} // namespace asan
 } // namespace ur_sanitizer_layer

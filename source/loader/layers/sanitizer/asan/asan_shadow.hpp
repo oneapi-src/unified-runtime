@@ -18,6 +18,7 @@
 #include <unordered_set>
 
 namespace ur_sanitizer_layer {
+namespace asan {
 
 struct ShadowMemory {
     ShadowMemory(ur_context_handle_t Context, ur_device_handle_t Device)
@@ -133,4 +134,5 @@ std::shared_ptr<ShadowMemory> GetShadowMemory(ur_context_handle_t Context,
                                               ur_device_handle_t Device,
                                               DeviceType Type);
 
+} // namespace asan
 } // namespace ur_sanitizer_layer

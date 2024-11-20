@@ -17,6 +17,7 @@
 #include <atomic>
 
 namespace ur_sanitizer_layer {
+namespace asan {
 
 struct AsanStats {
     void UpdateUSMMalloced(uptr MallocedSize, uptr RedzoneSize);
@@ -143,4 +144,5 @@ AsanStatsWrapper::AsanStatsWrapper() : Stat(nullptr) {
 
 AsanStatsWrapper::~AsanStatsWrapper() { delete Stat; }
 
+} // namespace asan
 } // namespace ur_sanitizer_layer

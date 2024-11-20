@@ -29,6 +29,7 @@
 #include <vector>
 
 namespace ur_sanitizer_layer {
+namespace asan {
 
 class Quarantine;
 
@@ -333,4 +334,5 @@ class AsanInterceptor {
 
 AsanInterceptor *getAsanInterceptor();
 
+} // namespace asan
 } // namespace ur_sanitizer_layer

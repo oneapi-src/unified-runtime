@@ -17,6 +17,7 @@
 #include <memory>
 
 namespace ur_sanitizer_layer {
+namespace asan {
 
 struct DeviceSanitizerReport;
 struct AllocInfo;
@@ -48,4 +49,5 @@ void ReportInvalidKernelArgument(ur_kernel_handle_t Kernel, uint32_t ArgIndex,
                                  uptr Addr, const ValidateUSMResult &VR,
                                  StackTrace Stack);
 
+} // namespace asan
 } // namespace ur_sanitizer_layer

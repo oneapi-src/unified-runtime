@@ -20,6 +20,7 @@
 #include <stdexcept>
 
 namespace ur_sanitizer_layer {
+namespace asan {
 
 AsanOptions::AsanOptions() {
     std::optional<EnvVarMap> OptionsEnvMap;
@@ -141,4 +142,5 @@ AsanOptions::AsanOptions() {
     }
 }
 
+} // namespace asan
 } // namespace ur_sanitizer_layer

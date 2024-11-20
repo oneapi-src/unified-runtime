@@ -16,6 +16,7 @@
 #include "ur_sanitizer_layer.hpp"
 
 namespace ur_sanitizer_layer {
+namespace asan {
 
 ur_result_t EnqueueMemCopyRectHelper(
     ur_queue_handle_t Queue, char *pSrc, char *pDst, ur_rect_offset_t SrcOffset,
@@ -199,4 +200,5 @@ size_t MemBuffer::getAlignment() {
     return Alignment;
 }
 
+} // namespace asan
 } // namespace ur_sanitizer_layer
