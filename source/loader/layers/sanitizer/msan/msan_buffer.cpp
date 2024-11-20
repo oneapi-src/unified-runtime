@@ -6,7 +6,7 @@
  * See LICENSE.TXT
  * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
  *
- * @file msan_buffer.cpp
+ * @file asan_buffer.cpp
  *
  */
 
@@ -16,6 +16,7 @@
 #include "ur_sanitizer_layer.hpp"
 
 namespace ur_sanitizer_layer {
+namespace msan {
 
 ur_result_t EnqueueMemCopyRectHelper(
     ur_queue_handle_t Queue, char *pSrc, char *pDst, ur_rect_offset_t SrcOffset,
@@ -92,7 +93,7 @@ ur_result_t MemBuffer::getHandle(ur_device_handle_t Device, char *&Handle) {
         USMDesc.align = getAlignment();
         ur_usm_pool_handle_t Pool{};
         URes = getMsanInterceptor()->allocateMemory(
-            Context, Device, &USMDesc, Pool, Size, MsanAllocType::MEM_BUFFER,
+            Context, Device, &USMDesc, Pool, Size, AllocType::MEM_BUFFER,
             ur_cast<void **>(&Allocation));
         if (URes != UR_RESULT_SUCCESS) {
             getContext()->logger.error(
@@ -130,7 +131,7 @@ ur_result_t MemBuffer::getHandle(ur_device_handle_t Device, char *&Handle) {
             USMDesc.align = getAlignment();
             ur_usm_pool_handle_t Pool{};
             URes = getMsanInterceptor()->allocateMemory(
-                Context, nullptr, &USMDesc, Pool, Size, MsanAllocType::HOST_USM,
+                Context, nullptr, &USMDesc, Pool, Size, AllocType::HOST_USM,
                 ur_cast<void **>(&HostAllocation));
             if (URes != UR_RESULT_SUCCESS) {
                 getContext()->logger.error("Failed to allocate {} bytes host "
@@ -199,4 +200,5 @@ size_t MemBuffer::getAlignment() {
     return Alignment;
 }
 
+} // namespace msan
 } // namespace ur_sanitizer_layer

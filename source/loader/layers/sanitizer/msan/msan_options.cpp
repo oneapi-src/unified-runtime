@@ -20,11 +20,12 @@
 #include <stdexcept>
 
 namespace ur_sanitizer_layer {
+namespace msan {
 
 MsanOptions::MsanOptions() {
     std::optional<EnvVarMap> OptionsEnvMap;
     try {
-        OptionsEnvMap = getenv_to_map("UR_LAYER_msan_OPTIONS");
+        OptionsEnvMap = getenv_to_map("UR_LAYER_MSAN_OPTIONS");
     } catch (const std::invalid_argument &e) {
         std::stringstream SS;
         SS << "<SANITIZER>[ERROR]: ";
@@ -85,4 +86,5 @@ MsanOptions::MsanOptions() {
     SetBoolOption("debug", Debug);
 }
 
+} // namespace msan
 } // namespace ur_sanitizer_layer

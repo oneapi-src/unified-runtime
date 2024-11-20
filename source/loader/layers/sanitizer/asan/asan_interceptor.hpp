@@ -332,7 +332,8 @@ class AsanInterceptor {
     bool m_NormalExit = true;
 };
 
-AsanInterceptor *getAsanInterceptor();
-
 } // namespace asan
+
+asan::AsanInterceptor *getAsanInterceptor();
+
 } // namespace ur_sanitizer_layer

@@ -14,8 +14,6 @@
 #include "msan/msan_ddi.hpp"
 #include "ur_sanitizer_layer.hpp"
 
-#include <memory>
-
 namespace ur_sanitizer_layer {
 
 ur_result_t context_t::init(ur_dditable_t *dditable,

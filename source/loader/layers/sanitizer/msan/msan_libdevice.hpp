@@ -18,22 +18,6 @@
 namespace ur_sanitizer_layer {
 #endif // !__SPIR__ && !__SPIRV__
 
-enum class MsanErrorType : int32_t {
-    UNKNOWN,
-    USES_OF_UNINITIALIZED_VALUE,
-};
-
-enum class MsanMemoryType : int32_t {
-    UNKNOWN,
-    USM_DEVICE,
-    USM_HOST,
-    USM_SHARED,
-    LOCAL,
-    PRIVATE,
-    MEM_BUFFER,
-    DEVICE_GLOBAL,
-};
-
 struct MsanErrorReport {
     int Flag = 0;
 
@@ -51,8 +35,7 @@ struct MsanErrorReport {
     uint64_t LID2 = 0;
 
     uint32_t AccessSize = 0;
-    MsanMemoryType MemoryType = MsanMemoryType::UNKNOWN;
-    MsanErrorType ErrorType = MsanErrorType::UNKNOWN;
+    ErrorType ErrorTy = ErrorType::UNKNOWN;
 };
 
 struct MsanLocalArgsInfo {
@@ -80,36 +63,6 @@ constexpr std::size_t MSAN_PRIVATE_SIZE = 0xffffffULL + 1;
 
 constexpr auto kSPIR_MsanDeviceGlobalCount = "__MsanDeviceGlobalCount";
 constexpr auto kSPIR_MsanDeviceGlobalMetadata = "__MsanDeviceGlobalMetadata";
-
-inline const char *ToString(MsanMemoryType MemoryType) {
-    switch (MemoryType) {
-    case MsanMemoryType::USM_DEVICE:
-        return "Device USM";
-    case MsanMemoryType::USM_HOST:
-        return "Host USM";
-    case MsanMemoryType::USM_SHARED:
-        return "Shared USM";
-    case MsanMemoryType::LOCAL:
-        return "Local Memory";
-    case MsanMemoryType::PRIVATE:
-        return "Private Memory";
-    case MsanMemoryType::MEM_BUFFER:
-        return "Memory Buffer";
-    case MsanMemoryType::DEVICE_GLOBAL:
-        return "Device Global";
-    default:
-        return "Unknown Memory";
-    }
-}
-
-inline const char *ToString(MsanErrorType ErrorType) {
-    switch (ErrorType) {
-    case MsanErrorType::USES_OF_UNINITIALIZED_VALUE:
-        return "out-of-uninitialized-value";
-    default:
-        return "unknown-error";
-    }
-}
 
 #if !defined(__SPIR__) && !defined(__SPIRV__)
 } // namespace ur_sanitizer_layer

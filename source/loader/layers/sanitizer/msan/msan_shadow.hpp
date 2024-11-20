@@ -17,8 +17,8 @@
 
 #include <unordered_set>
 
-
 namespace ur_sanitizer_layer {
+namespace msan {
 
 struct MsanShadowMemory {
     MsanShadowMemory(ur_context_handle_t Context, ur_device_handle_t Device)
@@ -49,7 +49,6 @@ struct MsanShadowMemory {
 
     uptr ShadowEnd = 0;
 };
-
 
 // Shadow Memory layout of CPU PVC device
 //
@@ -159,4 +158,5 @@ std::shared_ptr<MsanShadowMemory>
 GetMsanShadowMemory(ur_context_handle_t Context, ur_device_handle_t Device,
                     DeviceType Type);
 
+} // namespace msan
 } // namespace ur_sanitizer_layer

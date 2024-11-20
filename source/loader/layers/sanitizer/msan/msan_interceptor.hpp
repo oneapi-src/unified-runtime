@@ -27,7 +27,6 @@
 #include <vector>
 
 namespace ur_sanitizer_layer {
-
 namespace msan {
 
 struct AllocInfoList {
@@ -177,8 +176,6 @@ struct DeviceGlobalInfo {
     uptr Addr;
 };
 
-} // namespace msan
-
 class MsanInterceptor {
   public:
     explicit MsanInterceptor();
@@ -189,7 +186,7 @@ class MsanInterceptor {
                                ur_device_handle_t Device,
                                const ur_usm_desc_t *Properties,
                                ur_usm_pool_handle_t Pool, size_t Size,
-                               MsanAllocType Type, void **ResultPtr);
+                               AllocType Type, void **ResultPtr);
     ur_result_t releaseMemory(ur_context_handle_t Context, void *Ptr);
 
     ur_result_t registerProgram(ur_context_handle_t Context,
@@ -317,6 +314,8 @@ class MsanInterceptor {
     ur_shared_mutex m_AdaptersMutex;
 };
 
-MsanInterceptor *getMsanInterceptor();
+} // namespace msan
+
+msan::MsanInterceptor *getMsanInterceptor();
 
 } // namespace ur_sanitizer_layer

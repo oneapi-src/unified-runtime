@@ -15,6 +15,7 @@
 #include <cstdint>
 
 namespace ur_sanitizer_layer {
+namespace msan {
 
 struct MsanOptions {
     bool Debug = false;
@@ -22,4 +23,5 @@ struct MsanOptions {
     explicit MsanOptions();
 };
 
+} // namespace msan
 } // namespace ur_sanitizer_layer

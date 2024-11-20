@@ -18,7 +18,10 @@ namespace ur_sanitizer_layer {
 
 class MsanErrorReport;
 
+namespace msan {
+
 void ReportUsesUninitializedValue(const MsanErrorReport &Report,
                                   ur_kernel_handle_t Kernel);
 
+} // namespace msan
 } // namespace ur_sanitizer_layer

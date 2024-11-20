@@ -14,6 +14,7 @@
 #include "ur_sanitizer_layer.hpp"
 
 namespace ur_sanitizer_layer {
+namespace msan {
 
 void MsanAllocInfo::print() {
     getContext()->logger.info(
@@ -21,4 +22,5 @@ void MsanAllocInfo::print() {
         (void *)(AllocBegin + AllocSize), AllocSize, ToString(Type));
 }
 
+} // namespace msan
 } // namespace ur_sanitizer_layer

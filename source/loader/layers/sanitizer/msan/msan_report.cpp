@@ -18,6 +18,7 @@
 #include "ur_sanitizer_layer.hpp"
 
 namespace ur_sanitizer_layer {
+namespace msan {
 
 void ReportUsesUninitializedValue(const MsanErrorReport &Report,
                                   ur_kernel_handle_t Kernel) {
@@ -38,4 +39,5 @@ void ReportUsesUninitializedValue(const MsanErrorReport &Report,
     getContext()->logger.always("  #0 {} {}:{}", Func, File, Report.Line);
 }
 
+} // namespace msan
 } // namespace ur_sanitizer_layer

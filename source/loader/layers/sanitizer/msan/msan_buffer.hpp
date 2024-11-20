@@ -19,6 +19,7 @@
 #include "ur/ur.hpp"
 
 namespace ur_sanitizer_layer {
+namespace msan {
 
 struct MemBuffer {
     // Buffer constructor
@@ -77,4 +78,5 @@ ur_result_t EnqueueMemCopyRectHelper(
     bool Blocking, uint32_t NumEventsInWaitList,
     const ur_event_handle_t *EventWaitList, ur_event_handle_t *Event);
 
+} // namespace msan
 } // namespace ur_sanitizer_layer

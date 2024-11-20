@@ -18,6 +18,7 @@
 #include "ur_sanitizer_layer.hpp"
 
 namespace ur_sanitizer_layer {
+namespace msan {
 
 std::shared_ptr<MsanShadowMemory>
 GetMsanShadowMemory(ur_context_handle_t Context, ur_device_handle_t Device,
@@ -278,4 +279,5 @@ uptr MsanShadowMemoryDG2::MemToShadow(uptr Ptr) {
     return ShadowBegin + (Ptr & 0x3FFF'FFFF'FFFFULL);
 }
 
+} // namespace msan
 } // namespace ur_sanitizer_layer

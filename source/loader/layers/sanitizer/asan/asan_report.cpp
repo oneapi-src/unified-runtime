@@ -90,12 +90,12 @@ void ReportMemoryLeak(const std::shared_ptr<AllocInfo> &AI) {
     AI->AllocStack.print();
 }
 
-void ReportFatalError(const DeviceSanitizerReport &Report) {
+void ReportFatalError(const AsanErrorReport &Report) {
     getContext()->logger.always("\n====ERROR: DeviceSanitizer: {}",
-                                ToString(Report.ErrorType));
+                                ToString(Report.ErrorTy));
 }
 
-void ReportGenericError(const DeviceSanitizerReport &Report,
+void ReportGenericError(const AsanErrorReport &Report,
                         ur_kernel_handle_t Kernel) {
     const char *File = Report.File[0] ? Report.File : "<unknown file>";
     const char *Func = Report.Func[0] ? Report.Func : "<unknown func>";
@@ -105,8 +105,8 @@ void ReportGenericError(const DeviceSanitizerReport &Report,
     KernelName = DemangleName(KernelName);
 
     getContext()->logger.always("\n====ERROR: DeviceSanitizer: {} on {} ({})",
-                                ToString(Report.ErrorType),
-                                ToString(Report.MemoryType),
+                                ToString(Report.ErrorTy),
+                                ToString(Report.MemoryTy),
                                 (void *)Report.Address);
     getContext()->logger.always(
         "{} of size {} at kernel <{}> LID({}, {}, {}) GID({}, "
@@ -117,7 +117,7 @@ void ReportGenericError(const DeviceSanitizerReport &Report,
     getContext()->logger.always("  #0 {} {}:{}", Func, File, Report.Line);
 }
 
-void ReportUseAfterFree(const DeviceSanitizerReport &Report,
+void ReportUseAfterFree(const AsanErrorReport &Report,
                         ur_kernel_handle_t Kernel,
                         ur_context_handle_t Context) {
     const char *File = Report.File[0] ? Report.File : "<unknown file>";
@@ -129,7 +129,7 @@ void ReportUseAfterFree(const DeviceSanitizerReport &Report,
 
     getContext()->logger.always(
         "\n====ERROR: DeviceSanitizer: {} on address {}",
-        ToString(Report.ErrorType), (void *)Report.Address);
+        ToString(Report.ErrorTy), (void *)Report.Address);
     getContext()->logger.always(
         "{} of size {} at kernel <{}> LID({}, {}, {}) GID({}, "
         "{}, {})",

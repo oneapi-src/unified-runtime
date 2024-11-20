@@ -18,12 +18,12 @@
 #include "msan_shadow.hpp"
 #include "sanitizer_common/sanitizer_stacktrace.hpp"
 #include "sanitizer_common/sanitizer_utils.hpp"
+#include "sycl/info/info_desc.hpp"
 #include "ur_api.h"
 #include "ur_sanitizer_layer.hpp"
 
 namespace ur_sanitizer_layer {
-
-using namespace msan;
+namespace msan {
 
 MsanInterceptor::MsanInterceptor() {}
 
@@ -55,7 +55,7 @@ ur_result_t MsanInterceptor::allocateMemory(ur_context_handle_t Context,
                                             ur_device_handle_t Device,
                                             const ur_usm_desc_t *Properties,
                                             ur_usm_pool_handle_t Pool,
-                                            size_t Size, MsanAllocType Type,
+                                            size_t Size, AllocType Type,
                                             void **ResultPtr) {
 
     auto ContextInfo = getContextInfo(Context);
@@ -64,16 +64,16 @@ ur_result_t MsanInterceptor::allocateMemory(ur_context_handle_t Context,
 
     void *Allocated = nullptr;
 
-    if (Type == MsanAllocType::DEVICE_USM) {
+    if (Type == AllocType::DEVICE_USM) {
         UR_CALL(getContext()->urDdiTable.USM.pfnDeviceAlloc(
             Context, Device, Properties, Pool, Size, &Allocated));
-    } else if (Type == MsanAllocType::HOST_USM) {
+    } else if (Type == AllocType::HOST_USM) {
         UR_CALL(getContext()->urDdiTable.USM.pfnHostAlloc(
             Context, Properties, Pool, Size, &Allocated));
-    } else if (Type == MsanAllocType::SHARED_USM) {
+    } else if (Type == AllocType::SHARED_USM) {
         UR_CALL(getContext()->urDdiTable.USM.pfnSharedAlloc(
             Context, Device, Properties, Pool, Size, &Allocated));
-    } else if (Type == MsanAllocType::MEM_BUFFER) {
+    } else if (Type == AllocType::MEM_BUFFER) {
         UR_CALL(getContext()->urDdiTable.USM.pfnDeviceAlloc(
             Context, Device, Properties, Pool, Size, &Allocated));
     } else {
@@ -83,7 +83,7 @@ ur_result_t MsanInterceptor::allocateMemory(ur_context_handle_t Context,
 
     *ResultPtr = Allocated;
 
-    if (Type != MsanAllocType::DEVICE_USM) {
+    if (Type != AllocType::DEVICE_USM) {
         return UR_RESULT_SUCCESS;
     }
 
@@ -151,7 +151,7 @@ ur_result_t MsanInterceptor::releaseMemory(ur_context_handle_t Context,
     // MsanAllocInfo->IsReleased = true;
     // MsanAllocInfo->ReleaseStack = GetCurrentBacktrace();
 
-    // if (MsanAllocInfo->Type == MsanAllocType::HOST_USM) {
+    // if (MsanAllocInfo->Type == AllocType::HOST_USM) {
     //     ContextInfo->insertAllocInfo(ContextInfo->DeviceList, MsanAllocInfo);
     // } else {
     //     ContextInfo->insertAllocInfo({MsanAllocInfo->Device}, MsanAllocInfo);
@@ -183,7 +183,7 @@ ur_result_t MsanInterceptor::releaseMemory(ur_context_handle_t Context,
     //                                               MsanAllocInfo->getRedzoneSize());
 
     //         m_AllocationMap.erase(It);
-    //         if (MsanAllocInfo->Type == MsanAllocType::HOST_USM) {
+    //         if (MsanAllocInfo->Type == AllocType::HOST_USM) {
     //             for (auto &Device : ContextInfo->DeviceList) {
     //                 UR_CALL(getDeviceInfo(Device)->Shadow->ReleaseShadow(
     //                     MsanAllocInfo));
@@ -307,7 +307,7 @@ ur_result_t MsanInterceptor::registerProgram(ur_context_handle_t Context,
     //                       GVInfos[i].Addr,
     //                       GVInfos[i].Addr + GVInfos[i].Size,
     //                       GVInfos[i].SizeWithRedZone,
-    //                       MsanAllocType::DEVICE_GLOBAL,
+    //                       AllocType::DEVICE_GLOBAL,
     //                       false,
     //                       Context,
     //                       Device,
@@ -376,7 +376,7 @@ ur_result_t MsanInterceptor::insertDevice(ur_device_handle_t Device,
         return UR_RESULT_SUCCESS;
     }
 
-    DI = std::make_shared<ur_sanitizer_layer::DeviceInfo>(Device);
+    DI = std::make_shared<DeviceInfo>(Device);
 
     DI->IsSupportSharedSystemUSM = GetDeviceUSMCapability(
         Device, UR_DEVICE_INFO_USM_SYSTEM_SHARED_SUPPORT);
@@ -492,8 +492,7 @@ ur_result_t MsanInterceptor::prepareLaunch(
             (void *)LaunchInfo.Data, LaunchInfo.Data->NumLocalArgs,
             (void *)LaunchInfo.Data->LocalArgs);
 
-        EnqueueWriteGlobal("__MsanLaunchInfo", &LaunchInfo.Data,
-                                   sizeof(uptr));
+        EnqueueWriteGlobal("__MsanLaunchInfo", &LaunchInfo.Data, sizeof(uptr));
     } while (false);
 
     return UR_RESULT_SUCCESS;
@@ -526,8 +525,6 @@ MsanInterceptor::findAllocInfoByContext(ur_context_handle_t Context) {
     }
     return AllocInfos;
 }
-
-namespace msan {
 
 ur_result_t DeviceInfo::allocShadowMemory(ur_context_handle_t Context) {
     Shadow = GetMsanShadowMemory(Context, Handle, Type);
@@ -612,6 +609,8 @@ USMLaunchInfo::~USMLaunchInfo() {
 }
 
 } // namespace msan
+
+using namespace msan;
 
 static MsanInterceptor *interceptor;
 

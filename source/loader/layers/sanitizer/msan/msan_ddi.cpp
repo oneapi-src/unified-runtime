@@ -113,8 +113,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMDeviceAlloc(
     getContext()->logger.debug("==== urUSMDeviceAlloc");
 
     return getMsanInterceptor()->allocateMemory(
-        hContext, hDevice, pUSMDesc, pool, size, MsanAllocType::DEVICE_USM,
-        ppMem);
+        hContext, hDevice, pUSMDesc, pool, size, AllocType::DEVICE_USM, ppMem);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1204,7 +1203,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferMap(
             USMDesc.align = MemBuffer->getAlignment();
             ur_usm_pool_handle_t Pool{};
             UR_CALL(getMsanInterceptor()->allocateMemory(
-                Context, nullptr, &USMDesc, Pool, size, MsanAllocType::HOST_USM,
+                Context, nullptr, &USMDesc, Pool, size, AllocType::HOST_USM,
                 ppRetMap));
         }
 

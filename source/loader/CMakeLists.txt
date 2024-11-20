@@ -153,8 +153,8 @@ if(UR_ENABLE_SANITIZER)
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_validator.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_allocator.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_allocator.hpp
-        # ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_buffer.cpp
-        # ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_buffer.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_buffer.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_buffer.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_ddi.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_ddi.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/msan/msan_interceptor.cpp

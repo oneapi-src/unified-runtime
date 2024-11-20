@@ -19,8 +19,6 @@
 
 namespace ur_sanitizer_layer {
 
-class AsanInterceptor;
-
 enum class SanitizerType {
     None,
     AddressSanitizer,
