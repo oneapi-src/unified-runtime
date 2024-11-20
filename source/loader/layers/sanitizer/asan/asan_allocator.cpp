@@ -23,5 +23,5 @@ void AllocInfo::print() {
         (void *)(UserEnd), AllocSize, ToString(Type));
 }
 
-}
+} // namespace asan
 } // namespace ur_sanitizer_layer
