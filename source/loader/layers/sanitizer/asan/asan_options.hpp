@@ -15,6 +15,7 @@
 #include <cstdint>
 
 namespace ur_sanitizer_layer {
+namespace asan {
 
 struct AsanOptions {
     bool Debug = false;
@@ -29,4 +30,5 @@ struct AsanOptions {
     explicit AsanOptions();
 };
 
+} // namespace asan
 } // namespace ur_sanitizer_layer

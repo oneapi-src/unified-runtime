@@ -92,10 +92,9 @@ void StackTrace::print() const {
         BacktraceInfo BI = BacktraceSymbols[i];
 
         // Skip runtime modules
-        if (!getContext()->interceptor->getOptions().Debug &&
-            (Contains(BI, "libsycl.so") || Contains(BI, "libur_loader.so") ||
-             Contains(BI, "libomptarget.rtl.unified_runtime.so") ||
-             Contains(BI, "libomptarget.so"))) {
+        if (Contains(BI, "libsycl.so") || Contains(BI, "libur_loader.so") ||
+            Contains(BI, "libomptarget.rtl.unified_runtime.so") ||
+            Contains(BI, "libomptarget.so")) {
             continue;
         }
 

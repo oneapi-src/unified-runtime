@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (C) 2023 Intel Corporation
+ * Copyright (C) 2024 Intel Corporation
  *
  * Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
  * See LICENSE.TXT
@@ -38,8 +38,14 @@ ur_result_t context_t::init(ur_dditable_t *dditable,
 
     urDdiTable = *dditable;
 
-    initAsanInterceptor();
-    result = initAsanDDITable(dditable);
+    switch (enabledType) {
+    case SanitizerType::AddressSanitizer:
+        initAsanInterceptor();
+        result = initAsanDDITable(dditable);
+        break;
+    default:
+        break;
+    }
 
     return result;
 }

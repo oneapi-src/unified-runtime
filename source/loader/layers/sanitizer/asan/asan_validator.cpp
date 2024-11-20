@@ -15,6 +15,7 @@
 #include "sanitizer_common/sanitizer_utils.hpp"
 
 namespace ur_sanitizer_layer {
+namespace asan {
 
 namespace {
 
@@ -74,4 +75,5 @@ ValidateUSMResult ValidateUSMPointer(ur_context_handle_t Context,
     return ValidateUSMResult::success();
 }
 
+} // namespace asan
 } // namespace ur_sanitizer_layer

@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (C) 2023 Intel Corporation
+ * Copyright (C) 2024 Intel Corporation
  *
  * Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
  * See LICENSE.TXT
@@ -29,6 +29,7 @@
 #include <vector>
 
 namespace ur_sanitizer_layer {
+namespace asan {
 
 class Quarantine;
 
@@ -331,6 +332,8 @@ class AsanInterceptor {
     bool m_NormalExit = true;
 };
 
-AsanInterceptor *getAsanInterceptor();
+} // namespace asan
+
+asan::AsanInterceptor *getAsanInterceptor();
 
 } // namespace ur_sanitizer_layer

@@ -15,6 +15,7 @@
 #include "sanitizer_common/sanitizer_common.hpp"
 
 namespace ur_sanitizer_layer {
+namespace asan {
 
 struct AsanStats;
 
@@ -36,4 +37,5 @@ struct AsanStatsWrapper {
     AsanStats *Stat;
 };
 
+} // namespace asan
 } // namespace ur_sanitizer_layer

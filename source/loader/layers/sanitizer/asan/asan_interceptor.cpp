@@ -22,6 +22,7 @@
 #include "sanitizer_common/sanitizer_utils.hpp"
 
 namespace ur_sanitizer_layer {
+namespace asan {
 
 AsanInterceptor::AsanInterceptor() {
     if (getOptions().MaxQuarantineSizeMB) {
@@ -278,23 +279,23 @@ ur_result_t AsanInterceptor::postLaunchKernel(ur_kernel_handle_t Kernel,
     auto Result = getContext()->urDdiTable.Queue.pfnFinish(Queue);
 
     if (Result == UR_RESULT_SUCCESS) {
-        for (const auto &AH : LaunchInfo.Data->SanitizerReport) {
-            if (!AH.Flag) {
+        for (const auto &Report : LaunchInfo.Data->Report) {
+            if (!Report.Flag) {
                 continue;
             }
-            switch (AH.ErrorType) {
-            case DeviceSanitizerErrorType::USE_AFTER_FREE:
-                ReportUseAfterFree(AH, Kernel, GetContext(Queue));
+            switch (Report.ErrorTy) {
+            case ErrorType::USE_AFTER_FREE:
+                ReportUseAfterFree(Report, Kernel, GetContext(Queue));
                 break;
-            case DeviceSanitizerErrorType::OUT_OF_BOUNDS:
-            case DeviceSanitizerErrorType::MISALIGNED:
-            case DeviceSanitizerErrorType::NULL_POINTER:
-                ReportGenericError(AH, Kernel);
+            case ErrorType::OUT_OF_BOUNDS:
+            case ErrorType::MISALIGNED:
+            case ErrorType::NULL_POINTER:
+                ReportGenericError(Report, Kernel);
                 break;
             default:
-                ReportFatalError(AH);
+                ReportFatalError(Report);
             }
-            if (!AH.IsRecover) {
+            if (!Report.IsRecover) {
                 exitWithErrors();
             }
         }
@@ -918,6 +919,10 @@ USMLaunchInfo::~USMLaunchInfo() {
     Result = getContext()->urDdiTable.Device.pfnRelease(Device);
     assert(Result == UR_RESULT_SUCCESS);
 }
+
+} // namespace asan
+
+using namespace asan;
 
 static AsanInterceptor *interceptor;
 
