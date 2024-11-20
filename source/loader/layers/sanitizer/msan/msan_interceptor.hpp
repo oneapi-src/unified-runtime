@@ -263,6 +263,13 @@ class MsanInterceptor {
 
     const MsanOptions &getOptions() { return m_Options; }
 
+    void exitWithErrors() {
+        m_NormalExit = false;
+        exit(1);
+    }
+
+    bool isNormalExit() { return m_NormalExit; }
+
   private:
     ur_result_t
     updateShadowMemory(std::shared_ptr<msan::ContextInfo> &ContextInfo,
@@ -312,6 +319,8 @@ class MsanInterceptor {
 
     std::unordered_set<ur_adapter_handle_t> m_Adapters;
     ur_shared_mutex m_AdaptersMutex;
+
+    bool m_NormalExit = true;
 };
 
 } // namespace msan

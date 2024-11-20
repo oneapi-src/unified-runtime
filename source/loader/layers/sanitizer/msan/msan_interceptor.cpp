@@ -241,6 +241,8 @@ ur_result_t MsanInterceptor::postLaunchKernel(ur_kernel_handle_t Kernel,
         }
 
         ReportUsesUninitializedValue(LaunchInfo.Data->Report, Kernel);
+
+        exitWithErrors();
     }
 
     return Result;
