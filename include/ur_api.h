@@ -230,6 +230,7 @@ typedef enum ur_function_t {
     UR_FUNCTION_COMMAND_BUFFER_UPDATE_SIGNAL_EVENT_EXP = 243,             ///< Enumerator for ::urCommandBufferUpdateSignalEventExp
     UR_FUNCTION_COMMAND_BUFFER_UPDATE_WAIT_EVENTS_EXP = 244,              ///< Enumerator for ::urCommandBufferUpdateWaitEventsExp
     UR_FUNCTION_BINDLESS_IMAGES_MAP_EXTERNAL_LINEAR_MEMORY_EXP = 245,     ///< Enumerator for ::urBindlessImagesMapExternalLinearMemoryExp
+    UR_FUNCTION_ENQUEUE_EVENTS_WAIT_WITH_BARRIER_EXT = 246,               ///< Enumerator for ::urEnqueueEventsWaitWithBarrierExt
     /// @cond
     UR_FUNCTION_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -288,6 +289,7 @@ typedef enum ur_structure_type_t {
     UR_STRUCTURE_TYPE_EXP_SAMPLER_CUBEMAP_PROPERTIES = 0x2006,               ///< ::ur_exp_sampler_cubemap_properties_t
     UR_STRUCTURE_TYPE_EXP_IMAGE_COPY_REGION = 0x2007,                        ///< ::ur_exp_image_copy_region_t
     UR_STRUCTURE_TYPE_EXP_ENQUEUE_NATIVE_COMMAND_PROPERTIES = 0x3000,        ///< ::ur_exp_enqueue_native_command_properties_t
+    UR_STRUCTURE_TYPE_EXP_ENQUEUE_EXT_PROPERTIES = 0x4000,                   ///< ::ur_exp_enqueue_ext_properties_t
     /// @cond
     UR_STRUCTURE_TYPE_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -1054,6 +1056,8 @@ typedef enum ur_adapter_backend_t {
 ///         + `NULL == phAdapters`
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         + `NumEntries == 0 && phPlatforms != NULL`
+///     - ::UR_RESULT_ERROR_INVALID_VALUE
+///         + `pNumPlatforms == NULL && phPlatforms == NULL`
 UR_APIEXPORT ur_result_t UR_APICALL
 urPlatformGet(
     ur_adapter_handle_t *phAdapters,   ///< [in][range(0, NumAdapters)] array of adapters to query for platforms.
@@ -1637,6 +1641,9 @@ typedef enum ur_device_info_t {
     UR_DEVICE_INFO_GLOBAL_VARIABLE_SUPPORT = 118,                    ///< [::ur_bool_t] return true if the device supports the
                                                                      ///< `EnqueueDeviceGlobalVariableWrite` and
                                                                      ///< `EnqueueDeviceGlobalVariableRead` entry points.
+    UR_DEVICE_INFO_USM_POOL_SUPPORT = 119,                           ///< [::ur_bool_t] return true if the device supports USM pooling. Pertains
+                                                                     ///< to the `USMPool` entry points and usage of the `pool` parameter of the
+                                                                     ///< USM alloc entry points.
     UR_DEVICE_INFO_COMMAND_BUFFER_SUPPORT_EXP = 0x1000,              ///< [::ur_bool_t] Returns true if the device supports the use of
                                                                      ///< command-buffers.
     UR_DEVICE_INFO_COMMAND_BUFFER_UPDATE_CAPABILITIES_EXP = 0x1001,  ///< [::ur_device_command_buffer_update_capability_flags_t] Command-buffer
@@ -1697,6 +1704,7 @@ typedef enum ur_device_info_t {
                                                                      ///< backed 2D sampled image data.
     UR_DEVICE_INFO_ENQUEUE_NATIVE_COMMAND_SUPPORT_EXP = 0x2020,      ///< [::ur_bool_t] returns true if the device supports enqueueing of native
                                                                      ///< work
+    UR_DEVICE_INFO_LOW_POWER_EVENTS_EXP = 0x2021,                    ///< [::ur_bool_t] returns true if the device supports low-power events.
     /// @cond
     UR_DEVICE_INFO_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -1722,7 +1730,7 @@ typedef enum ur_device_info_t {
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hDevice`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_DEVICE_INFO_ENQUEUE_NATIVE_COMMAND_SUPPORT_EXP < propName`
+///         + `::UR_DEVICE_INFO_LOW_POWER_EVENTS_EXP < propName`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
 ///         + If `propName` is not supported by the adapter.
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
@@ -2510,8 +2518,12 @@ typedef enum ur_mem_type_t {
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Memory Information type
 typedef enum ur_mem_info_t {
-    UR_MEM_INFO_SIZE = 0,    ///< [size_t] actual size of of memory object in bytes
-    UR_MEM_INFO_CONTEXT = 1, ///< [::ur_context_handle_t] context in which the memory object was created
+    UR_MEM_INFO_SIZE = 0,            ///< [size_t] actual size of of memory object in bytes
+    UR_MEM_INFO_CONTEXT = 1,         ///< [::ur_context_handle_t] context in which the memory object was created
+    UR_MEM_INFO_REFERENCE_COUNT = 2, ///< [uint32_t] Reference count of the memory object.
+                                     ///< The reference count returned should be considered immediately stale.
+                                     ///< It is unsuitable for general use in applications. This feature is
+                                     ///< provided for identifying memory leaks.
     /// @cond
     UR_MEM_INFO_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -2645,6 +2657,7 @@ typedef struct ur_image_desc_t {
 ///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
 ///     - ::UR_RESULT_ERROR_INVALID_VALUE
 ///     - ::UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR
+///         + `pImageDesc && UR_STRUCTURE_TYPE_IMAGE_DESC != pImageDesc->stype`
 ///         + `pImageDesc && UR_MEM_TYPE_IMAGE1D_ARRAY < pImageDesc->type`
 ///         + `pImageDesc && pImageDesc->numMipLevel != 0`
 ///         + `pImageDesc && pImageDesc->numSamples != 0`
@@ -2985,7 +2998,7 @@ urMemImageCreateWithNativeHandle(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hMemory`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_MEM_INFO_CONTEXT < propName`
+///         + `::UR_MEM_INFO_REFERENCE_COUNT < propName`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
 ///         + If `propName` is not supported by the adapter.
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
@@ -3501,7 +3514,6 @@ typedef struct ur_usm_pool_limits_desc_t {
 /// @brief USM allocate host memory
 ///
 /// @details
-///     - This function must support memory pooling.
 ///     - If pUSMDesc is not NULL and pUSMDesc->pool is not NULL the allocation
 ///       will be served from a specified memory pool.
 ///     - Otherwise, the behavior is implementation-defined.
@@ -3534,6 +3546,8 @@ typedef struct ur_usm_pool_limits_desc_t {
 ///         + `size` is greater than ::UR_DEVICE_INFO_MAX_MEM_ALLOC_SIZE.
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
+///         + If any device associated with `hContext` reports `false` for ::UR_DEVICE_INFO_USM_POOL_SUPPORT
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMHostAlloc(
     ur_context_handle_t hContext,  ///< [in] handle of the context object
@@ -3547,7 +3561,6 @@ urUSMHostAlloc(
 /// @brief USM allocate device memory
 ///
 /// @details
-///     - This function must support memory pooling.
 ///     - If pUSMDesc is not NULL and pUSMDesc->pool is not NULL the allocation
 ///       will be served from a specified memory pool.
 ///     - Otherwise, the behavior is implementation-defined.
@@ -3581,6 +3594,8 @@ urUSMHostAlloc(
 ///         + `size` is greater than ::UR_DEVICE_INFO_MAX_MEM_ALLOC_SIZE.
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
+///         + If any device associated with `hContext` reports `false` for ::UR_DEVICE_INFO_USM_POOL_SUPPORT
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMDeviceAlloc(
     ur_context_handle_t hContext,  ///< [in] handle of the context object
@@ -3595,7 +3610,6 @@ urUSMDeviceAlloc(
 /// @brief USM allocate shared memory
 ///
 /// @details
-///     - This function must support memory pooling.
 ///     - If pUSMDesc is not NULL and pUSMDesc->pool is not NULL the allocation
 ///       will be served from a specified memory pool.
 ///     - Otherwise, the behavior is implementation-defined.
@@ -3630,6 +3644,8 @@ urUSMDeviceAlloc(
 ///         + If `UR_DEVICE_INFO_USM_SINGLE_SHARED_SUPPORT` and `UR_DEVICE_INFO_USM_CROSS_SHARED_SUPPORT` are both false.
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
+///         + If any device associated with `hContext` reports `false` for ::UR_DEVICE_INFO_USM_POOL_SUPPORT
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMSharedAlloc(
     ur_context_handle_t hContext,  ///< [in] handle of the context object
@@ -3711,6 +3727,8 @@ urUSMGetMemAllocInfo(
 ///         + `::UR_USM_POOL_FLAGS_MASK & pPoolDesc->flags`
 ///     - ::UR_RESULT_ERROR_INVALID_VALUE
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
+///         + If any device associated with `hContext` reports `false` for ::UR_DEVICE_INFO_USM_POOL_SUPPORT
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMPoolCreate(
     ur_context_handle_t hContext,  ///< [in] handle of the context object
@@ -3729,6 +3747,7 @@ urUSMPoolCreate(
 ///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == pPool`
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMPoolRetain(
     ur_usm_pool_handle_t pPool ///< [in][retain] pointer to USM memory pool
@@ -3751,6 +3770,7 @@ urUSMPoolRetain(
 ///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == pPool`
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMPoolRelease(
     ur_usm_pool_handle_t pPool ///< [in][release] pointer to USM memory pool
@@ -3792,6 +3812,7 @@ typedef enum ur_usm_pool_info_t {
 ///         + `pPropValue == NULL && pPropSizeRet == NULL`
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMPoolGetInfo(
     ur_usm_pool_handle_t hPool,  ///< [in] handle of the USM memory pool
@@ -5429,13 +5450,17 @@ typedef enum ur_queue_flag_t {
                                                              ///< ignore this flag.
     UR_QUEUE_FLAG_SYNC_WITH_DEFAULT_STREAM = UR_BIT(10),     ///< Synchronize with the default stream. Only meaningful for CUDA. Other
                                                              ///< platforms may ignore this flag.
+    UR_QUEUE_FLAG_LOW_POWER_EVENTS_EXP = UR_BIT(11),         ///< Hint: use low-power events. Only meaningful for Level Zero, where the
+                                                             ///< implementation may use interrupt-driven events. May reduce CPU
+                                                             ///< utilization at the cost of increased event completion latency. Other
+                                                             ///< platforms may ignore this flag.
     /// @cond
     UR_QUEUE_FLAG_FORCE_UINT32 = 0x7fffffff
     /// @endcond
 
 } ur_queue_flag_t;
 /// @brief Bit Mask for validating ur_queue_flags_t
-#define UR_QUEUE_FLAGS_MASK 0xfffff800
+#define UR_QUEUE_FLAGS_MASK 0xfffff000
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Query information about a command queue
@@ -8316,7 +8341,7 @@ typedef struct ur_exp_command_buffer_update_value_arg_desc_t {
                                                          ///< ::UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_VALUE_ARG_DESC
     const void *pNext;                                   ///< [in][optional] pointer to extension-specific structure
     uint32_t argIndex;                                   ///< [in] Argument index.
-    uint32_t argSize;                                    ///< [in] Argument size.
+    size_t argSize;                                      ///< [in] Argument size.
     const ur_kernel_arg_value_properties_t *pProperties; ///< [in][optional] Pointer to value properties.
     const void *pNewValueArg;                            ///< [in][optional] Argument value representing matching kernel arg type to
                                                          ///< set at argument index.
@@ -9817,9 +9842,9 @@ urUSMReleaseExp(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Supported peer info
 typedef enum ur_exp_peer_info_t {
-    UR_EXP_PEER_INFO_UR_PEER_ACCESS_SUPPORTED = 0,  ///< [uint32_t] 1 if P2P access is supported otherwise P2P access is not
+    UR_EXP_PEER_INFO_UR_PEER_ACCESS_SUPPORTED = 0,  ///< [int] 1 if P2P access is supported otherwise P2P access is not
                                                     ///< supported.
-    UR_EXP_PEER_INFO_UR_PEER_ATOMICS_SUPPORTED = 1, ///< [uint32_t] 1 if atomic operations are supported over the P2P link,
+    UR_EXP_PEER_INFO_UR_PEER_ATOMICS_SUPPORTED = 1, ///< [int] 1 if atomic operations are supported over the P2P link,
                                                     ///< otherwise such operations are not supported.
     /// @cond
     UR_EXP_PEER_INFO_FORCE_UINT32 = 0x7fffffff
@@ -9954,6 +9979,89 @@ urUsmP2PPeerAccessGetInfoExp(
                                       ///< then the ::UR_RESULT_ERROR_INVALID_SIZE error is returned and
                                       ///< pPropValue is not used.
     size_t *pPropSizeRet              ///< [out][optional] pointer to the actual size in bytes of the queried propName.
+);
+
+#if !defined(__GNUC__)
+#pragma endregion
+#endif
+// Intel 'oneAPI' Unified Runtime Experimental API for low-power events API
+#if !defined(__GNUC__)
+#pragma region low_power_events_(experimental)
+#endif
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Extended enqueue properties
+typedef uint32_t ur_exp_enqueue_ext_flags_t;
+typedef enum ur_exp_enqueue_ext_flag_t {
+    UR_EXP_ENQUEUE_EXT_FLAG_LOW_POWER_EVENTS = UR_BIT(11), ///< Hint: use low-power events. Only meaningful for Level Zero, where the
+                                                           ///< implementation may use interrupt-driven events. May reduce CPU
+                                                           ///< utilization at the cost of increased event completion latency. Other
+                                                           ///< platforms may ignore this flag.
+    /// @cond
+    UR_EXP_ENQUEUE_EXT_FLAG_FORCE_UINT32 = 0x7fffffff
+    /// @endcond
+
+} ur_exp_enqueue_ext_flag_t;
+/// @brief Bit Mask for validating ur_exp_enqueue_ext_flags_t
+#define UR_EXP_ENQUEUE_EXT_FLAGS_MASK 0xfffff7ff
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Extended enqueue properties
+typedef struct ur_exp_enqueue_ext_properties_t {
+    ur_structure_type_t stype;        ///< [in] type of this structure, must be
+                                      ///< ::UR_STRUCTURE_TYPE_EXP_ENQUEUE_EXT_PROPERTIES
+    void *pNext;                      ///< [in,out][optional] pointer to extension-specific structure
+    ur_exp_enqueue_ext_flags_t flags; ///< [in] extended enqueue flags
+
+} ur_exp_enqueue_ext_properties_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Enqueue a barrier command which waits a list of events to complete
+///        before it completes, with optional extended properties
+///
+/// @details
+///     - If the event list is empty, it waits for all previously enqueued
+///       commands to complete.
+///     - It blocks command execution - any following commands enqueued after it
+///       do not execute until it completes.
+///     - It returns an event which can be waited on.
+///
+/// @remarks
+///   _Analogues_
+///     - **clEnqueueBarrierWithWaitList**
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hQueue`
+///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
+///         + `NULL != pProperties && ::UR_EXP_ENQUEUE_EXT_FLAGS_MASK & pProperties->flags`
+///     - ::UR_RESULT_ERROR_INVALID_QUEUE
+///     - ::UR_RESULT_ERROR_INVALID_EVENT
+///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
+///         + `phEventWaitList == NULL && numEventsInWaitList > 0`
+///         + `phEventWaitList != NULL && numEventsInWaitList == 0`
+///         + If event objects in phEventWaitList are not valid events.
+///     - ::UR_RESULT_ERROR_IN_EVENT_LIST_EXEC_STATUS
+///         + An event in `phEventWaitList` has ::UR_EVENT_STATUS_ERROR.
+///     - ::UR_RESULT_ERROR_INVALID_VALUE
+///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
+///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+UR_APIEXPORT ur_result_t UR_APICALL
+urEnqueueEventsWaitWithBarrierExt(
+    ur_queue_handle_t hQueue,                           ///< [in] handle of the queue object
+    const ur_exp_enqueue_ext_properties_t *pProperties, ///< [in][optional] pointer to the extended enqueue properties
+    uint32_t numEventsInWaitList,                       ///< [in] size of the event wait list
+    const ur_event_handle_t *phEventWaitList,           ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+                                                        ///< events that must be complete before this command can be executed.
+                                                        ///< If nullptr, the numEventsInWaitList must be 0, indicating that all
+                                                        ///< previously enqueued commands
+                                                        ///< must be complete.
+    ur_event_handle_t *phEvent                          ///< [out][optional] return an event object that identifies this particular
+                                                        ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+                                                        ///< must not refer to an element of the phEventWaitList array.
 );
 
 #if !defined(__GNUC__)
@@ -11431,6 +11539,18 @@ typedef struct ur_enqueue_kernel_launch_custom_exp_params_t {
     const ur_event_handle_t **pphEventWaitList;
     ur_event_handle_t **pphEvent;
 } ur_enqueue_kernel_launch_custom_exp_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urEnqueueEventsWaitWithBarrierExt
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_enqueue_events_wait_with_barrier_ext_params_t {
+    ur_queue_handle_t *phQueue;
+    const ur_exp_enqueue_ext_properties_t **ppProperties;
+    uint32_t *pnumEventsInWaitList;
+    const ur_event_handle_t **pphEventWaitList;
+    ur_event_handle_t **pphEvent;
+} ur_enqueue_events_wait_with_barrier_ext_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urEnqueueCooperativeKernelLaunchExp

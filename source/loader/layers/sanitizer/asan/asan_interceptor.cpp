@@ -40,9 +40,11 @@ AsanInterceptor::~AsanInterceptor() {
 
     m_Quarantine = nullptr;
     m_MemBufferMap.clear();
-    m_AllocationMap.clear();
     m_KernelMap.clear();
     m_ContextMap.clear();
+    // AllocationMap need to be cleared after ContextMap because memory leak
+    // detection depends on it.
+    m_AllocationMap.clear();
 
     for (auto Adapter : m_Adapters) {
         getContext()->urDdiTable.Global.pfnAdapterRelease(Adapter);
@@ -293,7 +295,7 @@ ur_result_t AsanInterceptor::postLaunchKernel(ur_kernel_handle_t Kernel,
                 ReportFatalError(AH);
             }
             if (!AH.IsRecover) {
-                exit(1);
+                exitWithErrors();
             }
         }
     }
@@ -419,22 +421,25 @@ ur_result_t AsanInterceptor::registerProgram(ur_context_handle_t Context,
     for (auto Device : Devices) {
         ManagedQueue Queue(Context, Device);
 
-        uint64_t NumOfDeviceGlobal;
+        size_t MetadataSize;
+        void *MetadataPtr;
         auto Result =
-            getContext()->urDdiTable.Enqueue.pfnDeviceGlobalVariableRead(
-                Queue, Program, kSPIR_AsanDeviceGlobalCount, true,
-                sizeof(NumOfDeviceGlobal), 0, &NumOfDeviceGlobal, 0, nullptr,
-                nullptr);
+            getContext()->urDdiTable.Program.pfnGetGlobalVariablePointer(
+                Device, Program, kSPIR_AsanDeviceGlobalMetadata, &MetadataSize,
+                &MetadataPtr);
         if (Result != UR_RESULT_SUCCESS) {
             getContext()->logger.info("No device globals");
             continue;
         }
 
+        const uint64_t NumOfDeviceGlobal =
+            MetadataSize / sizeof(DeviceGlobalInfo);
+        assert((MetadataSize % sizeof(DeviceGlobalInfo) == 0) &&
+               "DeviceGlobal metadata size is not correct");
         std::vector<DeviceGlobalInfo> GVInfos(NumOfDeviceGlobal);
-        Result = getContext()->urDdiTable.Enqueue.pfnDeviceGlobalVariableRead(
-            Queue, Program, kSPIR_AsanDeviceGlobalMetadata, true,
-            sizeof(DeviceGlobalInfo) * NumOfDeviceGlobal, 0, &GVInfos[0], 0,
-            nullptr, nullptr);
+        Result = getContext()->urDdiTable.Enqueue.pfnUSMMemcpy(
+            Queue, true, &GVInfos[0], MetadataPtr,
+            sizeof(DeviceGlobalInfo) * NumOfDeviceGlobal, 0, nullptr, nullptr);
         if (Result != UR_RESULT_SUCCESS) {
             getContext()->logger.error("Device Global[{}] Read Failed: {}",
                                        kSPIR_AsanDeviceGlobalMetadata, Result);
@@ -617,7 +622,7 @@ ur_result_t AsanInterceptor::prepareLaunch(
                         ContextInfo->Handle, DeviceInfo->Handle, (uptr)Ptr)) {
                     ReportInvalidKernelArgument(Kernel, ArgIndex, (uptr)Ptr,
                                                 ValidateResult, PtrPair.second);
-                    exit(1);
+                    exitWithErrors();
                 }
             }
         }
@@ -839,12 +844,14 @@ ContextInfo::~ContextInfo() {
     assert(Result == UR_RESULT_SUCCESS);
 
     // check memory leaks
-    std::vector<AllocationIterator> AllocInfos =
-        getAsanInterceptor()->findAllocInfoByContext(Handle);
-    for (const auto &It : AllocInfos) {
-        const auto &[_, AI] = *It;
-        if (!AI->IsReleased) {
-            ReportMemoryLeak(AI);
+    if (getAsanInterceptor()->isNormalExit()) {
+        std::vector<AllocationIterator> AllocInfos =
+            getAsanInterceptor()->findAllocInfoByContext(Handle);
+        for (const auto &It : AllocInfos) {
+            const auto &[_, AI] = *It;
+            if (!AI->IsReleased) {
+                ReportMemoryLeak(AI);
+            }
         }
     }
 }

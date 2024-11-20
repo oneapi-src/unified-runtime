@@ -30,8 +30,8 @@ if (NOT DEFINED UMF_REPO)
 endif()
 
 if (NOT DEFINED UMF_TAG)
-    # main 03.10.2024: Add umfIsFreeOpDefault(hProvider)
-    set(UMF_TAG fa006eea503a58e79fa197891f1391c9dcda73e1)
+    # main 28.10.2024: Merge pull request #832 ...
+    set(UMF_TAG 43e9af0f50b70ccb989f786243881035dd829203)
 endif()
 
 message(STATUS "Will fetch Unified Memory Framework from ${UMF_REPO}")

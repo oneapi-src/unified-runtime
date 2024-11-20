@@ -40,6 +40,7 @@ option(UR_USE_ASAN "enable AddressSanitizer" OFF)
 option(UR_USE_UBSAN "enable UndefinedBehaviorSanitizer" OFF)
 option(UR_USE_MSAN "enable MemorySanitizer" OFF)
 option(UR_USE_TSAN "enable ThreadSanitizer" OFF)
+option(UR_USE_CFI "enable Control Flow Integrity checks (requires clang and implies -flto)" ON)
 option(UR_ENABLE_TRACING "enable api tracing through xpti" OFF)
 option(UR_ENABLE_SANITIZER "enable device sanitizer" ON)
 option(UR_ENABLE_SYMBOLIZER "enable symoblizer for sanitizer" OFF)
@@ -137,7 +138,7 @@ if(UR_ENABLE_TRACING)
 
     if (UR_BUILD_XPTI_LIBS)
         # fetch xpti proxy library for the tracing layer
-        FetchContentSparse_Declare(xpti https://github.com/intel/llvm.git "sycl-nightly/20230703" "xpti")
+        FetchContentSparse_Declare(xpti https://github.com/intel/llvm.git "nightly-2024-10-22" "xpti")
         FetchContent_MakeAvailable(xpti)
 
         # set -fPIC for xpti since we are linking it with a shared library
@@ -149,7 +150,7 @@ if(UR_ENABLE_TRACING)
         set(XPTI_DIR ${xpti_SOURCE_DIR})
         set(XPTI_ENABLE_TESTS OFF CACHE INTERNAL "Turn off xptifw tests")
 
-        FetchContentSparse_Declare(xptifw https://github.com/intel/llvm.git "sycl-nightly/20230703" "xptifw")
+        FetchContentSparse_Declare(xptifw https://github.com/intel/llvm.git "nightly-2024-10-22" "xptifw")
 
         FetchContent_MakeAvailable(xptifw)
 

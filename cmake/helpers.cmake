@@ -58,7 +58,20 @@ macro(add_sanitizer_flag flag)
     set(CMAKE_REQUIRED_LIBRARIES ${SAVED_CMAKE_REQUIRED_LIBRARIES})
 endmacro()
 
-check_cxx_compiler_flag("-fcf-protection=full" CXX_HAS_FCF_PROTECTION_FULL)
+if(CMAKE_SYSTEM_NAME STREQUAL Linux)
+    check_cxx_compiler_flag("-fcf-protection=full" CXX_HAS_FCF_PROTECTION_FULL)
+    check_cxx_compiler_flag("-fstack-clash-protection" CXX_HAS_FSTACK_CLASH_PROTECTION)
+endif()
+
+if (UR_USE_CFI)
+    set(SAVED_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
+    set(CMAKE_REQUIRED_FLAGS "-flto -fvisibility=hidden")
+    check_cxx_compiler_flag("-fsanitize=cfi" CXX_HAS_CFI_SANITIZE)
+    set(CMAKE_REQUIRED_FLAGS ${SAVED_CMAKE_REQUIRED_FLAGS})
+else()
+    # If CFI checking is disabled, pretend we don't support it
+    set(CXX_HAS_CFI_SANITIZE OFF)
+endif()
 
 function(add_ur_target_compile_options name)
     if(NOT MSVC)
@@ -75,15 +88,12 @@ function(add_ur_target_compile_options name)
             # Hardening options
             -fPIC
             -fstack-protector-strong
-            -fvisibility=hidden # Required for -fsanitize=cfi
-            # -fsanitize=cfi requires -flto, which breaks a lot of things
-            # See: https://github.com/oneapi-src/unified-runtime/issues/2120
-            # -flto
-            # $<$<CXX_COMPILER_ID:Clang,AppleClang>:-fsanitize=cfi>
+            -fvisibility=hidden
+            # cfi-icall requires called functions in shared libraries to also be built with cfi-icall, which we can't
+            # guarantee. -fsanitize=cfi depends on -flto
+            $<$<BOOL:${CXX_HAS_CFI_SANITIZE}>:-flto -fsanitize=cfi -fno-sanitize=cfi-icall>
             $<$<BOOL:${CXX_HAS_FCF_PROTECTION_FULL}>:-fcf-protection=full>
-            # -fstack-clash-protection is not supported in apple clang or GCC < 8
-            $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,8>>:-fstack-clash-protection>
-            $<$<CXX_COMPILER_ID:Clang>:-fstack-clash-protection>
+            $<$<BOOL:${CXX_HAS_FSTACK_CLASH_PROTECTION}>:-fstack-clash-protection>
 
             # Colored output
             $<$<CXX_COMPILER_ID:GNU>:-fdiagnostics-color=always>
@@ -118,7 +128,10 @@ endfunction()
 function(add_ur_target_link_options name)
     if(NOT MSVC)
         if (NOT APPLE)
-            target_link_options(${name} PRIVATE "LINKER:-z,relro,-z,now,-z,noexecstack")
+            target_link_options(${name} PRIVATE
+                $<$<BOOL:${CXX_HAS_CFI_SANITIZE}>:-flto -fsanitize=cfi -fno-sanitize=cfi-icall>
+                "LINKER:-z,relro,-z,now,-z,noexecstack"
+            )
             if (UR_DEVELOPER_MODE)
                 target_link_options(${name} PRIVATE -Werror -Wextra)
             endif()
@@ -130,9 +143,9 @@ function(add_ur_target_link_options name)
         endif()
     elseif(MSVC)
         target_link_options(${name} PRIVATE
-            /DYNAMICBASE
-            /HIGHENTROPYVA
-            /NXCOMPAT
+            LINKER:/DYNAMICBASE
+            LINKER:/HIGHENTROPYVA
+            LINKER:/NXCOMPAT
         )
     endif()
 endfunction()
@@ -140,7 +153,7 @@ endfunction()
 function(add_ur_target_exec_options name)
     if(MSVC)
         target_link_options(${name} PRIVATE
-            /ALLOWISOLATION
+            LINKER:/ALLOWISOLATION
         )
     endif()
 endfunction()
@@ -158,7 +171,7 @@ function(add_ur_library name)
     add_ur_target_link_options(${name})
     if(MSVC)
         target_link_options(${name} PRIVATE
-            $<$<STREQUAL:$<TARGET_LINKER_FILE_NAME:${name}>,link.exe>:/DEPENDENTLOADFLAG:0x2000>
+            $<$<STREQUAL:$<TARGET_LINKER_FILE_NAME:${name}>,link.exe>:LINKER:/DEPENDENTLOADFLAG:0x2000>
         )
     endif()
 endfunction()
