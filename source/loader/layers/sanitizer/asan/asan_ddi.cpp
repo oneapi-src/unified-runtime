@@ -1823,8 +1823,26 @@ __urdlllocal ur_result_t UR_APICALL urGetUSMProcAddrTable(
 
 } // namespace asan
 
-ur_result_t initAsanDDITable(ur_dditable_t *dditable) {
+ur_result_t context_t::init(ur_dditable_t *dditable,
+                            const std::set<std::string> &enabledLayerNames,
+                            [[maybe_unused]] codeloc_data codelocData) {
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    if (enabledLayerNames.count("UR_LAYER_ASAN")) {
+        enabledType = SanitizerType::AddressSanitizer;
+        initAsanInterceptor();
+    } else if (enabledLayerNames.count("UR_LAYER_MSAN")) {
+        enabledType = SanitizerType::MemorySanitizer;
+    } else if (enabledLayerNames.count("UR_LAYER_TSAN")) {
+        enabledType = SanitizerType::ThreadSanitizer;
+    }
+
+    // Only support AddressSanitizer now
+    if (enabledType != SanitizerType::AddressSanitizer) {
+        return result;
+    }
+
+    urDdiTable = *dditable;
 
     if (UR_RESULT_SUCCESS == result) {
         result = ur_sanitizer_layer::asan::urGetGlobalProcAddrTable(

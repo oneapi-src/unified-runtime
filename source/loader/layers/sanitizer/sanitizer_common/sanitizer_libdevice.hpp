@@ -14,7 +14,9 @@
 
 #include <cstdint>
 
+#if !defined(__SPIR__) && !defined(__SPIRV__)
 namespace ur_sanitizer_layer {
+#endif // !__SPIR__ && !__SPIRV__
 
 enum class DeviceType : uint32_t { UNKNOWN = 0, CPU, GPU_PVC, GPU_DG2 };
 
@@ -94,4 +96,6 @@ inline const char *ToString(MemoryType MemoryType) {
     }
 }
 
+#if !defined(__SPIR__) && !defined(__SPIRV__)
 } // namespace ur_sanitizer_layer
+#endif // !__SPIR__ && !__SPIRV__

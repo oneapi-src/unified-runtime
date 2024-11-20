@@ -522,7 +522,7 @@ ur_result_t AsanInterceptor::insertDevice(ur_device_handle_t Device,
         return UR_RESULT_SUCCESS;
     }
 
-    DI = std::make_shared<ur_sanitizer_layer::DeviceInfo>(Device);
+    DI = std::make_shared<DeviceInfo>(Device);
 
     DI->IsSupportSharedSystemUSM = GetDeviceUSMCapability(
         Device, UR_DEVICE_INFO_USM_SYSTEM_SHARED_SUPPORT);
