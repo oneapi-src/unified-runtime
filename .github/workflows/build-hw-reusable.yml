@@ -74,25 +74,7 @@ jobs:
 
     - name: Target Build
       run: |
-        BUILDDIR=build2
         mkdir build2
-        if [ "$(pwd)" = /home/test-user/actions-runner/_work/unified-runtime/unified-runtime ]; then
-          mkdir shared
-          mv testfile.cpp source include build2 shared
-          cd shared
-        fi;
-        /usr/bin/clang++ -DUR_ENABLE_SANITIZER -DUR_ENABLE_TRACING -DUR_VALIDATION_LAYER_SUPPORTED_VERSION="0" -DUR_VERSION="0" -D_FORTIFY_SOURCE=2 -Isource/common -Iinclude -g -Wall -Wpedantic -Wempty-body -Wformat -Wformat-security -Wunused-parameter -fPIC -fstack-protector-strong -fvisibility=hidden -flto -fsanitize=cfi -fno-sanitize=cfi-icall -fdebug-default-version=4 -fcf-protection=full -fstack-clash-protection -fcolor-diagnostics -Werror -Wextra -std=gnu++17 -MD -o ${BUILDDIR}/testfile.cpp.o -c testfile.cpp
-        /usr/bin/clang++ -DUR_ENABLE_SANITIZER -DUR_ENABLE_TRACING -DUR_VALIDATION_LAYER_SUPPORTED_VERSION="0" -DUR_VERSION="0" -D_FORTIFY_SOURCE=2 -Isource/common -Iinclude -g -Wall -Wpedantic -Wempty-body -Wformat -Wformat-security -Wunused-parameter -fPIC -fstack-protector-strong -fvisibility=hidden -flto -fsanitize=cfi -fno-sanitize=cfi-icall -fdebug-default-version=4 -fcf-protection=full -fstack-clash-protection -fcolor-diagnostics -Werror -Wextra -std=gnu++17 -MD -o ${BUILDDIR}/ur_util.cpp.o -c source/common/ur_util.cpp
-        /usr/bin/ar qc ${BUILDDIR}/libur_common.a ${BUILDDIR}/ur_util.cpp.o ${BUILDDIR}/testfile.cpp.o | tee ${BUILDDIR}/arlog
-
-        md5sum ${BUILDDIR}/*
-        echo "testfile: "
-        base64 ${BUILDDIR}/testfile.cpp.o
-        echo "ur_util: "
-        base64 ${BUILDDIR}/ur_util.cpp.o
-
-        test ! -s ${BUILDDIR}/arlog
-
-    - name: Get information about platform
-      if: ${{ always() }}
-      run: .github/scripts/get_system_info.sh
+        ls -lah /usr/lib/bfd-plugins/
+        /usr/bin/ar Dqc --plugin /usr/lib/bfd-plugins/LLVMgold-14.so build2/good.a good.o | tee build2/arlog.good
+        test ! -s build2/arlog.good
