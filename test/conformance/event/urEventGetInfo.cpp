@@ -58,13 +58,13 @@ TEST_P(urEventGetInfoTest, Success) {
     }
 }
 
-UUR_TEST_SUITE_P(urEventGetInfoTest,
-                 ::testing::Values(UR_EVENT_INFO_COMMAND_QUEUE,
-                                   UR_EVENT_INFO_CONTEXT,
-                                   UR_EVENT_INFO_COMMAND_TYPE,
-                                   UR_EVENT_INFO_COMMAND_EXECUTION_STATUS,
-                                   UR_EVENT_INFO_REFERENCE_COUNT),
-                 uur::deviceTestWithParamPrinter<ur_event_info_t>);
+UUR_DEVICE_TEST_SUITE_P(
+    urEventGetInfoTest,
+    ::testing::Values(UR_EVENT_INFO_COMMAND_QUEUE, UR_EVENT_INFO_CONTEXT,
+                      UR_EVENT_INFO_COMMAND_TYPE,
+                      UR_EVENT_INFO_COMMAND_EXECUTION_STATUS,
+                      UR_EVENT_INFO_REFERENCE_COUNT),
+    uur::deviceTestWithParamPrinter<ur_event_info_t>);
 
 using urEventGetInfoNegativeTest = uur::event::urEventTest;
 

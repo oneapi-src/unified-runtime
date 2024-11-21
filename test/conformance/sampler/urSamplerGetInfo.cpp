@@ -7,13 +7,13 @@
 
 using urSamplerGetInfoTestWithParam =
     uur::urSamplerTestWithParam<ur_sampler_info_t>;
-UUR_TEST_SUITE_P(urSamplerGetInfoTestWithParam,
-                 ::testing::Values(UR_SAMPLER_INFO_REFERENCE_COUNT,
-                                   UR_SAMPLER_INFO_CONTEXT,
-                                   UR_SAMPLER_INFO_NORMALIZED_COORDS,
-                                   UR_SAMPLER_INFO_ADDRESSING_MODE,
-                                   UR_SAMPLER_INFO_FILTER_MODE),
-                 uur::deviceTestWithParamPrinter<ur_sampler_info_t>);
+UUR_DEVICE_TEST_SUITE_P(urSamplerGetInfoTestWithParam,
+                        ::testing::Values(UR_SAMPLER_INFO_REFERENCE_COUNT,
+                                          UR_SAMPLER_INFO_CONTEXT,
+                                          UR_SAMPLER_INFO_NORMALIZED_COORDS,
+                                          UR_SAMPLER_INFO_ADDRESSING_MODE,
+                                          UR_SAMPLER_INFO_FILTER_MODE),
+                        uur::deviceTestWithParamPrinter<ur_sampler_info_t>);
 
 TEST_P(urSamplerGetInfoTestWithParam, Success) {
     size_t size = 0;
