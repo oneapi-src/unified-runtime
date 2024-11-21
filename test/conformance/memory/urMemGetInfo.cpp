@@ -16,9 +16,9 @@ static std::unordered_map<ur_mem_info_t, size_t> mem_info_size_map = {
     {UR_MEM_INFO_REFERENCE_COUNT, sizeof(uint32_t)},
 };
 
-UUR_TEST_SUITE_P(urMemGetInfoTestWithParam,
-                 ::testing::ValuesIn(mem_info_values),
-                 uur::deviceTestWithParamPrinter<ur_mem_info_t>);
+UUR_DEVICE_TEST_SUITE_P(urMemGetInfoTestWithParam,
+                        ::testing::ValuesIn(mem_info_values),
+                        uur::deviceTestWithParamPrinter<ur_mem_info_t>);
 
 TEST_P(urMemGetInfoTestWithParam, Success) {
     ur_mem_info_t info = getParam();
@@ -103,8 +103,9 @@ TEST_P(urMemGetInfoTest, InvalidNullPointerPropSizeRet) {
 }
 
 using urMemGetInfoImageTest = uur::urMemImageTestWithParam<ur_mem_info_t>;
-UUR_TEST_SUITE_P(urMemGetInfoImageTest, ::testing::ValuesIn(mem_info_values),
-                 uur::deviceTestWithParamPrinter<ur_mem_info_t>);
+UUR_DEVICE_TEST_SUITE_P(urMemGetInfoImageTest,
+                        ::testing::ValuesIn(mem_info_values),
+                        uur::deviceTestWithParamPrinter<ur_mem_info_t>);
 
 TEST_P(urMemGetInfoImageTest, Success) {
     ur_mem_info_t info = getParam();

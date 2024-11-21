@@ -9,7 +9,7 @@
 using urKernelGetGroupInfoTest =
     uur::urKernelTestWithParam<ur_kernel_group_info_t>;
 
-UUR_TEST_SUITE_P(
+UUR_DEVICE_TEST_SUITE_P(
     urKernelGetGroupInfoTest,
     ::testing::Values(UR_KERNEL_GROUP_INFO_GLOBAL_WORK_SIZE,
                       UR_KERNEL_GROUP_INFO_WORK_GROUP_SIZE,

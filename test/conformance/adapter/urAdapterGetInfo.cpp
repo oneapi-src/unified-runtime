@@ -16,8 +16,6 @@ TEST_P(urAdapterGetInfoTest, Backend) {
     size_t size = 0;
     ASSERT_SUCCESS_OR_OPTIONAL_QUERY(
         urAdapterGetInfo(adapter, info_type, 0, nullptr, &size), info_type);
-    ASSERT_NE(size, 0);
-
     ASSERT_EQ(size, sizeof(ur_adapter_backend_t));
 
     std::vector<char> info_data(size);

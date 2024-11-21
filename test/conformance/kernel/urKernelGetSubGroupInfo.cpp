@@ -8,7 +8,7 @@
 using urKernelGetSubGroupInfoTest =
     uur::urKernelTestWithParam<ur_kernel_sub_group_info_t>;
 
-UUR_TEST_SUITE_P(
+UUR_DEVICE_TEST_SUITE_P(
     urKernelGetSubGroupInfoTest,
     ::testing::Values(UR_KERNEL_SUB_GROUP_INFO_MAX_SUB_GROUP_SIZE,
                       UR_KERNEL_SUB_GROUP_INFO_MAX_NUM_SUB_GROUPS,
