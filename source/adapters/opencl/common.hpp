@@ -203,6 +203,7 @@ CONSTFIX char EnqueueWriteGlobalVariableName[] =
     "clEnqueueWriteGlobalVariableINTEL";
 CONSTFIX char EnqueueReadGlobalVariableName[] =
     "clEnqueueReadGlobalVariableINTEL";
+CONSTFIX char EnqueueMigrateMemName[] = "clEnqueueMigrateMemINTEL";
 // Names of host pipe functions queried from OpenCL
 CONSTFIX char EnqueueReadHostPipeName[] = "clEnqueueReadHostPipeINTEL";
 CONSTFIX char EnqueueWriteHostPipeName[] = "clEnqueueWriteHostPipeINTEL";
@@ -219,6 +220,7 @@ CONSTFIX char EnqueueCommandBufferName[] = "clEnqueueCommandBufferKHR";
 CONSTFIX char GetCommandBufferInfoName[] = "clGetCommandBufferInfoKHR";
 CONSTFIX char UpdateMutableCommandsName[] = "clUpdateMutableCommandsKHR";
 CONSTFIX char CreateProgramWithILName[] = "clCreateProgramWithILKHR";
+CONSTFIX char GetKernelSubGroupInfoName[] = "clGetKernelSubGroupInfoKHR";
 CONSTFIX char GetKernelSubGroupInfoName[] = "clGetKernelSubGroupInfoKHR";
 
 #undef CONSTFIX

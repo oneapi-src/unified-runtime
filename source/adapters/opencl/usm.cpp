@@ -493,47 +493,47 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
     uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
     ur_event_handle_t *phEvent) {
 
-  return mapCLErrorToUR(clEnqueueMarkerWithWaitList(
-      cl_adapter::cast<cl_command_queue>(hQueue), numEventsInWaitList,
-      cl_adapter::cast<const cl_event *>(phEventWaitList),
-      cl_adapter::cast<cl_event *>(phEvent)));
+  // return mapCLErrorToUR(clEnqueueMarkerWithWaitList(
+  //     cl_adapter::cast<cl_command_queue>(hQueue), numEventsInWaitList,
+  //     cl_adapter::cast<const cl_event *>(phEventWaitList),
+  //     cl_adapter::cast<cl_event *>(phEvent)));
 
-  // cl_mem_migration_flags MigrationFlag;
-  // if (flags == UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE) {
-  //   MigrationFlag = CL_MIGRATE_MEM_OBJECT_CONTENT_UNDEFINED;
-  // } else if (flags == UR_USM_MIGRATION_FLAG_DEVICE_TO_HOST) {
-  //   MigrationFlag = CL_MIGRATE_MEM_OBJECT_HOST;
-  // } else {
-  //   return UR_RESULT_ERROR_INVALID_ENUMERATION;
-  // }
 
-  // // Have to look up the context from the kernel
-  // cl_context CLContext;
-  // cl_int CLErr =
-  // clGetCommandQueueInfo(cl_adapter::cast<cl_command_queue>(hQueue),
-  //                                      CL_QUEUE_CONTEXT, sizeof(cl_context),
-  //                                      &CLContext, nullptr);
-  // if (CLErr != CL_SUCCESS) {
-  //   return map_cl_error_to_ur(CLErr);
-  // }
+  cl_mem_migration_flags MigrationFlag;
+  if (flags == UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE) {
+    MigrationFlag = CL_MIGRATE_MEM_OBJECT_CONTENT_UNDEFINED;
+  } else if (flags == UR_USM_MIGRATION_FLAG_DEVICE_TO_HOST) {
+    MigrationFlag = CL_MIGRATE_MEM_OBJECT_HOST;
+  } else {
+    return UR_RESULT_ERROR_INVALID_ENUMERATION;
+  }
 
-  // clEnqueueMigrateMemINTEL_fn FuncPtr;
-  // ur_result_t Err = cl_ext::getExtFuncFromContext<clEnqueueMigrateMemINTEL_fn>(
-  //     CLContext, "clEnqueueMigrateMemINTEL", &FuncPtr);
-  //     // cl_ext::getExtFuncFromContext<clHostMemAllocINTEL_fn>(
-  //     // CLContext, cl_ext::ExtFuncPtrCache->clHostMemAllocINTELCache,
-  //     // cl_ext::HostMemAllocName, &HostMemAlloc)
+  // Have to look up the context from the kernel
+  cl_context CLContext;
+  cl_int CLErr =
+  clGetCommandQueueInfo(cl_adapter::cast<cl_command_queue>(hQueue),
+                                       CL_QUEUE_CONTEXT, sizeof(cl_context),
+                                       &CLContext, nullptr);
+  if (CLErr != CL_SUCCESS) {
+    return map_cl_error_to_ur(CLErr);
+  }
 
-  // ur_result_t RetVal;
-  // if (Err != UR_RESULT_SUCCESS) {
-  //   RetVal = Err;
-  // } else {
-  //   RetVal = map_cl_error_to_ur(
-  //       FuncPtr(cl_adapter::cast<cl_command_queue>(hQueue), pMem, size,
-  //               MigrationFlag, numEventsInWaitList,
-  //               reinterpret_cast<const cl_event *>(phEventWaitList),
-  //               reinterpret_cast<cl_event *>(phEvent)));
-  // }
+  clEnqueueMigrateMemINTEL_fn FuncPtr;
+  if (cl_ext::getExtFuncFromContext<clEnqueueMigrateMemINTEL_fn>(
+      CLContext, cl_ext::ExtFuncPtrCache->clEnqueueMigrateMemINTELCache,
+      cl_ext::EnqueueMigrateMemName, &FuncPtr)) {
+    // Exit gracefully if unable to find USM function
+    return UR_RESULT_SUCCESS;
+  }
+      // cl_ext::getExtFuncFromContext<clHostMemAllocINTEL_fn>(
+      // CLContext, cl_ext::ExtFuncPtrCache->clHostMemAllocINTELCache,
+      // cl_ext::HostMemAllocName, &HostMemAlloc)
+
+  return mapCLErrorToUR(
+      FuncPtr(cl_adapter::cast<cl_command_queue>(hQueue), pMem, size,
+              MigrationFlag, numEventsInWaitList,
+              reinterpret_cast<const cl_event *>(phEventWaitList),
+              reinterpret_cast<cl_event *>(phEvent)));
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMAdvise(
