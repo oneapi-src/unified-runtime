@@ -499,6 +499,28 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
   //     cl_adapter::cast<cl_event *>(phEvent)));
 
 
+  // Have to look up the context from the kernel
+  cl_context CLContext;
+  cl_int CLErr =
+  clGetCommandQueueInfo(cl_adapter::cast<cl_command_queue>(hQueue),
+                                       CL_QUEUE_CONTEXT, sizeof(cl_context),
+                                       &CLContext, nullptr);
+  if (CLErr != CL_SUCCESS) {
+    return mapCLErrorToUR(CLErr);
+  }
+
+  clEnqueueMigrateMemINTEL_fn FuncPtr;
+  if (cl_ext::getExtFuncFromContext<clEnqueueMigrateMemINTEL_fn>(
+      CLContext, cl_ext::ExtFuncPtrCache->clEnqueueMigrateMemINTELCache,
+      cl_ext::EnqueueMigrateMemName, &FuncPtr)) {
+    // Exit gracefully if unable to find USM function
+    setErrorMessage("Prefetch hint ignored as current OpenCL version does not support clEnqueueMigrateMemINTEL", UR_RESULT_SUCCESS);
+    return UR_RESULT_SUCCESS;
+  }
+      // cl_ext::getExtFuncFromContext<clHostMemAllocINTEL_fn>(
+      // CLContext, cl_ext::ExtFuncPtrCache->clHostMemAllocINTELCache,
+      // cl_ext::HostMemAllocName, &HostMemAlloc)
+
   cl_mem_migration_flags MigrationFlag;
   if (flags == UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE) {
     MigrationFlag = CL_MIGRATE_MEM_OBJECT_CONTENT_UNDEFINED;
@@ -507,27 +529,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
   } else {
     return UR_RESULT_ERROR_INVALID_ENUMERATION;
   }
-
-  // Have to look up the context from the kernel
-  cl_context CLContext;
-  cl_int CLErr =
-  clGetCommandQueueInfo(cl_adapter::cast<cl_command_queue>(hQueue),
-                                       CL_QUEUE_CONTEXT, sizeof(cl_context),
-                                       &CLContext, nullptr);
-  if (CLErr != CL_SUCCESS) {
-    return map_cl_error_to_ur(CLErr);
-  }
-
-  clEnqueueMigrateMemINTEL_fn FuncPtr;
-  if (cl_ext::getExtFuncFromContext<clEnqueueMigrateMemINTEL_fn>(
-      CLContext, cl_ext::ExtFuncPtrCache->clEnqueueMigrateMemINTELCache,
-      cl_ext::EnqueueMigrateMemName, &FuncPtr)) {
-    // Exit gracefully if unable to find USM function
-    return UR_RESULT_SUCCESS;
-  }
-      // cl_ext::getExtFuncFromContext<clHostMemAllocINTEL_fn>(
-      // CLContext, cl_ext::ExtFuncPtrCache->clHostMemAllocINTELCache,
-      // cl_ext::HostMemAllocName, &HostMemAlloc)
 
   return mapCLErrorToUR(
       FuncPtr(cl_adapter::cast<cl_command_queue>(hQueue), pMem, size,
