@@ -514,7 +514,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
       CLContext, cl_ext::ExtFuncPtrCache->clEnqueueMigrateMemINTELCache,
       cl_ext::EnqueueMigrateMemName, &FuncPtr)) {
     // Exit gracefully if unable to find USM function
-    setErrorMessage("Prefetch hint ignored as current OpenCL version does not support clEnqueueMigrateMemINTEL", UR_RESULT_SUCCESS);
+    cl_adapter::setErrorMessage("Prefetch hint ignored as current OpenCL version does not support clEnqueueMigrateMemINTEL", UR_RESULT_SUCCESS);
     return UR_RESULT_SUCCESS;
   }
       // cl_ext::getExtFuncFromContext<clHostMemAllocINTEL_fn>(
