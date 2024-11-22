@@ -221,7 +221,6 @@ CONSTFIX char GetCommandBufferInfoName[] = "clGetCommandBufferInfoKHR";
 CONSTFIX char UpdateMutableCommandsName[] = "clUpdateMutableCommandsKHR";
 CONSTFIX char CreateProgramWithILName[] = "clCreateProgramWithILKHR";
 CONSTFIX char GetKernelSubGroupInfoName[] = "clGetKernelSubGroupInfoKHR";
-CONSTFIX char GetKernelSubGroupInfoName[] = "clGetKernelSubGroupInfoKHR";
 
 #undef CONSTFIX
 
