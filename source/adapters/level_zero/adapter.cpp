@@ -265,6 +265,7 @@ ur_adapter_handle_t_::ur_adapter_handle_t_()
     setEnvVar("ZE_ENABLE_PARAMETER_VALIDATION", "1");
   }
 
+  printf("ur_adapter_handle_t_ l0 plat init\n");
   PlatformCache.Compute = [](Result<PlatformVec> &result) {
     static std::once_flag ZeCallCountInitialized;
     try {
@@ -391,6 +392,7 @@ ur_adapter_handle_t_::ur_adapter_handle_t_()
         GlobalAdapter->ZeResult = ZE_RESULT_ERROR_UNINITIALIZED;
       }
     }
+    printf("GlobalAdapter->ZeResult: %d\n", *GlobalAdapter->ZeResult);
     assert(GlobalAdapter->ZeResult !=
            std::nullopt); // verify that level-zero is initialized
     PlatformVec platforms;
@@ -398,6 +400,7 @@ ur_adapter_handle_t_::ur_adapter_handle_t_()
     // Absorb the ZE_RESULT_ERROR_UNINITIALIZED and just return 0 Platforms.
     if (*GlobalAdapter->ZeResult == ZE_RESULT_ERROR_UNINITIALIZED) {
       result = std::move(platforms);
+      printf("GlobalAdapter->ZeResult is uninit such that platforms are 0, returning\n");
       return;
     }
     if (*GlobalAdapter->ZeResult != ZE_RESULT_SUCCESS) {
@@ -448,6 +451,7 @@ ur_adapter_handle_t_::ur_adapter_handle_t_()
       result = err;
     }
   };
+  printf("ur_adapter_handle_t_ l0 plat init done\n");
 }
 
 void globalAdapterOnDemandCleanup() {
