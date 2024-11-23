@@ -412,7 +412,7 @@ AsanInterceptor::updateShadowMemory(std::shared_ptr<ContextInfo> &ContextInfo,
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t SanitizerInterceptor::registerProgram(ur_program_handle_t Program) {
+ur_result_t AsanInterceptor::registerProgram(ur_program_handle_t Program) {
     ur_result_t Result = UR_RESULT_SUCCESS;
     do {
         getContext()->logger.info("registerSpirKernels");
@@ -430,7 +430,7 @@ ur_result_t SanitizerInterceptor::registerProgram(ur_program_handle_t Program) {
 }
 
 ur_result_t
-SanitizerInterceptor::unregisterProgram(ur_program_handle_t Program) {
+AsanInterceptor::unregisterProgram(ur_program_handle_t Program) {
     auto ProgramInfo = getProgramInfo(Program);
 
     for (auto AI : ProgramInfo->AllocInfoForGlobals) {
@@ -445,7 +445,7 @@ SanitizerInterceptor::unregisterProgram(ur_program_handle_t Program) {
 }
 
 ur_result_t
-SanitizerInterceptor::registerSpirKernels(ur_program_handle_t Program) {
+AsanInterceptor::registerSpirKernels(ur_program_handle_t Program) {
     auto Context = GetContext(Program);
     std::vector<ur_device_handle_t> Devices = GetDevices(Program);
 
@@ -510,7 +510,7 @@ SanitizerInterceptor::registerSpirKernels(ur_program_handle_t Program) {
 }
 
 ur_result_t
-SanitizerInterceptor::registerDeviceGlobals(ur_program_handle_t Program) {
+AsanInterceptor::registerDeviceGlobals(ur_program_handle_t Program) {
     std::vector<ur_device_handle_t> Devices = GetDevices(Program);
     assert(Devices.size() != 0 && "No devices in registerDeviceGlobals");
     auto Context = GetContext(Program);
@@ -570,7 +570,7 @@ SanitizerInterceptor::registerDeviceGlobals(ur_program_handle_t Program) {
 }
 
 ur_result_t
-SanitizerInterceptor::insertContext(ur_context_handle_t Context,
+AsanInterceptor::insertContext(ur_context_handle_t Context,
                                     std::shared_ptr<ContextInfo> &CI) {
     std::scoped_lock<ur_shared_mutex> Guard(m_ContextMapMutex);
 
