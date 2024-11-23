@@ -18,8 +18,8 @@
 
 namespace ur_sanitizer_layer {
 
-struct StackTrace;
 struct AsanErrorReport;
+struct StackTrace;
 
 namespace asan {
 

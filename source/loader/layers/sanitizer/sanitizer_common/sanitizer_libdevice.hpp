@@ -20,28 +20,6 @@ namespace ur_sanitizer_layer {
 
 enum class DeviceType : uint32_t { UNKNOWN = 0, CPU, GPU_PVC, GPU_DG2 };
 
-enum class MemoryType : int32_t {
-    UNKNOWN,
-    USM_DEVICE,
-    USM_HOST,
-    USM_SHARED,
-    LOCAL,
-    PRIVATE,
-    MEM_BUFFER,
-    DEVICE_GLOBAL,
-};
-
-enum class ErrorType : int32_t {
-    UNKNOWN,
-    OUT_OF_BOUNDS,
-    MISALIGNED,
-    USE_AFTER_FREE,
-    OUT_OF_SHADOW_BOUNDS,
-    UNKNOWN_DEVICE,
-    NULL_POINTER,
-    USE_OF_UNINITIALIZED_VALUE,
-};
-
 inline const char *ToString(DeviceType Type) {
     switch (Type) {
     case DeviceType::UNKNOWN:
@@ -56,6 +34,46 @@ inline const char *ToString(DeviceType Type) {
         return "UNKNOWN";
     }
 }
+
+enum class ErrorType : int32_t {
+    UNKNOWN,
+    OUT_OF_BOUNDS,
+    MISALIGNED,
+    USE_AFTER_FREE,
+    OUT_OF_SHADOW_BOUNDS,
+    UNKNOWN_DEVICE,
+    NULL_POINTER,
+};
+
+inline const char *ToString(ErrorType ErrorType) {
+    switch (ErrorType) {
+    case ErrorType::OUT_OF_BOUNDS:
+        return "out-of-bounds-access";
+    case ErrorType::MISALIGNED:
+        return "misaligned-access";
+    case ErrorType::USE_AFTER_FREE:
+        return "use-after-free";
+    case ErrorType::OUT_OF_SHADOW_BOUNDS:
+        return "out-of-shadow-bounds-access";
+    case ErrorType::UNKNOWN_DEVICE:
+        return "unknown-device";
+    case ErrorType::NULL_POINTER:
+        return "null-pointer-access";
+    default:
+        return "unknown-error";
+    }
+}
+
+enum class MemoryType : int32_t {
+    UNKNOWN,
+    USM_DEVICE,
+    USM_HOST,
+    USM_SHARED,
+    LOCAL,
+    PRIVATE,
+    MEM_BUFFER,
+    DEVICE_GLOBAL,
+};
 
 inline const char *ToString(MemoryType MemoryType) {
     switch (MemoryType) {
@@ -75,27 +93,6 @@ inline const char *ToString(MemoryType MemoryType) {
         return "Device Global";
     default:
         return "Unknown Memory";
-    }
-}
-
-inline const char *ToString(ErrorType ErrorType) {
-    switch (ErrorType) {
-    case ErrorType::OUT_OF_BOUNDS:
-        return "out-of-bounds-access";
-    case ErrorType::MISALIGNED:
-        return "misaligned-access";
-    case ErrorType::USE_AFTER_FREE:
-        return "use-after-free";
-    case ErrorType::OUT_OF_SHADOW_BOUNDS:
-        return "out-of-shadow-bounds-access";
-    case ErrorType::UNKNOWN_DEVICE:
-        return "unknown-device";
-    case ErrorType::NULL_POINTER:
-        return "null-pointer-access";
-    case ErrorType::USE_OF_UNINITIALIZED_VALUE:
-        return "use-of-uninitialized-value";
-    default:
-        return "unknown-error";
     }
 }
 

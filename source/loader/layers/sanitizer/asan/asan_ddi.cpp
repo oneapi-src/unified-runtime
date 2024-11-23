@@ -1870,7 +1870,6 @@ ur_result_t initAsanDDITable(ur_dditable_t *dditable) {
         result = ur_sanitizer_layer::asan::urGetUSMProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->USM);
     }
-
     getContext()->logger.info("initMsanDDITable: {}", result);
 
     return result;
