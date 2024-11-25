@@ -23,7 +23,6 @@ struct MsanAllocInfo {
     uptr AllocBegin = 0;
     size_t AllocSize = 0;
 
-    AllocType Type = AllocType::UNKNOWN;
     bool IsReleased = false;
 
     ur_context_handle_t Context = nullptr;

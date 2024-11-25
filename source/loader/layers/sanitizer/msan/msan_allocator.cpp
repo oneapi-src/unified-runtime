@@ -17,9 +17,9 @@ namespace ur_sanitizer_layer {
 namespace msan {
 
 void MsanAllocInfo::print() {
-    getContext()->logger.info(
-        "AllocInfo(Alloc=[{}-{}), AllocSize={}, Type={})", (void *)AllocBegin,
-        (void *)(AllocBegin + AllocSize), AllocSize, ToString(Type));
+    getContext()->logger.info("AllocInfo(Alloc=[{}-{}), AllocSize={})",
+                              (void *)AllocBegin,
+                              (void *)(AllocBegin + AllocSize), AllocSize);
 }
 
 } // namespace msan

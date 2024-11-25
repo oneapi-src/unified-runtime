@@ -47,9 +47,6 @@ struct MsanLaunchInfo {
     uintptr_t GlobalShadowOffset = 0;
     uintptr_t GlobalShadowOffsetEnd = 0;
 
-    MsanLocalArgsInfo *LocalArgs = nullptr; // Ordered by ArgIndex
-    uint32_t NumLocalArgs = 0;
-
     DeviceType DeviceTy = DeviceType::UNKNOWN;
     uint32_t Debug = 0;
     uint32_t IsRecover = 0;

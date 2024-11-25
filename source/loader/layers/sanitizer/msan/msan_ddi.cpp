@@ -101,18 +101,7 @@ ur_result_t urUSMDeviceAlloc(
     getContext()->logger.debug("==== urUSMDeviceAlloc");
 
     return getMsanInterceptor()->allocateMemory(
-        hContext, hDevice, pUSMDesc, pool, size, AllocType::DEVICE_USM, ppMem);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urUSMFree
-ur_result_t
-urUSMFree(ur_context_handle_t hContext, ///< [in] handle of the context object
-          void *pMem                    ///< [in] pointer to USM memory object
-) {
-    getContext()->logger.debug("==== urUSMFree");
-
-    return getMsanInterceptor()->releaseMemory(hContext, pMem);
+        hContext, hDevice, pUSMDesc, pool, size, ppMem);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1070,9 +1059,8 @@ ur_result_t urEnqueueMemBufferMap(
             ur_usm_desc_t USMDesc{};
             USMDesc.align = MemBuffer->getAlignment();
             ur_usm_pool_handle_t Pool{};
-            UR_CALL(getMsanInterceptor()->allocateMemory(
-                Context, nullptr, &USMDesc, Pool, size, AllocType::HOST_USM,
-                ppRetMap));
+            UR_CALL(getContext()->urDdiTable.USM.pfnHostAlloc(
+                Context, &USMDesc, Pool, size, ppRetMap));
         }
 
         // Actually, if the access mode is write only, we don't need to do this
@@ -1144,7 +1132,7 @@ ur_result_t urEnqueueMemUnmap(
             numEventsInWaitList, phEventWaitList, phEvent));
 
         if (!MemBuffer->HostPtr) {
-            UR_CALL(getMsanInterceptor()->releaseMemory(Context, pMappedPtr));
+            UR_CALL(getContext()->urDdiTable.USM.pfnFree(Context, pMappedPtr));
         }
     } else {
         UR_CALL(pfnMemUnmap(hQueue, hMem, pMappedPtr, numEventsInWaitList,
@@ -1251,13 +1239,13 @@ ur_result_t urKernelSetArgMemObj(
 
     getContext()->logger.debug("==== urKernelSetArgMemObj");
 
-    // if (auto MemBuffer = getMsanInterceptor()->getMemBuffer(hArgValue)) {
-    //     auto KernelInfo = getMsanInterceptor()->getKernelInfo(hKernel);
-    //     std::scoped_lock<ur_shared_mutex> Guard(KernelInfo->Mutex);
-    //     KernelInfo->BufferArgs[argIndex] = std::move(MemBuffer);
-    // } else {
-    UR_CALL(pfnSetArgMemObj(hKernel, argIndex, pProperties, hArgValue));
-    // }
+    if (auto MemBuffer = getMsanInterceptor()->getMemBuffer(hArgValue)) {
+        auto KernelInfo = getMsanInterceptor()->getKernelInfo(hKernel);
+        std::scoped_lock<ur_shared_mutex> Guard(KernelInfo->Mutex);
+        KernelInfo->BufferArgs[argIndex] = std::move(MemBuffer);
+    } else {
+        UR_CALL(pfnSetArgMemObj(hKernel, argIndex, pProperties, hArgValue));
+    }
 
     return UR_RESULT_SUCCESS;
 }
@@ -1437,7 +1425,6 @@ ur_result_t urGetUSMProcAddrTable(
     ur_result_t result = UR_RESULT_SUCCESS;
 
     pDdiTable->pfnDeviceAlloc = ur_sanitizer_layer::msan::urUSMDeviceAlloc;
-    pDdiTable->pfnFree = ur_sanitizer_layer::msan::urUSMFree;
 
     return result;
 }

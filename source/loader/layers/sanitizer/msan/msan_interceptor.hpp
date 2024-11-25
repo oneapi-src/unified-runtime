@@ -78,7 +78,7 @@ struct KernelInfo {
 
     // lock this mutex if following fields are accessed
     ur_shared_mutex Mutex;
-    // std::unordered_map<uint32_t, std::shared_ptr<MemBuffer>> BufferArgs;
+    std::unordered_map<uint32_t, std::shared_ptr<MemBuffer>> BufferArgs;
     // std::unordered_map<uint32_t, std::pair<const void *, StackTrace>>
     //     PointerArgs;
 
@@ -167,7 +167,6 @@ struct USMLaunchInfo {
     ~USMLaunchInfo();
 
     ur_result_t initialize();
-    ur_result_t updateKernelInfo(const KernelInfo &KI);
 };
 
 struct DeviceGlobalInfo {
@@ -186,8 +185,7 @@ class MsanInterceptor {
                                ur_device_handle_t Device,
                                const ur_usm_desc_t *Properties,
                                ur_usm_pool_handle_t Pool, size_t Size,
-                               AllocType Type, void **ResultPtr);
-    ur_result_t releaseMemory(ur_context_handle_t Context, void *Ptr);
+                               void **ResultPtr);
 
     ur_result_t registerProgram(ur_context_handle_t Context,
                                 ur_program_handle_t Program);
@@ -281,8 +279,7 @@ class MsanInterceptor {
                                  std::shared_ptr<MsanAllocInfo> &AI);
 
     /// Initialize Global Variables & Kernel Name at first Launch
-    ur_result_t prepareLaunch(std::shared_ptr<msan::ContextInfo> &ContextInfo,
-                              std::shared_ptr<msan::DeviceInfo> &DeviceInfo,
+    ur_result_t prepareLaunch(std::shared_ptr<msan::DeviceInfo> &DeviceInfo,
                               ur_queue_handle_t Queue,
                               ur_kernel_handle_t Kernel,
                               msan::USMLaunchInfo &LaunchInfo);

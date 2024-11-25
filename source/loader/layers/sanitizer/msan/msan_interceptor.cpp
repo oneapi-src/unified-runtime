@@ -53,8 +53,7 @@ ur_result_t MsanInterceptor::allocateMemory(ur_context_handle_t Context,
                                             ur_device_handle_t Device,
                                             const ur_usm_desc_t *Properties,
                                             ur_usm_pool_handle_t Pool,
-                                            size_t Size, AllocType Type,
-                                            void **ResultPtr) {
+                                            size_t Size, void **ResultPtr) {
 
     auto ContextInfo = getContextInfo(Context);
     std::shared_ptr<DeviceInfo> DeviceInfo =
@@ -62,33 +61,14 @@ ur_result_t MsanInterceptor::allocateMemory(ur_context_handle_t Context,
 
     void *Allocated = nullptr;
 
-    if (Type == AllocType::DEVICE_USM) {
-        UR_CALL(getContext()->urDdiTable.USM.pfnDeviceAlloc(
-            Context, Device, Properties, Pool, Size, &Allocated));
-    } else if (Type == AllocType::HOST_USM) {
-        UR_CALL(getContext()->urDdiTable.USM.pfnHostAlloc(
-            Context, Properties, Pool, Size, &Allocated));
-    } else if (Type == AllocType::SHARED_USM) {
-        UR_CALL(getContext()->urDdiTable.USM.pfnSharedAlloc(
-            Context, Device, Properties, Pool, Size, &Allocated));
-    } else if (Type == AllocType::MEM_BUFFER) {
-        UR_CALL(getContext()->urDdiTable.USM.pfnDeviceAlloc(
-            Context, Device, Properties, Pool, Size, &Allocated));
-    } else {
-        getContext()->logger.error("Unsupport memory type");
-        return UR_RESULT_ERROR_INVALID_ARGUMENT;
-    }
+    UR_CALL(getContext()->urDdiTable.USM.pfnDeviceAlloc(
+        Context, Device, Properties, Pool, Size, &Allocated));
 
     *ResultPtr = Allocated;
-
-    if (Type != AllocType::DEVICE_USM) {
-        return UR_RESULT_SUCCESS;
-    }
 
     auto AI =
         std::make_shared<MsanAllocInfo>(MsanAllocInfo{(uptr)Allocated,
                                                       Size,
-                                                      Type,
                                                       false,
                                                       Context,
                                                       Device,
@@ -109,97 +89,6 @@ ur_result_t MsanInterceptor::allocateMemory(ur_context_handle_t Context,
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t MsanInterceptor::releaseMemory(ur_context_handle_t Context,
-                                           void *Ptr) {
-    // auto ContextInfo = getContextInfo(Context);
-
-    // auto Addr = reinterpret_cast<uptr>(Ptr);
-    // auto AllocInfoItOp = findAllocInfoByAddress(Addr);
-
-    // if (!AllocInfoItOp) {
-    //     // "Addr" might be a host pointer
-    //     ReportBadFree(Addr, GetCurrentBacktrace(), nullptr);
-    //     return UR_RESULT_ERROR_INVALID_ARGUMENT;
-    // }
-
-    // auto AllocInfoIt = *AllocInfoItOp;
-    // // NOTE: AllocInfoIt will be erased later, so "MsanAllocInfo" must be a new reference here
-    // auto MsanAllocInfo = AllocInfoIt->second;
-
-    // if (MsanAllocInfo->Context != Context) {
-    //     if (MsanAllocInfo->UserBegin == Addr) {
-    //         ReportBadContext(Addr, GetCurrentBacktrace(), MsanAllocInfo);
-    //     } else {
-    //         // "Addr" might be a host pointer
-    //         ReportBadFree(Addr, GetCurrentBacktrace(), nullptr);
-    //     }
-    //     return UR_RESULT_ERROR_INVALID_ARGUMENT;
-    // }
-
-    // if (Addr != MsanAllocInfo->UserBegin) {
-    //     ReportBadFree(Addr, GetCurrentBacktrace(), MsanAllocInfo);
-    //     return UR_RESULT_ERROR_INVALID_ARGUMENT;
-    // }
-
-    // if (MsanAllocInfo->IsReleased) {
-    //     ReportDoubleFree(Addr, GetCurrentBacktrace(), MsanAllocInfo);
-    //     return UR_RESULT_ERROR_INVALID_ARGUMENT;
-    // }
-
-    // MsanAllocInfo->IsReleased = true;
-    // MsanAllocInfo->ReleaseStack = GetCurrentBacktrace();
-
-    // if (MsanAllocInfo->Type == AllocType::HOST_USM) {
-    //     ContextInfo->insertAllocInfo(ContextInfo->DeviceList, MsanAllocInfo);
-    // } else {
-    //     ContextInfo->insertAllocInfo({MsanAllocInfo->Device}, MsanAllocInfo);
-    // }
-
-    // // If quarantine is disabled, USM is freed immediately
-    // if (!m_Quarantine) {
-    //     getContext()->logger.debug("Free: {}", (void *)MsanAllocInfo->AllocBegin);
-
-    //     ContextInfo->Stats.UpdateUSMRealFreed(MsanAllocInfo->AllocSize,
-    //                                           MsanAllocInfo->getRedzoneSize());
-
-    //     std::scoped_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
-    //     m_AllocationMap.erase(AllocInfoIt);
-
-    //     return getContext()->urDdiTable.USM.pfnFree(
-    //         Context, (void *)(MsanAllocInfo->AllocBegin));
-    // }
-
-    // // If quarantine is enabled, cache it
-    // auto ReleaseList = m_Quarantine->put(MsanAllocInfo->Device, AllocInfoIt);
-    // if (ReleaseList.size()) {
-    //     std::scoped_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
-    //     for (auto &It : ReleaseList) {
-    //         getContext()->logger.info("Quarantine Free: {}",
-    //                                   (void *)It->second->AllocBegin);
-
-    //         ContextInfo->Stats.UpdateUSMRealFreed(MsanAllocInfo->AllocSize,
-    //                                               MsanAllocInfo->getRedzoneSize());
-
-    //         m_AllocationMap.erase(It);
-    //         if (MsanAllocInfo->Type == AllocType::HOST_USM) {
-    //             for (auto &Device : ContextInfo->DeviceList) {
-    //                 UR_CALL(getDeviceInfo(Device)->Shadow->ReleaseShadow(
-    //                     MsanAllocInfo));
-    //             }
-    //         } else {
-    //             UR_CALL(getDeviceInfo(MsanAllocInfo->Device)
-    //                         ->Shadow->ReleaseShadow(MsanAllocInfo));
-    //         }
-
-    //         UR_CALL(getContext()->urDdiTable.USM.pfnFree(
-    //             Context, (void *)(It->second->AllocBegin)));
-    //     }
-    // }
-    // ContextInfo->Stats.UpdateUSMFreed(MsanAllocInfo->AllocSize);
-
-    return UR_RESULT_SUCCESS;
-}
-
 ur_result_t MsanInterceptor::preLaunchKernel(ur_kernel_handle_t Kernel,
                                              ur_queue_handle_t Queue,
                                              USMLaunchInfo &LaunchInfo) {
@@ -207,9 +96,6 @@ ur_result_t MsanInterceptor::preLaunchKernel(ur_kernel_handle_t Kernel,
     auto Device = GetDevice(Queue);
     auto ContextInfo = getContextInfo(Context);
     auto DeviceInfo = getDeviceInfo(Device);
-    auto KernelInfo = getKernelInfo(Kernel);
-
-    UR_CALL(LaunchInfo.updateKernelInfo(*KernelInfo.get()));
 
     ManagedQueue InternalQueue(Context, Device);
     if (!InternalQueue) {
@@ -217,8 +103,7 @@ ur_result_t MsanInterceptor::preLaunchKernel(ur_kernel_handle_t Kernel,
         return UR_RESULT_ERROR_INVALID_QUEUE;
     }
 
-    UR_CALL(prepareLaunch(ContextInfo, DeviceInfo, InternalQueue, Kernel,
-                          LaunchInfo));
+    UR_CALL(prepareLaunch(DeviceInfo, InternalQueue, Kernel, LaunchInfo));
 
     UR_CALL(updateShadowMemory(ContextInfo, DeviceInfo, InternalQueue));
 
@@ -269,76 +154,12 @@ MsanInterceptor::updateShadowMemory(std::shared_ptr<ContextInfo> &ContextInfo,
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t MsanInterceptor::registerProgram(ur_context_handle_t Context,
-                                             ur_program_handle_t Program) {
-    // std::vector<ur_device_handle_t> Devices = GetDevices(Program);
-
-    // auto ContextInfo = getContextInfo(Context);
-    // auto ProgramInfo = getProgramInfo(Program);
-
-    // for (auto Device : Devices) {
-    //     ManagedQueue Queue(Context, Device);
-
-    //     uint64_t NumOfDeviceGlobal;
-    //     auto Result =
-    //         getContext()->urDdiTable.Enqueue.pfnDeviceGlobalVariableRead(
-    //             Queue, Program, kSPIR_MsanDeviceGlobalCount, true,
-    //             sizeof(NumOfDeviceGlobal), 0, &NumOfDeviceGlobal, 0, nullptr,
-    //             nullptr);
-    //     if (Result != UR_RESULT_SUCCESS) {
-    //         getContext()->logger.info("No device globals");
-    //         continue;
-    //     }
-
-    //     std::vector<DeviceGlobalInfo> GVInfos(NumOfDeviceGlobal);
-    //     Result = getContext()->urDdiTable.Enqueue.pfnDeviceGlobalVariableRead(
-    //         Queue, Program, kSPIR_MsanDeviceGlobalMetadata, true,
-    //         sizeof(DeviceGlobalInfo) * NumOfDeviceGlobal, 0, &GVInfos[0], 0,
-    //         nullptr, nullptr);
-    //     if (Result != UR_RESULT_SUCCESS) {
-    //         getContext()->logger.error("Device Global[{}] Read Failed: {}",
-    //                                    kSPIR_MsanDeviceGlobalMetadata, Result);
-    //         return Result;
-    //     }
-
-    // for (size_t i = 0; i < NumOfDeviceGlobal; i++) {
-    //     auto AI = std::make_shared<MsanAllocInfo>(
-    //         MsanAllocInfo{GVInfos[i].Addr,
-    //                       GVInfos[i].Addr,
-    //                       GVInfos[i].Addr + GVInfos[i].Size,
-    //                       GVInfos[i].SizeWithRedZone,
-    //                       AllocType::DEVICE_GLOBAL,
-    //                       false,
-    //                       Context,
-    //                       Device,
-    //                       GetCurrentBacktrace(),
-    //                       {}});
-
-    //     ContextInfo->insertAllocInfo({Device}, AI);
-
-    //     {
-    //         std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Guard(
-    //             m_AllocationMapMutex, ProgramInfo->Mutex);
-    //         ProgramInfo->AllocInfoForGlobals.emplace(AI);
-    //         m_AllocationMap.emplace(AI->AllocBegin, std::move(AI));
-    //     }
-    // }
-    // }
-
+ur_result_t MsanInterceptor::registerProgram(ur_context_handle_t,
+                                             ur_program_handle_t) {
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t MsanInterceptor::unregisterProgram(ur_program_handle_t Program) {
-    // auto ProgramInfo = getProgramInfo(Program);
-
-    // std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Guard(
-    //     m_AllocationMapMutex, ProgramInfo->Mutex);
-    // for (auto AI : ProgramInfo->AllocInfoForGlobals) {
-    //     UR_CALL(getDeviceInfo(AI->Device)->Shadow->ReleaseShadow(AI));
-    //     m_AllocationMap.erase(AI->AllocBegin);
-    // }
-    // ProgramInfo->AllocInfoForGlobals.clear();
-
+ur_result_t MsanInterceptor::unregisterProgram(ur_program_handle_t) {
     return UR_RESULT_SUCCESS;
 }
 
@@ -459,7 +280,6 @@ MsanInterceptor::getMemBuffer(ur_mem_handle_t MemHandle) {
 }
 
 ur_result_t MsanInterceptor::prepareLaunch(
-    std::shared_ptr<ContextInfo> &ContextInfo,
     std::shared_ptr<DeviceInfo> &DeviceInfo, ur_queue_handle_t Queue,
     ur_kernel_handle_t Kernel, USMLaunchInfo &LaunchInfo) {
     auto Program = GetProgram(Kernel);
@@ -480,15 +300,29 @@ ur_result_t MsanInterceptor::prepareLaunch(
             return UR_RESULT_SUCCESS;
         };
 
+        // Set membuffer arguments
+        auto KernelInfo = getKernelInfo(Kernel);
+        for (const auto &[ArgIndex, MemBuffer] : KernelInfo->BufferArgs) {
+            char *ArgPointer = nullptr;
+            UR_CALL(MemBuffer->getHandle(DeviceInfo->Handle, ArgPointer));
+            ur_result_t URes = getContext()->urDdiTable.Kernel.pfnSetArgPointer(
+                Kernel, ArgIndex, nullptr, ArgPointer);
+            if (URes != UR_RESULT_SUCCESS) {
+                getContext()->logger.error(
+                    "Failed to set buffer {} as the {} arg to kernel {}: {}",
+                    ur_cast<ur_mem_handle_t>(MemBuffer.get()), ArgIndex, Kernel,
+                    URes);
+            }
+        }
+
         LaunchInfo.Data->GlobalShadowOffset = DeviceInfo->Shadow->ShadowBegin;
         LaunchInfo.Data->GlobalShadowOffsetEnd = DeviceInfo->Shadow->ShadowEnd;
         LaunchInfo.Data->DeviceTy = DeviceInfo->Type;
         LaunchInfo.Data->Debug = getOptions().Debug ? 1 : 0;
 
         getContext()->logger.debug(
-            "launch_info {} (numLocalArgs={}, localArgs={})",
-            (void *)LaunchInfo.Data, LaunchInfo.Data->NumLocalArgs,
-            (void *)LaunchInfo.Data->LocalArgs);
+            "launch_info {}",
+            (void *)LaunchInfo.Data);
 
         UR_CALL(EnqueueWriteGlobal("__MsanLaunchInfo", &LaunchInfo.Data,
                                    sizeof(uptr)));
@@ -553,51 +387,9 @@ ur_result_t USMLaunchInfo::initialize() {
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t USMLaunchInfo::updateKernelInfo(const KernelInfo &KI) {
-    // auto NumArgs = KI.LocalArgs.size();
-    // if (NumArgs) {
-    //     Data->NumLocalArgs = NumArgs;
-    //     UR_CALL(getContext()->urDdiTable.USM.pfnSharedAlloc(
-    //         Context, Device, nullptr, nullptr,
-    //         sizeof(MsanLocalArgsInfo) * NumArgs, (void **)&Data->LocalArgs));
-    //     uint32_t i = 0;
-    //     for (auto [ArgIndex, ArgInfo] : KI.LocalArgs) {
-    //         Data->LocalArgs[i++] = ArgInfo;
-    //         getContext()->logger.debug(
-    //             "local_args (argIndex={}, size={}, sizeWithRZ={})", ArgIndex,
-    //             ArgInfo.Size, ArgInfo.SizeWithRedZone);
-    //     }
-    // }
-    return UR_RESULT_SUCCESS;
-}
-
 USMLaunchInfo::~USMLaunchInfo() {
     [[maybe_unused]] ur_result_t Result;
     if (Data) {
-        auto Type = GetDeviceType(Context, Device);
-        auto ContextInfo = getMsanInterceptor()->getContextInfo(Context);
-        // if (Type == DeviceType::GPU_PVC || Type == DeviceType::GPU_DG2) {
-        //     // if (Data->PrivateShadowOffset) {
-        //     //     // ContextInfo->Stats.UpdateShadowFreed(
-        //     //     //     Data->PrivateShadowOffsetEnd - Data->PrivateShadowOffset +
-        //     //     //     1);
-        //     //     Result = getContext()->urDdiTable.USM.pfnFree(
-        //     //         Context, (void *)Data->PrivateShadowOffset);
-        //     //     assert(Result == UR_RESULT_SUCCESS);
-        //     // }
-        //     // if (Data->LocalShadowOffset) {
-        //     //     // ContextInfo->Stats.UpdateShadowFreed(
-        //     //     //     Data->LocalShadowOffsetEnd - Data->LocalShadowOffset + 1);
-        //     //     Result = getContext()->urDdiTable.USM.pfnFree(
-        //     //         Context, (void *)Data->LocalShadowOffset);
-        //     //     assert(Result == UR_RESULT_SUCCESS);
-        //     // }
-        // }
-        if (Data->LocalArgs) {
-            Result = getContext()->urDdiTable.USM.pfnFree(
-                Context, (void *)Data->LocalArgs);
-            assert(Result == UR_RESULT_SUCCESS);
-        }
         Result = getContext()->urDdiTable.USM.pfnFree(Context, (void *)Data);
         assert(Result == UR_RESULT_SUCCESS);
     }
