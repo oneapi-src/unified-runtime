@@ -111,7 +111,7 @@ struct ProgramInfo {
     ur_program_handle_t Handle;
     std::atomic<int32_t> RefCount = 1;
 
-    // Program is likely built only once, so we don't need to lock it
+    // Program is built only once, so we don't need to lock it
     std::unordered_set<std::shared_ptr<AllocInfo>> AllocInfoForGlobals;
     std::unordered_set<std::string> InstrumentedKernels;
 
