@@ -429,8 +429,7 @@ ur_result_t AsanInterceptor::registerProgram(ur_program_handle_t Program) {
     return Result;
 }
 
-ur_result_t
-AsanInterceptor::unregisterProgram(ur_program_handle_t Program) {
+ur_result_t AsanInterceptor::unregisterProgram(ur_program_handle_t Program) {
     auto ProgramInfo = getProgramInfo(Program);
 
     for (auto AI : ProgramInfo->AllocInfoForGlobals) {
@@ -444,8 +443,7 @@ AsanInterceptor::unregisterProgram(ur_program_handle_t Program) {
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t
-AsanInterceptor::registerSpirKernels(ur_program_handle_t Program) {
+ur_result_t AsanInterceptor::registerSpirKernels(ur_program_handle_t Program) {
     auto Context = GetContext(Program);
     std::vector<ur_device_handle_t> Devices = GetDevices(Program);
 
@@ -569,9 +567,8 @@ AsanInterceptor::registerDeviceGlobals(ur_program_handle_t Program) {
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t
-AsanInterceptor::insertContext(ur_context_handle_t Context,
-                                    std::shared_ptr<ContextInfo> &CI) {
+ur_result_t AsanInterceptor::insertContext(ur_context_handle_t Context,
+                                           std::shared_ptr<ContextInfo> &CI) {
     std::scoped_lock<ur_shared_mutex> Guard(m_ContextMapMutex);
 
     if (m_ContextMap.find(Context) != m_ContextMap.end()) {
