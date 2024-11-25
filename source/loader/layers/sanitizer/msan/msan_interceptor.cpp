@@ -18,8 +18,6 @@
 #include "msan_shadow.hpp"
 #include "sanitizer_common/sanitizer_stacktrace.hpp"
 #include "sanitizer_common/sanitizer_utils.hpp"
-#include "sycl/info/info_desc.hpp"
-#include "ur_api.h"
 #include "ur_sanitizer_layer.hpp"
 
 namespace ur_sanitizer_layer {
