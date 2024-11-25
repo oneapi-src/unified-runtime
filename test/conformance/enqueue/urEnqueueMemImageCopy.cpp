@@ -17,7 +17,7 @@ struct urEnqueueMemImageCopyTest
 
         ur_bool_t imageSupported;
         ASSERT_SUCCESS(
-            urDeviceGetInfo(this->device, UR_DEVICE_INFO_IMAGE_SUPPORTED,
+            urDeviceGetInfo(this->device, UR_DEVICE_INFO_IMAGE_SUPPORT,
                             sizeof(ur_bool_t), &imageSupported, nullptr));
         if (!imageSupported) {
             GTEST_SKIP();

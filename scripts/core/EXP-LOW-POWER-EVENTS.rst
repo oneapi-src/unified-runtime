@@ -47,7 +47,7 @@ Enums
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * ${x}_device_info_t
-    * ${X}_DEVICE_INFO_LOW_POWER_EVENTS_EXP
+    * ${X}_DEVICE_INFO_LOW_POWER_EVENTS_SUPPORT_EXP
 * ${x}_queue_flags_t
     * ${X}_QUEUE_FLAG_LOW_POWER_EVENTS_EXP
 * ${x}_exp_enqueue_ext_flags_t
@@ -78,7 +78,7 @@ Support
 --------------------------------------------------------------------------------
 
 Adapters which support this experimental feature *must* return true for the new
-``${X}_DEVICE_INFO_LOW_POWER_EVENTS_EXP`` device info query.
+``${X}_DEVICE_INFO_LOW_POWER_EVENTS_SUPPORT_EXP`` device info query.
 
 
 Contributors

@@ -79,7 +79,7 @@ TEST_P(urEnqueueKernelLaunchCustomTest, Success) {
 
         ur_bool_t cluster_launch_supported = false;
         ASSERT_SUCCESS(urDeviceGetInfo(
-            device, UR_DEVICE_INFO_CLUSTER_LAUNCH_EXP, sizeof(ur_bool_t),
+            device, UR_DEVICE_INFO_CLUSTER_LAUNCH_SUPPORT_EXP, sizeof(ur_bool_t),
             &cluster_launch_supported, nullptr));
 
         if (cluster_launch_supported) {

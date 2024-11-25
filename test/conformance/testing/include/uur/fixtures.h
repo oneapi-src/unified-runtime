@@ -15,24 +15,6 @@
 
 #include <random>
 
-#define UUR_RETURN_ON_FATAL_FAILURE(...)                                       \
-    __VA_ARGS__;                                                               \
-    if (this->HasFatalFailure() || this->IsSkipped()) {                        \
-        return;                                                                \
-    }                                                                          \
-    (void)0
-
-#define UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(ret)                                 \
-    do {                                                                       \
-        auto status = ret;                                                     \
-        if (status == UR_RESULT_ERROR_UNSUPPORTED_FEATURE ||                   \
-            status == UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION) {               \
-            GTEST_SKIP();                                                      \
-        } else {                                                               \
-            ASSERT_EQ(status, UR_RESULT_SUCCESS);                              \
-        }                                                                      \
-    } while (0)
-
 namespace uur {
 
 struct urAdapterTest : ::testing::Test,
@@ -268,7 +250,7 @@ struct urMemImageTest : urContextTest {
         UUR_RETURN_ON_FATAL_FAILURE(urContextTest::SetUp());
         ur_bool_t imageSupported = false;
         ASSERT_SUCCESS(
-            urDeviceGetInfo(this->device, UR_DEVICE_INFO_IMAGE_SUPPORTED,
+            urDeviceGetInfo(this->device, UR_DEVICE_INFO_IMAGE_SUPPORT,
                             sizeof(ur_bool_t), &imageSupported, nullptr));
         if (!imageSupported) {
             GTEST_SKIP();
@@ -394,7 +376,7 @@ template <class T> struct urMemImageTestWithParam : urContextTestWithParam<T> {
         UUR_RETURN_ON_FATAL_FAILURE(urContextTestWithParam<T>::SetUp());
         ur_bool_t imageSupported = false;
         ASSERT_SUCCESS(
-            urDeviceGetInfo(this->device, UR_DEVICE_INFO_IMAGE_SUPPORTED,
+            urDeviceGetInfo(this->device, UR_DEVICE_INFO_IMAGE_SUPPORT,
                             sizeof(ur_bool_t), &imageSupported, nullptr));
         if (!imageSupported) {
             GTEST_SKIP();
@@ -459,16 +441,16 @@ struct urHostPipeTest : urQueueTest {
         UUR_RETURN_ON_FATAL_FAILURE(urQueueTest::SetUp());
 
         size_t size = 0;
-        ASSERT_SUCCESS(urDeviceGetInfo(
-            device, UR_DEVICE_INFO_HOST_PIPE_READ_WRITE_SUPPORTED, 0, nullptr,
-            &size));
+        ASSERT_SUCCESS(
+            urDeviceGetInfo(device, UR_DEVICE_INFO_HOST_PIPE_READ_WRITE_SUPPORT,
+                            0, nullptr, &size));
         ASSERT_NE(size, 0);
         ASSERT_EQ(sizeof(ur_bool_t), size);
 
         void *info_data = alloca(size);
-        ASSERT_SUCCESS(urDeviceGetInfo(
-            device, UR_DEVICE_INFO_HOST_PIPE_READ_WRITE_SUPPORTED, size,
-            info_data, nullptr));
+        ASSERT_SUCCESS(
+            urDeviceGetInfo(device, UR_DEVICE_INFO_HOST_PIPE_READ_WRITE_SUPPORT,
+                            size, info_data, nullptr));
         ASSERT_NE(info_data, nullptr);
 
         bool supported;
@@ -718,7 +700,7 @@ struct urMemImageQueueTest : urQueueTest {
         UUR_RETURN_ON_FATAL_FAILURE(urQueueTest::SetUp());
         ur_bool_t imageSupported = false;
         ASSERT_SUCCESS(
-            urDeviceGetInfo(this->device, UR_DEVICE_INFO_IMAGE_SUPPORTED,
+            urDeviceGetInfo(this->device, UR_DEVICE_INFO_IMAGE_SUPPORT,
                             sizeof(ur_bool_t), &imageSupported, nullptr));
         if (!imageSupported) {
             GTEST_SKIP();
@@ -800,9 +782,9 @@ struct urMultiDeviceMemImageTest : urMultiDeviceContextTest {
         UUR_RETURN_ON_FATAL_FAILURE(urMultiDeviceContextTest::SetUp());
         for (auto device : devices) {
             ur_bool_t imageSupported = false;
-            ASSERT_SUCCESS(
-                urDeviceGetInfo(device, UR_DEVICE_INFO_IMAGE_SUPPORTED,
-                                sizeof(ur_bool_t), &imageSupported, nullptr));
+            ASSERT_SUCCESS(urDeviceGetInfo(device, UR_DEVICE_INFO_IMAGE_SUPPORT,
+                                           sizeof(ur_bool_t), &imageSupported,
+                                           nullptr));
             if (!imageSupported) {
                 GTEST_SKIP();
             }

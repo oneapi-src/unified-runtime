@@ -369,7 +369,7 @@ ur_result_t urDeviceGetInfo(
   case UR_DEVICE_INFO_LOCAL_MEM_SIZE:
     return ReturnValue(
         uint64_t{Device->ZeDeviceComputeProperties->maxSharedLocalMemory});
-  case UR_DEVICE_INFO_IMAGE_SUPPORTED:
+  case UR_DEVICE_INFO_IMAGE_SUPPORT:
     return ReturnValue(Device->ZeDeviceImageProperties->maxImageDims1D > 0);
   case UR_DEVICE_INFO_HOST_UNIFIED_MEMORY:
     return ReturnValue(
@@ -485,7 +485,7 @@ ur_result_t urDeviceGetInfo(
   case UR_DEVICE_INFO_BUILT_IN_KERNELS:
     // TODO: To find out correct value
     return ReturnValue("");
-  case UR_DEVICE_INFO_LOW_POWER_EVENTS_EXP:
+  case UR_DEVICE_INFO_LOW_POWER_EVENTS_SUPPORT_EXP:
     return ReturnValue(static_cast<ur_bool_t>(true));
   case UR_DEVICE_INFO_QUEUE_PROPERTIES:
     return ReturnValue(
@@ -1118,23 +1118,23 @@ ur_result_t urDeviceGetInfo(
     // L0 does not support cubemap seamless filtering.
     return ReturnValue(false);
   }
-  case UR_DEVICE_INFO_BINDLESS_SAMPLED_IMAGE_FETCH_1D_USM_EXP: {
+  case UR_DEVICE_INFO_BINDLESS_SAMPLED_IMAGE_FETCH_1D_USM_SUPPORT_EXP: {
     // L0 does not support fetching 1D USM sampled image data.
     return ReturnValue(false);
   }
-  case UR_DEVICE_INFO_BINDLESS_SAMPLED_IMAGE_FETCH_1D_EXP: {
+  case UR_DEVICE_INFO_BINDLESS_SAMPLED_IMAGE_FETCH_1D_SUPPORT_EXP: {
     // L0 does not not support fetching 1D non-USM sampled image data.
     return ReturnValue(false);
   }
-  case UR_DEVICE_INFO_BINDLESS_SAMPLED_IMAGE_FETCH_2D_USM_EXP: {
+  case UR_DEVICE_INFO_BINDLESS_SAMPLED_IMAGE_FETCH_2D_USM_SUPPORT_EXP: {
     // L0 does not support fetching 2D USM sampled image data.
     return ReturnValue(false);
   }
-  case UR_DEVICE_INFO_BINDLESS_SAMPLED_IMAGE_FETCH_2D_EXP: {
+  case UR_DEVICE_INFO_BINDLESS_SAMPLED_IMAGE_FETCH_2D_SUPPORT_EXP: {
     // L0 does not support fetching 2D non-USM sampled image data.
     return ReturnValue(false);
   }
-  case UR_DEVICE_INFO_BINDLESS_SAMPLED_IMAGE_FETCH_3D_EXP: {
+  case UR_DEVICE_INFO_BINDLESS_SAMPLED_IMAGE_FETCH_3D_SUPPORT_EXP: {
     // L0 does not support fetching 3D non-USM sampled image data.
     return ReturnValue(false);
   }
@@ -1142,15 +1142,15 @@ ur_result_t urDeviceGetInfo(
     // L0 does not support image arrays
     return ReturnValue(false);
   }
-  case UR_DEVICE_INFO_BINDLESS_UNIQUE_ADDRESSING_PER_DIM_EXP: {
+  case UR_DEVICE_INFO_BINDLESS_UNIQUE_ADDRESSING_PER_DIM_SUPPORT_EXP: {
     // L0 does not support unique addressing per dimension
     return ReturnValue(false);
   }
-  case UR_DEVICE_INFO_BINDLESS_SAMPLE_1D_USM_EXP: {
+  case UR_DEVICE_INFO_BINDLESS_SAMPLE_1D_USM_SUPPORT_EXP: {
     // L0 does not support sampling 1D USM sampled image data.
     return ReturnValue(false);
   }
-  case UR_DEVICE_INFO_BINDLESS_SAMPLE_2D_USM_EXP: {
+  case UR_DEVICE_INFO_BINDLESS_SAMPLE_2D_USM_SUPPORT_EXP: {
     // L0 does not support sampling 1D USM sampled image data.
     return ReturnValue(false);
   }
@@ -1186,7 +1186,7 @@ ur_result_t urDeviceGetInfo(
   }
   case UR_DEVICE_INFO_ASYNC_BARRIER:
     return ReturnValue(false);
-  case UR_DEVICE_INFO_HOST_PIPE_READ_WRITE_SUPPORTED:
+  case UR_DEVICE_INFO_HOST_PIPE_READ_WRITE_SUPPORT:
     return ReturnValue(false);
   default:
     logger::error("Unsupported ParamName in urGetDeviceInfo");
