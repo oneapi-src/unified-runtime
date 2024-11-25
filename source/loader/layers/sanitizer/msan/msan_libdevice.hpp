@@ -58,8 +58,8 @@ struct MsanLaunchInfo {
 // variable have changed
 constexpr std::size_t MSAN_PRIVATE_SIZE = 0xffffffULL + 1;
 
-constexpr auto kSPIR_MsanDeviceGlobalCount = "__MsanDeviceGlobalCount";
 constexpr auto kSPIR_MsanDeviceGlobalMetadata = "__MsanDeviceGlobalMetadata";
+constexpr auto kSPIR_MsanSpirKernelMetadata = "__MsanKernelMetadata";
 
 #if !defined(__SPIR__) && !defined(__SPIRV__)
 } // namespace ur_sanitizer_layer

@@ -50,6 +50,12 @@ ur_result_t setupContext(ur_context_handle_t Context, uint32_t numDevices,
     return UR_RESULT_SUCCESS;
 }
 
+bool isInstrumentedKernel(ur_kernel_handle_t hKernel) {
+    auto hProgram = GetProgram(hKernel);
+    auto PI = getMsanInterceptor()->getProgramInfo(hProgram);
+    return PI->isKernelInstrumented(hKernel);
+}
+
 } // namespace
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -100,8 +106,8 @@ ur_result_t urUSMDeviceAlloc(
 ) {
     getContext()->logger.debug("==== urUSMDeviceAlloc");
 
-    return getMsanInterceptor()->allocateMemory(
-        hContext, hDevice, pUSMDesc, pool, size, ppMem);
+    return getMsanInterceptor()->allocateMemory(hContext, hDevice, pUSMDesc,
+                                                pool, size, ppMem);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -214,7 +220,7 @@ ur_result_t urProgramBuild(
 
     UR_CALL(pfnProgramBuild(hContext, hProgram, pOptions));
 
-    UR_CALL(getMsanInterceptor()->registerProgram(hContext, hProgram));
+    UR_CALL(getMsanInterceptor()->registerProgram(hProgram));
 
     return UR_RESULT_SUCCESS;
 }
@@ -234,8 +240,7 @@ ur_result_t urProgramBuildExp(
     getContext()->logger.debug("==== urProgramBuildExp");
 
     UR_CALL(pfnBuildExp(hProgram, numDevices, phDevices, pOptions));
-    UR_CALL(
-        getMsanInterceptor()->registerProgram(GetContext(hProgram), hProgram));
+    UR_CALL(getMsanInterceptor()->registerProgram(hProgram));
 
     return UR_RESULT_SUCCESS;
 }
@@ -258,7 +263,8 @@ ur_result_t urProgramLink(
 
     UR_CALL(pfnProgramLink(hContext, count, phPrograms, pOptions, phProgram));
 
-    UR_CALL(getMsanInterceptor()->registerProgram(hContext, *phProgram));
+    UR_CALL(getMsanInterceptor()->insertProgram(*phProgram));
+    UR_CALL(getMsanInterceptor()->registerProgram(*phProgram));
 
     return UR_RESULT_SUCCESS;
 }
@@ -285,7 +291,8 @@ ur_result_t urProgramLinkExp(
     UR_CALL(pfnProgramLinkExp(hContext, numDevices, phDevices, count,
                               phPrograms, pOptions, phProgram));
 
-    UR_CALL(getMsanInterceptor()->registerProgram(hContext, *phProgram));
+    UR_CALL(getMsanInterceptor()->insertProgram(*phProgram));
+    UR_CALL(getMsanInterceptor()->registerProgram(*phProgram));
 
     return UR_RESULT_SUCCESS;
 }
@@ -346,6 +353,12 @@ ur_result_t urEnqueueKernelLaunch(
     auto pfnKernelLaunch = getContext()->urDdiTable.Enqueue.pfnKernelLaunch;
 
     getContext()->logger.debug("==== urEnqueueKernelLaunch");
+
+    if (!isInstrumentedKernel(hKernel)) {
+        return pfnKernelLaunch(hQueue, hKernel, workDim, pGlobalWorkOffset,
+                               pGlobalWorkSize, pLocalWorkSize,
+                               numEventsInWaitList, phEventWaitList, phEvent);
+    }
 
     USMLaunchInfo LaunchInfo(GetContext(hQueue), GetDevice(hQueue),
                              pGlobalWorkSize, pLocalWorkSize, pGlobalWorkOffset,
@@ -1155,7 +1168,9 @@ ur_result_t urKernelCreate(
     getContext()->logger.debug("==== urKernelCreate");
 
     UR_CALL(pfnCreate(hProgram, pKernelName, phKernel));
-    UR_CALL(getMsanInterceptor()->insertKernel(*phKernel));
+    if (isInstrumentedKernel(*phKernel)) {
+        UR_CALL(getMsanInterceptor()->insertKernel(*phKernel));
+    }
 
     return UR_RESULT_SUCCESS;
 }
@@ -1172,8 +1187,9 @@ ur_result_t urKernelRetain(
     UR_CALL(pfnRetain(hKernel));
 
     auto KernelInfo = getMsanInterceptor()->getKernelInfo(hKernel);
-    UR_ASSERT(KernelInfo != nullptr, UR_RESULT_ERROR_INVALID_VALUE);
-    KernelInfo->RefCount++;
+    if (KernelInfo) {
+        KernelInfo->RefCount++;
+    }
 
     return UR_RESULT_SUCCESS;
 }
@@ -1189,9 +1205,10 @@ ur_result_t urKernelRelease(
     UR_CALL(pfnRelease(hKernel));
 
     auto KernelInfo = getMsanInterceptor()->getKernelInfo(hKernel);
-    UR_ASSERT(KernelInfo != nullptr, UR_RESULT_ERROR_INVALID_VALUE);
-    if (--KernelInfo->RefCount == 0) {
-        UR_CALL(getMsanInterceptor()->eraseKernel(hKernel));
+    if (KernelInfo) {
+        if (--KernelInfo->RefCount == 0) {
+            UR_CALL(getMsanInterceptor()->eraseKernel(hKernel));
+        }
     }
 
     return UR_RESULT_SUCCESS;
@@ -1212,16 +1229,18 @@ ur_result_t urKernelSetArgValue(
 
     getContext()->logger.debug("==== urKernelSetArgValue");
 
-    // std::shared_ptr<MemBuffer> MemBuffer;
-    // if (argSize == sizeof(ur_mem_handle_t) &&
-    //     (MemBuffer = getMsanInterceptor()->getMemBuffer(
-    //          *ur_cast<const ur_mem_handle_t *>(pArgValue)))) {
-    //     auto KernelInfo = getMsanInterceptor()->getKernelInfo(hKernel);
-    //     std::scoped_lock<ur_shared_mutex> Guard(KernelInfo->Mutex);
-    //     KernelInfo->BufferArgs[argIndex] = std::move(MemBuffer);
-    // } else {
-    UR_CALL(pfnSetArgValue(hKernel, argIndex, argSize, pProperties, pArgValue));
-    // }
+    std::shared_ptr<MemBuffer> MemBuffer;
+    std::shared_ptr<KernelInfo> KernelInfo;
+    if (argSize == sizeof(ur_mem_handle_t) &&
+        (MemBuffer = getMsanInterceptor()->getMemBuffer(
+             *ur_cast<const ur_mem_handle_t *>(pArgValue))) &&
+        (KernelInfo = getMsanInterceptor()->getKernelInfo(hKernel))) {
+        std::scoped_lock<ur_shared_mutex> Guard(KernelInfo->Mutex);
+        KernelInfo->BufferArgs[argIndex] = std::move(MemBuffer);
+    } else {
+        UR_CALL(
+            pfnSetArgValue(hKernel, argIndex, argSize, pProperties, pArgValue));
+    }
 
     return UR_RESULT_SUCCESS;
 }
@@ -1239,8 +1258,10 @@ ur_result_t urKernelSetArgMemObj(
 
     getContext()->logger.debug("==== urKernelSetArgMemObj");
 
-    if (auto MemBuffer = getMsanInterceptor()->getMemBuffer(hArgValue)) {
-        auto KernelInfo = getMsanInterceptor()->getKernelInfo(hKernel);
+    std::shared_ptr<MemBuffer> MemBuffer;
+    std::shared_ptr<KernelInfo> KernelInfo;
+    if ((MemBuffer = getMsanInterceptor()->getMemBuffer(hArgValue)) &&
+        (KernelInfo = getMsanInterceptor()->getKernelInfo(hKernel))) {
         std::scoped_lock<ur_shared_mutex> Guard(KernelInfo->Mutex);
         KernelInfo->BufferArgs[argIndex] = std::move(MemBuffer);
     } else {

@@ -154,12 +154,83 @@ MsanInterceptor::updateShadowMemory(std::shared_ptr<ContextInfo> &ContextInfo,
     return UR_RESULT_SUCCESS;
 }
 
-ur_result_t MsanInterceptor::registerProgram(ur_context_handle_t,
-                                             ur_program_handle_t) {
-    return UR_RESULT_SUCCESS;
+ur_result_t MsanInterceptor::registerProgram(ur_program_handle_t Program) {
+    ur_result_t Result = UR_RESULT_SUCCESS;
+    do {
+        getContext()->logger.info("registerSpirKernels");
+        Result = registerSpirKernels(Program);
+        if (Result != UR_RESULT_SUCCESS) {
+            break;
+        }
+    } while (false);
+    return Result;
 }
 
 ur_result_t MsanInterceptor::unregisterProgram(ur_program_handle_t) {
+    return UR_RESULT_SUCCESS;
+}
+
+ur_result_t MsanInterceptor::registerSpirKernels(ur_program_handle_t Program) {
+    auto Context = GetContext(Program);
+    std::vector<ur_device_handle_t> Devices = GetDevices(Program);
+
+    for (auto Device : Devices) {
+        size_t MetadataSize;
+        void *MetadataPtr;
+        ur_result_t Result =
+            getContext()->urDdiTable.Program.pfnGetGlobalVariablePointer(
+                Device, Program, kSPIR_MsanSpirKernelMetadata, &MetadataSize,
+                &MetadataPtr);
+        if (Result != UR_RESULT_SUCCESS) {
+            getContext()->logger.error(
+                "Can't get the pointer of <{}> under device {}: {}",
+                kSPIR_MsanSpirKernelMetadata, (void *)Device, Result);
+            return Result;
+        }
+
+        const uint64_t NumOfSpirKernel = MetadataSize / sizeof(SpirKernelInfo);
+        assert((MetadataSize % sizeof(SpirKernelInfo) == 0) &&
+               "SpirKernelMetadata size is not correct");
+
+        ManagedQueue Queue(Context, Device);
+
+        std::vector<SpirKernelInfo> SKInfo(NumOfSpirKernel);
+        Result = getContext()->urDdiTable.Enqueue.pfnUSMMemcpy(
+            Queue, true, &SKInfo[0], MetadataPtr,
+            sizeof(SpirKernelInfo) * NumOfSpirKernel, 0, nullptr, nullptr);
+        if (Result != UR_RESULT_SUCCESS) {
+            getContext()->logger.error("Can't read the value of <{}>: {}",
+                                       kSPIR_MsanSpirKernelMetadata, Result);
+            return Result;
+        }
+
+        auto PI = getProgramInfo(Program);
+        for (const auto &SKI : SKInfo) {
+            if (SKI.Size == 0) {
+                continue;
+            }
+            std::vector<char> KernelNameV(SKI.Size);
+            Result = getContext()->urDdiTable.Enqueue.pfnUSMMemcpy(
+                Queue, true, KernelNameV.data(), (void *)SKI.KernelName,
+                sizeof(char) * SKI.Size, 0, nullptr, nullptr);
+            if (Result != UR_RESULT_SUCCESS) {
+                getContext()->logger.error("Can't read kernel name: {}",
+                                           Result);
+                return Result;
+            }
+
+            std::string KernelName =
+                std::string(KernelNameV.begin(), KernelNameV.end());
+
+            getContext()->logger.info(
+                "SpirKernel(name='{}', isInstrumented={})", KernelName, true);
+
+            PI->InstrumentedKernels.insert(KernelName);
+        }
+        getContext()->logger.info("Number of sanitized kernel: {}",
+                                  PI->InstrumentedKernels.size());
+    }
+
     return UR_RESULT_SUCCESS;
 }
 
@@ -302,6 +373,8 @@ ur_result_t MsanInterceptor::prepareLaunch(
 
         // Set membuffer arguments
         auto KernelInfo = getKernelInfo(Kernel);
+        assert(KernelInfo && "Kernel must be instrumented");
+
         for (const auto &[ArgIndex, MemBuffer] : KernelInfo->BufferArgs) {
             char *ArgPointer = nullptr;
             UR_CALL(MemBuffer->getHandle(DeviceInfo->Handle, ArgPointer));
@@ -315,14 +388,16 @@ ur_result_t MsanInterceptor::prepareLaunch(
             }
         }
 
+        // Set LaunchInfo
         LaunchInfo.Data->GlobalShadowOffset = DeviceInfo->Shadow->ShadowBegin;
         LaunchInfo.Data->GlobalShadowOffsetEnd = DeviceInfo->Shadow->ShadowEnd;
         LaunchInfo.Data->DeviceTy = DeviceInfo->Type;
         LaunchInfo.Data->Debug = getOptions().Debug ? 1 : 0;
 
-        getContext()->logger.debug(
-            "launch_info {}",
-            (void *)LaunchInfo.Data);
+        getContext()->logger.info(
+            "launch_info {} (GlobalShadow={}, Device={}, Debug={})",
+            (void *)LaunchInfo.Data, LaunchInfo.Data->GlobalShadowOffset,
+            ToString(LaunchInfo.Data->DeviceTy), LaunchInfo.Data->Debug);
 
         UR_CALL(EnqueueWriteGlobal("__MsanLaunchInfo", &LaunchInfo.Data,
                                    sizeof(uptr)));
@@ -367,6 +442,11 @@ ur_result_t DeviceInfo::allocShadowMemory(ur_context_handle_t Context) {
                               (void *)Shadow->ShadowBegin,
                               (void *)Shadow->ShadowEnd);
     return UR_RESULT_SUCCESS;
+}
+
+bool ProgramInfo::isKernelInstrumented(ur_kernel_handle_t Kernel) const {
+    const auto Name = GetKernelName(Kernel);
+    return InstrumentedKernels.find(Name) != InstrumentedKernels.end();
 }
 
 ContextInfo::~ContextInfo() {

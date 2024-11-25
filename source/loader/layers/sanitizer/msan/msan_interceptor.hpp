@@ -102,9 +102,8 @@ struct ProgramInfo {
     ur_program_handle_t Handle;
     std::atomic<int32_t> RefCount = 1;
 
-    // lock this mutex if following fields are accessed
-    // ur_shared_mutex Mutex;
-    // std::unordered_set<std::shared_ptr<MsanAllocInfo>> AllocInfoForGlobals;
+    // Program is built only once, so we don't need to lock it
+    std::unordered_set<std::string> InstrumentedKernels;
 
     explicit ProgramInfo(ur_program_handle_t Program) : Handle(Program) {
         [[maybe_unused]] auto Result =
@@ -117,6 +116,8 @@ struct ProgramInfo {
             getContext()->urDdiTable.Program.pfnRelease(Handle);
         assert(Result == UR_RESULT_SUCCESS);
     }
+
+    bool isKernelInstrumented(ur_kernel_handle_t Kernel) const;
 };
 
 struct ContextInfo {
@@ -175,6 +176,11 @@ struct DeviceGlobalInfo {
     uptr Addr;
 };
 
+struct SpirKernelInfo {
+    uptr KernelName;
+    uptr Size;
+};
+
 class MsanInterceptor {
   public:
     explicit MsanInterceptor();
@@ -187,15 +193,12 @@ class MsanInterceptor {
                                ur_usm_pool_handle_t Pool, size_t Size,
                                void **ResultPtr);
 
-    ur_result_t registerProgram(ur_context_handle_t Context,
-                                ur_program_handle_t Program);
-
+    ur_result_t registerProgram(ur_program_handle_t Program);
     ur_result_t unregisterProgram(ur_program_handle_t Program);
 
     ur_result_t preLaunchKernel(ur_kernel_handle_t Kernel,
                                 ur_queue_handle_t Queue,
                                 msan::USMLaunchInfo &LaunchInfo);
-
     ur_result_t postLaunchKernel(ur_kernel_handle_t Kernel,
                                  ur_queue_handle_t Queue,
                                  msan::USMLaunchInfo &LaunchInfo);
@@ -255,8 +258,10 @@ class MsanInterceptor {
 
     std::shared_ptr<msan::KernelInfo> getKernelInfo(ur_kernel_handle_t Kernel) {
         std::shared_lock<ur_shared_mutex> Guard(m_KernelMapMutex);
-        assert(m_KernelMap.find(Kernel) != m_KernelMap.end());
-        return m_KernelMap[Kernel];
+        if (m_KernelMap.find(Kernel) != m_KernelMap.end()) {
+            return m_KernelMap[Kernel];
+        }
+        return nullptr;
     }
 
     const MsanOptions &getOptions() { return m_Options; }
@@ -287,6 +292,8 @@ class MsanInterceptor {
     ur_result_t
     allocShadowMemory(ur_context_handle_t Context,
                       std::shared_ptr<msan::DeviceInfo> &DeviceInfo);
+
+    ur_result_t registerSpirKernels(ur_program_handle_t Program);
 
   private:
     std::unordered_map<ur_context_handle_t, std::shared_ptr<msan::ContextInfo>>
