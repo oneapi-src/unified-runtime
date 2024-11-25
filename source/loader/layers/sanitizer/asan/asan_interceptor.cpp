@@ -255,6 +255,7 @@ ur_result_t AsanInterceptor::preLaunchKernel(ur_kernel_handle_t Kernel,
     auto ContextInfo = getContextInfo(Context);
     auto DeviceInfo = getDeviceInfo(Device);
     auto KernelInfo = getKernelInfo(Kernel);
+    assert(KernelInfo && "Kernel should be instrumented");
 
     UR_CALL(LaunchInfo.updateKernelInfo(*KernelInfo.get()));
 
@@ -690,6 +691,7 @@ ur_result_t AsanInterceptor::prepareLaunch(
 
     do {
         auto KernelInfo = getKernelInfo(Kernel);
+        assert(KernelInfo && "Kernel should be instrumented");
 
         // Validate pointer arguments
         if (getOptions().DetectKernelArguments) {
