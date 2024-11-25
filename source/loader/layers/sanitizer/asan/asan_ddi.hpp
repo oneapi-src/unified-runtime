@@ -10,6 +10,7 @@
  *
  */
 
+#include "ur_api.h"
 #include "ur_ddi.h"
 
 namespace ur_sanitizer_layer {
