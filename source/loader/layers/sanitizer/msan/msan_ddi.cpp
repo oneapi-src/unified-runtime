@@ -1449,6 +1449,7 @@ ur_result_t urCheckVersion(ur_api_version_t version) {
             UR_MINOR_VERSION(version)) {
         return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
     }
+    return UR_RESULT_SUCCESS;
 }
 
 } // namespace msan
@@ -1506,8 +1507,8 @@ ur_result_t initMsanDDITable(ur_dditable_t *dditable) {
             ur_sanitizer_layer::msan::urGetUSMProcAddrTable(&dditable->USM);
     }
 
-    getContext()->logger.info("Initialize MemorySanitizer DDI Table: {}",
-                              result);
+    getContext()->logger.warning("Initialize MemorySanitizer DDI Table: {}",
+                                 result);
 
     return result;
 }

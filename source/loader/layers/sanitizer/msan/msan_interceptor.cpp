@@ -467,21 +467,19 @@ ur_result_t MsanInterceptor::prepareLaunch(
     auto Program = GetProgram(Kernel);
 
     do {
-        auto KernelInfo = getKernelInfo(Kernel);
-
-        auto EnqueueWriteGlobal = [&Queue, &Program](
-                                      const char *Name, const void *Value,
-                                      size_t Size, bool ReportWarning = true) {
+        auto EnqueueWriteGlobal = [&Queue, &Program](const char *Name,
+                                                     const void *Value,
+                                                     size_t Size) {
             auto Result =
                 getContext()->urDdiTable.Enqueue.pfnDeviceGlobalVariableWrite(
                     Queue, Program, Name, false, Size, 0, Value, 0, nullptr,
                     nullptr);
-            if (ReportWarning && Result != UR_RESULT_SUCCESS) {
-                getContext()->logger.warning(
+            if (Result != UR_RESULT_SUCCESS) {
+                getContext()->logger.error(
                     "Failed to write device global \"{}\": {}", Name, Result);
-                return false;
+                return Result;
             }
-            return true;
+            return UR_RESULT_SUCCESS;
         };
 
         LaunchInfo.Data->GlobalShadowOffset = DeviceInfo->Shadow->ShadowBegin;
@@ -494,7 +492,8 @@ ur_result_t MsanInterceptor::prepareLaunch(
             (void *)LaunchInfo.Data, LaunchInfo.Data->NumLocalArgs,
             (void *)LaunchInfo.Data->LocalArgs);
 
-        EnqueueWriteGlobal("__MsanLaunchInfo", &LaunchInfo.Data, sizeof(uptr));
+        UR_CALL(EnqueueWriteGlobal("__MsanLaunchInfo", &LaunchInfo.Data,
+                                   sizeof(uptr)));
     } while (false);
 
     return UR_RESULT_SUCCESS;
