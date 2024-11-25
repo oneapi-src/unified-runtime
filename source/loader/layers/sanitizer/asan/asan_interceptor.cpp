@@ -415,18 +415,19 @@ AsanInterceptor::updateShadowMemory(std::shared_ptr<ContextInfo> &ContextInfo,
 
 ur_result_t AsanInterceptor::registerProgram(ur_program_handle_t Program) {
     ur_result_t Result = UR_RESULT_SUCCESS;
-    do {
-        getContext()->logger.info("registerSpirKernels");
-        Result = registerSpirKernels(Program);
-        if (Result != UR_RESULT_SUCCESS) {
-            break;
-        }
-        getContext()->logger.info("registerDeviceGlobals");
-        Result = registerDeviceGlobals(Program);
-        if (Result != UR_RESULT_SUCCESS) {
-            break;
-        }
-    } while (false);
+
+    getContext()->logger.info("registerSpirKernels");
+    Result = registerSpirKernels(Program);
+    if (Result != UR_RESULT_SUCCESS) {
+        return Result;
+    }
+
+    getContext()->logger.info("registerDeviceGlobals");
+    Result = registerDeviceGlobals(Program);
+    if (Result != UR_RESULT_SUCCESS) {
+        return Result;
+    }
+
     return Result;
 }
 
