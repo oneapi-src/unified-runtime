@@ -99,14 +99,14 @@ TEST_P(urPlatformGetInfoTest, SuccessBackend) {
   ASSERT_SUCCESS_OR_OPTIONAL_QUERY(
       urPlatformGetInfo(platform, property_name, 0, nullptr, &property_size),
       property_name);
-  ASSERT_EQ(property_size, sizeof(ur_platform_backend_t));
+  ASSERT_EQ(property_size, sizeof(ur_backend_t));
 
-  ur_platform_backend_t returned_backend = UR_PLATFORM_BACKEND_UNKNOWN;
+  ur_backend_t returned_backend = UR_BACKEND_UNKNOWN;
   ASSERT_SUCCESS(urPlatformGetInfo(platform, property_name, property_size,
                                    &returned_backend, nullptr));
 
-  ASSERT_TRUE(returned_backend >= UR_PLATFORM_BACKEND_LEVEL_ZERO &&
-              returned_backend <= UR_PLATFORM_BACKEND_NATIVE_CPU);
+  ASSERT_TRUE(returned_backend >= UR_BACKEND_LEVEL_ZERO &&
+              returned_backend <= UR_BACKEND_NATIVE_CPU);
 }
 
 TEST_P(urPlatformGetInfoTest, SuccessAdapter) {
@@ -143,21 +143,21 @@ TEST_P(urPlatformGetInfoTest, InvalidEnumerationPlatformInfoType) {
 }
 
 TEST_P(urPlatformGetInfoTest, InvalidSizeZero) {
-  ur_platform_backend_t backend = UR_PLATFORM_BACKEND_UNKNOWN;
+  ur_backend_t backend = UR_BACKEND_UNKNOWN;
   ASSERT_EQ_RESULT(urPlatformGetInfo(platform, UR_PLATFORM_INFO_BACKEND, 0,
                                      &backend, nullptr),
                    UR_RESULT_ERROR_INVALID_SIZE);
 }
 
 TEST_P(urPlatformGetInfoTest, InvalidSizeSmall) {
-  ur_platform_backend_t backend = UR_PLATFORM_BACKEND_UNKNOWN;
+  ur_backend_t backend = UR_BACKEND_UNKNOWN;
   ASSERT_EQ_RESULT(urPlatformGetInfo(platform, UR_PLATFORM_INFO_BACKEND,
                                      sizeof(backend) - 1, &backend, nullptr),
                    UR_RESULT_ERROR_INVALID_SIZE);
 }
 
 TEST_P(urPlatformGetInfoTest, InvalidNullPointerPropValue) {
-  ur_platform_backend_t backend = UR_PLATFORM_BACKEND_UNKNOWN;
+  ur_backend_t backend = UR_BACKEND_UNKNOWN;
   ASSERT_EQ_RESULT(urPlatformGetInfo(platform, UR_PLATFORM_INFO_BACKEND,
                                      sizeof(backend), nullptr, nullptr),
                    UR_RESULT_ERROR_INVALID_NULL_POINTER);
