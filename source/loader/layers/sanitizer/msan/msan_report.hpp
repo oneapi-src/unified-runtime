@@ -16,7 +16,7 @@
 
 namespace ur_sanitizer_layer {
 
-class MsanErrorReport;
+struct MsanErrorReport;
 
 namespace msan {
 
