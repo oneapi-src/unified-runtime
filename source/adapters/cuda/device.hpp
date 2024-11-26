@@ -33,6 +33,7 @@ private:
   int MaxChosenLocalMem{0};
   bool MaxLocalMemSizeChosen{false};
   uint32_t NumComputeUnits{0};
+  uint32_t WarpSize{0};
 
 public:
   ur_device_handle_t_(native_type cuDevice, CUcontext cuContext, CUevent evBase,
@@ -58,6 +59,10 @@ public:
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         reinterpret_cast<int *>(&NumComputeUnits),
         CU_DEVICE_ATTRIBUTE_MULTIPROCESSOR_COUNT, cuDevice));
+
+    UR_CHECK_ERROR(cuDeviceGetAttribute(reinterpret_cast<int *>(&WarpSize),
+                                        CU_DEVICE_ATTRIBUTE_WARP_SIZE,
+                                        cuDevice));
 
     // Set local mem max size if env var is present
     static const char *LocalMemSizePtrUR =
@@ -114,6 +119,8 @@ public:
   bool maxLocalMemSizeChosen() { return MaxLocalMemSizeChosen; };
 
   uint32_t getNumComputeUnits() const noexcept { return NumComputeUnits; };
+
+  uint32_t getWarpSize() const noexcept { return WarpSize; };
 };
 
 int getAttribute(ur_device_handle_t Device, CUdevice_attribute Attribute);

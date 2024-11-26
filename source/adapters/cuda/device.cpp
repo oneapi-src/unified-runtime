@@ -1082,12 +1082,27 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_COMPOSITE_DEVICE:
   case UR_DEVICE_INFO_MAX_READ_WRITE_IMAGE_ARGS:
   case UR_DEVICE_INFO_GPU_EU_COUNT:
-  case UR_DEVICE_INFO_GPU_EU_SIMD_WIDTH:
   case UR_DEVICE_INFO_GPU_EU_SLICES:
   case UR_DEVICE_INFO_GPU_SUBSLICES_PER_SLICE:
   case UR_DEVICE_INFO_GPU_EU_COUNT_PER_SUBSLICE:
-  case UR_DEVICE_INFO_GPU_HW_THREADS_PER_EU:
     return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
+
+  case UR_DEVICE_INFO_GPU_EU_SIMD_WIDTH: {
+    // Nvidia's GPU SIMD units are warp-size wide.
+    return ReturnValue(hDevice->getWarpSize());
+  }
+  case UR_DEVICE_INFO_GPU_HW_THREADS_PER_EU: {
+    int MaxHwThreads{0};
+    UR_CHECK_ERROR(cuDeviceGetAttribute(
+        reinterpret_cast<int *>(&MaxHwThreads),
+        CU_DEVICE_ATTRIBUTE_MAX_THREADS_PER_MULTIPROCESSOR, hDevice->get()));
+    detail::ur::assertion(MaxHwThreads > 0);
+    // calculate the maximum number of resident warps per SM.
+    const uint32_t WarpSize = hDevice->getWarpSize();
+    detail::ur::assertion(WarpSize > 0);
+    uint32_t ResidentWarpCount = static_cast<uint32_t>(MaxHwThreads) / WarpSize;
+    return ReturnValue(ResidentWarpCount);
+  }
 
   case UR_DEVICE_INFO_COMMAND_BUFFER_SUPPORT_EXP:
   case UR_DEVICE_INFO_COMMAND_BUFFER_EVENT_SUPPORT_EXP:
