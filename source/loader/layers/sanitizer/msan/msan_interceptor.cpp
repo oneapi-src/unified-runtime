@@ -1,7 +1,7 @@
 //===----------------------------------------------------------------------===//
 /*
  *
- * Copyright (C) 2023 Intel Corporation
+ * Copyright (C) 2024 Intel Corporation
  *
  * Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
  * See LICENSE.TXT
@@ -42,13 +42,6 @@ MsanInterceptor::~MsanInterceptor() {
     }
 }
 
-/// The memory chunk allocated from the underlying allocator looks like this:
-/// L L L L L L U U U U U U R R
-///   L -- left redzone words (0 or more bytes)
-///   U -- user memory.
-///   R -- right redzone (0 or more bytes)
-///
-/// ref: "compiler-rt/lib/asan/msan_allocator.cpp" Allocator::Allocate
 ur_result_t MsanInterceptor::allocateMemory(ur_context_handle_t Context,
                                             ur_device_handle_t Device,
                                             const ur_usm_desc_t *Properties,
@@ -156,13 +149,13 @@ MsanInterceptor::updateShadowMemory(std::shared_ptr<ContextInfo> &ContextInfo,
 
 ur_result_t MsanInterceptor::registerProgram(ur_program_handle_t Program) {
     ur_result_t Result = UR_RESULT_SUCCESS;
-    do {
-        getContext()->logger.info("registerSpirKernels");
-        Result = registerSpirKernels(Program);
-        if (Result != UR_RESULT_SUCCESS) {
-            break;
-        }
-    } while (false);
+
+    getContext()->logger.info("registerSpirKernels");
+    Result = registerSpirKernels(Program);
+    if (Result != UR_RESULT_SUCCESS) {
+        return Result;
+    }
+
     return Result;
 }
 
@@ -450,8 +443,6 @@ bool ProgramInfo::isKernelInstrumented(ur_kernel_handle_t Kernel) const {
 }
 
 ContextInfo::~ContextInfo() {
-    // Stats.Print(Handle);
-
     [[maybe_unused]] auto Result =
         getContext()->urDdiTable.Context.pfnRelease(Handle);
     assert(Result == UR_RESULT_SUCCESS);

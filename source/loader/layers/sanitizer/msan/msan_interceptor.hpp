@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (C) 2023 Intel Corporation
+ * Copyright (C) 2024 Intel Corporation
  *
  * Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
  * See LICENSE.TXT
@@ -79,11 +79,6 @@ struct KernelInfo {
     // lock this mutex if following fields are accessed
     ur_shared_mutex Mutex;
     std::unordered_map<uint32_t, std::shared_ptr<MemBuffer>> BufferArgs;
-    // std::unordered_map<uint32_t, std::pair<const void *, StackTrace>>
-    //     PointerArgs;
-
-    // Need preserve the order of local arguments
-    // std::map<uint32_t, MsanLocalArgsInfo> LocalArgs;
 
     explicit KernelInfo(ur_kernel_handle_t Kernel) : Handle(Kernel) {
         [[maybe_unused]] auto Result =
@@ -168,12 +163,6 @@ struct USMLaunchInfo {
     ~USMLaunchInfo();
 
     ur_result_t initialize();
-};
-
-struct DeviceGlobalInfo {
-    uptr Size;
-    uptr SizeWithRedZone;
-    uptr Addr;
 };
 
 struct SpirKernelInfo {

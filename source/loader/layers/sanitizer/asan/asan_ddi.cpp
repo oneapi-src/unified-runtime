@@ -1826,6 +1826,8 @@ __urdlllocal ur_result_t UR_APICALL urGetUSMProcAddrTable(
 ur_result_t initAsanDDITable(ur_dditable_t *dditable) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    getContext()->logger.always("==== DeviceSanitizer: ASAN");
+
     if (UR_RESULT_SUCCESS == result) {
         result = ur_sanitizer_layer::asan::urGetGlobalProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->Global);
@@ -1870,7 +1872,11 @@ ur_result_t initAsanDDITable(ur_dditable_t *dditable) {
         result = ur_sanitizer_layer::asan::urGetUSMProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->USM);
     }
-    getContext()->logger.info("initMsanDDITable: {}", result);
+
+    if (result != UR_RESULT_SUCCESS) {
+        getContext()->logger.error("Initialize ASAN DDI table failed: {}",
+                                   result);
+    }
 
     return result;
 }

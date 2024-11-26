@@ -12,13 +12,19 @@
 
 #include "msan_shadow.hpp"
 #include "msan_interceptor.hpp"
-#include "msan_libdevice.hpp"
 #include "sanitizer_common/sanitizer_utils.hpp"
 #include "ur_api.h"
 #include "ur_sanitizer_layer.hpp"
 
 namespace ur_sanitizer_layer {
 namespace msan {
+
+#define CPU_SHADOW1_BEGIN 0x010000000000ULL
+#define CPU_SHADOW1_END 0x100000000000ULL
+#define CPU_SHADOW2_BEGIN 0x200000000000ULL
+#define CPU_SHADOW2_END 0x300000000000ULL
+#define CPU_SHADOW3_BEGIN 0x500000000000ULL
+#define CPU_SHADOW3_END 0x510000000000ULL
 
 std::shared_ptr<MsanShadowMemory>
 GetMsanShadowMemory(ur_context_handle_t Context, ur_device_handle_t Device,

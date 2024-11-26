@@ -39,8 +39,6 @@ struct MsanShadowMemory {
         return UR_RESULT_SUCCESS;
     }
 
-    virtual size_t GetShadowSize() = 0;
-
     ur_context_handle_t Context{};
 
     ur_device_handle_t Device{};
@@ -50,28 +48,22 @@ struct MsanShadowMemory {
     uptr ShadowEnd = 0;
 };
 
-// Shadow Memory layout of CPU PVC device
-//
-// 0x000000000000 ~ 0x010000000000 "app-1"
-// 0x010000000000 ~ 0x100000000000 "shadow-2"
-// 0x100000000000 ~ 0x110000000000 "invalid"
-// 0x110000000000 ~ 0x200000000000 "origin-2"
-// 0x200000000000 ~ 0x300000000000 "shadow-3"
-// 0x300000000000 ~ 0x400000000000 "origin-3"
-// 0x400000000000 ~ 0x500000000000 "invalid"
-// 0x500000000000 ~ 0x510000000000 "shadow-1"
-// 0x510000000000 ~ 0x600000000000 "app-2"
-// 0x600000000000 ~ 0x610000000000 "origin-1"
-// 0x610000000000 ~ 0x700000000000 "invalid"
-// 0x700000000000 ~ 0x740000000000 "allocator"
-// 0x740000000000 ~ 0x800000000000 "app-3"
-#define CPU_SHADOW1_BEGIN 0x010000000000ULL
-#define CPU_SHADOW1_END 0x100000000000ULL
-#define CPU_SHADOW2_BEGIN 0x200000000000ULL
-#define CPU_SHADOW2_END 0x300000000000ULL
-#define CPU_SHADOW3_BEGIN 0x500000000000ULL
-#define CPU_SHADOW3_END 0x510000000000ULL
-
+/// Shadow Memory layout of CPU device
+///
+/// 0x000000000000 ~ 0x010000000000 "app-1"
+/// 0x010000000000 ~ 0x100000000000 "shadow-2"
+/// 0x100000000000 ~ 0x110000000000 "invalid"
+/// 0x110000000000 ~ 0x200000000000 "origin-2"
+/// 0x200000000000 ~ 0x300000000000 "shadow-3"
+/// 0x300000000000 ~ 0x400000000000 "origin-3"
+/// 0x400000000000 ~ 0x500000000000 "invalid"
+/// 0x500000000000 ~ 0x510000000000 "shadow-1"
+/// 0x510000000000 ~ 0x600000000000 "app-2"
+/// 0x600000000000 ~ 0x610000000000 "origin-1"
+/// 0x610000000000 ~ 0x700000000000 "invalid"
+/// 0x700000000000 ~ 0x740000000000 "allocator"
+/// 0x740000000000 ~ 0x800000000000 "app-3"
+///
 struct MsanShadowMemoryCPU final : public MsanShadowMemory {
     MsanShadowMemoryCPU(ur_context_handle_t Context, ur_device_handle_t Device)
         : MsanShadowMemory(Context, Device) {}
@@ -84,10 +76,6 @@ struct MsanShadowMemoryCPU final : public MsanShadowMemory {
 
     ur_result_t EnqueuePoisonShadow(ur_queue_handle_t Queue, uptr Ptr,
                                     uptr Size, u8 Value) override;
-
-    size_t GetShadowSize() override {
-        return CPU_SHADOW3_END - CPU_SHADOW1_BEGIN;
-    }
 };
 
 struct MsanShadowMemoryGPU : public MsanShadowMemory {
@@ -101,6 +89,8 @@ struct MsanShadowMemoryGPU : public MsanShadowMemory {
                                     uptr Size, u8 Value) override final;
 
     ur_result_t ReleaseShadow(std::shared_ptr<MsanAllocInfo> AI) override final;
+
+    virtual size_t GetShadowSize() = 0;
 
     ur_mutex VirtualMemMapsMutex;
 
@@ -122,10 +112,6 @@ struct MsanShadowMemoryGPU : public MsanShadowMemory {
 ///   Shared USM : 0x0000_0000_0000_0000 ~ 0x0000_7fff_ffff_ffff
 ///   Device USM : 0xff00_0000_0000_0000 ~ 0xff00_ffff_ffff_ffff
 ///
-/// Shadow Memory Mapping (SHADOW_SCALE=4, AllocateHostAllocationsInHeapExtendedHost=0)
-///   Host/Shared USM : 0x0              ~ 0x07ff_ffff_ffff
-///   Device USM      : 0x0800_0000_0000 ~ 0x17ff_ffff_ffff
-///
 struct MsanShadowMemoryPVC final : public MsanShadowMemoryGPU {
     MsanShadowMemoryPVC(ur_context_handle_t Context, ur_device_handle_t Device)
         : MsanShadowMemoryGPU(Context, Device) {}
@@ -135,15 +121,11 @@ struct MsanShadowMemoryPVC final : public MsanShadowMemoryGPU {
     size_t GetShadowSize() override { return 0x8000'0000'0000ULL; }
 };
 
-/// Shadow Memory layout of GPU PVC device
+/// Shadow Memory layout of GPU DG2 device
 ///
 /// USM Allocation Range (48 bits)
 ///   Host/Shared USM : 0x0000_0000_0000_0000 ~ 0x0000_7fff_ffff_ffff
 ///   Device      USM : 0xffff_8000_0000_0000 ~ 0xffff_ffff_ffff_ffff
-///
-/// Shadow Memory Mapping (SHADOW_SCALE=4)
-///   Host/Shared USM : 0x0              ~ 0x07ff_ffff_ffff
-///   Device      USM : 0x0800_0000_0000 ~ 0x0fff_ffff_ffff
 ///
 struct MsanShadowMemoryDG2 final : public MsanShadowMemoryGPU {
     MsanShadowMemoryDG2(ur_context_handle_t Context, ur_device_handle_t Device)
@@ -151,7 +133,7 @@ struct MsanShadowMemoryDG2 final : public MsanShadowMemoryGPU {
 
     uptr MemToShadow(uptr Ptr) override;
 
-    size_t GetShadowSize() override { return 0x100000000000ULL; }
+    size_t GetShadowSize() override { return 0x4000'0000'0000ULL; }
 };
 
 std::shared_ptr<MsanShadowMemory>

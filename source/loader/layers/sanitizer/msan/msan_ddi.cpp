@@ -75,10 +75,10 @@ ur_result_t urAdapterGet(
 ) {
     auto pfnAdapterGet = getContext()->urDdiTable.Global.pfnAdapterGet;
 
+    // FIXME: This is a W/A to disable heap extended for MSAN so that we can reserve large VA of GPU.
     setenv("NEOReadDebugKeys", "1", 1);
     setenv("AllocateHostAllocationsInHeapExtendedHost", "0", 1);
     setenv("UseHighAlignmentForHeapExtended", "0", 1);
-    // setenv("EnableReservingInSvmRange", "0", 1);
 
     ur_result_t result = pfnAdapterGet(NumEntries, phAdapters, pNumAdapters);
     if (result == UR_RESULT_SUCCESS && phAdapters) {
@@ -1465,6 +1465,8 @@ ur_result_t urCheckVersion(ur_api_version_t version) {
 ur_result_t initMsanDDITable(ur_dditable_t *dditable) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
+    getContext()->logger.always("==== DeviceSanitizer: MSAN");
+
     if (UR_RESULT_SUCCESS == result) {
         result =
             ur_sanitizer_layer::msan::urCheckVersion(UR_API_VERSION_CURRENT);
@@ -1515,8 +1517,10 @@ ur_result_t initMsanDDITable(ur_dditable_t *dditable) {
             ur_sanitizer_layer::msan::urGetUSMProcAddrTable(&dditable->USM);
     }
 
-    getContext()->logger.warning("Initialize MemorySanitizer DDI Table: {}",
-                                 result);
+    if (result != UR_RESULT_SUCCESS) {
+        getContext()->logger.error("Initialize MSAN DDI table failed: {}",
+                                   result);
+    }
 
     return result;
 }

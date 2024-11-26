@@ -30,7 +30,7 @@ void ReportUsesUninitializedValue(const MsanErrorReport &Report,
     KernelName = DemangleName(KernelName);
 
     getContext()->logger.always(
-        "====WARNING: MemorySanitizer: use-of-uninitialized-value");
+        "====WARNING: DeviceSanitizer: use-of-uninitialized-value");
     getContext()->logger.always(
         "use of size {} at kernel <{}> LID({}, {}, {}) GID({}, "
         "{}, {})",
