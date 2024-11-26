@@ -76,5 +76,5 @@ jobs:
       run: |
         mkdir build2
         ls -lah /usr/lib/bfd-plugins/
-        /usr/bin/ar Dqc --plugin /usr/lib/bfd-plugins/LLVMgold-14.so build2/good.a good.o | tee build2/arlog.good
+        /usr/bin/ar Dqc build2/good.a good.o | tee build2/arlog.good
         test ! -s build2/arlog.good
