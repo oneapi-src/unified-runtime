@@ -2,3 +2,7 @@ urKernelSetExecInfoTest.SuccessIndirectAccess/*
 urKernelSetExecInfoUSMPointersTest.SuccessHost/*
 urKernelSetExecInfoUSMPointersTest.SuccessDevice/*
 urKernelSetExecInfoUSMPointersTest.SuccessShared/*
+
+# These produce the wrong values
+urKernelSetArgSamplerReadTestWithParam.ReadSamplerFilter/*
+urKernelSetArgSamplerReadTestWithParam.ReadSamplerAddressMode/*

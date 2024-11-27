@@ -84,6 +84,9 @@ macro(add_device_binary SOURCE_FILE)
         if(${TRIPLE} MATCHES "amd" AND ${KERNEL_NAME} MATCHES "image_copy")
             continue()
         endif()
+        if(${TRIPLE} MATCHES "amd" AND ${KERNEL_NAME} MATCHES "sampler_read")
+            continue()
+        endif()
 
         # This seems to fail to build the SYCL binary due to the invalid asm
         if(${TRIPLE} MATCHES "cuda" AND ${KERNEL_NAME} MATCHES "build_failure")
@@ -161,6 +164,7 @@ add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/fixed_wg_size.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/sequence.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/standard_types.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/subgroup.cpp)
+add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/sampler_read.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/linker_error.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/saxpy_usm_local_mem.cpp)
 

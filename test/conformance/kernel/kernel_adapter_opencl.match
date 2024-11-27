@@ -1,1 +1,5 @@
 urKernelGetInfoTest.Success/*_UR_KERNEL_INFO_NUM_REGS
+
+# Seems to segfault?
+urKernelSetArgSamplerReadTestWithParam.ReadSamplerFilter/*
+urKernelSetArgSamplerReadTestWithParam.ReadSamplerAddressMode/*

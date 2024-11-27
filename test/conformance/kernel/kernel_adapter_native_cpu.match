@@ -51,6 +51,8 @@ urKernelSetArgSamplerTest.SuccessWithProps/*
 urKernelSetArgSamplerTest.InvalidNullHandleKernel/*
 urKernelSetArgSamplerTest.InvalidNullHandleArgValue/*
 urKernelSetArgSamplerTest.InvalidKernelArgumentIndex/*
+urKernelSetArgSamplerReadTestWithParam.ReadSamplerFilter/*
+urKernelSetArgSamplerReadTestWithParam.ReadSamplerAddressMode/*
 urKernelSetArgValueTest.Success/*
 urKernelSetArgValueTest.InvalidNullHandleKernel/*
 urKernelSetArgValueTest.InvalidNullPointerArgValue/*
