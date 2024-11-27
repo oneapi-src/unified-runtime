@@ -113,7 +113,6 @@ struct ProgramInfo {
 
     // lock this mutex if following fields are accessed
     ur_shared_mutex Mutex;
-    std::unordered_set<std::shared_ptr<AllocInfo>> AllocInfoForGlobals;
 
     explicit ProgramInfo(ur_program_handle_t Program) : Handle(Program) {
         [[maybe_unused]] auto Result =
@@ -130,6 +129,10 @@ struct ProgramInfo {
 
 struct ContextInfo {
     ur_context_handle_t Handle;
+
+    ur_usm_pool_handle_t USMPool{};
+    std::once_flag PoolInit;
+
     std::atomic<int32_t> RefCount = 1;
 
     std::vector<ur_device_handle_t> DeviceList;
@@ -153,6 +156,8 @@ struct ContextInfo {
             AllocInfos.List.emplace_back(AI);
         }
     }
+
+    ur_usm_pool_handle_t getUSMPool();
 };
 
 struct USMLaunchInfo {
