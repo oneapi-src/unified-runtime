@@ -173,9 +173,9 @@ struct ur_context_handle_t_ : _ur_object {
 
   // Caches for events.
   using EventCache = std::vector<std::list<ur_event_handle_t>>;
-  EventCache EventCaches{4};
+  EventCache EventCaches{8};
   std::vector<std::unordered_map<ur_device_handle_t, size_t>>
-      EventCachesDeviceMap{4};
+      EventCachesDeviceMap{8};
 
   // Initialize the PI context.
   ur_result_t initialize();
@@ -308,11 +308,14 @@ struct ur_context_handle_t_ : _ur_object {
 private:
   // Get the cache of events for a provided scope and profiling mode.
   auto getEventCache(bool HostVisible, bool WithProfiling,
-                     ur_device_handle_t Device) {
+                     ur_device_handle_t Device, bool counter) {
+
+    size_t offset = counter ? 4 : 0;
+
     if (HostVisible) {
       if (Device) {
         auto EventCachesMap =
-            WithProfiling ? &EventCachesDeviceMap[0] : &EventCachesDeviceMap[1];
+            WithProfiling ? &EventCachesDeviceMap[offset + 0] : &EventCachesDeviceMap[offset + 1];
         if (EventCachesMap->find(Device) == EventCachesMap->end()) {
           EventCaches.emplace_back();
           EventCachesMap->insert(
@@ -320,12 +323,12 @@ private:
         }
         return &EventCaches[(*EventCachesMap)[Device]];
       } else {
-        return WithProfiling ? &EventCaches[0] : &EventCaches[1];
+        return WithProfiling ? &EventCaches[offset + 0] : &EventCaches[offset + 1];
       }
     } else {
       if (Device) {
         auto EventCachesMap =
-            WithProfiling ? &EventCachesDeviceMap[2] : &EventCachesDeviceMap[3];
+            WithProfiling ? &EventCachesDeviceMap[offset + 2] : &EventCachesDeviceMap[offset + 3];
         if (EventCachesMap->find(Device) == EventCachesMap->end()) {
           EventCaches.emplace_back();
           EventCachesMap->insert(
@@ -333,7 +336,7 @@ private:
         }
         return &EventCaches[(*EventCachesMap)[Device]];
       } else {
-        return WithProfiling ? &EventCaches[2] : &EventCaches[3];
+        return WithProfiling ? &EventCaches[offset + 2] : &EventCaches[offset + 3];
       }
     }
   }

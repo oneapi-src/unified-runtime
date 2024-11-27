@@ -561,15 +561,12 @@ ur_event_handle_t ur_context_handle_t_::getEventFromContextCache(
     bool HostVisible, bool WithProfiling, ur_device_handle_t Device,
     bool CounterBasedEventEnabled) {
   std::scoped_lock<ur_mutex> Lock(EventCacheMutex);
-  auto Cache = getEventCache(HostVisible, WithProfiling, Device);
+  auto Cache = getEventCache(HostVisible, WithProfiling, Device, CounterBasedEventEnabled);
   if (Cache->empty())
     return nullptr;
 
   auto It = Cache->begin();
   ur_event_handle_t Event = *It;
-  if (Event->CounterBasedEventsEnabled != CounterBasedEventEnabled) {
-    return nullptr;
-  }
   Cache->erase(It);
   // We have to reset event before using it.
   Event->reset();
@@ -585,7 +582,7 @@ void ur_context_handle_t_::addEventToContextCache(ur_event_handle_t Event) {
   }
 
   auto Cache = getEventCache(Event->isHostVisible(),
-                             Event->isProfilingEnabled(), Device);
+                             Event->isProfilingEnabled(), Device, Event->CounterBasedEventsEnabled);
   Cache->emplace_back(Event);
 }
 
