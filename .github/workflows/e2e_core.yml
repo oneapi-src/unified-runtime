@@ -115,6 +115,9 @@ jobs:
         ref: refs/heads/sycl
         path: sycl-repo
 
+    - name: Install psutil for test timeout
+      run: pip3 install psutil
+
     - name: Set CUDA env vars
       if: matrix.adapter.name == 'CUDA'
       run: |

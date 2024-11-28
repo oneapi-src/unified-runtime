@@ -28,4 +28,4 @@ jobs:
       filter_out: "Basic/accessor/accessor.cpp|DeviceArchitecture/device_architecture_comparison_on_device_aot.cpp|Graph/Explicit/interop-level-zero-launch-kernel.cpp|Graph/RecordReplay/interop-level-zero-launch-kernel.cpp|syclcompat/launch/launch_policy_lmem.cpp"
       # These runners by default spawn upwards of 260 workers.
       # We also add a time out just in case some test hangs
-      extra_lit_flags: "--param gpu-intel-pvc=True --param gpu-intel-pvc-1T=True -sv -j 100 --max-time=3600"
+      extra_lit_flags: "--param gpu-intel-pvc=True --param gpu-intel-pvc-1T=True -sv -j 100 --max-time=3600 --timeout=120"
