@@ -44,12 +44,10 @@ TEST_P(urProgramSetSpecializationConstantsTest, Success) {
 }
 
 TEST_P(urProgramSetSpecializationConstantsTest, UseDefaultValue) {
-    ur_platform_backend_t backend;
+    ur_backend_t backend;
     ASSERT_SUCCESS(urPlatformGetInfo(platform, UR_PLATFORM_INFO_BACKEND,
-                                     sizeof(ur_platform_backend_t), &backend,
-                                     nullptr));
-    if (backend == UR_PLATFORM_BACKEND_CUDA ||
-        backend == UR_PLATFORM_BACKEND_HIP) {
+                                     sizeof(ur_backend_t), &backend, nullptr));
+    if (backend == UR_BACKEND_CUDA || backend == UR_BACKEND_HIP) {
         GTEST_FAIL() << "This test is known to cause crashes on Nvidia and "
                         "AMD; not running.";
     }

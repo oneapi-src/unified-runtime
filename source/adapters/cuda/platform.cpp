@@ -39,7 +39,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPlatformGetInfo(
     return ReturnValue("");
   }
   case UR_PLATFORM_INFO_BACKEND: {
-    return ReturnValue(UR_PLATFORM_BACKEND_CUDA);
+    return ReturnValue(UR_BACKEND_CUDA);
   }
   default:
     return UR_RESULT_ERROR_INVALID_ENUMERATION;

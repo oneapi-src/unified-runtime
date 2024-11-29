@@ -31,7 +31,7 @@ TEST_P(urPlatformGetInfoTest, Success) {
     ur_platform_info_t info_type = GetParam();
     ASSERT_SUCCESS(urPlatformGetInfo(platform, info_type, 0, nullptr, &size));
     if (info_type == UR_PLATFORM_INFO_BACKEND) {
-        ASSERT_EQ(size, sizeof(ur_platform_backend_t));
+        ASSERT_EQ(size, sizeof(ur_backend_t));
     } else {
         ASSERT_NE(size, 0);
     }
@@ -57,21 +57,21 @@ TEST_F(urPlatformGetInfoTest, InvalidEnumerationPlatformInfoType) {
 }
 
 TEST_F(urPlatformGetInfoTest, InvalidSizeZero) {
-    ur_platform_backend_t backend;
+    ur_backend_t backend;
     ASSERT_EQ_RESULT(urPlatformGetInfo(platform, UR_PLATFORM_INFO_BACKEND, 0,
                                        &backend, nullptr),
                      UR_RESULT_ERROR_INVALID_SIZE);
 }
 
 TEST_F(urPlatformGetInfoTest, InvalidSizeSmall) {
-    ur_platform_backend_t backend;
+    ur_backend_t backend;
     ASSERT_EQ_RESULT(urPlatformGetInfo(platform, UR_PLATFORM_INFO_BACKEND,
                                        sizeof(backend) - 1, &backend, nullptr),
                      UR_RESULT_ERROR_INVALID_SIZE);
 }
 
 TEST_F(urPlatformGetInfoTest, InvalidNullPointerPropValue) {
-    ur_platform_backend_t backend;
+    ur_backend_t backend;
     ASSERT_EQ_RESULT(urPlatformGetInfo(platform, UR_PLATFORM_INFO_BACKEND,
                                        sizeof(backend), nullptr, nullptr),
                      UR_RESULT_ERROR_INVALID_NULL_POINTER);

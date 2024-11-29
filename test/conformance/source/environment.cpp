@@ -26,18 +26,18 @@ constexpr char ERROR_NO_ADAPTER[] = "Could not load adapter";
 
 PlatformEnvironment *PlatformEnvironment::instance = nullptr;
 
-constexpr std::pair<const char *, ur_platform_backend_t> backends[] = {
-    {"LEVEL_ZERO", UR_PLATFORM_BACKEND_LEVEL_ZERO},
-    {"L0", UR_PLATFORM_BACKEND_LEVEL_ZERO},
-    {"OPENCL", UR_PLATFORM_BACKEND_OPENCL},
-    {"CUDA", UR_PLATFORM_BACKEND_CUDA},
-    {"HIP", UR_PLATFORM_BACKEND_HIP},
-    {"NATIVE_CPU", UR_PLATFORM_BACKEND_NATIVE_CPU},
-    {"UNKNOWN", UR_PLATFORM_BACKEND_UNKNOWN},
+constexpr std::pair<const char *, ur_backend_t> backends[] = {
+    {"LEVEL_ZERO", UR_BACKEND_LEVEL_ZERO},
+    {"L0", UR_BACKEND_LEVEL_ZERO},
+    {"OPENCL", UR_BACKEND_OPENCL},
+    {"CUDA", UR_BACKEND_CUDA},
+    {"HIP", UR_BACKEND_HIP},
+    {"NATIVE_CPU", UR_BACKEND_NATIVE_CPU},
+    {"UNKNOWN", UR_BACKEND_UNKNOWN},
 };
 
 namespace {
-constexpr const char *backend_to_str(ur_platform_backend_t backend) {
+constexpr const char *backend_to_str(ur_backend_t backend) {
     for (auto b : backends) {
         if (b.second == backend) {
             return b.first;
@@ -46,7 +46,7 @@ constexpr const char *backend_to_str(ur_platform_backend_t backend) {
     return "INVALID";
 };
 
-ur_platform_backend_t str_to_backend(std::string str) {
+ur_backend_t str_to_backend(std::string str) {
 
     std::transform(str.begin(), str.end(), str.begin(), ::toupper);
     for (auto b : backends) {
@@ -54,7 +54,7 @@ ur_platform_backend_t str_to_backend(std::string str) {
             return b.second;
         }
     }
-    return UR_PLATFORM_BACKEND_UNKNOWN;
+    return UR_BACKEND_UNKNOWN;
 };
 } // namespace
 
@@ -127,7 +127,7 @@ void uur::PlatformEnvironment::selectPlatformFromOptions() {
         ur_adapter_handle_t adapter;
         ur_platform_handle_t platform;
         std::string name;
-        ur_platform_backend_t backend;
+        ur_backend_t backend;
     };
     std::vector<platform_info> platforms;
     for (auto a : adapters) {
@@ -138,10 +138,10 @@ void uur::PlatformEnvironment::selectPlatformFromOptions() {
             urPlatformGet(&a, 1, count, platform_list.data(), nullptr));
 
         for (auto p : platform_list) {
-            ur_platform_backend_t backend;
+            ur_backend_t backend;
             ASSERT_SUCCESS(urPlatformGetInfo(p, UR_PLATFORM_INFO_BACKEND,
-                                             sizeof(ur_platform_backend_t),
-                                             &backend, nullptr));
+                                             sizeof(ur_backend_t), &backend,
+                                             nullptr));
 
             size_t size;
             ASSERT_SUCCESS(
@@ -157,7 +157,7 @@ void uur::PlatformEnvironment::selectPlatformFromOptions() {
     }
 
     std::string default_name{};
-    std::map<ur_platform_backend_t, std::string> backend_platform_names{};
+    std::map<ur_backend_t, std::string> backend_platform_names{};
     auto stream = std::stringstream{platform_options.platform_name};
     for (std::string filter; std::getline(stream, filter, ';');) {
         auto split = filter.find(':');
@@ -257,7 +257,7 @@ PlatformEnvironment::parsePlatformOptions(int argc, char **argv) {
     PlatformOptions options{};
     auto parse_backend = [&](std::string backend_string) {
         options.platform_backend = str_to_backend(backend_string);
-        if (options.platform_backend == UR_PLATFORM_BACKEND_UNKNOWN) {
+        if (options.platform_backend == UR_BACKEND_UNKNOWN) {
             std::stringstream errstr{error};
             errstr << "--backend not valid; expected one of [";
             bool first = true;
@@ -476,7 +476,7 @@ std::string KernelsEnvironment::getTargetName() {
     }
 
     // special case for AMD as it doesn't support IL.
-    ur_platform_backend_t backend;
+    ur_backend_t backend;
     if (urPlatformGetInfo(platform, UR_PLATFORM_INFO_BACKEND, sizeof(backend),
                           &backend, nullptr)) {
         error = "failed to get backend from platform.";
@@ -485,14 +485,14 @@ std::string KernelsEnvironment::getTargetName() {
 
     std::string target = "";
     switch (backend) {
-    case UR_PLATFORM_BACKEND_OPENCL:
-    case UR_PLATFORM_BACKEND_LEVEL_ZERO:
+    case UR_BACKEND_OPENCL:
+    case UR_BACKEND_LEVEL_ZERO:
         return "spir64";
-    case UR_PLATFORM_BACKEND_CUDA:
+    case UR_BACKEND_CUDA:
         return "nvptx64-nvidia-cuda";
-    case UR_PLATFORM_BACKEND_HIP:
+    case UR_BACKEND_HIP:
         return "amdgcn-amd-amdhsa";
-    case UR_PLATFORM_BACKEND_NATIVE_CPU:
+    case UR_BACKEND_NATIVE_CPU:
         error = "native_cpu doesn't support kernel tests yet";
         return {};
     default:
@@ -559,14 +559,13 @@ ur_result_t KernelsEnvironment::CreateProgram(
     ur_platform_handle_t hPlatform, ur_context_handle_t hContext,
     ur_device_handle_t hDevice, const std::vector<char> &binary,
     const ur_program_properties_t *properties, ur_program_handle_t *phProgram) {
-    ur_platform_backend_t backend;
-    if (auto error = urPlatformGetInfo(hPlatform, UR_PLATFORM_INFO_BACKEND,
-                                       sizeof(ur_platform_backend_t), &backend,
-                                       nullptr)) {
+    ur_backend_t backend;
+    if (auto error =
+            urPlatformGetInfo(hPlatform, UR_PLATFORM_INFO_BACKEND,
+                              sizeof(ur_backend_t), &backend, nullptr)) {
         return error;
     }
-    if (backend == UR_PLATFORM_BACKEND_HIP ||
-        backend == UR_PLATFORM_BACKEND_CUDA) {
+    if (backend == UR_BACKEND_HIP || backend == UR_BACKEND_CUDA) {
         // The CUDA and HIP adapters do not support urProgramCreateWithIL so we
         // need to use urProgramCreateWithBinary instead.
         auto size = binary.size();

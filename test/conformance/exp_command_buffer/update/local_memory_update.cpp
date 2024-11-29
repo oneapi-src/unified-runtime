@@ -18,7 +18,7 @@ struct LocalMemoryUpdateTestBase
             urUpdatableCommandBufferExpExecutionTest::SetUp());
 
         // HIP has extra args for local memory so we define an offset for arg indices here for updating
-        hip_arg_offset = backend == UR_PLATFORM_BACKEND_HIP ? 3 : 0;
+        hip_arg_offset = backend == UR_BACKEND_HIP ? 3 : 0;
         ur_device_usm_access_capability_flags_t shared_usm_flags;
         ASSERT_SUCCESS(
             uur::GetDeviceUSMSingleSharedSupport(device, shared_usm_flags));
@@ -43,7 +43,7 @@ struct LocalMemoryUpdateTestBase
                                            local_mem_size, nullptr));
 
         //Hip has extr args for local mem at index 1-3
-        if (backend == UR_PLATFORM_BACKEND_HIP) {
+        if (backend == UR_BACKEND_HIP) {
             ASSERT_SUCCESS(urKernelSetArgValue(kernel, current_index++,
                                                sizeof(local_size), nullptr,
                                                &local_size));
@@ -240,7 +240,7 @@ TEST_P(LocalMemoryUpdateTest, UpdateParametersAndLocalSize) {
         nullptr, // hArgValue
     });
 
-    if (backend == UR_PLATFORM_BACKEND_HIP) {
+    if (backend == UR_BACKEND_HIP) {
         new_value_descs.push_back({
             UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_VALUE_ARG_DESC, // stype
             nullptr,                                                    // pNext

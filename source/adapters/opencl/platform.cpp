@@ -56,7 +56,7 @@ urPlatformGetInfo(ur_platform_handle_t hPlatform, ur_platform_info_t propName,
 
   switch (static_cast<uint32_t>(propName)) {
   case UR_PLATFORM_INFO_BACKEND:
-    return ReturnValue(UR_PLATFORM_BACKEND_OPENCL);
+    return ReturnValue(UR_BACKEND_OPENCL);
   case UR_PLATFORM_INFO_NAME:
   case UR_PLATFORM_INFO_VENDOR_NAME:
   case UR_PLATFORM_INFO_VERSION:

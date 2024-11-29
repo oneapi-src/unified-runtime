@@ -560,6 +560,21 @@ typedef struct ur_rect_region_t {
 
 } ur_rect_region_t;
 
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Defines known backends.
+typedef enum ur_backend_t {
+    UR_BACKEND_UNKNOWN = 0,    ///< The backend is not a recognized one
+    UR_BACKEND_LEVEL_ZERO = 1, ///< The backend is Level Zero
+    UR_BACKEND_OPENCL = 2,     ///< The backend is OpenCL
+    UR_BACKEND_CUDA = 3,       ///< The backend is CUDA
+    UR_BACKEND_HIP = 4,        ///< The backend is HIP
+    UR_BACKEND_NATIVE_CPU = 5, ///< The backend is Native CPU
+    /// @cond
+    UR_BACKEND_FORCE_UINT32 = 0x7fffffff
+    /// @endcond
+
+} ur_backend_t;
+
 #if !defined(__GNUC__)
 #pragma endregion
 #endif
@@ -961,8 +976,8 @@ urAdapterGetLastError(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Supported adapter info
 typedef enum ur_adapter_info_t {
-    UR_ADAPTER_INFO_BACKEND = 0,         ///< [::ur_adapter_backend_t] Identifies the native backend supported by
-                                         ///< the adapter.
+    UR_ADAPTER_INFO_BACKEND = 0,         ///< [::ur_backend_t] Identifies the native backend supported by the
+                                         ///< adapter.
     UR_ADAPTER_INFO_REFERENCE_COUNT = 1, ///< [uint32_t] Reference count of the adapter.
                                          ///< The reference count returned should be considered immediately stale.
                                          ///< It is unsuitable for general use in applications. This feature is
@@ -1011,21 +1026,6 @@ urAdapterGetInfo(
                                   ///< returned and pPropValue is not used.
     size_t *pPropSizeRet          ///< [out][optional] pointer to the actual number of bytes being queried by pPropValue.
 );
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Identifies backend of the adapter
-typedef enum ur_adapter_backend_t {
-    UR_ADAPTER_BACKEND_UNKNOWN = 0,    ///< The backend is not a recognized one
-    UR_ADAPTER_BACKEND_LEVEL_ZERO = 1, ///< The backend is Level Zero
-    UR_ADAPTER_BACKEND_OPENCL = 2,     ///< The backend is OpenCL
-    UR_ADAPTER_BACKEND_CUDA = 3,       ///< The backend is CUDA
-    UR_ADAPTER_BACKEND_HIP = 4,        ///< The backend is HIP
-    UR_ADAPTER_BACKEND_NATIVE_CPU = 5, ///< The backend is Native CPU
-    /// @cond
-    UR_ADAPTER_BACKEND_FORCE_UINT32 = 0x7fffffff
-    /// @endcond
-
-} ur_adapter_backend_t;
 
 #if !defined(__GNUC__)
 #pragma endregion
@@ -1085,8 +1085,8 @@ typedef enum ur_platform_info_t {
                                       ///< size of the info needs to be dynamically queried.
     UR_PLATFORM_INFO_PROFILE = 5,     ///< [char[]] The string denoting profile of the platform. The size of the
                                       ///< info needs to be dynamically queried.
-    UR_PLATFORM_INFO_BACKEND = 6,     ///< [::ur_platform_backend_t] The backend of the platform. Identifies the
-                                      ///< native backend adapter implementing this platform.
+    UR_PLATFORM_INFO_BACKEND = 6,     ///< [::ur_backend_t] The backend of the platform. Identifies the native
+                                      ///< backend adapter implementing this platform.
     /// @cond
     UR_PLATFORM_INFO_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -1280,21 +1280,6 @@ urPlatformGetBackendOption(
     const char **ppPlatformOption   ///< [out] returns the correct platform specific compiler option based on
                                     ///< the frontend option.
 );
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Identifies native backend adapters
-typedef enum ur_platform_backend_t {
-    UR_PLATFORM_BACKEND_UNKNOWN = 0,    ///< The backend is not a recognized one
-    UR_PLATFORM_BACKEND_LEVEL_ZERO = 1, ///< The backend is Level Zero
-    UR_PLATFORM_BACKEND_OPENCL = 2,     ///< The backend is OpenCL
-    UR_PLATFORM_BACKEND_CUDA = 3,       ///< The backend is CUDA
-    UR_PLATFORM_BACKEND_HIP = 4,        ///< The backend is HIP
-    UR_PLATFORM_BACKEND_NATIVE_CPU = 5, ///< The backend is Native CPU
-    /// @cond
-    UR_PLATFORM_BACKEND_FORCE_UINT32 = 0x7fffffff
-    /// @endcond
-
-} ur_platform_backend_t;
 
 #if !defined(__GNUC__)
 #pragma endregion

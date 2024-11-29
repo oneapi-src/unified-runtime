@@ -77,7 +77,7 @@ urPlatformGetInfo(ur_platform_handle_t hPlatform, ur_platform_info_t propName,
   case UR_PLATFORM_INFO_BACKEND:
     // TODO(alcpz): PR with this enum value at
     // https://github.com/oneapi-src/unified-runtime
-    return ReturnValue(UR_PLATFORM_BACKEND_NATIVE_CPU);
+    return ReturnValue(UR_BACKEND_NATIVE_CPU);
   default:
     DIE_NO_IMPLEMENTATION;
   }

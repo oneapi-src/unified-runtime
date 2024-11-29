@@ -133,14 +133,12 @@ TEST_P(urEnqueueKernelLaunchTest, InvalidWorkGroupSize) {
 }
 
 TEST_P(urEnqueueKernelLaunchTest, InvalidKernelArgs) {
-    ur_platform_backend_t backend;
+    ur_backend_t backend;
     ASSERT_SUCCESS(urPlatformGetInfo(platform, UR_PLATFORM_INFO_BACKEND,
-                                     sizeof(ur_platform_backend_t), &backend,
-                                     nullptr));
+                                     sizeof(ur_backend_t), &backend, nullptr));
 
-    if (backend == UR_PLATFORM_BACKEND_CUDA ||
-        backend == UR_PLATFORM_BACKEND_HIP ||
-        backend == UR_PLATFORM_BACKEND_LEVEL_ZERO) {
+    if (backend == UR_BACKEND_CUDA || backend == UR_BACKEND_HIP ||
+        backend == UR_BACKEND_LEVEL_ZERO) {
         GTEST_FAIL() << "AMD, L0 and Nvidia can't check kernel arguments.";
     }
 

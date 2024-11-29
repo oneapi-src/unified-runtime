@@ -19,7 +19,7 @@ struct urAdapterGetInfoTest : uur::runtime::urAdapterTest,
 };
 
 std::unordered_map<ur_adapter_info_t, size_t> adapter_info_size_map = {
-    {UR_ADAPTER_INFO_BACKEND, sizeof(ur_adapter_backend_t)},
+    {UR_ADAPTER_INFO_BACKEND, sizeof(ur_backend_t)},
     {UR_ADAPTER_INFO_REFERENCE_COUNT, sizeof(uint32_t)},
 };
 
@@ -62,21 +62,21 @@ TEST_F(urAdapterGetInfoTest, InvalidEnumerationAdapterInfoType) {
 }
 
 TEST_F(urAdapterGetInfoTest, InvalidSizeZero) {
-    ur_adapter_backend_t backend;
+    ur_backend_t backend;
     ASSERT_EQ_RESULT(urAdapterGetInfo(adapter, UR_ADAPTER_INFO_BACKEND, 0,
                                       &backend, nullptr),
                      UR_RESULT_ERROR_INVALID_SIZE);
 }
 
 TEST_F(urAdapterGetInfoTest, InvalidSizeSmall) {
-    ur_adapter_backend_t backend;
+    ur_backend_t backend;
     ASSERT_EQ_RESULT(urAdapterGetInfo(adapter, UR_ADAPTER_INFO_BACKEND,
                                       sizeof(backend) - 1, &backend, nullptr),
                      UR_RESULT_ERROR_INVALID_SIZE);
 }
 
 TEST_F(urAdapterGetInfoTest, InvalidNullPointerPropValue) {
-    ur_adapter_backend_t backend;
+    ur_backend_t backend;
     ASSERT_EQ_RESULT(urAdapterGetInfo(adapter, UR_ADAPTER_INFO_BACKEND,
                                       sizeof(backend), nullptr, nullptr),
                      UR_RESULT_ERROR_INVALID_NULL_POINTER);
@@ -98,10 +98,10 @@ TEST_F(urAdapterGetInfoTest, ReferenceCountNotZero) {
 }
 
 TEST_F(urAdapterGetInfoTest, ValidAdapterBackend) {
-    ur_adapter_backend_t backend;
+    ur_backend_t backend;
     ASSERT_SUCCESS(urAdapterGetInfo(adapter, UR_ADAPTER_INFO_BACKEND,
                                     sizeof(backend), &backend, nullptr));
 
-    ASSERT_TRUE(backend >= UR_ADAPTER_BACKEND_LEVEL_ZERO &&
-                backend <= UR_ADAPTER_BACKEND_NATIVE_CPU);
+    ASSERT_TRUE(backend >= UR_BACKEND_LEVEL_ZERO &&
+                backend <= UR_BACKEND_NATIVE_CPU);
 }

@@ -33,14 +33,14 @@ TEST_P(urProgramGetBuildInfoTest, Success) {
     auto property_name = getParam();
     size_t property_size = 0;
     std::vector<char> property_value;
-    ur_platform_backend_t backend;
+    ur_backend_t backend;
     ASSERT_SUCCESS(urPlatformGetInfo(platform, UR_PLATFORM_INFO_BACKEND,
                                      sizeof(backend), &backend, nullptr));
     auto result = urProgramGetBuildInfo(program, device, property_name, 0,
                                         nullptr, &property_size);
 
     if (property_name == UR_PROGRAM_BUILD_INFO_STATUS &&
-        backend == UR_PLATFORM_BACKEND_LEVEL_ZERO) {
+        backend == UR_BACKEND_LEVEL_ZERO) {
         ASSERT_EQ(UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION, result);
         return;
     }

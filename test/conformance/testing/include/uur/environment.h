@@ -18,7 +18,7 @@ struct PlatformEnvironment : ::testing::Environment {
 
     struct PlatformOptions {
         std::string platform_name;
-        std::optional<ur_platform_backend_t> platform_backend;
+        std::optional<ur_backend_t> platform_backend;
         unsigned long platforms_count = 0;
     };
 

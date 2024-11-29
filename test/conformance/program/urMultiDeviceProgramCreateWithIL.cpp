@@ -12,10 +12,10 @@ using urMultiDeviceProgramTest = uur::urMultiDeviceProgramTest;
 // Test binary sizes and binaries obtained from urProgramGetInfo when program is built for a subset of devices in the context.
 TEST_F(urMultiDeviceProgramTest, urMultiDeviceProgramGetInfo) {
     // Run test only for level zero backend which supports urProgramBuildExp.
-    ur_platform_backend_t backend;
+    ur_backend_t backend;
     ASSERT_SUCCESS(urPlatformGetInfo(platform, UR_PLATFORM_INFO_BACKEND,
                                      sizeof(backend), &backend, nullptr));
-    if (backend != UR_PLATFORM_BACKEND_LEVEL_ZERO) {
+    if (backend != UR_BACKEND_LEVEL_ZERO) {
         GTEST_SKIP();
     }
 
