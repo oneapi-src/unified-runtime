@@ -90,6 +90,8 @@ jobs:
         pip install --force-reinstall -r ${{github.workspace}}/ur-repo/third_party/benchmark_requirements.txt
 
     # We need to fetch special ref for proper PR's merge commit. Note, this ref may be absent if the PR is already merged.
+
+    # REMOVE start
     - name: Fetch PR's merge commit
       if: ${{ inputs.pr_no != 0 }}
       working-directory: ${{github.workspace}}/ur-repo
@@ -100,6 +102,7 @@ jobs:
         git checkout origin/pr/${PR_NO}/merge
         git rev-parse origin/pr/${PR_NO}/merge
 
+# HERE
     - name: Checkout SYCL
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       with:
@@ -155,6 +158,27 @@ jobs:
 
     - name: Install UR
       run: cmake --install ${{github.workspace}}/ur_build
+    #   # remove end
+
+    - name: Checkout UMF
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      with:
+        repository: EuphoricThinking/unified-memory-framework
+        ref: 6aef9bf11b47d0b1390209aeafb6998f0da475c9
+        path: umf-repo
+        fetch-depth: 1
+        fetch-tags: false
+
+    - name: Configure UMF
+      run: >
+        cmake -DCMAKE_BUILD_TYPE=Release
+        -S${{github.workspace}}/umf-repo
+        -B${{github.workspace}}/umf_build
+        -DUMF_BUILD_BENCHMARKS=ON
+        -DUMF_TESTS_FAIL_ON_SKIP=ON
+
+    - name: Build UMF
+      run: cmake --build ${{github.workspace}}/umf_build -j $(nproc)
 
     - name: Run benchmarks
       working-directory: ${{ github.workspace }}/ur-repo/
@@ -164,6 +188,7 @@ jobs:
         ~/bench_workdir
         --sycl ${{ github.workspace }}/sycl_build
         --ur ${{ github.workspace }}/ur_install
+        --umf ${{ github.workspace }}/umf_build
         --adapter ${{ matrix.adapter.str_name }}
         ${{ inputs.upload_report && '--output-html' || '' }}
         ${{ inputs.bench_script_params }}
@@ -199,5 +224,5 @@ jobs:
       if: ${{ always() && inputs.upload_report }}
       uses: actions/cache/save@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
       with:
-        path: ur-repo/benchmark_results.html
+        path: umf-repo/benchmark_results.html
         key: benchmark-results-${{ matrix.adapter.str_name }}-${{ github.run_id }}

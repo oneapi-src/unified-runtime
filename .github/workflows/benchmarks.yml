@@ -1,4 +1,5 @@
 name: Compute Benchmarks
+# for tests
 
 on:
   workflow_dispatch:
