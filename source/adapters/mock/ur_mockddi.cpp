@@ -10003,6 +10003,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
 /// @brief Intercept function for urKernelSuggestMaxCooperativeGroupCountExp
 __urdlllocal ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
     ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
+    ur_device_handle_t hDevice, ///< [in] handle of the device object
     size_t
         localWorkSize, ///< [in] number of local work-items that will form a work-group when the
                        ///< kernel is launched
@@ -10014,7 +10015,8 @@ __urdlllocal ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
     ur_result_t result = UR_RESULT_SUCCESS;
 
     ur_kernel_suggest_max_cooperative_group_count_exp_params_t params = {
-        &hKernel, &localWorkSize, &dynamicSharedMemorySize, &pGroupCountRet};
+        &hKernel, &hDevice, &localWorkSize, &dynamicSharedMemorySize,
+        &pGroupCountRet};
 
     auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
         mock::getCallbacks().get_before_callback(

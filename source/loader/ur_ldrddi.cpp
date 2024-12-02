@@ -8760,6 +8760,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
 /// @brief Intercept function for urKernelSuggestMaxCooperativeGroupCountExp
 __urdlllocal ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
     ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
+    ur_device_handle_t hDevice, ///< [in] handle of the device object
     size_t
         localWorkSize, ///< [in] number of local work-items that will form a work-group when the
                        ///< kernel is launched
@@ -8783,9 +8784,13 @@ __urdlllocal ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
     // convert loader handle to platform handle
     hKernel = reinterpret_cast<ur_kernel_object_t *>(hKernel)->handle;
 
+    // convert loader handle to platform handle
+    hDevice = reinterpret_cast<ur_device_object_t *>(hDevice)->handle;
+
     // forward to device-platform
     result = pfnSuggestMaxCooperativeGroupCountExp(
-        hKernel, localWorkSize, dynamicSharedMemorySize, pGroupCountRet);
+        hKernel, hDevice, localWorkSize, dynamicSharedMemorySize,
+        pGroupCountRet);
 
     return result;
 }

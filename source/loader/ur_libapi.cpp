@@ -8892,11 +8892,13 @@ ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
 ///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hKernel`
+///         + `NULL == hDevice`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `NULL == pGroupCountRet`
 ///     - ::UR_RESULT_ERROR_INVALID_KERNEL
 ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
     ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
+    ur_device_handle_t hDevice, ///< [in] handle of the device object
     size_t
         localWorkSize, ///< [in] number of local work-items that will form a work-group when the
                        ///< kernel is launched
@@ -8913,7 +8915,8 @@ ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
     }
 
     return pfnSuggestMaxCooperativeGroupCountExp(
-        hKernel, localWorkSize, dynamicSharedMemorySize, pGroupCountRet);
+        hKernel, hDevice, localWorkSize, dynamicSharedMemorySize,
+        pGroupCountRet);
 } catch (...) {
     return exceptionToResult(std::current_exception());
 }

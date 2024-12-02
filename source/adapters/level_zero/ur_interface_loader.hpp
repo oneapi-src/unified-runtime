@@ -687,8 +687,9 @@ ur_result_t urEnqueueCooperativeKernelLaunchExp(
     const size_t *pLocalWorkSize, uint32_t numEventsInWaitList,
     const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent);
 ur_result_t urKernelSuggestMaxCooperativeGroupCountExp(
-    ur_kernel_handle_t hKernel, size_t localWorkSize,
-    size_t dynamicSharedMemorySize, uint32_t *pGroupCountRet);
+    ur_kernel_handle_t hKernel, ur_device_handle_t hDevice,
+    size_t localWorkSize, size_t dynamicSharedMemorySize,
+    uint32_t *pGroupCountRet);
 ur_result_t urEnqueueTimestampRecordingExp(
     ur_queue_handle_t hQueue, bool blocking, uint32_t numEventsInWaitList,
     const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent);

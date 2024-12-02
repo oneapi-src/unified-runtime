@@ -12523,6 +12523,12 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
                           *(params->phKernel));
 
     os << ", ";
+    os << ".hDevice = ";
+
+    ur::details::printPtr(os,
+                          *(params->phDevice));
+
+    os << ", ";
     os << ".localWorkSize = ";
 
     os << *(params->plocalWorkSize);

@@ -190,9 +190,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelGetNativeHandle(
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
-    ur_kernel_handle_t hKernel, size_t localWorkSize,
-    size_t dynamicSharedMemorySize, uint32_t *pGroupCountRet) {
+    ur_kernel_handle_t hKernel, ur_device_handle_t hDevice,
+    size_t localWorkSize, size_t dynamicSharedMemorySize,
+    uint32_t *pGroupCountRet) {
   UR_ASSERT(hKernel, UR_RESULT_ERROR_INVALID_KERNEL);
+
+  std::ignore = hDevice;
 
   // We need to set the active current device for this kernel explicitly here,
   // because the occupancy querying API does not take device parameter.
