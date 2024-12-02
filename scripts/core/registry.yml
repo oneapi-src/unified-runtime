@@ -607,6 +607,9 @@ etors:
 - name: ENQUEUE_EVENTS_WAIT_WITH_BARRIER_EXT
   desc: Enumerator for $xEnqueueEventsWaitWithBarrierExt
   value: '246'
+- name: PHYSICAL_MEM_GET_INFO
+  desc: Enumerator for $xPhysicalMemGetInfo
+  value: '247'
 ---
 type: enum
 desc: Defines structure types
