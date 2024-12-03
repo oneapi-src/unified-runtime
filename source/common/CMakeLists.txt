@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2023 Intel Corporation
+# Copyright (C) 2022-2024 Intel Corporation
 # Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
 # See LICENSE.TXT
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
@@ -32,11 +32,10 @@ if (NOT DEFINED UMF_REPO)
 endif()
 
 if (NOT DEFINED UMF_TAG)
-    # special branch with cherry-picks for incoming pulldown
-    # contains UMF PRs: #866, #924, and #930
-    # branch was based on commit: 3bae087c9a8c0cbed5bde40f0d5a2
-    # umf-fixes-nov-pulldown: 25.11.2024: Disable libudev in hwloc builds
-    set(UMF_TAG a7b6152b7b095c88ddf34bc7d442eb4c2b3f74d6)
+    # v0.10.x: stable UMF branch for upcoming 0.11 UR release
+    # Date:   Thu Dec 5 17:17:35 2024 +0100
+    # Merge pull request #960 from vinser52/svinogra_ipc_api
+    set(UMF_TAG 66b161a185b7c0babd63ce6605864d5614876677)
 endif()
 
 message(STATUS "Will fetch Unified Memory Framework from ${UMF_REPO}")
