@@ -186,8 +186,9 @@ struct urEnqueueUSMMemcpyMultiDeviceTest : uur::urAllDevicesTest {
             GTEST_SKIP() << "Not enough devices in platform with USM support";
         }
 
-        ASSERT_SUCCESS(urContextCreate(usm_devices.size(), usm_devices.data(),
-                                       nullptr, &context));
+        ASSERT_SUCCESS(
+            urContextCreate(static_cast<uint32_t>(usm_devices.size()),
+                            usm_devices.data(), nullptr, &context));
         ASSERT_SUCCESS(
             urQueueCreate(context, usm_devices[0], nullptr, &src_queue));
         ASSERT_SUCCESS(

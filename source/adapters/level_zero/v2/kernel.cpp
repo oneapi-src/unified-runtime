@@ -548,7 +548,6 @@ ur_result_t urKernelGetGroupInfo(
     return UR_RESULT_ERROR_INVALID_VALUE;
   }
   }
-  return UR_RESULT_SUCCESS;
 } catch (...) {
   return exceptionToResult(std::current_exception());
 }
@@ -579,7 +578,6 @@ ur_result_t urKernelGetSubGroupInfo(
     returnValue(uint32_t{props.requiredSubgroupSize});
   } else {
     die("urKernelGetSubGroupInfo: parameter not implemented");
-    return {};
   }
   return UR_RESULT_SUCCESS;
 } catch (...) {
