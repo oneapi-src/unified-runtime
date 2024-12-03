@@ -36,6 +36,18 @@ TEST_P(urAdapterGetInfoTest, ReferenceCount) {
     ASSERT_GE(reference_count, 0);
 }
 
+TEST_P(urAdapterGetInfoTest, Version) {
+    auto info_type = UR_ADAPTER_INFO_VERSION;
+    size_t size = 0;
+    ASSERT_SUCCESS(urAdapterGetInfo(adapter, info_type, 0, nullptr, &size));
+    ASSERT_EQ(size, sizeof(uint32_t));
+
+    uint32_t version = 0;
+    ASSERT_SUCCESS(
+        urAdapterGetInfo(adapter, info_type, size, &version, nullptr));
+    ASSERT_GE(version, 1);
+}
+
 TEST_P(urAdapterGetInfoTest, InvalidNullHandleAdapter) {
     size_t size = 0;
     ASSERT_EQ_RESULT(
