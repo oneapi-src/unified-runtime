@@ -131,3 +131,9 @@ TEST_P(urEnqueueUSMPrefetchTest, InvalidEventWaitList) {
 
     ASSERT_SUCCESS(urEventRelease(validEvent));
 }
+
+TEST_P(urEnqueueUSMPrefetchTest, InvalidMigrationFlag) {
+    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_ENUMERATION,
+                     urEnqueueUSMPrefetch(queue, ptr, allocation_size, 23, 0,
+                                          nullptr, nullptr));
+}

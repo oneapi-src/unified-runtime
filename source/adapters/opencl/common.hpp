@@ -150,12 +150,11 @@ inline const OpenCLVersion V3_0(3, 0);
 
 namespace cl_adapter {
 constexpr size_t MaxMessageSize = 256;
-extern thread_local int32_t ErrorMessageCode;
+extern thread_local ur_result_t ErrorMessageCode;
 extern thread_local char ErrorMessage[MaxMessageSize];
 
 // Utility function for setting a message and warning
-[[maybe_unused]] void setErrorMessage(const char *Message,
-                                      ur_result_t ErrorCode);
+[[maybe_unused]] void setErrorMessage(const char *Message, ur_result_t ErrorCode);
 
 [[noreturn]] void die(const char *Message);
 

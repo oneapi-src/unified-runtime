@@ -489,22 +489,16 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMMemcpy(
 UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
     ur_queue_handle_t hQueue, [[maybe_unused]] const void *pMem,
     [[maybe_unused]] size_t size,
-    [[maybe_unused]] ur_usm_migration_flags_t flags,
+    ur_usm_migration_flags_t flags,
     uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
     ur_event_handle_t *phEvent) {
-
-  // return mapCLErrorToUR(clEnqueueMarkerWithWaitList(
-  //     cl_adapter::cast<cl_command_queue>(hQueue), numEventsInWaitList,
-  //     cl_adapter::cast<const cl_event *>(phEventWaitList),
-  //     cl_adapter::cast<cl_event *>(phEvent)));
-
 
   // Have to look up the context from the kernel
   cl_context CLContext;
   cl_int CLErr =
-  clGetCommandQueueInfo(cl_adapter::cast<cl_command_queue>(hQueue),
-                                       CL_QUEUE_CONTEXT, sizeof(cl_context),
-                                       &CLContext, nullptr);
+    clGetCommandQueueInfo(cl_adapter::cast<cl_command_queue>(hQueue),
+                          CL_QUEUE_CONTEXT, sizeof(cl_context), &CLContext,
+                          nullptr);
   if (CLErr != CL_SUCCESS) {
     return mapCLErrorToUR(CLErr);
   }
@@ -514,20 +508,22 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
       CLContext, cl_ext::ExtFuncPtrCache->clEnqueueMigrateMemINTELCache,
       cl_ext::EnqueueMigrateMemName, &FuncPtr)) {
     // Exit gracefully if unable to find USM function
-    cl_adapter::setErrorMessage("Prefetch hint ignored as current OpenCL version does not support clEnqueueMigrateMemINTEL", UR_RESULT_SUCCESS);
+    cl_adapter::setErrorMessage("Prefetch hint ignored as current OpenCL versio"
+                                "n does not support clEnqueueMigrateMemINTEL",
+                                UR_RESULT_SUCCESS);
     return UR_RESULT_SUCCESS;
   }
-      // cl_ext::getExtFuncFromContext<clHostMemAllocINTEL_fn>(
-      // CLContext, cl_ext::ExtFuncPtrCache->clHostMemAllocINTELCache,
-      // cl_ext::HostMemAllocName, &HostMemAlloc)
 
   cl_mem_migration_flags MigrationFlag;
-  if (flags == UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE) {
-    MigrationFlag = CL_MIGRATE_MEM_OBJECT_CONTENT_UNDEFINED;
-  } else if (flags == UR_USM_MIGRATION_FLAG_DEVICE_TO_HOST) {
-    MigrationFlag = CL_MIGRATE_MEM_OBJECT_HOST;
-  } else {
-    return UR_RESULT_ERROR_INVALID_ENUMERATION;
+  switch (flags) {
+    case UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE:
+      MigrationFlag = CL_MIGRATE_MEM_OBJECT_CONTENT_UNDEFINED;
+      break;
+    case UR_USM_MIGRATION_FLAG_DEVICE_TO_HOST:
+      MigrationFlag = CL_MIGRATE_MEM_OBJECT_HOST;
+      break;
+    default:
+      return UR_RESULT_ERROR_INVALID_ENUMERATION;
   }
 
   return mapCLErrorToUR(

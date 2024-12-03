@@ -13,10 +13,10 @@
 namespace cl_adapter {
 
 /* Global variables for urAdapterGetLastError() */
-thread_local int32_t ErrorMessageCode = 0;
+thread_local ur_result_t ErrorMessageCode = UR_RESULT_SUCCESS;
 thread_local char ErrorMessage[MaxMessageSize];
 
-[[maybe_unused]] void setErrorMessage(const char *Message, int32_t ErrorCode) {
+[[maybe_unused]] void setErrorMessage(const char *Message, ur_result_t ErrorCode) {
   assert(strlen(Message) <= cl_adapter::MaxMessageSize);
   strcpy(cl_adapter::ErrorMessage, Message);
   ErrorMessageCode = ErrorCode;
