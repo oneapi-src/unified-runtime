@@ -1065,6 +1065,25 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
                         CL_DEVICE_UUID_KHR, UUID.size(), UUID.data(), nullptr));
     return ReturnValue(UUID);
   }
+  case UR_DEVICE_INFO_PCI_ADDRESS: {
+    bool isKhrPciBusInfoSupported = false;
+    if (cl_adapter::checkDeviceExtensions(
+            cl_adapter::cast<cl_device_id>(hDevice), {"cl_khr_pci_bus_info"},
+            isKhrPciBusInfoSupported) != UR_RESULT_SUCCESS ||
+        !isKhrPciBusInfoSupported) {
+      return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
+    }
+    cl_device_pci_bus_info_khr PciBusInfo{};
+    CL_RETURN_ON_FAILURE(clGetDeviceInfo(
+        cl_adapter::cast<cl_device_id>(hDevice), CL_DEVICE_PCI_BUS_INFO_KHR,
+        sizeof(PciBusInfo), &PciBusInfo, nullptr));
+    // PCI address in BDF format requires 13 bytes DOMA:BU:DE.F + null bytes
+    std::array<char, 13> PciAddr;
+    std::snprintf(PciAddr.data(), PciAddr.size(), "%.4x:%.2x:%.2x.%x",
+                  PciBusInfo.pci_domain, PciBusInfo.pci_bus,
+                  PciBusInfo.pci_device, PciBusInfo.pci_function);
+    return ReturnValue(PciAddr);
+  }
 
   case UR_DEVICE_INFO_KERNEL_SET_SPECIALIZATION_CONSTANTS: {
     return ReturnValue(false);
@@ -1080,7 +1099,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
    * the Registry. */
   case UR_DEVICE_INFO_COMPONENT_DEVICES:
   case UR_DEVICE_INFO_COMPOSITE_DEVICE:
-  case UR_DEVICE_INFO_PCI_ADDRESS:
   case UR_DEVICE_INFO_GPU_EU_COUNT:
   case UR_DEVICE_INFO_GPU_EU_SIMD_WIDTH:
   case UR_DEVICE_INFO_GPU_EU_SLICES:
