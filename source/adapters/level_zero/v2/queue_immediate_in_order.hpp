@@ -47,6 +47,7 @@ private:
   std::vector<ze_event_handle_t> waitList;
 
   std::vector<ur_event_handle_t> deferredEvents;
+  std::vector<ur_kernel_handle_t> submittedKernels;
 
   std::pair<ze_event_handle_t *, uint32_t>
   getWaitListView(const ur_event_handle_t *phWaitEvents,
@@ -76,6 +77,8 @@ private:
       const void *pPattern, size_t size, uint32_t numEventsInWaitList,
       const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent,
       ur_command_t commandType);
+
+  void recordSubmittedKernel(ur_kernel_handle_t hKernel);
 
 public:
   ur_queue_immediate_in_order_t(ur_context_handle_t, ur_device_handle_t,
