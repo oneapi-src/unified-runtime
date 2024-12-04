@@ -1533,6 +1533,53 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgPointer(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urDeviceGetInfo
+__urdlllocal ur_result_t UR_APICALL urDeviceGetInfo(
+    ur_device_handle_t hDevice, ///< [in] handle of the device instance
+    ur_device_info_t propName,  ///< [in] type of the info to retrieve
+    size_t propSize, ///< [in] the number of bytes pointed to by pPropValue.
+    void *
+        pPropValue, ///< [out][optional][typename(propName, propSize)] array of bytes holding
+                    ///< the info.
+    ///< If propSize is not equal to or greater than the real number of bytes
+    ///< needed to return the info
+    ///< then the ::UR_RESULT_ERROR_INVALID_SIZE error is returned and
+    ///< pPropValue is not used.
+    size_t *
+        pPropSizeRet ///< [out][optional] pointer to the actual size in bytes of the queried propName.
+) {
+    auto pfnGetInfo = getContext()->urDdiTable.Device.pfnGetInfo;
+
+    if (nullptr == pfnGetInfo) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    // For unsupported features for device address sanitizer, we override the result.
+    std::unordered_set<ur_device_info_t> UnsupportedFeatures = {
+        // Virtual Memory
+        UR_DEVICE_INFO_VIRTUAL_MEMORY_SUPPORT,
+
+        // Command Buffer
+        UR_DEVICE_INFO_COMMAND_BUFFER_SUPPORT_EXP,
+    };
+    if(UnsupportedFeatures.find(propName) != UnsupportedFeatures.end()) {
+        UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+        return ReturnValue(false);
+    }
+
+    if(propName == UR_DEVICE_INFO_EXTENSIONS) {
+        auto Res = pfnGetInfo(hDevice, propName, propSize, pPropValue, pPropSizeRet);
+        if(Res != UR_RESULT_SUCCESS) {
+            return Res;
+        }
+        UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+        return ReturnValue(true);
+    }
+
+    return pfnGetInfo(hDevice, propName, propSize, pPropValue, pPropSizeRet);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's Global table
 ///        with current process' addresses
 ///
@@ -1811,6 +1858,37 @@ __urdlllocal ur_result_t UR_APICALL urGetUSMProcAddrTable(
     return result;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Exported function for filling application's Device table
+///        with current process' addresses
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+__urdlllocal ur_result_t UR_APICALL urGetDeviceProcAddrTable(
+    ur_api_version_t version, ///< [in] API version requested
+    ur_device_dditable_t
+        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
+) {
+    if (nullptr == pDdiTable) {
+        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    if (UR_MAJOR_VERSION(ur_sanitizer_layer::getContext()->version) !=
+            UR_MAJOR_VERSION(version) ||
+        UR_MINOR_VERSION(ur_sanitizer_layer::getContext()->version) >
+            UR_MINOR_VERSION(version)) {
+        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+    }
+
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    pDdiTable->pfnGetInfo = ur_sanitizer_layer::urDeviceGetInfo;
+
+    return result;
+}
+
 ur_result_t context_t::init(ur_dditable_t *dditable,
                             const std::set<std::string> &enabledLayerNames,
                             [[maybe_unused]] codeloc_data codelocData) {
@@ -1886,6 +1964,11 @@ ur_result_t context_t::init(ur_dditable_t *dditable,
     if (UR_RESULT_SUCCESS == result) {
         result = ur_sanitizer_layer::urGetUSMProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->USM);
+    }
+
+    if (UR_RESULT_SUCCESS == result) {
+        result = ur_sanitizer_layer::urGetDeviceProcAddrTable(
+            UR_API_VERSION_CURRENT, &dditable->Device);
     }
 
     return result;
