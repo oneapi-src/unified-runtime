@@ -130,39 +130,37 @@ endif()
 if(UR_ENABLE_SANITIZER)
     set(SANITIZER_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/../ur/ur.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_allocator.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_allocator.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_buffer.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_buffer.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_interceptor.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_interceptor.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_libdevice.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_options.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_options.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_quarantine.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_quarantine.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_report.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_report.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_shadow.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_shadow.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_statistics.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_statistics.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_validator.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_validator.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/common.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/stacktrace.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/stacktrace.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/ur_sanddi.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_allocator.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_allocator.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_buffer.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_buffer.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_ddi.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_interceptor.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_interceptor.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_libdevice.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_options.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_options.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_quarantine.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_quarantine.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_report.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_report.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_shadow.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_shadow.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_statistics.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_statistics.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_validator.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan/asan_validator.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/sanitizer_common/linux/backtrace.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/sanitizer_common/linux/sanitizer_utils.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/sanitizer_common/sanitizer_allocator.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/sanitizer_common/sanitizer_common.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/sanitizer_common/sanitizer_libdevice.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/sanitizer_common/sanitizer_stacktrace.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/sanitizer_common/sanitizer_stacktrace.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/sanitizer_common/sanitizer_utils.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/sanitizer_common/sanitizer_utils.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/ur_sanitizer_layer.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/ur_sanitizer_layer.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/ur_sanitizer_utils.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/ur_sanitizer_utils.hpp
-    )
-
-    target_sources(ur_loader
-        PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/linux/backtrace.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/linux/sanitizer_utils.cpp
     )
 
     target_sources(ur_loader

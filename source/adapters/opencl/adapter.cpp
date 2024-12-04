@@ -24,7 +24,7 @@ ur_adapter_handle_t_::ur_adapter_handle_t_() {
   auto handle = LoadLibraryA("OpenCL.dll");
 
 #define CL_CORE_FUNCTION(FUNC)                                                 \
-  FUNC = reinterpret_cast<decltype(::FUNC) *>(GetProcAddress(handle, "FUNC"));
+  FUNC = reinterpret_cast<decltype(::FUNC) *>(GetProcAddress(handle, #FUNC));
 #include "core_functions.def"
 #undef CL_CORE_FUNCTION
 
@@ -128,6 +128,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urAdapterGetInfo(ur_adapter_handle_t,
     return ReturnValue(UR_ADAPTER_BACKEND_OPENCL);
   case UR_ADAPTER_INFO_REFERENCE_COUNT:
     return ReturnValue(adapter->RefCount.load());
+  case UR_ADAPTER_INFO_VERSION:
+    return ReturnValue(uint32_t{1});
   default:
     return UR_RESULT_ERROR_INVALID_ENUMERATION;
   }
