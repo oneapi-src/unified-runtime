@@ -128,8 +128,7 @@ if(UR_ENABLE_TRACING)
 endif()
 
 if(UR_ENABLE_SANITIZER)
-    target_sources(ur_loader
-        PRIVATE
+    set(SANITIZER_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/../ur/ur.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_allocator.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/asan_allocator.hpp
@@ -166,11 +165,30 @@ if(UR_ENABLE_SANITIZER)
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/linux/sanitizer_utils.cpp
     )
 
-    if(UR_ENABLE_SYMBOLIZER)
-        target_sources(ur_loader
-            PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/linux/symbolizer.cpp
+    target_sources(ur_loader
+        PRIVATE ${SANITIZER_SOURCES}
+    )
+
+    if(CXX_HAS_CFI_SANITIZE)
+        set_source_files_properties(
+            ${SANITIZER_SOURCES}
+            PROPERTIES COMPILE_FLAGS "-fno-sanitize=cfi-unrelated-cast"
         )
+    endif()
+
+    if(UR_ENABLE_SYMBOLIZER)
+        set(SYMBOLIZER_SOURCES
+            ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/sanitizer_common/linux/symbolizer.cpp
+        )
+        target_sources(ur_loader
+            PRIVATE ${SYMBOLIZER_SOURCES}
+        )
+        if(CXX_HAS_CFI_SANITIZE)
+            set_source_files_properties(
+                ${SYMBOLIZER_SOURCES}
+                PROPERTIES COMPILE_FLAGS "-fno-sanitize=cfi-nvcall"
+            )
+        endif()
         target_include_directories(ur_loader PRIVATE ${LLVM_INCLUDE_DIRS})
         target_link_libraries(ur_loader PRIVATE LLVMSupport LLVMSymbolize)
         # In in-tree build, if LLVM is built with libc++, we also need to build
