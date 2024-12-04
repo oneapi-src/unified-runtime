@@ -1606,6 +1606,7 @@ typedef ur_result_t (UR_APICALL *ur_pfnEnqueueKernelLaunchCustomExp_t)(
     uint32_t,
     const size_t*,
     const size_t*,
+    const size_t*,
     uint32_t,
     const ur_exp_launch_property_t*,
     uint32_t,
