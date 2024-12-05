@@ -7,6 +7,8 @@ if (UR_BUILD_ADAPTER_L0 OR UR_BUILD_ADAPTER_L0_V2)
     include(FetchLevelZero)
     set(UMF_BUILD_LEVEL_ZERO_PROVIDER ON CACHE INTERNAL "Build Level Zero Provider")
     set(UMF_LEVEL_ZERO_INCLUDE_DIR "${LEVEL_ZERO_INCLUDE_DIR}" CACHE INTERNAL "Level Zero headers")
+else()
+    set(UMF_BUILD_LEVEL_ZERO_PROVIDER OFF CACHE INTERNAL "Build Level Zero Provider")
 endif()
 
 add_ur_library(ur_common STATIC
@@ -30,8 +32,11 @@ if (NOT DEFINED UMF_REPO)
 endif()
 
 if (NOT DEFINED UMF_TAG)
-    # main 28.10.2024: Merge pull request #832 ...
-    set(UMF_TAG 43e9af0f50b70ccb989f786243881035dd829203)
+    # special branch with cherry-picks for incoming pulldown
+    # contains UMF PRs: #866, #924, and #930
+    # branch was based on commit: 3bae087c9a8c0cbed5bde40f0d5a2
+    # umf-fixes-nov-pulldown: 25.11.2024: Disable libudev in hwloc builds
+    set(UMF_TAG a7b6152b7b095c88ddf34bc7d442eb4c2b3f74d6)
 endif()
 
 message(STATUS "Will fetch Unified Memory Framework from ${UMF_REPO}")
