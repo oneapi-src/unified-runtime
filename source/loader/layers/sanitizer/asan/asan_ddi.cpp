@@ -1878,7 +1878,6 @@ __urdlllocal ur_result_t UR_APICALL urGetUSMProcAddrTable(
     return result;
 }
 
-<<<<<<< HEAD:source/loader/layers/sanitizer/ur_sanddi.cpp
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's Device table
 ///        with current process' addresses
