@@ -1904,7 +1904,7 @@ __urdlllocal ur_result_t UR_APICALL urGetDeviceProcAddrTable(
 
     ur_result_t result = UR_RESULT_SUCCESS;
 
-    pDdiTable->pfnGetInfo = ur_sanitizer_layer::urDeviceGetInfo;
+    pDdiTable->pfnGetInfo = ur_sanitizer_layer::asan::urDeviceGetInfo;
 
     return result;
 }
@@ -1950,9 +1950,6 @@ __urdlllocal ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
     ur_command_buffer_exp_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
 ) {
-    auto &dditable =
-        ur_sanitizer_layer::getContext()->urDdiTable.CommandBufferExp;
-
     if (nullptr == pDdiTable) {
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
@@ -2013,8 +2010,6 @@ __urdlllocal ur_result_t UR_APICALL urGetVirtualMemProcAddrTable(
     ur_virtual_mem_dditable_t
         *pDdiTable ///< [in,out] pointer to table of DDI function pointers
 ) {
-    auto &dditable = ur_sanitizer_layer::getContext()->urDdiTable.VirtualMem;
-
     if (nullptr == pDdiTable) {
         return UR_RESULT_ERROR_INVALID_NULL_POINTER;
     }
