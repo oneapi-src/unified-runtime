@@ -167,13 +167,6 @@ if(UR_ENABLE_SANITIZER)
         PRIVATE ${SANITIZER_SOURCES}
     )
 
-    if(CXX_HAS_CFI_SANITIZE)
-        set_source_files_properties(
-            ${SANITIZER_SOURCES}
-            PROPERTIES COMPILE_FLAGS "-fno-sanitize=cfi-unrelated-cast"
-        )
-    endif()
-
     if(UR_ENABLE_SYMBOLIZER)
         set(SYMBOLIZER_SOURCES
             ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/sanitizer_common/linux/symbolizer.cpp

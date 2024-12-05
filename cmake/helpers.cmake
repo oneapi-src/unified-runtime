@@ -80,10 +80,10 @@ else()
 endif()
 
 set(CFI_FLAGS "")
-if (CFI_HAS_CFI_SANITIZE)
+if (CXX_HAS_CFI_SANITIZE)
     # cfi-icall requires called functions in shared libraries to also be built with cfi-icall, which we can't
     # guarantee. -fsanitize=cfi depends on -flto
-    set(CFI_FLAGS "-flto -fsanitize=cfi -fno-sanitize=cfi-icall -fsanitize-ignorelist=${CMAKE_SOURCE_DIR}/sanitizer-ignorelist.txt")
+    set(CFI_FLAGS -flto -fsanitize=cfi -fno-sanitize=cfi-icall -fsanitize-ignorelist=${CMAKE_CURRENT_SOURCE_DIR}/sanitizer-ignorelist.txt)
 endif()
 
 function(add_ur_target_compile_options name)
