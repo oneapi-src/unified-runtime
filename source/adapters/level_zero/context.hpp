@@ -24,6 +24,7 @@
 
 #include "common.hpp"
 #include "queue.hpp"
+#include "usm.hpp"
 
 #include <umf_helpers.hpp>
 
@@ -55,11 +56,14 @@ struct ur_context_handle_t_ : _ur_object {
   ur_context_handle_t_(ze_context_handle_t ZeContext, uint32_t NumDevices,
                        const ur_device_handle_t *Devs, bool OwnZeContext)
       : ZeContext{ZeContext}, Devices{Devs, Devs + NumDevices},
-        NumDevices{NumDevices} {
+        NumDevices{NumDevices}, DefaultPool{this, nullptr},
+        ProxyPool{this, nullptr} {
     OwnNativeHandle = OwnZeContext;
   }
 
-  ur_context_handle_t_(ze_context_handle_t ZeContext) : ZeContext{ZeContext} {}
+  ur_context_handle_t_(ze_context_handle_t ZeContext)
+      : ZeContext{ZeContext}, DefaultPool{this, nullptr},
+        ProxyPool{this, nullptr} {}
 
   // A L0 context handle is primarily used during creation and management of
   // resources that may be used by multiple devices.
@@ -123,24 +127,10 @@ struct ur_context_handle_t_ : _ur_object {
 
   // Store USM pool for USM shared and device allocations. There is 1 memory
   // pool per each pair of (context, device) per each memory type.
-  std::unordered_map<ze_device_handle_t, umf::pool_unique_handle_t>
-      DeviceMemPools;
-  std::unordered_map<ze_device_handle_t, umf::pool_unique_handle_t>
-      SharedMemPools;
-  std::unordered_map<ze_device_handle_t, umf::pool_unique_handle_t>
-      SharedReadOnlyMemPools;
-
-  // Store the host memory pool. It does not depend on any device.
-  umf::pool_unique_handle_t HostMemPool;
+  ur_usm_pool_handle_t_ DefaultPool;
 
   // Allocation-tracking proxy pools for direct allocations. No pooling used.
-  std::unordered_map<ze_device_handle_t, umf::pool_unique_handle_t>
-      DeviceMemProxyPools;
-  std::unordered_map<ze_device_handle_t, umf::pool_unique_handle_t>
-      SharedMemProxyPools;
-  std::unordered_map<ze_device_handle_t, umf::pool_unique_handle_t>
-      SharedReadOnlyMemProxyPools;
-  umf::pool_unique_handle_t HostMemProxyPool;
+  ur_usm_pool_handle_t_ ProxyPool;
 
   // Map associating pools created with urUsmPoolCreate and internal pools
   std::list<ur_usm_pool_handle_t> UsmPoolHandles{};
