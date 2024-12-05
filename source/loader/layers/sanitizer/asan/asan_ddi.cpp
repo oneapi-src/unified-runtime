@@ -2124,7 +2124,7 @@ ur_result_t context_t::init(ur_dditable_t *dditable,
     }
 
     if (UR_RESULT_SUCCESS == result) {
-        result = ur_sanitizer_layer::asan::rGetVirtualMemProcAddrTable(
+        result = ur_sanitizer_layer::asan::urGetVirtualMemProcAddrTable(
             UR_API_VERSION_CURRENT, &dditable->VirtualMem);
     }
 
