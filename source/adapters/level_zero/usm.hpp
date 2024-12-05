@@ -11,28 +11,26 @@
 
 #include "common.hpp"
 
+#include "ur_pool_manager.hpp"
 #include <umf_helpers.hpp>
 
 usm::DisjointPoolAllConfigs InitializeDisjointPoolConfig();
 
 struct ur_usm_pool_handle_t_ : _ur_object {
-  bool zeroInit;
-
-  usm::DisjointPoolAllConfigs DisjointPoolConfigs =
-      InitializeDisjointPoolConfig();
-
-  std::unordered_map<ur_device_handle_t, umf::pool_unique_handle_t>
-      DeviceMemPools;
-  std::unordered_map<ur_device_handle_t, umf::pool_unique_handle_t>
-      SharedMemPools;
-  std::unordered_map<ur_device_handle_t, umf::pool_unique_handle_t>
-      SharedReadOnlyMemPools;
-  umf::pool_unique_handle_t HostMemPool;
-
-  ur_context_handle_t Context{};
-
   ur_usm_pool_handle_t_(ur_context_handle_t Context,
                         ur_usm_pool_desc_t *PoolDesc);
+
+  ur_result_t allocate(ur_context_handle_t Context, ur_device_handle_t Device,
+                       const ur_usm_desc_t *USMDesc, ur_usm_type_t Type,
+                       size_t Size, void **RetMem);
+  ur_result_t free(void *Ptr);
+  umf_memory_pool_handle_t getPool(const usm::pool_descriptor &Desc);
+  bool hasPool(umf_memory_pool_handle_t Pool);
+
+  ur_context_handle_t Context;
+
+private:
+  usm::pool_manager<usm::pool_descriptor> PoolManager;
 };
 
 // Exception type to pass allocation errors
