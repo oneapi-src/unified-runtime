@@ -967,6 +967,9 @@ typedef enum ur_adapter_info_t {
                                          ///< The reference count returned should be considered immediately stale.
                                          ///< It is unsuitable for general use in applications. This feature is
                                          ///< provided for identifying memory leaks.
+    UR_ADAPTER_INFO_VERSION = 2,         ///< [uint32_t] Specifies the adapter version, initial value of 1 and
+                                         ///< incremented unpon major changes, e.g. when multiple versions of an
+                                         ///< adapter may exist in parallel.
     /// @cond
     UR_ADAPTER_INFO_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -988,7 +991,7 @@ typedef enum ur_adapter_info_t {
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hAdapter`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_ADAPTER_INFO_REFERENCE_COUNT < propName`
+///         + `::UR_ADAPTER_INFO_VERSION < propName`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
 ///         + If `propName` is not supported by the adapter.
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
@@ -1705,6 +1708,8 @@ typedef enum ur_device_info_t {
     UR_DEVICE_INFO_ENQUEUE_NATIVE_COMMAND_SUPPORT_EXP = 0x2020,      ///< [::ur_bool_t] returns true if the device supports enqueueing of native
                                                                      ///< work
     UR_DEVICE_INFO_LOW_POWER_EVENTS_EXP = 0x2021,                    ///< [::ur_bool_t] returns true if the device supports low-power events.
+    UR_DEVICE_INFO_2D_BLOCK_ARRAY_CAPABILITIES_EXP = 0x2022,         ///< [::ur_exp_device_2d_block_array_capability_flags_t] return a bit-field
+                                                                     ///< of Intel GPU 2D block array capabilities
     /// @cond
     UR_DEVICE_INFO_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -1730,7 +1735,7 @@ typedef enum ur_device_info_t {
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hDevice`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_DEVICE_INFO_LOW_POWER_EVENTS_EXP < propName`
+///         + `::UR_DEVICE_INFO_2D_BLOCK_ARRAY_CAPABILITIES_EXP < propName`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
 ///         + If `propName` is not supported by the adapter.
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
@@ -7431,6 +7436,27 @@ urEnqueueWriteHostPipe(
 #if !defined(__GNUC__)
 #pragma endregion
 #endif
+// Intel 'oneAPI' Unified Runtime Experimental device descriptor for querying Intel device 2D block array capabilities
+#if !defined(__GNUC__)
+#pragma region 2d_block_array_capabilities_(experimental)
+#endif
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intel GPU 2D block array capabilities
+typedef uint32_t ur_exp_device_2d_block_array_capability_flags_t;
+typedef enum ur_exp_device_2d_block_array_capability_flag_t {
+    UR_EXP_DEVICE_2D_BLOCK_ARRAY_CAPABILITY_FLAG_LOAD = UR_BIT(0),  ///< Load instructions are supported
+    UR_EXP_DEVICE_2D_BLOCK_ARRAY_CAPABILITY_FLAG_STORE = UR_BIT(1), ///< Store instructions are supported
+    /// @cond
+    UR_EXP_DEVICE_2D_BLOCK_ARRAY_CAPABILITY_FLAG_FORCE_UINT32 = 0x7fffffff
+    /// @endcond
+
+} ur_exp_device_2d_block_array_capability_flag_t;
+/// @brief Bit Mask for validating ur_exp_device_2d_block_array_capability_flags_t
+#define UR_EXP_DEVICE_2D_BLOCK_ARRAY_CAPABILITY_FLAGS_MASK 0xfffffffc
+
+#if !defined(__GNUC__)
+#pragma endregion
+#endif
 // Bindless Images Extension APIs
 #if !defined(__GNUC__)
 #pragma region bindless_images_(experimental)
@@ -9537,6 +9563,7 @@ typedef enum ur_exp_launch_property_id_t {
     UR_EXP_LAUNCH_PROPERTY_ID_IGNORE = 0,            ///< The property has no effect
     UR_EXP_LAUNCH_PROPERTY_ID_COOPERATIVE = 1,       ///< Whether to launch a cooperative kernel
     UR_EXP_LAUNCH_PROPERTY_ID_CLUSTER_DIMENSION = 2, ///< work-group cluster dimensions
+    UR_EXP_LAUNCH_PROPERTY_ID_WORK_GROUP_MEMORY = 3, ///< Implicit work group memory allocation
     /// @cond
     UR_EXP_LAUNCH_PROPERTY_ID_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -9550,10 +9577,12 @@ typedef enum ur_exp_launch_property_id_t {
 ///   _Analogues_
 ///     - **CUlaunchAttributeValue**
 typedef union ur_exp_launch_property_value_t {
-    uint32_t clusterDim[3]; ///< [in] dimensions of the cluster (units of work-group) (x, y, z). Each
-                            ///< value must be a divisor of the corresponding global work-size
-                            ///< dimension (in units of work-group).
-    int cooperative;        ///< [in] non-zero value indicates a cooperative kernel
+    uint32_t clusterDim[3];    ///< [in] dimensions of the cluster (units of work-group) (x, y, z). Each
+                               ///< value must be a divisor of the corresponding global work-size
+                               ///< dimension (in units of work-group).
+    int cooperative;           ///< [in] non-zero value indicates a cooperative kernel
+    size_t workgroup_mem_size; ///< [in] non-zero value indicates the amount of work group memory to
+                               ///< allocate in bytes
 
 } ur_exp_launch_property_value_t;
 
@@ -9594,6 +9623,7 @@ typedef struct ur_exp_launch_property_t {
 ///         + NULL == hQueue
 ///         + NULL == hKernel
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pGlobalWorkOffset`
 ///         + `NULL == pGlobalWorkSize`
 ///         + `NULL == launchPropList`
 ///         + NULL == pGlobalWorkSize
@@ -9622,6 +9652,8 @@ urEnqueueKernelLaunchCustomExp(
     ur_kernel_handle_t hKernel,                     ///< [in] handle of the kernel object
     uint32_t workDim,                               ///< [in] number of dimensions, from 1 to 3, to specify the global and
                                                     ///< work-group work-items
+    const size_t *pGlobalWorkOffset,                ///< [in] pointer to an array of workDim unsigned values that specify the
+                                                    ///< offset used to calculate the global ID of a work-item
     const size_t *pGlobalWorkSize,                  ///< [in] pointer to an array of workDim unsigned values that specify the
                                                     ///< number of global work-items in workDim that will execute the kernel
                                                     ///< function
@@ -11531,6 +11563,7 @@ typedef struct ur_enqueue_kernel_launch_custom_exp_params_t {
     ur_queue_handle_t *phQueue;
     ur_kernel_handle_t *phKernel;
     uint32_t *pworkDim;
+    const size_t **ppGlobalWorkOffset;
     const size_t **ppGlobalWorkSize;
     const size_t **ppLocalWorkSize;
     uint32_t *pnumPropsInLaunchPropList;
