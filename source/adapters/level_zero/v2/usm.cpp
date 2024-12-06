@@ -82,27 +82,50 @@ descToDisjoinPoolMemType(const usm::pool_descriptor &desc) {
 }
 
 static umf::pool_unique_handle_t
-makePool(umf_disjoint_pool_params_t *poolParams,
+makePool(umf_disjoint_pool_params_handle_t *poolParams,
          usm::pool_descriptor poolDescriptor) {
-  level_zero_memory_provider_params_t params = {};
-  params.level_zero_context_handle = poolDescriptor.hContext->getZeHandle();
-  params.level_zero_device_handle =
+  umf_level_zero_memory_provider_params_handle_t params = NULL;
+  umf_result_t umf_ret = umfLevelZeroMemoryProviderParamsCreate(&params);
+  if (umf_ret != UMF_RESULT_SUCCESS) {
+    throw umf::umf2urResult(umf_ret);
+  }
+
+  umf_ret = umfLevelZeroMemoryProviderParamsSetContext(
+      params, poolDescriptor.hContext->getZeHandle());
+  if (umf_ret != UMF_RESULT_SUCCESS) {
+    throw umf::umf2urResult(umf_ret);
+  }
+
+  ze_device_handle_t level_zero_device_handle =
       poolDescriptor.hDevice ? poolDescriptor.hDevice->ZeDevice : nullptr;
-  params.memory_type = urToUmfMemoryType(poolDescriptor.type);
+  umf_ret = umfLevelZeroMemoryProviderParamsSetDevice(params,
+                                                      level_zero_device_handle);
+  if (umf_ret != UMF_RESULT_SUCCESS) {
+    throw umf::umf2urResult(umf_ret);
+  }
+
+  umf_ret = umfLevelZeroMemoryProviderParamsSetMemoryType(
+      params, urToUmfMemoryType(poolDescriptor.type));
+  if (umf_ret != UMF_RESULT_SUCCESS) {
+    throw umf::umf2urResult(umf_ret);
+  }
 
   std::vector<ze_device_handle_t> residentZeHandles;
 
   if (poolDescriptor.type == UR_USM_TYPE_DEVICE) {
-    assert(params.level_zero_device_handle);
+    assert(level_zero_device_handle);
     auto residentHandles =
         poolDescriptor.hContext->getP2PDevices(poolDescriptor.hDevice);
-    residentZeHandles.push_back(params.level_zero_device_handle);
+    residentZeHandles.push_back(level_zero_device_handle);
     for (auto &device : residentHandles) {
       residentZeHandles.push_back(device->ZeDevice);
     }
 
-    params.resident_device_handles = residentZeHandles.data();
-    params.resident_device_count = residentZeHandles.size();
+    umf_ret = umfLevelZeroMemoryProviderParamsSetResidentDevices(
+        params, residentZeHandles.data(), residentZeHandles.size());
+    if (umf_ret != UMF_RESULT_SUCCESS) {
+      throw umf::umf2urResult(umf_ret);
+    }
   }
 
   auto [ret, provider] =
@@ -134,8 +157,20 @@ ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t hContext,
   auto disjointPoolConfigs = initializeDisjointPoolConfig();
   if (auto limits = find_stype_node<ur_usm_pool_limits_desc_t>(pPoolDesc)) {
     for (auto &config : disjointPoolConfigs.Configs) {
-      config.MaxPoolableSize = limits->maxPoolableSize;
-      config.SlabMinSize = limits->minDriverAllocSize;
+      umf_result_t umf_ret = umfDisjointPoolParamsSetMaxPoolableSize(
+          config, limits->maxPoolableSize);
+      if (umf_ret != UMF_RESULT_SUCCESS) {
+        logger::error("urUSMPoolHandle: setting maxPoolableSize in "
+                      "DisjointPool params failed");
+        throw umf::umf2urResult(umf_ret);
+      }
+      umf_ret = umfDisjointPoolParamsSetSlabMinSize(config,
+                                                    limits->minDriverAllocSize);
+      if (umf_ret != UMF_RESULT_SUCCESS) {
+        logger::error("urUSMPoolHandle: setting slabMinSize in DisjointPool "
+                      "params failed");
+        throw umf::umf2urResult(umf_ret);
+      }
     }
   }
 

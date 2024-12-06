@@ -25,9 +25,10 @@ class DisjointPoolAllConfigs {
   public:
     size_t EnableBuffers = 1;
     std::shared_ptr<umf_disjoint_pool_shared_limits_t> limits;
-    umf_disjoint_pool_params_t Configs[DisjointPoolMemType::All];
+    umf_disjoint_pool_params_handle_t Configs[DisjointPoolMemType::All];
 
     DisjointPoolAllConfigs(int trace = 0);
+    ~DisjointPoolAllConfigs();
 };
 
 // Parse optional config parameters of this form:

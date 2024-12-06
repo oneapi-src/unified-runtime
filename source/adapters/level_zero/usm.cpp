@@ -1034,8 +1034,18 @@ ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t Context,
       const ur_usm_pool_limits_desc_t *Limits =
           reinterpret_cast<const ur_usm_pool_limits_desc_t *>(BaseDesc);
       for (auto &config : DisjointPoolConfigs.Configs) {
-        config.MaxPoolableSize = Limits->maxPoolableSize;
-        config.SlabMinSize = Limits->minDriverAllocSize;
+        if (umfDisjointPoolParamsSetMaxPoolableSize(
+                config, Limits->maxPoolableSize) != UMF_RESULT_SUCCESS) {
+          logger::error("urUSMPoolCreate: setting maxPoolableSize in "
+                        "DisjointPool params failed");
+          throw UsmAllocationException(UR_RESULT_ERROR_UNKNOWN);
+        }
+        if (umfDisjointPoolParamsSetSlabMinSize(
+                config, Limits->minDriverAllocSize) != UMF_RESULT_SUCCESS) {
+          logger::error("urUSMPoolCreate: setting slabMinSize in DisjointPool "
+                        "params failed");
+          throw UsmAllocationException(UR_RESULT_ERROR_UNKNOWN);
+        }
       }
       break;
     }

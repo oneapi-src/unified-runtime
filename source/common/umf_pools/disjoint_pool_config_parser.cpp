@@ -9,11 +9,23 @@
 //===----------------------------------------------------------------------===//
 
 #include "disjoint_pool_config_parser.hpp"
+#include "logger/ur_logger.hpp"
 
+#include <cassert>
 #include <iomanip>
 #include <iostream>
 #include <limits>
 #include <string>
+
+// Don't expect any failures in setting params; the only 2 reasons for failure
+// are not enough memory for allocating 'name' or a NULL params handle.
+#define UMF_CALL(RET)                                                          \
+    if (RET != UMF_RESULT_SUCCESS) {                                           \
+        if (RET == UMF_RESULT_ERROR_OUT_OF_HOST_MEMORY) {                      \
+            throw std::runtime_error("DisjointPool name allocation failed");   \
+        }                                                                      \
+        throw std::runtime_error("DisjointPool setting params failed");        \
+    }
 
 namespace usm {
 constexpr auto operator""_B(unsigned long long x) -> size_t { return x; }
@@ -27,45 +39,82 @@ constexpr auto operator""_GB(unsigned long long x) -> size_t {
     return x * 1024 * 1024 * 1024;
 }
 
-DisjointPoolAllConfigs::DisjointPoolAllConfigs(int trace) {
+DisjointPoolAllConfigs::~DisjointPoolAllConfigs() {
     for (auto &Config : Configs) {
-        Config = umfDisjointPoolParamsDefault();
-        Config.PoolTrace = trace;
+        umfDisjointPoolParamsDestroy(Config);
     }
+}
 
-    Configs[DisjointPoolMemType::Host].Name = "Host";
-    Configs[DisjointPoolMemType::Device].Name = "Device";
-    Configs[DisjointPoolMemType::Shared].Name = "Shared";
-    Configs[DisjointPoolMemType::SharedReadOnly].Name = "SharedReadOnly";
+DisjointPoolAllConfigs::DisjointPoolAllConfigs(int trace) {
+    try {
+        for (auto &Config : Configs) {
+            umf_disjoint_pool_params_handle_t params = NULL;
+            if (umfDisjointPoolParamsCreate(&params) != UMF_RESULT_SUCCESS) {
+                logger::error("DisjointPool params create failed");
+                assert(0);
+            }
+            UMF_CALL(umfDisjointPoolParamsSetTrace(params, trace));
 
-    // Buckets for Host use a minimum of the cache line size of 64 bytes.
-    // This prevents two separate allocations residing in the same cache line.
-    // Buckets for Device and Shared allocations will use starting size of 512.
-    // This is because memory compression on newer GPUs makes the
-    // minimum granularity 512 bytes instead of 64.
-    Configs[DisjointPoolMemType::Host].MinBucketSize = 64;
-    Configs[DisjointPoolMemType::Device].MinBucketSize = 512;
-    Configs[DisjointPoolMemType::Shared].MinBucketSize = 512;
-    Configs[DisjointPoolMemType::SharedReadOnly].MinBucketSize = 512;
+            Config = params;
+        }
 
-    // Initialize default pool settings.
-    Configs[DisjointPoolMemType::Host].MaxPoolableSize = 2_MB;
-    Configs[DisjointPoolMemType::Host].Capacity = 4;
-    Configs[DisjointPoolMemType::Host].SlabMinSize = 64_KB;
+        UMF_CALL(umfDisjointPoolParamsSetName(
+            Configs[DisjointPoolMemType::Host], "Host"));
+        UMF_CALL(umfDisjointPoolParamsSetName(
+            Configs[DisjointPoolMemType::Device], "Device"));
+        UMF_CALL(umfDisjointPoolParamsSetName(
+            Configs[DisjointPoolMemType::Shared], "Shared"));
+        UMF_CALL(umfDisjointPoolParamsSetName(
+            Configs[DisjointPoolMemType::SharedReadOnly], "SharedReadOnly"));
 
-    Configs[DisjointPoolMemType::Device].MaxPoolableSize = 4_MB;
-    Configs[DisjointPoolMemType::Device].Capacity = 4;
-    Configs[DisjointPoolMemType::Device].SlabMinSize = 64_KB;
+        // Buckets for Host use a minimum of the cache line size of 64 bytes.
+        // This prevents two separate allocations residing in the same cache line.
+        // Buckets for Device and Shared allocations will use starting size of 512.
+        // This is because memory compression on newer GPUs makes the
+        // minimum granularity 512 bytes instead of 64.
+        UMF_CALL(umfDisjointPoolParamsSetMinBucketSize(
+            Configs[DisjointPoolMemType::Host], 64));
+        UMF_CALL(umfDisjointPoolParamsSetMinBucketSize(
+            Configs[DisjointPoolMemType::Device], 512));
+        UMF_CALL(umfDisjointPoolParamsSetMinBucketSize(
+            Configs[DisjointPoolMemType::Shared], 512));
+        UMF_CALL(umfDisjointPoolParamsSetMinBucketSize(
+            Configs[DisjointPoolMemType::SharedReadOnly], 512));
 
-    // Disable pooling of shared USM allocations.
-    Configs[DisjointPoolMemType::Shared].MaxPoolableSize = 0;
-    Configs[DisjointPoolMemType::Shared].Capacity = 0;
-    Configs[DisjointPoolMemType::Shared].SlabMinSize = 2_MB;
+        // Initialize default pool settings.
+        UMF_CALL(umfDisjointPoolParamsSetMaxPoolableSize(
+            Configs[DisjointPoolMemType::Host], 2_MB));
+        UMF_CALL(umfDisjointPoolParamsSetCapacity(
+            Configs[DisjointPoolMemType::Host], 4));
+        UMF_CALL(umfDisjointPoolParamsSetSlabMinSize(
+            Configs[DisjointPoolMemType::Host], 64_KB));
 
-    // Allow pooling of shared allocations that are only modified on host.
-    Configs[DisjointPoolMemType::SharedReadOnly].MaxPoolableSize = 4_MB;
-    Configs[DisjointPoolMemType::SharedReadOnly].Capacity = 4;
-    Configs[DisjointPoolMemType::SharedReadOnly].SlabMinSize = 2_MB;
+        UMF_CALL(umfDisjointPoolParamsSetMaxPoolableSize(
+            Configs[DisjointPoolMemType::Device], 4_MB));
+        UMF_CALL(umfDisjointPoolParamsSetCapacity(
+            Configs[DisjointPoolMemType::Device], 4));
+        UMF_CALL(umfDisjointPoolParamsSetSlabMinSize(
+            Configs[DisjointPoolMemType::Device], 64_KB));
+
+        // Disable pooling of shared USM allocations.
+        UMF_CALL(umfDisjointPoolParamsSetMaxPoolableSize(
+            Configs[DisjointPoolMemType::Shared], 0));
+        UMF_CALL(umfDisjointPoolParamsSetCapacity(
+            Configs[DisjointPoolMemType::Shared], 0));
+        UMF_CALL(umfDisjointPoolParamsSetSlabMinSize(
+            Configs[DisjointPoolMemType::Shared], 2_MB));
+
+        // Allow pooling of shared allocations that are only modified on host.
+        UMF_CALL(umfDisjointPoolParamsSetMaxPoolableSize(
+            Configs[DisjointPoolMemType::SharedReadOnly], 4_MB));
+        UMF_CALL(umfDisjointPoolParamsSetCapacity(
+            Configs[DisjointPoolMemType::SharedReadOnly], 4));
+        UMF_CALL(umfDisjointPoolParamsSetSlabMinSize(
+            Configs[DisjointPoolMemType::SharedReadOnly], 2_MB));
+    } catch (const std::runtime_error &e) {
+        logger::error(e.what());
+        assert(0);
+    }
 }
 
 DisjointPoolAllConfigs parseDisjointPoolConfig(const std::string &config,
@@ -120,34 +169,45 @@ DisjointPoolAllConfigs parseDisjointPoolConfig(const std::string &config,
                                                 DisjointPoolMemType memType =
                                                     DisjointPoolMemType::All) {
         bool ParamWasSet;
+        size_t TmpValue = 0;
         DisjointPoolMemType LM = memType;
         if (memType == DisjointPoolMemType::All) {
             LM = DisjointPoolMemType::Host;
         }
 
-        bool More = ParamParser(Params, AllConfigs.Configs[LM].MaxPoolableSize,
-                                ParamWasSet);
+        bool More = ParamParser(Params, TmpValue, ParamWasSet);
         if (ParamWasSet && memType == DisjointPoolMemType::All) {
             for (auto &Config : AllConfigs.Configs) {
-                Config.MaxPoolableSize = AllConfigs.Configs[LM].MaxPoolableSize;
+                UMF_CALL(
+                    umfDisjointPoolParamsSetMaxPoolableSize(Config, TmpValue));
+            }
+        } else if (ParamWasSet) {
+            UMF_CALL(umfDisjointPoolParamsSetMaxPoolableSize(
+                AllConfigs.Configs[LM], TmpValue));
+        }
+
+        if (More) {
+            More = ParamParser(Params, TmpValue, ParamWasSet);
+            if (ParamWasSet && memType == DisjointPoolMemType::All) {
+                for (auto &Config : AllConfigs.Configs) {
+                    UMF_CALL(
+                        umfDisjointPoolParamsSetCapacity(Config, TmpValue));
+                }
+            } else if (ParamWasSet) {
+                UMF_CALL(umfDisjointPoolParamsSetCapacity(
+                    AllConfigs.Configs[LM], TmpValue));
             }
         }
         if (More) {
-            More = ParamParser(Params, AllConfigs.Configs[LM].Capacity,
-                               ParamWasSet);
+            ParamParser(Params, TmpValue, ParamWasSet);
             if (ParamWasSet && memType == DisjointPoolMemType::All) {
                 for (auto &Config : AllConfigs.Configs) {
-                    Config.Capacity = AllConfigs.Configs[LM].Capacity;
+                    UMF_CALL(
+                        umfDisjointPoolParamsSetSlabMinSize(Config, TmpValue));
                 }
-            }
-        }
-        if (More) {
-            ParamParser(Params, AllConfigs.Configs[LM].SlabMinSize,
-                        ParamWasSet);
-            if (ParamWasSet && memType == DisjointPoolMemType::All) {
-                for (auto &Config : AllConfigs.Configs) {
-                    Config.SlabMinSize = AllConfigs.Configs[LM].SlabMinSize;
-                }
+            } else if (ParamWasSet) {
+                UMF_CALL(umfDisjointPoolParamsSetSlabMinSize(
+                    AllConfigs.Configs[LM], TmpValue));
             }
         }
     };
@@ -193,18 +253,26 @@ DisjointPoolAllConfigs parseDisjointPoolConfig(const std::string &config,
                 }
                 Params.erase(0, Pos + 1);
                 do {
-                    size_t Pos = Params.find(';');
-                    if (Pos != std::string::npos) {
-                        if (Pos > 0) {
-                            std::string MemParams = Params.substr(0, Pos);
-                            MemTypeParser(MemParams);
-                        }
-                        Params.erase(0, Pos + 1);
-                        if (Params.size() == 0) {
+                    try {
+                        size_t Pos = Params.find(';');
+                        if (Pos != std::string::npos) {
+                            if (Pos > 0) {
+                                std::string MemParams = Params.substr(0, Pos);
+                                MemTypeParser(MemParams);
+                            }
+                            Params.erase(0, Pos + 1);
+                            if (Params.size() == 0) {
+                                break;
+                            }
+                        } else {
+                            MemTypeParser(Params);
                             break;
                         }
-                    } else {
-                        MemTypeParser(Params);
+                    } catch (const std::runtime_error &e) {
+                        logger::error("Error in parsing DisjointPool config, "
+                                      "returning default config values. ",
+                                      e.what());
+                        AllConfigs = DisjointPoolAllConfigs(trace);
                         break;
                     }
                 } while (true);
@@ -224,8 +292,9 @@ DisjointPoolAllConfigs parseDisjointPoolConfig(const std::string &config,
         umfDisjointPoolSharedLimitsDestroy);
 
     for (auto &Config : AllConfigs.Configs) {
-        Config.SharedLimits = AllConfigs.limits.get();
-        Config.PoolTrace = trace;
+        UMF_CALL(umfDisjointPoolParamsSetSharedLimits(Config,
+                                                      AllConfigs.limits.get()));
+        UMF_CALL(umfDisjointPoolParamsSetTrace(Config, trace));
     }
 
     if (!trace) {
@@ -236,39 +305,39 @@ DisjointPoolAllConfigs parseDisjointPoolConfig(const std::string &config,
                  "Variable)"
               << std::endl;
 
-    std::cout << std::setw(15) << "Parameter" << std::setw(12) << "Host"
-              << std::setw(12) << "Device" << std::setw(12) << "Shared RW"
-              << std::setw(12) << "Shared RO" << std::endl;
-    std::cout
-        << std::setw(15) << "SlabMinSize" << std::setw(12)
-        << AllConfigs.Configs[DisjointPoolMemType::Host].SlabMinSize
-        << std::setw(12)
-        << AllConfigs.Configs[DisjointPoolMemType::Device].SlabMinSize
-        << std::setw(12)
-        << AllConfigs.Configs[DisjointPoolMemType::Shared].SlabMinSize
-        << std::setw(12)
-        << AllConfigs.Configs[DisjointPoolMemType::SharedReadOnly].SlabMinSize
-        << std::endl;
-    std::cout << std::setw(15) << "MaxPoolableSize" << std::setw(12)
-              << AllConfigs.Configs[DisjointPoolMemType::Host].MaxPoolableSize
-              << std::setw(12)
-              << AllConfigs.Configs[DisjointPoolMemType::Device].MaxPoolableSize
-              << std::setw(12)
-              << AllConfigs.Configs[DisjointPoolMemType::Shared].MaxPoolableSize
-              << std::setw(12)
-              << AllConfigs.Configs[DisjointPoolMemType::SharedReadOnly]
-                     .MaxPoolableSize
-              << std::endl;
-    std::cout
-        << std::setw(15) << "Capacity" << std::setw(12)
-        << AllConfigs.Configs[DisjointPoolMemType::Host].Capacity
-        << std::setw(12)
-        << AllConfigs.Configs[DisjointPoolMemType::Device].Capacity
-        << std::setw(12)
-        << AllConfigs.Configs[DisjointPoolMemType::Shared].Capacity
-        << std::setw(12)
-        << AllConfigs.Configs[DisjointPoolMemType::SharedReadOnly].Capacity
-        << std::endl;
+    // TODO: fixme, accessing config values directly is no longer allowed - API's changed
+    // std::cout << std::setw(15) << "Parameter" << std::setw(12) << "Host"
+    //           << std::setw(12) << "Device" << std::setw(12) << "Shared RW"
+    //           << std::setw(12) << "Shared RO" << std::endl;
+    // std::cout
+    //     << std::setw(15) << "SlabMinSize" << std::setw(12)
+    //     << umfDisjointPoolParamsGetSlabMinSize(AllConfigs.Configs[DisjointPoolMemType::Host])
+    //     << std::setw(12)
+    //     << umfDisjointPoolParamsGetSlabMinSize(AllConfigs.Configs[DisjointPoolMemType::Device])
+    //     << std::setw(12)
+    //     << umfDisjointPoolParamsGetSlabMinSize(AllConfigs.Configs[DisjointPoolMemType::Shared])
+    //     << std::setw(12)
+    //     << umfDisjointPoolParamsGetSlabMinSize(AllConfigs.Configs[DisjointPoolMemType::SharedReadOnly])
+    //     << std::endl;
+    // std::cout << std::setw(15) << "MaxPoolableSize" << std::setw(12)
+    //           << umfDisjointPoolParamsGetMaxPoolableSize(AllConfigs.Configs[DisjointPoolMemType::Host])
+    //           << std::setw(12)
+    //           << umfDisjointPoolParamsGetMaxPoolableSize(AllConfigs.Configs[DisjointPoolMemType::Device])
+    //           << std::setw(12)
+    //           << umfDisjointPoolParamsGetMaxPoolableSize(AllConfigs.Configs[DisjointPoolMemType::Shared])
+    //           << std::setw(12)
+    //           << umfDisjointPoolParamsGetMaxPoolableSize(AllConfigs.Configs[DisjointPoolMemType::SharedReadOnly])
+    //           << std::endl;
+    // std::cout
+    //     << std::setw(15) << "Capacity" << std::setw(12)
+    //     << umfDisjointPoolParamsGetCapacity(AllConfigs.Configs[DisjointPoolMemType::Host])
+    //     << std::setw(12)
+    //     << umfDisjointPoolParamsGetCapacity(AllConfigs.Configs[DisjointPoolMemType::Device])
+    //     << std::setw(12)
+    //     << umfDisjointPoolParamsGetCapacity(AllConfigs.Configs[DisjointPoolMemType::Shared])
+    //     << std::setw(12)
+    //     << umfDisjointPoolParamsGetCapacity(AllConfigs.Configs[DisjointPoolMemType::SharedReadOnly])
+    //     << std::endl;
     std::cout << std::setw(15) << "MaxPoolSize" << std::setw(12) << MaxSize
               << std::endl;
     std::cout << std::setw(15) << "EnableBuffers" << std::setw(12)
