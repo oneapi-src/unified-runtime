@@ -10,6 +10,10 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  UR_LOG_LEVEL_ZERO: "level:debug;flush:debug"
+  UMF_LOG: "level:debug;flush:debug;output:stdout"
+
 jobs:
   examples:
     name: Multi Device testing

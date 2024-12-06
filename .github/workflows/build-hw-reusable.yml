@@ -32,11 +32,12 @@ permissions:
   contents: read
 
 env:
-  UR_LOG_CUDA: "level:error;flush:error"
+  UR_LOG_CUDA: "level:debug;flush:debug"
   UR_LOG_HIP: "level:error;flush:error"
-  UR_LOG_LEVEL_ZERO: "level:error;flush:error"
   UR_LOG_NATIVE_CPU: "level:error;flush:error"
   UR_LOG_OPENCL: "level:error;flush:error"
+  UR_LOG_LEVEL_ZERO: "level:debug;flush:debug"
+  UMF_LOG: "level:debug;flush:debug;output:stdout"
 
 jobs:
   adapter-build-hw:

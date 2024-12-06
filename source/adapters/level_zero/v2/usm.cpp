@@ -129,7 +129,7 @@ makePool(umf_disjoint_pool_params_handle_t *poolParams,
   }
 
   auto [ret, provider] =
-      umf::providerMakeUniqueFromOps(umfLevelZeroMemoryProviderOps(), &params);
+      umf::providerMakeUniqueFromOps(umfLevelZeroMemoryProviderOps(), params);
   if (ret != UMF_RESULT_SUCCESS) {
     throw umf::umf2urResult(ret);
   }
