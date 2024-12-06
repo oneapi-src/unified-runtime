@@ -12,18 +12,36 @@
 #include <umf/pools/pool_disjoint.h>
 
 #include <memory>
+#include <mutex>
 #include <string>
+#include <thread>
 #include <unordered_map>
 
 namespace usm {
 enum DisjointPoolMemType { Host, Device, Shared, SharedReadOnly, All };
+
+typedef struct umf_disjoint_pool_config_t {
+    umf_disjoint_pool_config_t();
+
+    size_t SlabMinSize;
+    size_t MaxPoolableSize;
+    size_t Capacity;
+    size_t MinBucketSize;
+    int PoolTrace;
+    umf_disjoint_pool_shared_limits_t *SharedLimits;
+    const char *Name;
+} umf_disjoint_pool_config_t;
+
+using umfDisjointPoolParamsHandle =
+    std::unique_ptr<umf_disjoint_pool_params_t,
+                    decltype(&umfDisjointPoolParamsDestroy)>;
 
 // Stores configuration for all instances of USM allocator
 class DisjointPoolAllConfigs {
   public:
     size_t EnableBuffers = 1;
     std::shared_ptr<umf_disjoint_pool_shared_limits_t> limits;
-    umf_disjoint_pool_params_t Configs[DisjointPoolMemType::All];
+    umf_disjoint_pool_config_t Configs[DisjointPoolMemType::All];
 
     DisjointPoolAllConfigs(int trace = 0);
 };
@@ -54,6 +72,30 @@ class DisjointPoolAllConfigs {
 // "1;32M;host:1M,4,64K;device:1M,4,64K;shared:0,0,2M"
 DisjointPoolAllConfigs parseDisjointPoolConfig(const std::string &config,
                                                int trace = 1);
+
+static void UMF_CALL_THROWS(umf_result_t res) {
+    if (res != UMF_RESULT_SUCCESS) {
+        throw res;
+    }
+}
+
+static inline umfDisjointPoolParamsHandle
+getUmfParamsHandle(umf_disjoint_pool_config_t &config) {
+    umf_disjoint_pool_params_handle_t handle;
+    UMF_CALL_THROWS(umfDisjointPoolParamsCreate(&handle));
+    UMF_CALL_THROWS(
+        umfDisjointPoolParamsSetSlabMinSize(handle, config.SlabMinSize));
+    UMF_CALL_THROWS(umfDisjointPoolParamsSetMaxPoolableSize(
+        handle, config.MaxPoolableSize));
+    UMF_CALL_THROWS(umfDisjointPoolParamsSetCapacity(handle, config.Capacity));
+    UMF_CALL_THROWS(
+        umfDisjointPoolParamsSetMinBucketSize(handle, config.MinBucketSize));
+    UMF_CALL_THROWS(
+        umfDisjointPoolParamsSetSharedLimits(handle, config.SharedLimits));
+    UMF_CALL_THROWS(umfDisjointPoolParamsSetName(handle, config.Name));
+    UMF_CALL_THROWS(umfDisjointPoolParamsSetTrace(handle, config.PoolTrace));
+    return umfDisjointPoolParamsHandle(handle, &umfDisjointPoolParamsDestroy);
+}
 } // namespace usm
 
 #endif
