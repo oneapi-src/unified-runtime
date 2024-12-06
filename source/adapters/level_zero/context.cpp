@@ -322,6 +322,19 @@ ur_result_t ur_context_handle_t_::initialize() {
   ZE2UR_CALL(
       zeCommandListCreateImmediate,
       (ZeContext, Device->ZeDevice, &ZeCommandQueueDesc, &ZeCommandListInit));
+
+  if (Device->useDriverInOrderLists() &&
+      Device->useDriverCounterBasedEvents()) {
+    logger::debug(
+        "L0 Synchronous Immediate Command List needed with In Order property.");
+    ZeStruct<ze_command_queue_desc_t> ZeCommandQueueDescInOrder;
+    ZeCommandQueueDescInOrder = ZeCommandQueueDesc;
+    ZeCommandQueueDescInOrder.flags |= ZE_COMMAND_LIST_FLAG_IN_ORDER;
+    ZE2UR_CALL(zeCommandListCreateImmediate,
+               (ZeContext, Device->ZeDevice, &ZeCommandQueueDescInOrder,
+                &ZeCommandListInitInOrder));
+    this->InOrderListInitEnabled = true;
+  }
   return UR_RESULT_SUCCESS;
 }
 
@@ -433,6 +446,15 @@ ur_result_t ur_context_handle_t_::finalize() {
   // Gracefully handle the case that L0 was already unloaded.
   if (ZeResult && ZeResult != ZE_RESULT_ERROR_UNINITIALIZED)
     return ze2urResult(ZeResult);
+
+  if (this->InOrderListInitEnabled) {
+    // Destroy the in order command list used for initializations
+    auto ZeResultInOrder =
+        ZE_CALL_NOCHECK(zeCommandListDestroy, (ZeCommandListInitInOrder));
+    // Gracefully handle the case that L0 was already unloaded.
+    if (ZeResultInOrder && ZeResultInOrder != ZE_RESULT_ERROR_UNINITIALIZED)
+      return ze2urResult(ZeResultInOrder);
+  }
 
   std::scoped_lock<ur_mutex> Lock(ZeCommandListCacheMutex);
   for (auto &List : ZeComputeCommandListCache) {

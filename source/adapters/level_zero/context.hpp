@@ -85,6 +85,15 @@ struct ur_context_handle_t_ : _ur_object {
   // support of the multiple devices per context will be added.
   ze_command_list_handle_t ZeCommandListInit{};
 
+  // Immediate Level Zero command list for the device that has the property of
+  // in-order execution. This command list is used for memory copy operations.
+  // Due to different event types supported, one needs to use separate command
+  // list types given Counting Events are being used.
+  ze_command_list_handle_t ZeCommandListInitInOrder{};
+
+  // Indicates if the immediate command list with in-order property is enabled.
+  bool InOrderListInitEnabled = false;
+
   // Mutex for the immediate command list. Per the Level Zero spec memory copy
   // operations submitted to an immediate command list are not allowed to be
   // called from simultaneous threads.

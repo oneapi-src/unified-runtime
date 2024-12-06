@@ -2165,7 +2165,13 @@ ur_result_t _ur_buffer::getZeHandle(char *&ZeHandle, access_mode_t AccessMode,
       waitlist.ZeEventList = nullptr;
       waitlist.Length = 0;
       uint32_t EventListIndex = 0;
+      bool InOrderListRequired = false;
       for (unsigned i = 0; i < numWaitEvents; ++i) {
+        // If any of the wait events are of the type "counter" then we need to
+        // use an in order list otherwise the event is invalid in this list.
+        if (phWaitEvents[i]->CounterBasedEventsEnabled) {
+          InOrderListRequired = true;
+        }
         if (phWaitEvents[i]->HostVisibleEvent) {
           ZE2UR_CALL(zeEventHostSynchronize,
                      (phWaitEvents[i]->ZeEvent, UINT64_MAX));
@@ -2181,9 +2187,14 @@ ur_result_t _ur_buffer::getZeHandle(char *&ZeHandle, access_mode_t AccessMode,
         }
       }
       if (waitlist.Length > 0) {
-        ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
-                   (UrContext->ZeCommandListInit, waitlist.Length,
-                    waitlist.ZeEventList));
+        ze_command_list_handle_t ZeCommandListForInit =
+            UrContext->ZeCommandListInit;
+        if (InOrderListRequired) {
+          ZeCommandListForInit = UrContext->ZeCommandListInitInOrder;
+        }
+        ZE2UR_CALL(
+            zeCommandListAppendWaitOnEvents,
+            (ZeCommandListForInit, waitlist.Length, waitlist.ZeEventList));
       }
 
       // Copy valid buffer data to this allocation.
