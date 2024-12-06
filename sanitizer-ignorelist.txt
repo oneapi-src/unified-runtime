@@ -4,3 +4,9 @@
 # in order to call std::allocator_traits<T>::construct.
 # See: https://github.com/llvm/llvm-project/blob/main/compiler-rt/lib/cfi/cfi_ignorelist.txt
 fun:_ZNSt23_Sp_counted_ptr_inplace*
+
+# std::make_shared use __aligned_buffer as storage, and cast to
+# uninitialized T* (libstdc++)
+# See: https://github.com/llvm/llvm-project/pull/118599
+fun:*__aligned_buffer*
+
