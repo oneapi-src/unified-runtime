@@ -405,7 +405,12 @@ urProgramGetInfo(ur_program_handle_t hProgram, ur_program_info_t propName,
     return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
   case UR_PROGRAM_INFO_NUM_KERNELS:
   case UR_PROGRAM_INFO_IL:
-    return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
+    // HIP only supports urProgramCreateWithBinary, so we can always return
+    // nothing for INFO_IL.
+    if (pPropSizeRet) {
+      *pPropSizeRet = 0;
+    }
+    return UR_RESULT_SUCCESS;
   default:
     break;
   }
