@@ -2404,6 +2404,11 @@ ur_result_t UR_APICALL urUSMSharedAlloc(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Free the USM memory object
 ///
+/// @details
+///     - Note that implementations are required to wait for previously enqueued
+///       commands that may be accessing `pMem` to finish before freeing the
+///       memory.
+///
 /// @returns
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
@@ -8893,13 +8898,18 @@ ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hKernel`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pLocalWorkSize`
 ///         + `NULL == pGroupCountRet`
 ///     - ::UR_RESULT_ERROR_INVALID_KERNEL
 ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
     ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
-    size_t
-        localWorkSize, ///< [in] number of local work-items that will form a work-group when the
-                       ///< kernel is launched
+    uint32_t
+        workDim, ///< [in] number of dimensions, from 1 to 3, to specify the work-group
+                 ///< work-items
+    const size_t *
+        pLocalWorkSize, ///< [in] pointer to an array of workDim unsigned values that specify the
+    ///< number of local work-items forming a work-group that will execute the
+    ///< kernel function.
     size_t
         dynamicSharedMemorySize, ///< [in] size of dynamic shared memory, for each work-group, in bytes,
     ///< that will be used when the kernel is launched
@@ -8913,7 +8923,8 @@ ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
     }
 
     return pfnSuggestMaxCooperativeGroupCountExp(
-        hKernel, localWorkSize, dynamicSharedMemorySize, pGroupCountRet);
+        hKernel, workDim, pLocalWorkSize, dynamicSharedMemorySize,
+        pGroupCountRet);
 } catch (...) {
     return exceptionToResult(std::current_exception());
 }
