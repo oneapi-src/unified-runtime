@@ -10,3 +10,7 @@ fun:_ZNSt23_Sp_counted_ptr_inplace*
 # See: https://github.com/llvm/llvm-project/pull/118599
 fun:*__aligned_buffer*
 
+[cfi-nvcall]
+# For sanitizer layer symbolizer
+# We don't meet the requirement to enable nvcall check
+src:*llvm/include/llvm/Support/raw_ostream.h
