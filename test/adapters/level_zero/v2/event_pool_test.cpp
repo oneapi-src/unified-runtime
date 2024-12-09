@@ -26,6 +26,14 @@ using namespace v2;
 
 static constexpr size_t MAX_DEVICES = 10;
 
+// mock necessary functions from context, we can't pull in entire context implementation due to
+// a lot of other dependencies
+std::vector<ur_device_handle_t> mockVec{};
+const std::vector<ur_device_handle_t> &
+ur_context_handle_t_::getDevices() const {
+    return mockVec;
+}
+
 enum ProviderType {
     TEST_PROVIDER_NORMAL,
     TEST_PROVIDER_COUNTER,
@@ -92,14 +100,16 @@ printParams(const testing::TestParamInfo<typename T::ParamType> &info) {
     return params_stream.str();
 }
 
-struct EventPoolTest : public uur::urContextTestWithParam<ProviderParams> {
+struct EventPoolTest : public uur::urQueueTestWithParam<ProviderParams> {
     void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(urContextTestWithParam::SetUp());
+        UUR_RETURN_ON_FATAL_FAILURE(urQueueTestWithParam::SetUp());
 
         auto params = getParam();
 
+        mockVec.push_back(device);
+
         cache = std::unique_ptr<event_pool_cache>(new event_pool_cache(
-            MAX_DEVICES,
+            nullptr, MAX_DEVICES,
             [this, params](DeviceId, event_flags_t flags)
                 -> std::unique_ptr<event_provider> {
                 // normally id would be used to find the appropriate device to create the provider
@@ -109,14 +119,14 @@ struct EventPoolTest : public uur::urContextTestWithParam<ProviderParams> {
                                                               device);
                 case TEST_PROVIDER_NORMAL:
                     return std::make_unique<provider_normal>(
-                        context, device, params.queue, flags);
+                        context, params.queue, flags);
                 }
                 return nullptr;
             }));
     }
     void TearDown() override {
         cache.reset();
-        UUR_RETURN_ON_FATAL_FAILURE(urContextTestWithParam::TearDown());
+        UUR_RETURN_ON_FATAL_FAILURE(urQueueTestWithParam::TearDown());
     }
 
     std::unique_ptr<event_pool_cache> cache;
@@ -150,8 +160,8 @@ TEST_P(EventPoolTest, Basic) {
         {
             auto pool = cache->borrow(device->Id.value(), getParam().flags);
 
-            first = pool->allocate(reinterpret_cast<ur_queue_handle_t>(0x1),
-                                   UR_COMMAND_KERNEL_LAUNCH);
+            first = pool->allocate();
+            first->resetQueueAndCommand(queue, UR_COMMAND_KERNEL_LAUNCH);
             zeFirst = first->getZeEvent();
 
             urEventRelease(first);
@@ -161,8 +171,8 @@ TEST_P(EventPoolTest, Basic) {
         {
             auto pool = cache->borrow(device->Id.value(), getParam().flags);
 
-            second = pool->allocate(reinterpret_cast<ur_queue_handle_t>(0x1),
-                                    UR_COMMAND_KERNEL_LAUNCH);
+            second = pool->allocate();
+            first->resetQueueAndCommand(queue, UR_COMMAND_KERNEL_LAUNCH);
             zeSecond = second->getZeEvent();
 
             urEventRelease(second);
@@ -181,9 +191,9 @@ TEST_P(EventPoolTest, Threaded) {
                 auto pool = cache->borrow(device->Id.value(), getParam().flags);
                 std::vector<ur_event_handle_t> events;
                 for (int i = 0; i < 100; ++i) {
-                    events.push_back(
-                        pool->allocate(reinterpret_cast<ur_queue_handle_t>(0x1),
-                                       UR_COMMAND_KERNEL_LAUNCH));
+                    events.push_back(pool->allocate());
+                    events.back()->resetQueueAndCommand(
+                        queue, UR_COMMAND_KERNEL_LAUNCH);
                 }
                 for (int i = 0; i < 100; ++i) {
                     urEventRelease(events[i]);
@@ -201,9 +211,9 @@ TEST_P(EventPoolTest, ProviderNormalUseMostFreePool) {
     auto pool = cache->borrow(device->Id.value(), getParam().flags);
     std::list<ur_event_handle_t> events;
     for (int i = 0; i < 128; ++i) {
-        events.push_back(
-            pool->allocate(reinterpret_cast<ur_queue_handle_t>(0x1),
-                           UR_COMMAND_KERNEL_LAUNCH));
+        auto event = pool->allocate();
+        event->resetQueueAndCommand(queue, UR_COMMAND_KERNEL_LAUNCH);
+        events.push_back(event);
     }
     auto frontZeHandle = events.front()->getZeEvent();
     for (int i = 0; i < 8; ++i) {
@@ -211,8 +221,8 @@ TEST_P(EventPoolTest, ProviderNormalUseMostFreePool) {
         events.pop_front();
     }
     for (int i = 0; i < 8; ++i) {
-        auto e = pool->allocate(reinterpret_cast<ur_queue_handle_t>(0x1),
-                                UR_COMMAND_KERNEL_LAUNCH);
+        auto e = pool->allocate();
+        e->resetQueueAndCommand(queue, UR_COMMAND_KERNEL_LAUNCH);
         events.push_back(e);
     }
 
@@ -222,4 +232,66 @@ TEST_P(EventPoolTest, ProviderNormalUseMostFreePool) {
     for (auto e : events) {
         urEventRelease(e);
     }
+}
+
+using EventPoolTestWithQueue = uur::urQueueTestWithParam<ProviderParams>;
+
+UUR_TEST_SUITE_P(EventPoolTestWithQueue, testing::ValuesIn(test_cases),
+                 printParams<EventPoolTest>);
+
+TEST_P(EventPoolTestWithQueue, WithTimestamp) {
+    if (!(getParam().flags & EVENT_FLAGS_PROFILING_ENABLED)) {
+        GTEST_SKIP() << "Profiling needs to be enabled";
+    }
+
+    ur_event_handle_t hEvent;
+    ASSERT_SUCCESS(urEventCreateWithNativeHandle(
+        reinterpret_cast<ur_native_handle_t>(nullptr), context, nullptr,
+        &hEvent));
+
+    ur_device_handle_t hDevice;
+    ASSERT_SUCCESS(urQueueGetInfo(queue, UR_QUEUE_INFO_DEVICE, sizeof(device),
+                                  &hDevice, nullptr));
+
+    ur_event_handle_t first;
+    ze_event_handle_t zeFirst;
+    {
+        ASSERT_SUCCESS(
+            urEnqueueTimestampRecordingExp(queue, false, 1, &hEvent, &first));
+        zeFirst = first->getZeEvent();
+
+        urEventRelease(
+            first); // should not actually release the event until recording is completed
+    }
+    ur_event_handle_t second;
+    ze_event_handle_t zeSecond;
+    {
+        ASSERT_SUCCESS(
+            urEnqueueEventsWaitWithBarrier(queue, 0, nullptr, &second));
+        zeSecond = second->getZeEvent();
+        ASSERT_SUCCESS(urEventRelease(second));
+    }
+    ASSERT_NE(first, second);
+    ASSERT_NE(zeFirst, zeSecond);
+
+    ze_event_handle_t zeEvent;
+    ASSERT_SUCCESS(urEventGetNativeHandle(
+        hEvent, reinterpret_cast<ur_native_handle_t *>(&zeEvent)));
+    ASSERT_EQ(zeEventHostSignal(zeEvent), ZE_RESULT_SUCCESS);
+
+    ASSERT_SUCCESS(urQueueFinish(queue));
+
+    // Now, the first event should be avilable for reuse
+    ur_event_handle_t third;
+    ze_event_handle_t zeThird;
+    {
+        ASSERT_SUCCESS(
+            urEnqueueEventsWaitWithBarrier(queue, 0, nullptr, &third));
+        zeThird = third->getZeEvent();
+        ASSERT_SUCCESS(urEventRelease(third));
+
+        ASSERT_FALSE(third->isTimestamped());
+    }
+    ASSERT_EQ(first, third);
+    ASSERT_EQ(zeFirst, zeThird);
 }

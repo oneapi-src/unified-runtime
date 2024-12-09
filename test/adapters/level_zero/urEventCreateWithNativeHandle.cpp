@@ -16,7 +16,8 @@ UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urLevelZeroEventNativeHandleTest);
 
 #define TEST_MEMCPY_SIZE 4096
 
-TEST_P(urLevelZeroEventNativeHandleTest, WaitForNative) {
+std::unique_ptr<_ze_event_handle_t, std::function<void(ze_event_handle_t)>>
+createZeEvent(ur_context_handle_t hContext, ur_device_handle_t hDevice) {
     ze_event_pool_desc_t desc;
     desc.stype = ZE_STRUCTURE_TYPE_EVENT_POOL_DESC;
     desc.pNext = nullptr;
@@ -24,14 +25,14 @@ TEST_P(urLevelZeroEventNativeHandleTest, WaitForNative) {
     desc.flags = ZE_EVENT_POOL_FLAG_HOST_VISIBLE;
 
     ur_native_handle_t nativeContext;
-    ASSERT_SUCCESS(urContextGetNativeHandle(context, &nativeContext));
+    EXPECT_SUCCESS(urContextGetNativeHandle(hContext, &nativeContext));
 
     ur_native_handle_t nativeDevice;
-    ASSERT_SUCCESS(urDeviceGetNativeHandle(device, &nativeDevice));
+    EXPECT_SUCCESS(urDeviceGetNativeHandle(hDevice, &nativeDevice));
 
     ze_event_pool_handle_t pool = nullptr;
 
-    ASSERT_EQ(zeEventPoolCreate((ze_context_handle_t)nativeContext, &desc, 1,
+    EXPECT_EQ(zeEventPoolCreate((ze_context_handle_t)nativeContext, &desc, 1,
                                 (ze_device_handle_t *)&nativeDevice, &pool),
               ZE_RESULT_SUCCESS);
 
@@ -43,7 +44,18 @@ TEST_P(urLevelZeroEventNativeHandleTest, WaitForNative) {
     eventDesc.wait = 0;
 
     ze_event_handle_t zeEvent;
-    ASSERT_EQ(zeEventCreate(pool, &eventDesc, &zeEvent), ZE_RESULT_SUCCESS);
+    EXPECT_EQ(zeEventCreate(pool, &eventDesc, &zeEvent), ZE_RESULT_SUCCESS);
+
+    return std::unique_ptr<_ze_event_handle_t,
+                           std::function<void(ze_event_handle_t)>>(
+        zeEvent, [pool](ze_event_handle_t zeEvent) {
+            zeEventDestroy(zeEvent);
+            zeEventPoolDestroy(pool);
+        });
+}
+
+TEST_P(urLevelZeroEventNativeHandleTest, WaitForNative) {
+    auto zeEvent = createZeEvent(context, device);
 
     ur_event_native_properties_t pprops;
     pprops.isNativeHandleOwned = false;
@@ -51,8 +63,8 @@ TEST_P(urLevelZeroEventNativeHandleTest, WaitForNative) {
     pprops.stype = UR_STRUCTURE_TYPE_EVENT_NATIVE_PROPERTIES;
 
     ur_event_handle_t urEvent;
-    ASSERT_SUCCESS(urEventCreateWithNativeHandle((ur_native_handle_t)zeEvent,
-                                                 context, &pprops, &urEvent));
+    ASSERT_SUCCESS(urEventCreateWithNativeHandle(
+        (ur_native_handle_t)zeEvent.get(), context, &pprops, &urEvent));
 
     int *src = (int *)malloc(TEST_MEMCPY_SIZE);
     memset(src, 0xc, TEST_MEMCPY_SIZE);
@@ -90,7 +102,7 @@ TEST_P(urLevelZeroEventNativeHandleTest, WaitForNative) {
 
     ASSERT_NE(memcmp(src, dst, TEST_MEMCPY_SIZE), 0);
 
-    zeEventHostSignal(zeEvent);
+    zeEventHostSignal(zeEvent.get());
 
     urQueueFinish(queue);
 
@@ -104,6 +116,32 @@ TEST_P(urLevelZeroEventNativeHandleTest, WaitForNative) {
     urEventRelease(memcpyEvent);
     urEventRelease(memcpyEvent2);
     urEventRelease(memcpyEvent3);
-    zeEventDestroy(zeEvent);
-    zeEventPoolDestroy(pool);
+}
+
+TEST_P(urLevelZeroEventNativeHandleTest, NativeStatusQuery) {
+    auto zeEvent = createZeEvent(context, device);
+
+    ur_event_native_properties_t pprops;
+    pprops.isNativeHandleOwned = false;
+    pprops.pNext = nullptr;
+    pprops.stype = UR_STRUCTURE_TYPE_EVENT_NATIVE_PROPERTIES;
+
+    ur_event_handle_t urEvent;
+    ASSERT_SUCCESS(urEventCreateWithNativeHandle(
+        (ur_native_handle_t)zeEvent.get(), context, &pprops, &urEvent));
+
+    ur_event_status_t status;
+    ASSERT_SUCCESS(urEventGetInfo(urEvent,
+                                  UR_EVENT_INFO_COMMAND_EXECUTION_STATUS,
+                                  sizeof(ur_event_status_t), &status, nullptr));
+    ASSERT_EQ(status, UR_EVENT_STATUS_SUBMITTED);
+
+    zeEventHostSignal(zeEvent.get());
+
+    ASSERT_SUCCESS(urEventGetInfo(urEvent,
+                                  UR_EVENT_INFO_COMMAND_EXECUTION_STATUS,
+                                  sizeof(ur_event_status_t), &status, nullptr));
+    ASSERT_EQ(status, UR_EVENT_STATUS_COMPLETE);
+
+    urEventRelease(urEvent);
 }
