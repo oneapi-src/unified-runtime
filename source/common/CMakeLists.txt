@@ -28,14 +28,15 @@ target_include_directories(ur_common PUBLIC
 
 message(STATUS "Download Unified Memory Framework from github.com")
 if (NOT DEFINED UMF_REPO)
-    set(UMF_REPO "https://github.com/oneapi-src/unified-memory-framework.git")
+    set(UMF_REPO "https://github.com/igchor/unified-memory-framework.git")
 endif()
 
 if (NOT DEFINED UMF_TAG)
-    # tag v0.10.0
-    # Tagger: Łukasz Stolarczuk <lukasz.stolarczuk@intel.com>
-    # Date:   Mon Dec 9 17:01:43 2024 +0100
-    set(UMF_TAG v0.10.0)
+    # commit f160016e40080e31f098984cb8d99d412806e966
+    # Merge: 625a9d4 a094b44
+    # Author: Łukasz Stolarczuk <lukasz.stolarczuk@intel.com>
+    # Date:   Tue Dec 10 12:59:44 2024 +0100
+    set(UMF_TAG 477edb6e444ae3d34b9e2d674df42df71d637c2b)
 endif()
 
 message(STATUS "Will fetch Unified Memory Framework from ${UMF_REPO}")
