@@ -526,11 +526,23 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
       return UR_RESULT_ERROR_INVALID_ENUMERATION;
   }
 
-  return mapCLErrorToUR(
-      FuncPtr(cl_adapter::cast<cl_command_queue>(hQueue), pMem, size,
-              MigrationFlag, numEventsInWaitList,
-              reinterpret_cast<const cl_event *>(phEventWaitList),
-              reinterpret_cast<cl_event *>(phEvent)));
+  cl_int Result =
+   FuncPtr(cl_adapter::cast<cl_command_queue>(hQueue), pMem, size,
+           MigrationFlag, numEventsInWaitList,
+           reinterpret_cast<const cl_event *>(phEventWaitList),
+           reinterpret_cast<cl_event *>(phEvent));
+
+  switch (Result) {
+    case CL_INVALID_VALUE:
+      cl_adapter::setErrorMessage("Prefetch hint ignored as current OpenCL "
+                                  "version does not support prefetching "
+                                  "(clEnqueueMigrateMemINTEL) from current "
+                                  "device to host (CL_MIGRATE_MEM_OBJECT_HOST)",
+                                  UR_RESULT_SUCCESS);
+      return UR_RESULT_SUCCESS;
+    default:
+      return mapCLErrorToUR(Result);
+  }
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMAdvise(
