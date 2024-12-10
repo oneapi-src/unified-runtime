@@ -477,7 +477,7 @@ void ur_exp_command_buffer_handle_t_::registerSyncPoint(
 
 ze_command_list_handle_t
 ur_exp_command_buffer_handle_t_::chooseCommandList(bool PreferCopyEngine) {
-  if (PreferCopyEngine && this->useCopyEngine() && !this->IsInOrderCmdList) {
+  if (PreferCopyEngine && this->useCopyEngine()) {
     // We indicate that ZeCopyCommandList contains commands to be submitted.
     this->MCopyCommandListEmpty = false;
     return this->ZeCopyCommandList;
@@ -646,7 +646,7 @@ urCommandBufferCreateExp(ur_context_handle_t Context, ur_device_handle_t Device,
   // the current implementation only uses the main copy engine and does not use
   // the link engine even if available.
   if (Device->hasMainCopyEngine()) {
-    UR_CALL(createMainCommandList(Context, Device, false, false, true,
+    UR_CALL(createMainCommandList(Context, Device, IsInOrder, false, true,
                                   ZeCopyCommandList));
   }
 
