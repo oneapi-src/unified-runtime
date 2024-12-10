@@ -104,10 +104,10 @@ ur_result_t ur_completion_batch::seal(ur_queue_handle_t queue,
   assert(st == ACCUMULATING);
 
   if (!barrierEvent) {
-    UR_CALL(EventCreate(queue->Context, queue, false /*IsMultiDevice*/,
-                        true /*HostVisible*/, &barrierEvent,
-                        false /*CounterBasedEventEnabled*/,
-                        false /*ForceDisableProfiling*/));
+    UR_CALL(EventCreate(
+        queue->Context, queue, false /*IsMultiDevice*/, true /*HostVisible*/,
+        &barrierEvent, false /*CounterBasedEventEnabled*/,
+        false /*ForceDisableProfiling*/, false /*InterruptBasedEventEnabled*/));
   }
 
   // Instead of collecting all the batched events, we simply issue a global
@@ -1197,6 +1197,8 @@ ur_queue_handle_t_::ur_queue_handle_t_(
       UsingImmCmdLists && isInOrderQueue() && Device->useDriverInOrderLists() &&
       useDriverCounterBasedEvents &&
       Device->Platform->ZeDriverEventPoolCountingEventsExtensionFound;
+  this->InterruptBasedEventsEnabled =
+      isLowPowerEvents() && isInOrderQueue() && Device->useDriverInOrderLists();
 }
 
 void ur_queue_handle_t_::adjustBatchSizeForFullBatch(bool IsCopy) {
@@ -1564,24 +1566,23 @@ void ur_queue_handle_t_::clearEndTimeRecordings() {
   for (auto Entry : EndTimeRecordings) {
     auto &Event = Entry.first;
     auto &EndTimeRecording = Entry.second;
-    if (!Entry.second.EventHasDied) {
-      // Write the result back to the event if it is not dead.
-      uint64_t ContextEndTime =
-          (EndTimeRecording.RecordEventEndTimestamp & TimestampMaxValue) *
-          ZeTimerResolution;
 
-      // Handle a possible wrap-around (the underlying HW counter is < 64-bit).
-      // Note, it will not report correct time if there were multiple wrap
-      // arounds, and the longer term plan is to enlarge the capacity of the
-      // HW timestamps.
-      if (ContextEndTime < Event->RecordEventStartTimestamp)
-        ContextEndTime += TimestampMaxValue * ZeTimerResolution;
+    // Write the result back to the event if it is not dead.
+    uint64_t ContextEndTime =
+        (EndTimeRecording & TimestampMaxValue) * ZeTimerResolution;
 
-      // Store it in the event.
-      Event->RecordEventEndTimestamp = ContextEndTime;
-    }
+    // Handle a possible wrap-around (the underlying HW counter is < 64-bit).
+    // Note, it will not report correct time if there were multiple wrap
+    // arounds, and the longer term plan is to enlarge the capacity of the
+    // HW timestamps.
+    if (ContextEndTime < Event->RecordEventStartTimestamp)
+      ContextEndTime += TimestampMaxValue * ZeTimerResolution;
+
+    // Store it in the event.
+    Event->RecordEventEndTimestamp = ContextEndTime;
   }
   EndTimeRecordings.clear();
+  EvictedEndTimeRecordings.clear();
 }
 
 ur_result_t urQueueReleaseInternal(ur_queue_handle_t Queue) {
@@ -1653,6 +1654,10 @@ bool ur_queue_handle_t_::isInOrderQueue() const {
   // If out-of-order queue property is not set, then this is a in-order queue.
   return ((this->Properties & UR_QUEUE_FLAG_OUT_OF_ORDER_EXEC_MODE_ENABLE) ==
           0);
+}
+
+bool ur_queue_handle_t_::isLowPowerEvents() const {
+  return ((this->Properties & UR_QUEUE_FLAG_LOW_POWER_EVENTS_EXP) != 0);
 }
 
 // Helper function to perform the necessary cleanup of the events from reset cmd
@@ -1889,7 +1894,8 @@ ur_result_t createEventAndAssociateQueue(ur_queue_handle_t Queue,
   if (*Event == nullptr)
     UR_CALL(EventCreate(
         Queue->Context, Queue, IsMultiDevice, HostVisible.value(), Event,
-        Queue->CounterBasedEventsEnabled, false /*ForceDisableProfiling*/));
+        Queue->CounterBasedEventsEnabled, false /*ForceDisableProfiling*/,
+        Queue->InterruptBasedEventsEnabled));
 
   (*Event)->UrQueue = Queue;
   (*Event)->CommandType = CommandType;
@@ -2391,7 +2397,11 @@ ur_command_list_ptr_t &ur_queue_handle_t_::ur_queue_group_t::getImmCmdList() {
   uint32_t QueueIndex, QueueOrdinal;
   auto Index = getQueueIndex(&QueueOrdinal, &QueueIndex);
 
-  if (ImmCmdLists[Index] != Queue->CommandListMap.end())
+  if ((ImmCmdLists[Index] != Queue->CommandListMap.end()) &&
+      (!Queue->CounterBasedEventsEnabled ||
+       (Queue->CounterBasedEventsEnabled &&
+        (ImmCmdLists[Index]->second.ZeQueueDesc.flags &
+         ZE_COMMAND_QUEUE_FLAG_IN_ORDER))))
     return ImmCmdLists[Index];
 
   ZeStruct<ze_command_queue_desc_t> ZeCommandQueueDesc;
