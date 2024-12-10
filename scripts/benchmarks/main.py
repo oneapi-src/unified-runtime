@@ -103,7 +103,10 @@ def process_results(results: dict[str, list[Result]]) -> tuple[bool, list[Result
         rlist.sort(key=lambda res: res.value)
         median_index = len(rlist) // 2
         median_result = rlist[median_index]
-        median_result.stddev = stddev
+
+        # only override the stddev if not already set
+        if median_result.stddev == 0.0:
+            median_result.stddev = stddev
 
         processed.append(median_result)
 
@@ -160,7 +163,6 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
                 if valid:
                     break
             results += processed
-
         except Exception as e:
             if options.exit_on_failure:
                 raise e
@@ -180,6 +182,9 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
     # limit how many files we load.
     # should this be configurable?
     history.load(1000)
+
+    # remove duplicates. this can happen if e.g., --compare baseline is specified manually.
+    compare_names = list(dict.fromkeys(compare_names))
 
     for name in compare_names:
         compare_result = history.get_compare(name)
@@ -201,7 +206,8 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
     # Otherwise we might be comparing the results to themselves.
     if not options.dry_run:
         history.save(saved_name, results, save_name is not None)
-        compare_names.append(saved_name)
+        if saved_name not in compare_names:
+            compare_names.append(saved_name)
 
     if options.output_html:
         html_content = generate_html(history.runs, 'oneapi-src/unified-runtime', compare_names)

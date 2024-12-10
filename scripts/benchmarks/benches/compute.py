@@ -104,6 +104,9 @@ class ComputeBenchmark(Benchmark):
     def setup(self):
         self.benchmark_bin = os.path.join(self.bench.directory, 'compute-benchmarks-build', 'bin', self.bench_name)
 
+    def explicit_group(self):
+        return ""
+
     def run(self, env_vars) -> list[Result]:
         command = [
             f"{self.benchmark_bin}",
@@ -118,9 +121,10 @@ class ComputeBenchmark(Benchmark):
         result = self.run_bench(command, env_vars)
         parsed_results = self.parse_output(result)
         ret = []
-        for label, mean, unit in parsed_results:
+        for label, median, stddev, unit in parsed_results:
             extra_label = " CPU count" if parse_unit_type(unit) == "instr" else ""
-            ret.append(Result(label=self.name() + extra_label, value=mean, command=command, env=env_vars, stdout=result, unit=parse_unit_type(unit)))
+            explicit_group = self.explicit_group() + extra_label if self.explicit_group() != "" else ""
+            ret.append(Result(label=self.name() + extra_label, explicit_group=explicit_group, value=median, stddev=stddev, command=command, env=env_vars, stdout=result, unit=parse_unit_type(unit)))
         return ret
 
     def parse_output(self, output):
@@ -135,8 +139,11 @@ class ComputeBenchmark(Benchmark):
             try:
                 label = data_row[0]
                 mean = float(data_row[1])
+                median = float(data_row[2])
+                # compute benchmarks report stddev as %
+                stddev = mean * (float(data_row[3].strip('%')) / 100.0)
                 unit = data_row[7]
-                results.append((label, mean, unit))
+                results.append((label, median, stddev, unit))
             except (ValueError, IndexError) as e:
                 raise ValueError(f"Error parsing output: {e}")
         if len(results) == 0:
@@ -154,6 +161,9 @@ class SubmitKernelSYCL(ComputeBenchmark):
     def name(self):
         order = "in order" if self.ioq else "out of order"
         return f"api_overhead_benchmark_sycl SubmitKernel {order}"
+
+    def explicit_group(self):
+        return "SubmitKernel"
 
     def bin_args(self) -> list[str]:
         return [
@@ -175,6 +185,9 @@ class SubmitKernelUR(ComputeBenchmark):
         order = "in order" if self.ioq else "out of order"
         return f"api_overhead_benchmark_ur SubmitKernel {order}"
 
+    def explicit_group(self):
+        return "SubmitKernel"
+
     def bin_args(self) -> list[str]:
         return [
             f"--Ioq={self.ioq}",
@@ -194,6 +207,9 @@ class SubmitKernelL0(ComputeBenchmark):
     def name(self):
         order = "in order" if self.ioq else "out of order"
         return f"api_overhead_benchmark_l0 SubmitKernel {order}"
+
+    def explicit_group(self):
+        return "SubmitKernel"
 
     def bin_args(self) -> list[str]:
         return [
