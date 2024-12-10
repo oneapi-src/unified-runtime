@@ -99,7 +99,6 @@ struct urDeviceTest : urPlatformTest,
     }
 
     void TearDown() override {
-        EXPECT_SUCCESS(urDeviceRelease(device));
         UUR_RETURN_ON_FATAL_FAILURE(urPlatformTest::TearDown());
     }
 
