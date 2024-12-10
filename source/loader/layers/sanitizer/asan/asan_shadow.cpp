@@ -108,11 +108,15 @@ ur_result_t ShadowMemoryGPU::Setup() {
         // TODO: Protect Bad Zone
         auto Result = getContext()->urDdiTable.VirtualMem.pfnReserve(
             Context, nullptr, ShadowSize, (void **)&ShadowBegin);
-        if (Result == UR_RESULT_SUCCESS) {
-            ShadowEnd = ShadowBegin + ShadowSize;
-            // Retain the context which reserves shadow memory
-            getContext()->urDdiTable.Context.pfnRetain(Context);
+        if (Result != UR_RESULT_SUCCESS) {
+            getContext()->logger.error(
+                "Shadow memory reserved failed with size {}: {}",
+                (void *)ShadowSize, Result);
+            return Result;
         }
+        ShadowEnd = ShadowBegin + ShadowSize;
+        // Retain the context which reserves shadow memory
+        getContext()->urDdiTable.Context.pfnRetain(Context);
 
         // Set shadow memory for null pointer
         // For GPU, wu use up to 1 page of shadow memory
