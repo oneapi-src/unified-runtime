@@ -75,8 +75,9 @@ class ComputeBench(Suite):
 
         if options.ur is not None:
             benches += [
-                SubmitKernelUR(self, 0),
-                SubmitKernelUR(self, 1),
+                SubmitKernelUR(self, 0, 0),
+                SubmitKernelUR(self, 1, 0),
+                SubmitKernelUR(self, 1, 1),
             ]
 
         return benches
@@ -154,13 +155,14 @@ class ComputeBenchmark(Benchmark):
         return
 
 class SubmitKernelSYCL(ComputeBenchmark):
-    def __init__(self, bench, ioq):
+    def __init__(self, bench, ioq, measureCompletion):
         self.ioq = ioq
+        self.measureCompletion = measureCompletion
         super().__init__(bench, "api_overhead_benchmark_sycl", "SubmitKernel")
 
     def name(self):
         order = "in order" if self.ioq else "out of order"
-        return f"api_overhead_benchmark_sycl SubmitKernel {order}"
+        return f"api_overhead_benchmark_sycl SubmitKernel {order}" + (" with measure completion" if self.measureCompletion else "")
 
     def explicit_group(self):
         return "SubmitKernel"
@@ -169,7 +171,7 @@ class SubmitKernelSYCL(ComputeBenchmark):
         return [
             f"--Ioq={self.ioq}",
             "--DiscardEvents=0",
-            "--MeasureCompletion=0",
+            f"--MeasureCompletion={self.measureCompletion}",
             "--iterations=100000",
             "--Profiling=0",
             "--NumKernels=10",
