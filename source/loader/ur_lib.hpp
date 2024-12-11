@@ -72,14 +72,16 @@ class __urdlllocal context_t : public AtomicSingleton<context_t> {
 
     using LayerData = std::pair<proxy_layer_context_t *, void (*)()>;
     const std::vector<LayerData> layers = {
-        {ur_validation_layer::getContext(),
-         ur_validation_layer::context_t::forceDelete},
-    // Initialize tracing layer after sanitizer layer to make sure tracing
-    // layer will properly print all API calls.
+    // First initialize sanitizer layer for two reasons:
+    //   (1) make sure tracing layer will properly print all API calls.
+    //   (2) avoid internal UR API calls from sanitizer layer being intercepted
+    //       by validation layer for better performance.
 #if UR_ENABLE_SANITIZER
         {ur_sanitizer_layer::getContext(),
          ur_sanitizer_layer::context_t::forceDelete},
 #endif
+        {ur_validation_layer::getContext(),
+         ur_validation_layer::context_t::forceDelete},
 #if UR_ENABLE_TRACING
         {ur_tracing_layer::getContext(),
          ur_tracing_layer::context_t::forceDelete},
