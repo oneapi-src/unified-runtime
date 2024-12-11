@@ -1628,13 +1628,16 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
     const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent) {
   ur_device_handle_t Device = hQueue->getDevice();
   CUdevice TargetDevice;
-  if (flags == UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE) {
-    TargetDevice = Device->get();
-  } else if (flags == UR_USM_MIGRATION_FLAG_DEVICE_TO_HOST) {
-    TargetDevice = CU_DEVICE_CPU;
-  } else {
-    setErrorMessage("Invalid USM migration flag", UR_RESULT_ERROR_INVALID_ENUMERATION);
-    return UR_RESULT_ERROR_INVALID_ENUMERATION;
+  switch (flags) {
+    case UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE:
+      TargetDevice = Device->get();
+      break;
+    case UR_USM_MIGRATION_FLAG_DEVICE_TO_HOST:
+      TargetDevice = CU_DEVICE_CPU;
+      break;
+    default:
+      setErrorMessage("Invalid USM migration flag", UR_RESULT_ERROR_INVALID_ENUMERATION);
+      return UR_RESULT_ERROR_INVALID_ENUMERATION;
   }
 
   size_t PointerRangeSize = 0;

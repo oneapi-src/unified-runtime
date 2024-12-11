@@ -1369,15 +1369,18 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
   void *HIPDevicePtr = const_cast<void *>(pMem);
   ur_device_handle_t Device = hQueue->getDevice();
   hipDevice_t TargetDevice;
-  if (flags == UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE) {
-    TargetDevice = Device->get();
-  } else if (flags == UR_USM_MIGRATION_FLAG_DEVICE_TO_HOST) {
-    // HIP doesn't have a constant for host like CUDA does; -1 is used instead
-    // https://github.com/ROCm/HIP/blob/3d60bd3a6415c2/docs/how-to/unified_memory.rst#L376
-    TargetDevice = -1;
-  } else {
-    setErrorMessage("Invalid USM migration flag", UR_RESULT_ERROR_INVALID_ENUMERATION);
-    return UR_RESULT_ERROR_INVALID_ENUMERATION;
+  switch (flags) {
+    case UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE:
+      TargetDevice = Device->get();
+      break;
+    case UR_USM_MIGRATION_FLAG_DEVICE_TO_HOST:
+      // HIP doesn't have a constant for host like CUDA does; -1 is used instead
+      // https://github.com/ROCm/HIP/blob/3d60bd3a6415c2/docs/how-to/unified_memory.rst#L376
+      TargetDevice = -1;
+      break;
+    default:
+      cl_adapter::setErrorMessage("Invalid USM migration flag", UR_RESULT_ERROR_INVALID_ENUMERATION);
+      return UR_RESULT_ERROR_INVALID_ENUMERATION;
   }
 
 // HIP_POINTER_ATTRIBUTE_RANGE_SIZE is not an attribute in ROCM < 5,

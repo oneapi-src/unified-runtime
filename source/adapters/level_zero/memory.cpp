@@ -1239,6 +1239,12 @@ ur_result_t urEnqueueUSMPrefetch(
         *OutEvent ///< [in,out][optional] return an event object that identifies
                   ///< this particular command instance.
 ) {
+  // L0 does not suppot migrating from device to host yet: skip procedure
+  if (Flags == UR_USM_MIGRATION_FLAG_DEVICE_TO_HOST) {
+    logger::warning("urEnqueueUSMPrefetch: Prefetch from device to host not yet supported by level zero");
+    return UR_RESULT_SUCCESS;
+  }
+
   // Lock automatically releases when this goes out of scope.
   std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
 
@@ -1254,10 +1260,6 @@ ur_result_t urEnqueueUSMPrefetch(
   UR_CALL(TmpWaitList.createAndRetainUrZeEventList(
       NumEventsInWaitList, EventWaitList, Queue, UseCopyEngine));
   
-  // L0 does not suppot migrating from device to host yet: skip procedure
-  if (Flags == UR_USM_MIGRATION_FLAG_DEVICE_TO_HOST)
-    return UR_RESULT_SUCCESS;
-
   // Get a new command list to be used on this call
   ur_command_list_ptr_t CommandList{};
   // TODO: Change UseCopyEngine argument to 'true' once L0 backend

@@ -1290,7 +1290,11 @@ ur_result_t urCommandBufferAppendUSMPrefetchExp(
   std::ignore = EventWaitList;
   std::ignore = Event;
   std::ignore = Command;
-  std::ignore = Flags;
+
+  if (Flags == UR_USM_MIGRATION_FLAG_DEVICE_TO_HOST) {
+    logger::warning("USM migration from device to host is not currently supported by level zero.");
+    return UR_RESULT_SUCCESS;
+  }
 
   if (CommandBuffer->IsInOrderCmdList) {
     // Add the prefetch command to the command buffer.
