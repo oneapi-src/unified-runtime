@@ -578,8 +578,6 @@ ur_result_t getImageRegionHelper(ze_image_desc_t ZeImageDesc,
                 (ZeImageDesc.type == ZE_IMAGE_TYPE_3D),
             UR_RESULT_ERROR_INVALID_VALUE);
 
-  UR_ASSERT(Region->width && Region->height && Region->depth,
-            UR_RESULT_ERROR_INVALID_VALUE);
   UR_ASSERT(
       (ZeImageDesc.type == ZE_IMAGE_TYPE_1D && Region->height == 1 &&
        Region->depth == 1) ||
