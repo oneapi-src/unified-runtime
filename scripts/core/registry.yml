@@ -613,6 +613,18 @@ etors:
 - name: TENSOR_MAP_ENCODE_TILED_EXP
   desc: Enumerator for $xTensorMapEncodeTiledExp
   value: '248'
+- name: ENQUEUE_USM_DEVICE_ALLOC_EXP
+  desc: Enumerator for $xEnqueueUSMDeviceAllocExp
+  value: '249'
+- name: ENQUEUE_USM_SHARED_ALLOC_EXP
+  desc: Enumerator for $xEnqueueUSMSharedAllocExp
+  value: '250'
+- name: ENQUEUE_USM_HOST_ALLOC_EXP
+  desc: Enumerator for $xEnqueueUSMHostAllocExp
+  value: '251'
+- name: ENQUEUE_USM_FREE_EXP
+  desc: Enumerator for $xEnqueueUSMFreeExp
+  value: '252'
 ---
 type: enum
 desc: Defines structure types
