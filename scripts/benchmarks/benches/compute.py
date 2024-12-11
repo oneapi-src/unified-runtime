@@ -109,6 +109,9 @@ class ComputeBenchmark(Benchmark):
 
     def run(self, env_vars) -> list[Result]:
         command = [
+            f"taskset",
+            "-c",
+            "5-25", # this can't be hardcoded. We either need to move this to the GHA workflow or dynamically calculate
             f"{self.benchmark_bin}",
             f"--test={self.test}",
             "--csv",
