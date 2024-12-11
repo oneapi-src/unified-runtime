@@ -1379,7 +1379,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
       TargetDevice = -1;
       break;
     default:
-      cl_adapter::setErrorMessage("Invalid USM migration flag", 
+      setErrorMessage("Invalid USM migration flag", 
                                   UR_RESULT_ERROR_INVALID_ENUMERATION);
       return UR_RESULT_ERROR_INVALID_ENUMERATION;
   }
