@@ -1636,7 +1636,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
       TargetDevice = CU_DEVICE_CPU;
       break;
     default:
-      setErrorMessage("Invalid USM migration flag", UR_RESULT_ERROR_INVALID_ENUMERATION);
+      setErrorMessage("Invalid USM migration flag",
+                      UR_RESULT_ERROR_INVALID_ENUMERATION);
       return UR_RESULT_ERROR_INVALID_ENUMERATION;
   }
 

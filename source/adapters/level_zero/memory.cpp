@@ -1241,7 +1241,8 @@ ur_result_t urEnqueueUSMPrefetch(
 ) {
   // L0 does not suppot migrating from device to host yet: skip procedure
   if (Flags == UR_USM_MIGRATION_FLAG_DEVICE_TO_HOST) {
-    logger::warning("urEnqueueUSMPrefetch: Prefetch from device to host not yet supported by level zero");
+    logger::warning("urEnqueueUSMPrefetch: Prefetch from device to host not yet"
+                    " supported by level zero");
     return UR_RESULT_SUCCESS;
   }
 

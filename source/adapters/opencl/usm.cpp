@@ -523,7 +523,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMPrefetch(
       MigrationFlag = CL_MIGRATE_MEM_OBJECT_HOST;
       break;
     default:
-      cl_adapter::setErrorMessage("Invalid USM migration flag", UR_RESULT_ERROR_INVALID_ENUMERATION);
+      cl_adapter::setErrorMessage("Invalid USM migration flag",
+                                  UR_RESULT_ERROR_INVALID_ENUMERATION);
       return UR_RESULT_ERROR_INVALID_ENUMERATION;
   }
 
