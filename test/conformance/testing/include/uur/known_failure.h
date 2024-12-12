@@ -116,8 +116,10 @@ inline bool isKnownFailureOn(const DeviceTuple &param,
                              const std::vector<Matcher> &matchers) {
     for (const auto &matcher : matchers) {
         auto adapterInfo = detail::getAdapterInfo(param.adapter);
-        if (matcher.adapterVersion != adapterInfo.version &&
-            matcher.backend != adapterInfo.backend) {
+        if (matcher.backend != adapterInfo.backend) {
+            continue;
+        }
+        if(matcher.adapterVersion != adapterInfo.version) {
             continue;
         }
         if (matcher.names.empty()) {
