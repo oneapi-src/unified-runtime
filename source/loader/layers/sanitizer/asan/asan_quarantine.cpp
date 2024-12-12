@@ -15,23 +15,30 @@
 namespace ur_sanitizer_layer {
 namespace asan {
 
-std::vector<AllocationIterator> Quarantine::put(ur_device_handle_t Device,
-                                                AllocationIterator &It) {
-    auto &AI = It->second;
+std::vector<std::shared_ptr<AllocInfo>> Quarantine::put(std::shared_ptr<AllocInfo> &AI) {
+    auto Device = AI->Device;
     auto AllocSize = AI->AllocSize;
     auto &Cache = getCache(Device);
 
-    std::vector<AllocationIterator> DequeueList;
+    std::vector<std::shared_ptr<AllocInfo>> DequeueList;
     std::scoped_lock<ur_mutex> Guard(Cache.Mutex);
     while (Cache.size() + AllocSize > m_MaxQuarantineSize) {
-        auto ElementOp = Cache.dequeue();
-        if (!ElementOp) {
+        auto AIToFreeOp = Cache.dequeue();
+        if (!AIToFreeOp) {
             break;
         }
-        DequeueList.emplace_back(*ElementOp);
+        DequeueList.emplace_back(*AIToFreeOp);
     }
-    Cache.enqueue(It);
+    Cache.enqueue(AI);
     return DequeueList;
+}
+
+void Quarantine::remove(std::shared_ptr<AllocInfo> &AI) {
+    auto Device = AI->Device;
+    auto &Cache = getCache(Device);
+
+    std::scoped_lock<ur_mutex> Guard(Cache.Mutex);
+    Cache.remove(AI);
 }
 
 } // namespace asan

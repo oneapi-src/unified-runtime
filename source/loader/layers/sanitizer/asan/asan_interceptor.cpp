@@ -158,8 +158,6 @@ ur_result_t AsanInterceptor::allocateMemory(ur_context_handle_t Context,
 
 ur_result_t AsanInterceptor::releaseMemory(ur_context_handle_t Context,
                                            void *Ptr) {
-    auto ContextInfo = getContextInfo(Context);
-
     auto Addr = reinterpret_cast<uptr>(Ptr);
     auto AllocInfoItOp = findAllocInfoByAddress(Addr);
 
@@ -193,59 +191,23 @@ ur_result_t AsanInterceptor::releaseMemory(ur_context_handle_t Context,
         return UR_RESULT_ERROR_INVALID_ARGUMENT;
     }
 
-    AllocInfo->IsReleased = true;
-    AllocInfo->ReleaseStack = GetCurrentBacktrace();
-
-    if (AllocInfo->Type == AllocType::HOST_USM) {
-        ContextInfo->insertAllocInfo(ContextInfo->DeviceList, AllocInfo);
-    } else {
-        ContextInfo->insertAllocInfo({AllocInfo->Device}, AllocInfo);
-    }
-
     // If quarantine is disabled, USM is freed immediately
     if (!m_Quarantine) {
-        getContext()->logger.debug("Free: {}", (void *)AllocInfo->AllocBegin);
-
-        ContextInfo->Stats.UpdateUSMRealFreed(AllocInfo->AllocSize,
-                                              AllocInfo->getRedzoneSize());
-
         std::scoped_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
         m_AllocationMap.erase(AllocInfoIt);
-
-        return getContext()->urDdiTable.USM.pfnFree(
-            Context, (void *)(AllocInfo->AllocBegin));
-    }
-
-    // If quarantine is enabled, cache it
-    auto ReleaseList = m_Quarantine->put(AllocInfo->Device, AllocInfoIt);
-    if (ReleaseList.size()) {
-        std::scoped_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
-        for (auto &It : ReleaseList) {
-            auto ToFreeAllocInfo = It->second;
-            getContext()->logger.info("Quarantine Free: {}",
-                                      (void *)ToFreeAllocInfo->AllocBegin);
-
-            ContextInfo->Stats.UpdateUSMRealFreed(
-                ToFreeAllocInfo->AllocSize, ToFreeAllocInfo->getRedzoneSize());
-
-            if (ToFreeAllocInfo->Type == AllocType::HOST_USM) {
-                for (auto &Device : ContextInfo->DeviceList) {
-                    UR_CALL(getDeviceInfo(Device)->Shadow->ReleaseShadow(
-                        ToFreeAllocInfo));
-                }
-            } else {
-                UR_CALL(getDeviceInfo(ToFreeAllocInfo->Device)
-                            ->Shadow->ReleaseShadow(ToFreeAllocInfo));
+        UR_CALL(releaseAllocationNoCheck(Context, AllocInfo, false));
+    } else {
+        // If quarantine is enabled, cache it
+        auto ReleaseList = m_Quarantine->put(AllocInfo);
+        if (ReleaseList.size()) {
+            std::scoped_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
+            for (auto &ToFreeAllocInfo : ReleaseList) {
+                m_AllocationMap.erase(ToFreeAllocInfo->AllocBegin);
+                UR_CALL(
+                    releaseAllocationNoCheck(Context, ToFreeAllocInfo, true));
             }
-
-            UR_CALL(getContext()->urDdiTable.USM.pfnFree(
-                Context, (void *)(ToFreeAllocInfo->AllocBegin)));
-
-            // Erase it at last to avoid use-after-free.
-            m_AllocationMap.erase(It);
         }
     }
-    ContextInfo->Stats.UpdateUSMFreed(AllocInfo->AllocSize);
 
     return UR_RESULT_SUCCESS;
 }
@@ -588,6 +550,23 @@ ur_result_t AsanInterceptor::insertContext(ur_context_handle_t Context,
 }
 
 ur_result_t AsanInterceptor::eraseContext(ur_context_handle_t Context) {
+    // Remove quarantined memory when associated context is removed
+    // We don't use findAllocInfoByContext() here because we need to remove elements from quarantine, and it will break iterator.
+    if (m_Quarantine) {
+        auto ContextInfo = getContextInfo(Context);
+        auto AllocInfoIt = m_AllocationMap.begin();
+        while (AllocInfoIt != m_AllocationMap.end()) {
+            auto AI = AllocInfoIt->second;
+            if (AI->Context == Context) {
+                m_Quarantine->remove(AI);
+                releaseAllocationNoCheck(Context, AI, AI->IsReleased);
+                AllocInfoIt = m_AllocationMap.erase(AllocInfoIt);
+            } else {
+                AllocInfoIt++;
+            }
+        }
+    }
+
     std::scoped_lock<ur_shared_mutex> Guard(m_ContextMapMutex);
     assert(m_ContextMap.find(Context) != m_ContextMap.end());
     m_ContextMap.erase(Context);
@@ -940,6 +919,34 @@ AsanInterceptor::findAllocInfoByContext(ur_context_handle_t Context) {
         }
     }
     return AllocInfos;
+}
+
+ur_result_t
+AsanInterceptor::releaseAllocationNoCheck(ur_context_handle_t Context,
+                                          std::shared_ptr<AllocInfo> AI,
+                                          bool IsFromQuarantine) {
+    if (IsFromQuarantine) {
+        getContext()->logger.debug("Quarantine Free: {}",
+                                   (void *)AI->AllocBegin);
+    } else {
+        getContext()->logger.debug("Free: {}", (void *)AI->AllocBegin);
+    }
+    auto ContextInfo = getContextInfo(Context);
+
+    ContextInfo->Stats.UpdateUSMRealFreed(AI->AllocSize, AI->getRedzoneSize());
+    ContextInfo->Stats.UpdateUSMFreed(AI->AllocSize);
+
+    AI->IsReleased = true;
+    AI->ReleaseStack = GetCurrentBacktrace();
+
+    if (AI->Type == AllocType::HOST_USM) {
+        ContextInfo->insertAllocInfo(ContextInfo->DeviceList, AI);
+    } else {
+        ContextInfo->insertAllocInfo({AI->Device}, AI);
+    }
+
+    return getContext()->urDdiTable.USM.pfnFree(Context,
+                                                (void *)(AI->AllocBegin));
 }
 
 bool ProgramInfo::isKernelInstrumented(ur_kernel_handle_t Kernel) const {
