@@ -161,6 +161,27 @@ struct urPlatformTestWithParam
 };
 
 template <class T>
+struct urAllDevicesTestWithParam : urPlatformTestWithParam<T> {
+    void SetUp() override {
+        UUR_RETURN_ON_FATAL_FAILURE(urPlatformTestWithParam<T>::SetUp());
+        auto devicesPair = GetDevices(this->platform);
+        if (!devicesPair.first) {
+            FAIL() << "Failed to get devices";
+        }
+        devices = std::move(devicesPair.second);
+    }
+
+    void TearDown() override {
+        for (auto &device : devices) {
+            EXPECT_SUCCESS(urDeviceRelease(device));
+        }
+        UUR_RETURN_ON_FATAL_FAILURE(urPlatformTestWithParam<T>::TearDown());
+    }
+
+    std::vector<ur_device_handle_t> devices;
+};
+
+template <class T>
 struct urDeviceTestWithParam
     : ::testing::Test,
       ::testing::WithParamInterface<std::tuple<DeviceTuple, T>> {
@@ -1248,6 +1269,11 @@ template <>
 std::string deviceTestWithParamPrinter<BoolTestParam>(
     const ::testing::TestParamInfo<std::tuple<DeviceTuple, BoolTestParam>>
         &info);
+
+template <>
+std::string platformTestWithParamPrinter<BoolTestParam>(
+    const ::testing::TestParamInfo<
+        std::tuple<ur_platform_handle_t, BoolTestParam>> &info);
 
 using SamplerCreateParamT =
     std::tuple<bool, ur_sampler_addressing_mode_t, ur_sampler_filter_mode_t>;
