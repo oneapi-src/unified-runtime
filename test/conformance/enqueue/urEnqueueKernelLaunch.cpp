@@ -5,6 +5,9 @@
 
 #include <array>
 #include <uur/fixtures.h>
+#include <uur/raii.h>
+
+#include "helpers.h"
 
 struct urEnqueueKernelLaunchTest : uur::urKernelExecutionTest {
     void SetUp() override {
@@ -605,4 +608,145 @@ TEST_P(urEnqueueKernelLaunchUSMLinkedList, Success) {
         ASSERT_EQ(list_cur->num, i * 4 + 1);
         list_cur = list_cur->next;
     }
+}
+
+struct urTwoQueueLaunchBlockingFree : uur::urMultiQueueMultiDeviceTest {
+    std::string KernelName;
+    std::vector<ur_program_handle_t> programs;
+    std::vector<ur_kernel_handle_t> kernels;
+    std::vector<void *> SharedMem;
+
+    static constexpr char ProgramName[] = "atomic_wait";
+
+    void SetUp() override {
+        if (uur::KernelsEnvironment::instance->devices.size() < 2) {
+            GTEST_SKIP() << "This test requires at least 2 devices.";
+        }
+
+        // ur_platform_backend_t backend;
+        // ASSERT_SUCCESS(urPlatformGetInfo(platform, UR_PLATFORM_INFO_BACKEND,
+        //                                  sizeof(ur_platform_backend_t),
+        //                                  &backend, nullptr));
+
+        // if (backend == UR_PLATFORM_BACKEND_OPENCL) {
+        //     GTEST_FAIL() << "TODO: this test fails on OPENCL backend";
+        // }
+
+        for (auto &device : uur::KernelsEnvironment::instance->devices) {
+            ur_device_usm_access_capability_flags_t shared_usm_flags = 0;
+            ASSERT_SUCCESS(
+                uur::GetDeviceUSMSingleSharedSupport(device, shared_usm_flags));
+            if (!(shared_usm_flags &
+                  UR_DEVICE_USM_ACCESS_CAPABILITY_FLAG_ACCESS)) {
+                GTEST_SKIP() << "Cross Device USM is not supported.";
+            }
+            if (!(shared_usm_flags &
+                  UR_DEVICE_USM_ACCESS_CAPABILITY_FLAG_ATOMIC_ACCESS)) {
+                GTEST_SKIP() << "Atomic USM is not supported.";
+            }
+        }
+
+        std::vector<ur_device_handle_t> devs;
+        devs.push_back(uur::KernelsEnvironment::instance->devices[0]);
+        devs.push_back(uur::KernelsEnvironment::instance->devices[1]);
+        UUR_RETURN_ON_FATAL_FAILURE(
+            uur::urMultiQueueMultiDeviceTest::SetUp(devs, 2));
+
+        programs.resize(devices.size());
+        kernels.resize(devices.size());
+        SharedMem.resize(devices.size());
+
+        KernelName = uur::KernelsEnvironment::instance->GetEntryPointNames(
+            ProgramName)[0];
+
+        std::shared_ptr<std::vector<char>> il_binary;
+        std::vector<ur_program_metadata_t> metadatas{};
+
+        uur::KernelsEnvironment::instance->LoadSource(ProgramName, il_binary);
+
+        for (size_t i = 0; i < devices.size(); i++) {
+            const ur_program_properties_t properties = {
+                UR_STRUCTURE_TYPE_PROGRAM_PROPERTIES, nullptr,
+                static_cast<uint32_t>(metadatas.size()),
+                metadatas.empty() ? nullptr : metadatas.data()};
+
+            uur::raii::Program program;
+            ASSERT_SUCCESS(uur::KernelsEnvironment::instance->CreateProgram(
+                platform, context, devices[i], *il_binary, &properties,
+                &programs[i]));
+
+            UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(
+                urProgramBuild(context, programs[i], nullptr));
+            ASSERT_SUCCESS(
+                urKernelCreate(programs[i], KernelName.data(), &kernels[i]));
+
+            ASSERT_SUCCESS(urUSMSharedAlloc(context, devices[i], nullptr,
+                                            nullptr, sizeof(uint64_t),
+                                            &SharedMem[i]));
+            ASSERT_NE(SharedMem[i], nullptr);
+
+            uint64_t pattern = 0;
+            ASSERT_SUCCESS(urEnqueueUSMFill(
+                queues[i], SharedMem[i], sizeof(uint64_t), &pattern,
+                sizeof(uint64_t), 0, nullptr, nullptr));
+            ASSERT_SUCCESS(urQueueFinish(queues[i]));
+
+            ASSERT_SUCCESS(
+                urKernelSetArgPointer(kernels[i], 0, nullptr, SharedMem[i]));
+        }
+    }
+
+    void TearDown() override {
+        for (auto &Ptr : SharedMem) {
+            urUSMFree(context, Ptr);
+        }
+        for (const auto &kernel : kernels) {
+            urKernelRelease(kernel);
+        }
+        for (const auto &program : programs) {
+            urProgramRelease(program);
+        }
+        UUR_RETURN_ON_FATAL_FAILURE(
+            uur::urMultiDeviceContextTestTemplate<1>::TearDown());
+    }
+};
+
+TEST_F(urTwoQueueLaunchBlockingFree, FreeDoesNotDeadlock) {
+    constexpr size_t global_offset = 0;
+    static constexpr size_t global_size = 1;
+
+    auto signalKernel = [&](size_t i) {
+        // use different device for signaling to avoid a deadlock
+        auto signalQueue = queues[(i + 1) % queues.size()];
+
+        uint64_t pattern = 1;
+        ASSERT_SUCCESS(urEnqueueUSMFill(signalQueue, SharedMem[i],
+                                        sizeof(uint64_t), &pattern,
+                                        sizeof(uint64_t), 0, nullptr, nullptr));
+        ASSERT_SUCCESS(urQueueFinish(signalQueue));
+    };
+
+    ur_event_handle_t k1Executed;
+
+    // do not block the first kernel
+    signalKernel(0);
+    ASSERT_SUCCESS(urEnqueueKernelLaunch(queues[0], kernels[0], 1,
+                                         &global_offset, &global_size, nullptr,
+                                         0, nullptr, &k1Executed));
+
+    // launch second kernel on the same device (devices[2] == devices[0]),
+    // this one will spin until we signal it
+    assert(devices[0] == devices[2]);
+    ASSERT_SUCCESS(urEnqueueKernelLaunch(queues[2], kernels[2], 1,
+                                         &global_offset, &global_size, nullptr,
+                                         0, nullptr, nullptr));
+
+    ASSERT_SUCCESS(urEventWait(1, &k1Executed));
+    ASSERT_SUCCESS(urUSMFree(context, SharedMem[0]));
+    SharedMem[0] = 0;
+
+    signalKernel(2);
+
+    ASSERT_SUCCESS(urQueueFinish(queues[0]));
+    ASSERT_SUCCESS(urQueueFinish(queues[2]));
 }

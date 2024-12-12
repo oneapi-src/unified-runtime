@@ -135,6 +135,7 @@ macro(add_device_binary SOURCE_FILE)
     list(APPEND DEVICE_CODE_SOURCES ${SOURCE_FILE})
 endmacro()
 
+add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/atomic_wait.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/bar.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/device_global.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/fill.cpp)

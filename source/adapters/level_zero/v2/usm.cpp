@@ -129,6 +129,12 @@ makePool(usm::umf_disjoint_pool_config_t *poolParams,
     }
   }
 
+  umf_ret = umfLevelZeroMemoryProviderParamsSetFreePolicy(
+      params, UMF_LEVEL_ZERO_MEMORY_PROVIDER_FREE_POLICY_DEFER_FREE);
+  if (umf_ret != UMF_RESULT_SUCCESS) {
+    throw umf::umf2urResult(umf_ret);
+  }
+
   auto [ret, provider] =
       umf::providerMakeUniqueFromOps(umfLevelZeroMemoryProviderOps(), params);
   if (ret != UMF_RESULT_SUCCESS) {
