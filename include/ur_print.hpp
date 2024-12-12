@@ -446,6 +446,11 @@ template <typename T> inline ur_result_t printTagged(std::ostream &os, const voi
 
 
 
+    template <> inline ur_result_t printTagged(std::ostream &os, const void *ptr, ur_physical_mem_info_t value, size_t size);
+
+
+
+
 
 
 
@@ -987,6 +992,7 @@ template <typename T> inline ur_result_t printTagged(std::ostream &os, const voi
     inline std::ostream &operator<<(std::ostream &os, enum ur_virtual_mem_info_t value);
     inline std::ostream &operator<<(std::ostream &os, enum ur_physical_mem_flag_t value);
     inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_physical_mem_properties_t params);
+    inline std::ostream &operator<<(std::ostream &os, enum ur_physical_mem_info_t value);
     inline std::ostream &operator<<(std::ostream &os, enum ur_program_metadata_type_t value);
     inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_program_metadata_t params);
     inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_program_properties_t params);
@@ -1667,6 +1673,9 @@ template <typename T> inline ur_result_t printTagged(std::ostream &os, const voi
                     break;
                 case UR_FUNCTION_TENSOR_MAP_ENCODE_TILED_EXP:
                     os << "UR_FUNCTION_TENSOR_MAP_ENCODE_TILED_EXP";
+                    break;
+                case UR_FUNCTION_PHYSICAL_MEM_GET_INFO:
+                    os << "UR_FUNCTION_PHYSICAL_MEM_GET_INFO";
                     break;
                 default:
                     os << "unknown enumerator";
@@ -8959,6 +8968,121 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_physical_mem_p
     os << "}";
     return os;
 }
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Print operator for the ur_physical_mem_info_t type
+    /// @returns
+    ///     std::ostream &
+    inline std::ostream &operator<<(std::ostream &os, enum ur_physical_mem_info_t value) {
+        switch (value) {
+                case UR_PHYSICAL_MEM_INFO_CONTEXT:
+                    os << "UR_PHYSICAL_MEM_INFO_CONTEXT";
+                    break;
+                case UR_PHYSICAL_MEM_INFO_DEVICE:
+                    os << "UR_PHYSICAL_MEM_INFO_DEVICE";
+                    break;
+                case UR_PHYSICAL_MEM_INFO_SIZE:
+                    os << "UR_PHYSICAL_MEM_INFO_SIZE";
+                    break;
+                case UR_PHYSICAL_MEM_INFO_PROPERTIES:
+                    os << "UR_PHYSICAL_MEM_INFO_PROPERTIES";
+                    break;
+                case UR_PHYSICAL_MEM_INFO_REFERENCE_COUNT:
+                    os << "UR_PHYSICAL_MEM_INFO_REFERENCE_COUNT";
+                    break;
+                default:
+                    os << "unknown enumerator";
+                    break;
+        }
+        return os;
+    }
+    namespace ur::details {
+    ///////////////////////////////////////////////////////////////////////////////
+    /// @brief Print ur_physical_mem_info_t enum value
+    template <>
+    inline ur_result_t printTagged(std::ostream &os, const void *ptr, ur_physical_mem_info_t value, size_t size) {
+        if (ptr == NULL) {
+            return printPtr(os, ptr);
+        }
+
+        switch (value) {
+                case UR_PHYSICAL_MEM_INFO_CONTEXT: {
+                    const ur_context_handle_t *tptr = (const ur_context_handle_t *)ptr;
+                    if (sizeof(ur_context_handle_t) > size) {
+                        os << "invalid size (is: " << size << ", expected: >=" << sizeof(ur_context_handle_t) << ")";
+                        return UR_RESULT_ERROR_INVALID_SIZE;
+                    }
+                    os << (const void *)(tptr) << " (";
+                    
+        ur::details::printPtr(os, 
+                        *tptr
+                    );
+
+                    os << ")";
+                } break;
+                case UR_PHYSICAL_MEM_INFO_DEVICE: {
+                    const ur_device_handle_t *tptr = (const ur_device_handle_t *)ptr;
+                    if (sizeof(ur_device_handle_t) > size) {
+                        os << "invalid size (is: " << size << ", expected: >=" << sizeof(ur_device_handle_t) << ")";
+                        return UR_RESULT_ERROR_INVALID_SIZE;
+                    }
+                    os << (const void *)(tptr) << " (";
+                    
+        ur::details::printPtr(os, 
+                        *tptr
+                    );
+
+                    os << ")";
+                } break;
+                case UR_PHYSICAL_MEM_INFO_SIZE: {
+                    const size_t *tptr = (const size_t *)ptr;
+                    if (sizeof(size_t) > size) {
+                        os << "invalid size (is: " << size << ", expected: >=" << sizeof(size_t) << ")";
+                        return UR_RESULT_ERROR_INVALID_SIZE;
+                    }
+                    os << (const void *)(tptr) << " (";
+                    
+        os << 
+                        *tptr
+                    ;
+
+                    os << ")";
+                } break;
+                case UR_PHYSICAL_MEM_INFO_PROPERTIES: {
+                    const ur_physical_mem_properties_t *tptr = (const ur_physical_mem_properties_t *)ptr;
+                    if (sizeof(ur_physical_mem_properties_t) > size) {
+                        os << "invalid size (is: " << size << ", expected: >=" << sizeof(ur_physical_mem_properties_t) << ")";
+                        return UR_RESULT_ERROR_INVALID_SIZE;
+                    }
+                    os << (const void *)(tptr) << " (";
+                    
+        os << 
+                        *tptr
+                    ;
+
+                    os << ")";
+                } break;
+                case UR_PHYSICAL_MEM_INFO_REFERENCE_COUNT: {
+                    const uint32_t *tptr = (const uint32_t *)ptr;
+                    if (sizeof(uint32_t) > size) {
+                        os << "invalid size (is: " << size << ", expected: >=" << sizeof(uint32_t) << ")";
+                        return UR_RESULT_ERROR_INVALID_SIZE;
+                    }
+                    os << (const void *)(tptr) << " (";
+                    
+        os << 
+                        *tptr
+                    ;
+
+                    os << ")";
+                } break;
+                default:
+                    os << "unknown enumerator";
+                    return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        }
+        return UR_RESULT_SUCCESS;
+    }
+    } // namespace ur::details
+
     ///////////////////////////////////////////////////////////////////////////////
     /// @brief Print operator for the ur_program_metadata_type_t type
     /// @returns
@@ -17262,6 +17386,61 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
         
         ur::details::printPtr(os, 
             *(params->phPhysicalMem)
+        );
+
+
+    return os;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_physical_mem_get_info_params_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_physical_mem_get_info_params_t *params) {
+    
+        
+    
+        os << ".hPhysicalMem = ";
+        
+        ur::details::printPtr(os, 
+            *(params->phPhysicalMem)
+        );
+
+
+        
+    
+        os << ", ";
+        os << ".propName = ";
+        
+        os << 
+            *(params->ppropName)
+        ;
+
+
+        
+    
+        os << ", ";
+        os << ".propSize = ";
+        
+        os << 
+            *(params->ppropSize)
+        ;
+
+
+        
+    
+        os << ", ";
+        os << ".pPropValue = ";
+        ur::details::printTagged(os, *(params->ppPropValue), *(params->ppropName), *(params->ppropSize));
+
+        
+    
+        os << ", ";
+        os << ".pPropSizeRet = ";
+        
+        ur::details::printPtr(os, 
+            *(params->ppPropSizeRet)
         );
 
 
@@ -26342,6 +26521,9 @@ inline ur_result_t UR_APICALL printFunctionParams(std::ostream &os, ur_function_
         } break;
         case UR_FUNCTION_PHYSICAL_MEM_RELEASE: {
             os << (const struct ur_physical_mem_release_params_t *)params;
+        } break;
+        case UR_FUNCTION_PHYSICAL_MEM_GET_INFO: {
+            os << (const struct ur_physical_mem_get_info_params_t *)params;
         } break;
         case UR_FUNCTION_ADAPTER_GET: {
             os << (const struct ur_adapter_get_params_t *)params;
