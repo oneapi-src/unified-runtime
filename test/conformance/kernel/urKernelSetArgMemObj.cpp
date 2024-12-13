@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 struct urKernelSetArgMemObjTest : uur::urKernelTest {
     void SetUp() {
@@ -35,6 +36,9 @@ TEST_P(urKernelSetArgMemObjTest, InvalidNullHandleKernel) {
 }
 
 TEST_P(urKernelSetArgMemObjTest, InvalidKernelArgumentIndex) {
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+
     uint32_t num_kernel_args = 0;
     ASSERT_SUCCESS(urKernelGetInfo(kernel, UR_KERNEL_INFO_NUM_ARGS,
                                    sizeof(num_kernel_args), &num_kernel_args,

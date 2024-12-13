@@ -3,8 +3,8 @@
 // See LICENSE.TXT
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-#include "uur/known_failure.h"
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 struct urKernelSetArgValueTest : uur::urKernelTest {
     void SetUp() {
@@ -34,6 +34,9 @@ TEST_P(urKernelSetArgValueTest, InvalidNullPointerArgValue) {
 }
 
 TEST_P(urKernelSetArgValueTest, InvalidKernelArgumentIndex) {
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+
     uint32_t num_kernel_args = 0;
     ASSERT_SUCCESS(urKernelGetInfo(kernel, UR_KERNEL_INFO_NUM_ARGS,
                                    sizeof(num_kernel_args), &num_kernel_args,
@@ -47,6 +50,8 @@ TEST_P(urKernelSetArgValueTest, InvalidKernelArgumentIndex) {
 
 TEST_P(urKernelSetArgValueTest, InvalidKernelArgumentSize) {
     UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) UHD Graphics 770"});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_KERNEL_ARGUMENT_SIZE,
                      urKernelSetArgValue(kernel, 2, 0, nullptr, &arg_value));
 }

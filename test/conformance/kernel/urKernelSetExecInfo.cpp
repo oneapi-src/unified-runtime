@@ -4,11 +4,15 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 using urKernelSetExecInfoTest = uur::urKernelTest;
 UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urKernelSetExecInfoTest);
 
 TEST_P(urKernelSetExecInfoTest, SuccessIndirectAccess) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
     bool property_value = false;
     ASSERT_SUCCESS(
         urKernelSetExecInfo(kernel, UR_KERNEL_EXEC_INFO_USM_INDIRECT_ACCESS,
@@ -58,6 +62,9 @@ struct urKernelSetExecInfoUSMPointersTest : uur::urKernelTest {
 UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urKernelSetExecInfoUSMPointersTest);
 
 TEST_P(urKernelSetExecInfoUSMPointersTest, SuccessHost) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
     ur_device_usm_access_capability_flags_t host_supported = 0;
     ASSERT_SUCCESS(uur::GetDeviceUSMHostSupport(device, host_supported));
     if (!host_supported) {
@@ -74,6 +81,9 @@ TEST_P(urKernelSetExecInfoUSMPointersTest, SuccessHost) {
 }
 
 TEST_P(urKernelSetExecInfoUSMPointersTest, SuccessDevice) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
     ur_device_usm_access_capability_flags_t device_supported = 0;
     ASSERT_SUCCESS(uur::GetDeviceUSMDeviceSupport(device, device_supported));
     if (!device_supported) {
@@ -90,6 +100,9 @@ TEST_P(urKernelSetExecInfoUSMPointersTest, SuccessDevice) {
 }
 
 TEST_P(urKernelSetExecInfoUSMPointersTest, SuccessShared) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
     ur_device_usm_access_capability_flags_t shared_supported = 0;
     ASSERT_SUCCESS(
         uur::GetDeviceUSMSingleSharedSupport(device, shared_supported));

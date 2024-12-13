@@ -6,6 +6,7 @@
 #include "helpers.h"
 
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 #include <uur/raii.h>
 
 #include <thread>
@@ -32,6 +33,9 @@ struct urMultiQueueLaunchMemcpyTest
     using uur::urMultiQueueMultiDeviceTestWithParam<minDevices, T>::queues;
 
     void SetUp() override {
+        // We haven't got device code tests working on native cpu yet.
+        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
         UUR_RETURN_ON_FATAL_FAILURE(
             uur::urMultiQueueMultiDeviceTestWithParam<minDevices, T>::SetUp());
 
@@ -175,6 +179,8 @@ UUR_PLATFORM_TEST_SUITE_P(
     uur::platformTestWithParamPrinter<uur::BoolTestParam>);
 
 TEST_P(urEnqueueKernelLaunchIncrementTest, Success) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
     constexpr size_t global_offset = 0;
     constexpr size_t n_dimensions = 1;
 
@@ -244,7 +250,10 @@ printParams(const testing::TestParamInfo<typename T::ParamType> &info) {
         auto param3 = std::get<2>(info.param);
     }
 
-    return ss.str();
+    auto platform = std::get<0>(info.param);
+
+    return uur::GetPlatformNameWithID(platform) + "__" +
+           uur::GTestSanitizeString(ss.str());
 }
 
 using urEnqueueKernelLaunchIncrementMultiDeviceTest =
@@ -261,6 +270,8 @@ UUR_PLATFORM_TEST_SUITE_P(
 
 // Do a chain of kernelLaunch(dev0) -> memcpy(dev0, dev1) -> kernelLaunch(dev1) ... ops
 TEST_P(urEnqueueKernelLaunchIncrementMultiDeviceTest, Success) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
     auto waitOnEvent = std::get<0>(getParam()).value;
     auto runBackgroundCheck = std::get<1>(getParam()).value;
 

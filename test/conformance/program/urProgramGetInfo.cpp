@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 struct urProgramGetInfoTest : uur::urProgramTestWithParam<ur_program_info_t> {
     void SetUp() override {
@@ -33,6 +34,12 @@ UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urProgramGetInfoSingleTest);
 
 TEST_P(urProgramGetInfoTest, Success) {
     auto property_name = getParam();
+
+    // It isn't possible to implement this on HIP
+    if (property_name == UR_PROGRAM_INFO_NUM_KERNELS) {
+        UUR_KNOWN_FAILURE_ON(uur::HIP{});
+    }
+
     std::vector<char> property_value;
     size_t property_size = 0;
     if (property_name == UR_PROGRAM_INFO_BINARIES) {

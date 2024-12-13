@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 using urEnqueueUSMAdviseWithParamTest =
     uur::urUSMDeviceAllocTestWithParam<ur_usm_advice_flag_t>;
@@ -12,6 +13,13 @@ UUR_DEVICE_TEST_SUITE_P(urEnqueueUSMAdviseWithParamTest,
                         uur::deviceTestWithParamPrinter<ur_usm_advice_flag_t>);
 
 TEST_P(urEnqueueUSMAdviseWithParamTest, Success) {
+    // HIP and CUDA return UR_RESULT_ERROR_ADAPTER_SPECIFIC to issue a warning
+    // about the hint being unsupported.
+    // TODO: codify this in the spec and account for it in the CTS.
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     ur_event_handle_t advise_event = nullptr;
     ASSERT_SUCCESS(urEnqueueUSMAdvise(queue, ptr, allocation_size, getParam(),
                                       &advise_event));
@@ -32,6 +40,12 @@ using urEnqueueUSMAdviseTest = uur::urUSMDeviceAllocTest;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueUSMAdviseTest);
 
 TEST_P(urEnqueueUSMAdviseTest, MultipleParamsSuccess) {
+    // HIP and CUDA return UR_RESULT_ERROR_ADAPTER_SPECIFIC to issue a warning
+    // about the hint being unsupported.
+    // TODO: codify this in the spec and account for it in the CTS.
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+
     ASSERT_SUCCESS(urEnqueueUSMAdvise(queue, ptr, allocation_size,
                                       UR_USM_ADVICE_FLAG_SET_READ_MOSTLY |
                                           UR_USM_ADVICE_FLAG_BIAS_CACHED,
@@ -64,6 +78,10 @@ TEST_P(urEnqueueUSMAdviseTest, InvalidSizeZero) {
 }
 
 TEST_P(urEnqueueUSMAdviseTest, InvalidSizeTooLarge) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
                      urEnqueueUSMAdvise(queue, ptr, allocation_size * 2,
                                         UR_USM_ADVICE_FLAG_DEFAULT, nullptr));

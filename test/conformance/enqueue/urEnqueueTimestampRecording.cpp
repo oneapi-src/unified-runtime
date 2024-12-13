@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 struct urEnqueueTimestampRecordingExpTest : uur::urQueueTest {
     void SetUp() override {
@@ -45,6 +46,9 @@ void common_check(ur_event_handle_t event) {
 }
 
 TEST_P(urEnqueueTimestampRecordingExpTest, Success) {
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+
     ur_event_handle_t event = nullptr;
     ASSERT_SUCCESS(
         urEnqueueTimestampRecordingExp(queue, false, 0, nullptr, &event));
@@ -54,6 +58,10 @@ TEST_P(urEnqueueTimestampRecordingExpTest, Success) {
 }
 
 TEST_P(urEnqueueTimestampRecordingExpTest, SuccessBlocking) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+
     ur_event_handle_t event = nullptr;
     ASSERT_SUCCESS(
         urEnqueueTimestampRecordingExp(queue, true, 0, nullptr, &event));

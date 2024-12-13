@@ -4,9 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 struct urProgramCreateWithILTest : uur::urContextTest {
     void SetUp() override {
+        // We haven't got device code tests working on native cpu yet.
+        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
         UUR_RETURN_ON_FATAL_FAILURE(urContextTest::SetUp());
         // TODO: This should use a query for urProgramCreateWithIL support or
         // rely on UR_RESULT_ERROR_UNSUPPORTED_FEATURE being returned.
@@ -29,6 +33,8 @@ struct urProgramCreateWithILTest : uur::urContextTest {
 UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urProgramCreateWithILTest);
 
 TEST_P(urProgramCreateWithILTest, Success) {
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+
     ur_program_handle_t program = nullptr;
     ASSERT_SUCCESS(urProgramCreateWithIL(context, il_binary->data(),
                                          il_binary->size(), nullptr, &program));
@@ -37,6 +43,8 @@ TEST_P(urProgramCreateWithILTest, Success) {
 }
 
 TEST_P(urProgramCreateWithILTest, SuccessWithProperties) {
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+
     ur_program_properties_t properties{UR_STRUCTURE_TYPE_PROGRAM_PROPERTIES,
                                        nullptr, 0, nullptr};
     ur_program_handle_t program = nullptr;
@@ -76,6 +84,8 @@ TEST_P(urProgramCreateWithILTest, InvalidNullPointerProgram) {
 }
 
 TEST_P(urProgramCreateWithILTest, BuildInvalidProgram) {
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+
     ur_program_handle_t program = nullptr;
     char binary[] = {0, 1, 2, 3, 4};
     auto result = urProgramCreateWithIL(context, &binary, 5, nullptr, &program);

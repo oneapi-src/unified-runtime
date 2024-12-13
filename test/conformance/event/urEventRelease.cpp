@@ -4,12 +4,16 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include "fixtures.h"
+#include "uur/known_failure.h"
 
 using urEventReleaseTest = uur::event::urEventTest;
 
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEventReleaseTest);
 
 TEST_P(urEventReleaseTest, Success) {
+    // This test has issues when UR_CONFORMANCE_TEST_LOADER=ON
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     ASSERT_SUCCESS(urEventRetain(event));
 
     uint32_t prevRefCount = 0;

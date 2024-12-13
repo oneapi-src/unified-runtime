@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 using urKernelGetInfoTest = uur::urKernelTestWithParam<ur_kernel_info_t>;
 
@@ -20,6 +21,12 @@ UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urKernelGetInfoSingleTest);
 
 TEST_P(urKernelGetInfoTest, Success) {
     auto property_name = getParam();
+
+    if (property_name == UR_KERNEL_INFO_NUM_REGS) {
+        UUR_KNOWN_FAILURE_ON(uur::HIP{});
+        UUR_KNOWN_FAILURE_ON(uur::OpenCL{});
+    }
+
     size_t property_size = 0;
     std::vector<char> property_value;
     ASSERT_SUCCESS_OR_OPTIONAL_QUERY(

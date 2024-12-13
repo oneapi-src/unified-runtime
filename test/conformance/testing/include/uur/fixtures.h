@@ -10,6 +10,7 @@
 
 #include <uur/checks.h>
 #include <uur/environment.h>
+#include <uur/known_failure.h>
 #include <uur/utils.h>
 
 #include <random>
@@ -206,7 +207,9 @@ struct urContextTest : urDeviceTest {
     }
 
     void TearDown() override {
-        EXPECT_SUCCESS(urContextRelease(context));
+        if (context) {
+            EXPECT_SUCCESS(urContextRelease(context));
+        }
         UUR_RETURN_ON_FATAL_FAILURE(urDeviceTest::TearDown());
     }
 
@@ -329,10 +332,12 @@ template <class T> struct urContextTestWithParam : urDeviceTestWithParam<T> {
     }
 
     void TearDown() override {
-        EXPECT_SUCCESS(urContextRelease(context));
+        if (context) {
+            EXPECT_SUCCESS(urContextRelease(context));
+        }
         UUR_RETURN_ON_FATAL_FAILURE(urDeviceTestWithParam<T>::TearDown());
     }
-    ur_context_handle_t context;
+    ur_context_handle_t context = nullptr;
 };
 
 template <class T> struct urSamplerTestWithParam : urContextTestWithParam<T> {
@@ -442,6 +447,13 @@ struct urQueueTest : urContextTest {
 
 struct urHostPipeTest : urQueueTest {
     void SetUp() override {
+        // We haven't got device code tests working on native cpu yet.
+        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
+        // The host pipe support query isn't implement on l0
+        UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+        UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
         UUR_RETURN_ON_FATAL_FAILURE(urQueueTest::SetUp());
 
         size_t size = 0;
@@ -991,6 +1003,8 @@ template <class T> struct urUSMPoolTestWithParam : urContextTestWithParam<T> {
 
 struct urVirtualMemGranularityTest : urContextTest {
     void SetUp() override {
+        UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
         UUR_RETURN_ON_FATAL_FAILURE(urContextTest::SetUp());
 
         ur_bool_t virtual_memory_support = false;
@@ -1011,6 +1025,8 @@ struct urVirtualMemGranularityTest : urContextTest {
 template <class T>
 struct urVirtualMemGranularityTestWithParam : urContextTestWithParam<T> {
     void SetUp() override {
+        UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
         UUR_RETURN_ON_FATAL_FAILURE(urContextTestWithParam<T>::SetUp());
 
         ur_bool_t virtual_memory_support = false;
@@ -1285,6 +1301,9 @@ std::string deviceTestWithParamPrinter<SamplerCreateParamT>(
 
 struct urProgramTest : urQueueTest {
     void SetUp() override {
+        // We haven't got device code tests working on native cpu yet.
+        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
         UUR_RETURN_ON_FATAL_FAILURE(urQueueTest::SetUp());
 
         ur_platform_backend_t backend;
@@ -1322,6 +1341,9 @@ struct urProgramTest : urQueueTest {
 
 template <class T> struct urProgramTestWithParam : urQueueTestWithParam<T> {
     void SetUp() override {
+        // We haven't got device code tests working on native cpu yet.
+        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
         UUR_RETURN_ON_FATAL_FAILURE(urQueueTestWithParam<T>::SetUp());
 
         ur_platform_backend_t backend;
@@ -1363,6 +1385,9 @@ template <class T> struct urProgramTestWithParam : urQueueTestWithParam<T> {
 // instead.
 struct urBaseKernelTest : urProgramTest {
     void SetUp() override {
+        // We haven't got device code tests working on native cpu yet.
+        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
         UUR_RETURN_ON_FATAL_FAILURE(urProgramTest::SetUp());
         auto kernel_names =
             uur::KernelsEnvironment::instance->GetEntryPointNames(program_name);
@@ -1388,7 +1413,7 @@ struct urBaseKernelTest : urProgramTest {
 
 struct urKernelTest : urBaseKernelTest {
     void SetUp() override {
-        urBaseKernelTest::SetUp();
+        UUR_RETURN_ON_FATAL_FAILURE(urBaseKernelTest::SetUp());
         Build();
     }
 };

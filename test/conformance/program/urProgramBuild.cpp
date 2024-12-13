@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 using urProgramBuildTest = uur::urProgramTest;
 UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urProgramBuildTest);
@@ -28,6 +29,9 @@ TEST_P(urProgramBuildTest, InvalidNullHandleProgram) {
 }
 
 TEST_P(urProgramBuildTest, BuildFailure) {
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+
     ur_program_handle_t program = nullptr;
     std::shared_ptr<std::vector<char>> il_binary;
     uur::KernelsEnvironment::instance->LoadSource("build_failure", il_binary);

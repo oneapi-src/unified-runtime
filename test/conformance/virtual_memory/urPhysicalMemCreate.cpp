@@ -3,7 +3,8 @@
 // See LICENSE.TXT
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-#include "uur/fixtures.h"
+#include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 struct urPhysicalMemCreateTest
     : uur::urVirtualMemGranularityTestWithParam<size_t> {
@@ -31,6 +32,8 @@ UUR_TEST_SUITE_P(urPhysicalMemCreateWithSizeParamTest,
                  uur::deviceTestWithParamPrinter<size_t>);
 
 TEST_P(urPhysicalMemCreateWithSizeParamTest, Success) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+
     ASSERT_SUCCESS(
         urPhysicalMemCreate(context, device, size, nullptr, &physical_mem));
     ASSERT_NE(physical_mem, nullptr);

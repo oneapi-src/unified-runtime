@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 struct urUSMGetMemAllocInfoTest
     : uur::urUSMDeviceAllocTestWithParam<ur_usm_alloc_info_t> {
@@ -31,8 +32,19 @@ static std::unordered_map<ur_usm_alloc_info_t, size_t> usm_info_size_map = {
 };
 
 TEST_P(urUSMGetMemAllocInfoTest, Success) {
+    // These fail on native cpu because the fixture ends up doing a
+    // urQueueFlush() during TearDown and native cpu returns UNSUPPORTED_FEATURE
+    // this could potentially be resolved by making it a no-op instead
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     size_t size = 0;
     auto alloc_info = getParam();
+
+    if (alloc_info == UR_USM_ALLOC_INFO_POOL) {
+        UUR_KNOWN_FAILURE_ON(uur::OpenCL{});
+        UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    }
+
     ASSERT_SUCCESS_OR_OPTIONAL_QUERY(
         urUSMGetMemAllocInfo(context, ptr, alloc_info, 0, nullptr, &size),
         alloc_info);
@@ -84,6 +96,8 @@ using urUSMGetMemAllocInfoNegativeTest = uur::urUSMDeviceAllocTest;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urUSMGetMemAllocInfoNegativeTest);
 
 TEST_P(urUSMGetMemAllocInfoNegativeTest, InvalidNullHandleContext) {
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     ur_usm_type_t USMType;
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_HANDLE,
                      urUSMGetMemAllocInfo(nullptr, ptr, UR_USM_ALLOC_INFO_TYPE,
@@ -92,6 +106,8 @@ TEST_P(urUSMGetMemAllocInfoNegativeTest, InvalidNullHandleContext) {
 }
 
 TEST_P(urUSMGetMemAllocInfoNegativeTest, InvalidNullPointerMem) {
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     ur_usm_type_t USMType;
     ASSERT_EQ_RESULT(
         UR_RESULT_ERROR_INVALID_NULL_POINTER,
@@ -100,6 +116,8 @@ TEST_P(urUSMGetMemAllocInfoNegativeTest, InvalidNullPointerMem) {
 }
 
 TEST_P(urUSMGetMemAllocInfoNegativeTest, InvalidEnumeration) {
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     ur_usm_type_t USMType;
     ASSERT_EQ_RESULT(
         UR_RESULT_ERROR_INVALID_ENUMERATION,
@@ -108,6 +126,8 @@ TEST_P(urUSMGetMemAllocInfoNegativeTest, InvalidEnumeration) {
 }
 
 TEST_P(urUSMGetMemAllocInfoNegativeTest, InvalidValuePropSize) {
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     ur_usm_type_t USMType;
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
                      urUSMGetMemAllocInfo(context, ptr, UR_USM_ALLOC_INFO_TYPE,

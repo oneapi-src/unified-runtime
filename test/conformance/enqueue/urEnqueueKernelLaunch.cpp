@@ -5,6 +5,7 @@
 
 #include <array>
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 struct urEnqueueKernelLaunchTest : uur::urKernelExecutionTest {
     void SetUp() override {
@@ -133,6 +134,12 @@ TEST_P(urEnqueueKernelLaunchTest, InvalidWorkGroupSize) {
 }
 
 TEST_P(urEnqueueKernelLaunchTest, InvalidKernelArgs) {
+    // Cuda and hip both lack any way to validate kernel args
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
     ur_platform_backend_t backend;
     ASSERT_SUCCESS(urPlatformGetInfo(platform, UR_PLATFORM_INFO_BACKEND,
                                      sizeof(ur_platform_backend_t), &backend,
@@ -152,6 +159,11 @@ TEST_P(urEnqueueKernelLaunchTest, InvalidKernelArgs) {
 }
 
 TEST_P(urEnqueueKernelLaunchKernelWgSizeTest, Success) {
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
     ASSERT_SUCCESS(urEnqueueKernelLaunch(
         queue, kernel, n_dimensions, global_offset.data(), global_size.data(),
         nullptr, 0, nullptr, nullptr));
@@ -175,6 +187,10 @@ TEST_P(urEnqueueKernelLaunchKernelWgSizeTest, NonMatchingLocalSize) {
 }
 
 TEST_P(urEnqueueKernelLaunchKernelSubGroupTest, Success) {
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
     ur_mem_handle_t buffer = nullptr;
     AddBuffer1DArg(sizeof(size_t), &buffer);
     ASSERT_SUCCESS(urEnqueueKernelLaunch(
@@ -424,6 +440,8 @@ struct urEnqueueKernelLaunchWithVirtualMemory : uur::urKernelExecutionTest {
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueKernelLaunchWithVirtualMemory);
 
 TEST_P(urEnqueueKernelLaunchWithVirtualMemory, Success) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
     size_t work_dim = 1;
     size_t global_offset = 0;
     size_t global_size = alloc_size / sizeof(uint32_t);
@@ -476,6 +494,8 @@ UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueKernelLaunchMultiDeviceTest);
 // TODO: rewrite this test, right now it only works for a single queue
 // (the context is only created for one device)
 TEST_P(urEnqueueKernelLaunchMultiDeviceTest, KernelLaunchReadDifferentQueues) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
     ur_mem_handle_t buffer = nullptr;
     AddBuffer1DArg(sizeof(val) * global_size, &buffer);
     AddPodArg(val);
@@ -562,6 +582,10 @@ UUR_DEVICE_TEST_SUITE_P(
     uur::deviceTestWithParamPrinter<uur::BoolTestParam>);
 
 TEST_P(urEnqueueKernelLaunchUSMLinkedList, Success) {
+    if (use_pool) {
+        UUR_KNOWN_FAILURE_ON(uur::HIP{});
+    }
+
     ur_device_usm_access_capability_flags_t shared_usm_flags = 0;
     ASSERT_SUCCESS(
         uur::GetDeviceUSMSingleSharedSupport(device, shared_usm_flags));

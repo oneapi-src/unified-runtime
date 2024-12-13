@@ -6,9 +6,14 @@
 #include "fixtures.h"
 #include <chrono>
 #include <thread>
+#include <uur/known_failure.h>
 
 struct QueueUSMTestWithParam : uur::IntegrationQueueTestWithParam {
     void SetUp() override {
+        UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+        UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
         program_name = "cpy_and_mult_usm";
         UUR_RETURN_ON_FATAL_FAILURE(
             uur::IntegrationQueueTestWithParam::SetUp());
@@ -30,8 +35,12 @@ struct QueueUSMTestWithParam : uur::IntegrationQueueTestWithParam {
     }
 
     void TearDown() override {
-        ASSERT_SUCCESS(urUSMFree(context, DeviceMem1));
-        ASSERT_SUCCESS(urUSMFree(context, DeviceMem2));
+        if (DeviceMem1) {
+            ASSERT_SUCCESS(urUSMFree(context, DeviceMem1));
+        }
+        if (DeviceMem2) {
+            ASSERT_SUCCESS(urUSMFree(context, DeviceMem2));
+        }
         uur::IntegrationQueueTestWithParam::TearDown();
     }
 

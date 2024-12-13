@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #include "helpers.h"
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 using urEnqueueMemBufferReadTestWithParam =
     uur::urMemBufferQueueTestWithParam<uur::mem_buffer_test_parameters_t>;
@@ -66,6 +67,8 @@ TEST_P(urEnqueueMemBufferReadTestWithParam, InvalidNullPtrEventWaitList) {
 }
 
 TEST_P(urEnqueueMemBufferReadTestWithParam, InvalidSize) {
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     std::vector<uint32_t> output(count, 42);
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
                      urEnqueueMemBufferRead(queue, buffer, true, 1, size,

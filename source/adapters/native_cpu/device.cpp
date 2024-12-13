@@ -428,6 +428,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
 
   case UR_DEVICE_INFO_LOW_POWER_EVENTS_EXP:
     return ReturnValue(false);
+
+  case UR_DEVICE_INFO_QUEUE_ON_DEVICE_PROPERTIES:
+    return ReturnValue(ur_queue_flags_t{0});
+
   default:
     DIE_NO_IMPLEMENTATION;
   }
