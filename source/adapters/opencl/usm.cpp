@@ -668,6 +668,8 @@ urUSMGetMemAllocInfo(ur_context_handle_t hContext, const void *pMem,
   case UR_USM_ALLOC_INFO_DEVICE:
     PropNameCL = CL_MEM_ALLOC_DEVICE_INTEL;
     break;
+  case UR_USM_ALLOC_INFO_POOL:
+    return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
   default:
     return UR_RESULT_ERROR_INVALID_VALUE;
   }
