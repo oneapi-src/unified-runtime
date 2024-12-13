@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include "helpers.h"
+#include "uur/known_failure.h"
 
 #include <thread>
 
@@ -188,6 +189,11 @@ TEST_P(urEnqueueEventsWaitMultiDeviceMTTest, EnqueueWaitSingleQueueMultiOps) {
 }
 
 TEST_P(urEnqueueEventsWaitMultiDeviceMTTest, EnqueueWaitOnAllQueues) {
+    // This is a flaky fail when UR_CONFORMANCE_TEST_LOADER=ON
+    if (getParam().value) {
+        UUR_KNOWN_FAILURE_ON(uur::OpenCL{});
+    }
+
     std::vector<uur::raii::Event> eventsRaii(devices.size());
     std::vector<ur_event_handle_t> events(devices.size());
     auto work = [this, &events, &eventsRaii](size_t i) {

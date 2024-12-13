@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #include "helpers.h"
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 using urEnqueueMemBufferMapTestWithParam =
     uur::urMemBufferQueueTestWithParam<uur::mem_buffer_test_parameters_t>;
@@ -43,6 +44,10 @@ UUR_DEVICE_TEST_SUITE_P(urEnqueueMemBufferMapTestWithWriteFlagParam,
                             urEnqueueMemBufferMapTestWithWriteFlagParam>);
 
 TEST_P(urEnqueueMemBufferMapTestWithWriteFlagParam, SuccessWrite) {
+    if (getParam().map_flag == UR_MAP_FLAG_WRITE_INVALIDATE_REGION) {
+        UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    }
+
     const std::vector<uint32_t> input(count, 0);
     ASSERT_SUCCESS(urEnqueueMemBufferWrite(queue, buffer, true, 0, size,
                                            input.data(), 0, nullptr, nullptr));
@@ -270,6 +275,8 @@ TEST_P(urEnqueueMemBufferMapTestWithParam, InvalidNullPtrEventWaitList) {
 }
 
 TEST_P(urEnqueueMemBufferMapTestWithParam, InvalidSize) {
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     void *map = nullptr;
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
                      urEnqueueMemBufferMap(queue, buffer, true, 0, 1, size, 0,

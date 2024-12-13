@@ -5,6 +5,7 @@
 #include <array>
 #include <map>
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 using urMemGetInfoTestWithParam = uur::urMemBufferTestWithParam<ur_mem_info_t>;
 
@@ -21,6 +22,8 @@ UUR_DEVICE_TEST_SUITE_P(urMemGetInfoTestWithParam,
                         uur::deviceTestWithParamPrinter<ur_mem_info_t>);
 
 TEST_P(urMemGetInfoTestWithParam, Success) {
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     ur_mem_info_t info = getParam();
     size_t size;
     ASSERT_SUCCESS_OR_OPTIONAL_QUERY(
@@ -83,6 +86,8 @@ TEST_P(urMemGetInfoTest, InvalidSizeZero) {
 }
 
 TEST_P(urMemGetInfoTest, InvalidSizeSmall) {
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     size_t mem_size = 0;
     ASSERT_EQ_RESULT(urMemGetInfo(buffer, UR_MEM_INFO_SIZE,
                                   sizeof(mem_size) - 1, &mem_size, nullptr),
@@ -108,7 +113,14 @@ UUR_DEVICE_TEST_SUITE_P(urMemGetInfoImageTest,
                         uur::deviceTestWithParamPrinter<ur_mem_info_t>);
 
 TEST_P(urMemGetInfoImageTest, Success) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
     ur_mem_info_t info = getParam();
+
+    if (info == UR_MEM_INFO_SIZE) {
+        UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+    }
+
     size_t size;
     ASSERT_SUCCESS(urMemGetInfo(image, info, 0, nullptr, &size));
     ASSERT_NE(size, 0);

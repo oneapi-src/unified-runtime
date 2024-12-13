@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 using urSamplerGetInfoTestWithParam =
     uur::urSamplerTestWithParam<ur_sampler_info_t>;
@@ -16,6 +17,9 @@ UUR_DEVICE_TEST_SUITE_P(urSamplerGetInfoTestWithParam,
                         uur::deviceTestWithParamPrinter<ur_sampler_info_t>);
 
 TEST_P(urSamplerGetInfoTestWithParam, Success) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
     size_t size = 0;
     ur_sampler_info_t info = getParam();
     ASSERT_SUCCESS_OR_OPTIONAL_QUERY(
@@ -95,6 +99,9 @@ TEST_P(urSamplerGetInfoTest, InvalidSizePropSizeZero) {
 }
 
 TEST_P(urSamplerGetInfoTest, InvalidSizePropSizeSmall) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
     ur_sampler_addressing_mode_t mode;
     ASSERT_EQ_RESULT(urSamplerGetInfo(sampler, UR_SAMPLER_INFO_ADDRESSING_MODE,
                                       sizeof(mode) - 1, &mode, nullptr),

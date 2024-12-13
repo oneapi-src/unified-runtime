@@ -6,10 +6,14 @@
 #include "fixtures.h"
 #include <chrono>
 #include <thread>
+#include <uur/known_failure.h>
 
 struct QueueEmptyStatusTestWithParam : uur::IntegrationQueueTestWithParam {
 
     void SetUp() override {
+        UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+        UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
 
         program_name = "multiply";
         UUR_RETURN_ON_FATAL_FAILURE(

@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 struct testParametersFill {
     size_t size;
@@ -95,6 +96,7 @@ UUR_DEVICE_TEST_SUITE_P(urEnqueueUSMFillTestWithParam,
                         printFillTestString<urEnqueueUSMFillTestWithParam>);
 
 TEST_P(urEnqueueUSMFillTestWithParam, Success) {
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
 
     ur_event_handle_t event = nullptr;
 

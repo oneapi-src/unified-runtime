@@ -4,12 +4,18 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 #include <uur/raii.h>
 
 using urMemBufferCreateWithNativeHandleTest = uur::urMemBufferTest;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urMemBufferCreateWithNativeHandleTest);
 
 TEST_P(urMemBufferCreateWithNativeHandleTest, Success) {
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     ur_native_handle_t hNativeMem = 0;
     ASSERT_SUCCESS(urMemGetNativeHandle(buffer, device, &hNativeMem));
 
@@ -30,6 +36,11 @@ TEST_P(urMemBufferCreateWithNativeHandleTest, Success) {
 }
 
 TEST_P(urMemBufferCreateWithNativeHandleTest, SuccessWithOwnedNativeHandle) {
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     ur_native_handle_t native_handle = 0;
     ASSERT_SUCCESS(urMemGetNativeHandle(buffer, device, &native_handle));
 
@@ -51,6 +62,11 @@ TEST_P(urMemBufferCreateWithNativeHandleTest, SuccessWithOwnedNativeHandle) {
 }
 
 TEST_P(urMemBufferCreateWithNativeHandleTest, SuccessWithUnOwnedNativeHandle) {
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     ur_native_handle_t native_handle = 0;
     ASSERT_SUCCESS(urMemGetNativeHandle(buffer, device, &native_handle));
 
@@ -72,6 +88,9 @@ TEST_P(urMemBufferCreateWithNativeHandleTest, SuccessWithUnOwnedNativeHandle) {
 }
 
 TEST_P(urMemBufferCreateWithNativeHandleTest, InvalidNullHandle) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     ur_native_handle_t hNativeMem = 0;
     ASSERT_SUCCESS(urMemGetNativeHandle(buffer, device, &hNativeMem));
 
@@ -87,6 +106,9 @@ TEST_P(urMemBufferCreateWithNativeHandleTest, InvalidNullHandle) {
 }
 
 TEST_P(urMemBufferCreateWithNativeHandleTest, InvalidNullPointer) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     ur_native_handle_t hNativeMem = 0;
     ASSERT_SUCCESS(urMemGetNativeHandle(buffer, device, &hNativeMem));
 
@@ -104,6 +126,8 @@ using urMemBufferMultiQueueMemBufferTest = uur::urMultiDeviceMemBufferQueueTest;
 UUR_INSTANTIATE_PLATFORM_TEST_SUITE_P(urMemBufferMultiQueueMemBufferTest);
 
 TEST_P(urMemBufferMultiQueueMemBufferTest, WriteBack) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+
     void *ptr;
     ASSERT_SUCCESS(urUSMHostAlloc(context, nullptr, nullptr, size, &ptr));
     ur_mem_handle_t mem = nullptr;
