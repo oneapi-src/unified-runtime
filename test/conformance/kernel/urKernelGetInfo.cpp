@@ -22,48 +22,55 @@ TEST_P(urKernelGetInfoTest, Success) {
     auto property_name = getParam();
     size_t property_size = 0;
     std::vector<char> property_value;
-    ASSERT_SUCCESS(
-        urKernelGetInfo(kernel, property_name, 0, nullptr, &property_size));
+    ur_result_t result =
+        urKernelGetInfo(kernel, property_name, 0, nullptr, &property_size);
     property_value.resize(property_size);
-    ASSERT_SUCCESS(urKernelGetInfo(kernel, property_name, property_size,
-                                   property_value.data(), nullptr));
-    switch (property_name) {
-    case UR_KERNEL_INFO_CONTEXT: {
-        auto returned_context =
-            reinterpret_cast<ur_context_handle_t *>(property_value.data());
-        ASSERT_EQ(context, *returned_context);
-        break;
-    }
-    case UR_KERNEL_INFO_PROGRAM: {
-        auto returned_program =
-            reinterpret_cast<ur_program_handle_t *>(property_value.data());
-        ASSERT_EQ(program, *returned_program);
-        break;
-    }
-    case UR_KERNEL_INFO_REFERENCE_COUNT: {
-        auto returned_reference_count =
-            reinterpret_cast<uint32_t *>(property_value.data());
-        ASSERT_GT(*returned_reference_count, 0U);
-        break;
-    }
-    case UR_KERNEL_INFO_ATTRIBUTES: {
-        auto returned_attributes = std::string(property_value.data());
-        ur_platform_backend_t backend;
-        ASSERT_SUCCESS(urPlatformGetInfo(platform, UR_PLATFORM_INFO_BACKEND,
-                                         sizeof(backend), &backend, nullptr));
-        if (backend == UR_PLATFORM_BACKEND_OPENCL ||
-            backend == UR_PLATFORM_BACKEND_LEVEL_ZERO) {
-            // Older intel drivers don't attach any default attributes and newer ones force walk order to X/Y/Z using special attribute.
-            ASSERT_TRUE(returned_attributes.empty() ||
-                        returned_attributes ==
-                            "intel_reqd_workgroup_walk_order(0,1,2)");
-        } else {
-            ASSERT_TRUE(returned_attributes.empty());
+
+    if (result == UR_RESULT_SUCCESS) {
+        ASSERT_SUCCESS(urKernelGetInfo(kernel, property_name, property_size,
+                                       property_value.data(), nullptr));
+
+        switch (property_name) {
+        case UR_KERNEL_INFO_CONTEXT: {
+            auto returned_context =
+                reinterpret_cast<ur_context_handle_t *>(property_value.data());
+            ASSERT_EQ(context, *returned_context);
+            break;
         }
-        break;
-    }
-    default:
-        break;
+        case UR_KERNEL_INFO_PROGRAM: {
+            auto returned_program =
+                reinterpret_cast<ur_program_handle_t *>(property_value.data());
+            ASSERT_EQ(program, *returned_program);
+            break;
+        }
+        case UR_KERNEL_INFO_REFERENCE_COUNT: {
+            auto returned_reference_count =
+                reinterpret_cast<uint32_t *>(property_value.data());
+            ASSERT_GT(*returned_reference_count, 0U);
+            break;
+        }
+        case UR_KERNEL_INFO_ATTRIBUTES: {
+            auto returned_attributes = std::string(property_value.data());
+            ur_platform_backend_t backend;
+            ASSERT_SUCCESS(urPlatformGetInfo(platform, UR_PLATFORM_INFO_BACKEND,
+                                             sizeof(backend), &backend,
+                                             nullptr));
+            if (backend == UR_PLATFORM_BACKEND_OPENCL ||
+                backend == UR_PLATFORM_BACKEND_LEVEL_ZERO) {
+                // Older intel drivers don't attach any default attributes and newer ones force walk order to X/Y/Z using special attribute.
+                ASSERT_TRUE(returned_attributes.empty() ||
+                            returned_attributes ==
+                                "intel_reqd_workgroup_walk_order(0,1,2)");
+            } else {
+                ASSERT_TRUE(returned_attributes.empty());
+            }
+            break;
+        }
+        default:
+            break;
+        }
+    } else {
+        UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(result);
     }
 }
 
