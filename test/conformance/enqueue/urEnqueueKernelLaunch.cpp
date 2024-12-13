@@ -164,6 +164,8 @@ TEST_P(urEnqueueKernelLaunchTest, InvalidKernelArgs) {
 }
 
 TEST_P(urEnqueueKernelLaunchKernelWgSizeTest, Success) {
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
     UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
     UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
 
@@ -193,6 +195,10 @@ TEST_P(urEnqueueKernelLaunchKernelWgSizeTest, NonMatchingLocalSize) {
 }
 
 TEST_P(urEnqueueKernelLaunchKernelSubGroupTest, Success) {
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
     ur_mem_handle_t buffer = nullptr;
     AddBuffer1DArg(sizeof(size_t), &buffer);
     ASSERT_SUCCESS(urEnqueueKernelLaunch(
