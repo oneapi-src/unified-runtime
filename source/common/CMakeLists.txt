@@ -7,6 +7,8 @@ if (UR_BUILD_ADAPTER_L0 OR UR_BUILD_ADAPTER_L0_V2)
     include(FetchLevelZero)
     set(UMF_BUILD_LEVEL_ZERO_PROVIDER ON CACHE INTERNAL "Build Level Zero Provider")
     set(UMF_LEVEL_ZERO_INCLUDE_DIR "${LEVEL_ZERO_INCLUDE_DIR}" CACHE INTERNAL "Level Zero headers")
+else()
+    set(UMF_BUILD_LEVEL_ZERO_PROVIDER OFF CACHE INTERNAL "Build Level Zero Provider")
 endif()
 
 add_ur_library(ur_common STATIC
@@ -30,8 +32,10 @@ if (NOT DEFINED UMF_REPO)
 endif()
 
 if (NOT DEFINED UMF_TAG)
-    # main 03.10.2024: Add umfIsFreeOpDefault(hProvider)
-    set(UMF_TAG fa006eea503a58e79fa197891f1391c9dcda73e1)
+    # tag v0.10.0
+    # Tagger: Łukasz Stolarczuk <lukasz.stolarczuk@intel.com>
+    # Date:   Mon Dec 9 17:01:43 2024 +0100
+    set(UMF_TAG v0.10.0)
 endif()
 
 message(STATUS "Will fetch Unified Memory Framework from ${UMF_REPO}")
@@ -49,14 +53,22 @@ if (UR_STATIC_ADAPTER_L0)
     endif()
 endif()
 
-set(UMF_BUILD_TESTS OFF CACHE INTERNAL "Build UMF tests")
-set(UMF_BUILD_EXAMPLES OFF CACHE INTERNAL "Build UMF examples")
-set(UMF_BUILD_SHARED_LIBRARY ${UMF_BUILD_SHARED_LIBRARY} CACHE INTERNAL "Build UMF shared library")
-set(UMF_BUILD_LIBUMF_POOL_DISJOINT ON CACHE INTERNAL "Build Disjoint Pool")
-set(UMF_BUILD_CUDA_PROVIDER OFF CACHE INTERNAL "Build UMF CUDA provider")
+set(UR_USE_EXTERNAL_UMF OFF CACHE BOOL "Use a pre-built UMF")
 
-FetchContent_MakeAvailable(unified-memory-framework)
-FetchContent_GetProperties(unified-memory-framework)
+if (UR_USE_EXTERNAL_UMF)
+  find_package(umf REQUIRED)
+  # Add an alias matching the FetchContent case
+  add_library(umf::headers ALIAS umf::umf_headers)
+else()
+  set(UMF_BUILD_TESTS OFF CACHE INTERNAL "Build UMF tests")
+  set(UMF_BUILD_EXAMPLES OFF CACHE INTERNAL "Build UMF examples")
+  set(UMF_BUILD_SHARED_LIBRARY ${UMF_BUILD_SHARED_LIBRARY} CACHE INTERNAL "Build UMF shared library")
+  set(UMF_BUILD_LIBUMF_POOL_DISJOINT ON CACHE INTERNAL "Build Disjoint Pool")
+  set(UMF_BUILD_CUDA_PROVIDER OFF CACHE INTERNAL "Build UMF CUDA provider")
+
+  FetchContent_MakeAvailable(unified-memory-framework)
+  FetchContent_GetProperties(unified-memory-framework)
+endif()
 
 if(UR_ENABLE_LATENCY_HISTOGRAM)
     set(HDR_HISTOGRAM_BUILD_STATIC CACHE INTERNAL ON "")

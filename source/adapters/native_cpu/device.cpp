@@ -10,6 +10,7 @@
 
 #include <ur_api.h>
 
+#include "common.hpp"
 #include "platform.hpp"
 
 #if defined(_MSC_VER) || defined(__MINGW32__) || defined(__MINGW64__)
@@ -247,7 +248,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     return ReturnValue(uint32_t{4});
   case UR_DEVICE_INFO_NATIVE_VECTOR_WIDTH_HALF:
     return ReturnValue(uint32_t{16});
-  // Imported from level_zero
   case UR_DEVICE_INFO_USM_HOST_SUPPORT:
   case UR_DEVICE_INFO_USM_DEVICE_SUPPORT:
   case UR_DEVICE_INFO_USM_SINGLE_SHARED_SUPPORT:
@@ -366,6 +366,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_MEMORY_CLOCK_RATE:
   case UR_DEVICE_INFO_MEMORY_BUS_WIDTH:
     return UR_RESULT_ERROR_INVALID_VALUE;
+  case UR_DEVICE_INFO_2D_BLOCK_ARRAY_CAPABILITIES_EXP:
+    return ReturnValue(
+        static_cast<ur_exp_device_2d_block_array_capability_flags_t>(0));
   case UR_DEVICE_INFO_ATOMIC_FENCE_ORDER_CAPABILITIES: {
     // Currently for Native CPU fences are implemented using OCK
     // builtins, so we have different capabilities than atomic operations
@@ -414,6 +417,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_ENQUEUE_NATIVE_COMMAND_SUPPORT_EXP:
     return ReturnValue(false);
 
+  case UR_DEVICE_INFO_USM_POOL_SUPPORT:
+    return ReturnValue(false);
+
+  case UR_DEVICE_INFO_LOW_POWER_EVENTS_EXP:
+    return ReturnValue(false);
   default:
     DIE_NO_IMPLEMENTATION;
   }
@@ -469,19 +477,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
 UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetGlobalTimestamps(
     ur_device_handle_t hDevice, uint64_t *pDeviceTimestamp,
     uint64_t *pHostTimestamp) {
-  std::ignore = hDevice; // todo
+  std::ignore = hDevice;
   if (pHostTimestamp) {
-    using namespace std::chrono;
-    *pHostTimestamp =
-        duration_cast<nanoseconds>(steady_clock::now().time_since_epoch())
-            .count();
+    *pHostTimestamp = get_timestamp();
   }
   if (pDeviceTimestamp) {
-    // todo: calculate elapsed time properly
-    using namespace std::chrono;
-    *pDeviceTimestamp =
-        duration_cast<nanoseconds>(steady_clock::now().time_since_epoch())
-            .count();
+    *pDeviceTimestamp = get_timestamp();
   }
   return UR_RESULT_SUCCESS;
 }

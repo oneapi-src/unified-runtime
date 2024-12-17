@@ -7,7 +7,7 @@
  * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
  *
  * @file ur_api.h
- * @version v0.11-r0
+ * @version v0.12-r0
  *
  */
 #ifndef UR_API_H_INCLUDED
@@ -230,10 +230,14 @@ typedef enum ur_function_t {
     UR_FUNCTION_COMMAND_BUFFER_UPDATE_SIGNAL_EVENT_EXP = 243,             ///< Enumerator for ::urCommandBufferUpdateSignalEventExp
     UR_FUNCTION_COMMAND_BUFFER_UPDATE_WAIT_EVENTS_EXP = 244,              ///< Enumerator for ::urCommandBufferUpdateWaitEventsExp
     UR_FUNCTION_BINDLESS_IMAGES_MAP_EXTERNAL_LINEAR_MEMORY_EXP = 245,     ///< Enumerator for ::urBindlessImagesMapExternalLinearMemoryExp
-    UR_FUNCTION_ENQUEUE_USM_DEVICE_ALLOC_EXP = 246,                       ///< Enumerator for ::urEnqueueUSMDeviceAllocExp
-    UR_FUNCTION_ENQUEUE_USM_SHARED_ALLOC_EXP = 247,                       ///< Enumerator for ::urEnqueueUSMSharedAllocExp
-    UR_FUNCTION_ENQUEUE_USM_HOST_ALLOC_EXP = 248,                         ///< Enumerator for ::urEnqueueUSMHostAllocExp
-    UR_FUNCTION_ENQUEUE_USM_FREE_EXP = 249,                               ///< Enumerator for ::urEnqueueUSMFreeExp
+    UR_FUNCTION_ENQUEUE_EVENTS_WAIT_WITH_BARRIER_EXT = 246,               ///< Enumerator for ::urEnqueueEventsWaitWithBarrierExt
+    UR_FUNCTION_TENSOR_MAP_ENCODE_IM_2_COL_EXP = 247,                     ///< Enumerator for ::urTensorMapEncodeIm2ColExp
+    UR_FUNCTION_TENSOR_MAP_ENCODE_TILED_EXP = 248,                        ///< Enumerator for ::urTensorMapEncodeTiledExp
+    UR_FUNCTION_PHYSICAL_MEM_GET_INFO = 249,                              ///< Enumerator for ::urPhysicalMemGetInfo
+    UR_FUNCTION_ENQUEUE_USM_DEVICE_ALLOC_EXP = 250,                       ///< Enumerator for ::urEnqueueUSMDeviceAllocExp
+    UR_FUNCTION_ENQUEUE_USM_SHARED_ALLOC_EXP = 251,                       ///< Enumerator for ::urEnqueueUSMSharedAllocExp
+    UR_FUNCTION_ENQUEUE_USM_HOST_ALLOC_EXP = 252,                         ///< Enumerator for ::urEnqueueUSMHostAllocExp
+    UR_FUNCTION_ENQUEUE_USM_FREE_EXP = 253,                               ///< Enumerator for ::urEnqueueUSMFreeExp
     /// @cond
     UR_FUNCTION_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -293,6 +297,7 @@ typedef enum ur_structure_type_t {
     UR_STRUCTURE_TYPE_EXP_IMAGE_COPY_REGION = 0x2007,                        ///< ::ur_exp_image_copy_region_t
     UR_STRUCTURE_TYPE_EXP_ENQUEUE_NATIVE_COMMAND_PROPERTIES = 0x3000,        ///< ::ur_exp_enqueue_native_command_properties_t
     UR_STRUCTURE_TYPE_EXP_ENQUEUE_USM_ALLOC_PROPERTIES = 0x3001,             ///< ::ur_exp_async_usm_alloc_properties_t
+    UR_STRUCTURE_TYPE_EXP_ENQUEUE_EXT_PROPERTIES = 0x4000,                   ///< ::ur_exp_enqueue_ext_properties_t
     /// @cond
     UR_STRUCTURE_TYPE_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -970,6 +975,9 @@ typedef enum ur_adapter_info_t {
                                          ///< The reference count returned should be considered immediately stale.
                                          ///< It is unsuitable for general use in applications. This feature is
                                          ///< provided for identifying memory leaks.
+    UR_ADAPTER_INFO_VERSION = 2,         ///< [uint32_t] Specifies the adapter version, initial value of 1 and
+                                         ///< incremented unpon major changes, e.g. when multiple versions of an
+                                         ///< adapter may exist in parallel.
     /// @cond
     UR_ADAPTER_INFO_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -991,7 +999,7 @@ typedef enum ur_adapter_info_t {
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hAdapter`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_ADAPTER_INFO_REFERENCE_COUNT < propName`
+///         + `::UR_ADAPTER_INFO_VERSION < propName`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
 ///         + If `propName` is not supported by the adapter.
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
@@ -1059,6 +1067,8 @@ typedef enum ur_adapter_backend_t {
 ///         + `NULL == phAdapters`
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         + `NumEntries == 0 && phPlatforms != NULL`
+///     - ::UR_RESULT_ERROR_INVALID_VALUE
+///         + `pNumPlatforms == NULL && phPlatforms == NULL`
 UR_APIEXPORT ur_result_t UR_APICALL
 urPlatformGet(
     ur_adapter_handle_t *phAdapters,   ///< [in][range(0, NumAdapters)] array of adapters to query for platforms.
@@ -1151,7 +1161,8 @@ typedef enum ur_api_version_t {
     UR_API_VERSION_0_9 = UR_MAKE_VERSION(0, 9),      ///< version 0.9
     UR_API_VERSION_0_10 = UR_MAKE_VERSION(0, 10),    ///< version 0.10
     UR_API_VERSION_0_11 = UR_MAKE_VERSION(0, 11),    ///< version 0.11
-    UR_API_VERSION_CURRENT = UR_MAKE_VERSION(0, 11), ///< latest known version
+    UR_API_VERSION_0_12 = UR_MAKE_VERSION(0, 12),    ///< version 0.12
+    UR_API_VERSION_CURRENT = UR_MAKE_VERSION(0, 12), ///< latest known version
     /// @cond
     UR_API_VERSION_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -1642,6 +1653,9 @@ typedef enum ur_device_info_t {
     UR_DEVICE_INFO_GLOBAL_VARIABLE_SUPPORT = 118,                    ///< [::ur_bool_t] return true if the device supports the
                                                                      ///< `EnqueueDeviceGlobalVariableWrite` and
                                                                      ///< `EnqueueDeviceGlobalVariableRead` entry points.
+    UR_DEVICE_INFO_USM_POOL_SUPPORT = 119,                           ///< [::ur_bool_t] return true if the device supports USM pooling. Pertains
+                                                                     ///< to the `USMPool` entry points and usage of the `pool` parameter of the
+                                                                     ///< USM alloc entry points.
     UR_DEVICE_INFO_COMMAND_BUFFER_SUPPORT_EXP = 0x1000,              ///< [::ur_bool_t] Returns true if the device supports the use of
                                                                      ///< command-buffers.
     UR_DEVICE_INFO_COMMAND_BUFFER_UPDATE_CAPABILITIES_EXP = 0x1001,  ///< [::ur_device_command_buffer_update_capability_flags_t] Command-buffer
@@ -1702,7 +1716,10 @@ typedef enum ur_device_info_t {
                                                                      ///< backed 2D sampled image data.
     UR_DEVICE_INFO_ENQUEUE_NATIVE_COMMAND_SUPPORT_EXP = 0x2020,      ///< [::ur_bool_t] returns true if the device supports enqueueing of native
                                                                      ///< work
-    UR_DEVICE_INFO_ASYNC_USM_ALLOCATIONS_EXP = 0x2021,               ///< [::ur_bool_t] returns true if the device supports enqueueing of native
+    UR_DEVICE_INFO_LOW_POWER_EVENTS_EXP = 0x2021,                    ///< [::ur_bool_t] returns true if the device supports low-power events.
+    UR_DEVICE_INFO_2D_BLOCK_ARRAY_CAPABILITIES_EXP = 0x2022,         ///< [::ur_exp_device_2d_block_array_capability_flags_t] return a bit-field
+                                                                     ///< of Intel GPU 2D block array capabilities
+    UR_DEVICE_INFO_ASYNC_USM_ALLOCATIONS_EXP = 0x2024,               ///< [::ur_bool_t] returns true if the device supports enqueueing of native
                                                                      ///< work
     /// @cond
     UR_DEVICE_INFO_FORCE_UINT32 = 0x7fffffff
@@ -2517,8 +2534,12 @@ typedef enum ur_mem_type_t {
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Memory Information type
 typedef enum ur_mem_info_t {
-    UR_MEM_INFO_SIZE = 0,    ///< [size_t] actual size of of memory object in bytes
-    UR_MEM_INFO_CONTEXT = 1, ///< [::ur_context_handle_t] context in which the memory object was created
+    UR_MEM_INFO_SIZE = 0,            ///< [size_t] actual size of the memory object in bytes
+    UR_MEM_INFO_CONTEXT = 1,         ///< [::ur_context_handle_t] context in which the memory object was created
+    UR_MEM_INFO_REFERENCE_COUNT = 2, ///< [uint32_t] Reference count of the memory object.
+                                     ///< The reference count returned should be considered immediately stale.
+                                     ///< It is unsuitable for general use in applications. This feature is
+                                     ///< provided for identifying memory leaks.
     /// @cond
     UR_MEM_INFO_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -2652,6 +2673,7 @@ typedef struct ur_image_desc_t {
 ///     - ::UR_RESULT_ERROR_INVALID_CONTEXT
 ///     - ::UR_RESULT_ERROR_INVALID_VALUE
 ///     - ::UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR
+///         + `pImageDesc && UR_STRUCTURE_TYPE_IMAGE_DESC != pImageDesc->stype`
 ///         + `pImageDesc && UR_MEM_TYPE_IMAGE1D_ARRAY < pImageDesc->type`
 ///         + `pImageDesc && pImageDesc->numMipLevel != 0`
 ///         + `pImageDesc && pImageDesc->numSamples != 0`
@@ -2992,7 +3014,7 @@ urMemImageCreateWithNativeHandle(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hMemory`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_MEM_INFO_CONTEXT < propName`
+///         + `::UR_MEM_INFO_REFERENCE_COUNT < propName`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
 ///         + If `propName` is not supported by the adapter.
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
@@ -3509,7 +3531,6 @@ typedef struct ur_usm_pool_limits_desc_t {
 /// @brief USM allocate host memory
 ///
 /// @details
-///     - This function must support memory pooling.
 ///     - If pUSMDesc is not NULL and pUSMDesc->pool is not NULL the allocation
 ///       will be served from a specified memory pool.
 ///     - Otherwise, the behavior is implementation-defined.
@@ -3542,6 +3563,8 @@ typedef struct ur_usm_pool_limits_desc_t {
 ///         + `size` is greater than ::UR_DEVICE_INFO_MAX_MEM_ALLOC_SIZE.
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
+///         + If any device associated with `hContext` reports `false` for ::UR_DEVICE_INFO_USM_POOL_SUPPORT
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMHostAlloc(
     ur_context_handle_t hContext,  ///< [in] handle of the context object
@@ -3555,7 +3578,6 @@ urUSMHostAlloc(
 /// @brief USM allocate device memory
 ///
 /// @details
-///     - This function must support memory pooling.
 ///     - If pUSMDesc is not NULL and pUSMDesc->pool is not NULL the allocation
 ///       will be served from a specified memory pool.
 ///     - Otherwise, the behavior is implementation-defined.
@@ -3589,6 +3611,8 @@ urUSMHostAlloc(
 ///         + `size` is greater than ::UR_DEVICE_INFO_MAX_MEM_ALLOC_SIZE.
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
+///         + If any device associated with `hContext` reports `false` for ::UR_DEVICE_INFO_USM_POOL_SUPPORT
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMDeviceAlloc(
     ur_context_handle_t hContext,  ///< [in] handle of the context object
@@ -3603,7 +3627,6 @@ urUSMDeviceAlloc(
 /// @brief USM allocate shared memory
 ///
 /// @details
-///     - This function must support memory pooling.
 ///     - If pUSMDesc is not NULL and pUSMDesc->pool is not NULL the allocation
 ///       will be served from a specified memory pool.
 ///     - Otherwise, the behavior is implementation-defined.
@@ -3638,6 +3661,8 @@ urUSMDeviceAlloc(
 ///         + If `UR_DEVICE_INFO_USM_SINGLE_SHARED_SUPPORT` and `UR_DEVICE_INFO_USM_CROSS_SHARED_SUPPORT` are both false.
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
+///         + If any device associated with `hContext` reports `false` for ::UR_DEVICE_INFO_USM_POOL_SUPPORT
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMSharedAlloc(
     ur_context_handle_t hContext,  ///< [in] handle of the context object
@@ -3650,6 +3675,11 @@ urUSMSharedAlloc(
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Free the USM memory object
+///
+/// @details
+///     - Note that implementations are required to wait for previously enqueued
+///       commands that may be accessing `pMem` to finish before freeing the
+///       memory.
 ///
 /// @returns
 ///     - ::UR_RESULT_SUCCESS
@@ -3719,6 +3749,8 @@ urUSMGetMemAllocInfo(
 ///         + `::UR_USM_POOL_FLAGS_MASK & pPoolDesc->flags`
 ///     - ::UR_RESULT_ERROR_INVALID_VALUE
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
+///         + If any device associated with `hContext` reports `false` for ::UR_DEVICE_INFO_USM_POOL_SUPPORT
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMPoolCreate(
     ur_context_handle_t hContext,  ///< [in] handle of the context object
@@ -3737,6 +3769,7 @@ urUSMPoolCreate(
 ///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == pPool`
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMPoolRetain(
     ur_usm_pool_handle_t pPool ///< [in][retain] pointer to USM memory pool
@@ -3759,6 +3792,7 @@ urUSMPoolRetain(
 ///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == pPool`
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMPoolRelease(
     ur_usm_pool_handle_t pPool ///< [in][release] pointer to USM memory pool
@@ -3800,6 +3834,7 @@ typedef enum ur_usm_pool_info_t {
 ///         + `pPropValue == NULL && pPropSizeRet == NULL`
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
 UR_APIEXPORT ur_result_t UR_APICALL
 urUSMPoolGetInfo(
     ur_usm_pool_handle_t hPool,  ///< [in] handle of the USM memory pool
@@ -4113,6 +4148,50 @@ urPhysicalMemRelease(
     ur_physical_mem_handle_t hPhysicalMem ///< [in][release] handle of the physical memory object to release.
 );
 
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Physical memory range info queries.
+typedef enum ur_physical_mem_info_t {
+    UR_PHYSICAL_MEM_INFO_CONTEXT = 0,         ///< [::ur_context_handle_t] context in which the physical memory object
+                                              ///< was created.
+    UR_PHYSICAL_MEM_INFO_DEVICE = 1,          ///< [::ur_device_handle_t] device associated with this physical memory
+                                              ///< object.
+    UR_PHYSICAL_MEM_INFO_SIZE = 2,            ///< [size_t] actual size of the physical memory object in bytes.
+    UR_PHYSICAL_MEM_INFO_PROPERTIES = 3,      ///< [::ur_physical_mem_properties_t] properties set when creating this
+                                              ///< physical memory object.
+    UR_PHYSICAL_MEM_INFO_REFERENCE_COUNT = 4, ///< [uint32_t] Reference count of the physical memory object.
+                                              ///< The reference count returned should be considered immediately stale.
+                                              ///< It is unsuitable for general use in applications. This feature is
+                                              ///< provided for identifying memory leaks.
+    /// @cond
+    UR_PHYSICAL_MEM_INFO_FORCE_UINT32 = 0x7fffffff
+    /// @endcond
+
+} ur_physical_mem_info_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get information about a physical memory object.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hPhysicalMem`
+///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
+///         + `::UR_PHYSICAL_MEM_INFO_REFERENCE_COUNT < propName`
+UR_APIEXPORT ur_result_t UR_APICALL
+urPhysicalMemGetInfo(
+    ur_physical_mem_handle_t hPhysicalMem, ///< [in] handle of the physical memory object to query.
+    ur_physical_mem_info_t propName,       ///< [in] type of the info to query.
+    size_t propSize,                       ///< [in] size in bytes of the memory pointed to by pPropValue.
+    void *pPropValue,                      ///< [out][optional][typename(propName, propSize)] array of bytes holding
+                                           ///< the info. If propSize is less than the real number of bytes needed to
+                                           ///< return the info then the ::UR_RESULT_ERROR_INVALID_SIZE error is
+                                           ///< returned and pPropValue is not used.
+    size_t *pPropSizeRet                   ///< [out][optional] pointer to the actual size in bytes of the queried propName."
+);
+
 #if !defined(__GNUC__)
 #pragma endregion
 #endif
@@ -4210,17 +4289,19 @@ urProgramCreateWithIL(
 );
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Create a program object from device native binary.
+/// @brief Create a program object from native binaries for the specified
+///        devices.
 ///
 /// @details
 ///     - The application may call this function from simultaneous threads.
 ///     - Following a successful call to this entry point, `phProgram` will
-///       contain a binary of type ::UR_PROGRAM_BINARY_TYPE_COMPILED_OBJECT or
-///       ::UR_PROGRAM_BINARY_TYPE_LIBRARY for `hDevice`.
-///     - The device specified by `hDevice` must be device associated with
+///       contain binaries of type ::UR_PROGRAM_BINARY_TYPE_COMPILED_OBJECT or
+///       ::UR_PROGRAM_BINARY_TYPE_LIBRARY for the specified devices in
+///       `phDevices`.
+///     - The devices specified by `phDevices` must be associated with the
 ///       context.
 ///     - The adapter may (but is not required to) perform validation of the
-///       provided module during this call.
+///       provided modules during this call.
 ///
 /// @remarks
 ///   _Analogues_
@@ -4233,21 +4314,27 @@ urProgramCreateWithIL(
 ///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
-///         + `NULL == hDevice`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///         + `NULL == pBinary`
+///         + `NULL == phDevices`
+///         + `NULL == pLengths`
+///         + `NULL == ppBinaries`
 ///         + `NULL == phProgram`
 ///         + `NULL != pProperties && pProperties->count > 0 && NULL == pProperties->pMetadatas`
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         + `NULL != pProperties && NULL != pProperties->pMetadatas && pProperties->count == 0`
+///         + `numDevices == 0`
 ///     - ::UR_RESULT_ERROR_INVALID_NATIVE_BINARY
-///         + If `pBinary` isn't a valid binary for `hDevice.`
+///         + If any binary in `ppBinaries` isn't a valid binary for the corresponding device in `phDevices.`
 UR_APIEXPORT ur_result_t UR_APICALL
 urProgramCreateWithBinary(
     ur_context_handle_t hContext,               ///< [in] handle of the context instance
-    ur_device_handle_t hDevice,                 ///< [in] handle to device associated with binary.
-    size_t size,                                ///< [in] size in bytes.
-    const uint8_t *pBinary,                     ///< [in] pointer to binary.
+    uint32_t numDevices,                        ///< [in] number of devices
+    ur_device_handle_t *phDevices,              ///< [in][range(0, numDevices)] a pointer to a list of device handles. The
+                                                ///< binaries are loaded for devices specified in this list.
+    size_t *pLengths,                           ///< [in][range(0, numDevices)] array of sizes of program binaries
+                                                ///< specified by `pBinaries` (in bytes).
+    const uint8_t **ppBinaries,                 ///< [in][range(0, numDevices)] pointer to program binaries to be loaded
+                                                ///< for devices specified by `phDevices`.
     const ur_program_properties_t *pProperties, ///< [in][optional] pointer to program creation properties.
     ur_program_handle_t *phProgram              ///< [out] pointer to handle of Program object created.
 );
@@ -5429,13 +5516,17 @@ typedef enum ur_queue_flag_t {
                                                              ///< ignore this flag.
     UR_QUEUE_FLAG_SYNC_WITH_DEFAULT_STREAM = UR_BIT(10),     ///< Synchronize with the default stream. Only meaningful for CUDA. Other
                                                              ///< platforms may ignore this flag.
+    UR_QUEUE_FLAG_LOW_POWER_EVENTS_EXP = UR_BIT(11),         ///< Hint: use low-power events. Only meaningful for Level Zero, where the
+                                                             ///< implementation may use interrupt-driven events. May reduce CPU
+                                                             ///< utilization at the cost of increased event completion latency. Other
+                                                             ///< platforms may ignore this flag.
     /// @cond
     UR_QUEUE_FLAG_FORCE_UINT32 = 0x7fffffff
     /// @endcond
 
 } ur_queue_flag_t;
 /// @brief Bit Mask for validating ur_queue_flags_t
-#define UR_QUEUE_FLAGS_MASK 0xfffff800
+#define UR_QUEUE_FLAGS_MASK 0xfffff000
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Query information about a command queue
@@ -7410,6 +7501,27 @@ urEnqueueWriteHostPipe(
 #if !defined(__GNUC__)
 #pragma endregion
 #endif
+// Intel 'oneAPI' Unified Runtime Experimental device descriptor for querying Intel device 2D block array capabilities
+#if !defined(__GNUC__)
+#pragma region 2d_block_array_capabilities_(experimental)
+#endif
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intel GPU 2D block array capabilities
+typedef uint32_t ur_exp_device_2d_block_array_capability_flags_t;
+typedef enum ur_exp_device_2d_block_array_capability_flag_t {
+    UR_EXP_DEVICE_2D_BLOCK_ARRAY_CAPABILITY_FLAG_LOAD = UR_BIT(0),  ///< Load instructions are supported
+    UR_EXP_DEVICE_2D_BLOCK_ARRAY_CAPABILITY_FLAG_STORE = UR_BIT(1), ///< Store instructions are supported
+    /// @cond
+    UR_EXP_DEVICE_2D_BLOCK_ARRAY_CAPABILITY_FLAG_FORCE_UINT32 = 0x7fffffff
+    /// @endcond
+
+} ur_exp_device_2d_block_array_capability_flag_t;
+/// @brief Bit Mask for validating ur_exp_device_2d_block_array_capability_flags_t
+#define UR_EXP_DEVICE_2D_BLOCK_ARRAY_CAPABILITY_FLAGS_MASK 0xfffffffc
+
+#if !defined(__GNUC__)
+#pragma endregion
+#endif
 // Intel 'oneAPI' Unified Runtime Experimental API for asynchronous allocations
 #if !defined(__GNUC__)
 #pragma region async_alloc_(experimental)
@@ -8468,7 +8580,7 @@ typedef struct ur_exp_command_buffer_update_value_arg_desc_t {
                                                          ///< ::UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_VALUE_ARG_DESC
     const void *pNext;                                   ///< [in][optional] pointer to extension-specific structure
     uint32_t argIndex;                                   ///< [in] Argument index.
-    uint32_t argSize;                                    ///< [in] Argument size.
+    size_t argSize;                                      ///< [in] Argument size.
     const ur_kernel_arg_value_properties_t *pProperties; ///< [in][optional] Pointer to value properties.
     const void *pNewValueArg;                            ///< [in][optional] Argument value representing matching kernel arg type to
                                                          ///< set at argument index.
@@ -8611,6 +8723,7 @@ urCommandBufferReleaseExp(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hCommandBuffer`
 ///     - ::UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_EXP
+///     - ::UR_RESULT_ERROR_INVALID_OPERATION - "If `hCommandBuffer` has already been finalized"
 ///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
 ///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -9585,13 +9698,17 @@ urEnqueueCooperativeKernelLaunchExp(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hKernel`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pLocalWorkSize`
 ///         + `NULL == pGroupCountRet`
 ///     - ::UR_RESULT_ERROR_INVALID_KERNEL
 UR_APIEXPORT ur_result_t UR_APICALL
 urKernelSuggestMaxCooperativeGroupCountExp(
     ur_kernel_handle_t hKernel,     ///< [in] handle of the kernel object
-    size_t localWorkSize,           ///< [in] number of local work-items that will form a work-group when the
-                                    ///< kernel is launched
+    uint32_t workDim,               ///< [in] number of dimensions, from 1 to 3, to specify the work-group
+                                    ///< work-items
+    const size_t *pLocalWorkSize,   ///< [in] pointer to an array of workDim unsigned values that specify the
+                                    ///< number of local work-items forming a work-group that will execute the
+                                    ///< kernel function.
     size_t dynamicSharedMemorySize, ///< [in] size of dynamic shared memory, for each work-group, in bytes,
                                     ///< that will be used when the kernel is launched
     uint32_t *pGroupCountRet        ///< [out] pointer to maximum number of groups
@@ -9664,6 +9781,7 @@ typedef enum ur_exp_launch_property_id_t {
     UR_EXP_LAUNCH_PROPERTY_ID_IGNORE = 0,            ///< The property has no effect
     UR_EXP_LAUNCH_PROPERTY_ID_COOPERATIVE = 1,       ///< Whether to launch a cooperative kernel
     UR_EXP_LAUNCH_PROPERTY_ID_CLUSTER_DIMENSION = 2, ///< work-group cluster dimensions
+    UR_EXP_LAUNCH_PROPERTY_ID_WORK_GROUP_MEMORY = 3, ///< Implicit work group memory allocation
     /// @cond
     UR_EXP_LAUNCH_PROPERTY_ID_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -9677,10 +9795,12 @@ typedef enum ur_exp_launch_property_id_t {
 ///   _Analogues_
 ///     - **CUlaunchAttributeValue**
 typedef union ur_exp_launch_property_value_t {
-    uint32_t clusterDim[3]; ///< [in] dimensions of the cluster (units of work-group) (x, y, z). Each
-                            ///< value must be a divisor of the corresponding global work-size
-                            ///< dimension (in units of work-group).
-    int cooperative;        ///< [in] non-zero value indicates a cooperative kernel
+    uint32_t clusterDim[3];    ///< [in] dimensions of the cluster (units of work-group) (x, y, z). Each
+                               ///< value must be a divisor of the corresponding global work-size
+                               ///< dimension (in units of work-group).
+    int cooperative;           ///< [in] non-zero value indicates a cooperative kernel
+    size_t workgroup_mem_size; ///< [in] non-zero value indicates the amount of work group memory to
+                               ///< allocate in bytes
 
 } ur_exp_launch_property_value_t;
 
@@ -9721,6 +9841,7 @@ typedef struct ur_exp_launch_property_t {
 ///         + NULL == hQueue
 ///         + NULL == hKernel
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pGlobalWorkOffset`
 ///         + `NULL == pGlobalWorkSize`
 ///         + `NULL == launchPropList`
 ///         + NULL == pGlobalWorkSize
@@ -9749,6 +9870,8 @@ urEnqueueKernelLaunchCustomExp(
     ur_kernel_handle_t hKernel,                     ///< [in] handle of the kernel object
     uint32_t workDim,                               ///< [in] number of dimensions, from 1 to 3, to specify the global and
                                                     ///< work-group work-items
+    const size_t *pGlobalWorkOffset,                ///< [in] pointer to an array of workDim unsigned values that specify the
+                                                    ///< offset used to calculate the global ID of a work-item
     const size_t *pGlobalWorkSize,                  ///< [in] pointer to an array of workDim unsigned values that specify the
                                                     ///< number of global work-items in workDim that will execute the kernel
                                                     ///< function
@@ -9969,9 +10092,9 @@ urUSMReleaseExp(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Supported peer info
 typedef enum ur_exp_peer_info_t {
-    UR_EXP_PEER_INFO_UR_PEER_ACCESS_SUPPORTED = 0,  ///< [uint32_t] 1 if P2P access is supported otherwise P2P access is not
+    UR_EXP_PEER_INFO_UR_PEER_ACCESS_SUPPORTED = 0,  ///< [int] 1 if P2P access is supported otherwise P2P access is not
                                                     ///< supported.
-    UR_EXP_PEER_INFO_UR_PEER_ATOMICS_SUPPORTED = 1, ///< [uint32_t] 1 if atomic operations are supported over the P2P link,
+    UR_EXP_PEER_INFO_UR_PEER_ATOMICS_SUPPORTED = 1, ///< [int] 1 if atomic operations are supported over the P2P link,
                                                     ///< otherwise such operations are not supported.
     /// @cond
     UR_EXP_PEER_INFO_FORCE_UINT32 = 0x7fffffff
@@ -10111,6 +10234,89 @@ urUsmP2PPeerAccessGetInfoExp(
 #if !defined(__GNUC__)
 #pragma endregion
 #endif
+// Intel 'oneAPI' Unified Runtime Experimental API for low-power events API
+#if !defined(__GNUC__)
+#pragma region low_power_events_(experimental)
+#endif
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Extended enqueue properties
+typedef uint32_t ur_exp_enqueue_ext_flags_t;
+typedef enum ur_exp_enqueue_ext_flag_t {
+    UR_EXP_ENQUEUE_EXT_FLAG_LOW_POWER_EVENTS = UR_BIT(11), ///< Hint: use low-power events. Only meaningful for Level Zero, where the
+                                                           ///< implementation may use interrupt-driven events. May reduce CPU
+                                                           ///< utilization at the cost of increased event completion latency. Other
+                                                           ///< platforms may ignore this flag.
+    /// @cond
+    UR_EXP_ENQUEUE_EXT_FLAG_FORCE_UINT32 = 0x7fffffff
+    /// @endcond
+
+} ur_exp_enqueue_ext_flag_t;
+/// @brief Bit Mask for validating ur_exp_enqueue_ext_flags_t
+#define UR_EXP_ENQUEUE_EXT_FLAGS_MASK 0xfffff7ff
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Extended enqueue properties
+typedef struct ur_exp_enqueue_ext_properties_t {
+    ur_structure_type_t stype;        ///< [in] type of this structure, must be
+                                      ///< ::UR_STRUCTURE_TYPE_EXP_ENQUEUE_EXT_PROPERTIES
+    void *pNext;                      ///< [in,out][optional] pointer to extension-specific structure
+    ur_exp_enqueue_ext_flags_t flags; ///< [in] extended enqueue flags
+
+} ur_exp_enqueue_ext_properties_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Enqueue a barrier command which waits a list of events to complete
+///        before it completes, with optional extended properties
+///
+/// @details
+///     - If the event list is empty, it waits for all previously enqueued
+///       commands to complete.
+///     - It blocks command execution - any following commands enqueued after it
+///       do not execute until it completes.
+///     - It returns an event which can be waited on.
+///
+/// @remarks
+///   _Analogues_
+///     - **clEnqueueBarrierWithWaitList**
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hQueue`
+///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
+///         + `NULL != pProperties && ::UR_EXP_ENQUEUE_EXT_FLAGS_MASK & pProperties->flags`
+///     - ::UR_RESULT_ERROR_INVALID_QUEUE
+///     - ::UR_RESULT_ERROR_INVALID_EVENT
+///     - ::UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
+///         + `phEventWaitList == NULL && numEventsInWaitList > 0`
+///         + `phEventWaitList != NULL && numEventsInWaitList == 0`
+///         + If event objects in phEventWaitList are not valid events.
+///     - ::UR_RESULT_ERROR_IN_EVENT_LIST_EXEC_STATUS
+///         + An event in `phEventWaitList` has ::UR_EVENT_STATUS_ERROR.
+///     - ::UR_RESULT_ERROR_INVALID_VALUE
+///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
+///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
+UR_APIEXPORT ur_result_t UR_APICALL
+urEnqueueEventsWaitWithBarrierExt(
+    ur_queue_handle_t hQueue,                           ///< [in] handle of the queue object
+    const ur_exp_enqueue_ext_properties_t *pProperties, ///< [in][optional] pointer to the extended enqueue properties
+    uint32_t numEventsInWaitList,                       ///< [in] size of the event wait list
+    const ur_event_handle_t *phEventWaitList,           ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+                                                        ///< events that must be complete before this command can be executed.
+                                                        ///< If nullptr, the numEventsInWaitList must be 0, indicating that all
+                                                        ///< previously enqueued commands
+                                                        ///< must be complete.
+    ur_event_handle_t *phEvent                          ///< [out][optional] return an event object that identifies this particular
+                                                        ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+                                                        ///< must not refer to an element of the phEventWaitList array.
+);
+
+#if !defined(__GNUC__)
+#pragma endregion
+#endif
 // Intel 'oneAPI' Unified Runtime Experimental API for enqueuing work through native APIs
 #if !defined(__GNUC__)
 #pragma region native_enqueue_(experimental)
@@ -10180,6 +10386,207 @@ urEnqueueNativeCommandExp(
     ur_event_handle_t *phEvent                                     ///< [out][optional] return an event object that identifies the work that has
                                                                    ///< been enqueued in nativeEnqueueFunc. If phEventWaitList and phEvent are
                                                                    ///< not NULL, phEvent must not refer to an element of the phEventWaitList array.
+);
+
+#if !defined(__GNUC__)
+#pragma endregion
+#endif
+// Intel 'oneAPI' Unified Runtime Experimental API for mapping tensor objects
+#if !defined(__GNUC__)
+#pragma region tensor_map_(experimental)
+#endif
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Handle of tensor map object
+typedef struct ur_exp_tensor_map_handle_t_ *ur_exp_tensor_map_handle_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Tensor map data type
+typedef uint32_t ur_exp_tensor_map_data_type_flags_t;
+typedef enum ur_exp_tensor_map_data_type_flag_t {
+    UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT8 = UR_BIT(0),         ///< 1 byte
+    UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT16 = UR_BIT(1),        ///< 2 bytes
+    UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT32 = UR_BIT(2),        ///< 4 bytes
+    UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_INT32 = UR_BIT(3),         ///< 4 bytes
+    UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT64 = UR_BIT(4),        ///< 8 bytes
+    UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_INT64 = UR_BIT(5),         ///< 8 bytes
+    UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT16 = UR_BIT(6),       ///< 2 bytes
+    UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT32 = UR_BIT(7),       ///< 4 bytes
+    UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT64 = UR_BIT(8),       ///< 8 bytes
+    UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_BFLOAT16 = UR_BIT(9),      ///< 2 bytes
+    UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT32_FTZ = UR_BIT(10),  ///< 4 bytes
+    UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_TFLOAT32 = UR_BIT(11),     ///< 4 bytes
+    UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_TFLOAT32_FTZ = UR_BIT(12), ///< 4 bytes
+    /// @cond
+    UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FORCE_UINT32 = 0x7fffffff
+    /// @endcond
+
+} ur_exp_tensor_map_data_type_flag_t;
+/// @brief Bit Mask for validating ur_exp_tensor_map_data_type_flags_t
+#define UR_EXP_TENSOR_MAP_DATA_TYPE_FLAGS_MASK 0xffffe000
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Tensor map interleave
+typedef uint32_t ur_exp_tensor_map_interleave_flags_t;
+typedef enum ur_exp_tensor_map_interleave_flag_t {
+    UR_EXP_TENSOR_MAP_INTERLEAVE_FLAG_NONE = UR_BIT(0), ///< No interleave
+    UR_EXP_TENSOR_MAP_INTERLEAVE_FLAG_16B = UR_BIT(1),  ///< 16B interleave
+    UR_EXP_TENSOR_MAP_INTERLEAVE_FLAG_32B = UR_BIT(2),  ///< 32B interleave
+    /// @cond
+    UR_EXP_TENSOR_MAP_INTERLEAVE_FLAG_FORCE_UINT32 = 0x7fffffff
+    /// @endcond
+
+} ur_exp_tensor_map_interleave_flag_t;
+/// @brief Bit Mask for validating ur_exp_tensor_map_interleave_flags_t
+#define UR_EXP_TENSOR_MAP_INTERLEAVE_FLAGS_MASK 0xfffffff8
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Tensor map l2 promotion
+typedef uint32_t ur_exp_tensor_map_l2_promotion_flags_t;
+typedef enum ur_exp_tensor_map_l2_promotion_flag_t {
+    UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_NONE = UR_BIT(0), ///< No promotion type
+    UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_64B = UR_BIT(1),  ///< 64B promotion type
+    UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_128B = UR_BIT(2), ///< 128B promotion type
+    UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_256B = UR_BIT(3), ///< 256B promotion type
+    /// @cond
+    UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_FORCE_UINT32 = 0x7fffffff
+    /// @endcond
+
+} ur_exp_tensor_map_l2_promotion_flag_t;
+/// @brief Bit Mask for validating ur_exp_tensor_map_l2_promotion_flags_t
+#define UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAGS_MASK 0xfffffff0
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Tensor map swizzle
+typedef uint32_t ur_exp_tensor_map_swizzle_flags_t;
+typedef enum ur_exp_tensor_map_swizzle_flag_t {
+    UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_NONE = UR_BIT(0), ///< No swizzle
+    UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_32B = UR_BIT(1),  ///< 32B swizzle
+    UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_64B = UR_BIT(2),  ///< 64B swizzle
+    UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_128B = UR_BIT(3), ///< 128B swizzle
+    /// @cond
+    UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_FORCE_UINT32 = 0x7fffffff
+    /// @endcond
+
+} ur_exp_tensor_map_swizzle_flag_t;
+/// @brief Bit Mask for validating ur_exp_tensor_map_swizzle_flags_t
+#define UR_EXP_TENSOR_MAP_SWIZZLE_FLAGS_MASK 0xfffffff0
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Tensor map OOB fill
+typedef uint32_t ur_exp_tensor_map_oob_fill_flags_t;
+typedef enum ur_exp_tensor_map_oob_fill_flag_t {
+    UR_EXP_TENSOR_MAP_OOB_FILL_FLAG_NONE = UR_BIT(0),             ///< No OOB fill
+    UR_EXP_TENSOR_MAP_OOB_FILL_FLAG_REQUEST_ZERO_FMA = UR_BIT(1), ///< Refer to NVIDIA docs
+    /// @cond
+    UR_EXP_TENSOR_MAP_OOB_FILL_FLAG_FORCE_UINT32 = 0x7fffffff
+    /// @endcond
+
+} ur_exp_tensor_map_oob_fill_flag_t;
+/// @brief Bit Mask for validating ur_exp_tensor_map_oob_fill_flags_t
+#define UR_EXP_TENSOR_MAP_OOB_FILL_FLAGS_MASK 0xfffffffc
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Encode tensor map with image data
+///
+/// @details
+///     - Map encode using im2col.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hDevice`
+///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
+///         + `::UR_EXP_TENSOR_MAP_DATA_TYPE_FLAGS_MASK & TensorMapType`
+///         + `::UR_EXP_TENSOR_MAP_INTERLEAVE_FLAGS_MASK & Interleave`
+///         + `::UR_EXP_TENSOR_MAP_SWIZZLE_FLAGS_MASK & Swizzle`
+///         + `::UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAGS_MASK & L2Promotion`
+///         + `::UR_EXP_TENSOR_MAP_OOB_FILL_FLAGS_MASK & OobFill`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == GlobalAddress`
+///         + `NULL == GlobalDim`
+///         + `NULL == GlobalStrides`
+///         + `NULL == PixelBoxLowerCorner`
+///         + `NULL == PixelBoxUpperCorner`
+///         + `NULL == ElementStrides`
+///         + `NULL == hTensorMap`
+///     - ::UR_RESULT_ERROR_INVALID_ARGUMENT
+///         + `TensorRank < 3`
+UR_APIEXPORT ur_result_t UR_APICALL
+urTensorMapEncodeIm2ColExp(
+    ur_device_handle_t hDevice,                         ///< [in] Handle of the device object.
+    ur_exp_tensor_map_data_type_flags_t TensorMapType,  ///< [in] Data type of the tensor object.
+    uint32_t TensorRank,                                ///< [in] Dimensionality of tensor; must be at least 3.
+    void *GlobalAddress,                                ///< [in] Starting address of memory region described by tensor.
+    const uint64_t *GlobalDim,                          ///< [in] Array containing tensor size (number of elements) along each of
+                                                        ///< the TensorRank dimensions.
+    const uint64_t *GlobalStrides,                      ///< [in] Array containing stride size (in bytes) along each of the
+                                                        ///< TensorRank - 1 dimensions.
+    const int *PixelBoxLowerCorner,                     ///< [in] Array containing DHW dimensions of lower box corner.
+    const int *PixelBoxUpperCorner,                     ///< [in] Array containing DHW dimensions of upper box corner.
+    uint32_t ChannelsPerPixel,                          ///< [in] Number of channels per pixel.
+    uint32_t PixelsPerColumn,                           ///< [in] Number of pixels per column.
+    const uint32_t *ElementStrides,                     ///< [in] Array containing traversal stride in each of the TensorRank
+                                                        ///< dimensions.
+    ur_exp_tensor_map_interleave_flags_t Interleave,    ///< [in] Type of interleaved layout the tensor addresses
+    ur_exp_tensor_map_swizzle_flags_t Swizzle,          ///< [in] Bank swizzling pattern inside shared memory
+    ur_exp_tensor_map_l2_promotion_flags_t L2Promotion, ///< [in] L2 promotion size.
+    ur_exp_tensor_map_oob_fill_flags_t OobFill,         ///< [in] Indicates whether zero or special NaN constant will be used to
+                                                        ///< fill out-of-bounds elements.
+    ur_exp_tensor_map_handle_t *hTensorMap              ///< [out] Handle of the tensor map object.
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Encode tensor map with tiled data
+///
+/// @details
+///     - Tiled map encode.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hDevice`
+///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
+///         + `::UR_EXP_TENSOR_MAP_DATA_TYPE_FLAGS_MASK & TensorMapType`
+///         + `::UR_EXP_TENSOR_MAP_INTERLEAVE_FLAGS_MASK & Interleave`
+///         + `::UR_EXP_TENSOR_MAP_SWIZZLE_FLAGS_MASK & Swizzle`
+///         + `::UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAGS_MASK & L2Promotion`
+///         + `::UR_EXP_TENSOR_MAP_OOB_FILL_FLAGS_MASK & OobFill`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == GlobalAddress`
+///         + `NULL == GlobalDim`
+///         + `NULL == GlobalStrides`
+///         + `NULL == BoxDim`
+///         + `NULL == ElementStrides`
+///         + `NULL == hTensorMap`
+///     - ::UR_RESULT_ERROR_INVALID_ARGUMENT
+///         + `TensorRank < 3`
+UR_APIEXPORT ur_result_t UR_APICALL
+urTensorMapEncodeTiledExp(
+    ur_device_handle_t hDevice,                         ///< [in] Handle of the device object.
+    ur_exp_tensor_map_data_type_flags_t TensorMapType,  ///< [in] Data type of the tensor object.
+    uint32_t TensorRank,                                ///< [in] Dimensionality of tensor; must be at least 3.
+    void *GlobalAddress,                                ///< [in] Starting address of memory region described by tensor.
+    const uint64_t *GlobalDim,                          ///< [in] Array containing tensor size (number of elements) along each of
+                                                        ///< the TensorRank dimensions.
+    const uint64_t *GlobalStrides,                      ///< [in] Array containing stride size (in bytes) along each of the
+                                                        ///< TensorRank - 1 dimensions.
+    const uint32_t *BoxDim,                             ///< [in] Array containing traversal box size (number of elments) along
+                                                        ///< each of the TensorRank dimensions. Specifies how many elements to be
+                                                        ///< traversed along each tensor dimension.
+    const uint32_t *ElementStrides,                     ///< [in] Array containing traversal stride in each of the TensorRank
+                                                        ///< dimensions.
+    ur_exp_tensor_map_interleave_flags_t Interleave,    ///< [in] Type of interleaved layout the tensor addresses
+    ur_exp_tensor_map_swizzle_flags_t Swizzle,          ///< [in] Bank swizzling pattern inside shared memory
+    ur_exp_tensor_map_l2_promotion_flags_t L2Promotion, ///< [in] L2 promotion size.
+    ur_exp_tensor_map_oob_fill_flags_t OobFill,         ///< [in] Indicates whether zero or special NaN constant will be used to
+                                                        ///< fill out-of-bounds elements.
+    ur_exp_tensor_map_handle_t *hTensorMap              ///< [out] Handle of the tensor map object.
 );
 
 #if !defined(__GNUC__)
@@ -10485,9 +10892,10 @@ typedef struct ur_program_create_with_il_params_t {
 ///     allowing the callback the ability to modify the parameter's value
 typedef struct ur_program_create_with_binary_params_t {
     ur_context_handle_t *phContext;
-    ur_device_handle_t *phDevice;
-    size_t *psize;
-    const uint8_t **ppBinary;
+    uint32_t *pnumDevices;
+    ur_device_handle_t **pphDevices;
+    size_t **ppLengths;
+    const uint8_t ***pppBinaries;
     const ur_program_properties_t **ppProperties;
     ur_program_handle_t **pphProgram;
 } ur_program_create_with_binary_params_t;
@@ -10836,7 +11244,8 @@ typedef struct ur_kernel_set_specialization_constants_params_t {
 ///     allowing the callback the ability to modify the parameter's value
 typedef struct ur_kernel_suggest_max_cooperative_group_count_exp_params_t {
     ur_kernel_handle_t *phKernel;
-    size_t *plocalWorkSize;
+    uint32_t *pworkDim;
+    const size_t **ppLocalWorkSize;
     size_t *pdynamicSharedMemorySize;
     uint32_t **ppGroupCountRet;
 } ur_kernel_suggest_max_cooperative_group_count_exp_params_t;
@@ -11114,6 +11523,18 @@ typedef struct ur_physical_mem_retain_params_t {
 typedef struct ur_physical_mem_release_params_t {
     ur_physical_mem_handle_t *phPhysicalMem;
 } ur_physical_mem_release_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urPhysicalMemGetInfo
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_physical_mem_get_info_params_t {
+    ur_physical_mem_handle_t *phPhysicalMem;
+    ur_physical_mem_info_t *ppropName;
+    size_t *ppropSize;
+    void **ppPropValue;
+    size_t **ppPropSizeRet;
+} ur_physical_mem_get_info_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urAdapterGet
@@ -11574,6 +11995,7 @@ typedef struct ur_enqueue_kernel_launch_custom_exp_params_t {
     ur_queue_handle_t *phQueue;
     ur_kernel_handle_t *phKernel;
     uint32_t *pworkDim;
+    const size_t **ppGlobalWorkOffset;
     const size_t **ppGlobalWorkSize;
     const size_t **ppLocalWorkSize;
     uint32_t *pnumPropsInLaunchPropList;
@@ -11582,6 +12004,18 @@ typedef struct ur_enqueue_kernel_launch_custom_exp_params_t {
     const ur_event_handle_t **pphEventWaitList;
     ur_event_handle_t **pphEvent;
 } ur_enqueue_kernel_launch_custom_exp_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urEnqueueEventsWaitWithBarrierExt
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_enqueue_events_wait_with_barrier_ext_params_t {
+    ur_queue_handle_t *phQueue;
+    const ur_exp_enqueue_ext_properties_t **ppProperties;
+    uint32_t *pnumEventsInWaitList;
+    const ur_event_handle_t **pphEventWaitList;
+    ur_event_handle_t **pphEvent;
+} ur_enqueue_events_wait_with_barrier_ext_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urEnqueueUSMDeviceAllocExp
@@ -12398,6 +12832,49 @@ typedef struct ur_command_buffer_command_get_info_exp_params_t {
     void **ppPropValue;
     size_t **ppPropSizeRet;
 } ur_command_buffer_command_get_info_exp_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urTensorMapEncodeIm2ColExp
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_tensor_map_encode_im_2_col_exp_params_t {
+    ur_device_handle_t *phDevice;
+    ur_exp_tensor_map_data_type_flags_t *pTensorMapType;
+    uint32_t *pTensorRank;
+    void **pGlobalAddress;
+    const uint64_t **pGlobalDim;
+    const uint64_t **pGlobalStrides;
+    const int **pPixelBoxLowerCorner;
+    const int **pPixelBoxUpperCorner;
+    uint32_t *pChannelsPerPixel;
+    uint32_t *pPixelsPerColumn;
+    const uint32_t **pElementStrides;
+    ur_exp_tensor_map_interleave_flags_t *pInterleave;
+    ur_exp_tensor_map_swizzle_flags_t *pSwizzle;
+    ur_exp_tensor_map_l2_promotion_flags_t *pL2Promotion;
+    ur_exp_tensor_map_oob_fill_flags_t *pOobFill;
+    ur_exp_tensor_map_handle_t **phTensorMap;
+} ur_tensor_map_encode_im_2_col_exp_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urTensorMapEncodeTiledExp
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_tensor_map_encode_tiled_exp_params_t {
+    ur_device_handle_t *phDevice;
+    ur_exp_tensor_map_data_type_flags_t *pTensorMapType;
+    uint32_t *pTensorRank;
+    void **pGlobalAddress;
+    const uint64_t **pGlobalDim;
+    const uint64_t **pGlobalStrides;
+    const uint32_t **pBoxDim;
+    const uint32_t **pElementStrides;
+    ur_exp_tensor_map_interleave_flags_t *pInterleave;
+    ur_exp_tensor_map_swizzle_flags_t *pSwizzle;
+    ur_exp_tensor_map_l2_promotion_flags_t *pL2Promotion;
+    ur_exp_tensor_map_oob_fill_flags_t *pOobFill;
+    ur_exp_tensor_map_handle_t **phTensorMap;
+} ur_tensor_map_encode_tiled_exp_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urUsmP2PEnablePeerAccessExp

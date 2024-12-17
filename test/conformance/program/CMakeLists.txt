@@ -7,6 +7,8 @@ add_conformance_test_with_kernels_environment(program
     urProgramBuild.cpp
     urProgramCompile.cpp
     urProgramCreateWithBinary.cpp
+    urMultiDeviceProgramCreateWithBinary.cpp
+    urMultiDeviceProgramCreateWithIL.cpp
     urProgramCreateWithIL.cpp
     urProgramCreateWithNativeHandle.cpp
     urProgramGetBuildInfo.cpp

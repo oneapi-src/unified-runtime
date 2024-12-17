@@ -186,7 +186,7 @@ uint64_t calculateGlobalMemSize(ur_device_handle_t Device) {
           }
         }
       };
-  return Device->ZeGlobalMemSize.operator->()->value;
+  return Device->ZeGlobalMemSize.get().value;
 }
 
 ur_result_t urDeviceGetInfo(
@@ -485,6 +485,8 @@ ur_result_t urDeviceGetInfo(
   case UR_DEVICE_INFO_BUILT_IN_KERNELS:
     // TODO: To find out correct value
     return ReturnValue("");
+  case UR_DEVICE_INFO_LOW_POWER_EVENTS_EXP:
+    return ReturnValue(static_cast<ur_bool_t>(true));
   case UR_DEVICE_INFO_QUEUE_PROPERTIES:
     return ReturnValue(
         ur_queue_flag_t(UR_QUEUE_FLAG_OUT_OF_ORDER_EXEC_MODE_ENABLE |
@@ -652,9 +654,15 @@ ur_result_t urDeviceGetInfo(
     return ReturnValue(Device->ZeDeviceProperties->physicalEUSimdWidth / 4);
   case UR_DEVICE_INFO_NATIVE_VECTOR_WIDTH_DOUBLE:
   case UR_DEVICE_INFO_PREFERRED_VECTOR_WIDTH_DOUBLE:
+    // Must return 0 for *vector_width_double* if the device does not have fp64.
+    if (!(Device->ZeDeviceModuleProperties->flags & ZE_DEVICE_MODULE_FLAG_FP64))
+      return ReturnValue(uint32_t{0});
     return ReturnValue(Device->ZeDeviceProperties->physicalEUSimdWidth / 8);
   case UR_DEVICE_INFO_NATIVE_VECTOR_WIDTH_HALF:
   case UR_DEVICE_INFO_PREFERRED_VECTOR_WIDTH_HALF:
+    // Must return 0 for *vector_width_half* if the device does not have fp16.
+    if (!(Device->ZeDeviceModuleProperties->flags & ZE_DEVICE_MODULE_FLAG_FP16))
+      return ReturnValue(uint32_t{0});
     return ReturnValue(Device->ZeDeviceProperties->physicalEUSimdWidth / 2);
   case UR_DEVICE_INFO_MAX_NUM_SUB_GROUPS: {
     // Max_num_sub_Groups = maxTotalGroupSize/min(set of subGroupSizes);
@@ -1048,14 +1056,16 @@ ur_result_t urDeviceGetInfo(
       UpdateCapabilities |=
           UR_DEVICE_COMMAND_BUFFER_UPDATE_CAPABILITY_FLAG_GLOBAL_WORK_OFFSET;
     }
+    if (supportsFlags(ZE_MUTABLE_COMMAND_EXP_FLAG_KERNEL_INSTRUCTION)) {
+      UpdateCapabilities |=
+          UR_DEVICE_COMMAND_BUFFER_UPDATE_CAPABILITY_FLAG_KERNEL_HANDLE;
+    }
     return ReturnValue(UpdateCapabilities);
   }
   case UR_DEVICE_INFO_COMMAND_BUFFER_EVENT_SUPPORT_EXP:
     return ReturnValue(false);
   case UR_DEVICE_INFO_BINDLESS_IMAGES_SUPPORT_EXP: {
-    bool DeviceIsDG2OrNewer =
-        Device->ZeDeviceIpVersionExt->ipVersion >= 0x030dc000;
-    return ReturnValue(DeviceIsDG2OrNewer &&
+    return ReturnValue(Device->isIntelDG2OrNewer() &&
                        Device->ZeDeviceImageProperties->maxImageDims1D > 0 &&
                        Device->ZeDeviceImageProperties->maxImageDims2D > 0 &&
                        Device->ZeDeviceImageProperties->maxImageDims3D > 0);
@@ -1065,15 +1075,11 @@ ur_result_t urDeviceGetInfo(
     return ReturnValue(false);
   }
   case UR_DEVICE_INFO_BINDLESS_IMAGES_1D_USM_SUPPORT_EXP: {
-    bool DeviceIsDG2OrNewer =
-        Device->ZeDeviceIpVersionExt->ipVersion >= 0x030dc000;
-    return ReturnValue(DeviceIsDG2OrNewer &&
+    return ReturnValue(Device->isIntelDG2OrNewer() &&
                        Device->ZeDeviceImageProperties->maxImageDims1D > 0);
   }
   case UR_DEVICE_INFO_BINDLESS_IMAGES_2D_USM_SUPPORT_EXP: {
-    bool DeviceIsDG2OrNewer =
-        Device->ZeDeviceIpVersionExt->ipVersion >= 0x030dc000;
-    return ReturnValue(DeviceIsDG2OrNewer &&
+    return ReturnValue(Device->isIntelDG2OrNewer() &&
                        Device->ZeDeviceImageProperties->maxImageDims2D > 0);
   }
   case UR_DEVICE_INFO_IMAGE_PITCH_ALIGN_EXP:
@@ -1155,6 +1161,32 @@ ur_result_t urDeviceGetInfo(
     return ReturnValue(false);
   case UR_DEVICE_INFO_GLOBAL_VARIABLE_SUPPORT:
     return ReturnValue(true);
+  case UR_DEVICE_INFO_USM_POOL_SUPPORT:
+    return ReturnValue(true);
+  case UR_DEVICE_INFO_2D_BLOCK_ARRAY_CAPABILITIES_EXP: {
+#ifdef ZE_INTEL_DEVICE_BLOCK_ARRAY_EXP_NAME
+    const auto ZeDeviceBlockArrayFlags =
+        Device->ZeDeviceBlockArrayProperties->flags;
+
+    auto supportsFlags =
+        [&](ze_intel_device_block_array_exp_flags_t RequiredFlags) {
+          return (ZeDeviceBlockArrayFlags & RequiredFlags) == RequiredFlags;
+        };
+
+    ur_exp_device_2d_block_array_capability_flags_t BlockArrayCapabilities = 0;
+    if (supportsFlags(ZE_INTEL_DEVICE_EXP_FLAG_2D_BLOCK_LOAD)) {
+      BlockArrayCapabilities |=
+          UR_EXP_DEVICE_2D_BLOCK_ARRAY_CAPABILITY_FLAG_LOAD;
+    }
+    if (supportsFlags(ZE_INTEL_DEVICE_EXP_FLAG_2D_BLOCK_STORE)) {
+      BlockArrayCapabilities |=
+          UR_EXP_DEVICE_2D_BLOCK_ARRAY_CAPABILITY_FLAG_STORE;
+    }
+    return ReturnValue(BlockArrayCapabilities);
+#else
+    return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
+#endif
+  }
   default:
     logger::error("Unsupported ParamName in urGetDeviceInfo");
     logger::error("ParamNameParamName={}(0x{})", ParamName,
@@ -1409,13 +1441,35 @@ ur_result_t urDeviceRelease(ur_device_handle_t Device) {
 }
 } // namespace ur::level_zero
 
-// Whether immediate commandlists will be used for kernel launches and copies.
-// The default is standard commandlists. Setting 1 or 2 specifies use of
-// immediate commandlists. Note: when immediate commandlists are used then
-// device-only events must be either AllHostVisible or OnDemandHostVisibleProxy.
-// (See env var UR_L0_DEVICE_SCOPE_EVENTS).
-
-// Get value of immediate commandlists env var setting or -1 if unset
+/**
+ * @brief Determines the mode of immediate command lists to be used.
+ *
+ * This function checks environment variables and device properties to decide
+ * the mode of immediate command lists. The mode can be influenced by the
+ * following environment variables:
+ * - `UR_L0_USE_IMMEDIATE_COMMANDLISTS`
+ * - `SYCL_PI_LEVEL_ZERO_USE_IMMEDIATE_COMMANDLISTS`
+ *
+ * If neither environment variable is set, the function defaults to using the
+ * device's properties to determine the mode.
+ *
+ * @return The mode of immediate command lists, which can be one of the
+ * following:
+ * - `NotUsed`: Immediate command lists are not used.
+ * - `PerQueue`: Immediate command lists are used per queue.
+ * - `PerThreadPerQueue`: Immediate command lists are used per thread per queue.
+ *
+ * The decision process is as follows:
+ * 1. If the environment variables are not set, the function checks if the
+ * device is Intel DG2 or newer and if the driver version is supported. If both
+ *    conditions are met, or if the device is PVC, it returns `PerQueue`.
+ *    Otherwise, it returns `NotUsed`.
+ * 2. If the environment variable is set, it returns the corresponding mode:
+ *    - `0`: `NotUsed`
+ *    - `1`: `PerQueue`
+ *    - `2`: `PerThreadPerQueue`
+ *    - Any other value: `NotUsed`
+ */
 ur_device_handle_t_::ImmCmdlistMode
 ur_device_handle_t_::useImmediateCommandLists() {
   // If immediate commandlist setting is not explicitly set, then use the device
@@ -1433,9 +1487,10 @@ ur_device_handle_t_::useImmediateCommandLists() {
   }();
 
   if (ImmediateCommandlistsSetting == -1) {
+    bool isDG2OrNewer = this->isIntelDG2OrNewer();
     bool isDG2SupportedDriver =
         this->Platform->isDriverVersionNewerOrSimilar(1, 5, 30820);
-    if ((isDG2SupportedDriver && isDG2()) || isPVC()) {
+    if ((isDG2SupportedDriver && isDG2OrNewer) || isPVC()) {
       return PerQueue;
     } else {
       return NotUsed;
@@ -1469,14 +1524,28 @@ bool ur_device_handle_t_::useDriverInOrderLists() {
 
   static const bool UseDriverInOrderLists = [&] {
     const char *UrRet = std::getenv("UR_L0_USE_DRIVER_INORDER_LISTS");
-    bool CompatibleDriver = this->Platform->isDriverVersionNewerOrSimilar(
-        1, 3, L0_DRIVER_INORDER_MIN_VERSION);
+    // bool CompatibleDriver = this->Platform->isDriverVersionNewerOrSimilar(
+    //     1, 3, L0_DRIVER_INORDER_MIN_VERSION);
     if (!UrRet)
-      return CompatibleDriver;
+      return false;
     return std::atoi(UrRet) != 0;
   }();
 
   return UseDriverInOrderLists;
+}
+
+bool ur_device_handle_t_::useDriverCounterBasedEvents() {
+  // Use counter-based events implementation from L0 driver.
+
+  static const bool DriverCounterBasedEventsEnabled = [] {
+    const char *UrRet = std::getenv("UR_L0_USE_DRIVER_COUNTER_BASED_EVENTS");
+    if (!UrRet) {
+      return true;
+    }
+    return std::atoi(UrRet) != 0;
+  }();
+
+  return DriverCounterBasedEventsEnabled;
 }
 
 ur_result_t ur_device_handle_t_::initialize(int SubSubDeviceOrdinal,
@@ -1562,6 +1631,17 @@ ur_result_t ur_device_handle_t_::initialize(int SubSubDeviceOrdinal,
         P.pNext = &Properties;
         ZE_CALL_NOCHECK(zeDeviceGetProperties, (ZeDevice, &P));
       };
+
+#ifdef ZE_INTEL_DEVICE_BLOCK_ARRAY_EXP_NAME
+  ZeDeviceBlockArrayProperties.Compute =
+      [ZeDevice](
+          ZeStruct<ze_intel_device_block_array_exp_properties_t> &Properties) {
+        ze_device_properties_t P;
+        P.stype = ZE_STRUCTURE_TYPE_DEVICE_PROPERTIES;
+        P.pNext = &Properties;
+        ZE_CALL_NOCHECK(zeDeviceGetProperties, (ZeDevice, &P));
+      };
+#endif // ZE_INTEL_DEVICE_BLOCK_ARRAY_EXP_NAME
 
   ImmCommandListUsed = this->useImmediateCommandLists();
 

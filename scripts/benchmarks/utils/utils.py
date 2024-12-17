@@ -3,21 +3,27 @@
 # See LICENSE.TXT
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
+import gzip
 import os
-import json
 import shutil
-import subprocess # nosec B404
-from pathlib import Path
-from benches.result import Result
-from benches.options import options
+import subprocess
 
-def run(command, env_vars={}, cwd=None, add_sycl=False):
+import tarfile
+import urllib # nosec B404
+from benches.options import options
+from pathlib import Path
+
+def run(command, env_vars={}, cwd=None, add_sycl=False, ld_library=[]):
     try:
         if isinstance(command, str):
             command = command.split()
 
         env = os.environ.copy()
 
+        for ldlib in ld_library:
+            env['LD_LIBRARY_PATH'] = ldlib + os.pathsep + env.get('LD_LIBRARY_PATH', '')
+
+        # order is important, we want provided sycl rt libraries to be first
         if add_sycl:
             sycl_bin_path = os.path.join(options.sycl, 'bin')
             env['PATH'] = sycl_bin_path + os.pathsep + env.get('PATH', '')
@@ -25,6 +31,7 @@ def run(command, env_vars={}, cwd=None, add_sycl=False):
             env['LD_LIBRARY_PATH'] = sycl_lib_path + os.pathsep + env.get('LD_LIBRARY_PATH', '')
 
         env.update(env_vars)
+
         result = subprocess.run(command, cwd=cwd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, timeout=options.timeout) # nosec B603
 
         if options.verbose:
@@ -51,27 +58,8 @@ def git_clone(dir, name, repo, commit):
         raise Exception(f"The directory {repo_path} exists but is not a git repository.")
     return repo_path
 
-def save_benchmark_results(dir, save_name, benchmark_data: list[Result]):
-    serialized = [res.to_json() for res in benchmark_data]
-    results_dir = Path(os.path.join(dir, 'results'))
-    os.makedirs(results_dir, exist_ok=True)
-
-    file_path = Path(os.path.join(results_dir, f"{save_name}.json"))
-    with file_path.open('w') as file:
-        json.dump(serialized, file, indent=4)
-    print(f"Benchmark results saved to {file_path}")
-
-def load_benchmark_results(dir, compare_name) -> list[Result]:
-    file_path = Path(os.path.join(dir, 'results', f"{compare_name}.json"))
-    if file_path.exists():
-        with file_path.open('r') as file:
-            data = json.load(file)
-            return [Result.from_json(item) for item in data]
-    else:
-        return None
-
 def prepare_bench_cwd(dir):
-    # we need 2 deep to workaround a problem with a fixed relative path in cudaSift
+    # we need 2 deep to workaround a problem with a fixed relative paths in some velocity benchmarks
     options.benchmark_cwd = os.path.join(dir, 'bcwd', 'bcwd')
     if os.path.exists(options.benchmark_cwd):
         shutil.rmtree(options.benchmark_cwd)
@@ -109,3 +97,20 @@ def create_build_path(directory, name):
     Path(build_path).mkdir(parents=True, exist_ok=True)
 
     return build_path
+
+def download(dir, url, file, untar = False, unzip = False):
+    data_file = os.path.join(dir, file)
+    if not Path(data_file).exists():
+        print(f"{data_file} does not exist, downloading")
+        urllib.request.urlretrieve(url, data_file)
+        if untar:
+            file = tarfile.open(data_file)
+            file.extractall(dir)
+            file.close()
+        if unzip:
+            [stripped_gz, _] = os.path.splitext(data_file)
+            with gzip.open(data_file, 'rb') as f_in, open(stripped_gz, 'wb') as f_out:
+                shutil.copyfileobj(f_in, f_out)
+    else:
+        print(f"{data_file} exists, skipping...")
+    return data_file

@@ -200,6 +200,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urGetEnqueueProcAddrTable(
       ur::level_zero::urEnqueueDeviceGlobalVariableRead;
   pDdiTable->pfnReadHostPipe = ur::level_zero::urEnqueueReadHostPipe;
   pDdiTable->pfnWriteHostPipe = ur::level_zero::urEnqueueWriteHostPipe;
+  pDdiTable->pfnEventsWaitWithBarrierExt =
+      ur::level_zero::urEnqueueEventsWaitWithBarrierExt;
 
   return result;
 }
@@ -322,6 +324,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urGetPhysicalMemProcAddrTable(
   pDdiTable->pfnCreate = ur::level_zero::urPhysicalMemCreate;
   pDdiTable->pfnRetain = ur::level_zero::urPhysicalMemRetain;
   pDdiTable->pfnRelease = ur::level_zero::urPhysicalMemRelease;
+  pDdiTable->pfnGetInfo = ur::level_zero::urPhysicalMemGetInfo;
 
   return result;
 }
@@ -421,6 +424,19 @@ UR_APIEXPORT ur_result_t UR_APICALL urGetSamplerProcAddrTable(
   pDdiTable->pfnGetNativeHandle = ur::level_zero::urSamplerGetNativeHandle;
   pDdiTable->pfnCreateWithNativeHandle =
       ur::level_zero::urSamplerCreateWithNativeHandle;
+
+  return result;
+}
+
+UR_APIEXPORT ur_result_t UR_APICALL urGetTensorMapExpProcAddrTable(
+    ur_api_version_t version, ur_tensor_map_exp_dditable_t *pDdiTable) {
+  auto result = validateProcInputs(version, pDdiTable);
+  if (UR_RESULT_SUCCESS != result) {
+    return result;
+  }
+
+  pDdiTable->pfnEncodeIm2ColExp = ur::level_zero::urTensorMapEncodeIm2ColExp;
+  pDdiTable->pfnEncodeTiledExp = ur::level_zero::urTensorMapEncodeTiledExp;
 
   return result;
 }
@@ -594,6 +610,10 @@ ur_result_t urAdapterGetDdiTables(ur_dditable_t *ddi) {
     return result;
   result = ur::level_zero::urGetSamplerProcAddrTable(UR_API_VERSION_CURRENT,
                                                      &ddi->Sampler);
+  if (result != UR_RESULT_SUCCESS)
+    return result;
+  result = ur::level_zero::urGetTensorMapExpProcAddrTable(
+      UR_API_VERSION_CURRENT, &ddi->TensorMapExp);
   if (result != UR_RESULT_SUCCESS)
     return result;
   result =

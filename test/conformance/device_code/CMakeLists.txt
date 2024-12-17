@@ -109,9 +109,11 @@ macro(add_device_binary SOURCE_FILE)
         endif()
 
         add_custom_command(OUTPUT ${BIN_PATH}
-            COMMAND ${UR_DPCXX} -fsycl -fsycl-targets=${TRIPLE} -fsycl-device-code-split=off 
-            ${AMD_TARGET_BACKEND} ${AMD_OFFLOAD_ARCH} ${AMD_NOGPULIB}
-            ${DPCXX_BUILD_FLAGS_LIST} ${SOURCE_FILE} -o ${EXE_PATH}
+            COMMAND LD_LIBRARY_PATH=${UR_SYCL_LIBRARY_DIR}:$ENV{LD_LIBRARY_PATH} 
+            ${UR_DPCXX} -fsycl -fsycl-targets=${TRIPLE} 
+            -fsycl-device-code-split=off ${AMD_TARGET_BACKEND} 
+            ${AMD_OFFLOAD_ARCH} ${AMD_NOGPULIB} ${DPCXX_BUILD_FLAGS_LIST} 
+            ${SOURCE_FILE} -o ${EXE_PATH}
 
             COMMAND ${CMAKE_COMMAND} -E env ${EXTRA_ENV} ${UR_DEVICE_CODE_EXTRACTOR} --stem="${TRIPLE}.bin" ${EXE_PATH}
 
@@ -162,6 +164,7 @@ add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/sequence.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/standard_types.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/subgroup.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/linker_error.cpp)
+add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/saxpy_usm_local_mem.cpp)
 
 set(KERNEL_HEADER ${UR_CONFORMANCE_DEVICE_BINARIES_DIR}/kernel_entry_points.h)
 add_custom_command(OUTPUT ${KERNEL_HEADER}

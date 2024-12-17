@@ -150,10 +150,9 @@ private:
 };
 
 ur_result_t resetCommandLists(ur_queue_handle_t Queue);
-ur_result_t
-CleanupEventsInImmCmdLists(ur_queue_handle_t UrQueue, bool QueueLocked = false,
-                           bool QueueSynced = false,
-                           ur_event_handle_t CompletedEvent = nullptr);
+ur_result_t CleanupEventsInImmCmdLists(ur_queue_handle_t UrQueue,
+                                       bool QueueLocked, bool QueueSynced,
+                                       ur_event_handle_t CompletedEvent);
 
 // Structure describing the specific use of a command-list in a queue.
 // This is because command-lists are re-used across multiple queues
@@ -162,8 +161,8 @@ struct ur_command_list_info_t {
   ur_command_list_info_t(ze_fence_handle_t ZeFence, bool ZeFenceInUse,
                          bool IsClosed, ze_command_queue_handle_t ZeQueue,
                          ZeStruct<ze_command_queue_desc_t> ZeQueueDesc,
-                         bool UseCompletionBatching, bool CanReuse = true,
-                         bool IsInOrderList = false, bool IsImmediate = false)
+                         bool UseCompletionBatching, bool CanReuse,
+                         bool IsInOrderList, bool IsImmediate)
       : ZeFence(ZeFence), ZeFenceInUse(ZeFenceInUse), IsClosed(IsClosed),
         ZeQueue(ZeQueue), ZeQueueDesc(ZeQueueDesc),
         IsInOrderList(IsInOrderList), CanReuse(CanReuse),
@@ -376,6 +375,8 @@ struct ur_queue_handle_t_ : _ur_object {
   // Keeps track of whether we are using Counter-based Events
   bool CounterBasedEventsEnabled = false;
 
+  bool InterruptBasedEventsEnabled = false;
+
   // Map of all command lists used in this queue.
   ur_command_list_map_t CommandListMap;
 
@@ -491,15 +492,12 @@ struct ur_queue_handle_t_ : _ur_object {
   // End-times enqueued are stored on the queue rather than on the event to
   // avoid the event objects having been destroyed prior to the write to the
   // end-time member.
-  struct end_time_recording {
-    // RecordEventEndTimestamp is not adjusted for valid bits nor resolution, as
-    // it is written asynchronously.
-    uint64_t RecordEventEndTimestamp = 0;
-    // The event may die before the recording has been written back. In this
-    // case the event will mark this for deletion when the queue sees fit.
-    bool EventHasDied = false;
-  };
-  std::map<ur_event_handle_t, end_time_recording> EndTimeRecordings;
+  // RecordEventEndTimestamp is not adjusted for valid bits nor resolution, as
+  // it is written asynchronously.
+  std::map<ur_event_handle_t, uint64_t> EndTimeRecordings;
+  // The event may die before the recording has been written back. In this case
+  // we move it to a separate map to avoid conflicts.
+  std::multimap<ur_event_handle_t, uint64_t> EvictedEndTimeRecordings;
 
   // Clear the end time recording timestamps entries.
   void clearEndTimeRecordings();
@@ -528,8 +526,7 @@ struct ur_queue_handle_t_ : _ur_object {
   //
   // For immediate commandlists, no close and execute is necessary.
   ur_result_t executeCommandList(ur_command_list_ptr_t CommandList,
-                                 bool IsBlocking = false,
-                                 bool OKToBatchCommand = false);
+                                 bool IsBlocking, bool OKToBatchCommand);
 
   // Helper method telling whether we need to reuse discarded event in this
   // queue.
@@ -558,6 +555,9 @@ struct ur_queue_handle_t_ : _ur_object {
 
   // Returns true if the queue has discard events property.
   bool isDiscardEvents() const;
+
+  // Returns true if the queue has low power events property.
+  bool isLowPowerEvents() const;
 
   // Returns true if the queue has explicit priority set by user.
   bool isPriorityLow() const;

@@ -218,6 +218,8 @@ CONSTFIX char CommandFillBufferName[] = "clCommandFillBufferKHR";
 CONSTFIX char EnqueueCommandBufferName[] = "clEnqueueCommandBufferKHR";
 CONSTFIX char GetCommandBufferInfoName[] = "clGetCommandBufferInfoKHR";
 CONSTFIX char UpdateMutableCommandsName[] = "clUpdateMutableCommandsKHR";
+CONSTFIX char CreateProgramWithILName[] = "clCreateProgramWithILKHR";
+CONSTFIX char GetKernelSubGroupInfoName[] = "clGetKernelSubGroupInfoKHR";
 
 #undef CONSTFIX
 
@@ -238,10 +240,6 @@ using clEnqueueReadGlobalVariable_fn = CL_API_ENTRY
 cl_int(CL_API_CALL *)(cl_command_queue, cl_program, const char *, cl_bool,
                       size_t, size_t, void *, cl_uint, const cl_event *,
                       cl_event *);
-
-using clSetProgramSpecializationConstant_fn = CL_API_ENTRY
-cl_int(CL_API_CALL *)(cl_program program, cl_uint spec_id, size_t spec_size,
-                      const void *spec_value);
 
 using clEnqueueReadHostPipeINTEL_fn = CL_API_ENTRY
 cl_int(CL_API_CALL *)(cl_command_queue queue, cl_program program,
@@ -319,6 +317,13 @@ using clUpdateMutableCommandsKHR_fn = CL_API_ENTRY
 cl_int(CL_API_CALL *)(cl_command_buffer_khr command_buffer, cl_uint num_configs,
                       const cl_command_buffer_update_type_khr *config_types,
                       const void **configs);
+
+using clCreateProgramWithILKHR_fn = CL_API_ENTRY
+cl_program(CL_API_CALL *)(cl_context, const void *, size_t, cl_int *);
+
+using clGetKernelSubGroupInfoKHR_fn = CL_API_ENTRY
+cl_int(CL_API_CALL *)(cl_kernel, cl_device_id, cl_kernel_sub_group_info, size_t,
+                      const void *, size_t, void *, size_t *);
 
 template <typename T> struct FuncPtrCache {
   std::map<cl_context, T> Map;

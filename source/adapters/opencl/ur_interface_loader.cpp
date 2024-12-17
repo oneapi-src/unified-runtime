@@ -154,6 +154,7 @@ urGetMemProcAddrTable(ur_api_version_t Version, ur_mem_dditable_t *pDdiTable) {
   pDdiTable->pfnBufferPartition = urMemBufferPartition;
   pDdiTable->pfnBufferCreateWithNativeHandle =
       urMemBufferCreateWithNativeHandle;
+  pDdiTable->pfnImageCreateWithNativeHandle = urMemImageCreateWithNativeHandle;
   pDdiTable->pfnGetInfo = urMemGetInfo;
   pDdiTable->pfnGetNativeHandle = urMemGetNativeHandle;
   pDdiTable->pfnImageCreate = urMemImageCreate;
@@ -173,6 +174,7 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetEnqueueProcAddrTable(
   pDdiTable->pfnDeviceGlobalVariableWrite = urEnqueueDeviceGlobalVariableWrite;
   pDdiTable->pfnEventsWait = urEnqueueEventsWait;
   pDdiTable->pfnEventsWaitWithBarrier = urEnqueueEventsWaitWithBarrier;
+  pDdiTable->pfnEventsWaitWithBarrierExt = urEnqueueEventsWaitWithBarrierExt;
   pDdiTable->pfnKernelLaunch = urEnqueueKernelLaunch;
   pDdiTable->pfnMemBufferCopy = urEnqueueMemBufferCopy;
   pDdiTable->pfnMemBufferCopyRect = urEnqueueMemBufferCopyRect;
@@ -238,10 +240,10 @@ urGetUSMProcAddrTable(ur_api_version_t Version, ur_usm_dditable_t *pDdiTable) {
   pDdiTable->pfnFree = urUSMFree;
   pDdiTable->pfnGetMemAllocInfo = urUSMGetMemAllocInfo;
   pDdiTable->pfnHostAlloc = urUSMHostAlloc;
-  pDdiTable->pfnPoolCreate = nullptr;
-  pDdiTable->pfnPoolRetain = nullptr;
-  pDdiTable->pfnPoolRelease = nullptr;
-  pDdiTable->pfnPoolGetInfo = nullptr;
+  pDdiTable->pfnPoolCreate = urUSMPoolCreate;
+  pDdiTable->pfnPoolRetain = urUSMPoolRetain;
+  pDdiTable->pfnPoolRelease = urUSMPoolRelease;
+  pDdiTable->pfnPoolGetInfo = urUSMPoolGetInfo;
   pDdiTable->pfnSharedAlloc = urUSMSharedAlloc;
   return UR_RESULT_SUCCESS;
 }
@@ -392,6 +394,7 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetPhysicalMemProcAddrTable(
   pDdiTable->pfnCreate = urPhysicalMemCreate;
   pDdiTable->pfnRelease = urPhysicalMemRelease;
   pDdiTable->pfnRetain = urPhysicalMemRetain;
+  pDdiTable->pfnGetInfo = urPhysicalMemGetInfo;
 
   return retVal;
 }
@@ -422,6 +425,19 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetKernelExpProcAddrTable(
       urKernelSuggestMaxCooperativeGroupCountExp;
 
   return UR_RESULT_SUCCESS;
+}
+
+UR_APIEXPORT ur_result_t UR_APICALL urGetTensorMapExpProcAddrTable(
+    ur_api_version_t version, ur_tensor_map_exp_dditable_t *pDdiTable) {
+  auto result = validateProcInputs(version, pDdiTable);
+  if (UR_RESULT_SUCCESS != result) {
+    return result;
+  }
+
+  pDdiTable->pfnEncodeIm2ColExp = urTensorMapEncodeIm2ColExp;
+  pDdiTable->pfnEncodeTiledExp = urTensorMapEncodeTiledExp;
+
+  return result;
 }
 
 UR_DLLEXPORT ur_result_t UR_APICALL urGetProgramExpProcAddrTable(

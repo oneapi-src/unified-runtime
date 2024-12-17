@@ -292,7 +292,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
       logger::always(
           "Images are not fully supported by the CUDA BE, their support is "
           "disabled by default. Their partial support can be activated by "
-          "setting SYCL_PI_CUDA_ENABLE_IMAGE_SUPPORT environment variable at "
+          "setting UR_CUDA_ENABLE_IMAGE_SUPPORT environment variable at "
           "runtime.");
     }
 
@@ -1076,6 +1076,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     return ReturnValue(static_cast<ur_bool_t>(false));
   case UR_DEVICE_INFO_GLOBAL_VARIABLE_SUPPORT:
     return ReturnValue(static_cast<ur_bool_t>(true));
+  case UR_DEVICE_INFO_USM_POOL_SUPPORT:
+    return ReturnValue(static_cast<ur_bool_t>(true));
   case UR_DEVICE_INFO_COMPONENT_DEVICES:
   case UR_DEVICE_INFO_COMPOSITE_DEVICE:
   case UR_DEVICE_INFO_MAX_READ_WRITE_IMAGE_ARGS:
@@ -1086,7 +1088,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_GPU_EU_COUNT_PER_SUBSLICE:
   case UR_DEVICE_INFO_GPU_HW_THREADS_PER_EU:
     return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
-
+  case UR_DEVICE_INFO_2D_BLOCK_ARRAY_CAPABILITIES_EXP:
+    return ReturnValue(
+        static_cast<ur_exp_device_2d_block_array_capability_flags_t>(0));
   case UR_DEVICE_INFO_COMMAND_BUFFER_SUPPORT_EXP:
   case UR_DEVICE_INFO_COMMAND_BUFFER_EVENT_SUPPORT_EXP:
     return ReturnValue(true);
@@ -1105,7 +1109,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
                              CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MAJOR) >= 9;
     return ReturnValue(static_cast<bool>(Value));
   }
-
+  case UR_DEVICE_INFO_LOW_POWER_EVENTS_EXP:
+    return ReturnValue(false);
   default:
     break;
   }

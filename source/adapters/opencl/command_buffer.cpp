@@ -124,6 +124,7 @@ urCommandBufferReleaseExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urCommandBufferFinalizeExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
+  UR_ASSERT(!hCommandBuffer->IsFinalized, UR_RESULT_ERROR_INVALID_OPERATION);
   cl_context CLContext = cl_adapter::cast<cl_context>(hCommandBuffer->hContext);
   cl_ext::clFinalizeCommandBufferKHR_fn clFinalizeCommandBufferKHR = nullptr;
   UR_RETURN_ON_FAILURE(
@@ -547,7 +548,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
         *pUpdateKernelLaunch) {
 
   // Kernel handle updates are not yet supported.
-  if (pUpdateKernelLaunch->hNewKernel != hCommand->Kernel) {
+  if (pUpdateKernelLaunch->hNewKernel &&
+      pUpdateKernelLaunch->hNewKernel != hCommand->Kernel) {
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 

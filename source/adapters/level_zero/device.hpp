@@ -18,13 +18,13 @@
 #include <unordered_map>
 #include <vector>
 
+#include "adapters/level_zero/platform.hpp"
+#include "common.hpp"
+#include <level_zero/include/ze_intel_gpu.h>
 #include <ur/ur.hpp>
 #include <ur_ddi.h>
 #include <ze_api.h>
 #include <zes_api.h>
-
-#include "adapters/level_zero/platform.hpp"
-#include "common.hpp"
 
 enum EventsScope {
   // All events are created host-visible.
@@ -159,6 +159,9 @@ struct ur_device_handle_t_ : _ur_object {
   // Whether Adapter uses driver's implementation of in-order lists or not
   bool useDriverInOrderLists();
 
+  // Whether Adapter uses driver's implementation of counter-based events or not
+  bool useDriverCounterBasedEvents();
+
   // Returns whether immediate command lists are used on this device.
   ImmCmdlistMode ImmCommandListUsed{};
 
@@ -180,10 +183,6 @@ struct ur_device_handle_t_ : _ur_object {
 
   bool isSubDevice() { return RootDevice != nullptr; }
 
-  // Is this a Data Center GPU Max series (aka PVC)?
-  // TODO: change to use
-  // https://spec.oneapi.io/level-zero/latest/core/api.html#ze-device-ip-version-ext-t
-  // when that is stable.
   bool isPVC() {
     return (ZeDeviceProperties->deviceId & 0xff0) == 0xbd0 ||
            (ZeDeviceProperties->deviceId & 0xff0) == 0xb60;
@@ -191,6 +190,11 @@ struct ur_device_handle_t_ : _ur_object {
 
   // Checks if this GPU is an Intel Flex GPU or Intel Arc Alchemist
   bool isDG2() { return (ZeDeviceProperties->deviceId & 0xff00) == 0x5600; }
+
+  bool isIntelDG2OrNewer() {
+    return (ZeDeviceProperties->vendorId == 0x8086 &&
+            ZeDeviceIpVersionExt->ipVersion >= 0x030dc000);
+  }
 
   bool isIntegrated() {
     return (ZeDeviceProperties->flags & ZE_DEVICE_PROPERTY_FLAG_INTEGRATED);
@@ -223,6 +227,10 @@ struct ur_device_handle_t_ : _ur_object {
   ZeCache<struct ze_global_memsize> ZeGlobalMemSize;
   ZeCache<ZeStruct<ze_mutable_command_list_exp_properties_t>>
       ZeDeviceMutableCmdListsProperties;
+#ifdef ZE_INTEL_DEVICE_BLOCK_ARRAY_EXP_NAME
+  ZeCache<ZeStruct<ze_intel_device_block_array_exp_properties_t>>
+      ZeDeviceBlockArrayProperties;
+#endif // ZE_INTEL_DEVICE_BLOCK_ARRAY_EXP_NAME
 
   // Map device bindless image offset to corresponding host image handle.
   std::unordered_map<ur_exp_image_native_handle_t, ze_image_handle_t>

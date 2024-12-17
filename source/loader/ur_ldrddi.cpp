@@ -2516,6 +2516,90 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemRelease(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urPhysicalMemGetInfo
+__urdlllocal ur_result_t UR_APICALL urPhysicalMemGetInfo(
+    ur_physical_mem_handle_t
+        hPhysicalMem, ///< [in] handle of the physical memory object to query.
+    ur_physical_mem_info_t propName, ///< [in] type of the info to query.
+    size_t
+        propSize, ///< [in] size in bytes of the memory pointed to by pPropValue.
+    void *
+        pPropValue, ///< [out][optional][typename(propName, propSize)] array of bytes holding
+    ///< the info. If propSize is less than the real number of bytes needed to
+    ///< return the info then the ::UR_RESULT_ERROR_INVALID_SIZE error is
+    ///< returned and pPropValue is not used.
+    size_t *
+        pPropSizeRet ///< [out][optional] pointer to the actual size in bytes of the queried propName."
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    [[maybe_unused]] auto context = getContext();
+
+    // extract platform's function pointer table
+    auto dditable =
+        reinterpret_cast<ur_physical_mem_object_t *>(hPhysicalMem)->dditable;
+    auto pfnGetInfo = dditable->ur.PhysicalMem.pfnGetInfo;
+    if (nullptr == pfnGetInfo) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    hPhysicalMem =
+        reinterpret_cast<ur_physical_mem_object_t *>(hPhysicalMem)->handle;
+
+    // this value is needed for converting adapter handles to loader handles
+    size_t sizeret = 0;
+    if (pPropSizeRet == NULL) {
+        pPropSizeRet = &sizeret;
+    }
+
+    // forward to device-platform
+    result =
+        pfnGetInfo(hPhysicalMem, propName, propSize, pPropValue, pPropSizeRet);
+
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    try {
+        if (pPropValue != nullptr) {
+            switch (propName) {
+            case UR_PHYSICAL_MEM_INFO_CONTEXT: {
+                ur_context_handle_t *handles =
+                    reinterpret_cast<ur_context_handle_t *>(pPropValue);
+                size_t nelements = *pPropSizeRet / sizeof(ur_context_handle_t);
+                for (size_t i = 0; i < nelements; ++i) {
+                    if (handles[i] != nullptr) {
+                        handles[i] = reinterpret_cast<ur_context_handle_t>(
+                            context->factories.ur_context_factory.getInstance(
+                                handles[i], dditable));
+                    }
+                }
+            } break;
+            case UR_PHYSICAL_MEM_INFO_DEVICE: {
+                ur_device_handle_t *handles =
+                    reinterpret_cast<ur_device_handle_t *>(pPropValue);
+                size_t nelements = *pPropSizeRet / sizeof(ur_device_handle_t);
+                for (size_t i = 0; i < nelements; ++i) {
+                    if (handles[i] != nullptr) {
+                        handles[i] = reinterpret_cast<ur_device_handle_t>(
+                            context->factories.ur_device_factory.getInstance(
+                                handles[i], dditable));
+                    }
+                }
+            } break;
+            default: {
+            } break;
+            }
+        }
+    } catch (std::bad_alloc &) {
+        result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
+    }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urProgramCreateWithIL
 __urdlllocal ur_result_t UR_APICALL urProgramCreateWithIL(
     ur_context_handle_t hContext, ///< [in] handle of the context instance
@@ -2563,10 +2647,16 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithIL(
 /// @brief Intercept function for urProgramCreateWithBinary
 __urdlllocal ur_result_t UR_APICALL urProgramCreateWithBinary(
     ur_context_handle_t hContext, ///< [in] handle of the context instance
-    ur_device_handle_t
-        hDevice,            ///< [in] handle to device associated with binary.
-    size_t size,            ///< [in] size in bytes.
-    const uint8_t *pBinary, ///< [in] pointer to binary.
+    uint32_t numDevices,          ///< [in] number of devices
+    ur_device_handle_t *
+        phDevices, ///< [in][range(0, numDevices)] a pointer to a list of device handles. The
+                   ///< binaries are loaded for devices specified in this list.
+    size_t *
+        pLengths, ///< [in][range(0, numDevices)] array of sizes of program binaries
+                  ///< specified by `pBinaries` (in bytes).
+    const uint8_t **
+        ppBinaries, ///< [in][range(0, numDevices)] pointer to program binaries to be loaded
+                    ///< for devices specified by `phDevices`.
     const ur_program_properties_t *
         pProperties, ///< [in][optional] pointer to program creation properties.
     ur_program_handle_t
@@ -2586,12 +2676,16 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithBinary(
     // convert loader handle to platform handle
     hContext = reinterpret_cast<ur_context_object_t *>(hContext)->handle;
 
-    // convert loader handle to platform handle
-    hDevice = reinterpret_cast<ur_device_object_t *>(hDevice)->handle;
+    // convert loader handles to platform handles
+    auto phDevicesLocal = std::vector<ur_device_handle_t>(numDevices);
+    for (size_t i = 0; i < numDevices; ++i) {
+        phDevicesLocal[i] =
+            reinterpret_cast<ur_device_object_t *>(phDevices[i])->handle;
+    }
 
     // forward to device-platform
-    result = pfnCreateWithBinary(hContext, hDevice, size, pBinary, pProperties,
-                                 phProgram);
+    result = pfnCreateWithBinary(hContext, numDevices, phDevicesLocal.data(),
+                                 pLengths, ppBinaries, pProperties, phProgram);
 
     if (UR_RESULT_SUCCESS != result) {
         return result;
@@ -9017,9 +9111,13 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
 /// @brief Intercept function for urKernelSuggestMaxCooperativeGroupCountExp
 __urdlllocal ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
     ur_kernel_handle_t hKernel, ///< [in] handle of the kernel object
-    size_t
-        localWorkSize, ///< [in] number of local work-items that will form a work-group when the
-                       ///< kernel is launched
+    uint32_t
+        workDim, ///< [in] number of dimensions, from 1 to 3, to specify the work-group
+                 ///< work-items
+    const size_t *
+        pLocalWorkSize, ///< [in] pointer to an array of workDim unsigned values that specify the
+    ///< number of local work-items forming a work-group that will execute the
+    ///< kernel function.
     size_t
         dynamicSharedMemorySize, ///< [in] size of dynamic shared memory, for each work-group, in bytes,
     ///< that will be used when the kernel is launched
@@ -9042,7 +9140,8 @@ __urdlllocal ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
 
     // forward to device-platform
     result = pfnSuggestMaxCooperativeGroupCountExp(
-        hKernel, localWorkSize, dynamicSharedMemorySize, pGroupCountRet);
+        hKernel, workDim, pLocalWorkSize, dynamicSharedMemorySize,
+        pGroupCountRet);
 
     return result;
 }
@@ -9124,6 +9223,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
         workDim, ///< [in] number of dimensions, from 1 to 3, to specify the global and
                  ///< work-group work-items
     const size_t *
+        pGlobalWorkOffset, ///< [in] pointer to an array of workDim unsigned values that specify the
+    ///< offset used to calculate the global ID of a work-item
+    const size_t *
         pGlobalWorkSize, ///< [in] pointer to an array of workDim unsigned values that specify the
     ///< number of global work-items in workDim that will execute the kernel
     ///< function
@@ -9165,11 +9267,35 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
     // convert loader handle to platform handle
     hKernel = reinterpret_cast<ur_kernel_object_t *>(hKernel)->handle;
 
+    // convert loader handles to platform handles
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
+    for (size_t i = 0; i < numEventsInWaitList; ++i) {
+        phEventWaitListLocal[i] =
+            reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
+    }
+
     // forward to device-platform
-    result = pfnKernelLaunchCustomExp(hQueue, hKernel, workDim, pGlobalWorkSize,
-                                      pLocalWorkSize, numPropsInLaunchPropList,
-                                      launchPropList, numEventsInWaitList,
-                                      phEventWaitList, phEvent);
+    result = pfnKernelLaunchCustomExp(
+        hQueue, hKernel, workDim, pGlobalWorkOffset, pGlobalWorkSize,
+        pLocalWorkSize, numPropsInLaunchPropList, launchPropList,
+        numEventsInWaitList, phEventWaitListLocal.data(), phEvent);
+
+    // In the event of ERROR_ADAPTER_SPECIFIC we should still attempt to wrap any output handles below.
+    if (UR_RESULT_SUCCESS != result &&
+        UR_RESULT_ERROR_ADAPTER_SPECIFIC != result) {
+        return result;
+    }
+    try {
+        // convert platform handle to loader handle
+        if (nullptr != phEvent) {
+            *phEvent = reinterpret_cast<ur_event_handle_t>(
+                context->factories.ur_event_factory.getInstance(*phEvent,
+                                                                dditable));
+        }
+    } catch (std::bad_alloc &) {
+        result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
+    }
 
     return result;
 }
@@ -9478,6 +9604,71 @@ __urdlllocal ur_result_t UR_APICALL urUsmP2PPeerAccessGetInfoExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urEnqueueEventsWaitWithBarrierExt
+__urdlllocal ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrierExt(
+    ur_queue_handle_t hQueue, ///< [in] handle of the queue object
+    const ur_exp_enqueue_ext_properties_t *
+        pProperties, ///< [in][optional] pointer to the extended enqueue properties
+    uint32_t numEventsInWaitList, ///< [in] size of the event wait list
+    const ur_event_handle_t *
+        phEventWaitList, ///< [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    ///< events that must be complete before this command can be executed.
+    ///< If nullptr, the numEventsInWaitList must be 0, indicating that all
+    ///< previously enqueued commands
+    ///< must be complete.
+    ur_event_handle_t *
+        phEvent ///< [out][optional] return an event object that identifies this particular
+    ///< command instance. If phEventWaitList and phEvent are not NULL, phEvent
+    ///< must not refer to an element of the phEventWaitList array.
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    [[maybe_unused]] auto context = getContext();
+
+    // extract platform's function pointer table
+    auto dditable = reinterpret_cast<ur_queue_object_t *>(hQueue)->dditable;
+    auto pfnEventsWaitWithBarrierExt =
+        dditable->ur.Enqueue.pfnEventsWaitWithBarrierExt;
+    if (nullptr == pfnEventsWaitWithBarrierExt) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    hQueue = reinterpret_cast<ur_queue_object_t *>(hQueue)->handle;
+
+    // convert loader handles to platform handles
+    auto phEventWaitListLocal =
+        std::vector<ur_event_handle_t>(numEventsInWaitList);
+    for (size_t i = 0; i < numEventsInWaitList; ++i) {
+        phEventWaitListLocal[i] =
+            reinterpret_cast<ur_event_object_t *>(phEventWaitList[i])->handle;
+    }
+
+    // forward to device-platform
+    result =
+        pfnEventsWaitWithBarrierExt(hQueue, pProperties, numEventsInWaitList,
+                                    phEventWaitListLocal.data(), phEvent);
+
+    // In the event of ERROR_ADAPTER_SPECIFIC we should still attempt to wrap any output handles below.
+    if (UR_RESULT_SUCCESS != result &&
+        UR_RESULT_ERROR_ADAPTER_SPECIFIC != result) {
+        return result;
+    }
+    try {
+        // convert platform handle to loader handle
+        if (nullptr != phEvent) {
+            *phEvent = reinterpret_cast<ur_event_handle_t>(
+                context->factories.ur_event_factory.getInstance(*phEvent,
+                                                                dditable));
+        }
+    } catch (std::bad_alloc &) {
+        result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
+    }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urEnqueueNativeCommandExp
 __urdlllocal ur_result_t UR_APICALL urEnqueueNativeCommandExp(
     ur_queue_handle_t hQueue, ///< [in] handle of the queue object
@@ -9549,6 +9740,149 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueNativeCommandExp(
                 context->factories.ur_event_factory.getInstance(*phEvent,
                                                                 dditable));
         }
+    } catch (std::bad_alloc &) {
+        result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
+    }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urTensorMapEncodeIm2ColExp
+__urdlllocal ur_result_t UR_APICALL urTensorMapEncodeIm2ColExp(
+    ur_device_handle_t hDevice, ///< [in] Handle of the device object.
+    ur_exp_tensor_map_data_type_flags_t
+        TensorMapType,   ///< [in] Data type of the tensor object.
+    uint32_t TensorRank, ///< [in] Dimensionality of tensor; must be at least 3.
+    void *
+        GlobalAddress, ///< [in] Starting address of memory region described by tensor.
+    const uint64_t *
+        GlobalDim, ///< [in] Array containing tensor size (number of elements) along each of
+                   ///< the TensorRank dimensions.
+    const uint64_t *
+        GlobalStrides, ///< [in] Array containing stride size (in bytes) along each of the
+                       ///< TensorRank - 1 dimensions.
+    const int *
+        PixelBoxLowerCorner, ///< [in] Array containing DHW dimensions of lower box corner.
+    const int *
+        PixelBoxUpperCorner, ///< [in] Array containing DHW dimensions of upper box corner.
+    uint32_t ChannelsPerPixel, ///< [in] Number of channels per pixel.
+    uint32_t PixelsPerColumn,  ///< [in] Number of pixels per column.
+    const uint32_t *
+        ElementStrides, ///< [in] Array containing traversal stride in each of the TensorRank
+                        ///< dimensions.
+    ur_exp_tensor_map_interleave_flags_t
+        Interleave, ///< [in] Type of interleaved layout the tensor addresses
+    ur_exp_tensor_map_swizzle_flags_t
+        Swizzle, ///< [in] Bank swizzling pattern inside shared memory
+    ur_exp_tensor_map_l2_promotion_flags_t
+        L2Promotion, ///< [in] L2 promotion size.
+    ur_exp_tensor_map_oob_fill_flags_t
+        OobFill, ///< [in] Indicates whether zero or special NaN constant will be used to
+                 ///< fill out-of-bounds elements.
+    ur_exp_tensor_map_handle_t
+        *hTensorMap ///< [out] Handle of the tensor map object.
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    [[maybe_unused]] auto context = getContext();
+
+    // extract platform's function pointer table
+    auto dditable = reinterpret_cast<ur_device_object_t *>(hDevice)->dditable;
+    auto pfnEncodeIm2ColExp = dditable->ur.TensorMapExp.pfnEncodeIm2ColExp;
+    if (nullptr == pfnEncodeIm2ColExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    hDevice = reinterpret_cast<ur_device_object_t *>(hDevice)->handle;
+
+    // forward to device-platform
+    result = pfnEncodeIm2ColExp(
+        hDevice, TensorMapType, TensorRank, GlobalAddress, GlobalDim,
+        GlobalStrides, PixelBoxLowerCorner, PixelBoxUpperCorner,
+        ChannelsPerPixel, PixelsPerColumn, ElementStrides, Interleave, Swizzle,
+        L2Promotion, OobFill, hTensorMap);
+
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    try {
+        // convert platform handle to loader handle
+        *hTensorMap = reinterpret_cast<ur_exp_tensor_map_handle_t>(
+            context->factories.ur_exp_tensor_map_factory.getInstance(
+                *hTensorMap, dditable));
+    } catch (std::bad_alloc &) {
+        result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
+    }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urTensorMapEncodeTiledExp
+__urdlllocal ur_result_t UR_APICALL urTensorMapEncodeTiledExp(
+    ur_device_handle_t hDevice, ///< [in] Handle of the device object.
+    ur_exp_tensor_map_data_type_flags_t
+        TensorMapType,   ///< [in] Data type of the tensor object.
+    uint32_t TensorRank, ///< [in] Dimensionality of tensor; must be at least 3.
+    void *
+        GlobalAddress, ///< [in] Starting address of memory region described by tensor.
+    const uint64_t *
+        GlobalDim, ///< [in] Array containing tensor size (number of elements) along each of
+                   ///< the TensorRank dimensions.
+    const uint64_t *
+        GlobalStrides, ///< [in] Array containing stride size (in bytes) along each of the
+                       ///< TensorRank - 1 dimensions.
+    const uint32_t *
+        BoxDim, ///< [in] Array containing traversal box size (number of elments) along
+    ///< each of the TensorRank dimensions. Specifies how many elements to be
+    ///< traversed along each tensor dimension.
+    const uint32_t *
+        ElementStrides, ///< [in] Array containing traversal stride in each of the TensorRank
+                        ///< dimensions.
+    ur_exp_tensor_map_interleave_flags_t
+        Interleave, ///< [in] Type of interleaved layout the tensor addresses
+    ur_exp_tensor_map_swizzle_flags_t
+        Swizzle, ///< [in] Bank swizzling pattern inside shared memory
+    ur_exp_tensor_map_l2_promotion_flags_t
+        L2Promotion, ///< [in] L2 promotion size.
+    ur_exp_tensor_map_oob_fill_flags_t
+        OobFill, ///< [in] Indicates whether zero or special NaN constant will be used to
+                 ///< fill out-of-bounds elements.
+    ur_exp_tensor_map_handle_t
+        *hTensorMap ///< [out] Handle of the tensor map object.
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    [[maybe_unused]] auto context = getContext();
+
+    // extract platform's function pointer table
+    auto dditable = reinterpret_cast<ur_device_object_t *>(hDevice)->dditable;
+    auto pfnEncodeTiledExp = dditable->ur.TensorMapExp.pfnEncodeTiledExp;
+    if (nullptr == pfnEncodeTiledExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    hDevice = reinterpret_cast<ur_device_object_t *>(hDevice)->handle;
+
+    // forward to device-platform
+    result = pfnEncodeTiledExp(hDevice, TensorMapType, TensorRank,
+                               GlobalAddress, GlobalDim, GlobalStrides, BoxDim,
+                               ElementStrides, Interleave, Swizzle, L2Promotion,
+                               OobFill, hTensorMap);
+
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    try {
+        // convert platform handle to loader handle
+        *hTensorMap = reinterpret_cast<ur_exp_tensor_map_handle_t>(
+            context->factories.ur_exp_tensor_map_factory.getInstance(
+                *hTensorMap, dditable));
     } catch (std::bad_alloc &) {
         result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
     }
@@ -9969,6 +10303,8 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetEnqueueProcAddrTable(
                 ur_loader::urEnqueueDeviceGlobalVariableRead;
             pDdiTable->pfnReadHostPipe = ur_loader::urEnqueueReadHostPipe;
             pDdiTable->pfnWriteHostPipe = ur_loader::urEnqueueWriteHostPipe;
+            pDdiTable->pfnEventsWaitWithBarrierExt =
+                ur_loader::urEnqueueEventsWaitWithBarrierExt;
         } else {
             // return pointers directly to platform's DDIs
             *pDdiTable =
@@ -10375,6 +10711,7 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetPhysicalMemProcAddrTable(
             pDdiTable->pfnCreate = ur_loader::urPhysicalMemCreate;
             pDdiTable->pfnRetain = ur_loader::urPhysicalMemRetain;
             pDdiTable->pfnRelease = ur_loader::urPhysicalMemRelease;
+            pDdiTable->pfnGetInfo = ur_loader::urPhysicalMemGetInfo;
         } else {
             // return pointers directly to platform's DDIs
             *pDdiTable = ur_loader::getContext()
@@ -10714,6 +11051,68 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetSamplerProcAddrTable(
             // return pointers directly to platform's DDIs
             *pDdiTable =
                 ur_loader::getContext()->platforms.front().dditable.ur.Sampler;
+        }
+    }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Exported function for filling application's TensorMapExp table
+///        with current process' addresses
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
+UR_DLLEXPORT ur_result_t UR_APICALL urGetTensorMapExpProcAddrTable(
+    ur_api_version_t version, ///< [in] API version requested
+    ur_tensor_map_exp_dditable_t
+        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
+) {
+    if (nullptr == pDdiTable) {
+        return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    if (ur_loader::getContext()->version < version) {
+        return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
+    }
+
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    // Load the device-platform DDI tables
+    for (auto &platform : ur_loader::getContext()->platforms) {
+        // statically linked adapter inside of the loader
+        if (platform.handle == nullptr) {
+            continue;
+        }
+
+        if (platform.initStatus != UR_RESULT_SUCCESS) {
+            continue;
+        }
+        auto getTable = reinterpret_cast<ur_pfnGetTensorMapExpProcAddrTable_t>(
+            ur_loader::LibLoader::getFunctionPtr(
+                platform.handle.get(), "urGetTensorMapExpProcAddrTable"));
+        if (!getTable) {
+            continue;
+        }
+        platform.initStatus =
+            getTable(version, &platform.dditable.ur.TensorMapExp);
+    }
+
+    if (UR_RESULT_SUCCESS == result) {
+        if (ur_loader::getContext()->platforms.size() != 1 ||
+            ur_loader::getContext()->forceIntercept) {
+            // return pointers to loader's DDIs
+            pDdiTable->pfnEncodeIm2ColExp =
+                ur_loader::urTensorMapEncodeIm2ColExp;
+            pDdiTable->pfnEncodeTiledExp = ur_loader::urTensorMapEncodeTiledExp;
+        } else {
+            // return pointers directly to platform's DDIs
+            *pDdiTable = ur_loader::getContext()
+                             ->platforms.front()
+                             .dditable.ur.TensorMapExp;
         }
     }
 

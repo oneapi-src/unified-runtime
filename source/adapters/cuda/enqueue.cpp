@@ -402,6 +402,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
   }
 }
 
+UR_APIEXPORT ur_result_t urEnqueueEventsWaitWithBarrierExt(
+    ur_queue_handle_t hQueue, const ur_exp_enqueue_ext_properties_t *,
+    uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
+    ur_event_handle_t *phEvent) {
+  return urEnqueueEventsWaitWithBarrier(hQueue, numEventsInWaitList,
+                                        phEventWaitList, phEvent);
+}
+
 /// Enqueues a wait on the given CUstream for all events.
 /// See \ref enqueueEventWait
 /// TODO: Add support for multiple streams once the Event class is properly
@@ -414,11 +422,13 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueEventsWait(
                                         phEventWaitList, phEvent);
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
-    ur_queue_handle_t hQueue, ur_kernel_handle_t hKernel, uint32_t workDim,
-    const size_t *pGlobalWorkOffset, const size_t *pGlobalWorkSize,
-    const size_t *pLocalWorkSize, uint32_t numEventsInWaitList,
-    const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent) {
+static ur_result_t
+enqueueKernelLaunch(ur_queue_handle_t hQueue, ur_kernel_handle_t hKernel,
+                    uint32_t workDim, const size_t *pGlobalWorkOffset,
+                    const size_t *pGlobalWorkSize, const size_t *pLocalWorkSize,
+                    uint32_t numEventsInWaitList,
+                    const ur_event_handle_t *phEventWaitList,
+                    ur_event_handle_t *phEvent, size_t WorkGroupMemory) {
   // Preconditions
   UR_ASSERT(hQueue->getDevice() == hKernel->getProgram()->getDevice(),
             UR_RESULT_ERROR_INVALID_KERNEL);
@@ -436,6 +446,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
   size_t ThreadsPerBlock[3] = {32u, 1u, 1u};
   size_t BlocksPerGrid[3] = {1u, 1u, 1u};
 
+  // Set work group memory so we can compute the whole memory requirement
+  if (WorkGroupMemory)
+    hKernel->setWorkGroupMemory(WorkGroupMemory);
   uint32_t LocalSize = hKernel->getLocalSize();
   CUfunction CuFunc = hKernel->get();
 
@@ -485,9 +498,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
         ThreadsPerBlock[0], ThreadsPerBlock[1], ThreadsPerBlock[2], LocalSize,
         CuStream, const_cast<void **>(ArgIndices.data()), nullptr));
 
-    if (LocalSize != 0)
-      hKernel->clearLocalSize();
-
     if (phEvent) {
       UR_CHECK_ERROR(RetImplEvent->record());
       *phEvent = RetImplEvent.release();
@@ -496,6 +506,17 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
     return Err;
   }
   return UR_RESULT_SUCCESS;
+}
+
+UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
+    ur_queue_handle_t hQueue, ur_kernel_handle_t hKernel, uint32_t workDim,
+    const size_t *pGlobalWorkOffset, const size_t *pGlobalWorkSize,
+    const size_t *pLocalWorkSize, uint32_t numEventsInWaitList,
+    const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent) {
+  return enqueueKernelLaunch(hQueue, hKernel, workDim, pGlobalWorkOffset,
+                             pGlobalWorkSize, pLocalWorkSize,
+                             numEventsInWaitList, phEventWaitList, phEvent,
+                             /*WorkGroupMemory=*/0);
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
@@ -508,8 +529,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
     coop_prop.id = UR_EXP_LAUNCH_PROPERTY_ID_COOPERATIVE;
     coop_prop.value.cooperative = 1;
     return urEnqueueKernelLaunchCustomExp(
-        hQueue, hKernel, workDim, pGlobalWorkSize, pLocalWorkSize, 1,
-        &coop_prop, numEventsInWaitList, phEventWaitList, phEvent);
+        hQueue, hKernel, workDim, pGlobalWorkOffset, pGlobalWorkSize,
+        pLocalWorkSize, 1, &coop_prop, numEventsInWaitList, phEventWaitList,
+        phEvent);
   }
   return urEnqueueKernelLaunch(hQueue, hKernel, workDim, pGlobalWorkOffset,
                                pGlobalWorkSize, pLocalWorkSize,
@@ -518,16 +540,29 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
 
 UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
     ur_queue_handle_t hQueue, ur_kernel_handle_t hKernel, uint32_t workDim,
-    const size_t *pGlobalWorkSize, const size_t *pLocalWorkSize,
-    uint32_t numPropsInLaunchPropList,
+    const size_t *pGlobalWorkOffset, const size_t *pGlobalWorkSize,
+    const size_t *pLocalWorkSize, uint32_t numPropsInLaunchPropList,
     const ur_exp_launch_property_t *launchPropList,
     uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
     ur_event_handle_t *phEvent) {
 
-  if (numPropsInLaunchPropList == 0) {
-    urEnqueueKernelLaunch(hQueue, hKernel, workDim, nullptr, pGlobalWorkSize,
-                          pLocalWorkSize, numEventsInWaitList, phEventWaitList,
-                          phEvent);
+  size_t WorkGroupMemory = [&]() -> size_t {
+    const ur_exp_launch_property_t *WorkGroupMemoryProp = std::find_if(
+        launchPropList, launchPropList + numPropsInLaunchPropList,
+        [](const ur_exp_launch_property_t &Prop) {
+          return Prop.id == UR_EXP_LAUNCH_PROPERTY_ID_WORK_GROUP_MEMORY;
+        });
+    if (WorkGroupMemoryProp != launchPropList + numPropsInLaunchPropList)
+      return WorkGroupMemoryProp->value.workgroup_mem_size;
+    return 0;
+  }();
+
+  if (numPropsInLaunchPropList == 0 ||
+      (WorkGroupMemory && numPropsInLaunchPropList == 1)) {
+    return enqueueKernelLaunch(hQueue, hKernel, workDim, pGlobalWorkOffset,
+                               pGlobalWorkSize, pLocalWorkSize,
+                               numEventsInWaitList, phEventWaitList, phEvent,
+                               WorkGroupMemory);
   }
 #if CUDA_VERSION >= 11080
   // Preconditions
@@ -540,7 +575,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
     return UR_RESULT_ERROR_INVALID_NULL_POINTER;
   }
 
-  std::vector<CUlaunchAttribute> launch_attribute(numPropsInLaunchPropList);
+  std::vector<CUlaunchAttribute> launch_attribute;
+  launch_attribute.reserve(numPropsInLaunchPropList);
 
   // Early exit for zero size kernel
   if (*pGlobalWorkSize == 0) {
@@ -553,40 +589,35 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
   size_t ThreadsPerBlock[3] = {32u, 1u, 1u};
   size_t BlocksPerGrid[3] = {1u, 1u, 1u};
 
+  // Set work group memory so we can compute the whole memory requirement
+  if (WorkGroupMemory)
+    hKernel->setWorkGroupMemory(WorkGroupMemory);
   uint32_t LocalSize = hKernel->getLocalSize();
   CUfunction CuFunc = hKernel->get();
 
   for (uint32_t i = 0; i < numPropsInLaunchPropList; i++) {
     switch (launchPropList[i].id) {
     case UR_EXP_LAUNCH_PROPERTY_ID_IGNORE: {
-      launch_attribute[i].id = CU_LAUNCH_ATTRIBUTE_IGNORE;
+      auto &attr = launch_attribute.emplace_back();
+      attr.id = CU_LAUNCH_ATTRIBUTE_IGNORE;
       break;
     }
     case UR_EXP_LAUNCH_PROPERTY_ID_CLUSTER_DIMENSION: {
-
-      launch_attribute[i].id = CU_LAUNCH_ATTRIBUTE_CLUSTER_DIMENSION;
+      auto &attr = launch_attribute.emplace_back();
+      attr.id = CU_LAUNCH_ATTRIBUTE_CLUSTER_DIMENSION;
       // Note that cuda orders from right to left wrt SYCL dimensional order.
       if (workDim == 3) {
-        launch_attribute[i].value.clusterDim.x =
-            launchPropList[i].value.clusterDim[2];
-        launch_attribute[i].value.clusterDim.y =
-            launchPropList[i].value.clusterDim[1];
-        launch_attribute[i].value.clusterDim.z =
-            launchPropList[i].value.clusterDim[0];
+        attr.value.clusterDim.x = launchPropList[i].value.clusterDim[2];
+        attr.value.clusterDim.y = launchPropList[i].value.clusterDim[1];
+        attr.value.clusterDim.z = launchPropList[i].value.clusterDim[0];
       } else if (workDim == 2) {
-        launch_attribute[i].value.clusterDim.x =
-            launchPropList[i].value.clusterDim[1];
-        launch_attribute[i].value.clusterDim.y =
-            launchPropList[i].value.clusterDim[0];
-        launch_attribute[i].value.clusterDim.z =
-            launchPropList[i].value.clusterDim[2];
+        attr.value.clusterDim.x = launchPropList[i].value.clusterDim[1];
+        attr.value.clusterDim.y = launchPropList[i].value.clusterDim[0];
+        attr.value.clusterDim.z = launchPropList[i].value.clusterDim[2];
       } else {
-        launch_attribute[i].value.clusterDim.x =
-            launchPropList[i].value.clusterDim[0];
-        launch_attribute[i].value.clusterDim.y =
-            launchPropList[i].value.clusterDim[1];
-        launch_attribute[i].value.clusterDim.z =
-            launchPropList[i].value.clusterDim[2];
+        attr.value.clusterDim.x = launchPropList[i].value.clusterDim[0];
+        attr.value.clusterDim.y = launchPropList[i].value.clusterDim[1];
+        attr.value.clusterDim.z = launchPropList[i].value.clusterDim[2];
       }
 
       UR_CHECK_ERROR(cuFuncSetAttribute(
@@ -595,9 +626,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
       break;
     }
     case UR_EXP_LAUNCH_PROPERTY_ID_COOPERATIVE: {
-      launch_attribute[i].id = CU_LAUNCH_ATTRIBUTE_COOPERATIVE;
-      launch_attribute[i].value.cooperative =
-          launchPropList[i].value.cooperative;
+      auto &attr = launch_attribute.emplace_back();
+      attr.id = CU_LAUNCH_ATTRIBUTE_COOPERATIVE;
+      attr.value.cooperative = launchPropList[i].value.cooperative;
+      break;
+    }
+    case UR_EXP_LAUNCH_PROPERTY_ID_WORK_GROUP_MEMORY: {
       break;
     }
     default: {
@@ -610,8 +644,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
   // using the standard UR_CHECK_ERROR
   if (ur_result_t Ret =
           setKernelParams(hQueue->getContext(), hQueue->Device, workDim,
-                          nullptr, pGlobalWorkSize, pLocalWorkSize, hKernel,
-                          CuFunc, ThreadsPerBlock, BlocksPerGrid);
+                          pGlobalWorkOffset, pGlobalWorkSize, pLocalWorkSize,
+                          hKernel, CuFunc, ThreadsPerBlock, BlocksPerGrid);
       Ret != UR_RESULT_SUCCESS)
     return Ret;
 
@@ -659,14 +693,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
     launch_config.sharedMemBytes = LocalSize;
     launch_config.hStream = CuStream;
     launch_config.attrs = &launch_attribute[0];
-    launch_config.numAttrs = numPropsInLaunchPropList;
+    launch_config.numAttrs = launch_attribute.size();
 
     UR_CHECK_ERROR(cuLaunchKernelEx(&launch_config, CuFunc,
                                     const_cast<void **>(ArgIndices.data()),
                                     nullptr));
-
-    if (LocalSize != 0)
-      hKernel->clearLocalSize();
 
     if (phEvent) {
       UR_CHECK_ERROR(RetImplEvent->record());
@@ -953,35 +984,71 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
 
 // CUDA has no memset functions that allow setting values more than 4 bytes. UR
 // API lets you pass an arbitrary "pattern" to the buffer fill, which can be
-// more than 4 bytes. We must break up the pattern into 1 byte values, and set
-// the buffer using multiple strided calls.  The first 4 patterns are set using
-// cuMemsetD32Async then all subsequent 1 byte patterns are set using
-// cuMemset2DAsync which is called for each pattern.
+// more than 4 bytes. We must break up the pattern into 1, 2 or 4-byte values
+// and set the buffer using multiple strided calls.
 ur_result_t commonMemSetLargePattern(CUstream Stream, uint32_t PatternSize,
                                      size_t Size, const void *pPattern,
                                      CUdeviceptr Ptr) {
-  // Calculate the number of patterns, stride, number of times the pattern
-  // needs to be applied, and the number of times the first 32 bit pattern
-  // needs to be applied.
-  auto NumberOfSteps = PatternSize / sizeof(uint8_t);
-  auto Pitch = NumberOfSteps * sizeof(uint8_t);
-  auto Height = Size / NumberOfSteps;
-  auto Count32 = Size / sizeof(uint32_t);
+  // Find the largest supported word size into which the pattern can be divided
+  auto BackendWordSize = PatternSize % 4u == 0u   ? 4u
+                         : PatternSize % 2u == 0u ? 2u
+                                                  : 1u;
 
-  // Get 4-byte chunk of the pattern and call cuMemsetD32Async
-  auto Value = *(static_cast<const uint32_t *>(pPattern));
-  UR_CHECK_ERROR(cuMemsetD32Async(Ptr, Value, Count32, Stream));
-  for (auto step = 4u; step < NumberOfSteps; ++step) {
-    // take 1 byte of the pattern
-    Value = *(static_cast<const uint8_t *>(pPattern) + step);
+  // Calculate the number of words in the pattern, the stride, and the number of
+  // times the pattern needs to be applied
+  auto NumberOfSteps = PatternSize / BackendWordSize;
+  auto Pitch = NumberOfSteps * BackendWordSize;
+  auto Height = Size / PatternSize;
 
-    // offset the pointer to the part of the buffer we want to write to
-    auto OffsetPtr = Ptr + (step * sizeof(uint8_t));
+  // Same implementation works for any pattern word type (uint8_t, uint16_t,
+  // uint32_t)
+  auto memsetImpl = [BackendWordSize, NumberOfSteps, Pitch, Height, Size, Ptr,
+                     &Stream](const auto *pPatternWords,
+                              auto &&continuousMemset, auto &&stridedMemset) {
+    // If the pattern is 1 word or the first word is repeated throughout, a fast
+    // continuous fill can be used without the need for slower strided fills
+    bool UseOnlyFirstValue{true};
+    for (auto Step{1u}; (Step < NumberOfSteps) && UseOnlyFirstValue; ++Step) {
+      if (*(pPatternWords + Step) != *pPatternWords) {
+        UseOnlyFirstValue = false;
+      }
+    }
+    auto OptimizedNumberOfSteps{UseOnlyFirstValue ? 1u : NumberOfSteps};
 
-    // set all of the pattern chunks
-    UR_CHECK_ERROR(cuMemsetD2D8Async(OffsetPtr, Pitch, Value, sizeof(uint8_t),
-                                     Height, Stream));
+    // Fill the pattern in steps of BackendWordSize bytes. Use a continuous
+    // fill in the first step because it's faster than a strided fill. Then,
+    // overwrite the other values in subsequent steps.
+    for (auto Step{0u}; Step < OptimizedNumberOfSteps; ++Step) {
+      if (Step == 0) {
+        UR_CHECK_ERROR(continuousMemset(Ptr, *(pPatternWords),
+                                        Size / BackendWordSize, Stream));
+      } else {
+        UR_CHECK_ERROR(stridedMemset(Ptr + Step * BackendWordSize, Pitch,
+                                     *(pPatternWords + Step), 1u, Height,
+                                     Stream));
+      }
+    }
+  };
+
+  // Apply the implementation to the chosen pattern word type
+  switch (BackendWordSize) {
+  case 4u: {
+    memsetImpl(static_cast<const uint32_t *>(pPattern), cuMemsetD32Async,
+               cuMemsetD2D32Async);
+    break;
   }
+  case 2u: {
+    memsetImpl(static_cast<const uint16_t *>(pPattern), cuMemsetD16Async,
+               cuMemsetD2D16Async);
+    break;
+  }
+  default: {
+    memsetImpl(static_cast<const uint8_t *>(pPattern), cuMemsetD8Async,
+               cuMemsetD2D8Async);
+    break;
+  }
+  }
+
   return UR_RESULT_SUCCESS;
 }
 

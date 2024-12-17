@@ -96,6 +96,11 @@ urPlatformGet(ur_adapter_handle_t *, uint32_t, uint32_t NumEntries,
     }
   }
 
+  /* INVALID_VALUE is returned when the size is invalid, special case it here */
+  if (Result == CL_INVALID_VALUE && phPlatforms != nullptr && NumEntries == 0) {
+    return UR_RESULT_ERROR_INVALID_SIZE;
+  }
+
   return mapCLErrorToUR(Result);
 }
 
@@ -137,6 +142,11 @@ urPlatformGetBackendOption(ur_platform_handle_t, const char *pFrontendOption,
   }
   if (pFrontendOption == "-ftarget-compile-fast"sv) {
     *ppPlatformOption = "-igc_opts 'PartitionUnit=1,SubroutineThreshold=50000'";
+    return UR_RESULT_SUCCESS;
+  }
+  if (pFrontendOption == "-foffload-fp32-prec-div"sv ||
+      pFrontendOption == "-foffload-fp32-prec-sqrt"sv) {
+    *ppPlatformOption = "-cl-fp32-correctly-rounded-divide-sqrt";
     return UR_RESULT_SUCCESS;
   }
   return UR_RESULT_ERROR_INVALID_VALUE;

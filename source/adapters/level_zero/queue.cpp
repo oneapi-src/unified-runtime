@@ -104,7 +104,10 @@ ur_result_t ur_completion_batch::seal(ur_queue_handle_t queue,
   assert(st == ACCUMULATING);
 
   if (!barrierEvent) {
-    UR_CALL(EventCreate(queue->Context, queue, false, true, &barrierEvent));
+    UR_CALL(EventCreate(
+        queue->Context, queue, false /*IsMultiDevice*/, true /*HostVisible*/,
+        &barrierEvent, false /*CounterBasedEventEnabled*/,
+        false /*ForceDisableProfiling*/, false /*InterruptBasedEventEnabled*/));
   }
 
   // Instead of collecting all the batched events, we simply issue a global
@@ -307,7 +310,9 @@ ur_result_t resetCommandLists(ur_queue_handle_t Queue) {
   // Handle immediate command lists here, they don't need to be reset and we
   // only need to cleanup events.
   if (Queue->UsingImmCmdLists) {
-    UR_CALL(CleanupEventsInImmCmdLists(Queue, true /*locked*/));
+    UR_CALL(CleanupEventsInImmCmdLists(Queue, true /*QueueLocked*/,
+                                       false /*QueueSynced*/,
+                                       nullptr /*CompletedEvent*/));
     return UR_RESULT_SUCCESS;
   }
 
@@ -682,7 +687,8 @@ ur_result_t urQueueRelease(
       std::scoped_lock<ur_shared_mutex> EventLock(Event->Mutex);
       Event->Completed = true;
     }
-    UR_CALL(CleanupCompletedEvent(Event));
+    UR_CALL(CleanupCompletedEvent(Event, false /*QueueLocked*/,
+                                  false /*SetEventCompleted*/));
     // This event was removed from the command list, so decrement ref count
     // (it was incremented when they were added to the command list).
     UR_CALL(urEventReleaseInternal(reinterpret_cast<ur_event_handle_t>(Event)));
@@ -896,14 +902,15 @@ ur_result_t urQueueFlush(
 
 ur_result_t urEnqueueKernelLaunchCustomExp(
     ur_queue_handle_t hQueue, ur_kernel_handle_t hKernel, uint32_t workDim,
-    const size_t *pGlobalWorkSize, const size_t *pLocalWorkSize,
-    uint32_t numPropsInLaunchPropList,
+    const size_t *pGlobalWorkOffset, const size_t *pGlobalWorkSize,
+    const size_t *pLocalWorkSize, uint32_t numPropsInLaunchPropList,
     const ur_exp_launch_property_t *launchPropList,
     uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
     ur_event_handle_t *phEvent) {
   std::ignore = hQueue;
   std::ignore = hKernel;
   std::ignore = workDim;
+  std::ignore = pGlobalWorkOffset;
   std::ignore = pGlobalWorkSize;
   std::ignore = pLocalWorkSize;
   std::ignore = numPropsInLaunchPropList;
@@ -1179,17 +1186,12 @@ ur_queue_handle_t_::ur_queue_handle_t_(
       ZeCommandListBatchComputeConfig.startSize();
   CopyCommandBatch.QueueBatchSize = ZeCommandListBatchCopyConfig.startSize();
 
-  static const bool useDriverCounterBasedEvents = [] {
-    const char *UrRet = std::getenv("UR_L0_USE_DRIVER_COUNTER_BASED_EVENTS");
-    if (!UrRet) {
-      return true;
-    }
-    return std::atoi(UrRet) != 0;
-  }();
   this->CounterBasedEventsEnabled =
       UsingImmCmdLists && isInOrderQueue() && Device->useDriverInOrderLists() &&
-      useDriverCounterBasedEvents &&
+      Device->useDriverCounterBasedEvents() &&
       Device->Platform->ZeDriverEventPoolCountingEventsExtensionFound;
+  this->InterruptBasedEventsEnabled =
+      isLowPowerEvents() && isInOrderQueue() && Device->useDriverInOrderLists();
 }
 
 void ur_queue_handle_t_::adjustBatchSizeForFullBatch(bool IsCopy) {
@@ -1557,24 +1559,23 @@ void ur_queue_handle_t_::clearEndTimeRecordings() {
   for (auto Entry : EndTimeRecordings) {
     auto &Event = Entry.first;
     auto &EndTimeRecording = Entry.second;
-    if (!Entry.second.EventHasDied) {
-      // Write the result back to the event if it is not dead.
-      uint64_t ContextEndTime =
-          (EndTimeRecording.RecordEventEndTimestamp & TimestampMaxValue) *
-          ZeTimerResolution;
 
-      // Handle a possible wrap-around (the underlying HW counter is < 64-bit).
-      // Note, it will not report correct time if there were multiple wrap
-      // arounds, and the longer term plan is to enlarge the capacity of the
-      // HW timestamps.
-      if (ContextEndTime < Event->RecordEventStartTimestamp)
-        ContextEndTime += TimestampMaxValue * ZeTimerResolution;
+    // Write the result back to the event if it is not dead.
+    uint64_t ContextEndTime =
+        (EndTimeRecording & TimestampMaxValue) * ZeTimerResolution;
 
-      // Store it in the event.
-      Event->RecordEventEndTimestamp = ContextEndTime;
-    }
+    // Handle a possible wrap-around (the underlying HW counter is < 64-bit).
+    // Note, it will not report correct time if there were multiple wrap
+    // arounds, and the longer term plan is to enlarge the capacity of the
+    // HW timestamps.
+    if (ContextEndTime < Event->RecordEventStartTimestamp)
+      ContextEndTime += TimestampMaxValue * ZeTimerResolution;
+
+    // Store it in the event.
+    Event->RecordEventEndTimestamp = ContextEndTime;
   }
   EndTimeRecordings.clear();
+  EvictedEndTimeRecordings.clear();
 }
 
 ur_result_t urQueueReleaseInternal(ur_queue_handle_t Queue) {
@@ -1648,6 +1649,10 @@ bool ur_queue_handle_t_::isInOrderQueue() const {
           0);
 }
 
+bool ur_queue_handle_t_::isLowPowerEvents() const {
+  return ((this->Properties & UR_QUEUE_FLAG_LOW_POWER_EVENTS_EXP) != 0);
+}
+
 // Helper function to perform the necessary cleanup of the events from reset cmd
 // list.
 ur_result_t CleanupEventListFromResetCmdList(
@@ -1655,7 +1660,8 @@ ur_result_t CleanupEventListFromResetCmdList(
   for (auto &Event : EventListToCleanup) {
     // We don't need to synchronize the events since the fence associated with
     // the command list was synchronized.
-    UR_CALL(CleanupCompletedEvent(Event, QueueLocked, true));
+    UR_CALL(
+        CleanupCompletedEvent(Event, QueueLocked, true /*SetEventCompleted*/));
     // This event was removed from the command list, so decrement ref count
     // (it was incremented when they were added to the command list).
     UR_CALL(urEventReleaseInternal(Event));
@@ -1879,9 +1885,10 @@ ur_result_t createEventAndAssociateQueue(ur_queue_handle_t Queue,
                       : nullptr;
 
   if (*Event == nullptr)
-    UR_CALL(EventCreate(Queue->Context, Queue, IsMultiDevice,
-                        HostVisible.value(), Event,
-                        Queue->CounterBasedEventsEnabled));
+    UR_CALL(EventCreate(
+        Queue->Context, Queue, IsMultiDevice, HostVisible.value(), Event,
+        Queue->CounterBasedEventsEnabled, false /*ForceDisableProfiling*/,
+        Queue->InterruptBasedEventsEnabled));
 
   (*Event)->UrQueue = Queue;
   (*Event)->CommandType = CommandType;
@@ -1978,7 +1985,9 @@ ur_result_t ur_queue_handle_t_::executeOpenCommandList(bool IsCopy) {
   // queue, then close and execute that command list now.
   if (hasOpenCommandList(IsCopy)) {
     adjustBatchSizeForPartialBatch(IsCopy);
-    auto Res = executeCommandList(CommandBatch.OpenCommandList, false, false);
+    auto Res =
+        executeCommandList(CommandBatch.OpenCommandList, false /*IsBlocking*/,
+                           false /*OKToBatchCommand*/);
     CommandBatch.OpenCommandList = CommandListMap.end();
     return Res;
   }
@@ -2288,9 +2297,11 @@ ur_result_t ur_queue_handle_t_::createCommandList(
 
   std::tie(CommandList, std::ignore) = CommandListMap.insert(
       std::pair<ze_command_list_handle_t, ur_command_list_info_t>(
-          ZeCommandList, ur_command_list_info_t(
-                             ZeFence, false, false, ZeCommandQueue, ZeQueueDesc,
-                             useCompletionBatching(), true, IsInOrderList)));
+          ZeCommandList,
+          ur_command_list_info_t(
+              ZeFence, false /*ZeFenceInUse*/, false /*IsClosed*/,
+              ZeCommandQueue, ZeQueueDesc, useCompletionBatching(),
+              true /*CanReuse*/, IsInOrderList, false /*IsImmediate*/)));
 
   UR_CALL(insertStartBarrierIfDiscardEventsMode(CommandList));
   UR_CALL(insertActiveBarriers(CommandList, UseCopyEngine));
@@ -2379,7 +2390,11 @@ ur_command_list_ptr_t &ur_queue_handle_t_::ur_queue_group_t::getImmCmdList() {
   uint32_t QueueIndex, QueueOrdinal;
   auto Index = getQueueIndex(&QueueOrdinal, &QueueIndex);
 
-  if (ImmCmdLists[Index] != Queue->CommandListMap.end())
+  if ((ImmCmdLists[Index] != Queue->CommandListMap.end()) &&
+      (!Queue->CounterBasedEventsEnabled ||
+       (Queue->CounterBasedEventsEnabled &&
+        (ImmCmdLists[Index]->second.ZeQueueDesc.flags &
+         ZE_COMMAND_QUEUE_FLAG_IN_ORDER))))
     return ImmCmdLists[Index];
 
   ZeStruct<ze_command_queue_desc_t> ZeCommandQueueDesc;

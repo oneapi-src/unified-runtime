@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 cmake_minimum_required(VERSION 3.20.0 FATAL_ERROR)
-project(unified-runtime VERSION 0.11.0)
+project(unified-runtime VERSION 0.12.0)
 
 # Check if unified runtime is built as a standalone project.
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR OR UR_STANDALONE_BUILD)
@@ -15,19 +15,6 @@ include(GNUInstallDirs)
 include(CheckCXXSourceCompiles)
 include(CMakePackageConfigHelpers)
 include(CTest)
-
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-include(helpers)
-
-if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
-    set(Python3_FIND_FRAMEWORK NEVER)
-    set(Python3_FIND_STRATEGY LOCATION)
-endif()
-
-find_package(Python3 COMPONENTS Interpreter REQUIRED)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
 # Build Options
 option(UR_BUILD_EXAMPLES "Build example applications." ON)
@@ -40,6 +27,7 @@ option(UR_USE_ASAN "enable AddressSanitizer" OFF)
 option(UR_USE_UBSAN "enable UndefinedBehaviorSanitizer" OFF)
 option(UR_USE_MSAN "enable MemorySanitizer" OFF)
 option(UR_USE_TSAN "enable ThreadSanitizer" OFF)
+option(UR_USE_CFI "enable Control Flow Integrity checks (requires clang and implies -flto)" OFF)
 option(UR_ENABLE_TRACING "enable api tracing through xpti" OFF)
 option(UR_ENABLE_SANITIZER "enable device sanitizer" ON)
 option(UR_ENABLE_SYMBOLIZER "enable symoblizer for sanitizer" OFF)
@@ -79,6 +67,19 @@ set(UR_ADAPTER_HIP_SOURCE_DIR "" CACHE PATH
     "Path to external 'hip' adapter source dir")
 set(UR_ADAPTER_NATIVE_CPU_SOURCE_DIR "" CACHE PATH
     "Path to external 'native_cpu' adapter source dir")
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(helpers)
+
+if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
+    set(Python3_FIND_FRAMEWORK NEVER)
+    set(Python3_FIND_STRATEGY LOCATION)
+endif()
+
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
 # There's little reason not to generate the compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -137,7 +138,7 @@ if(UR_ENABLE_TRACING)
 
     if (UR_BUILD_XPTI_LIBS)
         # fetch xpti proxy library for the tracing layer
-        FetchContentSparse_Declare(xpti https://github.com/intel/llvm.git "sycl-nightly/20230703" "xpti")
+        FetchContentSparse_Declare(xpti https://github.com/intel/llvm.git "nightly-2024-10-22" "xpti")
         FetchContent_MakeAvailable(xpti)
 
         # set -fPIC for xpti since we are linking it with a shared library
@@ -149,7 +150,7 @@ if(UR_ENABLE_TRACING)
         set(XPTI_DIR ${xpti_SOURCE_DIR})
         set(XPTI_ENABLE_TESTS OFF CACHE INTERNAL "Turn off xptifw tests")
 
-        FetchContentSparse_Declare(xptifw https://github.com/intel/llvm.git "sycl-nightly/20230703" "xptifw")
+        FetchContentSparse_Declare(xptifw https://github.com/intel/llvm.git "nightly-2024-10-22" "xptifw")
 
         FetchContent_MakeAvailable(xptifw)
 

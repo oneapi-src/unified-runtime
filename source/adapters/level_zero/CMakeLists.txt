@@ -46,6 +46,7 @@ if(UR_BUILD_ADAPTER_L0)
         ${CMAKE_CURRENT_SOURCE_DIR}/program.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/queue.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/sampler.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tensor_map.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/image.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/helpers/kernel_helpers.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/helpers/memory_helpers.cpp
@@ -59,7 +60,7 @@ if(UR_BUILD_ADAPTER_L0)
         # 'utils' target from 'level-zero-loader' includes path which is prefixed
         # in the source directory, this breaks the installation of 'utils' target.
         set_target_properties(utils PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "")
-        install(TARGETS ur_umf LevelZeroLoader LevelZeroLoader-Headers ze_loader utils
+        install(TARGETS ur_umf LevelZeroLoader LevelZeroLoader-Headers ComputeRuntimeLevelZero-Headers ze_loader utils
             EXPORT ${PROJECT_NAME}-targets
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -101,7 +102,7 @@ if(UR_BUILD_ADAPTER_L0)
 
     if (WIN32)
     # 0x800: Search for the DLL only in the System32 folder
-    target_link_options(ur_adapter_level_zero PRIVATE /DEPENDENTLOADFLAG:0x800)
+    target_link_options(ur_adapter_level_zero PRIVATE LINKER:/DEPENDENTLOADFLAG:0x800)
     endif()
 
     target_link_libraries(ur_adapter_level_zero PRIVATE
@@ -110,6 +111,7 @@ if(UR_BUILD_ADAPTER_L0)
         ${PROJECT_NAME}::umf
         LevelZeroLoader
         LevelZeroLoader-Headers
+        ComputeRuntimeLevelZero-Headers
     )
 
     target_include_directories(ur_adapter_level_zero PRIVATE
@@ -126,6 +128,7 @@ if(UR_BUILD_ADAPTER_L0_V2)
         ${CMAKE_CURRENT_SOURCE_DIR}/common.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/device.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/platform.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/physical_mem.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/program.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/helpers/kernel_helpers.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/helpers/memory_helpers.hpp
@@ -134,10 +137,14 @@ if(UR_BUILD_ADAPTER_L0_V2)
         ${CMAKE_CURRENT_SOURCE_DIR}/device.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ur_interface_loader.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/platform.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/physical_mem.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/program.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/helpers/kernel_helpers.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/helpers/memory_helpers.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/usm_p2p.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/virtual_mem.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../ur/ur.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tensor_map.cpp
         # v2-only sources
         ${CMAKE_CURRENT_SOURCE_DIR}/v2/command_list_cache.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/v2/context.hpp
@@ -194,7 +201,7 @@ if(UR_BUILD_ADAPTER_L0_V2)
 
     if (WIN32)
     # 0x800: Search for the DLL only in the System32 folder
-    target_link_options(ur_adapter_level_zero_v2 PUBLIC /DEPENDENTLOADFLAG:0x800)
+    target_link_options(ur_adapter_level_zero_v2 PUBLIC LINKER:/DEPENDENTLOADFLAG:0x800)
     endif()
 
     target_link_libraries(ur_adapter_level_zero_v2 PRIVATE
@@ -203,6 +210,7 @@ if(UR_BUILD_ADAPTER_L0_V2)
         ${PROJECT_NAME}::umf
         LevelZeroLoader
         LevelZeroLoader-Headers
+        ComputeRuntimeLevelZero-Headers
     )
 
     target_include_directories(ur_adapter_level_zero_v2 PRIVATE
