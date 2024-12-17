@@ -32,10 +32,11 @@ if (NOT DEFINED UMF_REPO)
 endif()
 
 if (NOT DEFINED UMF_TAG)
-    # tag v0.10.0
-    # Tagger: Łukasz Stolarczuk <lukasz.stolarczuk@intel.com>
-    # Date:   Mon Dec 9 17:01:43 2024 +0100
-    set(UMF_TAG v0.10.0)
+    # commit 95861f3860d335fa23846cd31c35faade9c0b90b
+    # Merge: 97eacc7 b07c1a2
+    # Author: Łukasz Stolarczuk <lukasz.stolarczuk@intel.com>
+    # Date:   Mon Dec 16 13:30:12 2024 +0100
+    set(UMF_TAG 95861f3860d335fa23846cd31c35faade9c0b90b)
 endif()
 
 message(STATUS "Will fetch Unified Memory Framework from ${UMF_REPO}")
