@@ -19,6 +19,12 @@
 #include <umf/pools/pool_proxy.h>
 #include <umf/providers/provider_level_zero.h>
 
+static inline void UMF_CALL_THROWS(umf_result_t res) {
+  if (res != UMF_RESULT_SUCCESS) {
+    throw res;
+  }
+}
+
 namespace umf {
 ur_result_t getProviderNativeError(const char *providerName,
                                    int32_t nativeError) {
@@ -85,31 +91,18 @@ static umf::pool_unique_handle_t
 makePool(usm::umf_disjoint_pool_config_t *poolParams,
          usm::pool_descriptor poolDescriptor) {
   umf_level_zero_memory_provider_params_handle_t params = NULL;
-  umf_result_t umf_ret = umfLevelZeroMemoryProviderParamsCreate(&params);
-  if (umf_ret != UMF_RESULT_SUCCESS) {
-    throw umf::umf2urResult(umf_ret);
-  }
-
-  umf_ret = umfLevelZeroMemoryProviderParamsSetContext(
-      params, poolDescriptor.hContext->getZeHandle());
-  if (umf_ret != UMF_RESULT_SUCCESS) {
-    throw umf::umf2urResult(umf_ret);
-  };
+  UMF_CALL_THROWS(umfLevelZeroMemoryProviderParamsCreate(&params));
+  UMF_CALL_THROWS(umfLevelZeroMemoryProviderParamsSetContext(
+      params, poolDescriptor.hContext->getZeHandle()));
 
   ze_device_handle_t level_zero_device_handle =
       poolDescriptor.hDevice ? poolDescriptor.hDevice->ZeDevice : nullptr;
 
-  umf_ret = umfLevelZeroMemoryProviderParamsSetDevice(params,
-                                                      level_zero_device_handle);
-  if (umf_ret != UMF_RESULT_SUCCESS) {
-    throw umf::umf2urResult(umf_ret);
-  }
+  UMF_CALL_THROWS(umfLevelZeroMemoryProviderParamsSetDevice(
+      params, level_zero_device_handle));
 
-  umf_ret = umfLevelZeroMemoryProviderParamsSetMemoryType(
-      params, urToUmfMemoryType(poolDescriptor.type));
-  if (umf_ret != UMF_RESULT_SUCCESS) {
-    throw umf::umf2urResult(umf_ret);
-  }
+  UMF_CALL_THROWS(umfLevelZeroMemoryProviderParamsSetMemoryType(
+      params, urToUmfMemoryType(poolDescriptor.type)));
 
   std::vector<ze_device_handle_t> residentZeHandles;
 
@@ -122,11 +115,8 @@ makePool(usm::umf_disjoint_pool_config_t *poolParams,
       residentZeHandles.push_back(device->ZeDevice);
     }
 
-    umf_ret = umfLevelZeroMemoryProviderParamsSetResidentDevices(
-        params, residentZeHandles.data(), residentZeHandles.size());
-    if (umf_ret != UMF_RESULT_SUCCESS) {
-      throw umf::umf2urResult(umf_ret);
-    }
+    UMF_CALL_THROWS(umfLevelZeroMemoryProviderParamsSetResidentDevices(
+        params, residentZeHandles.data(), residentZeHandles.size()));
   }
 
   auto [ret, provider] =
