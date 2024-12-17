@@ -222,6 +222,45 @@ static inline auto poolMakeUniqueFromOps(umf_memory_pool_ops_t *ops,
         UMF_RESULT_SUCCESS, pool_unique_handle_t(hPool, umfPoolDestroy)};
 }
 
+template <typename Tag>
+static inline auto poolMakeUniqueFromOps(umf_memory_pool_ops_t *ops,
+                                         provider_unique_handle_t provider,
+                                         void *params, const Tag &tag) {
+    auto poolTag = new Tag(tag);
+
+    umf_memory_pool_handle_t hPool;
+    auto ret = umfPoolCreate(ops, provider.get(), params,
+                             UMF_POOL_CREATE_FLAG_OWN_PROVIDER, &hPool);
+    if (ret != UMF_RESULT_SUCCESS) {
+        return std::pair<umf_result_t, pool_unique_handle_t>{
+            ret, pool_unique_handle_t(nullptr, nullptr)};
+    }
+
+    ret = umfPoolSetTag(hPool, poolTag, nullptr);
+    if (ret != UMF_RESULT_SUCCESS) {
+        umfPoolDestroy(hPool);
+        return std::pair<umf_result_t, pool_unique_handle_t>{
+            ret, pool_unique_handle_t(nullptr, nullptr)};
+    }
+
+    provider.release(); // pool now owns the provider
+
+    return std::pair<umf_result_t, pool_unique_handle_t>{
+        UMF_RESULT_SUCCESS,
+        pool_unique_handle_t(hPool, [](umf_memory_pool_handle_t hPool) {
+            Tag *tag = nullptr;
+            umfPoolGetTag(hPool, reinterpret_cast<void **>(&tag));
+
+            if (tag) {
+                delete tag;
+            } else {
+                logger::error("Failed to get tag from pool");
+            }
+
+            umfPoolDestroy(hPool);
+        })};
+}
+
 static inline auto providerMakeUniqueFromOps(umf_memory_provider_ops_t *ops,
                                              void *params) {
     umf_memory_provider_handle_t hProvider;
