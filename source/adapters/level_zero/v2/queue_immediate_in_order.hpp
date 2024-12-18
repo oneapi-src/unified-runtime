@@ -19,6 +19,8 @@
 
 #include "ur/ur.hpp"
 
+#include "command_list_manager.hpp"
+
 namespace v2 {
 
 using queue_group_type = ur_device_handle_t_::queue_group_info_t::type;
@@ -36,16 +38,22 @@ struct ur_command_list_handler_t {
 
 struct ur_queue_immediate_in_order_t : _ur_object, public ur_queue_handle_t_ {
 private:
+  // to remove after command_list_manager is complete
   ur_context_handle_t hContext;
+  // to remove after command_list_manager is complete
   ur_device_handle_t hDevice;
   ur_queue_flags_t flags;
 
+  // to remove after command_list_manager is complete
   raii::cache_borrowed_event_pool eventPool;
 
+  // to remove after command_list_manager is complete
   ur_command_list_handler_t handler;
 
+  // to remove after command_list_manager is complete
   std::vector<ze_event_handle_t> waitList;
 
+  ur_command_list_manager commandListManager;
   std::vector<ur_event_handle_t> deferredEvents;
   std::vector<ur_kernel_handle_t> submittedKernels;
 
@@ -77,6 +85,11 @@ private:
       const void *pPattern, size_t size, uint32_t numEventsInWaitList,
       const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent,
       ur_command_t commandType);
+
+  ur_result_t enqueueGenericCommandListsExp(
+      uint32_t numCommandLists, ze_command_list_handle_t *phCommandLists,
+      ur_event_handle_t *phEvent, uint32_t numEventsInWaitList,
+      const ur_event_handle_t *phEventWaitList, ur_command_t callerCommand);
 
   ur_result_t
   enqueueEventsWaitWithBarrierImpl(uint32_t numEventsInWaitList,
@@ -276,6 +289,10 @@ public:
       const ur_exp_launch_property_t *launchPropList,
       uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
       ur_event_handle_t *phEvent) override;
+  ur_result_t
+  enqueueCommandBuffer(ze_command_list_handle_t commandBufferCommandList,
+                       ur_event_handle_t *phEvent, uint32_t numEventsInWaitList,
+                       const ur_event_handle_t *phEventWaitList) override;
   ur_result_t
   enqueueNativeCommandExp(ur_exp_enqueue_native_command_function_t, void *,
                           uint32_t, const ur_mem_handle_t *,
