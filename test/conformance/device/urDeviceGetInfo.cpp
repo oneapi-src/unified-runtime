@@ -317,8 +317,8 @@ TEST_P(urDeviceGetInfoTest, Success) {
     }
 
     std::vector<char> info_data(size);
-    ASSERT_SUCCESS(urDeviceGetInfo(device, info_type, size,
-                                   info_data.data(), nullptr));
+    ASSERT_SUCCESS(
+        urDeviceGetInfo(device, info_type, size, info_data.data(), nullptr));
 
     if (info_type == UR_DEVICE_INFO_PLATFORM) {
         auto returned_platform =

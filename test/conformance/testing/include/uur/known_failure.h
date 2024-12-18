@@ -124,7 +124,7 @@ inline bool isKnownFailureOn(const DeviceTuple &param,
         if (matcher.backend != adapterInfo.backend) {
             continue;
         }
-        if(matcher.adapterVersion != adapterInfo.version) {
+        if (matcher.adapterVersion != adapterInfo.version) {
             continue;
         }
         if (matcher.names.empty()) {
