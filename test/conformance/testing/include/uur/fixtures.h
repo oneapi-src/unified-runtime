@@ -218,6 +218,7 @@ struct urContextTest : urDeviceTest {
 
 struct urSamplerTest : urContextTest {
     void SetUp() override {
+        UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA Emulation Device"});
         UUR_RETURN_ON_FATAL_FAILURE(urContextTest::SetUp());
         sampler_desc = {
             UR_STRUCTURE_TYPE_SAMPLER_DESC,   /* stype */
@@ -342,6 +343,7 @@ template <class T> struct urContextTestWithParam : urDeviceTestWithParam<T> {
 
 template <class T> struct urSamplerTestWithParam : urContextTestWithParam<T> {
     void SetUp() override {
+        UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA Emulation Device"});
         UUR_RETURN_ON_FATAL_FAILURE(urContextTestWithParam<T>::SetUp());
         sampler_desc = {
             UR_STRUCTURE_TYPE_SAMPLER_DESC,   /* stype */
@@ -947,7 +949,9 @@ struct urUSMDeviceAllocTest : urQueueTest {
     }
 
     void TearDown() override {
-        ASSERT_SUCCESS(urUSMFree(context, ptr));
+        if (ptr) {
+            ASSERT_SUCCESS(urUSMFree(context, ptr));
+        }
         uur::urQueueTest::TearDown();
     }
 

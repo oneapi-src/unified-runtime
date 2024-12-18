@@ -66,6 +66,7 @@ std::vector<ur_image_format_t> all_image_formats;
 struct urMemImageCreateTestWithImageFormatParam
     : uur::urContextTestWithParam<ur_image_format_t> {
     void SetUp() {
+        UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA Emulation Device"});
         UUR_RETURN_ON_FATAL_FAILURE(
             uur::urContextTestWithParam<ur_image_format_t>::SetUp());
     }
