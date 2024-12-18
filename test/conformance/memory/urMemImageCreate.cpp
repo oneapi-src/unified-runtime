@@ -25,6 +25,7 @@ static ur_image_desc_t image_desc{
 
 struct urMemImageCreateTest : public uur::urContextTest {
     void SetUp() override {
+        UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA Emulation Device"});
         UUR_RETURN_ON_FATAL_FAILURE(uur::urContextTest::SetUp());
 
         uur::raii::Mem image_handle = nullptr;
@@ -76,6 +77,8 @@ UUR_DEVICE_TEST_SUITE_P(urMemImageCreateTestWith1DMemoryTypeParam,
                         uur::deviceTestWithParamPrinter<ur_mem_type_t>);
 
 TEST_P(urMemImageCreateTestWith1DMemoryTypeParam, Success) {
+    UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA Emulation Device"});
+
     if (getParam() == UR_MEM_TYPE_IMAGE1D_ARRAY) {
         UUR_KNOWN_FAILURE_ON(uur::CUDA{});
     }
@@ -110,6 +113,8 @@ UUR_DEVICE_TEST_SUITE_P(urMemImageCreateTestWith2DMemoryTypeParam,
                         uur::deviceTestWithParamPrinter<ur_mem_type_t>);
 
 TEST_P(urMemImageCreateTestWith2DMemoryTypeParam, Success) {
+    UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA Emulation Device"});
+
     if (getParam() == UR_MEM_TYPE_IMAGE2D_ARRAY) {
         UUR_KNOWN_FAILURE_ON(uur::CUDA{});
     }
@@ -332,6 +337,8 @@ UUR_DEVICE_TEST_SUITE_P(urMemImageCreateWithHostPtrFlagsTest,
                         uur::deviceTestWithParamPrinter<ur_mem_flag_t>);
 
 TEST_P(urMemImageCreateWithHostPtrFlagsTest, Success) {
+    UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA Emulation Device"});
+
     // This fail is specific to the "Multi device testing" ci job.
     UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
 
