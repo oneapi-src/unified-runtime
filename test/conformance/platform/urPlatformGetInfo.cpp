@@ -21,7 +21,8 @@ UUR_PLATFORM_TEST_SUITE_P(
 TEST_P(urPlatformGetInfoTest, Success) {
     size_t size = 0;
     ur_platform_info_t info_type = getParam();
-    ASSERT_SUCCESS_OR_OPTIONAL_QUERY(urPlatformGetInfo(platform, info_type, 0, nullptr, &size), info_type);
+    ASSERT_SUCCESS_OR_OPTIONAL_QUERY(
+        urPlatformGetInfo(platform, info_type, 0, nullptr, &size), info_type);
     if (info_type == UR_PLATFORM_INFO_BACKEND) {
         ASSERT_EQ(size, sizeof(ur_platform_backend_t));
     } else {
@@ -47,8 +48,11 @@ TEST_P(urPlatformGetInfoTest, Success) {
         auto queried_adapter =
             *reinterpret_cast<ur_adapter_handle_t *>(name.data());
         auto adapter_found =
-            std::find(adapters.begin(), adapters.end(), queried_adapter);
-        ASSERT_NE(adapter_found, adapters.end());
+            std::find(uur::PlatformEnvironment::instance->adapters.begin(),
+                      uur::PlatformEnvironment::instance->adapters.end(),
+                      queried_adapter);
+        ASSERT_NE(adapter_found,
+                  uur::AdapterEnvironment::instance->adapters.end());
         break;
     }
     default:

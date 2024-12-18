@@ -8,8 +8,8 @@
 
 #include <array>
 
-#include <uur/known_failure.h>
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 namespace uur {
 namespace command_buffer {

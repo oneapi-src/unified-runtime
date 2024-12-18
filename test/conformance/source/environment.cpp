@@ -80,6 +80,7 @@ constexpr std::pair<const char *, ur_platform_backend_t> backends[] = {
 };
 
 namespace {
+/* unused due to platform filtering being commented out
 constexpr const char *backend_to_str(ur_platform_backend_t backend) {
     for (auto b : backends) {
         if (b.second == backend) {
@@ -87,7 +88,7 @@ constexpr const char *backend_to_str(ur_platform_backend_t backend) {
         }
     }
     return "INVALID";
-};
+};*/
 
 ur_platform_backend_t str_to_backend(std::string str) {
 
