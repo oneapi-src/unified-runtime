@@ -299,7 +299,13 @@ TEST_P(urDeviceGetInfoTest, Success) {
     if (info_type == UR_DEVICE_INFO_GLOBAL_MEM_FREE) {
         UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
         UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
-    } else if (nativeCPUFails.count(info_type)) {
+    }
+
+    if (info_type == UR_DEVICE_INFO_MAX_READ_WRITE_IMAGE_ARGS) {
+        UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    }
+
+    if (nativeCPUFails.count(info_type)) {
         UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
     }
 

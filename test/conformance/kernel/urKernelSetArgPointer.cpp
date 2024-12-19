@@ -131,7 +131,7 @@ struct urKernelSetArgPointerNegativeTest : urKernelSetArgPointerTest {
 
     void SetUp() {
         UUR_RETURN_ON_FATAL_FAILURE(urKernelSetArgPointerTest::SetUp());
-        SetUpAllocation();
+        UUR_RETURN_ON_FATAL_FAILURE(SetUpAllocation());
         ASSERT_NE(allocation, nullptr);
     }
 };

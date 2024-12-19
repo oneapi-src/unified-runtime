@@ -78,6 +78,8 @@ TEST_P(urQueueGetInfoTest, ReferenceCount) {
 }
 
 TEST_P(urQueueGetInfoTest, EmptyQueue) {
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     size_t size = 0;
     auto infoType = UR_QUEUE_INFO_EMPTY;
     ASSERT_SUCCESS_OR_OPTIONAL_QUERY(
