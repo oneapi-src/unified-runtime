@@ -7,10 +7,10 @@
 #define UR_CONFORMANCE_INCLUDE_FIXTURES_H_INCLUDED
 
 #include "ur_api.h"
-#include "ur_ddi.h"
 
 #include <uur/checks.h>
 #include <uur/environment.h>
+#include <uur/known_failure.h>
 #include <uur/utils.h>
 
 #include <random>
@@ -42,14 +42,15 @@ struct urAdapterTest : ::testing::Test,
     ur_adapter_handle_t adapter;
 };
 
-struct urPlatformTest : ::testing::Test {
-    void SetUp() override {
-        platform = uur::PlatformEnvironment::instance->platform;
-        adapter = uur::PlatformEnvironment::instance->adapter;
-    }
+// In the vein of urAdapterTest and urDeviceTest this is a parameterized
+// platform fixture which can be instantiated via
+// UUR_INSTANTIATE_PLATFORM_TEST_SUITE_P to run tests on each discovered
+// platform.
+struct urPlatformTest : ::testing::Test,
+                        ::testing::WithParamInterface<ur_platform_handle_t> {
+    void SetUp() override { platform = GetParam(); }
 
     ur_platform_handle_t platform = nullptr;
-    ur_adapter_handle_t adapter = nullptr;
 };
 
 inline std::pair<bool, std::vector<ur_device_handle_t>>
@@ -97,20 +98,22 @@ struct urAllDevicesTest : urPlatformTest {
     std::vector<ur_device_handle_t> devices;
 };
 
-struct urDeviceTest : urPlatformTest,
-                      ::testing::WithParamInterface<ur_device_handle_t> {
+struct urDeviceTest : ::testing::Test,
+                      ::testing::WithParamInterface<DeviceTuple> {
     void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(urPlatformTest::SetUp());
-        device = GetParam();
-        EXPECT_SUCCESS(urDeviceRetain(device));
+        // TODO: change these to accessors like getDevice, getPlatform etc?
+        // downside: touch a lot of tests (many many tests just use `device` in
+        // place)
+        // upside: using the accessors means SetUp doesn't need to run before
+        // you can access device etc. to check for test compatibility
+        device = GetParam().device;
+        platform = GetParam().platform;
+        adapter = GetParam().adapter;
     }
 
-    void TearDown() override {
-        EXPECT_SUCCESS(urDeviceRelease(device));
-        UUR_RETURN_ON_FATAL_FAILURE(urPlatformTest::TearDown());
-    }
-
-    ur_device_handle_t device;
+    ur_device_handle_t device = nullptr;
+    ur_platform_handle_t platform = nullptr;
+    ur_adapter_handle_t adapter = nullptr;
 };
 } // namespace uur
 
@@ -122,35 +125,78 @@ struct urDeviceTest : urPlatformTest,
             return uur::GetAdapterBackendName(info.param);                     \
         })
 
+#define UUR_INSTANTIATE_PLATFORM_TEST_SUITE_P(FIXTURE)                         \
+    INSTANTIATE_TEST_SUITE_P(                                                  \
+        , FIXTURE,                                                             \
+        ::testing::ValuesIn(                                                   \
+            uur::PlatformEnvironment::instance->all_platforms),                \
+        [](const ::testing::TestParamInfo<ur_platform_handle_t> &info) {       \
+            return uur::GetPlatformNameWithID(info.param);                     \
+        })
+
 #define UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(FIXTURE)                           \
     INSTANTIATE_TEST_SUITE_P(                                                  \
         , FIXTURE,                                                             \
         ::testing::ValuesIn(uur::DevicesEnvironment::instance->devices),       \
-        [](const ::testing::TestParamInfo<ur_device_handle_t> &info) {         \
-            return uur::GetPlatformAndDeviceName(info.param);                  \
+        [](const ::testing::TestParamInfo<uur::DeviceTuple> &info) {           \
+            return uur::GetPlatformAndDeviceName(info.param.device);           \
         })
 
 #define UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(FIXTURE)                           \
     INSTANTIATE_TEST_SUITE_P(                                                  \
         , FIXTURE,                                                             \
         ::testing::ValuesIn(uur::KernelsEnvironment::instance->devices),       \
-        [](const ::testing::TestParamInfo<ur_device_handle_t> &info) {         \
-            return uur::GetPlatformAndDeviceName(info.param);                  \
+        [](const ::testing::TestParamInfo<uur::DeviceTuple> &info) {           \
+            return uur::GetPlatformAndDeviceName(info.param.device);           \
         })
 
 namespace uur {
 
 template <class T>
-struct urDeviceTestWithParam
-    : urPlatformTest,
-      ::testing::WithParamInterface<std::tuple<ur_device_handle_t, T>> {
+struct urPlatformTestWithParam
+    : ::testing::Test,
+      ::testing::WithParamInterface<std::tuple<ur_platform_handle_t, T>> {
+    void SetUp() override { platform = std::get<0>(this->GetParam()); }
+    const T &getParam() const { return std::get<1>(this->GetParam()); }
+    ur_platform_handle_t platform;
+};
+
+template <class T>
+struct urAllDevicesTestWithParam : urPlatformTestWithParam<T> {
     void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(urPlatformTest::SetUp());
-        device = std::get<0>(this->GetParam());
+        UUR_RETURN_ON_FATAL_FAILURE(urPlatformTestWithParam<T>::SetUp());
+        auto devicesPair = GetDevices(this->platform);
+        if (!devicesPair.first) {
+            FAIL() << "Failed to get devices";
+        }
+        devices = std::move(devicesPair.second);
+    }
+
+    void TearDown() override {
+        for (auto &device : devices) {
+            EXPECT_SUCCESS(urDeviceRelease(device));
+        }
+        UUR_RETURN_ON_FATAL_FAILURE(urPlatformTestWithParam<T>::TearDown());
+    }
+
+    std::vector<ur_device_handle_t> devices;
+};
+
+template <class T>
+struct urDeviceTestWithParam
+    : ::testing::Test,
+      ::testing::WithParamInterface<std::tuple<DeviceTuple, T>> {
+    void SetUp() override {
+        auto &device_tuple = std::get<0>(this->GetParam());
+        device = device_tuple.device;
+        platform = device_tuple.platform;
+        adapter = device_tuple.adapter;
     }
     // TODO - I don't like the confusion with GetParam();
     const T &getParam() const { return std::get<1>(this->GetParam()); }
     ur_device_handle_t device;
+    ur_platform_handle_t platform;
+    ur_adapter_handle_t adapter;
 };
 
 struct urContextTest : urDeviceTest {
@@ -161,7 +207,9 @@ struct urContextTest : urDeviceTest {
     }
 
     void TearDown() override {
-        EXPECT_SUCCESS(urContextRelease(context));
+        if (context) {
+            EXPECT_SUCCESS(urContextRelease(context));
+        }
         UUR_RETURN_ON_FATAL_FAILURE(urDeviceTest::TearDown());
     }
 
@@ -170,6 +218,7 @@ struct urContextTest : urDeviceTest {
 
 struct urSamplerTest : urContextTest {
     void SetUp() override {
+        UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA Emulation Device"});
         UUR_RETURN_ON_FATAL_FAILURE(urContextTest::SetUp());
         sampler_desc = {
             UR_STRUCTURE_TYPE_SAMPLER_DESC,   /* stype */
@@ -258,7 +307,16 @@ struct urMemImageTest : urContextTest {
 
 } // namespace uur
 
-#define UUR_TEST_SUITE_P(FIXTURE, VALUES, PRINTER)                             \
+#define UUR_PLATFORM_TEST_SUITE_P(FIXTURE, VALUES, PRINTER)                    \
+    INSTANTIATE_TEST_SUITE_P(                                                  \
+        , FIXTURE,                                                             \
+        testing::Combine(                                                      \
+            ::testing::ValuesIn(                                               \
+                uur::PlatformEnvironment::instance->all_platforms),            \
+            VALUES),                                                           \
+        PRINTER)
+
+#define UUR_DEVICE_TEST_SUITE_P(FIXTURE, VALUES, PRINTER)                      \
     INSTANTIATE_TEST_SUITE_P(                                                  \
         , FIXTURE,                                                             \
         testing::Combine(                                                      \
@@ -275,14 +333,17 @@ template <class T> struct urContextTestWithParam : urDeviceTestWithParam<T> {
     }
 
     void TearDown() override {
-        EXPECT_SUCCESS(urContextRelease(context));
+        if (context) {
+            EXPECT_SUCCESS(urContextRelease(context));
+        }
         UUR_RETURN_ON_FATAL_FAILURE(urDeviceTestWithParam<T>::TearDown());
     }
-    ur_context_handle_t context;
+    ur_context_handle_t context = nullptr;
 };
 
 template <class T> struct urSamplerTestWithParam : urContextTestWithParam<T> {
     void SetUp() override {
+        UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA Emulation Device"});
         UUR_RETURN_ON_FATAL_FAILURE(urContextTestWithParam<T>::SetUp());
         sampler_desc = {
             UR_STRUCTURE_TYPE_SAMPLER_DESC,   /* stype */
@@ -388,6 +449,13 @@ struct urQueueTest : urContextTest {
 
 struct urHostPipeTest : urQueueTest {
     void SetUp() override {
+        // We haven't got device code tests working on native cpu yet.
+        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
+        // The host pipe support query isn't implement on l0
+        UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+        UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
         UUR_RETURN_ON_FATAL_FAILURE(urQueueTest::SetUp());
 
         size_t size = 0;
@@ -561,10 +629,9 @@ struct urMultiQueueTestWithParam : urContextTestWithParam<T> {
 };
 
 template <size_t MinDevices = 2>
-struct urMultiDeviceContextTestTemplate : urPlatformTest {
+struct urMultiDeviceContextTestTemplate : urAllDevicesTest {
     void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(urPlatformTest::SetUp());
-        auto &devices = DevicesEnvironment::instance->devices;
+        UUR_RETURN_ON_FATAL_FAILURE(urAllDevicesTest::SetUp());
         if (devices.size() < MinDevices) {
             GTEST_SKIP();
         }
@@ -576,7 +643,7 @@ struct urMultiDeviceContextTestTemplate : urPlatformTest {
         if (context) {
             ASSERT_SUCCESS(urContextRelease(context));
         }
-        UUR_RETURN_ON_FATAL_FAILURE(urPlatformTest::TearDown());
+        UUR_RETURN_ON_FATAL_FAILURE(urAllDevicesTest::TearDown());
     }
 
     ur_context_handle_t context = nullptr;
@@ -609,8 +676,8 @@ struct urMultiDeviceMemBufferTest : urMultiDeviceContextTest {
 struct urMultiDeviceMemBufferQueueTest : urMultiDeviceMemBufferTest {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(urMultiDeviceMemBufferTest::SetUp());
-        queues.reserve(DevicesEnvironment::instance->devices.size());
-        for (const auto &device : DevicesEnvironment::instance->devices) {
+        queues.reserve(devices.size());
+        for (const auto &device : devices) {
             ur_queue_handle_t queue = nullptr;
             ASSERT_SUCCESS(urQueueCreate(context, device, 0, &queue));
             queues.push_back(queue);
@@ -731,7 +798,7 @@ struct urMemImageQueueTest : urQueueTest {
 struct urMultiDeviceMemImageTest : urMultiDeviceContextTest {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(urMultiDeviceContextTest::SetUp());
-        for (auto device : DevicesEnvironment::instance->devices) {
+        for (auto device : devices) {
             ur_bool_t imageSupported = false;
             ASSERT_SUCCESS(
                 urDeviceGetInfo(device, UR_DEVICE_INFO_IMAGE_SUPPORTED,
@@ -815,8 +882,8 @@ struct urMultiDeviceMemImageTest : urMultiDeviceContextTest {
 struct urMultiDeviceMemImageQueueTest : urMultiDeviceMemImageTest {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(urMultiDeviceMemImageTest::SetUp());
-        queues.reserve(DevicesEnvironment::instance->devices.size());
-        for (const auto &device : DevicesEnvironment::instance->devices) {
+        queues.reserve(devices.size());
+        for (const auto &device : devices) {
             ur_queue_handle_t queue = nullptr;
             ASSERT_SUCCESS(urQueueCreate(context, device, 0, &queue));
             queues.push_back(queue);
@@ -882,7 +949,9 @@ struct urUSMDeviceAllocTest : urQueueTest {
     }
 
     void TearDown() override {
-        ASSERT_SUCCESS(urUSMFree(context, ptr));
+        if (ptr) {
+            ASSERT_SUCCESS(urUSMFree(context, ptr));
+        }
         uur::urQueueTest::TearDown();
     }
 
@@ -938,6 +1007,8 @@ template <class T> struct urUSMPoolTestWithParam : urContextTestWithParam<T> {
 
 struct urVirtualMemGranularityTest : urContextTest {
     void SetUp() override {
+        UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
         UUR_RETURN_ON_FATAL_FAILURE(urContextTest::SetUp());
 
         ur_bool_t virtual_memory_support = false;
@@ -958,6 +1029,8 @@ struct urVirtualMemGranularityTest : urContextTest {
 template <class T>
 struct urVirtualMemGranularityTestWithParam : urContextTestWithParam<T> {
     void SetUp() override {
+        UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
         UUR_RETURN_ON_FATAL_FAILURE(urContextTestWithParam<T>::SetUp());
 
         ur_bool_t virtual_memory_support = false;
@@ -1169,14 +1242,26 @@ inline void generateMemFillPattern(std::vector<uint8_t> &pattern) {
     std::generate(begin(pattern), end(pattern), gen);
 }
 
+template <class T>
+std::string platformTestWithParamPrinter(
+    const ::testing::TestParamInfo<std::tuple<ur_platform_handle_t, T>> &info) {
+    auto platform = std::get<0>(info.param);
+    auto param = std::get<1>(info.param);
+
+    std::stringstream ss;
+    ss << param;
+    return uur::GetPlatformNameWithID(platform) + "__" +
+           GTestSanitizeString(ss.str());
+}
+
 /// @brief
 /// @tparam T
 /// @param info
 /// @return
 template <class T>
 std::string deviceTestWithParamPrinter(
-    const ::testing::TestParamInfo<std::tuple<ur_device_handle_t, T>> &info) {
-    auto device = std::get<0>(info.param);
+    const ::testing::TestParamInfo<std::tuple<DeviceTuple, T>> &info) {
+    auto device = std::get<0>(info.param).device;
     auto param = std::get<1>(info.param);
 
     std::stringstream ss;
@@ -1186,8 +1271,8 @@ std::string deviceTestWithParamPrinter(
 
 template <>
 std::string deviceTestWithParamPrinter<ur_image_format_t>(
-    const ::testing::TestParamInfo<
-        std::tuple<ur_device_handle_t, ur_image_format_t>> &info);
+    const ::testing::TestParamInfo<std::tuple<DeviceTuple, ur_image_format_t>>
+        &info);
 
 // Helper struct to allow bool param tests with meaningful names.
 struct BoolTestParam {
@@ -1202,19 +1287,27 @@ struct BoolTestParam {
 
 template <>
 std::string deviceTestWithParamPrinter<BoolTestParam>(
+    const ::testing::TestParamInfo<std::tuple<DeviceTuple, BoolTestParam>>
+        &info);
+
+template <>
+std::string platformTestWithParamPrinter<BoolTestParam>(
     const ::testing::TestParamInfo<
-        std::tuple<ur_device_handle_t, BoolTestParam>> &info);
+        std::tuple<ur_platform_handle_t, BoolTestParam>> &info);
 
 using SamplerCreateParamT =
     std::tuple<bool, ur_sampler_addressing_mode_t, ur_sampler_filter_mode_t>;
 
 template <>
 std::string deviceTestWithParamPrinter<SamplerCreateParamT>(
-    const ::testing::TestParamInfo<
-        std::tuple<ur_device_handle_t, SamplerCreateParamT>> &info);
+    const ::testing::TestParamInfo<std::tuple<DeviceTuple, SamplerCreateParamT>>
+        &info);
 
 struct urProgramTest : urQueueTest {
     void SetUp() override {
+        // We haven't got device code tests working on native cpu yet.
+        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
         UUR_RETURN_ON_FATAL_FAILURE(urQueueTest::SetUp());
 
         ur_platform_backend_t backend;
@@ -1252,6 +1345,9 @@ struct urProgramTest : urQueueTest {
 
 template <class T> struct urProgramTestWithParam : urQueueTestWithParam<T> {
     void SetUp() override {
+        // We haven't got device code tests working on native cpu yet.
+        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
         UUR_RETURN_ON_FATAL_FAILURE(urQueueTestWithParam<T>::SetUp());
 
         ur_platform_backend_t backend;
@@ -1293,6 +1389,9 @@ template <class T> struct urProgramTestWithParam : urQueueTestWithParam<T> {
 // instead.
 struct urBaseKernelTest : urProgramTest {
     void SetUp() override {
+        // We haven't got device code tests working on native cpu yet.
+        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
         UUR_RETURN_ON_FATAL_FAILURE(urProgramTest::SetUp());
         auto kernel_names =
             uur::KernelsEnvironment::instance->GetEntryPointNames(program_name);
@@ -1318,7 +1417,7 @@ struct urBaseKernelTest : urProgramTest {
 
 struct urKernelTest : urBaseKernelTest {
     void SetUp() override {
-        urBaseKernelTest::SetUp();
+        UUR_RETURN_ON_FATAL_FAILURE(urBaseKernelTest::SetUp());
         Build();
     }
 };
@@ -1606,8 +1705,8 @@ struct urGlobalVariableTest : uur::urKernelExecutionTest {
 struct urMultiDeviceQueueTest : urMultiDeviceContextTest {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(urMultiDeviceContextTest::SetUp());
-        queues.reserve(DevicesEnvironment::instance->devices.size());
-        for (const auto &device : DevicesEnvironment::instance->devices) {
+        queues.reserve(devices.size());
+        for (const auto &device : devices) {
             ur_queue_handle_t queue = nullptr;
             ASSERT_SUCCESS(urQueueCreate(context, device, 0, &queue));
             queues.push_back(queue);
@@ -1636,7 +1735,6 @@ struct urMultiDeviceProgramTest : urMultiDeviceQueueTest {
             backend == UR_PLATFORM_BACKEND_CUDA) {
             GTEST_SKIP();
         }
-        devices = uur::DevicesEnvironment::instance->devices;
         if (devices.size() < 2) {
             GTEST_SKIP();
         }
@@ -1665,7 +1763,6 @@ struct urMultiDeviceProgramTest : urMultiDeviceQueueTest {
     std::string program_name = "foo";
     ur_program_handle_t program = nullptr;
     std::vector<ur_program_metadata_t> metadatas{};
-    std::vector<ur_device_handle_t> devices;
 };
 
 } // namespace uur

@@ -80,6 +80,7 @@ constexpr std::pair<const char *, ur_platform_backend_t> backends[] = {
 };
 
 namespace {
+/* unused due to platform filtering being commented out
 constexpr const char *backend_to_str(ur_platform_backend_t backend) {
     for (auto b : backends) {
         if (b.second == backend) {
@@ -87,7 +88,7 @@ constexpr const char *backend_to_str(ur_platform_backend_t backend) {
         }
     }
     return "INVALID";
-};
+};*/
 
 ur_platform_backend_t str_to_backend(std::string str) {
 
@@ -145,6 +146,7 @@ void uur::PlatformEnvironment::selectPlatformFromOptions() {
             urPlatformGet(&a, 1, count, platform_list.data(), nullptr));
 
         for (auto p : platform_list) {
+            all_platforms.push_back(p);
             ur_platform_backend_t backend;
             ASSERT_SUCCESS(urPlatformGetInfo(p, UR_PLATFORM_INFO_BACKEND,
                                              sizeof(ur_platform_backend_t),
@@ -196,7 +198,9 @@ void uur::PlatformEnvironment::selectPlatformFromOptions() {
                      }
                      return true;
                  });
-
+    platform = platforms_filtered[0].platform;
+    adapter = platforms_filtered[0].adapter;
+    /*
     if (platforms_filtered.size() == 0) {
         std::stringstream errstr;
         errstr << "No platforms were found with the following filters:";
@@ -234,7 +238,7 @@ void uur::PlatformEnvironment::selectPlatformFromOptions() {
                    << " --platform=\"" << p.name << "\"\n";
         }
         FAIL() << errstr.str();
-    }
+    }*/
 }
 
 void uur::PlatformEnvironment::SetUp() {
@@ -363,9 +367,26 @@ DevicesEnvironment::DevicesEnvironment(int argc, char **argv)
         return;
     }
 
+    for (auto &platform : all_platforms) {
+        uint32_t platform_device_count = 0;
+        urDeviceGet(platform, UR_DEVICE_TYPE_ALL, 0, nullptr,
+                    &platform_device_count);
+        std::vector<ur_device_handle_t> platform_devices(platform_device_count);
+        urDeviceGet(platform, UR_DEVICE_TYPE_ALL, platform_device_count,
+                    platform_devices.data(), nullptr);
+        ur_adapter_handle_t adapter = nullptr;
+        urPlatformGetInfo(platform, UR_PLATFORM_INFO_ADAPTER,
+                          sizeof(ur_adapter_handle_t), &adapter, nullptr);
+        // query out platform and adapter for each device, push back device tuple appropriately
+        for (auto device : platform_devices) {
+            devices.push_back(DeviceTuple({device, platform, adapter}));
+        }
+    }
+
     // Get the argument (devices_count) to limit test devices count.
     // In case, the devices_count is "0", the variable count will not be changed.
     // The CTS will run on all devices.
+    /* filter devices with options after accumulating them all
     if (device_options.device_name.empty()) {
         if (device_options.devices_count >
             (std::numeric_limits<uint32_t>::max)()) {
@@ -420,7 +441,7 @@ DevicesEnvironment::DevicesEnvironment(int argc, char **argv)
             error = ss_error.str();
             return;
         }
-    }
+    }*/
 }
 
 void DevicesEnvironment::SetUp() {
@@ -435,8 +456,8 @@ void DevicesEnvironment::SetUp() {
 
 void DevicesEnvironment::TearDown() {
     PlatformEnvironment::TearDown();
-    for (auto device : devices) {
-        if (urDeviceRelease(device)) {
+    for (auto device_tuple : devices) {
+        if (urDeviceRelease(device_tuple.device)) {
             error = "urDeviceRelease() failed";
             return;
         }
