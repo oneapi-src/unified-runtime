@@ -29,7 +29,8 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   ur_exp_command_buffer_handle_t_(
       ur_context_handle_t Context, ur_device_handle_t Device,
       ze_command_list_handle_t CommandList,
-      ze_command_list_handle_t CommandListTranslated,
+      ze_command_list_handle_t ComputeCommandListTranslated,
+      ze_command_list_handle_t CopyCommandListTranslated,
       ze_command_list_handle_t CommandListResetEvents,
       ze_command_list_handle_t CopyCommandList,
       ur_event_handle_t ExecutionFinishedEvent, ur_event_handle_t WaitEvent,
@@ -87,6 +88,9 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   // Level Zero command list handle that has the copy engine commands for this
   // command-buffer.
   ze_command_list_handle_t ZeCopyCommandList;
+  // Given a multi driver scenario, the driver handle must be translated to the
+  // internal driver handle to allow calls to driver experimental apis.
+  ze_command_list_handle_t ZeCopyCommandListTranslated;
   // Event which will signals the most recent execution of the command-buffer
   // has finished.
   ur_event_handle_t ExecutionFinishedEvent = nullptr;
