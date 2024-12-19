@@ -26,14 +26,9 @@ namespace {
 // given Context and Device.
 bool checkImmediateAppendSupport(ur_context_handle_t Context,
                                  ur_device_handle_t Device) {
-  // TODO The L0 driver is not reporting this extension yet. Once it does,
-  // switch to using the variable zeDriverImmediateCommandListAppendFound.
 
-  // Minimum version that supports zeCommandListImmediateAppendCommandListsExp.
-  constexpr uint32_t MinDriverVersion = 30898;
   bool DriverSupportsImmediateAppend =
-      Context->getPlatform()->isDriverVersionNewerOrSimilar(1, 3,
-                                                            MinDriverVersion);
+      Context->getPlatform()->ZeCommandListImmediateAppendExt.Supported;
 
   // If this environment variable is:
   //   - Set to 1: the immediate append path will always be enabled as long the
@@ -56,6 +51,7 @@ bool checkImmediateAppendSupport(ur_context_handle_t Context,
       std::abort();
     }
     if (EnableAppendPath && !DriverSupportsImmediateAppend) {
+      constexpr uint32_t MinDriverVersion = 30898;
       logger::error("{} is set but "
                     "the current driver does not support the "
                     "zeCommandListImmediateAppendCommandListsExp entrypoint. A "
@@ -352,7 +348,8 @@ ur_result_t enqueueCommandBufferFillHelper(
 ur_exp_command_buffer_handle_t_::ur_exp_command_buffer_handle_t_(
     ur_context_handle_t Context, ur_device_handle_t Device,
     ze_command_list_handle_t CommandList,
-    ze_command_list_handle_t CommandListTranslated,
+    ze_command_list_handle_t ComputeCommandListTranslated,
+    ze_command_list_handle_t CopyCommandListTranslated,
     ze_command_list_handle_t CommandListResetEvents,
     ze_command_list_handle_t CopyCommandList,
     ur_event_handle_t ExecutionFinishedEvent, ur_event_handle_t WaitEvent,
@@ -361,7 +358,8 @@ ur_exp_command_buffer_handle_t_::ur_exp_command_buffer_handle_t_(
     const ur_exp_command_buffer_desc_t *Desc, const bool IsInOrderCmdList,
     const bool UseImmediateAppendPath)
     : Context(Context), Device(Device), ZeComputeCommandList(CommandList),
-      ZeComputeCommandListTranslated(CommandListTranslated),
+      ZeComputeCommandListTranslated(ComputeCommandListTranslated),
+      ZeCopyCommandListTranslated(CopyCommandListTranslated),
       ZeCommandListResetEvents(CommandListResetEvents),
       ZeCopyCommandList(CopyCommandList),
       ExecutionFinishedEvent(ExecutionFinishedEvent), WaitEvent(WaitEvent),
@@ -660,6 +658,7 @@ urCommandBufferCreateExp(ur_context_handle_t Context, ur_device_handle_t Device,
   ze_command_list_handle_t ZeCopyCommandList = nullptr;
   ze_command_list_handle_t ZeCommandListResetEvents = nullptr;
   ze_command_list_handle_t ZeComputeCommandListTranslated = nullptr;
+  ze_command_list_handle_t ZeCopyCommandListTranslated = nullptr;
 
   UR_CALL(createMainCommandList(Context, Device, IsInOrder, IsUpdatable, false,
                                 ZeComputeCommandList));
@@ -670,6 +669,9 @@ urCommandBufferCreateExp(ur_context_handle_t Context, ur_device_handle_t Device,
   if (Device->hasMainCopyEngine()) {
     UR_CALL(createMainCommandList(Context, Device, false, false, true,
                                   ZeCopyCommandList));
+    ZE2UR_CALL(zelLoaderTranslateHandle,
+           (ZEL_HANDLE_COMMAND_LIST, ZeCopyCommandList,
+            (void **)&ZeCopyCommandListTranslated));
   }
 
   ZE2UR_CALL(zelLoaderTranslateHandle,
@@ -729,7 +731,7 @@ urCommandBufferCreateExp(ur_context_handle_t Context, ur_device_handle_t Device,
 
   try {
     *CommandBuffer = new ur_exp_command_buffer_handle_t_(
-        Context, Device, ZeComputeCommandList, ZeComputeCommandListTranslated,
+        Context, Device, ZeComputeCommandList, ZeComputeCommandListTranslated, ZeCopyCommandListTranslated,
         ZeCommandListResetEvents, ZeCopyCommandList, ExecutionFinishedEvent,
         WaitEvent, AllResetEvent, CopyFinishedEvent, ComputeFinishedEvent,
         CommandBufferDesc, IsInOrder, ImmediateAppendPath);
@@ -1568,16 +1570,28 @@ ur_result_t enqueueImmediateAppendPath(
     uint32_t NumEventsInWaitList, const ur_event_handle_t *EventWaitList,
     ur_event_handle_t *Event, ur_command_list_ptr_t CommandListHelper,
     bool DoProfiling) {
+  ur_platform_handle_t Platform = CommandBuffer->Context->getPlatform();
 
   assert(CommandListHelper->second.IsImmediate);
+  assert(Platform->ZeCommandListImmediateAppendExt.Supported);
 
+  // Get a list of L0 event handles that the command-buffer needs to wait for
+  // before starting to execute.
   _ur_ze_event_list_t UrZeEventList;
   if (NumEventsInWaitList) {
     UR_CALL(UrZeEventList.createAndRetainUrZeEventList(
         NumEventsInWaitList, EventWaitList, Queue, false));
   }
   (*Event)->WaitList = UrZeEventList;
-  const auto &WaitList = (*Event)->WaitList;
+
+  // The event handles need to be translated because they will be submitted
+  // to an experimental entrypoint.
+  std::vector<ze_event_handle_t> ZeEventListTranslated(UrZeEventList.Length);
+  for (size_t i = 0; i < UrZeEventList.Length; ++i) {
+    ZE2UR_CALL(zelLoaderTranslateHandle,
+               (ZEL_HANDLE_EVENT, UrZeEventList.ZeEventList[i],
+                (void **)&ZeEventListTranslated[i]));
+  }
 
   if (!CommandBuffer->MCopyCommandListEmpty) {
     ur_command_list_ptr_t ZeCopyEngineImmediateListHelper{};
@@ -1587,21 +1601,45 @@ ur_result_t enqueueImmediateAppendPath(
         nullptr /*ForcedCmdQueue*/));
     assert(ZeCopyEngineImmediateListHelper->second.IsImmediate);
 
-    ZE2UR_CALL(zeCommandListImmediateAppendCommandListsExp,
-               (ZeCopyEngineImmediateListHelper->first, 1,
-                &CommandBuffer->ZeCopyCommandList, nullptr,
-                UrZeEventList.Length, UrZeEventList.ZeEventList));
+    // The handle of the helper command-list needs to be translated because it
+    // will be submitted to an experimental entrypoint.
+    ze_command_list_handle_t ZeCopyEngineImmediateListHelperTranslated;
+    ZE2UR_CALL(zelLoaderTranslateHandle,
+               (ZEL_HANDLE_COMMAND_LIST, ZeCopyEngineImmediateListHelper->first,
+                (void **)&ZeCopyEngineImmediateListHelperTranslated));
+
+    ZE2UR_CALL(Platform->ZeCommandListImmediateAppendExt
+                   .zeCommandListImmediateAppendCommandListsExp,
+               (ZeCopyEngineImmediateListHelperTranslated, 1,
+                &CommandBuffer->ZeCopyCommandListTranslated, nullptr,
+                UrZeEventList.Length, ZeEventListTranslated.data()));
 
     UR_CALL(Queue->executeCommandList(ZeCopyEngineImmediateListHelper, false,
                                       false));
   }
 
+  // The handle of the helper command-list needs to be translated because it
+  // will be submitted to an experimental entrypoint.
+  ze_command_list_handle_t ZeCommandListHelperTranslated;
+  ZE2UR_CALL(zelLoaderTranslateHandle,
+             (ZEL_HANDLE_COMMAND_LIST, CommandListHelper->first,
+              (void **)&ZeCommandListHelperTranslated));
+
   ze_event_handle_t &EventToSignal =
       DoProfiling ? CommandBuffer->ComputeFinishedEvent->ZeEvent
                   : (*Event)->ZeEvent;
+
+  // The signaling event needs to be translated  because it will be submitted to
+  // an experimental entrypoint.
+  ze_event_handle_t EventToSignalTranslated;
+  ZE2UR_CALL(zelLoaderTranslateHandle, (ZEL_HANDLE_EVENT, EventToSignal,
+                                        (void **)&EventToSignalTranslated));
+
   ZE2UR_CALL(zeCommandListImmediateAppendCommandListsExp,
-             (CommandListHelper->first, 1, &CommandBuffer->ZeComputeCommandList,
-              EventToSignal, WaitList.Length, WaitList.ZeEventList));
+             (ZeCommandListHelperTranslated, 1,
+              &CommandBuffer->ZeComputeCommandListTranslated,
+              EventToSignalTranslated, UrZeEventList.Length,
+              ZeEventListTranslated.data()));
 
   if (DoProfiling) {
     UR_CALL(appendProfilingQueries(CommandBuffer, CommandListHelper->first,
