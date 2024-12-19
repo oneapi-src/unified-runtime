@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 struct urProgramCreateWithNativeHandleTest : uur::urProgramTest {
     void SetUp() override {

@@ -4,10 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 struct urKernelSetArgSamplerTestWithParam
     : uur::urBaseKernelTestWithParam<uur::SamplerCreateParamT> {
     void SetUp() {
+        UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA Emulation Device"});
+
         const auto param = getParam();
         const auto normalized = std::get<0>(param);
         const auto addr_mode = std::get<1>(param);
@@ -48,7 +51,7 @@ struct urKernelSetArgSamplerTestWithParam
     ur_sampler_handle_t sampler = nullptr;
 };
 
-UUR_TEST_SUITE_P(
+UUR_DEVICE_TEST_SUITE_P(
     urKernelSetArgSamplerTestWithParam,
     ::testing::Combine(
         ::testing::Values(true, false),
@@ -68,6 +71,8 @@ TEST_P(urKernelSetArgSamplerTestWithParam, Success) {
 
 struct urKernelSetArgSamplerTest : uur::urBaseKernelTest {
     void SetUp() {
+        UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA Emulation Device"});
+
         program_name = "image_copy";
         UUR_RETURN_ON_FATAL_FAILURE(urBaseKernelTest::SetUp());
 
@@ -120,6 +125,8 @@ TEST_P(urKernelSetArgSamplerTest, InvalidNullHandleArgValue) {
 }
 
 TEST_P(urKernelSetArgSamplerTest, InvalidKernelArgumentIndex) {
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+
     uint32_t num_kernel_args = 0;
     ASSERT_SUCCESS(urKernelGetInfo(kernel, UR_KERNEL_INFO_NUM_ARGS,
                                    sizeof(num_kernel_args), &num_kernel_args,

@@ -5,6 +5,7 @@
 
 #include <array>
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 struct urEnqueueKernelLaunchTest : uur::urKernelExecutionTest {
     void SetUp() override {
@@ -36,6 +37,11 @@ UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueKernelLaunchKernelWgSizeTest);
 // Note: Due to an issue with HIP, the subgroup test is not generated
 struct urEnqueueKernelLaunchKernelSubGroupTest : uur::urKernelExecutionTest {
     void SetUp() override {
+        UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+        UUR_KNOWN_FAILURE_ON(uur::HIP{});
+        UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+        UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
         program_name = "subgroup";
         UUR_RETURN_ON_FATAL_FAILURE(urKernelExecutionTest::SetUp());
     }
@@ -133,6 +139,12 @@ TEST_P(urEnqueueKernelLaunchTest, InvalidWorkGroupSize) {
 }
 
 TEST_P(urEnqueueKernelLaunchTest, InvalidKernelArgs) {
+    // Cuda and hip both lack any way to validate kernel args
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
     ur_platform_backend_t backend;
     ASSERT_SUCCESS(urPlatformGetInfo(platform, UR_PLATFORM_INFO_BACKEND,
                                      sizeof(ur_platform_backend_t), &backend,
@@ -152,6 +164,9 @@ TEST_P(urEnqueueKernelLaunchTest, InvalidKernelArgs) {
 }
 
 TEST_P(urEnqueueKernelLaunchKernelWgSizeTest, Success) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
     ASSERT_SUCCESS(urEnqueueKernelLaunch(
         queue, kernel, n_dimensions, global_offset.data(), global_size.data(),
         nullptr, 0, nullptr, nullptr));
@@ -166,6 +181,9 @@ TEST_P(urEnqueueKernelLaunchKernelWgSizeTest, SuccessWithExplicitLocalSize) {
 }
 
 TEST_P(urEnqueueKernelLaunchKernelWgSizeTest, NonMatchingLocalSize) {
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+
     std::array<size_t, 3> wrong_wg_size{8, 8, 8};
     ASSERT_EQ_RESULT(
         urEnqueueKernelLaunch(queue, kernel, n_dimensions, global_offset.data(),
@@ -216,7 +234,7 @@ struct testParametersEnqueueKernel {
 template <typename T>
 inline std::string printKernelLaunchTestString(
     const testing::TestParamInfo<typename T::ParamType> &info) {
-    const auto device_handle = std::get<0>(info.param);
+    const auto device_handle = std::get<0>(info.param).device;
     const auto platform_device_name =
         uur::GetPlatformAndDeviceName(device_handle);
     std::stringstream test_name;
@@ -283,7 +301,7 @@ static std::vector<testParametersEnqueueKernel> test_cases{// 1D
                                                            {1027, 1, 19, 3},
                                                            {1, 53, 19, 3},
                                                            {256, 79, 8, 3}};
-UUR_TEST_SUITE_P(
+UUR_DEVICE_TEST_SUITE_P(
     urEnqueueKernelLaunchTestWithParam, testing::ValuesIn(test_cases),
     printKernelLaunchTestString<urEnqueueKernelLaunchTestWithParam>);
 
@@ -424,6 +442,8 @@ struct urEnqueueKernelLaunchWithVirtualMemory : uur::urKernelExecutionTest {
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueKernelLaunchWithVirtualMemory);
 
 TEST_P(urEnqueueKernelLaunchWithVirtualMemory, Success) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
     size_t work_dim = 1;
     size_t global_offset = 0;
     size_t global_size = alloc_size / sizeof(uint32_t);
@@ -449,7 +469,8 @@ TEST_P(urEnqueueKernelLaunchWithVirtualMemory, Success) {
         ASSERT_EQ(fill_val, data.at(i));
     }
 }
-
+/* this is not a proper multi device test, making it one might require a whole
+ * parallel chain on multi device fixtures for kernel
 struct urEnqueueKernelLaunchMultiDeviceTest : public urEnqueueKernelLaunchTest {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(urEnqueueKernelLaunchTest::SetUp());
@@ -475,6 +496,8 @@ UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueKernelLaunchMultiDeviceTest);
 // TODO: rewrite this test, right now it only works for a single queue
 // (the context is only created for one device)
 TEST_P(urEnqueueKernelLaunchMultiDeviceTest, KernelLaunchReadDifferentQueues) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
     ur_mem_handle_t buffer = nullptr;
     AddBuffer1DArg(sizeof(val) * global_size, &buffer);
     AddPodArg(val);
@@ -496,7 +519,7 @@ TEST_P(urEnqueueKernelLaunchMultiDeviceTest, KernelLaunchReadDifferentQueues) {
                                               nullptr, nullptr));
         ASSERT_EQ(val, output) << "Result on queue " << i << " did not match!";
     }
-}
+}*/
 
 struct urEnqueueKernelLaunchUSMLinkedList
     : uur::urKernelTestWithParam<uur::BoolTestParam> {
@@ -555,12 +578,16 @@ struct urEnqueueKernelLaunchUSMLinkedList
     ur_queue_handle_t queue = nullptr;
 };
 
-UUR_TEST_SUITE_P(
+UUR_DEVICE_TEST_SUITE_P(
     urEnqueueKernelLaunchUSMLinkedList,
     testing::ValuesIn(uur::BoolTestParam::makeBoolParam("UsePool")),
     uur::deviceTestWithParamPrinter<uur::BoolTestParam>);
 
 TEST_P(urEnqueueKernelLaunchUSMLinkedList, Success) {
+    if (use_pool) {
+        UUR_KNOWN_FAILURE_ON(uur::HIP{});
+    }
+
     ur_device_usm_access_capability_flags_t shared_usm_flags = 0;
     ASSERT_SUCCESS(
         uur::GetDeviceUSMSingleSharedSupport(device, shared_usm_flags));

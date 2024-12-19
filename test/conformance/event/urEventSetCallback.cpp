@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include "fixtures.h"
+#include "uur/known_failure.h"
 
 /* Using urEventReferenceTest to be able to release the event during the test */
 using urEventSetCallbackTest = uur::event::urEventReferenceTest;
@@ -12,6 +13,11 @@ using urEventSetCallbackTest = uur::event::urEventReferenceTest;
  * Checks that the callback function is called.
  */
 TEST_P(urEventSetCallbackTest, Success) {
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
 
     struct Callback {
         static void callback([[maybe_unused]] ur_event_handle_t hEvent,
@@ -37,6 +43,14 @@ TEST_P(urEventSetCallbackTest, Success) {
  * Check that the callback function parameters are correct
  */
 TEST_P(urEventSetCallbackTest, ValidateParameters) {
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
+    // This test has issues when UR_CONFORMANCE_TEST_LOADER=ON
+    UUR_KNOWN_FAILURE_ON(uur::OpenCL{});
 
     struct CallbackParameters {
         ur_event_handle_t event;
@@ -70,6 +84,11 @@ TEST_P(urEventSetCallbackTest, ValidateParameters) {
  * Check that the callback function is called for each execution state.
  */
 TEST_P(urEventSetCallbackTest, AllStates) {
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
 
     struct CallbackStatus {
         bool submitted = false;
@@ -127,6 +146,11 @@ TEST_P(urEventSetCallbackTest, AllStates) {
  * completed
  */
 TEST_P(urEventSetCallbackTest, EventAlreadyCompleted) {
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
 
     ASSERT_SUCCESS(urEventWait(1, &event));
 
@@ -158,6 +182,9 @@ using urEventSetCallbackNegativeTest = uur::event::urEventTest;
 void emptyCallback(ur_event_handle_t, ur_execution_info_t, void *) {}
 
 TEST_P(urEventSetCallbackNegativeTest, InvalidNullHandleEvent) {
+    // This test has issues when UR_CONFORMANCE_TEST_LOADER=ON
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     ASSERT_EQ_RESULT(urEventSetCallback(
                          nullptr, ur_execution_info_t::UR_EXECUTION_INFO_QUEUED,
                          emptyCallback, nullptr),

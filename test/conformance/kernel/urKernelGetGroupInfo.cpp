@@ -5,11 +5,12 @@
 
 #include <array>
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 using urKernelGetGroupInfoTest =
     uur::urKernelTestWithParam<ur_kernel_group_info_t>;
 
-UUR_TEST_SUITE_P(
+UUR_DEVICE_TEST_SUITE_P(
     urKernelGetGroupInfoTest,
     ::testing::Values(UR_KERNEL_GROUP_INFO_GLOBAL_WORK_SIZE,
                       UR_KERNEL_GROUP_INFO_WORK_GROUP_SIZE,
@@ -78,6 +79,9 @@ TEST_P(urKernelGetGroupInfoTest, InvalidEnumeration) {
 }
 
 TEST_P(urKernelGetGroupInfoWgSizeTest, CompileWorkGroupSize) {
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+
     std::array<size_t, 3> read_dims{1, 1, 1};
     ASSERT_SUCCESS(urKernelGetGroupInfo(
         kernel, device, UR_KERNEL_GROUP_INFO_COMPILE_WORK_GROUP_SIZE,

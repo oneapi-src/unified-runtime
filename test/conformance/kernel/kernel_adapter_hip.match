@@ -1,6 +1,0 @@
-urKernelGetGroupInfoWgSizeTest.CompileWorkGroupSize/*
-urKernelSetArgLocalTest.InvalidKernelArgumentIndex/*
-urKernelSetArgMemObjTest.InvalidKernelArgumentIndex/*
-urKernelSetArgPointerNegativeTest.InvalidKernelArgumentIndex/*
-urKernelSetArgValueTest.InvalidKernelArgumentIndex/*
-urKernelSetArgValueTest.InvalidKernelArgumentSize/*
