@@ -199,6 +199,10 @@ ur_result_t ur_usm_pool_handle_t_::allocate(
     void **ppRetMem) {
   uint32_t alignment = pUSMDesc ? pUSMDesc->align : 0;
 
+  if ((alignment & (alignment - 1)) != 0) {
+    return UR_RESULT_ERROR_INVALID_VALUE;
+  }
+
   auto umfPool =
       getPool(usm::pool_descriptor{this, hContext, hDevice, type, false});
   if (!umfPool) {
