@@ -21,6 +21,7 @@ struct ur_usm_pool_handle_t_ {
   std::atomic_uint32_t RefCount = 1;
 
   ur_context_handle_t Context = nullptr;
+  ur_device_handle_t Device = nullptr;
 
   usm::DisjointPoolAllConfigs DisjointPoolConfigs =
       usm::DisjointPoolAllConfigs();
@@ -32,6 +33,10 @@ struct ur_usm_pool_handle_t_ {
   CUmemoryPool CUmemPool{0};
 
   ur_usm_pool_handle_t_(ur_context_handle_t Context,
+                        ur_usm_pool_desc_t *PoolDesc);
+
+  // TODO: do we need the context param?
+  ur_usm_pool_handle_t_(ur_context_handle_t Context, ur_device_handle_t Device,
                         ur_usm_pool_desc_t *PoolDesc);
 
   uint32_t incrementReferenceCount() noexcept { return ++RefCount; }
