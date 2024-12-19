@@ -20,6 +20,22 @@ namespace v2 {
 
 namespace raii {
 
+template <typename ZeHandleT> const char *zeDestroyFunctionName() {
+  if constexpr (std::is_same_v<ZeHandleT, ::ze_kernel_handle_t>) {
+    return "zeKernelDestroy";
+  } else if constexpr (std::is_same_v<ZeHandleT, ::ze_event_handle_t>) {
+    return "zeEventDestroy";
+  } else if constexpr (std::is_same_v<ZeHandleT, ::ze_event_pool_handle_t>) {
+    return "zeEventPoolDestroy";
+  } else if constexpr (std::is_same_v<ZeHandleT, ::ze_context_handle_t>) {
+    return "zeContextDestroy";
+  } else if constexpr (std::is_same_v<ZeHandleT, ::ze_command_list_handle_t>) {
+    return "zeCommandListDestroy";
+  } else {
+    static_assert(sizeof(ZeHandleT) == 0, "Unknown handle type");
+  }
+}
+
 template <typename ZeHandleT, ze_result_t (*destroy)(ZeHandleT)>
 struct ze_handle_wrapper {
   ze_handle_wrapper(bool ownZeHandle = true)
@@ -65,7 +81,8 @@ struct ze_handle_wrapper {
     }
 
     if (ownZeHandle) {
-      auto zeResult = ZE_CALL_NOCHECK(destroy, (handle));
+      auto zeResult = ZeCall().doCall(
+          destroy(handle), zeDestroyFunctionName<ZeHandleT>(), "handle", false);
       // Gracefully handle the case that L0 was already unloaded.
       if (zeResult && zeResult != ZE_RESULT_ERROR_UNINITIALIZED)
         throw ze2urResult(zeResult);
