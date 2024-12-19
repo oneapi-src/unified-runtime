@@ -11,6 +11,8 @@
 
 #include <ur/ur.hpp>
 
+#include <umf/providers/provider_cuda.h>
+
 #include "common.hpp"
 
 struct ur_device_handle_t_ {
@@ -23,6 +25,7 @@ private:
   std::atomic_uint32_t RefCount;
   ur_platform_handle_t Platform;
   uint32_t DeviceIndex;
+  umf_memory_provider_handle_t umfCUDAprovider[UMF_MEMORY_TYPE_SHARED];
 
   static constexpr uint32_t MaxWorkItemDimensions = 3u;
   size_t MaxWorkItemSizes[MaxWorkItemDimensions];
@@ -114,6 +117,16 @@ public:
   bool maxLocalMemSizeChosen() { return MaxLocalMemSizeChosen; };
 
   uint32_t getNumComputeUnits() const noexcept { return NumComputeUnits; };
+
+  void setUmfCUDAprovider(umf_usm_memory_type_t memType,
+                          umf_memory_provider_handle_t _umfCUDAprovider) {
+    umfCUDAprovider[(int)memType - 1] = _umfCUDAprovider;
+  }
+
+  umf_memory_provider_handle_t
+  getUmfCUDAprovider(umf_usm_memory_type_t memType) {
+    return umfCUDAprovider[(int)memType - 1];
+  }
 
   // bookkeeping for mipmappedArray leaks in Mapping external Memory
   std::map<CUarray, CUmipmappedArray> ChildCuarrayFromMipmapMap;

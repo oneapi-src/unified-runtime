@@ -13,6 +13,7 @@
 #include "common.hpp"
 #include "context.hpp"
 #include "device.hpp"
+#include "umf_helpers.hpp"
 
 #include <cassert>
 #include <cuda.h>
@@ -109,6 +110,94 @@ urPlatformGet(ur_adapter_handle_t *, uint32_t, uint32_t NumEntries,
             for (int i = 0; i < NumDevices; ++i) {
               Platform.Devices.clear();
             }
+            Result = Err;
+            throw Err;
+          } catch (...) {
+            Result = UR_RESULT_ERROR_OUT_OF_RESOURCES;
+            throw;
+          }
+
+          try {
+            fprintf(stderr,
+                    "DEBUG_UMF >>> Creating CUDA memory provider (line %i)\n",
+                    __LINE__);
+            umf_cuda_memory_provider_params_handle_t cu_memory_provider_params =
+                nullptr;
+            umf_result_t umf_result =
+                umfCUDAMemoryProviderParamsCreate(&cu_memory_provider_params);
+            if (umf_result != UMF_RESULT_SUCCESS) {
+              Result = umf::umf2urResult(umf_result);
+              throw Result;
+            }
+
+            fprintf(stderr,
+                    "DEBUG_UMF >>> Creating CUDA memory provider (line %i, "
+                    "NumDevices=%i)\n",
+                    __LINE__, NumDevices);
+            for (int i = 0; i < NumDevices; ++i) {
+              ur_device_handle_t_ *device_handle = Platform.Devices[i].get();
+              CUdevice device = device_handle->get();
+              CUcontext context = device_handle->getNativeContext();
+
+              for (int memType = UMF_MEMORY_TYPE_HOST;
+                   memType <= UMF_MEMORY_TYPE_SHARED; memType++) {
+                umf_result = umfCUDAMemoryProviderParamsSetContext(
+                    cu_memory_provider_params, context);
+                if (umf_result != UMF_RESULT_SUCCESS) {
+                  Result = umf::umf2urResult(umf_result);
+                  throw Result;
+                }
+
+                umf_result = umfCUDAMemoryProviderParamsSetDevice(
+                    cu_memory_provider_params, device);
+                if (umf_result != UMF_RESULT_SUCCESS) {
+                  Result = umf::umf2urResult(umf_result);
+                  throw Result;
+                }
+
+                umf_result = umfCUDAMemoryProviderParamsSetMemoryType(
+                    cu_memory_provider_params, (umf_usm_memory_type_t)memType);
+                if (umf_result != UMF_RESULT_SUCCESS) {
+                  Result = umf::umf2urResult(umf_result);
+                  throw Result;
+                }
+
+                umf_memory_provider_handle_t umfCUDAprovider = nullptr;
+                fprintf(stderr,
+                        "DEBUG_UMF >>> Creating CUDA memory provider (line %i, "
+                        "i=%i, NumDevices=%i)\n",
+                        __LINE__, i, NumDevices);
+                umf_result = umfMemoryProviderCreate(umfCUDAMemoryProviderOps(),
+                                                     cu_memory_provider_params,
+                                                     &umfCUDAprovider);
+                fprintf(stderr,
+                        "DEBUG_UMF >>> Creating CUDA memory provider (line %i, "
+                        "i=%i, NumDevices=%i)\n",
+                        __LINE__, i, NumDevices);
+                if (umf_result != UMF_RESULT_SUCCESS) {
+                  Result = umf::umf2urResult(umf_result);
+                  throw Result;
+                }
+
+                fprintf(stderr,
+                        "DEBUG_UMF >>> Creating CUDA memory provider (line %i, "
+                        "i=%i, NumDevices=%i)\n",
+                        __LINE__, i, NumDevices);
+                device_handle->setUmfCUDAprovider(
+                    (umf_usm_memory_type_t)memType, umfCUDAprovider);
+              }
+            }
+
+            fprintf(stderr,
+                    "DEBUG_UMF >>> Creating CUDA memory provider (line %i, "
+                    "NumDevices=%i)\n",
+                    __LINE__, NumDevices);
+            umfCUDAMemoryProviderParamsDestroy(cu_memory_provider_params);
+            fprintf(stderr,
+                    "DEBUG_UMF >>> Creating CUDA memory provider (line %i, "
+                    "NumDevices=%i)\n",
+                    __LINE__, NumDevices);
+          } catch (ur_result_t Err) {
             Result = Err;
             throw Err;
           } catch (...) {
