@@ -66,7 +66,7 @@ TEST_P(urMultiDeviceKernelCreateTest, WithProgramBuild) {
         uur::KernelsEnvironment::instance->GetEntryPointNames("foo")[0];
 
     std::shared_ptr<std::vector<char>> il_binary;
-    uur::KernelsEnvironment::instance->LoadSource("foo", il_binary);
+    uur::KernelsEnvironment::instance->LoadSource("foo", platform, il_binary);
 
     for (size_t i = 0; i < devices.size(); i++) {
         uur::raii::Program program;
@@ -100,7 +100,7 @@ TEST_P(urMultiDeviceKernelCreateTest, WithProgramCompileAndLink) {
         uur::KernelsEnvironment::instance->GetEntryPointNames("foo")[0];
 
     std::shared_ptr<std::vector<char>> il_binary;
-    uur::KernelsEnvironment::instance->LoadSource("foo", il_binary);
+    uur::KernelsEnvironment::instance->LoadSource("foo", platform, il_binary);
 
     for (size_t i = 0; i < devices.size(); i++) {
         uur::raii::Program program;

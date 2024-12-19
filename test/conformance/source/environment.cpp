@@ -137,7 +137,7 @@ void uur::PlatformEnvironment::selectPlatformFromOptions() {
         std::string name;
         ur_platform_backend_t backend;
     };
-    std::vector<platform_info> platforms;
+    std::vector<platform_info> discovered_platforms;
     for (auto a : adapters) {
         uint32_t count = 0;
         ASSERT_SUCCESS(urPlatformGet(&a, 1, 0, nullptr, &count));
@@ -146,7 +146,7 @@ void uur::PlatformEnvironment::selectPlatformFromOptions() {
             urPlatformGet(&a, 1, count, platform_list.data(), nullptr));
 
         for (auto p : platform_list) {
-            all_platforms.push_back(p);
+            platforms.push_back(p);
             ur_platform_backend_t backend;
             ASSERT_SUCCESS(urPlatformGetInfo(p, UR_PLATFORM_INFO_BACKEND,
                                              sizeof(ur_platform_backend_t),
@@ -160,7 +160,7 @@ void uur::PlatformEnvironment::selectPlatformFromOptions() {
             ASSERT_SUCCESS(urPlatformGetInfo(p, UR_PLATFORM_INFO_NAME, size,
                                              platform_name.data(), nullptr));
 
-            platforms.push_back(platform_info{
+            discovered_platforms.push_back(platform_info{
                 a, p, std::string(platform_name.data()), backend});
         }
     }
@@ -182,7 +182,7 @@ void uur::PlatformEnvironment::selectPlatformFromOptions() {
     }
 
     std::vector<platform_info> platforms_filtered{};
-    std::copy_if(platforms.begin(), platforms.end(),
+    std::copy_if(discovered_platforms.begin(), discovered_platforms.end(),
                  std::inserter(platforms_filtered, platforms_filtered.begin()),
                  [&](platform_info info) {
                      if (!default_name.empty() && default_name != info.name) {
@@ -198,8 +198,6 @@ void uur::PlatformEnvironment::selectPlatformFromOptions() {
                      }
                      return true;
                  });
-    platform = platforms_filtered[0].platform;
-    adapter = platforms_filtered[0].adapter;
     /*
     if (platforms_filtered.size() == 0) {
         std::stringstream errstr;
@@ -357,17 +355,8 @@ DevicesEnvironment::DevicesEnvironment(int argc, char **argv)
     if (!error.empty()) {
         return;
     }
-    uint32_t count = 0;
-    if (urDeviceGet(platform, UR_DEVICE_TYPE_ALL, 0, nullptr, &count)) {
-        error = "urDevicesGet() failed to get number of devices.";
-        return;
-    }
-    if (count == 0) {
-        error = "Could not find any devices associated with the platform";
-        return;
-    }
 
-    for (auto &platform : all_platforms) {
+    for (auto &platform : platforms) {
         uint32_t platform_device_count = 0;
         urDeviceGet(platform, UR_DEVICE_TYPE_ALL, 0, nullptr,
                     &platform_device_count);
@@ -383,6 +372,10 @@ DevicesEnvironment::DevicesEnvironment(int argc, char **argv)
         }
     }
 
+    if (devices.empty()) {
+        error = "Could not find any devices to test";
+        return;
+    }
     // Get the argument (devices_count) to limit test devices count.
     // In case, the devices_count is "0", the variable count will not be changed.
     // The CTS will run on all devices.
@@ -495,7 +488,7 @@ KernelsEnvironment::parseKernelOptions(int argc, char **argv,
     return options;
 }
 
-std::string KernelsEnvironment::getTargetName() {
+std::string KernelsEnvironment::getTargetName(ur_platform_handle_t platform) {
     std::stringstream IL;
 
     if (instance->GetDevices().size() == 0) {
@@ -530,11 +523,12 @@ std::string KernelsEnvironment::getTargetName() {
 }
 
 std::string
-KernelsEnvironment::getKernelSourcePath(const std::string &kernel_name) {
+KernelsEnvironment::getKernelSourcePath(const std::string &kernel_name,
+                                        ur_platform_handle_t platform) {
     std::stringstream path;
     path << kernel_options.kernel_directory << "/" << kernel_name;
 
-    std::string target_name = getTargetName();
+    std::string target_name = getTargetName(platform);
     if (target_name.empty()) {
         return {};
     }
@@ -545,9 +539,10 @@ KernelsEnvironment::getKernelSourcePath(const std::string &kernel_name) {
 }
 
 void KernelsEnvironment::LoadSource(
-    const std::string &kernel_name,
+    const std::string &kernel_name, ur_platform_handle_t platform,
     std::shared_ptr<std::vector<char>> &binary_out) {
-    std::string source_path = instance->getKernelSourcePath(kernel_name);
+    std::string source_path =
+        instance->getKernelSourcePath(kernel_name, platform);
 
     if (source_path.empty()) {
         FAIL() << error;
@@ -582,6 +577,16 @@ void KernelsEnvironment::LoadSource(
     cached_kernels[kernel_name] = binary_ptr;
     binary_out = binary_ptr;
 }
+/*
+void LoadSource(const std::string &kernel_name,
+                ur_device_handle_t device,
+                std::shared_ptr<std::vector<char>> &binary_out) {
+    ur_platform_handle_t platform = nullptr;
+    if(urDeviceGetInfo(device, UR_DEVICE_INFO_PLATFORM, sizeof(ur_platform_handle_t), &platform, nullptr)) {
+        FAIL() << "Failed to retrieve platform from device";
+    }
+    LoadSource(kernel_name, platform, binary_out);
+}*/
 
 ur_result_t KernelsEnvironment::CreateProgram(
     ur_platform_handle_t hPlatform, ur_context_handle_t hContext,

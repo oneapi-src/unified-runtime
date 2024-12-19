@@ -54,7 +54,8 @@ struct urMultiQueueLaunchMemcpyTest
         std::shared_ptr<std::vector<char>> il_binary;
         std::vector<ur_program_metadata_t> metadatas{};
 
-        uur::KernelsEnvironment::instance->LoadSource(ProgramName, il_binary);
+        uur::KernelsEnvironment::instance->LoadSource(ProgramName, platform,
+                                                      il_binary);
 
         for (size_t i = 0; i < devices.size(); i++) {
             const ur_program_properties_t properties = {

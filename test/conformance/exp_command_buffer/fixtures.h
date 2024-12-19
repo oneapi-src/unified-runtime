@@ -256,8 +256,8 @@ struct TestKernel {
         ASSERT_SUCCESS(urPlatformGetInfo(Platform, UR_PLATFORM_INFO_BACKEND,
                                          sizeof(Backend), &Backend, nullptr));
 
-        ASSERT_NO_FATAL_FAILURE(
-            uur::KernelsEnvironment::instance->LoadSource(Name, ILBinary));
+        ASSERT_NO_FATAL_FAILURE(uur::KernelsEnvironment::instance->LoadSource(
+            Name, Platform, ILBinary));
 
         const ur_program_properties_t Properties = {
             UR_STRUCTURE_TYPE_PROGRAM_PROPERTIES, nullptr,
