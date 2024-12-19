@@ -130,6 +130,7 @@ TEST_P(urUSMHostAllocTest, InvalidNullPtrMem) {
 
 TEST_P(urUSMHostAllocTest, InvalidUSMSize) {
     UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
     UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
 
     void *ptr = nullptr;

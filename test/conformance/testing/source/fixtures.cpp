@@ -27,7 +27,7 @@ std::string platformTestWithParamPrinter<BoolTestParam>(
 
     std::stringstream ss;
     ss << param.name << (param.value ? "Enabled" : "Disabled");
-    return uur::GetPlatformName(platform) + "__" + ss.str();
+    return uur::GetPlatformNameWithID(platform) + "__" + ss.str();
 }
 
 template <>

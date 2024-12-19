@@ -5,7 +5,7 @@
 
 #include "fixtures.h"
 
-using urCudaDeviceCreateWithNativeHandle = uur::urSelectedPlatformTest;
+using urCudaDeviceCreateWithNativeHandle = uur::urPlatformTest;
 
 TEST_F(urCudaDeviceCreateWithNativeHandle, Success) {
     // get a device from cuda

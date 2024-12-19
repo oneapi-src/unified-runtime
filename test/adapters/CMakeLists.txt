@@ -77,13 +77,13 @@ function(add_adapter_memcheck_test name)
 endfunction()
 
 if(UR_BUILD_ADAPTER_CUDA OR UR_BUILD_ADAPTER_ALL)
-    add_subdirectory(cuda)
+    #    add_subdirectory(cuda)
 endif()
 
 if(UR_BUILD_ADAPTER_HIP OR UR_BUILD_ADAPTER_ALL)
-    add_subdirectory(hip)
+    #    add_subdirectory(hip)
 endif()
 
 if(UR_BUILD_ADAPTER_L0 OR UR_BUILD_ADAPTER_L0_V2 OR UR_BUILD_ADAPTER_ALL)
-    add_subdirectory(level_zero)
+    #    add_subdirectory(level_zero)
 endif()

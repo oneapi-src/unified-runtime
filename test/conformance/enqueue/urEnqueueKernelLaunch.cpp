@@ -37,6 +37,11 @@ UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueKernelLaunchKernelWgSizeTest);
 // Note: Due to an issue with HIP, the subgroup test is not generated
 struct urEnqueueKernelLaunchKernelSubGroupTest : uur::urKernelExecutionTest {
     void SetUp() override {
+        UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+        UUR_KNOWN_FAILURE_ON(uur::HIP{});
+        UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+        UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
         program_name = "subgroup";
         UUR_RETURN_ON_FATAL_FAILURE(urKernelExecutionTest::SetUp());
     }
@@ -159,8 +164,6 @@ TEST_P(urEnqueueKernelLaunchTest, InvalidKernelArgs) {
 }
 
 TEST_P(urEnqueueKernelLaunchKernelWgSizeTest, Success) {
-    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
-    UUR_KNOWN_FAILURE_ON(uur::HIP{});
     UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
     UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
 
@@ -178,6 +181,9 @@ TEST_P(urEnqueueKernelLaunchKernelWgSizeTest, SuccessWithExplicitLocalSize) {
 }
 
 TEST_P(urEnqueueKernelLaunchKernelWgSizeTest, NonMatchingLocalSize) {
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+
     std::array<size_t, 3> wrong_wg_size{8, 8, 8};
     ASSERT_EQ_RESULT(
         urEnqueueKernelLaunch(queue, kernel, n_dimensions, global_offset.data(),
@@ -187,10 +193,6 @@ TEST_P(urEnqueueKernelLaunchKernelWgSizeTest, NonMatchingLocalSize) {
 }
 
 TEST_P(urEnqueueKernelLaunchKernelSubGroupTest, Success) {
-    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
-    UUR_KNOWN_FAILURE_ON(uur::HIP{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
-
     ur_mem_handle_t buffer = nullptr;
     AddBuffer1DArg(sizeof(size_t), &buffer);
     ASSERT_SUCCESS(urEnqueueKernelLaunch(

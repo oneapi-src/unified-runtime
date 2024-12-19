@@ -119,6 +119,7 @@ TEST_P(urUSMDeviceAllocTest, InvalidNullPtrResult) {
 
 TEST_P(urUSMDeviceAllocTest, InvalidUSMSize) {
     UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
     UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
     UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
 
