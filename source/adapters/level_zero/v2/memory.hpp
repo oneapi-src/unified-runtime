@@ -98,11 +98,11 @@ private:
 };
 
 struct host_allocation_desc_t {
-  host_allocation_desc_t(void *ptr, size_t size, size_t offset,
+  host_allocation_desc_t(usm_unique_ptr_t ptr, size_t size, size_t offset,
                          ur_map_flags_t flags)
-      : ptr(ptr), size(size), offset(offset), flags(flags) {}
+      : ptr(std::move(ptr)), size(size), offset(offset), flags(flags) {}
 
-  void *ptr;
+  usm_unique_ptr_t ptr;
   size_t size;
   size_t offset;
   ur_map_flags_t flags;
@@ -145,6 +145,9 @@ private:
 
   // If not null, copy the buffer content back to this memory on release.
   void *writeBackPtr = nullptr;
+
+  // If not null, mapHostPtr should map memory to this ptr
+  void *mapToPtr = nullptr;
 
   std::vector<host_allocation_desc_t> hostAllocations;
 

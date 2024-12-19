@@ -209,7 +209,7 @@ ur_discrete_mem_handle_t::ur_discrete_mem_handle_t(
     device_access_mode_t accessMode)
     : ur_mem_handle_t_(hContext, size, accessMode),
       deviceAllocations(hContext->getPlatform()->getNumDevices()),
-      activeAllocationDevice(nullptr), hostAllocations() {
+      activeAllocationDevice(nullptr), mapToPtr(hostPtr), hostAllocations() {
   if (hostPtr) {
     auto initialDevice = hContext->getDevices()[0];
     UR_CALL_THROWS(migrateBufferTo(initialDevice, hostPtr, size));
@@ -299,21 +299,30 @@ void *ur_discrete_mem_handle_t::mapHostPtr(
   TRACK_SCOPE_LATENCY("ur_discrete_mem_handle_t::mapHostPtr");
   // TODO: use async alloc?
 
-  void *ptr;
-  UR_CALL_THROWS(hContext->getDefaultUSMPool()->allocate(
-      hContext, nullptr, nullptr, UR_USM_TYPE_HOST, size, &ptr));
+  void *ptr = mapToPtr;
+  if (!ptr) {
+    UR_CALL_THROWS(hContext->getDefaultUSMPool()->allocate(
+        hContext, nullptr, nullptr, UR_USM_TYPE_HOST, size, &ptr));
+  }
 
-  hostAllocations.emplace_back(ptr, size, offset, flags);
+  usm_unique_ptr_t mappedPtr =
+      usm_unique_ptr_t(ptr, [ownsAlloc = bool(mapToPtr), this](void *p) {
+        if (ownsAlloc) {
+          UR_CALL_THROWS(hContext->getDefaultUSMPool()->free(p));
+        }
+      });
+
+  hostAllocations.emplace_back(std::move(mappedPtr), size, offset, flags);
 
   if (activeAllocationDevice && (flags & UR_MAP_FLAG_READ)) {
     auto srcPtr =
         ur_cast<char *>(
             deviceAllocations[activeAllocationDevice->Id.value()].get()) +
         offset;
-    migrate(srcPtr, hostAllocations.back().ptr, size);
+    migrate(srcPtr, hostAllocations.back().ptr.get(), size);
   }
 
-  return hostAllocations.back().ptr;
+  return hostAllocations.back().ptr.get();
 }
 
 void ur_discrete_mem_handle_t::unmapHostPtr(
@@ -322,7 +331,7 @@ void ur_discrete_mem_handle_t::unmapHostPtr(
   TRACK_SCOPE_LATENCY("ur_discrete_mem_handle_t::unmapHostPtr");
 
   for (auto &hostAllocation : hostAllocations) {
-    if (hostAllocation.ptr == pMappedPtr) {
+    if (hostAllocation.ptr.get() == pMappedPtr) {
       void *devicePtr = nullptr;
       if (activeAllocationDevice) {
         devicePtr =
@@ -337,11 +346,9 @@ void ur_discrete_mem_handle_t::unmapHostPtr(
       }
 
       if (devicePtr) {
-        migrate(hostAllocation.ptr, devicePtr, hostAllocation.size);
+        migrate(hostAllocation.ptr.get(), devicePtr, hostAllocation.size);
       }
 
-      // TODO: use async free here?
-      UR_CALL_THROWS(hContext->getDefaultUSMPool()->free(hostAllocation.ptr));
       return;
     }
   }
