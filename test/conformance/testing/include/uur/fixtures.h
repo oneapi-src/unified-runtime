@@ -128,8 +128,7 @@ struct urDeviceTest : ::testing::Test,
 #define UUR_INSTANTIATE_PLATFORM_TEST_SUITE_P(FIXTURE)                         \
     INSTANTIATE_TEST_SUITE_P(                                                  \
         , FIXTURE,                                                             \
-        ::testing::ValuesIn(                                                   \
-            uur::PlatformEnvironment::instance->all_platforms),                \
+        ::testing::ValuesIn(uur::PlatformEnvironment::instance->platforms),    \
         [](const ::testing::TestParamInfo<ur_platform_handle_t> &info) {       \
             return uur::GetPlatformNameWithID(info.param);                     \
         })
@@ -310,10 +309,9 @@ struct urMemImageTest : urContextTest {
 #define UUR_PLATFORM_TEST_SUITE_P(FIXTURE, VALUES, PRINTER)                    \
     INSTANTIATE_TEST_SUITE_P(                                                  \
         , FIXTURE,                                                             \
-        testing::Combine(                                                      \
-            ::testing::ValuesIn(                                               \
-                uur::PlatformEnvironment::instance->all_platforms),            \
-            VALUES),                                                           \
+        testing::Combine(::testing::ValuesIn(                                  \
+                             uur::PlatformEnvironment::instance->platforms),   \
+                         VALUES),                                              \
         PRINTER)
 
 #define UUR_DEVICE_TEST_SUITE_P(FIXTURE, VALUES, PRINTER)                      \
@@ -478,7 +476,8 @@ struct urHostPipeTest : urQueueTest {
         }
 
         UUR_RETURN_ON_FATAL_FAILURE(
-            uur::KernelsEnvironment::instance->LoadSource("foo", il_binary));
+            uur::KernelsEnvironment::instance->LoadSource("foo", platform,
+                                                          il_binary));
         ASSERT_SUCCESS(uur::KernelsEnvironment::instance->CreateProgram(
             platform, context, device, *il_binary, nullptr, &program));
     }
@@ -1320,7 +1319,7 @@ struct urProgramTest : urQueueTest {
         }
         UUR_RETURN_ON_FATAL_FAILURE(
             uur::KernelsEnvironment::instance->LoadSource(program_name,
-                                                          il_binary));
+                                                          platform, il_binary));
 
         const ur_program_properties_t properties = {
             UR_STRUCTURE_TYPE_PROGRAM_PROPERTIES, nullptr,
@@ -1361,8 +1360,8 @@ template <class T> struct urProgramTestWithParam : urQueueTestWithParam<T> {
         }
 
         UUR_RETURN_ON_FATAL_FAILURE(
-            uur::KernelsEnvironment::instance->LoadSource(program_name,
-                                                          il_binary));
+            uur::KernelsEnvironment::instance->LoadSource(
+                program_name, this->platform, il_binary));
         ASSERT_SUCCESS(uur::KernelsEnvironment::instance->CreateProgram(
             this->platform, this->context, this->device, *il_binary, nullptr,
             &program));
@@ -1740,7 +1739,7 @@ struct urMultiDeviceProgramTest : urMultiDeviceQueueTest {
         }
         UUR_RETURN_ON_FATAL_FAILURE(
             uur::KernelsEnvironment::instance->LoadSource(program_name,
-                                                          il_binary));
+                                                          platform, il_binary));
 
         const ur_program_properties_t properties = {
             UR_STRUCTURE_TYPE_PROGRAM_PROPERTIES, nullptr,

@@ -43,10 +43,7 @@ struct PlatformEnvironment : AdapterEnvironment {
 
     PlatformOptions platform_options;
     // List of all discovered platforms
-    std::vector<ur_platform_handle_t> all_platforms;
-    // Adapter and platform selected for testing via platform_options
-    ur_adapter_handle_t adapter = nullptr;
-    ur_platform_handle_t platform = nullptr;
+    std::vector<ur_platform_handle_t> platforms;
     static PlatformEnvironment *instance;
 };
 
@@ -94,8 +91,13 @@ struct KernelsEnvironment : DevicesEnvironment {
     virtual void TearDown() override;
 
     void LoadSource(const std::string &kernel_name,
+                    ur_platform_handle_t platform,
                     std::shared_ptr<std::vector<char>> &binary_out);
-
+    /*
+    void LoadSource(const std::string &kernel_name,
+                    ur_device_handle_t device,
+                    std::shared_ptr<std::vector<char>> &binary_out);
+*/
     ur_result_t CreateProgram(ur_platform_handle_t hPlatform,
                               ur_context_handle_t hContext,
                               ur_device_handle_t hDevice,
@@ -110,8 +112,9 @@ struct KernelsEnvironment : DevicesEnvironment {
   private:
     KernelOptions parseKernelOptions(int argc, char **argv,
                                      const std::string &kernels_default_dir);
-    std::string getKernelSourcePath(const std::string &kernel_name);
-    std::string getTargetName();
+    std::string getKernelSourcePath(const std::string &kernel_name,
+                                    ur_platform_handle_t platform);
+    std::string getTargetName(ur_platform_handle_t platform);
 
     KernelOptions kernel_options;
     // mapping between kernels (full_path + kernel_name) and their saved source.
