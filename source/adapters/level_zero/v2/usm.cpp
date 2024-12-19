@@ -19,6 +19,12 @@
 #include <umf/pools/pool_proxy.h>
 #include <umf/providers/provider_level_zero.h>
 
+static inline void UMF_CALL_THROWS(umf_result_t res) {
+  if (res != UMF_RESULT_SUCCESS) {
+    throw res;
+  }
+}
+
 namespace umf {
 ur_result_t getProviderNativeError(const char *providerName,
                                    int32_t nativeError) {
@@ -85,31 +91,18 @@ static umf::pool_unique_handle_t
 makePool(usm::umf_disjoint_pool_config_t *poolParams,
          usm::pool_descriptor poolDescriptor) {
   umf_level_zero_memory_provider_params_handle_t params = NULL;
-  umf_result_t umf_ret = umfLevelZeroMemoryProviderParamsCreate(&params);
-  if (umf_ret != UMF_RESULT_SUCCESS) {
-    throw umf::umf2urResult(umf_ret);
-  }
-
-  umf_ret = umfLevelZeroMemoryProviderParamsSetContext(
-      params, poolDescriptor.hContext->getZeHandle());
-  if (umf_ret != UMF_RESULT_SUCCESS) {
-    throw umf::umf2urResult(umf_ret);
-  };
+  UMF_CALL_THROWS(umfLevelZeroMemoryProviderParamsCreate(&params));
+  UMF_CALL_THROWS(umfLevelZeroMemoryProviderParamsSetContext(
+      params, poolDescriptor.hContext->getZeHandle()));
 
   ze_device_handle_t level_zero_device_handle =
       poolDescriptor.hDevice ? poolDescriptor.hDevice->ZeDevice : nullptr;
 
-  umf_ret = umfLevelZeroMemoryProviderParamsSetDevice(params,
-                                                      level_zero_device_handle);
-  if (umf_ret != UMF_RESULT_SUCCESS) {
-    throw umf::umf2urResult(umf_ret);
-  }
+  UMF_CALL_THROWS(umfLevelZeroMemoryProviderParamsSetDevice(
+      params, level_zero_device_handle));
 
-  umf_ret = umfLevelZeroMemoryProviderParamsSetMemoryType(
-      params, urToUmfMemoryType(poolDescriptor.type));
-  if (umf_ret != UMF_RESULT_SUCCESS) {
-    throw umf::umf2urResult(umf_ret);
-  }
+  UMF_CALL_THROWS(umfLevelZeroMemoryProviderParamsSetMemoryType(
+      params, urToUmfMemoryType(poolDescriptor.type)));
 
   std::vector<ze_device_handle_t> residentZeHandles;
 
@@ -122,11 +115,8 @@ makePool(usm::umf_disjoint_pool_config_t *poolParams,
       residentZeHandles.push_back(device->ZeDevice);
     }
 
-    umf_ret = umfLevelZeroMemoryProviderParamsSetResidentDevices(
-        params, residentZeHandles.data(), residentZeHandles.size());
-    if (umf_ret != UMF_RESULT_SUCCESS) {
-      throw umf::umf2urResult(umf_ret);
-    }
+    UMF_CALL_THROWS(umfLevelZeroMemoryProviderParamsSetResidentDevices(
+        params, residentZeHandles.data(), residentZeHandles.size()));
   }
 
   auto [ret, provider] =
@@ -137,16 +127,16 @@ makePool(usm::umf_disjoint_pool_config_t *poolParams,
 
   if (!poolParams) {
     auto [ret, poolHandle] = umf::poolMakeUniqueFromOps(
-        umfProxyPoolOps(), std::move(provider), nullptr);
+        umfProxyPoolOps(), std::move(provider), nullptr, poolDescriptor);
     if (ret != UMF_RESULT_SUCCESS)
       throw umf::umf2urResult(ret);
     return std::move(poolHandle);
   } else {
     auto umfParams = getUmfParamsHandle(*poolParams);
 
-    auto [ret, poolHandle] =
-        umf::poolMakeUniqueFromOps(umfDisjointPoolOps(), std::move(provider),
-                                   static_cast<void *>(umfParams.get()));
+    auto [ret, poolHandle] = umf::poolMakeUniqueFromOps(
+        umfDisjointPoolOps(), std::move(provider),
+        static_cast<void *>(umfParams.get()), poolDescriptor);
     if (ret != UMF_RESULT_SUCCESS)
       throw umf::umf2urResult(ret);
     return std::move(poolHandle);
@@ -366,6 +356,19 @@ urUSMFree(ur_context_handle_t hContext, ///< [in] handle of the context object
   return exceptionToResult(std::current_exception());
 }
 
+static usm::pool_descriptor *getPoolDescriptor(const void *ptr) {
+  auto umfPool = umfPoolByPtr(ptr);
+  if (!umfPool) {
+    logger::error("urUSMGetMemAllocInfo: no memory associated with given ptr");
+    throw UR_RESULT_ERROR_INVALID_VALUE;
+  }
+
+  usm::pool_descriptor *poolDesc;
+  UMF_CALL_THROWS(umfPoolGetTag(umfPool, reinterpret_cast<void **>(&poolDesc)));
+
+  return poolDesc;
+}
+
 ur_result_t urUSMGetMemAllocInfo(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     const void *ptr,              ///< [in] pointer to USM memory object
@@ -377,48 +380,24 @@ ur_result_t urUSMGetMemAllocInfo(
     size_t *pPropValueSizeRet ///< [out][optional] bytes returned in USM
                               ///< allocation property
     ) try {
-  ze_device_handle_t zeDeviceHandle;
-  ZeStruct<ze_memory_allocation_properties_t> zeMemoryAllocationProperties;
-
-  // TODO: implement this using UMF once
-  // https://github.com/oneapi-src/unified-memory-framework/issues/686
-  // https://github.com/oneapi-src/unified-memory-framework/issues/687
-  // are implemented
-  ZE2UR_CALL(zeMemGetAllocProperties,
-             (hContext->getZeHandle(), ptr, &zeMemoryAllocationProperties,
-              &zeDeviceHandle));
 
   UrReturnHelper ReturnValue(propValueSize, pPropValue, pPropValueSizeRet);
   switch (propName) {
   case UR_USM_ALLOC_INFO_TYPE: {
-    ur_usm_type_t memAllocType;
-    switch (zeMemoryAllocationProperties.type) {
-    case ZE_MEMORY_TYPE_UNKNOWN:
-      memAllocType = UR_USM_TYPE_UNKNOWN;
-      break;
-    case ZE_MEMORY_TYPE_HOST:
-      memAllocType = UR_USM_TYPE_HOST;
-      break;
-    case ZE_MEMORY_TYPE_DEVICE:
-      memAllocType = UR_USM_TYPE_DEVICE;
-      break;
-    case ZE_MEMORY_TYPE_SHARED:
-      memAllocType = UR_USM_TYPE_SHARED;
-      break;
-    default:
-      logger::error("urUSMGetMemAllocInfo: unexpected usm memory type");
-      return UR_RESULT_ERROR_INVALID_VALUE;
+    try {
+      auto poolDesc = getPoolDescriptor(ptr);
+      return ReturnValue(poolDesc->type);
+    } catch (...) {
+      return ReturnValue(UR_USM_TYPE_UNKNOWN);
     }
-    return ReturnValue(memAllocType);
   }
-  case UR_USM_ALLOC_INFO_DEVICE:
-    if (zeDeviceHandle) {
-      auto Platform = hContext->getPlatform();
-      auto Device = Platform->getDeviceFromNativeHandle(zeDeviceHandle);
-      return Device ? ReturnValue(Device) : UR_RESULT_ERROR_INVALID_VALUE;
-    } else {
-      return UR_RESULT_ERROR_INVALID_VALUE;
-    }
+  case UR_USM_ALLOC_INFO_DEVICE: {
+    auto poolDesc = getPoolDescriptor(ptr);
+    return ReturnValue(poolDesc->hDevice);
+  }
+  // TODO: implement this using UMF once
+  // https://github.com/oneapi-src/unified-memory-framework/issues/686
+  // is implemented
   case UR_USM_ALLOC_INFO_BASE_PTR: {
     void *base;
     ZE2UR_CALL(zeMemGetAddressRange,
@@ -432,9 +411,10 @@ ur_result_t urUSMGetMemAllocInfo(
     return ReturnValue(size);
   }
   case UR_USM_ALLOC_INFO_POOL: {
-    // TODO
-    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-  default:
+    auto poolDesc = getPoolDescriptor(ptr);
+    return ReturnValue(poolDesc->poolHandle);
+  }
+  default: {
     logger::error("urUSMGetMemAllocInfo: unsupported ParamName");
     return UR_RESULT_ERROR_INVALID_VALUE;
   }
