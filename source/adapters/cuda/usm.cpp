@@ -433,6 +433,18 @@ ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t Context,
   }
 }
 
+ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t Context,
+                                             ur_device_handle_t Device,
+                                             ur_usm_pool_desc_t *PoolDesc)
+    : Context{Context}, Device{Device} {
+  if (!(PoolDesc->flags & UR_USM_POOL_FLAG_USE_NATIVE_MEMORY_POOL_EXP))
+    throw;
+
+  // TODO: what flags should be used here. Moreover what flags should have
+  // UR counterparts?
+  UR_CHECK_ERROR(cuMemPoolCreate(&CUmemPool, 0));
+}
+
 bool ur_usm_pool_handle_t_::hasUMFPool(umf_memory_pool_t *umf_pool) {
   return DeviceMemPool.get() == umf_pool || SharedMemPool.get() == umf_pool ||
          HostMemPool.get() == umf_pool;
@@ -467,6 +479,28 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMPoolCreate(
   std::ignore = Pool;
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 #endif
+}
+
+UR_APIEXPORT ur_result_t UR_APICALL urUSMPoolCreateExp(
+    ur_context_handle_t Context,  ///< [in] handle of the context object
+    ur_device_handle_t Device,    ///< [in] handle of the device object
+    ur_usm_pool_desc_t *PoolDesc, ///< [in] pointer to USM pool descriptor.
+                                  ///< Can be chained with
+                                  ///< ::ur_usm_pool_limits_desc_t
+    ur_usm_pool_handle_t *Pool    ///< [out] pointer to USM memory pool
+) {
+  // This entry point only supports native mem pools
+  if (!(PoolDesc->flags & UR_USM_POOL_FLAG_USE_NATIVE_MEMORY_POOL_EXP))
+    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+  try {
+    *Pool = reinterpret_cast<ur_usm_pool_handle_t>(
+        new ur_usm_pool_handle_t_(Context, Device, PoolDesc));
+  } catch (ur_result_t err) {
+    return err;
+  } catch (...) {
+    return UR_RESULT_ERROR_UNKNOWN;
+  }
+  return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urUSMPoolRetain(
