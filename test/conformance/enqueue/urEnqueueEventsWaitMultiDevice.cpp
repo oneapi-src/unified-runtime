@@ -189,10 +189,12 @@ TEST_P(urEnqueueEventsWaitMultiDeviceMTTest, EnqueueWaitSingleQueueMultiOps) {
 }
 
 TEST_P(urEnqueueEventsWaitMultiDeviceMTTest, EnqueueWaitOnAllQueues) {
-    // This is a flaky fail when UR_CONFORMANCE_TEST_LOADER=ON
+    // Fails when -fsanitize=cfi
+#ifdef UR_USE_CFI
     if (getParam().value) {
         UUR_KNOWN_FAILURE_ON(uur::OpenCL{});
     }
+#endif
 
     std::vector<uur::raii::Event> eventsRaii(devices.size());
     std::vector<ur_event_handle_t> events(devices.size());

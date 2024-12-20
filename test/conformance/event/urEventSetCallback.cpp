@@ -49,9 +49,6 @@ TEST_P(urEventSetCallbackTest, ValidateParameters) {
     UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
     UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
 
-    // This test has issues when UR_CONFORMANCE_TEST_LOADER=ON
-    UUR_KNOWN_FAILURE_ON(uur::OpenCL{});
-
     struct CallbackParameters {
         ur_event_handle_t event;
         ur_execution_info_t execStatus;
@@ -182,9 +179,6 @@ using urEventSetCallbackNegativeTest = uur::event::urEventTest;
 void emptyCallback(ur_event_handle_t, ur_execution_info_t, void *) {}
 
 TEST_P(urEventSetCallbackNegativeTest, InvalidNullHandleEvent) {
-    // This test has issues when UR_CONFORMANCE_TEST_LOADER=ON
-    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
-
     ASSERT_EQ_RESULT(urEventSetCallback(
                          nullptr, ur_execution_info_t::UR_EXECUTION_INFO_QUEUED,
                          emptyCallback, nullptr),

@@ -51,6 +51,10 @@ function(add_conformance_test name)
         GTest::gtest_main
         unit_tests_helpers)
 
+    if(UR_USE_CFI)
+        target_compile_definitions(${TEST_TARGET_NAME} PRIVATE UR_USE_CFI)
+    endif()
+
     if(UR_BUILD_ADAPTER_CUDA OR UR_BUILD_ADAPTER_ALL)
         add_test_adapter(${name} adapter_cuda CUDA)
     endif()
