@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include <array>
+#include <memory>
 #include <uur/fixtures.h>
 #include <uur/known_failure.h>
 
@@ -469,38 +470,68 @@ TEST_P(urEnqueueKernelLaunchWithVirtualMemory, Success) {
         ASSERT_EQ(fill_val, data.at(i));
     }
 }
-/* this is not a proper multi device test, making it one might require a whole
- * parallel chain on multi device fixtures for kernel
-struct urEnqueueKernelLaunchMultiDeviceTest : public urEnqueueKernelLaunchTest {
+
+struct urEnqueueKernelLaunchMultiDeviceTest
+    : public uur::urMultiDeviceContextTest {
     void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(urEnqueueKernelLaunchTest::SetUp());
+        UUR_RETURN_ON_FATAL_FAILURE(uur::urMultiDeviceContextTest::SetUp());
         queues.reserve(uur::DevicesEnvironment::instance->devices.size());
-        for (const auto &device : uur::DevicesEnvironment::instance->devices) {
+        for (const auto &device : devices) {
             ur_queue_handle_t queue = nullptr;
             ASSERT_SUCCESS(urQueueCreate(this->context, device, 0, &queue));
             queues.push_back(queue);
         }
+        auto kernelName =
+            uur::KernelsEnvironment::instance->GetEntryPointNames("foo")[0];
+
+        uur::KernelsEnvironment::instance->LoadSource("foo", platform,
+                                                      il_binary);
+
+        ASSERT_SUCCESS(uur::KernelsEnvironment::instance->CreateProgram(
+            platform, context, devices[0], *il_binary, nullptr, &program));
+
+        ASSERT_SUCCESS(urProgramBuild(context, program, nullptr));
+        ASSERT_SUCCESS(urKernelCreate(program, kernelName.data(), &kernel));
     }
 
     void TearDown() override {
         for (const auto &queue : queues) {
             EXPECT_SUCCESS(urQueueRelease(queue));
         }
-        UUR_RETURN_ON_FATAL_FAILURE(urEnqueueKernelLaunchTest::TearDown());
+        if (program) {
+            EXPECT_SUCCESS(urProgramRelease(program));
+        }
+        if (kernel) {
+            EXPECT_SUCCESS(urKernelRelease(kernel));
+        }
+        UUR_RETURN_ON_FATAL_FAILURE(uur::urMultiDeviceContextTest::TearDown());
     }
 
+    ur_program_handle_t program = nullptr;
+    ur_kernel_handle_t kernel = nullptr;
+
+    std::shared_ptr<std::vector<char>> il_binary;
     std::vector<ur_queue_handle_t> queues;
+
+    uint32_t val = 42;
+    size_t global_size = 32;
+    size_t global_offset = 0;
+    size_t n_dimensions = 1;
 };
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueKernelLaunchMultiDeviceTest);
+UUR_INSTANTIATE_PLATFORM_TEST_SUITE_P(urEnqueueKernelLaunchMultiDeviceTest);
 
 // TODO: rewrite this test, right now it only works for a single queue
 // (the context is only created for one device)
 TEST_P(urEnqueueKernelLaunchMultiDeviceTest, KernelLaunchReadDifferentQueues) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
     UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
 
+    uur::KernelLaunchHelper helper =
+        uur::KernelLaunchHelper{platform, context, kernel, queues[0]};
+
     ur_mem_handle_t buffer = nullptr;
-    AddBuffer1DArg(sizeof(val) * global_size, &buffer);
-    AddPodArg(val);
+    helper.AddBuffer1DArg(sizeof(val) * global_size, &buffer, nullptr);
+    helper.AddPodArg(val);
     ASSERT_SUCCESS(urEnqueueKernelLaunch(queues[0], kernel, n_dimensions,
                                          &global_offset, &global_size, nullptr,
                                          0, nullptr, nullptr));
@@ -519,7 +550,7 @@ TEST_P(urEnqueueKernelLaunchMultiDeviceTest, KernelLaunchReadDifferentQueues) {
                                               nullptr, nullptr));
         ASSERT_EQ(val, output) << "Result on queue " << i << " did not match!";
     }
-}*/
+}
 
 struct urEnqueueKernelLaunchUSMLinkedList
     : uur::urKernelTestWithParam<uur::BoolTestParam> {

@@ -32,11 +32,6 @@ static std::unordered_map<ur_usm_alloc_info_t, size_t> usm_info_size_map = {
 };
 
 TEST_P(urUSMGetMemAllocInfoTest, Success) {
-    // These fail on native cpu because the fixture ends up doing a
-    // urQueueFlush() during TearDown and native cpu returns UNSUPPORTED_FEATURE
-    // this could potentially be resolved by making it a no-op instead
-    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
-
     size_t size = 0;
     auto alloc_info = getParam();
 
