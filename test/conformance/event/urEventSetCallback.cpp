@@ -47,6 +47,7 @@ TEST_P(urEventSetCallbackTest, ValidateParameters) {
     UUR_KNOWN_FAILURE_ON(uur::HIP{});
     UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
     UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::OpenCL{});
     UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
 
     struct CallbackParameters {

@@ -9,6 +9,10 @@
 struct urUSMGetMemAllocInfoTest
     : uur::urUSMDeviceAllocTestWithParam<ur_usm_alloc_info_t> {
     void SetUp() override {
+        // The setup for the parent fixture does a urQueueFlush, which isn't
+        // supported by native cpu.
+        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
         use_pool = getParam() == UR_USM_ALLOC_INFO_POOL;
         UUR_RETURN_ON_FATAL_FAILURE(
             uur::urUSMDeviceAllocTestWithParam<ur_usm_alloc_info_t>::SetUp());
@@ -91,7 +95,14 @@ TEST_P(urUSMGetMemAllocInfoTest, Success) {
     }
 }
 
-using urUSMGetMemAllocInfoNegativeTest = uur::urUSMDeviceAllocTest;
+struct urUSMGetMemAllocInfoNegativeTest : uur::urUSMDeviceAllocTest {
+    void SetUp() override {
+        // The setup for the parent fixture does a urQueueFlush, which isn't
+        // supported by native cpu.
+        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+        UUR_RETURN_ON_FATAL_FAILURE(uur::urUSMDeviceAllocTest::SetUp());
+    }
+};
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urUSMGetMemAllocInfoNegativeTest);
 
 TEST_P(urUSMGetMemAllocInfoNegativeTest, InvalidNullHandleContext) {

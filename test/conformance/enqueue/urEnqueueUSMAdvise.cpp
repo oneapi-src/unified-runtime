@@ -6,8 +6,17 @@
 #include <uur/fixtures.h>
 #include <uur/known_failure.h>
 
-using urEnqueueUSMAdviseWithParamTest =
-    uur::urUSMDeviceAllocTestWithParam<ur_usm_advice_flag_t>;
+struct urEnqueueUSMAdviseWithParamTest
+    : uur::urUSMDeviceAllocTestWithParam<ur_usm_advice_flag_t> {
+    void SetUp() override {
+        // The setup for the parent fixture does a urQueueFlush, which isn't
+        // supported by native cpu.
+        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
+        UUR_RETURN_ON_FATAL_FAILURE(
+            uur::urUSMDeviceAllocTestWithParam<ur_usm_advice_flag_t>::SetUp());
+    }
+};
 UUR_DEVICE_TEST_SUITE_P(urEnqueueUSMAdviseWithParamTest,
                         ::testing::Values(UR_USM_ADVICE_FLAG_DEFAULT),
                         uur::deviceTestWithParamPrinter<ur_usm_advice_flag_t>);
@@ -18,7 +27,6 @@ TEST_P(urEnqueueUSMAdviseWithParamTest, Success) {
     // TODO: codify this in the spec and account for it in the CTS.
     UUR_KNOWN_FAILURE_ON(uur::HIP{});
     UUR_KNOWN_FAILURE_ON(uur::CUDA{});
-    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
 
     ur_event_handle_t advise_event = nullptr;
     ASSERT_SUCCESS(urEnqueueUSMAdvise(queue, ptr, allocation_size, getParam(),
@@ -36,7 +44,12 @@ TEST_P(urEnqueueUSMAdviseWithParamTest, Success) {
     ASSERT_SUCCESS(urEventRelease(advise_event));
 }
 
-using urEnqueueUSMAdviseTest = uur::urUSMDeviceAllocTest;
+struct urEnqueueUSMAdviseTest : uur::urUSMDeviceAllocTest {
+    void SetUp() override {
+        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+        uur::urUSMDeviceAllocTest::SetUp();
+    }
+};
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueUSMAdviseTest);
 
 TEST_P(urEnqueueUSMAdviseTest, MultipleParamsSuccess) {
@@ -45,7 +58,6 @@ TEST_P(urEnqueueUSMAdviseTest, MultipleParamsSuccess) {
     // TODO: codify this in the spec and account for it in the CTS.
     UUR_KNOWN_FAILURE_ON(uur::HIP{});
     UUR_KNOWN_FAILURE_ON(uur::CUDA{});
-    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
 
     ASSERT_SUCCESS(urEnqueueUSMAdvise(queue, ptr, allocation_size,
                                       UR_USM_ADVICE_FLAG_SET_READ_MOSTLY |
@@ -54,24 +66,18 @@ TEST_P(urEnqueueUSMAdviseTest, MultipleParamsSuccess) {
 }
 
 TEST_P(urEnqueueUSMAdviseTest, InvalidNullHandleQueue) {
-    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
-
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_HANDLE,
                      urEnqueueUSMAdvise(nullptr, ptr, allocation_size,
                                         UR_USM_ADVICE_FLAG_DEFAULT, nullptr));
 }
 
 TEST_P(urEnqueueUSMAdviseTest, InvalidNullPointerMem) {
-    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
-
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_POINTER,
                      urEnqueueUSMAdvise(queue, nullptr, allocation_size,
                                         UR_USM_ADVICE_FLAG_DEFAULT, nullptr));
 }
 
 TEST_P(urEnqueueUSMAdviseTest, InvalidEnumeration) {
-    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
-
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_ENUMERATION,
                      urEnqueueUSMAdvise(queue, ptr, allocation_size,
                                         UR_USM_ADVICE_FLAG_FORCE_UINT32,
@@ -79,8 +85,6 @@ TEST_P(urEnqueueUSMAdviseTest, InvalidEnumeration) {
 }
 
 TEST_P(urEnqueueUSMAdviseTest, InvalidSizeZero) {
-    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
-
     ASSERT_EQ_RESULT(
         UR_RESULT_ERROR_INVALID_SIZE,
         urEnqueueUSMAdvise(queue, ptr, 0, UR_USM_ADVICE_FLAG_DEFAULT, nullptr));
@@ -89,7 +93,6 @@ TEST_P(urEnqueueUSMAdviseTest, InvalidSizeZero) {
 TEST_P(urEnqueueUSMAdviseTest, InvalidSizeTooLarge) {
     UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
     UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
-    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
 
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
                      urEnqueueUSMAdvise(queue, ptr, allocation_size * 2,
@@ -97,8 +100,6 @@ TEST_P(urEnqueueUSMAdviseTest, InvalidSizeTooLarge) {
 }
 
 TEST_P(urEnqueueUSMAdviseTest, NonCoherentDeviceMemorySuccessOrWarning) {
-    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
-
     ur_result_t result =
         urEnqueueUSMAdvise(queue, ptr, allocation_size,
                            UR_USM_ADVICE_FLAG_SET_NON_COHERENT_MEMORY, nullptr);

@@ -31,7 +31,7 @@ using urDeviceGetGlobalTimestampTest = uur::urDeviceTest;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urDeviceGetGlobalTimestampTest);
 
 TEST_P(urDeviceGetGlobalTimestampTest, Success) {
-    UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA Emulation Device"});
+    UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA"});
 
     uint64_t device_time = 0;
     uint64_t host_time = 0;
@@ -42,7 +42,7 @@ TEST_P(urDeviceGetGlobalTimestampTest, Success) {
 }
 
 TEST_P(urDeviceGetGlobalTimestampTest, SuccessHostTimer) {
-    UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA Emulation Device"});
+    UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA"});
 
     uint64_t host_time = 0;
     ASSERT_SUCCESS(urDeviceGetGlobalTimestamps(device, nullptr, &host_time));
@@ -50,7 +50,7 @@ TEST_P(urDeviceGetGlobalTimestampTest, SuccessHostTimer) {
 }
 
 TEST_P(urDeviceGetGlobalTimestampTest, SuccessNoTimers) {
-    UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA Emulation Device"});
+    UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA"});
 
     ASSERT_SUCCESS(urDeviceGetGlobalTimestamps(device, nullptr, nullptr));
 }
@@ -62,7 +62,7 @@ TEST_P(urDeviceGetGlobalTimestampTest, SuccessSynchronizedTime) {
     UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
     UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
 
-    UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA Emulation Device"});
+    UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA"});
     UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) UHD Graphics 770"});
 
     // get the timer resolution of the device

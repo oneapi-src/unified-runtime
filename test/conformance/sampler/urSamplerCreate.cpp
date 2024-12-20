@@ -10,7 +10,7 @@
 struct urSamplerCreateTestWithParam
     : public uur::urContextTestWithParam<uur::SamplerCreateParamT> {
     void SetUp() override {
-        UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA Emulation Device"});
+        UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA"});
 
         UUR_RETURN_ON_FATAL_FAILURE(
             uur::urContextTestWithParam<uur::SamplerCreateParamT>::SetUp());

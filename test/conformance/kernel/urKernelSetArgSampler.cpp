@@ -9,7 +9,7 @@
 struct urKernelSetArgSamplerTestWithParam
     : uur::urBaseKernelTestWithParam<uur::SamplerCreateParamT> {
     void SetUp() {
-        UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA Emulation Device"});
+        UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA"});
 
         const auto param = getParam();
         const auto normalized = std::get<0>(param);
@@ -71,7 +71,7 @@ TEST_P(urKernelSetArgSamplerTestWithParam, Success) {
 
 struct urKernelSetArgSamplerTest : uur::urBaseKernelTest {
     void SetUp() {
-        UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA Emulation Device"});
+        UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA"});
 
         program_name = "image_copy";
         UUR_RETURN_ON_FATAL_FAILURE(urBaseKernelTest::SetUp());

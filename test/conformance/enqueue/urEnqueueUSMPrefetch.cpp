@@ -6,8 +6,15 @@
 #include <uur/fixtures.h>
 #include <uur/known_failure.h>
 
-using urEnqueueUSMPrefetchWithParamTest =
-    uur::urUSMDeviceAllocTestWithParam<ur_usm_migration_flag_t>;
+struct urEnqueueUSMPrefetchWithParamTest
+    : uur::urUSMDeviceAllocTestWithParam<ur_usm_migration_flag_t> {
+    void SetUp() override {
+        // The setup for the parent fixture does a urQueueFlush, which isn't
+        // supported by native cpu.
+        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+        uur::urUSMDeviceAllocTestWithParam<ur_usm_migration_flag_t>::SetUp();
+    }
+};
 
 UUR_DEVICE_TEST_SUITE_P(
     urEnqueueUSMPrefetchWithParamTest,
@@ -88,6 +95,8 @@ TEST_P(urEnqueueUSMPrefetchWithParamTest, CheckWaitEvent) {
 
 struct urEnqueueUSMPrefetchTest : uur::urUSMDeviceAllocTest {
     void SetUp() override {
+        // The setup for the parent fixture does a urQueueFlush, which isn't
+        // supported by native cpu.
         UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
         UUR_RETURN_ON_FATAL_FAILURE(uur::urUSMDeviceAllocTest::SetUp());
     }

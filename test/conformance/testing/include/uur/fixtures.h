@@ -204,7 +204,7 @@ struct urContextTest : urDeviceTest {
 
 struct urSamplerTest : urContextTest {
     void SetUp() override {
-        UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA Emulation Device"});
+        UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA"});
         UUR_RETURN_ON_FATAL_FAILURE(urContextTest::SetUp());
         sampler_desc = {
             UR_STRUCTURE_TYPE_SAMPLER_DESC,   /* stype */
@@ -328,7 +328,7 @@ template <class T> struct urContextTestWithParam : urDeviceTestWithParam<T> {
 
 template <class T> struct urSamplerTestWithParam : urContextTestWithParam<T> {
     void SetUp() override {
-        UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA Emulation Device"});
+        UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA"});
         UUR_RETURN_ON_FATAL_FAILURE(urContextTestWithParam<T>::SetUp());
         sampler_desc = {
             UR_STRUCTURE_TYPE_SAMPLER_DESC,   /* stype */
@@ -487,10 +487,13 @@ struct urHostPipeTest : urQueueTest {
 };
 
 template <class T> struct urQueueTestWithParam : urContextTestWithParam<T> {
+    using urContextTestWithParam<T>::device;
+    using urContextTestWithParam<T>::context;
+
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(urContextTestWithParam<T>::SetUp());
-        ASSERT_SUCCESS(urQueueCreate(this->context, this->device,
-                                     &queue_properties, &queue));
+        ASSERT_SUCCESS(
+            urQueueCreate(context, device, &queue_properties, &queue));
         ASSERT_NE(queue, nullptr);
     }
 

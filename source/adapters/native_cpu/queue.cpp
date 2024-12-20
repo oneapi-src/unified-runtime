@@ -83,6 +83,5 @@ UR_APIEXPORT ur_result_t UR_APICALL urQueueFinish(ur_queue_handle_t hQueue) {
 UR_APIEXPORT ur_result_t UR_APICALL urQueueFlush(ur_queue_handle_t hQueue) {
   std::ignore = hQueue;
 
-  // The native cpu queue is greedy, flushes are a no-op.
-  return UR_RESULT_SUCCESS;
+  DIE_NO_IMPLEMENTATION;
 }
