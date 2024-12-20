@@ -78,9 +78,9 @@ inline bool hasDevicePartitionSupport(ur_device_handle_t device,
            properties.end();
 }
 
-struct urAllDevicesTest : urSelectedPlatformTest {
+struct urAllDevicesTest : urPlatformTest {
     void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(urSelectedPlatformTest::SetUp());
+        UUR_RETURN_ON_FATAL_FAILURE(urPlatformTest::SetUp());
         auto devicesPair = GetDevices(platform);
         if (!devicesPair.first) {
             FAIL() << "Failed to get devices";
@@ -92,7 +92,7 @@ struct urAllDevicesTest : urSelectedPlatformTest {
         for (auto &device : devices) {
             EXPECT_SUCCESS(urDeviceRelease(device));
         }
-        UUR_RETURN_ON_FATAL_FAILURE(urSelectedPlatformTest::TearDown());
+        UUR_RETURN_ON_FATAL_FAILURE(urPlatformTest::TearDown());
     }
 
     std::vector<ur_device_handle_t> devices;
@@ -628,16 +628,9 @@ struct urMultiQueueTestWithParam : urContextTestWithParam<T> {
 };
 
 template <size_t MinDevices = 2>
-<<<<<<< HEAD
-struct urMultiDeviceContextTestTemplate : urSelectedPlatformTest {
-    void SetUp() override {
-        UUR_RETURN_ON_FATAL_FAILURE(urSelectedPlatformTest::SetUp());
-        auto &devices = DevicesEnvironment::instance->devices;
-=======
 struct urMultiDeviceContextTestTemplate : urAllDevicesTest {
     void SetUp() override {
         UUR_RETURN_ON_FATAL_FAILURE(urAllDevicesTest::SetUp());
->>>>>>> 4d4200bc (Initial attempt at parameterizing the cts over all available devices.)
         if (devices.size() < MinDevices) {
             GTEST_SKIP();
         }
@@ -649,11 +642,7 @@ struct urMultiDeviceContextTestTemplate : urAllDevicesTest {
         if (context) {
             ASSERT_SUCCESS(urContextRelease(context));
         }
-<<<<<<< HEAD
-        UUR_RETURN_ON_FATAL_FAILURE(urSelectedPlatformTest::TearDown());
-=======
         UUR_RETURN_ON_FATAL_FAILURE(urAllDevicesTest::TearDown());
->>>>>>> 4d4200bc (Initial attempt at parameterizing the cts over all available devices.)
     }
 
     ur_context_handle_t context = nullptr;
