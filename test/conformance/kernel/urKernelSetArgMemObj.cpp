@@ -24,7 +24,7 @@ struct urKernelSetArgMemObjTest : uur::urKernelTest {
 
     ur_mem_handle_t buffer = nullptr;
 };
-UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urKernelSetArgMemObjTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urKernelSetArgMemObjTest);
 
 TEST_P(urKernelSetArgMemObjTest, Success) {
     ASSERT_SUCCESS(urKernelSetArgMemObj(kernel, 0, nullptr, buffer));

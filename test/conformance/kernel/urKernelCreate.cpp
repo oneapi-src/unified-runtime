@@ -26,7 +26,7 @@ struct urKernelCreateTest : uur::urProgramTest {
     std::string kernel_name;
     ur_kernel_handle_t kernel = nullptr;
 };
-UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urKernelCreateTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urKernelCreateTest);
 
 TEST_P(urKernelCreateTest, Success) {
     ASSERT_SUCCESS(urKernelCreate(program, kernel_name.data(), &kernel));

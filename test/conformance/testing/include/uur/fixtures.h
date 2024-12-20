@@ -101,11 +101,6 @@ struct urAllDevicesTest : urPlatformTest {
 struct urDeviceTest : ::testing::Test,
                       ::testing::WithParamInterface<DeviceTuple> {
     void SetUp() override {
-        // TODO: change these to accessors like getDevice, getPlatform etc?
-        // downside: touch a lot of tests (many many tests just use `device` in
-        // place)
-        // upside: using the accessors means SetUp doesn't need to run before
-        // you can access device etc. to check for test compatibility
         device = GetParam().device;
         platform = GetParam().platform;
         adapter = GetParam().adapter;
@@ -137,14 +132,6 @@ struct urDeviceTest : ::testing::Test,
     INSTANTIATE_TEST_SUITE_P(                                                  \
         , FIXTURE,                                                             \
         ::testing::ValuesIn(uur::DevicesEnvironment::instance->devices),       \
-        [](const ::testing::TestParamInfo<uur::DeviceTuple> &info) {           \
-            return uur::GetPlatformAndDeviceName(info.param.device);           \
-        })
-
-#define UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(FIXTURE)                           \
-    INSTANTIATE_TEST_SUITE_P(                                                  \
-        , FIXTURE,                                                             \
-        ::testing::ValuesIn(uur::KernelsEnvironment::instance->devices),       \
         [](const ::testing::TestParamInfo<uur::DeviceTuple> &info) {           \
             return uur::GetPlatformAndDeviceName(info.param.device);           \
         })

@@ -105,7 +105,7 @@ struct urKernelSetArgSamplerTest : uur::urBaseKernelTest {
     ur_sampler_handle_t sampler = nullptr;
 };
 
-UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urKernelSetArgSamplerTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urKernelSetArgSamplerTest);
 
 TEST_P(urKernelSetArgSamplerTest, SuccessWithProps) {
     ur_kernel_arg_sampler_properties_t props{

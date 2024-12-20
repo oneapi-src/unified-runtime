@@ -28,7 +28,7 @@ struct urProgramGetBuildInfoSingleTest : uur::urProgramTest {
         ASSERT_SUCCESS(urProgramBuild(this->context, program, nullptr));
     }
 };
-UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urProgramGetBuildInfoSingleTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urProgramGetBuildInfoSingleTest);
 
 TEST_P(urProgramGetBuildInfoTest, Success) {
     auto property_name = getParam();

@@ -30,7 +30,7 @@ struct urProgramGetInfoSingleTest : uur::urProgramTest {
         ASSERT_SUCCESS(urProgramBuild(this->context, program, nullptr));
     }
 };
-UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urProgramGetInfoSingleTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urProgramGetInfoSingleTest);
 
 TEST_P(urProgramGetInfoTest, Success) {
     auto property_name = getParam();

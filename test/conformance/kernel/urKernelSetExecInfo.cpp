@@ -7,7 +7,7 @@
 #include <uur/known_failure.h>
 
 using urKernelSetExecInfoTest = uur::urKernelTest;
-UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urKernelSetExecInfoTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urKernelSetExecInfoTest);
 
 TEST_P(urKernelSetExecInfoTest, SuccessIndirectAccess) {
     UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
@@ -59,7 +59,7 @@ struct urKernelSetExecInfoUSMPointersTest : uur::urKernelTest {
     size_t allocation_size = 16;
     void *allocation = nullptr;
 };
-UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urKernelSetExecInfoUSMPointersTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urKernelSetExecInfoUSMPointersTest);
 
 TEST_P(urKernelSetExecInfoUSMPointersTest, SuccessHost) {
     UUR_KNOWN_FAILURE_ON(uur::LevelZero{});

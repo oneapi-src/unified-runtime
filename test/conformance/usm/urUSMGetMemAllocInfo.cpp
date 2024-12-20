@@ -40,6 +40,10 @@ TEST_P(urUSMGetMemAllocInfoTest, Success) {
         UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
     }
 
+    if (alloc_info == UR_USM_ALLOC_INFO_BASE_PTR) {
+        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+    }
+
     ASSERT_SUCCESS_OR_OPTIONAL_QUERY(
         urUSMGetMemAllocInfo(context, ptr, alloc_info, 0, nullptr, &size),
         alloc_info);

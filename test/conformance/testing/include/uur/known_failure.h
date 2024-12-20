@@ -85,7 +85,7 @@ inline bool isKnownFailureOn(ur_adapter_handle_t adapter,
 
 inline bool isKnownFailureOn(ur_platform_handle_t platform,
                              const std::vector<Matcher> &matchers) {
-    ur_adapter_handle_t adapter;
+    ur_adapter_handle_t adapter = nullptr;
     urPlatformGetInfo(platform, UR_PLATFORM_INFO_ADAPTER,
                       sizeof(ur_adapter_handle_t), &adapter, nullptr);
     for (const auto &matcher : matchers) {
@@ -154,7 +154,7 @@ inline std::string knownFailureMessage(ur_adapter_handle_t adapter) {
 }
 
 inline std::string knownFailureMessage(ur_platform_handle_t platform) {
-    ur_adapter_handle_t adapter;
+    ur_adapter_handle_t adapter = nullptr;
     urPlatformGetInfo(platform, UR_PLATFORM_INFO_ADAPTER,
                       sizeof(ur_adapter_handle_t), &adapter, nullptr);
     std::string backend = uur::GetAdapterBackendName(adapter);

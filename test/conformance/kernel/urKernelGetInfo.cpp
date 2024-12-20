@@ -17,7 +17,7 @@ UUR_DEVICE_TEST_SUITE_P(
     uur::deviceTestWithParamPrinter<ur_kernel_info_t>);
 
 using urKernelGetInfoSingleTest = uur::urKernelExecutionTest;
-UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urKernelGetInfoSingleTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urKernelGetInfoSingleTest);
 
 TEST_P(urKernelGetInfoTest, Success) {
     auto property_name = getParam();

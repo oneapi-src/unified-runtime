@@ -17,7 +17,7 @@ struct urProgramSetSpecializationConstantsTest : uur::urKernelExecutionTest {
     ur_specialization_constant_info_t info = {0, sizeof(spec_value),
                                               &spec_value};
 };
-UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urProgramSetSpecializationConstantsTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urProgramSetSpecializationConstantsTest);
 
 struct urProgramSetMultipleSpecializationConstantsTest
     : uur::urKernelExecutionTest {
@@ -27,7 +27,7 @@ struct urProgramSetMultipleSpecializationConstantsTest
         UUR_RETURN_ON_FATAL_FAILURE(urProgramTest::SetUp());
     }
 };
-UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(
     urProgramSetMultipleSpecializationConstantsTest);
 
 TEST_P(urProgramSetSpecializationConstantsTest, Success) {
