@@ -48,20 +48,20 @@ struct urContextGetInfoTestWithInfoParam
         ctx_info_mem_flags_map;
 };
 
-UUR_TEST_SUITE_P(urContextGetInfoTestWithInfoParam,
-                 ::testing::Values(
+UUR_DEVICE_TEST_SUITE_P(urContextGetInfoTestWithInfoParam,
+                        ::testing::Values(
 
-                     UR_CONTEXT_INFO_NUM_DEVICES,                      //
-                     UR_CONTEXT_INFO_DEVICES,                          //
-                     UR_CONTEXT_INFO_USM_MEMCPY2D_SUPPORT,             //
-                     UR_CONTEXT_INFO_USM_FILL2D_SUPPORT,               //
-                     UR_CONTEXT_INFO_REFERENCE_COUNT,                  //
-                     UR_CONTEXT_INFO_ATOMIC_MEMORY_ORDER_CAPABILITIES, //
-                     UR_CONTEXT_INFO_ATOMIC_MEMORY_SCOPE_CAPABILITIES, //
-                     UR_CONTEXT_INFO_ATOMIC_FENCE_ORDER_CAPABILITIES,  //
-                     UR_CONTEXT_INFO_ATOMIC_FENCE_SCOPE_CAPABILITIES   //
-                     ),
-                 uur::deviceTestWithParamPrinter<ur_context_info_t>);
+                            UR_CONTEXT_INFO_NUM_DEVICES,                      //
+                            UR_CONTEXT_INFO_DEVICES,                          //
+                            UR_CONTEXT_INFO_USM_MEMCPY2D_SUPPORT,             //
+                            UR_CONTEXT_INFO_USM_FILL2D_SUPPORT,               //
+                            UR_CONTEXT_INFO_REFERENCE_COUNT,                  //
+                            UR_CONTEXT_INFO_ATOMIC_MEMORY_ORDER_CAPABILITIES, //
+                            UR_CONTEXT_INFO_ATOMIC_MEMORY_SCOPE_CAPABILITIES, //
+                            UR_CONTEXT_INFO_ATOMIC_FENCE_ORDER_CAPABILITIES,  //
+                            UR_CONTEXT_INFO_ATOMIC_FENCE_SCOPE_CAPABILITIES   //
+                            ),
+                        uur::deviceTestWithParamPrinter<ur_context_info_t>);
 
 TEST_P(urContextGetInfoTestWithInfoParam, Success) {
     ur_context_info_t info = getParam();
@@ -83,22 +83,15 @@ TEST_P(urContextGetInfoTestWithInfoParam, Success) {
     case UR_CONTEXT_INFO_NUM_DEVICES: {
         auto returned_num_of_devices =
             reinterpret_cast<uint32_t *>(info_data.data());
-        ASSERT_GE(uur::DevicesEnvironment::instance->devices.size(),
-                  *returned_num_of_devices);
+        ASSERT_EQ(*returned_num_of_devices, 1);
         break;
     }
     case UR_CONTEXT_INFO_DEVICES: {
         auto returned_devices =
             reinterpret_cast<ur_device_handle_t *>(info_data.data());
         size_t devices_count = info_size / sizeof(ur_device_handle_t);
-        ASSERT_GT(devices_count, 0);
-        for (uint32_t i = 0; i < devices_count; i++) {
-            auto &devices = uur::DevicesEnvironment::instance->devices;
-            auto queried_device =
-                std::find(devices.begin(), devices.end(), returned_devices[i]);
-            EXPECT_TRUE(queried_device != devices.end())
-                << "device associated with the context is not valid";
-        }
+        ASSERT_EQ(devices_count, 1);
+        ASSERT_EQ(returned_devices[0], device);
         break;
     }
     case UR_CONTEXT_INFO_REFERENCE_COUNT: {

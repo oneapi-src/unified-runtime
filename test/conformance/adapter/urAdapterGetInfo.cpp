@@ -16,8 +16,6 @@ TEST_P(urAdapterGetInfoTest, Backend) {
     size_t size = 0;
     ASSERT_SUCCESS_OR_OPTIONAL_QUERY(
         urAdapterGetInfo(adapter, info_type, 0, nullptr, &size), info_type);
-    ASSERT_NE(size, 0);
-
     ASSERT_EQ(size, sizeof(ur_adapter_backend_t));
 
     std::vector<char> info_data(size);
@@ -36,6 +34,18 @@ TEST_P(urAdapterGetInfoTest, ReferenceCount) {
     ASSERT_SUCCESS(
         urAdapterGetInfo(adapter, info_type, size, &reference_count, nullptr));
     ASSERT_GE(reference_count, 0);
+}
+
+TEST_P(urAdapterGetInfoTest, Version) {
+    auto info_type = UR_ADAPTER_INFO_VERSION;
+    size_t size = 0;
+    ASSERT_SUCCESS(urAdapterGetInfo(adapter, info_type, 0, nullptr, &size));
+    ASSERT_EQ(size, sizeof(uint32_t));
+
+    uint32_t version = 0;
+    ASSERT_SUCCESS(
+        urAdapterGetInfo(adapter, info_type, size, &version, nullptr));
+    ASSERT_GE(version, 1);
 }
 
 TEST_P(urAdapterGetInfoTest, InvalidNullHandleAdapter) {
