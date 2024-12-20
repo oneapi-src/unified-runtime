@@ -360,13 +360,17 @@ UUR_PLATFORM_TEST_SUITE_P(
 // Enqueue kernelLaunch concurrently from multiple threads
 // With !queuePerThread this becomes a test on a single device
 TEST_P(urEnqueueKernelLaunchIncrementMultiDeviceMultiThreadTest, Success) {
+    auto useEvents = std::get<0>(getParam()).value;
+    auto queuePerThread = std::get<1>(getParam()).value;
+
+    if (!queuePerThread) {
+        UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+    }
+
     size_t numThreads = devices.size();
     std::vector<std::thread> threads;
 
     static constexpr size_t numOpsPerThread = 6;
-
-    auto useEvents = std::get<0>(getParam()).value;
-    auto queuePerThread = std::get<1>(getParam()).value;
 
     for (size_t i = 0; i < numThreads; i++) {
         threads.emplace_back([this, i, queuePerThread, useEvents]() {

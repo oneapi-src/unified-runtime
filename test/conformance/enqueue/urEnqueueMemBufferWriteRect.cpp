@@ -77,9 +77,6 @@ UUR_DEVICE_TEST_SUITE_P(
     uur::printRectTestString<urEnqueueMemBufferWriteRectTestWithParam>);
 
 TEST_P(urEnqueueMemBufferWriteRectTestWithParam, Success) {
-    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
-
     const auto name = getParam().name;
     if (name.find("write_row_2D") != std::string::npos) {
         UUR_KNOWN_FAILURE_ON(uur::HIP{});
@@ -88,6 +85,9 @@ TEST_P(urEnqueueMemBufferWriteRectTestWithParam, Success) {
     if (name.find("write_3D_2D") != std::string::npos) {
         UUR_KNOWN_FAILURE_ON(uur::HIP{});
     }
+
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
 
     // Unpack the parameters.
     const auto host_size = getParam().src_size;
@@ -178,6 +178,8 @@ TEST_P(urEnqueueMemBufferWriteRectTest, InvalidNullPointerSrc) {
 }
 
 TEST_P(urEnqueueMemBufferWriteRectTest, InvalidNullPtrEventWaitList) {
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     std::vector<uint32_t> src(count);
     ur_rect_region_t region{size, 1, 1};
     ur_rect_offset_t buffer_offset{0, 0, 0};

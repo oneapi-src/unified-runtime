@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include <cstring>
-#include <uur/fixtures.h>
 #include <uur/environment.h>
+#include <uur/fixtures.h>
 
 using urPlatformGetInfoTest = uur::urPlatformTestWithParam<ur_platform_info_t>;
 

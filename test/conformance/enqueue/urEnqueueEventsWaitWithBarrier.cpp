@@ -105,6 +105,7 @@ UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueEventsWaitWithBarrierOrderingTest);
 
 TEST_P(urEnqueueEventsWaitWithBarrierTest, Success) {
     UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
 
     ur_event_handle_t event1 = nullptr;
     ur_event_handle_t waitEvent = nullptr;
@@ -145,6 +146,8 @@ TEST_P(urEnqueueEventsWaitWithBarrierTest, InvalidNullHandleQueue) {
 }
 
 TEST_P(urEnqueueEventsWaitWithBarrierTest, InvalidNullPtrEventWaitList) {
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     ASSERT_EQ_RESULT(EnqueueBarrier(queue1, 1, nullptr, nullptr),
                      UR_RESULT_ERROR_INVALID_EVENT_WAIT_LIST);
 

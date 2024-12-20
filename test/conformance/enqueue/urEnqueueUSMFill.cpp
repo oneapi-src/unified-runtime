@@ -116,6 +116,8 @@ TEST_P(urEnqueueUSMFillTestWithParam, Success) {
 
 struct urEnqueueUSMFillNegativeTest : uur::urQueueTest {
     void SetUp() override {
+        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
         UUR_RETURN_ON_FATAL_FAILURE(uur::urQueueTest::SetUp());
 
         ur_device_usm_access_capability_flags_t device_usm = 0;

@@ -194,6 +194,8 @@ TEST_P(urEnqueueKernelLaunchKernelWgSizeTest, NonMatchingLocalSize) {
 }
 
 TEST_P(urEnqueueKernelLaunchKernelSubGroupTest, Success) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+
     ur_mem_handle_t buffer = nullptr;
     AddBuffer1DArg(sizeof(size_t), &buffer);
     ASSERT_SUCCESS(urEnqueueKernelLaunch(

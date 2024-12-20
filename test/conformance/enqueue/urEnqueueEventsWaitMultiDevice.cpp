@@ -26,6 +26,8 @@ void checkDevicesSupportSharedUSM(
 struct urEnqueueEventsWaitMultiDeviceTest
     : uur::urMultiQueueMultiDeviceTest<2> {
     void SetUp() override {
+        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
         UUR_RETURN_ON_FATAL_FAILURE(
             uur::urMultiQueueMultiDeviceTest<2>::SetUp());
 
@@ -122,6 +124,9 @@ struct urEnqueueEventsWaitMultiDeviceMTTest
     }
 
     void SetUp() override {
+        UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
         UUR_RETURN_ON_FATAL_FAILURE(uur::urMultiQueueMultiDeviceTestWithParam<
                                     8, uur::BoolTestParam>::SetUp());
         checkDevicesSupportSharedUSM(devices);

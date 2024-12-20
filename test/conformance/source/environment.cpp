@@ -69,8 +69,7 @@ AdapterEnvironment::AdapterEnvironment() {
 
 PlatformEnvironment *PlatformEnvironment::instance = nullptr;
 
-uur::PlatformEnvironment::PlatformEnvironment()
-    : AdapterEnvironment() {
+uur::PlatformEnvironment::PlatformEnvironment() : AdapterEnvironment() {
     instance = this;
 
     populatePlatforms();

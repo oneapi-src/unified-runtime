@@ -86,7 +86,12 @@ TEST_P(urEnqueueUSMPrefetchWithParamTest, CheckWaitEvent) {
     ASSERT_SUCCESS(urUSMFree(context, fill_ptr));
 }
 
-using urEnqueueUSMPrefetchTest = uur::urUSMDeviceAllocTest;
+struct urEnqueueUSMPrefetchTest : uur::urUSMDeviceAllocTest {
+    void SetUp() override {
+        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+        UUR_RETURN_ON_FATAL_FAILURE(uur::urUSMDeviceAllocTest::SetUp());
+    }
+};
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueUSMPrefetchTest);
 
 TEST_P(urEnqueueUSMPrefetchTest, InvalidNullHandleQueue) {

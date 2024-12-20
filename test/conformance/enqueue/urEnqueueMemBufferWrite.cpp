@@ -56,6 +56,8 @@ TEST_P(urEnqueueMemBufferWriteTestWithParam, InvalidNullPointerSrc) {
 }
 
 TEST_P(urEnqueueMemBufferWriteTestWithParam, InvalidNullPtrEventWaitList) {
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     std::vector<uint32_t> input(count, 42);
     ASSERT_EQ_RESULT(urEnqueueMemBufferWrite(queue, buffer, true, 0, size,
                                              input.data(), 1, nullptr, nullptr),

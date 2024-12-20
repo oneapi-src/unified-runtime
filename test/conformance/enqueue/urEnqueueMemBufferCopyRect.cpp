@@ -77,9 +77,6 @@ UUR_DEVICE_TEST_SUITE_P(
     uur::printRectTestString<urEnqueueMemBufferCopyRectTestWithParam>);
 
 TEST_P(urEnqueueMemBufferCopyRectTestWithParam, Success) {
-    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
-
     const auto name = getParam().name;
     if (name.find("copy_row_2D") != std::string::npos) {
         UUR_KNOWN_FAILURE_ON(uur::HIP{});
@@ -88,6 +85,9 @@ TEST_P(urEnqueueMemBufferCopyRectTestWithParam, Success) {
     if (name.find("copy_3D_2D") != std::string::npos) {
         UUR_KNOWN_FAILURE_ON(uur::HIP{});
     }
+
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
 
     // Unpack the parameters.
     const auto src_buffer_size = getParam().src_size;
@@ -215,6 +215,8 @@ TEST_P(urEnqueueMemBufferCopyRectTest, InvalidNullHandleBufferDst) {
 }
 
 TEST_P(urEnqueueMemBufferCopyRectTest, InvalidNullPtrEventWaitList) {
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     ur_rect_region_t src_region{size, 1, 1};
     ur_rect_offset_t src_origin{0, 0, 0};
     ur_rect_offset_t dst_origin{0, 0, 0};

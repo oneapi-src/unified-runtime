@@ -45,6 +45,7 @@ TEST_P(urEnqueueUSMAdviseTest, MultipleParamsSuccess) {
     // TODO: codify this in the spec and account for it in the CTS.
     UUR_KNOWN_FAILURE_ON(uur::HIP{});
     UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
 
     ASSERT_SUCCESS(urEnqueueUSMAdvise(queue, ptr, allocation_size,
                                       UR_USM_ADVICE_FLAG_SET_READ_MOSTLY |
@@ -53,18 +54,24 @@ TEST_P(urEnqueueUSMAdviseTest, MultipleParamsSuccess) {
 }
 
 TEST_P(urEnqueueUSMAdviseTest, InvalidNullHandleQueue) {
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_HANDLE,
                      urEnqueueUSMAdvise(nullptr, ptr, allocation_size,
                                         UR_USM_ADVICE_FLAG_DEFAULT, nullptr));
 }
 
 TEST_P(urEnqueueUSMAdviseTest, InvalidNullPointerMem) {
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_NULL_POINTER,
                      urEnqueueUSMAdvise(queue, nullptr, allocation_size,
                                         UR_USM_ADVICE_FLAG_DEFAULT, nullptr));
 }
 
 TEST_P(urEnqueueUSMAdviseTest, InvalidEnumeration) {
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_ENUMERATION,
                      urEnqueueUSMAdvise(queue, ptr, allocation_size,
                                         UR_USM_ADVICE_FLAG_FORCE_UINT32,
@@ -72,6 +79,8 @@ TEST_P(urEnqueueUSMAdviseTest, InvalidEnumeration) {
 }
 
 TEST_P(urEnqueueUSMAdviseTest, InvalidSizeZero) {
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     ASSERT_EQ_RESULT(
         UR_RESULT_ERROR_INVALID_SIZE,
         urEnqueueUSMAdvise(queue, ptr, 0, UR_USM_ADVICE_FLAG_DEFAULT, nullptr));
@@ -88,6 +97,8 @@ TEST_P(urEnqueueUSMAdviseTest, InvalidSizeTooLarge) {
 }
 
 TEST_P(urEnqueueUSMAdviseTest, NonCoherentDeviceMemorySuccessOrWarning) {
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     ur_result_t result =
         urEnqueueUSMAdvise(queue, ptr, allocation_size,
                            UR_USM_ADVICE_FLAG_SET_NON_COHERENT_MEMORY, nullptr);

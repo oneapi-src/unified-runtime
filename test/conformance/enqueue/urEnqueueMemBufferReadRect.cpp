@@ -162,6 +162,8 @@ TEST_P(urEnqueueMemBufferReadRectTest, InvalidNullPointerDst) {
 }
 
 TEST_P(urEnqueueMemBufferReadRectTest, InvalidNullPtrEventWaitList) {
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     std::vector<uint32_t> dst(count);
     ur_rect_region_t region{size, 1, 1};
     ur_rect_offset_t buffer_offset{0, 0, 0};

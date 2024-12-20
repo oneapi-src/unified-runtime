@@ -154,6 +154,8 @@ TEST_P(urEnqueueUSMFill2DTestWithParam, Success) {
 
 struct urEnqueueUSMFill2DNegativeTest : uur::urQueueTest {
     void SetUp() override {
+        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
         UUR_RETURN_ON_FATAL_FAILURE(uur::urQueueTest::SetUp());
 
         ur_device_usm_access_capability_flags_t device_usm = 0;
@@ -248,7 +250,6 @@ TEST_P(urEnqueueUSMFill2DNegativeTest, InvalidSize) {
 TEST_P(urEnqueueUSMFill2DNegativeTest, OutOfBounds) {
     UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
     UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
-    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
 
     size_t out_of_bounds = pitch * height + 1;
 

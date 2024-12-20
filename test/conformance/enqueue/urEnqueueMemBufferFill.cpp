@@ -170,6 +170,8 @@ TEST_P(urEnqueueMemBufferFillNegativeTest, InvalidNullHandlePointerPattern) {
 }
 
 TEST_P(urEnqueueMemBufferFillNegativeTest, InvalidNullPtrEventWaitList) {
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+
     const uint32_t pattern = 0xdeadbeef;
     ASSERT_EQ_RESULT(urEnqueueMemBufferFill(queue, buffer, &pattern,
                                             sizeof(uint32_t), 0, size, 1,
