@@ -2824,6 +2824,9 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_code_location_
                 case UR_PLATFORM_INFO_BACKEND:
                     os << "UR_PLATFORM_INFO_BACKEND";
                     break;
+                case UR_PLATFORM_INFO_ADAPTER:
+                    os << "UR_PLATFORM_INFO_ADAPTER";
+                    break;
                 default:
                     os << "unknown enumerator";
                     break;
@@ -2876,6 +2879,20 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_code_location_
         os << 
                         *tptr
                     ;
+
+                    os << ")";
+                } break;
+                case UR_PLATFORM_INFO_ADAPTER: {
+                    const ur_adapter_handle_t *tptr = (const ur_adapter_handle_t *)ptr;
+                    if (sizeof(ur_adapter_handle_t) > size) {
+                        os << "invalid size (is: " << size << ", expected: >=" << sizeof(ur_adapter_handle_t) << ")";
+                        return UR_RESULT_ERROR_INVALID_SIZE;
+                    }
+                    os << (const void *)(tptr) << " (";
+                    
+        ur::details::printPtr(os, 
+                        *tptr
+                    );
 
                     os << ")";
                 } break;
@@ -16269,6 +16286,16 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
         
         ur::details::printPtr(os, 
             *(params->phKernel)
+        );
+
+
+        
+    
+        os << ", ";
+        os << ".hDevice = ";
+        
+        ur::details::printPtr(os, 
+            *(params->phDevice)
         );
 
 
