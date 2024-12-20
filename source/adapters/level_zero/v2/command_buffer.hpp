@@ -30,16 +30,10 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   ur_exp_command_buffer_handle_t_(
       ur_context_handle_t Context, ur_device_handle_t Device,
       ze_command_list_handle_t CommandList,
-      ur_event_handle_t ProcessingFinishedEvent,
-      const ur_exp_command_buffer_desc_t *Desc, 
-      const bool IsInOrderCmdList
+      const ur_exp_command_buffer_desc_t *Desc
   );
   void registerSyncPoint(ur_exp_command_buffer_sync_point_t SyncPoint,
                          ur_event_handle_t Event);
-
-  ur_exp_command_buffer_sync_point_t getNextSyncPoint() const {
-    return NextSyncPoint;
-  }
 
   // Releases the resources associated with the command-buffer before the
   // command-buffer object is destroyed.
@@ -50,17 +44,6 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   // Device associated with this command buffer
   ur_device_handle_t Device;
   ze_command_list_handle_t ZeCommandList;
-  // [ImmediateAppend Path Only] Event that is signalled after the copy engine
-  // command-list finishes executing.
-  ur_event_handle_t ProcessingFinishedEvent = nullptr;
-  // Map of sync_points to ur_events
-  std::unordered_map<ur_exp_command_buffer_sync_point_t, ur_event_handle_t>
-      SyncPoints;
-  // Next sync_point value (may need to consider ways to reuse values if 32-bits
-  // is not enough)
-  ur_exp_command_buffer_sync_point_t NextSyncPoint;
-  // List of Level Zero events associated with submitted commands.
-  std::vector<ze_event_handle_t> ZeEventsList;
 
   // Indicates if command-buffer commands can be updated after it is closed.
   bool IsUpdatable = false;
@@ -68,8 +51,6 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   bool IsFinalized = false;
   // Command-buffer profiling is enabled.
   bool IsProfilingEnabled = false;
-  // Command-buffer can be submitted to an in-order command-list.
-  bool IsInOrderCmdList = false;
   // This list is needed to release all kernels retained by the
   // command_buffer.
   std::vector<ur_kernel_handle_t> KernelsList;
