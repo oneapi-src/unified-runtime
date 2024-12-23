@@ -38,10 +38,8 @@ UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueKernelLaunchKernelWgSizeTest);
 // Note: Due to an issue with HIP, the subgroup test is not generated
 struct urEnqueueKernelLaunchKernelSubGroupTest : uur::urKernelExecutionTest {
     void SetUp() override {
-        UUR_KNOWN_FAILURE_ON(uur::CUDA{});
-        UUR_KNOWN_FAILURE_ON(uur::HIP{});
-        UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-        UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+        UUR_KNOWN_FAILURE_ON(uur::CUDA{}, uur::HIP{}, uur::LevelZero{},
+                             uur::LevelZeroV2{});
 
         program_name = "subgroup";
         UUR_RETURN_ON_FATAL_FAILURE(urKernelExecutionTest::SetUp());
@@ -141,10 +139,8 @@ TEST_P(urEnqueueKernelLaunchTest, InvalidWorkGroupSize) {
 
 TEST_P(urEnqueueKernelLaunchTest, InvalidKernelArgs) {
     // Cuda and hip both lack any way to validate kernel args
-    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
-    UUR_KNOWN_FAILURE_ON(uur::HIP{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{}, uur::HIP{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{});
 
     ur_platform_backend_t backend;
     ASSERT_SUCCESS(urPlatformGetInfo(platform, UR_PLATFORM_INFO_BACKEND,
@@ -165,8 +161,7 @@ TEST_P(urEnqueueKernelLaunchTest, InvalidKernelArgs) {
 }
 
 TEST_P(urEnqueueKernelLaunchKernelWgSizeTest, Success) {
-    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{});
 
     ASSERT_SUCCESS(urEnqueueKernelLaunch(
         queue, kernel, n_dimensions, global_offset.data(), global_size.data(),
@@ -182,8 +177,7 @@ TEST_P(urEnqueueKernelLaunchKernelWgSizeTest, SuccessWithExplicitLocalSize) {
 }
 
 TEST_P(urEnqueueKernelLaunchKernelWgSizeTest, NonMatchingLocalSize) {
-    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
-    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{}, uur::HIP{});
 
     std::array<size_t, 3> wrong_wg_size{8, 8, 8};
     ASSERT_EQ_RESULT(
@@ -525,8 +519,7 @@ UUR_INSTANTIATE_PLATFORM_TEST_SUITE_P(urEnqueueKernelLaunchMultiDeviceTest);
 // TODO: rewrite this test, right now it only works for a single queue
 // (the context is only created for one device)
 TEST_P(urEnqueueKernelLaunchMultiDeviceTest, KernelLaunchReadDifferentQueues) {
-    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{});
 
     uur::KernelLaunchHelper helper =
         uur::KernelLaunchHelper{platform, context, kernel, queues[0]};

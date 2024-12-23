@@ -104,8 +104,7 @@ struct urEnqueueEventsWaitWithBarrierOrderingTest : uur::urProgramTest {
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueEventsWaitWithBarrierOrderingTest);
 
 TEST_P(urEnqueueEventsWaitWithBarrierTest, Success) {
-    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::NativeCPU{});
 
     ur_event_handle_t event1 = nullptr;
     ur_event_handle_t waitEvent = nullptr;

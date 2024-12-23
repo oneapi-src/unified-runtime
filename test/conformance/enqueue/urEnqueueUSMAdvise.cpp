@@ -25,8 +25,7 @@ TEST_P(urEnqueueUSMAdviseWithParamTest, Success) {
     // HIP and CUDA return UR_RESULT_ERROR_ADAPTER_SPECIFIC to issue a warning
     // about the hint being unsupported.
     // TODO: codify this in the spec and account for it in the CTS.
-    UUR_KNOWN_FAILURE_ON(uur::HIP{});
-    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{}, uur::CUDA{});
 
     ur_event_handle_t advise_event = nullptr;
     ASSERT_SUCCESS(urEnqueueUSMAdvise(queue, ptr, allocation_size, getParam(),
@@ -56,8 +55,7 @@ TEST_P(urEnqueueUSMAdviseTest, MultipleParamsSuccess) {
     // HIP and CUDA return UR_RESULT_ERROR_ADAPTER_SPECIFIC to issue a warning
     // about the hint being unsupported.
     // TODO: codify this in the spec and account for it in the CTS.
-    UUR_KNOWN_FAILURE_ON(uur::HIP{});
-    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{}, uur::CUDA{});
 
     ASSERT_SUCCESS(urEnqueueUSMAdvise(queue, ptr, allocation_size,
                                       UR_USM_ADVICE_FLAG_SET_READ_MOSTLY |
@@ -91,8 +89,7 @@ TEST_P(urEnqueueUSMAdviseTest, InvalidSizeZero) {
 }
 
 TEST_P(urEnqueueUSMAdviseTest, InvalidSizeTooLarge) {
-    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{});
 
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
                      urEnqueueUSMAdvise(queue, ptr, allocation_size * 2,

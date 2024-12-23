@@ -40,8 +40,7 @@ TEST_P(urUSMGetMemAllocInfoTest, Success) {
     auto alloc_info = getParam();
 
     if (alloc_info == UR_USM_ALLOC_INFO_POOL) {
-        UUR_KNOWN_FAILURE_ON(uur::OpenCL{});
-        UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+        UUR_KNOWN_FAILURE_ON(uur::OpenCL{}, uur::LevelZeroV2{});
     }
 
     if (alloc_info == UR_USM_ALLOC_INFO_BASE_PTR) {

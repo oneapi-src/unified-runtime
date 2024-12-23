@@ -29,8 +29,7 @@ TEST_P(urProgramBuildTest, InvalidNullHandleProgram) {
 }
 
 TEST_P(urProgramBuildTest, BuildFailure) {
-    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
-    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{}, uur::HIP{});
 
     ur_program_handle_t program = nullptr;
     std::shared_ptr<std::vector<char>> il_binary;

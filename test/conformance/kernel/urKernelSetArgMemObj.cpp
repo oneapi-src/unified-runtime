@@ -36,8 +36,7 @@ TEST_P(urKernelSetArgMemObjTest, InvalidNullHandleKernel) {
 }
 
 TEST_P(urKernelSetArgMemObjTest, InvalidKernelArgumentIndex) {
-    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
-    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{}, uur::HIP{});
 
     uint32_t num_kernel_args = 0;
     ASSERT_SUCCESS(urKernelGetInfo(kernel, UR_KERNEL_INFO_NUM_ARGS,

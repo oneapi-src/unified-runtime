@@ -78,8 +78,7 @@ UUR_DEVICE_TEST_SUITE_P(
     uur::printRectTestString<urEnqueueMemBufferReadRectTestWithParam>);
 
 TEST_P(urEnqueueMemBufferReadRectTestWithParam, Success) {
-    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{});
 
     // Unpack the parameters.
     const auto buffer_size = getParam().src_size;

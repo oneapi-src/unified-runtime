@@ -39,8 +39,7 @@ struct urEnqueueEventsWaitTest : uur::urMultiQueueTest {
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueEventsWaitTest);
 
 TEST_P(urEnqueueEventsWaitTest, Success) {
-    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::NativeCPU{});
 
     ur_event_handle_t event1 = nullptr;
     ur_event_handle_t waitEvent = nullptr;

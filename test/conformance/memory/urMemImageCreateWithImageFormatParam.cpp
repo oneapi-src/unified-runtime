@@ -92,9 +92,8 @@ UUR_DEVICE_TEST_SUITE_P(
     uur::deviceTestWithParamPrinter<ur_image_format_t>);
 
 TEST_P(urMemImageCreateTestWithImageFormatParam, Success) {
-    UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) UHD Graphics 770"});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
-    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{}, uur::NativeCPU{},
+                         uur::OpenCL{"Intel(R) UHD Graphics 770"});
 
     ur_image_channel_order_t channel_order =
         std::get<1>(GetParam()).channelOrder;

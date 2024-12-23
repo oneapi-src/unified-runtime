@@ -12,9 +12,8 @@ using urContextSetExtendedDeleterTest = uur::urDeviceTest;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urContextSetExtendedDeleterTest);
 
 TEST_P(urContextSetExtendedDeleterTest, Success) {
-    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
-    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{},
+                         uur::NativeCPU{});
 
     bool called = false;
     {

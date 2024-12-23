@@ -14,22 +14,18 @@ TEST_P(urEventGetProfilingInfoTest, Success) {
     ur_profiling_info_t info_type = getParam();
 
     if (info_type == UR_PROFILING_INFO_COMMAND_COMPLETE) {
-        UUR_KNOWN_FAILURE_ON(uur::CUDA{});
-        UUR_KNOWN_FAILURE_ON(uur::HIP{});
-        UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+        UUR_KNOWN_FAILURE_ON(uur::CUDA{}, uur::HIP{}, uur::LevelZero{},
+                             uur::NativeCPU{});
     }
 
     if (info_type == UR_PROFILING_INFO_COMMAND_QUEUED) {
-        UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-        UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
-        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+        UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{},
+                             uur::NativeCPU{});
     }
 
     if (info_type == UR_PROFILING_INFO_COMMAND_SUBMIT) {
-        UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-        UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
-        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+        UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{},
+                             uur::NativeCPU{});
     }
 
     size_t size;
@@ -59,11 +55,8 @@ UUR_DEVICE_TEST_SUITE_P(urEventGetProfilingInfoTest,
 using urEventGetProfilingInfoWithTimingComparisonTest = uur::event::urEventTest;
 
 TEST_P(urEventGetProfilingInfoWithTimingComparisonTest, Success) {
-    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
-    UUR_KNOWN_FAILURE_ON(uur::HIP{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
-    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{}, uur::HIP{}, uur::LevelZero{},
+                         uur::LevelZeroV2{}, uur::NativeCPU{});
 
     uint8_t size = 8;
 

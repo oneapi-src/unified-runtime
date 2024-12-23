@@ -438,8 +438,7 @@ struct urHostPipeTest : urQueueTest {
         UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
 
         // The host pipe support query isn't implement on l0
-        UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-        UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+        UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{});
 
         UUR_RETURN_ON_FATAL_FAILURE(urQueueTest::SetUp());
 

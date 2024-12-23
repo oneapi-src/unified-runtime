@@ -297,8 +297,7 @@ TEST_P(urDeviceGetInfoTest, Success) {
     ur_device_info_t info_type = getParam();
 
     if (info_type == UR_DEVICE_INFO_GLOBAL_MEM_FREE) {
-        UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
-        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+        UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{}, uur::NativeCPU{});
     }
 
     if (info_type == UR_DEVICE_INFO_MAX_READ_WRITE_IMAGE_ARGS) {

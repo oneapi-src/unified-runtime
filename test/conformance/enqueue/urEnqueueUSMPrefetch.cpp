@@ -22,12 +22,16 @@ UUR_DEVICE_TEST_SUITE_P(
     uur::deviceTestWithParamPrinter<ur_usm_migration_flag_t>);
 
 TEST_P(urEnqueueUSMPrefetchWithParamTest, Success) {
-    // HIP and CUDA return UR_RESULT_ERROR_ADAPTER_SPECIFIC to issue a warning
-    // about the hint being unsupported.
-    // TODO: codify this in the spec and account for it in the CTS.
-    UUR_KNOWN_FAILURE_ON(uur::HIP{});
-    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
-    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+    UUR_KNOWN_FAILURE_ON(
+        // HIP and CUDA return UR_RESULT_ERROR_ADAPTER_SPECIFIC to issue a
+        // warning about the hint being unsupported. The same applies for
+        // subsequent fails in this file.
+        // TODO: codify this in the spec and account for it in the CTS.
+        uur::HIP{}, uur::CUDA{},
+        // The setup for the parent fixture does a urQueueFlush, which isn't
+        // supported by native cpu. Again same goes for subsequent fails in
+        // this file.
+        uur::NativeCPU{});
 
     ur_event_handle_t prefetch_event = nullptr;
     ASSERT_SUCCESS(urEnqueueUSMPrefetch(queue, ptr, allocation_size, getParam(),
@@ -48,12 +52,7 @@ TEST_P(urEnqueueUSMPrefetchWithParamTest, Success) {
  * executing.
  */
 TEST_P(urEnqueueUSMPrefetchWithParamTest, CheckWaitEvent) {
-    // HIP and CUDA return UR_RESULT_ERROR_ADAPTER_SPECIFIC to issue a warning
-    // about the hint being unsupported.
-    // TODO: codify this in the spec and account for it in the CTS.
-    UUR_KNOWN_FAILURE_ON(uur::HIP{});
-    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
-    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+    UUR_KNOWN_FAILURE_ON(uur::HIP{}, uur::CUDA{}, uur::NativeCPU{});
 
     ur_queue_handle_t fill_queue;
     ASSERT_SUCCESS(urQueueCreate(context, device, nullptr, &fill_queue));
@@ -132,9 +131,8 @@ TEST_P(urEnqueueUSMPrefetchTest, InvalidSizeZero) {
 }
 
 TEST_P(urEnqueueUSMPrefetchTest, InvalidSizeTooLarge) {
-    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
-    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{},
+                         uur::NativeCPU{});
 
     ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_SIZE,
                      urEnqueueUSMPrefetch(queue, ptr, allocation_size * 2,

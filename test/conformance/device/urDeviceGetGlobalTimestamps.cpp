@@ -56,14 +56,10 @@ TEST_P(urDeviceGetGlobalTimestampTest, SuccessNoTimers) {
 }
 
 TEST_P(urDeviceGetGlobalTimestampTest, SuccessSynchronizedTime) {
-    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
-    UUR_KNOWN_FAILURE_ON(uur::HIP{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
-    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
-
-    UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA"});
-    UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) UHD Graphics 770"});
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{}, uur::HIP{}, uur::LevelZero{},
+                         uur::LevelZeroV2{}, uur::NativeCPU{},
+                         uur::OpenCL{"Intel(R) FPGA"},
+                         uur::OpenCL{"Intel(R) UHD Graphics 770"});
 
     // get the timer resolution of the device
     size_t deviceTimerResolutionNanoSecs = 0;

@@ -202,9 +202,8 @@ TEST_P(urMemImageCreateTest, InvalidNullPointerImageFormat) {
 }
 
 TEST_P(urMemImageCreateTest, InvalidSize) {
-    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
-    UUR_KNOWN_FAILURE_ON(uur::HIP{});
-    UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) UHD Graphics 770"});
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{}, uur::HIP{},
+                         uur::OpenCL{"Intel(R) UHD Graphics 770"});
 
     // This fail is specific to the "Multi device testing" ci job.
     UUR_KNOWN_FAILURE_ON(uur::LevelZero{});

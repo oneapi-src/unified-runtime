@@ -17,8 +17,7 @@ UUR_DEVICE_TEST_SUITE_P(urSamplerGetInfoTestWithParam,
                         uur::deviceTestWithParamPrinter<ur_sampler_info_t>);
 
 TEST_P(urSamplerGetInfoTestWithParam, Success) {
-    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{});
 
     size_t size = 0;
     ur_sampler_info_t info = getParam();
@@ -99,8 +98,7 @@ TEST_P(urSamplerGetInfoTest, InvalidSizePropSizeZero) {
 }
 
 TEST_P(urSamplerGetInfoTest, InvalidSizePropSizeSmall) {
-    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{});
 
     ur_sampler_addressing_mode_t mode;
     ASSERT_EQ_RESULT(urSamplerGetInfo(sampler, UR_SAMPLER_INFO_ADDRESSING_MODE,

@@ -34,8 +34,7 @@ TEST_P(urProgramGetBuildInfoTest, Success) {
     auto property_name = getParam();
 
     if (property_name == UR_PROGRAM_BUILD_INFO_STATUS) {
-        UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-        UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+        UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{});
     }
 
     size_t property_size = 0;

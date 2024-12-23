@@ -79,8 +79,7 @@ TEST_P(urKernelGetGroupInfoTest, InvalidEnumeration) {
 }
 
 TEST_P(urKernelGetGroupInfoWgSizeTest, CompileWorkGroupSize) {
-    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
-    UUR_KNOWN_FAILURE_ON(uur::HIP{});
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{}, uur::HIP{});
 
     std::array<size_t, 3> read_dims{1, 1, 1};
     ASSERT_SUCCESS(urKernelGetGroupInfo(

@@ -10,8 +10,7 @@ using urKernelSetExecInfoTest = uur::urKernelTest;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urKernelSetExecInfoTest);
 
 TEST_P(urKernelSetExecInfoTest, SuccessIndirectAccess) {
-    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{});
 
     bool property_value = false;
     ASSERT_SUCCESS(
@@ -62,8 +61,7 @@ struct urKernelSetExecInfoUSMPointersTest : uur::urKernelTest {
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urKernelSetExecInfoUSMPointersTest);
 
 TEST_P(urKernelSetExecInfoUSMPointersTest, SuccessHost) {
-    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{});
 
     ur_device_usm_access_capability_flags_t host_supported = 0;
     ASSERT_SUCCESS(uur::GetDeviceUSMHostSupport(device, host_supported));
@@ -81,8 +79,7 @@ TEST_P(urKernelSetExecInfoUSMPointersTest, SuccessHost) {
 }
 
 TEST_P(urKernelSetExecInfoUSMPointersTest, SuccessDevice) {
-    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{});
 
     ur_device_usm_access_capability_flags_t device_supported = 0;
     ASSERT_SUCCESS(uur::GetDeviceUSMDeviceSupport(device, device_supported));
@@ -100,8 +97,7 @@ TEST_P(urKernelSetExecInfoUSMPointersTest, SuccessDevice) {
 }
 
 TEST_P(urKernelSetExecInfoUSMPointersTest, SuccessShared) {
-    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{});
 
     ur_device_usm_access_capability_flags_t shared_supported = 0;
     ASSERT_SUCCESS(

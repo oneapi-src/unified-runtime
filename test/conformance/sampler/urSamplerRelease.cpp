@@ -10,8 +10,7 @@ using urSamplerReleaseTest = uur::urSamplerTest;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urSamplerReleaseTest);
 
 TEST_P(urSamplerReleaseTest, Success) {
-    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{});
 
     ASSERT_SUCCESS(urSamplerRetain(sampler));
 

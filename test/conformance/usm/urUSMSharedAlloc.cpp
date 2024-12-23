@@ -141,9 +141,7 @@ TEST_P(urUSMSharedAllocTest, InvalidNullPtrMem) {
 }
 
 TEST_P(urUSMSharedAllocTest, InvalidUSMSize) {
-    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
-    UUR_KNOWN_FAILURE_ON(uur::HIP{});
-    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{}, uur::HIP{}, uur::NativeCPU{});
 
     ASSERT_EQ_RESULT(
         UR_RESULT_ERROR_INVALID_USM_SIZE,

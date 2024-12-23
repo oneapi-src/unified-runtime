@@ -12,8 +12,7 @@ struct urEnqueueMemImageCopyTest
         uint32_t data[4];
     };
     void SetUp() override {
-        UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
-        UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
+        UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{}, uur::NativeCPU{});
 
         UUR_RETURN_ON_FATAL_FAILURE(urQueueTestWithParam::SetUp());
 

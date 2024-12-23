@@ -248,8 +248,7 @@ TEST_P(urEnqueueUSMFill2DNegativeTest, InvalidSize) {
 }
 
 TEST_P(urEnqueueUSMFill2DNegativeTest, OutOfBounds) {
-    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{});
 
     size_t out_of_bounds = pitch * height + 1;
 

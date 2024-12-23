@@ -10,8 +10,7 @@ using urSamplerRetainTest = uur::urSamplerTest;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urSamplerRetainTest);
 
 TEST_P(urSamplerRetainTest, Success) {
-    UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
-    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{});
 
     uint32_t prevRefCount = 0;
     ASSERT_SUCCESS(uur::GetObjectReferenceCount(sampler, prevRefCount));
