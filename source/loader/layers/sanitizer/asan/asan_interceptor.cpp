@@ -201,6 +201,7 @@ ur_result_t AsanInterceptor::releaseMemory(ur_context_handle_t Context,
     AllocInfo->IsReleased = true;
     AllocInfo->ReleaseStack = GetCurrentBacktrace();
 
+    // Make shadow memory gets update later
     if (AllocInfo->Type == AllocType::HOST_USM) {
         ContextInfo->insertAllocInfo(ContextInfo->DeviceList, AllocInfo);
     } else {
@@ -209,38 +210,23 @@ ur_result_t AsanInterceptor::releaseMemory(ur_context_handle_t Context,
 
     // If quarantine is disabled, USM is freed immediately
     if (!m_Quarantine) {
-        getContext()->logger.debug("Free: {}", (void *)AllocInfo->AllocBegin);
-
-        ContextInfo->Stats.UpdateUSMRealFreed(AllocInfo->AllocSize,
-                                              AllocInfo->getRedzoneSize());
-
         std::scoped_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
         m_AllocationMap.erase(AllocInfoIt);
-
-        return getContext()->urDdiTable.USM.pfnFree(
-            Context, (void *)(AllocInfo->AllocBegin));
-    }
-
-    // If quarantine is enabled, cache it
-    auto ReleaseList = m_Quarantine->put(AllocInfo->Device, AllocInfoIt);
-    if (ReleaseList.size()) {
-        std::scoped_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
-        for (auto &It : ReleaseList) {
-            auto ToFreeAllocInfo = It->second;
-            getContext()->logger.info("Quarantine Free: {}",
-                                      (void *)ToFreeAllocInfo->AllocBegin);
-
-            ContextInfo->Stats.UpdateUSMRealFreed(
-                ToFreeAllocInfo->AllocSize, ToFreeAllocInfo->getRedzoneSize());
-
-            UR_CALL(getContext()->urDdiTable.USM.pfnFree(
-                Context, (void *)(ToFreeAllocInfo->AllocBegin)));
-
-            // Erase it at last to avoid use-after-free.
-            m_AllocationMap.erase(It);
+        UR_CALL(releaseAllocationNoCheck(Context, AllocInfo));
+    } else {
+        // If quarantine is enabled, cache it
+        auto ReleaseList = m_Quarantine->put(AllocInfo);
+        getContext()->logger.info("Quarantine: {}",
+                                  (void *)AllocInfo->AllocBegin);
+        if (ReleaseList.size()) {
+            std::scoped_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
+            for (auto &ToFreeAllocInfo : ReleaseList) {
+                m_AllocationMap.erase(ToFreeAllocInfo->AllocBegin);
+                UR_CALL(
+                    releaseAllocationNoCheck(Context, ToFreeAllocInfo, true));
+            }
         }
     }
-    ContextInfo->Stats.UpdateUSMFreed(AllocInfo->AllocSize);
 
     return UR_RESULT_SUCCESS;
 }
@@ -583,11 +569,47 @@ ur_result_t AsanInterceptor::insertContext(ur_context_handle_t Context,
 }
 
 ur_result_t AsanInterceptor::eraseContext(ur_context_handle_t Context) {
+    // Check memory leaks first, or related AllocInfo will be removed later.
+    checkMemoryLeaks(Context);
+
+    // Release quarantined memory and all AllocInfo when associated context is removed.
+    auto AllocInfoIt = m_AllocationMap.begin();
+    while (AllocInfoIt != m_AllocationMap.end()) {
+        auto AI = AllocInfoIt->second;
+        if (AI->Context == Context) {
+            if (AI->IsReleased) {
+                // Only release the quarantined memory as user intented. Other not-relased memory will be released here.
+                m_Quarantine->remove(AI);
+                releaseAllocationNoCheck(Context, AI, true);
+            }
+            // But we still remove the AllocInfo for all allocation to avoid accidental match.
+            AllocInfoIt = m_AllocationMap.erase(AllocInfoIt);
+        } else {
+            AllocInfoIt++;
+        }
+    }
+
+    // This must come after the release of quarantined memory, as ContextInfo will be used in releaseAllocationNoCheck.
     std::scoped_lock<ur_shared_mutex> Guard(m_ContextMapMutex);
     assert(m_ContextMap.find(Context) != m_ContextMap.end());
     m_ContextMap.erase(Context);
+
     // TODO: Remove devices in each context
+
     return UR_RESULT_SUCCESS;
+}
+
+void AsanInterceptor::checkMemoryLeaks(ur_context_handle_t Context) {
+    if (getOptions().DetectLeaks && isNormalExit()) {
+        std::vector<AllocationIterator> AllocInfos =
+            findAllocInfoByContext(Context);
+        for (const auto &It : AllocInfos) {
+            const auto &[_, AI] = *It;
+            if (!AI->IsReleased) {
+                ReportMemoryLeak(AI);
+            }
+        }
+    }
 }
 
 ur_result_t AsanInterceptor::insertDevice(ur_device_handle_t Device,
@@ -847,7 +869,7 @@ AsanInterceptor::findAllocInfoByAddress(uptr Address) {
         return std::optional<AllocationIterator>{};
     }
     --It;
-    // Make sure we got the right AllocInfo
+    // Make sure we got the right AllocInfo, or any other follow-up ops are based on wrong info.
     bool IsTheRightAllocInfo =
         Address >= It->second->AllocBegin &&
         Address < It->second->AllocBegin + It->second->AllocSize;
@@ -877,6 +899,28 @@ bool ProgramInfo::isKernelInstrumented(ur_kernel_handle_t Kernel) const {
     return InstrumentedKernels.find(Name) != InstrumentedKernels.end();
 }
 
+/**
+ * Relase the actual allocation without other checks
+ */
+ur_result_t
+AsanInterceptor::releaseAllocationNoCheck(ur_context_handle_t Context,
+                                          std::shared_ptr<AllocInfo> AI,
+                                          bool IsFromQuarantined) {
+    if (IsFromQuarantined) {
+        getContext()->logger.info("Quarantine Free: {}",
+                                  (void *)AI->AllocBegin);
+    } else {
+        getContext()->logger.info("Free: {}", (void *)AI->AllocBegin);
+    }
+    auto ContextInfo = getContextInfo(Context);
+
+    ContextInfo->Stats.UpdateUSMRealFreed(AI->AllocSize, AI->getRedzoneSize());
+    ContextInfo->Stats.UpdateUSMFreed(AI->AllocSize);
+
+    return getContext()->urDdiTable.USM.pfnFree(Context,
+                                                (void *)(AI->AllocBegin));
+}
+
 ContextInfo::~ContextInfo() {
     Stats.Print(Handle);
 
@@ -888,19 +932,6 @@ ContextInfo::~ContextInfo() {
 
     URes = getContext()->urDdiTable.Context.pfnRelease(Handle);
     assert(URes == UR_RESULT_SUCCESS);
-
-    // check memory leaks
-    if (getAsanInterceptor()->getOptions().DetectLeaks &&
-        getAsanInterceptor()->isNormalExit()) {
-        std::vector<AllocationIterator> AllocInfos =
-            getAsanInterceptor()->findAllocInfoByContext(Handle);
-        for (const auto &It : AllocInfos) {
-            const auto &[_, AI] = *It;
-            if (!AI->IsReleased) {
-                ReportMemoryLeak(AI);
-            }
-        }
-    }
 }
 
 ur_usm_pool_handle_t ContextInfo::getUSMPool() {

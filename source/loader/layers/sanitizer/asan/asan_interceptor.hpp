@@ -384,6 +384,10 @@ class AsanInterceptor {
 
     ur_result_t registerDeviceGlobals(ur_program_handle_t Program);
     ur_result_t registerSpirKernels(ur_program_handle_t Program);
+    ur_result_t releaseAllocationNoCheck(ur_context_handle_t Context,
+                                         std::shared_ptr<AllocInfo> AI,
+                                         bool IsFromQuarantined = false);
+    void checkMemoryLeaks(ur_context_handle_t Context);
 
   private:
     // m_Options may be used in other places, place it at the top
