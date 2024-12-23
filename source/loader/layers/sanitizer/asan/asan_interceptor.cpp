@@ -848,9 +848,14 @@ AsanInterceptor::findAllocInfoByAddress(uptr Address) {
     }
     --It;
     // Make sure we got the right AllocInfo
-    assert(Address >= It->second->AllocBegin &&
-           Address < It->second->AllocBegin + It->second->AllocSize &&
-           "Wrong AllocInfo for the address");
+    bool IsTheRightAllocInfo =
+        Address >= It->second->AllocBegin &&
+        Address < It->second->AllocBegin + It->second->AllocSize;
+    if (!IsTheRightAllocInfo) {
+        getContext()->logger.error(
+            "Failed to find the right AllocInfo for address: {}", Address);
+        die("Address Sanitizer Fatal Error");
+    }
     return It;
 }
 
