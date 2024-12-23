@@ -3,13 +3,11 @@
 // See LICENSE.TXT
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-#include "fixtures.h"
-#include "uur/environment.h"
-#include "uur/fixtures.h"
 #include <cstring>
+#include <uur/environment.h>
+#include <uur/fixtures.h>
 
-using urPlatformGetInfoTest =
-    uur::platform::urPlatformTestWithParam<ur_platform_info_t>;
+using urPlatformGetInfoTest = uur::urPlatformTestWithParam<ur_platform_info_t>;
 
 UUR_PLATFORM_TEST_SUITE_P(
     urPlatformGetInfoTest,
@@ -17,7 +15,7 @@ UUR_PLATFORM_TEST_SUITE_P(
                       UR_PLATFORM_INFO_VERSION, UR_PLATFORM_INFO_EXTENSIONS,
                       UR_PLATFORM_INFO_PROFILE, UR_PLATFORM_INFO_BACKEND,
                       UR_PLATFORM_INFO_ADAPTER),
-    ur_platform_info_t);
+    uur::platformTestWithParamPrinter<ur_platform_info_t>);
 
 TEST_P(urPlatformGetInfoTest, Success) {
     size_t size = 0;
