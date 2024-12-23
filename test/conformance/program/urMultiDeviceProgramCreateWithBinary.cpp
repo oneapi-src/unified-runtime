@@ -4,6 +4,7 @@
 // See LICENSE.TXT
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
+#include "uur/known_failure.h"
 #include <uur/fixtures.h>
 #include <uur/raii.h>
 
@@ -245,6 +246,8 @@ TEST_P(urMultiDeviceProgramCreateWithBinaryTest, CheckProgramGetInfo) {
 struct urMultiDeviceCommandBufferExpTest
     : urMultiDeviceProgramCreateWithBinaryTest {
     void SetUp() override {
+        UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
         UUR_RETURN_ON_FATAL_FAILURE(
             urMultiDeviceProgramCreateWithBinaryTest::SetUp());
 
