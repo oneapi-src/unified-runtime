@@ -111,6 +111,67 @@ makePool(usm::umf_disjoint_pool_config_t *poolParams,
     throw umf::umf2urResult(umf_ret);
   }
 
+  ze_ops_t ze_ops;
+  ze_ops.zeMemAllocHost = [](ze_context_handle_t hContext,
+                             const ze_host_mem_alloc_desc_t *desc, size_t size,
+                             size_t alignment, void **ppRetMem) {
+    return ZE_CALL_NOCHECK(zeMemAllocHost,
+                           (hContext, desc, size, alignment, ppRetMem));
+  };
+  ze_ops.zeMemAllocDevice = [](ze_context_handle_t hContext,
+                               const ze_device_mem_alloc_desc_t *desc,
+                               size_t size, size_t alignment,
+                               ze_device_handle_t hDevice, void **ppRetMem) {
+    return ZE_CALL_NOCHECK(
+        zeMemAllocDevice, (hContext, desc, size, alignment, hDevice, ppRetMem));
+  };
+  ze_ops.zeMemAllocShared = [](ze_context_handle_t hContext,
+                               const ze_device_mem_alloc_desc_t *deviceDesc,
+                               const ze_host_mem_alloc_desc_t *hostDesc,
+                               size_t size, size_t alignment,
+                               ze_device_handle_t hDevice, void **ppRetMem) {
+    return ZE_CALL_NOCHECK(
+        zeMemAllocShared,
+        (hContext, deviceDesc, hostDesc, size, alignment, hDevice, ppRetMem));
+  };
+  ze_ops.zeMemFree = [](ze_context_handle_t hContext, void *ptr) {
+    return ZE_CALL_NOCHECK(zeMemFree, (hContext, ptr));
+  };
+  ze_ops.zeMemGetIpcHandle = [](ze_context_handle_t hContext, const void *ptr,
+                                ze_ipc_mem_handle_t *ipcHandle) {
+    return ZE_CALL_NOCHECK(zeMemGetIpcHandle, (hContext, ptr, ipcHandle));
+  };
+  ze_ops.zeMemPutIpcHandle = [](ze_context_handle_t hContext,
+                                ze_ipc_mem_handle_t ipcHandle) {
+    return ZE_CALL_NOCHECK(zeMemPutIpcHandle, (hContext, ipcHandle));
+  };
+  ze_ops.zeMemOpenIpcHandle = [](ze_context_handle_t hContext,
+                                 ze_device_handle_t hDevice,
+                                 ze_ipc_mem_handle_t ipcHandle,
+                                 ze_ipc_memory_flags_t flags, void **ptr) {
+    return ZE_CALL_NOCHECK(zeMemOpenIpcHandle,
+                           (hContext, hDevice, ipcHandle, flags, ptr));
+  };
+  ze_ops.zeMemCloseIpcHandle = [](ze_context_handle_t hContext,
+                                  const void *ptr) {
+    return ZE_CALL_NOCHECK(zeMemCloseIpcHandle, (hContext, ptr));
+  };
+  ze_ops.zeContextMakeMemoryResident = [](ze_context_handle_t hContext,
+                                          ze_device_handle_t hDevice, void *ptr,
+                                          size_t size) {
+    return ZE_CALL_NOCHECK(zeContextMakeMemoryResident,
+                           (hContext, hDevice, ptr, size));
+  };
+  ze_ops.zeDeviceGetProperties = [](ze_device_handle_t hDevice,
+                                    ze_device_properties_t *properties) {
+    return ZE_CALL_NOCHECK(zeDeviceGetProperties, (hDevice, properties));
+  };
+
+  umf_ret = umfLevelZeroProviderParamsSetZeOps(params, &ze_ops);
+  if (umf_ret != UMF_RESULT_SUCCESS) {
+    throw umf::umf2urResult(umf_ret);
+  }
+
   std::vector<ze_device_handle_t> residentZeHandles;
 
   if (poolDescriptor.type == UR_USM_TYPE_DEVICE) {
