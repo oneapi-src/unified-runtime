@@ -401,10 +401,15 @@ MsanInterceptor::findAllocInfoByAddress(uptr Address) {
         return std::optional<MsanAllocationIterator>{};
     }
     --It;
-    // Make sure we got the right MsanAllocInfo
-    assert(Address >= It->second->AllocBegin &&
-           Address < It->second->AllocBegin + It->second->AllocSize &&
-           "Wrong MsanAllocInfo for the address");
+    // Make sure we got the right AllocInfo, or any other follow-up ops are based on wrong info.
+    bool IsTheRightAllocInfo =
+        Address >= It->second->AllocBegin &&
+        Address < It->second->AllocBegin + It->second->AllocSize;
+    if (!IsTheRightAllocInfo) {
+        getContext()->logger.error(
+            "Failed to find the right AllocInfo for address: {}", Address);
+        die("Memory Sanitizer Fatal Error");
+    }
     return It;
 }
 
