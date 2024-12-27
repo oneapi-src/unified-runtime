@@ -137,7 +137,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMFree(ur_context_handle_t hContext,
   return USMFreeImpl(hContext, pMem);
 }
 
-ur_result_t USMDeviceAllocImpl(void **ResultPtr, ur_context_handle_t,
+ur_result_t USMDeviceAllocImpl(void **ResultPtr, ur_context_handle_t hContext,
                                ur_device_handle_t Device,
                                ur_usm_device_mem_flags_t, size_t Size,
                                uint32_t Alignment) {
@@ -148,12 +148,13 @@ ur_result_t USMDeviceAllocImpl(void **ResultPtr, ur_context_handle_t,
     return Err;
   }
 
-#ifdef NDEBUG
-  std::ignore = Alignment;
-#else
-  assert((Alignment == 0 ||
-          reinterpret_cast<std::uintptr_t>(*ResultPtr) % Alignment == 0));
-#endif
+  const bool validAlignment =
+      (Alignment == 0 ||
+       reinterpret_cast<std::uintptr_t>(*ResultPtr) % Alignment == 0);
+  if (!validAlignment) {
+    urUSMFree(hContext, *ResultPtr);
+    return UR_RESULT_ERROR_INVALID_VALUE;
+  }
   return UR_RESULT_SUCCESS;
 }
 
@@ -170,16 +171,17 @@ ur_result_t USMSharedAllocImpl(void **ResultPtr, ur_context_handle_t,
     return Err;
   }
 
-#ifdef NDEBUG
-  std::ignore = Alignment;
-#else
-  assert((Alignment == 0 ||
-          reinterpret_cast<std::uintptr_t>(*ResultPtr) % Alignment == 0));
-#endif
+  const bool validAlignment =
+      (Alignment == 0 ||
+       reinterpret_cast<std::uintptr_t>(*ResultPtr) % Alignment == 0);
+  if (!validAlignment) {
+    urUSMFree(Context, *ResultPtr);
+    return UR_RESULT_ERROR_INVALID_VALUE;
+  }
   return UR_RESULT_SUCCESS;
 }
 
-ur_result_t USMHostAllocImpl(void **ResultPtr, ur_context_handle_t,
+ur_result_t USMHostAllocImpl(void **ResultPtr, ur_context_handle_t hContext,
                              ur_usm_host_mem_flags_t, size_t Size,
                              uint32_t Alignment) {
   try {
@@ -188,12 +190,13 @@ ur_result_t USMHostAllocImpl(void **ResultPtr, ur_context_handle_t,
     return Err;
   }
 
-#ifdef NDEBUG
-  std::ignore = Alignment;
-#else
-  assert((Alignment == 0 ||
-          reinterpret_cast<std::uintptr_t>(*ResultPtr) % Alignment == 0));
-#endif
+  const bool validAlignment =
+      (Alignment == 0 ||
+       reinterpret_cast<std::uintptr_t>(*ResultPtr) % Alignment == 0);
+  if (!validAlignment) {
+    urUSMFree(hContext, *ResultPtr);
+    return UR_RESULT_ERROR_INVALID_VALUE;
+  }
   return UR_RESULT_SUCCESS;
 }
 
