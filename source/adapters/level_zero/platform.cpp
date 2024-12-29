@@ -454,6 +454,19 @@ ur_result_t ur_platform_handle_t_::initialize() {
   return UR_RESULT_SUCCESS;
 }
 
+bool ur_platform_handle_t_::allowDriverInOrderLists() {
+  // Use in-order lists implementation from L0 driver instead
+  // of adapter's implementation.
+
+  const char *UrRet = std::getenv("UR_L0_USE_DRIVER_INORDER_LISTS");
+  bool CompatibleDriver = this->isDriverVersionNewerOrSimilar(
+      1, L0_DRIVER_INORDER_MIN_MINOR_VERSION,
+      L0_DRIVER_INORDER_MIN_PATCH_VERSION);
+  bool DriverInOrderRequested = UrRet ? std::atoi(UrRet) != 0 : false;
+  bool CanUseDriverInOrderLists = CompatibleDriver || DriverInOrderRequested;
+  return CanUseDriverInOrderLists;
+}
+
 /// Checks the version of the level-zero driver.
 /// @param VersionMajor Major verion number to compare to.
 /// @param VersionMinor Minor verion number to compare to.
