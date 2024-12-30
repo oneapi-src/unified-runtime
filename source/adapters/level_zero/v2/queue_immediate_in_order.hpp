@@ -77,6 +77,15 @@ private:
       const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent,
       ur_command_t commandType);
 
+  ur_result_t enqueueGenericCommandListsExp(
+    uint32_t numCommandLists, 
+    ze_command_list_handle_t *phCommandLists, 
+    ur_event_handle_t *phEvent, 
+    uint32_t numEventsInWaitList, 
+    const ur_event_handle_t *phEventWaitList,
+    ur_command_t callerCommand
+    );
+
   ur_result_t
   enqueueEventsWaitWithBarrierImpl(uint32_t numEventsInWaitList,
                                    const ur_event_handle_t *phEventWaitList,
@@ -273,6 +282,12 @@ public:
       const ur_exp_launch_property_t *launchPropList,
       uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
       ur_event_handle_t *phEvent) override;
+  ur_result_t enqueueCommandBuffer(
+    ze_command_list_handle_t commandBufferCommandList, 
+    ur_event_handle_t *phEvent, 
+    uint32_t numEventsInWaitList, 
+    const ur_event_handle_t *phEventWaitList
+    ) override;
   ur_result_t
   enqueueNativeCommandExp(ur_exp_enqueue_native_command_function_t, void *,
                           uint32_t, const ur_mem_handle_t *,

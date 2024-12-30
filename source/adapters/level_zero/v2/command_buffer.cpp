@@ -64,6 +64,19 @@ void checkImmediateAppendSupport(ur_context_handle_t Context,
 }
 
 }
+
+std::pair<ze_event_handle_t *, uint32_t>
+ur_exp_command_buffer_handle_t_::getWaitListView(
+    const ur_event_handle_t *phWaitEvents, uint32_t numWaitEvents) {
+
+  waitList.resize(numWaitEvents);
+  for (uint32_t i = 0; i < numWaitEvents; i++) {
+    waitList[i] = phWaitEvents[i]->getZeEvent();
+  }
+
+  return {waitList.data(), static_cast<uint32_t>(numWaitEvents)};
+}
+
 ur_exp_command_buffer_handle_t_::ur_exp_command_buffer_handle_t_(
     ur_context_handle_t Context, ur_device_handle_t Device,
       ze_command_list_handle_t CommandList,
@@ -185,95 +198,82 @@ urCommandBufferFinalizeExp(ur_exp_command_buffer_handle_t hCommandBuffer)  {
 }
 
 ur_result_t urCommandBufferAppendKernelLaunchExp(
-    ur_exp_command_buffer_handle_t CommandBuffer, ur_kernel_handle_t Kernel,
-    uint32_t WorkDim, const size_t *GlobalWorkOffset,
-    const size_t *GlobalWorkSize, const size_t *LocalWorkSize,
-    uint32_t NumKernelAlternatives, ur_kernel_handle_t *KernelAlternatives,
-    uint32_t NumSyncPointsInWaitList,
-    const ur_exp_command_buffer_sync_point_t *SyncPointWaitList,
-    uint32_t NumEventsInWaitList, const ur_event_handle_t *EventWaitList,
-    ur_exp_command_buffer_sync_point_t *RetSyncPoint, ur_event_handle_t *Event,
-    ur_exp_command_buffer_command_handle_t *Command) {
-  std::ignore = NumEventsInWaitList;
-  std::ignore = EventWaitList;
-  std::ignore = Event;
+    ur_exp_command_buffer_handle_t commandBuffer, ur_kernel_handle_t hKernel,
+    uint32_t workDim, const size_t *pGlobalWorkOffset,
+    const size_t *pGlobalWorkSize, const size_t *pLocalWorkSize,
+    uint32_t numKernelAlternatives, ur_kernel_handle_t *kernelAlternatives,
+    uint32_t numSyncPointsInWaitList,
+    const ur_exp_command_buffer_sync_point_t *syncPointWaitList,
+    uint32_t numEventsInWaitList, const ur_event_handle_t *eventWaitList,
+    ur_exp_command_buffer_sync_point_t *retSyncPoint, ur_event_handle_t *event,
+    ur_exp_command_buffer_command_handle_t *command) {
+  //Need to know semantics 
+  // - should they be checked before kernel execution or before kernel appending to list
+  // if latter then it is easy fix, if former then TODO
+  std::ignore = numEventsInWaitList;
+  std::ignore = eventWaitList;
+  std::ignore = event;
 
-  auto hProgram = Kernel->getProgramHandle();
-  UR_ASSERT(hProgram, UR_RESULT_ERROR_INVALID_NULL_POINTER);
-  // Command handles can only be obtained from updatable command-buffers
-  UR_ASSERT(!(Command && !CommandBuffer->IsUpdatable),
-            UR_RESULT_ERROR_INVALID_OPERATION);
+  //sync mechanic can be removed, because all lists are in-order
+  std::ignore = numSyncPointsInWaitList;
+  std::ignore = syncPointWaitList;
+  std::ignore = retSyncPoint;
 
-  for (uint32_t i = 0; i < NumKernelAlternatives; ++i) {
-    UR_ASSERT(KernelAlternatives[i] != Kernel, UR_RESULT_ERROR_INVALID_VALUE);
-  }
+  //TODO
+  std::ignore = numKernelAlternatives;
+  std::ignore = kernelAlternatives;
+  std::ignore = command;
 
-  // Lock automatically releases when this goes out of scope.
-  std::scoped_lock<ur_shared_mutex, ur_shared_mutex, ur_shared_mutex> Lock(
-      Kernel->Mutex, hProgram->Mutex, CommandBuffer->Mutex);
+  UR_ASSERT(hKernel, UR_RESULT_ERROR_INVALID_NULL_HANDLE);
+  UR_ASSERT(hKernel->getProgramHandle(), UR_RESULT_ERROR_INVALID_NULL_POINTER);
 
-  auto Device = CommandBuffer->Device;
-  ze_kernel_handle_t ZeKernel = Kernel->getZeHandle(Device);
+  UR_ASSERT(workDim > 0, UR_RESULT_ERROR_INVALID_WORK_DIMENSION);
+  UR_ASSERT(workDim < 4, UR_RESULT_ERROR_INVALID_WORK_DIMENSION);
 
-  // if (GlobalWorkOffset != NULL) {
-  //   UR_CALL(setKernelGlobalOffset(CommandBuffer->Context, ZeKernel, WorkDim,
-  //                                 GlobalWorkOffset));
-  // }
+  ze_kernel_handle_t hZeKernel = hKernel->getZeHandle(commandBuffer->Device);
 
-  // // If there are any pending arguments set them now.
-  // if (!Kernel->PendingArguments.empty()) {
-  //   UR_CALL(
-  //       setKernelPendingArguments(Device, Kernel->PendingArguments, ZeKernel));
-  // }
+  std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Lock(commandBuffer->Mutex,
+                                                          hKernel->Mutex);
 
-  // ze_group_count_t ZeThreadGroupDimensions{1, 1, 1};
-  // uint32_t WG[3];
-  // UR_CALL(calculateKernelWorkDimensions(ZeKernel, Device,
-  //                                       ZeThreadGroupDimensions, WG, WorkDim,
-  //                                       GlobalWorkSize, LocalWorkSize));
+  ze_group_count_t zeThreadGroupDimensions{1, 1, 1};
+  uint32_t WG[3]{};
+  UR_CALL(calculateKernelWorkDimensions(hZeKernel, commandBuffer->Device,
+                                        zeThreadGroupDimensions, WG, workDim,
+                                        pGlobalWorkSize, pLocalWorkSize));
 
-  // ZE2UR_CALL(zeKernelSetGroupSize, (ZeKernel, WG[0], WG[1], WG[2]));
-  // ^^^ above correspond to api that enqueus kernel in queue_api, but we dont have access to queue
+  auto waitList = commandBuffer->getWaitListView(nullptr, 0);
 
-  // CommandBuffer->KernelsList.push_back(Kernel);
-  // for (size_t i = 0; i < NumKernelAlternatives; i++) {
-  //   CommandBuffer->KernelsList.push_back(KernelAlternatives[i]);
-  // }
+  bool memoryMigrated = false;
+  auto memoryMigrate = [&](void *src, void *dst, size_t size) {
+    ZE2UR_CALL_THROWS(zeCommandListAppendMemoryCopy,
+                      (commandBuffer->ZeCommandList, dst, src, size, nullptr,
+                       waitList.second, waitList.first));
+    memoryMigrated = true;
+  };
 
-  // ur::level_zero::urKernelRetain(Kernel);
-  // // Retain alternative kernels if provided
-  // for (size_t i = 0; i < NumKernelAlternatives; i++) {
-  //   ur::level_zero::urKernelRetain(KernelAlternatives[i]);
-  // }
+  UR_CALL(hKernel->prepareForSubmission(commandBuffer->Context, commandBuffer->Device, pGlobalWorkOffset,
+                                        workDim, WG[0], WG[1], WG[2],
+                                        memoryMigrate));
 
-  // if (Command) {
-  //   UR_CALL(createCommandHandle(CommandBuffer, Kernel, WorkDim, LocalWorkSize,
-  //                               NumKernelAlternatives, KernelAlternatives,
-  //                               *Command));
-  // }
-  // ^^^ temporaly assume that command is null
+  ZE2UR_CALL(zeCommandListAppendLaunchKernel,
+             (commandBuffer->ZeCommandList, hZeKernel, &zeThreadGroupDimensions,
+              nullptr, waitList.second, waitList.first));
 
-  // std::vector<ze_event_handle_t> ZeEventList;
-  // ze_event_handle_t ZeLaunchEvent = nullptr;
-  // UR_CALL(createSyncPointAndGetZeEvents(
-  //     UR_COMMAND_KERNEL_LAUNCH, CommandBuffer, NumSyncPointsInWaitList,
-  //     SyncPointWaitList, false, RetSyncPoint, ZeEventList, ZeLaunchEvent));
-  // ^^^ this is not present, because this is in order
-
-  // ZE2UR_CALL(zeCommandListAppendLaunchKernel,
-  //            (CommandBuffer->ZeComputeCommandList, ZeKernel,
-  //             &ZeThreadGroupDimensions, ZeLaunchEvent, ZeEventList.size(),
-  //             getPointerFromVector(ZeEventList)));
-  // ^^ also part of queue_api
   return UR_RESULT_SUCCESS;
 }
 
 ur_result_t urCommandBufferEnqueueExp(
-    ur_exp_command_buffer_handle_t CommandBuffer, ur_queue_handle_t UrQueue,
-    uint32_t NumEventsInWaitList, const ur_event_handle_t *EventWaitList,
-    ur_event_handle_t *Event) {
-  return UR_RESULT_SUCCESS;
+    ur_exp_command_buffer_handle_t hCommandBuffer, ur_queue_handle_t hQueue,
+    uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
+    ur_event_handle_t *phEvent) {
+  try {
+    return hQueue->enqueueCommandBuffer(
+        hCommandBuffer->ZeCommandList, phEvent, numEventsInWaitList, phEventWaitList);
+  } catch (...) {
+    return exceptionToResult(std::current_exception());
+  }
 }
+
 ur_result_t
 urCommandBufferGetInfoExp(ur_exp_command_buffer_handle_t hCommandBuffer,
                           ur_exp_command_buffer_info_t propName,
