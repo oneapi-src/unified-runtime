@@ -24,8 +24,8 @@ namespace asan {
 
 class QuarantineCache {
   public:
-    using Element = AllocationIterator;
-    using List = std::queue<Element>;
+    using ElementT = std::shared_ptr<AllocInfo>;
+    using QueueT = std::queue<ElementT>;
 
     // The following methods are not thread safe, use this lock
     ur_mutex Mutex;
@@ -33,23 +33,37 @@ class QuarantineCache {
     // Total memory used, including internal accounting.
     uptr size() const { return m_Size; }
 
-    void enqueue(Element &It) {
-        m_List.push(It);
-        m_Size += It->second->AllocSize;
+    void enqueue(ElementT &AI) {
+        m_Queue.push(AI);
+        m_Size += AI->AllocSize;
     }
 
-    std::optional<Element> dequeue() {
-        if (m_List.empty()) {
-            return std::optional<Element>{};
+    std::optional<ElementT> dequeue() {
+        if (m_Queue.empty()) {
+            return std::optional<ElementT>{};
         }
-        auto It = m_List.front();
-        m_List.pop();
-        m_Size -= It->second->AllocSize;
-        return It;
+        auto &AI = m_Queue.front();
+        m_Queue.pop();
+        m_Size -= AI->AllocSize;
+        return AI;
+    }
+
+    void remove(ElementT &AI) {
+        m_Size -= AI->AllocSize;
+        // remove the element from the queue
+        QueueT newQueue;
+        while (!m_Queue.empty()) {
+            auto currentElement = m_Queue.front();
+            m_Queue.pop();
+            if (currentElement != AI) {
+                newQueue.push(currentElement);
+            }
+        }
+        std::swap(m_Queue, newQueue);
     }
 
   private:
-    List m_List;
+    QueueT m_Queue;
     std::atomic_uintptr_t m_Size = 0;
 };
 
@@ -58,8 +72,8 @@ class Quarantine {
     explicit Quarantine(size_t MaxQuarantineSize)
         : m_MaxQuarantineSize(MaxQuarantineSize) {}
 
-    std::vector<AllocationIterator> put(ur_device_handle_t Device,
-                                        AllocationIterator &Ptr);
+    std::vector<std::shared_ptr<AllocInfo>> put(std::shared_ptr<AllocInfo> &AI);
+    void remove(std::shared_ptr<AllocInfo> &AI);
 
   private:
     QuarantineCache &getCache(ur_device_handle_t Device) {

@@ -97,7 +97,8 @@ ur_result_t MemBuffer::getHandle(ur_device_handle_t Device, char *&Handle) {
             ur_cast<void **>(&Allocation));
         if (URes != UR_RESULT_SUCCESS) {
             getContext()->logger.error(
-                "Failed to allocate {} bytes memory for buffer {}", Size, this);
+                "Failed to allocate {} bytes memory for buffer {}", Size,
+                (void *)this);
             return URes;
         }
 
@@ -109,7 +110,7 @@ ur_result_t MemBuffer::getHandle(ur_device_handle_t Device, char *&Handle) {
                 getContext()->logger.error(
                     "Failed to copy {} bytes data from host "
                     "pointer {} to buffer {}",
-                    Size, HostPtr, this);
+                    Size, (void *)HostPtr, (void *)this);
                 return URes;
             }
         }
@@ -136,7 +137,7 @@ ur_result_t MemBuffer::getHandle(ur_device_handle_t Device, char *&Handle) {
             if (URes != UR_RESULT_SUCCESS) {
                 getContext()->logger.error("Failed to allocate {} bytes host "
                                            "USM for buffer {} migration",
-                                           Size, this);
+                                           Size, (void *)this);
                 return URes;
             }
         }
@@ -177,7 +178,8 @@ ur_result_t MemBuffer::free() {
     for (const auto &[_, Ptr] : Allocations) {
         ur_result_t URes = getAsanInterceptor()->releaseMemory(Context, Ptr);
         if (URes != UR_RESULT_SUCCESS) {
-            getContext()->logger.error("Failed to free buffer handle {}", Ptr);
+            getContext()->logger.error("Failed to free buffer handle {}",
+                                       (void *)Ptr);
             return URes;
         }
     }
