@@ -880,11 +880,17 @@ std::optional<AllocationIterator>
 AsanInterceptor::findAllocInfoByAddress(uptr Address) {
     std::shared_lock<ur_shared_mutex> Guard(m_AllocationMapMutex);
     auto It = m_AllocationMap.upper_bound(Address);
+    // `It` points to the element right next to the target AllocInfo(if exists).
+    // It is okay that `It` points to end() here, as the target AllocInfo can be
+    // the last element in map. But that would require a not-empty map. As for
+    // an empty map, `It` will be end(), and `end() == begin()` is true for the
+    // empty map. Therefore the following check is enough for that case.
     if (It == m_AllocationMap.begin()) {
         return std::optional<AllocationIterator>{};
     }
     --It;
-    // Make sure we got the right AllocInfo, or any other follow-up ops are based on wrong info.
+    // Make sure we got the right AllocInfo, or any other follow-up ops are
+    // based on wrong info.
     bool IsTheRightAllocInfo =
         Address >= It->second->AllocBegin &&
         Address < It->second->AllocBegin + It->second->AllocSize;
