@@ -96,6 +96,7 @@ struct ur_platform_handle_t_ : public _ur_platform {
   // associated with particular Level Zero driver, store this extension here.
   struct ZeMutableCmdListExtension {
     bool Supported = false;
+    bool LoaderExtension = false;
     ze_result_t (*zexCommandListGetNextCommandIdExp)(
         ze_command_list_handle_t, const ze_mutable_command_id_exp_desc_t *,
         uint64_t *) = nullptr;
