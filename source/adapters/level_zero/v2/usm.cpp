@@ -111,6 +111,67 @@ makePool(usm::umf_disjoint_pool_config_t *poolParams,
     throw umf::umf2urResult(umf_ret);
   }
 
+  ze_ops_t ze_ops;
+  ze_ops.zeMemAllocHost = [](ze_context_handle_t hContext,
+                             const ze_host_mem_alloc_desc_t *desc, size_t size,
+                             size_t alignment, void **ppRetMem) {
+    return ZE_CALL_NOCHECK(zeMemAllocHost,
+                           (hContext, desc, size, alignment, ppRetMem));
+  };
+  ze_ops.zeMemAllocDevice = [](ze_context_handle_t hContext,
+                               const ze_device_mem_alloc_desc_t *desc,
+                               size_t size, size_t alignment,
+                               ze_device_handle_t hDevice, void **ppRetMem) {
+    return ZE_CALL_NOCHECK(
+        zeMemAllocDevice, (hContext, desc, size, alignment, hDevice, ppRetMem));
+  };
+  ze_ops.zeMemAllocShared = [](ze_context_handle_t hContext,
+                               const ze_device_mem_alloc_desc_t *deviceDesc,
+                               const ze_host_mem_alloc_desc_t *hostDesc,
+                               size_t size, size_t alignment,
+                               ze_device_handle_t hDevice, void **ppRetMem) {
+    return ZE_CALL_NOCHECK(
+        zeMemAllocShared,
+        (hContext, deviceDesc, hostDesc, size, alignment, hDevice, ppRetMem));
+  };
+  ze_ops.zeMemFree = [](ze_context_handle_t hContext, void *ptr) {
+    return ZE_CALL_NOCHECK(zeMemFree, (hContext, ptr));
+  };
+  ze_ops.zeMemGetIpcHandle = [](ze_context_handle_t hContext, const void *ptr,
+                                ze_ipc_mem_handle_t *ipcHandle) {
+    return ZE_CALL_NOCHECK(zeMemGetIpcHandle, (hContext, ptr, ipcHandle));
+  };
+  ze_ops.zeMemPutIpcHandle = [](ze_context_handle_t hContext,
+                                ze_ipc_mem_handle_t ipcHandle) {
+    return ZE_CALL_NOCHECK(zeMemPutIpcHandle, (hContext, ipcHandle));
+  };
+  ze_ops.zeMemOpenIpcHandle = [](ze_context_handle_t hContext,
+                                 ze_device_handle_t hDevice,
+                                 ze_ipc_mem_handle_t ipcHandle,
+                                 ze_ipc_memory_flags_t flags, void **ptr) {
+    return ZE_CALL_NOCHECK(zeMemOpenIpcHandle,
+                           (hContext, hDevice, ipcHandle, flags, ptr));
+  };
+  ze_ops.zeMemCloseIpcHandle = [](ze_context_handle_t hContext,
+                                  const void *ptr) {
+    return ZE_CALL_NOCHECK(zeMemCloseIpcHandle, (hContext, ptr));
+  };
+  ze_ops.zeContextMakeMemoryResident = [](ze_context_handle_t hContext,
+                                          ze_device_handle_t hDevice, void *ptr,
+                                          size_t size) {
+    return ZE_CALL_NOCHECK(zeContextMakeMemoryResident,
+                           (hContext, hDevice, ptr, size));
+  };
+  ze_ops.zeDeviceGetProperties = [](ze_device_handle_t hDevice,
+                                    ze_device_properties_t *properties) {
+    return ZE_CALL_NOCHECK(zeDeviceGetProperties, (hDevice, properties));
+  };
+
+  umf_ret = umfLevelZeroProviderParamsSetZeOps(params, &ze_ops);
+  if (umf_ret != UMF_RESULT_SUCCESS) {
+    throw umf::umf2urResult(umf_ret);
+  }
+
   std::vector<ze_device_handle_t> residentZeHandles;
 
   if (poolDescriptor.type == UR_USM_TYPE_DEVICE) {
@@ -192,6 +253,14 @@ ur_usm_pool_handle_t_::getPool(const usm::pool_descriptor &desc) {
   return pool;
 }
 
+static ur_usm_device_mem_flags_t getDeviceFlags(const ur_usm_desc_t *pUSMDesc) {
+  if (auto devDesc = find_stype_node<ur_usm_device_desc_t>(pUSMDesc)) {
+    return devDesc->flags;
+  }
+
+  return 0;
+}
+
 ur_result_t ur_usm_pool_handle_t_::allocate(
     ur_context_handle_t hContext, ///< [in] handle of the context object
     ur_device_handle_t hDevice,   ///< [in] handle of the device object
@@ -199,8 +268,15 @@ ur_result_t ur_usm_pool_handle_t_::allocate(
     void **ppRetMem) {
   uint32_t alignment = pUSMDesc ? pUSMDesc->align : 0;
 
-  auto umfPool =
-      getPool(usm::pool_descriptor{this, hContext, hDevice, type, false});
+  if ((alignment & (alignment - 1)) != 0) {
+    return UR_RESULT_ERROR_INVALID_VALUE;
+  }
+
+  auto deviceFlags = getDeviceFlags(pUSMDesc);
+
+  auto umfPool = getPool(usm::pool_descriptor{
+      this, hContext, hDevice, type,
+      bool(deviceFlags & UR_USM_DEVICE_MEM_FLAG_DEVICE_READ_ONLY)});
   if (!umfPool) {
     return UR_RESULT_ERROR_INVALID_ARGUMENT;
   }
@@ -215,7 +291,13 @@ ur_result_t ur_usm_pool_handle_t_::allocate(
 }
 
 ur_result_t ur_usm_pool_handle_t_::free(void *ptr) {
-  return umf::umf2urResult(umfFree(ptr));
+  auto umfPool = umfPoolByPtr(ptr);
+  if (umfPool) {
+    return umf::umf2urResult(umfPoolFree(umfPool, ptr));
+  } else {
+    logger::error("Failed to find pool for pointer: {}", ptr);
+    return UR_RESULT_ERROR_INVALID_VALUE;
+  }
 }
 
 namespace ur::level_zero {
@@ -445,4 +527,39 @@ ur_result_t urUSMGetMemAllocInfo(
 } catch (...) {
   return exceptionToResult(std::current_exception());
 }
+
+ur_result_t urUSMImportExp(ur_context_handle_t hContext, void *hostPtr,
+                           size_t size) {
+  UR_ASSERT(hContext, UR_RESULT_ERROR_INVALID_CONTEXT);
+
+  // Promote the host ptr to USM host memory.
+  if (ZeUSMImport.Supported && hostPtr != nullptr) {
+    // Query memory type of the host pointer
+    ze_device_handle_t hDevice;
+    ZeStruct<ze_memory_allocation_properties_t> zeMemoryAllocationProperties;
+    ZE2UR_CALL(zeMemGetAllocProperties,
+               (hContext->getZeHandle(), hostPtr, &zeMemoryAllocationProperties,
+                &hDevice));
+
+    // If not shared of any type, we can import the ptr
+    if (zeMemoryAllocationProperties.type == ZE_MEMORY_TYPE_UNKNOWN) {
+      // Promote the host ptr to USM host memory
+      ze_driver_handle_t driverHandle =
+          hContext->getPlatform()->ZeDriverHandleExpTranslated;
+      ZeUSMImport.doZeUSMImport(driverHandle, hostPtr, size);
+    }
+  }
+  return UR_RESULT_SUCCESS;
+}
+
+ur_result_t urUSMReleaseExp(ur_context_handle_t hContext, void *hostPtr) {
+  UR_ASSERT(hContext, UR_RESULT_ERROR_INVALID_CONTEXT);
+
+  // Release the imported memory.
+  if (ZeUSMImport.Supported && hostPtr != nullptr)
+    ZeUSMImport.doZeUSMRelease(
+        hContext->getPlatform()->ZeDriverHandleExpTranslated, hostPtr);
+  return UR_RESULT_SUCCESS;
+}
+
 } // namespace ur::level_zero
