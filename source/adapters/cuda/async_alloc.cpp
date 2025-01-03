@@ -42,7 +42,9 @@ UR_APIEXPORT ur_result_t urEnqueueUSMDeviceAllocExp(
 
     if (pPool) {
       assert(pPool->usesCudaPool());
-
+      UR_CHECK_ERROR(
+          cuMemAllocFromPoolAsync(reinterpret_cast<CUdeviceptr *>(ppMem), size,
+                                  pPool->getCudaPool(), CuStream));
     } else {
       UR_CHECK_ERROR(cuMemAllocAsync(reinterpret_cast<CUdeviceptr *>(ppMem),
                                      size, CuStream));
