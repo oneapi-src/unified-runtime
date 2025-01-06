@@ -145,6 +145,10 @@ ur_result_t urEnqueueEventsWait(
     std::unique_lock<ur_shared_mutex> Lock(Queue->Mutex);
     resetCommandLists(Queue);
   }
+  if (OutEvent && (*OutEvent)->Completed) {
+    UR_CALL(CleanupCompletedEvent((*OutEvent), false, false));
+    UR_CALL(urEventReleaseInternal((*OutEvent)));
+  }
 
   return UR_RESULT_SUCCESS;
 }
@@ -466,7 +470,7 @@ ur_result_t urEventGetInfo(
   }
   case UR_EVENT_INFO_COMMAND_TYPE: {
     std::shared_lock<ur_shared_mutex> EventLock(Event->Mutex);
-    return ReturnValue(ur_cast<uint64_t>(Event->CommandType));
+    return ReturnValue(ur_cast<ur_command_t>(Event->CommandType));
   }
   case UR_EVENT_INFO_COMMAND_EXECUTION_STATUS: {
     // Check to see if the event's Queue has an open command list due to
@@ -581,8 +585,7 @@ ur_result_t urEventGetProfilingInfo(
 
       // End time needs to be adjusted for resolution and valid bits.
       uint64_t ContextEndTime =
-          (EndTimeRecording.RecordEventEndTimestamp & TimestampMaxValue) *
-          ZeTimerResolution;
+          (EndTimeRecording & TimestampMaxValue) * ZeTimerResolution;
 
       // If the result is 0, we have not yet gotten results back and so we just
       // return it.
@@ -755,20 +758,20 @@ ur_result_t urEnqueueTimestampRecordingExp(
   ze_event_handle_t ZeEvent = (*OutEvent)->ZeEvent;
   (*OutEvent)->WaitList = TmpWaitList;
 
+  // Reset the end timestamp, in case it has been previously used.
+  (*OutEvent)->RecordEventEndTimestamp = 0;
+
   uint64_t DeviceStartTimestamp = 0;
   UR_CALL(ur::level_zero::urDeviceGetGlobalTimestamps(
       Device, &DeviceStartTimestamp, nullptr));
   (*OutEvent)->RecordEventStartTimestamp = DeviceStartTimestamp;
 
   // Create a new entry in the queue's recordings.
-  Queue->EndTimeRecordings[*OutEvent] =
-      ur_queue_handle_t_::end_time_recording{};
+  Queue->EndTimeRecordings[*OutEvent] = 0;
 
   ZE2UR_CALL(zeCommandListAppendWriteGlobalTimestamp,
-             (CommandList->first,
-              &Queue->EndTimeRecordings[*OutEvent].RecordEventEndTimestamp,
-              ZeEvent, (*OutEvent)->WaitList.Length,
-              (*OutEvent)->WaitList.ZeEventList));
+             (CommandList->first, &Queue->EndTimeRecordings[*OutEvent], ZeEvent,
+              (*OutEvent)->WaitList.Length, (*OutEvent)->WaitList.ZeEventList));
 
   UR_CALL(
       Queue->executeCommandList(CommandList, Blocking, false /* OkToBatch */));
@@ -956,7 +959,6 @@ ur_result_t urEventCreateWithNativeHandle(
     UREvent = new ur_event_handle_t_(ZeEvent, nullptr /* ZeEventPool */,
                                      Context, UR_EXT_COMMAND_TYPE_USER,
                                      Properties->isNativeHandleOwned);
-
     UREvent->RefCountExternal++;
 
   } catch (const std::bad_alloc &) {
@@ -1049,6 +1051,26 @@ ur_result_t ur_event_handle_t_::getOrCreateHostVisibleEvent(
   return UR_RESULT_SUCCESS;
 }
 
+/**
+ * @brief Destructor for the ur_event_handle_t_ class.
+ *
+ * This destructor is responsible for cleaning up the event handle when the
+ * object is destroyed. It checks if the event (`ZeEvent`) is valid and if the
+ * event has been completed (`Completed`). If both conditions are met, it
+ * further checks if the associated queue (`UrQueue`) is valid and if it is not
+ * set to discard events. If all conditions are satisfied, it calls
+ * `zeEventDestroy` to destroy the event.
+ *
+ * This ensures that resources are properly released and avoids potential memory
+ * leaks or resource mismanagement.
+ */
+ur_event_handle_t_::~ur_event_handle_t_() {
+  if (this->ZeEvent && this->Completed) {
+    if (this->UrQueue && !this->UrQueue->isDiscardEvents())
+      ZE_CALL_NOCHECK(zeEventDestroy, (this->ZeEvent));
+  }
+}
+
 ur_result_t urEventReleaseInternal(ur_event_handle_t Event) {
   if (!Event->RefCount.decrementAndTest())
     return UR_RESULT_SUCCESS;
@@ -1071,6 +1093,7 @@ ur_result_t urEventReleaseInternal(ur_event_handle_t Event) {
   if (Event->OwnNativeHandle) {
     if (DisableEventsCaching) {
       auto ZeResult = ZE_CALL_NOCHECK(zeEventDestroy, (Event->ZeEvent));
+      Event->ZeEvent = nullptr;
       // Gracefully handle the case that L0 was already unloaded.
       if (ZeResult && ZeResult != ZE_RESULT_ERROR_UNINITIALIZED)
         return ze2urResult(ZeResult);
@@ -1096,10 +1119,11 @@ ur_result_t urEventReleaseInternal(ur_event_handle_t Event) {
     auto Entry = Queue->EndTimeRecordings.find(Event);
     if (Entry != Queue->EndTimeRecordings.end()) {
       auto &EndTimeRecording = Entry->second;
-      if (EndTimeRecording.RecordEventEndTimestamp == 0) {
+      if (EndTimeRecording == 0) {
         // If the end time recording has not finished, we tell the queue that
         // the event is no longer alive to avoid invalid write-backs.
-        EndTimeRecording.EventHasDied = true;
+        Queue->EvictedEndTimeRecordings.insert(
+            Queue->EndTimeRecordings.extract(Entry));
       } else {
         // Otherwise we evict the entry.
         Queue->EndTimeRecordings.erase(Entry);

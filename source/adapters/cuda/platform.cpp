@@ -9,6 +9,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "platform.hpp"
+#include "adapter.hpp"
 #include "common.hpp"
 #include "context.hpp"
 #include "device.hpp"
@@ -40,6 +41,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urPlatformGetInfo(
   }
   case UR_PLATFORM_INFO_BACKEND: {
     return ReturnValue(UR_PLATFORM_BACKEND_CUDA);
+  }
+  case UR_PLATFORM_INFO_ADAPTER: {
+    return ReturnValue(&adapter);
   }
   default:
     return UR_RESULT_ERROR_INVALID_ENUMERATION;
@@ -84,7 +88,7 @@ urPlatformGet(ur_adapter_handle_t *, uint32_t, uint32_t NumEntries,
               UR_CHECK_ERROR(cuDevicePrimaryCtxRetain(&Context, Device));
 
               ScopedContext Active(Context); // Set native ctx as active
-              CUevent EvBase;
+              CUevent EvBase{};
               UR_CHECK_ERROR(cuEventCreate(&EvBase, CU_EVENT_DEFAULT));
 
               // Use default stream to record base event counter
