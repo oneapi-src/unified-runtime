@@ -76,11 +76,15 @@ struct KernelInfo {
     ur_kernel_handle_t Handle;
     std::atomic<int32_t> RefCount = 1;
 
+    // sanitized kernel
+    bool IsInstrumented = false;
+
     // lock this mutex if following fields are accessed
     ur_shared_mutex Mutex;
     std::unordered_map<uint32_t, std::shared_ptr<MemBuffer>> BufferArgs;
 
-    explicit KernelInfo(ur_kernel_handle_t Kernel) : Handle(Kernel) {
+    explicit KernelInfo(ur_kernel_handle_t Kernel, bool IsInstrumented)
+        : Handle(Kernel), IsInstrumented(IsInstrumented) {
         [[maybe_unused]] auto Result =
             getContext()->urDdiTable.Kernel.pfnRetain(Kernel);
         assert(Result == UR_RESULT_SUCCESS);
@@ -120,7 +124,6 @@ struct ContextInfo {
     std::atomic<int32_t> RefCount = 1;
 
     std::vector<ur_device_handle_t> DeviceList;
-    std::unordered_map<ur_device_handle_t, AllocInfoList> AllocInfosMap;
 
     explicit ContextInfo(ur_context_handle_t Context) : Handle(Context) {
         [[maybe_unused]] auto Result =
@@ -129,15 +132,6 @@ struct ContextInfo {
     }
 
     ~ContextInfo();
-
-    void insertAllocInfo(const std::vector<ur_device_handle_t> &Devices,
-                         std::shared_ptr<MsanAllocInfo> &AI) {
-        for (auto Device : Devices) {
-            auto &AllocInfos = AllocInfosMap[Device];
-            std::scoped_lock<ur_shared_mutex> Guard(AllocInfos.Mutex);
-            AllocInfos.List.emplace_back(AI);
-        }
-    }
 };
 
 struct USMLaunchInfo {
@@ -181,6 +175,7 @@ class MsanInterceptor {
                                const ur_usm_desc_t *Properties,
                                ur_usm_pool_handle_t Pool, size_t Size,
                                void **ResultPtr);
+    ur_result_t releaseMemory(ur_context_handle_t Context, void *Ptr);
 
     ur_result_t registerProgram(ur_program_handle_t Program);
     ur_result_t unregisterProgram(ur_program_handle_t Program);
@@ -202,9 +197,6 @@ class MsanInterceptor {
 
     ur_result_t insertProgram(ur_program_handle_t Program);
     ur_result_t eraseProgram(ur_program_handle_t Program);
-
-    ur_result_t insertKernel(ur_kernel_handle_t Kernel);
-    ur_result_t eraseKernel(ur_kernel_handle_t Kernel);
 
     ur_result_t insertMemBuffer(std::shared_ptr<MemBuffer> MemBuffer);
     ur_result_t eraseMemBuffer(ur_mem_handle_t MemHandle);
@@ -245,13 +237,8 @@ class MsanInterceptor {
         return m_ProgramMap[Program];
     }
 
-    std::shared_ptr<msan::KernelInfo> getKernelInfo(ur_kernel_handle_t Kernel) {
-        std::shared_lock<ur_shared_mutex> Guard(m_KernelMapMutex);
-        if (m_KernelMap.find(Kernel) != m_KernelMap.end()) {
-            return m_KernelMap[Kernel];
-        }
-        return nullptr;
-    }
+    KernelInfo &getOrCreateKernelInfo(ur_kernel_handle_t Kernel);
+    ur_result_t eraseKernelInfo(ur_kernel_handle_t Kernel);
 
     const MsanOptions &getOptions() { return m_Options; }
 
@@ -263,15 +250,6 @@ class MsanInterceptor {
     bool isNormalExit() { return m_NormalExit; }
 
   private:
-    ur_result_t
-    updateShadowMemory(std::shared_ptr<msan::ContextInfo> &ContextInfo,
-                       std::shared_ptr<msan::DeviceInfo> &DeviceInfo,
-                       ur_queue_handle_t Queue);
-
-    ur_result_t enqueueAllocInfo(std::shared_ptr<msan::DeviceInfo> &DeviceInfo,
-                                 ur_queue_handle_t Queue,
-                                 std::shared_ptr<MsanAllocInfo> &AI);
-
     /// Initialize Global Variables & Kernel Name at first Launch
     ur_result_t prepareLaunch(std::shared_ptr<msan::DeviceInfo> &DeviceInfo,
                               ur_queue_handle_t Queue,
