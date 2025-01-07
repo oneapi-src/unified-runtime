@@ -1239,13 +1239,6 @@ ur_result_t urEnqueueUSMPrefetch(
         *OutEvent ///< [in,out][optional] return an event object that identifies
                   ///< this particular command instance.
 ) {
-  // L0 does not suppot migrating from device to host yet: skip procedure
-  if (Flags == UR_USM_MIGRATION_FLAG_DEVICE_TO_HOST) {
-    logger::warning("urEnqueueUSMPrefetch: Prefetch from device to host not yet"
-                    " supported by level zero");
-    return UR_RESULT_SUCCESS;
-  }
-
   // Lock automatically releases when this goes out of scope.
   std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
 
@@ -1285,8 +1278,14 @@ ur_result_t urEnqueueUSMPrefetch(
     ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
                (ZeCommandList, WaitList.Length, WaitList.ZeEventList));
   }
-  // TODO: figure out how to translate "flags"
-  ZE2UR_CALL(zeCommandListAppendMemoryPrefetch, (ZeCommandList, Mem, Size));
+
+  if (Flags == UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE) {
+    ZE2UR_CALL(zeCommandListAppendMemoryPrefetch, (ZeCommandList, Mem, Size));
+  } else {
+    // L0 does not suppot migrating from device to host yet: skip procedure
+    logger::warning("urEnqueueUSMPrefetch: Prefetch from device to host not yet"
+                    " supported by level zero");
+  }
 
   // TODO: Level Zero does not have a completion "event" with the prefetch API,
   // so manually add command to signal our event.
