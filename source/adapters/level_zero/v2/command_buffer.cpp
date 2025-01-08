@@ -83,16 +83,16 @@ ur_exp_command_buffer_handle_t_::ur_exp_command_buffer_handle_t_(
       const ur_exp_command_buffer_desc_t *Desc)
     : Context(Context), Device(Device), ZeCommandList(CommandList),
       IsUpdatable(Desc ? Desc->isUpdatable : false) {
-  ur::level_zero::urContextRetain(Context);
-  ur::level_zero::urDeviceRetain(Device);
+  UR_CALL_THROWS(ur::level_zero::urContextRetain(Context));
+  UR_CALL_THROWS(ur::level_zero::urDeviceRetain(Device));
 }
 
 void ur_exp_command_buffer_handle_t_::cleanupCommandBufferResources() {
   // Release the memory allocated to the Context stored in the command_buffer
-  ur::level_zero::urContextRelease(Context);
+  UR_CALL_THROWS(ur::level_zero::urContextRelease(Context));
 
   // Release the device
-  ur::level_zero::urDeviceRelease(Device);
+  UR_CALL_THROWS(ur::level_zero::urDeviceRelease(Device));
 
   // Release the memory allocated to the CommandList stored in the
   // command_buffer
@@ -101,7 +101,7 @@ void ur_exp_command_buffer_handle_t_::cleanupCommandBufferResources() {
   }
 
   for (auto &AssociatedKernel : KernelsList) {
-    ur::level_zero::urKernelRelease(AssociatedKernel);
+    UR_CALL_THROWS(ur::level_zero::urKernelRelease(AssociatedKernel));
   }
 }
 
@@ -149,7 +149,7 @@ urCommandBufferCreateExp(ur_context_handle_t Context, ur_device_handle_t Device,
                          ur_exp_command_buffer_handle_t *CommandBuffer) {
   bool IsUpdatable = CommandBufferDesc && CommandBufferDesc->isUpdatable;
   checkImmediateAppendSupport(Context, Device);
-  
+
   if (IsUpdatable) {
     UR_ASSERT(Context->getPlatform()->ZeMutableCmdListExt.Supported,
               UR_RESULT_ERROR_UNSUPPORTED_FEATURE);
@@ -176,7 +176,12 @@ urCommandBufferReleaseExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
   if (!hCommandBuffer->RefCount.decrementAndTest())
     return UR_RESULT_SUCCESS;
 
-  hCommandBuffer->cleanupCommandBufferResources();
+  try {
+    hCommandBuffer->cleanupCommandBufferResources();
+  } catch (...) {
+    delete hCommandBuffer;
+    return exceptionToResult(std::current_exception());
+  }
   delete hCommandBuffer;
   return UR_RESULT_SUCCESS;
 }
@@ -214,7 +219,7 @@ ur_result_t urCommandBufferAppendKernelLaunchExp(
   std::ignore = eventWaitList;
   std::ignore = event;
 
-  //sync mechanic can be removed, because all lists are in-order
+  //sync mechanic can be ignored, because all lists are in-order
   std::ignore = numSyncPointsInWaitList;
   std::ignore = syncPointWaitList;
   std::ignore = retSyncPoint;
