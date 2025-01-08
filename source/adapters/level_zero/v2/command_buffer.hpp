@@ -71,22 +71,3 @@ struct ur_exp_command_buffer_command_handle_t_ : public _ur_object {
   // L0 command ID identifying this command
   uint64_t CommandId;
 };
-
-// struct kernel_command_handle : public ur_exp_command_buffer_command_handle_t_ {
-//   kernel_command_handle(ur_exp_command_buffer_handle_t CommandBuffer,
-//                         ur_kernel_handle_t Kernel, uint64_t CommandId,
-//                         uint32_t WorkDim, bool UserDefinedLocalSize,
-//                         uint32_t NumKernelAlternatives,
-//                         ur_kernel_handle_t *KernelAlternatives);
-
-//   ~kernel_command_handle();
-
-//   // Work-dimension the command was originally created with.
-//   uint32_t WorkDim;
-//   // Set to true if the user set the local work size on command creation.
-//   bool UserDefinedLocalSize;
-//   // Currently active kernel handle
-//   ur_kernel_handle_t Kernel;
-//   // Storage for valid kernel alternatives for this command.
-//   std::unordered_set<ur_kernel_handle_t> ValidKernelHandles;
-// };
