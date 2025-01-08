@@ -509,6 +509,7 @@ __urdlllocal ur_result_t UR_APICALL urContextCreate(
         pfnCreate(numDevices, phDevices, pProperties, phContext);
 
     if (result == UR_RESULT_SUCCESS) {
+        getContext()->objectHandler.add(*phContext);
         UR_CALL(setupContext(*phContext, numDevices, phDevices));
     }
 
@@ -543,6 +544,7 @@ __urdlllocal ur_result_t UR_APICALL urContextCreateWithNativeHandle(
                                   phDevices, pProperties, phContext);
 
     if (result == UR_RESULT_SUCCESS) {
+        getContext()->objectHandler.add(*phContext);
         UR_CALL(setupContext(*phContext, numDevices, phDevices));
     }
 
@@ -563,7 +565,8 @@ __urdlllocal ur_result_t UR_APICALL urContextRetain(
 
     getContext()->logger.debug("==== urContextRetain");
 
-    UR_CALL(pfnRetain(hContext));
+    // UR_CALL(pfnRetain(hContext));
+    UR_CALL(getContext()->objectHandler.retain(hContext));
 
     auto ContextInfo = getAsanInterceptor()->getContextInfo(hContext);
     UR_ASSERT(ContextInfo != nullptr, UR_RESULT_ERROR_INVALID_VALUE);
@@ -585,7 +588,8 @@ __urdlllocal ur_result_t UR_APICALL urContextRelease(
 
     getContext()->logger.debug("==== urContextRelease");
 
-    UR_CALL(pfnRelease(hContext));
+    // UR_CALL(pfnRelease(hContext));
+    UR_CALL(getContext()->objectHandler.release(hContext));
 
     auto ContextInfo = getAsanInterceptor()->getContextInfo(hContext);
     UR_ASSERT(ContextInfo != nullptr, UR_RESULT_ERROR_INVALID_VALUE);
@@ -2036,6 +2040,8 @@ ur_result_t initAsanDDITable(ur_dditable_t *dditable) {
     ur_result_t result = UR_RESULT_SUCCESS;
 
     getContext()->logger.always("==== DeviceSanitizer: ASAN");
+
+    getContext()->objectHandler.installDdiTable(dditable);
 
     if (UR_RESULT_SUCCESS == result) {
         result = ur_sanitizer_layer::asan::urGetGlobalProcAddrTable(

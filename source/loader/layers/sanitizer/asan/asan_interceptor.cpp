@@ -896,7 +896,8 @@ ContextInfo::~ContextInfo() {
         assert(URes == UR_RESULT_SUCCESS);
     }
 
-    URes = getContext()->urDdiTable.Context.pfnRelease(Handle);
+    // URes = getContext()->urDdiTable.Context.pfnRelease(Handle);
+    URes = getContext()->objectHandler.release(Handle);
     assert(URes == UR_RESULT_SUCCESS);
 
     // check memory leaks
@@ -944,7 +945,8 @@ AsanRuntimeDataWrapper::~AsanRuntimeDataWrapper() {
 
 LaunchInfo::~LaunchInfo() {
     [[maybe_unused]] ur_result_t Result;
-    Result = getContext()->urDdiTable.Context.pfnRelease(Context);
+    // Result = getContext()->urDdiTable.Context.pfnRelease(Context);
+    Result = getContext()->objectHandler.release(Context);
     assert(Result == UR_RESULT_SUCCESS);
     Result = getContext()->urDdiTable.Device.pfnRelease(Device);
     assert(Result == UR_RESULT_SUCCESS);

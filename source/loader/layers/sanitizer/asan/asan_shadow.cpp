@@ -22,6 +22,7 @@ namespace asan {
 std::shared_ptr<ShadowMemory> GetShadowMemory(ur_context_handle_t Context,
                                               ur_device_handle_t Device,
                                               DeviceType Type) {
+    getContext()->objectHandler.use(Context);
     if (Type == DeviceType::CPU) {
         static std::shared_ptr<ShadowMemory> ShadowCPU =
             std::make_shared<ShadowMemoryCPU>(Context, Device);
@@ -109,6 +110,8 @@ ur_result_t ShadowMemoryGPU::Setup() {
         // the SVM range, so that GFX driver will automatically switch to reservation on the GPU
         // heap.
         const void *StartAddress = (void *)(0x100'0000'0000'0000ULL);
+        
+        getContext()->objectHandler.use(Context);
         // TODO: Protect Bad Zone
         auto Result = getContext()->urDdiTable.VirtualMem.pfnReserve(
             Context, StartAddress, ShadowSize, (void **)&ShadowBegin);
@@ -120,7 +123,8 @@ ur_result_t ShadowMemoryGPU::Setup() {
         }
         ShadowEnd = ShadowBegin + ShadowSize;
         // Retain the context which reserves shadow memory
-        getContext()->urDdiTable.Context.pfnRetain(Context);
+        // getContext()->urDdiTable.Context.pfnRetain(Context);
+        getContext()->objectHandler.retain(Context);
 
         // Set shadow memory for null pointer
         // For GPU, wu use up to 1 page of shadow memory
@@ -147,6 +151,7 @@ ur_result_t ShadowMemoryGPU::Destory() {
     }
 
     static ur_result_t Result = [this]() {
+        getContext()->objectHandler.use(Context);
         const size_t PageSize = GetVirtualMemGranularity(Context, Device);
         for (auto [MappedPtr, PhysicalMem] : VirtualMemMaps) {
             UR_CALL(getContext()->urDdiTable.VirtualMem.pfnUnmap(
@@ -156,7 +161,8 @@ ur_result_t ShadowMemoryGPU::Destory() {
         }
         UR_CALL(getContext()->urDdiTable.VirtualMem.pfnFree(
             Context, (const void *)ShadowBegin, GetShadowSize()));
-        UR_CALL(getContext()->urDdiTable.Context.pfnRelease(Context));
+        // UR_CALL(getContext()->urDdiTable.Context.pfnRelease(Context));
+        UR_CALL(getContext()->objectHandler.release(Context));
         return UR_RESULT_SUCCESS;
     }();
     if (!Result) {
@@ -171,7 +177,8 @@ ur_result_t ShadowMemoryGPU::Destory() {
     if (ShadowBegin != 0) {
         UR_CALL(getContext()->urDdiTable.VirtualMem.pfnFree(
             Context, (const void *)ShadowBegin, GetShadowSize()));
-        UR_CALL(getContext()->urDdiTable.Context.pfnRelease(Context));
+        // UR_CALL(getContext()->urDdiTable.Context.pfnRelease(Context));
+        UR_CALL(getContext()->objectHandler.release(Context));
         ShadowBegin = ShadowEnd = 0;
     }
     return UR_RESULT_SUCCESS;

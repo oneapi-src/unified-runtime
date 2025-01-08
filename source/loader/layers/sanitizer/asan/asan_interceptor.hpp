@@ -148,8 +148,7 @@ struct ContextInfo {
     AsanStatsWrapper Stats;
 
     explicit ContextInfo(ur_context_handle_t Context) : Handle(Context) {
-        [[maybe_unused]] auto Result =
-            getContext()->urDdiTable.Context.pfnRetain(Context);
+        [[maybe_unused]] auto Result = getContext()->objectHandler.retain(Handle);
         assert(Result == UR_RESULT_SUCCESS);
     }
 
@@ -252,9 +251,9 @@ struct LaunchInfo {
             this->LocalWorkSize =
                 std::vector<size_t>(LocalWorkSize, LocalWorkSize + WorkDim);
         }
-        [[maybe_unused]] auto Result =
-            getContext()->urDdiTable.Context.pfnRetain(Context);
+        [[maybe_unused]] auto Result = getContext()->objectHandler.retain(Context);
         assert(Result == UR_RESULT_SUCCESS);
+        
         Result = getContext()->urDdiTable.Device.pfnRetain(Device);
         assert(Result == UR_RESULT_SUCCESS);
     }

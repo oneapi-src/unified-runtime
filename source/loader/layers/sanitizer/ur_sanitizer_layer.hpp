@@ -14,6 +14,7 @@
 
 #include "logger/ur_logger.hpp"
 #include "ur_proxy_layer.hpp"
+#include "ur_obj_handler.hpp"
 
 #define SANITIZER_COMP_NAME "sanitizer layer"
 
@@ -33,6 +34,7 @@ class __urdlllocal context_t : public proxy_layer_context_t,
     ur_dditable_t urDdiTable = {};
     logger::Logger logger;
     SanitizerType enabledType = SanitizerType::None;
+    UrObjectHandler objectHandler;
 
     context_t();
     ~context_t();
