@@ -15,11 +15,6 @@
 #include <unordered_map>
 #include <variant>
 
-// Some helper functions to make it easier to use the UR handle checker
-#define UR_USE(handle)                                                         \
-    (getContext()->urHandleChecker.use(handle) ? (handle)                      \
-                                               : decltype(handle){nullptr})
-
 namespace ur_sanitizer_layer {
 
 class UrHandleChecker {

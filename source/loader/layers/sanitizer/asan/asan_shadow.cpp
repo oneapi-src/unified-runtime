@@ -14,7 +14,6 @@
 #include "asan_interceptor.hpp"
 #include "asan_libdevice.hpp"
 #include "sanitizer_common/sanitizer_utils.hpp"
-#include "ur_handle_checker.hpp"
 #include "ur_sanitizer_layer.hpp"
 
 namespace ur_sanitizer_layer {

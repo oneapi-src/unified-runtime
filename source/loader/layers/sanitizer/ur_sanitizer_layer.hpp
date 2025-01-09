@@ -19,6 +19,11 @@
 
 #define SANITIZER_COMP_NAME "sanitizer layer"
 
+// Some helper functions to make it easier to use the UR handle checker
+#define UR_USE(handle)                                                         \
+    (getContext()->urHandleChecker.use(handle) ? (handle)                      \
+                                               : decltype(handle){nullptr})
+
 namespace ur_sanitizer_layer {
 
 enum class SanitizerType {
