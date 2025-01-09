@@ -35,6 +35,7 @@ ur_result_t context_t::init(ur_dditable_t *dditable,
         return UR_RESULT_SUCCESS;
     }
 
+    getContext()->urHandleChecker.wrapDditable(dditable);
     urDdiTable = *dditable;
 
     switch (enabledType) {

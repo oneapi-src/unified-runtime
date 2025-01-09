@@ -15,6 +15,7 @@
 #include "asan_options.hpp"
 #include "sanitizer_common/sanitizer_stacktrace.hpp"
 #include "sanitizer_common/sanitizer_utils.hpp"
+#include "ur_handle_checker.hpp"
 #include "ur_sanitizer_layer.hpp"
 
 #include <memory>

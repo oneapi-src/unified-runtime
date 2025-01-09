@@ -14,6 +14,7 @@
 #include "asan_interceptor.hpp"
 #include "asan_libdevice.hpp"
 #include "sanitizer_common/sanitizer_utils.hpp"
+#include "ur_handle_checker.hpp"
 #include "ur_sanitizer_layer.hpp"
 
 namespace ur_sanitizer_layer {
@@ -24,15 +25,15 @@ std::shared_ptr<ShadowMemory> GetShadowMemory(ur_context_handle_t Context,
                                               DeviceType Type) {
     if (Type == DeviceType::CPU) {
         static std::shared_ptr<ShadowMemory> ShadowCPU =
-            std::make_shared<ShadowMemoryCPU>(Context, Device);
+            std::make_shared<ShadowMemoryCPU>(UR_USE(Context), Device);
         return ShadowCPU;
     } else if (Type == DeviceType::GPU_PVC) {
         static std::shared_ptr<ShadowMemory> ShadowPVC =
-            std::make_shared<ShadowMemoryPVC>(Context, Device);
+            std::make_shared<ShadowMemoryPVC>(UR_USE(Context), Device);
         return ShadowPVC;
     } else if (Type == DeviceType::GPU_DG2) {
         static std::shared_ptr<ShadowMemory> ShadowDG2 =
-            std::make_shared<ShadowMemoryDG2>(Context, Device);
+            std::make_shared<ShadowMemoryDG2>(UR_USE(Context), Device);
         return ShadowDG2;
     } else {
         getContext()->logger.error("Unsupport device type");
@@ -111,7 +112,7 @@ ur_result_t ShadowMemoryGPU::Setup() {
         const void *StartAddress = (void *)(0x100'0000'0000'0000ULL);
         // TODO: Protect Bad Zone
         auto Result = getContext()->urDdiTable.VirtualMem.pfnReserve(
-            Context, StartAddress, ShadowSize, (void **)&ShadowBegin);
+            UR_USE(Context), StartAddress, ShadowSize, (void **)&ShadowBegin);
         if (Result != UR_RESULT_SUCCESS) {
             getContext()->logger.error(
                 "Shadow memory reserved failed with size {}: {}",
@@ -120,13 +121,14 @@ ur_result_t ShadowMemoryGPU::Setup() {
         }
         ShadowEnd = ShadowBegin + ShadowSize;
         // Retain the context which reserves shadow memory
-        getContext()->urDdiTable.Context.pfnRetain(Context);
+        getContext()->urDdiTable.Context.pfnRetain(UR_USE(Context));
 
         // Set shadow memory for null pointer
         // For GPU, wu use up to 1 page of shadow memory
         const size_t NullptrRedzoneSize =
-            GetVirtualMemGranularity(Context, Device) << ASAN_SHADOW_SCALE;
-        ManagedQueue Queue(Context, Device);
+            GetVirtualMemGranularity(UR_USE(Context), Device)
+            << ASAN_SHADOW_SCALE;
+        ManagedQueue Queue(UR_USE(Context), Device);
         Result = EnqueuePoisonShadow(Queue, 0, NullptrRedzoneSize,
                                      kNullPointerRedzoneMagic);
         if (Result != UR_RESULT_SUCCESS) {
@@ -142,21 +144,22 @@ ur_result_t ShadowMemoryGPU::Setup() {
 ur_result_t ShadowMemoryGPU::Destory() {
     if (PrivateShadowOffset != 0) {
         UR_CALL(getContext()->urDdiTable.USM.pfnFree(
-            Context, (void *)PrivateShadowOffset));
+            UR_USE(Context), (void *)PrivateShadowOffset));
         PrivateShadowOffset = 0;
     }
 
     static ur_result_t Result = [this]() {
-        const size_t PageSize = GetVirtualMemGranularity(Context, Device);
+        const size_t PageSize =
+            GetVirtualMemGranularity(UR_USE(Context), Device);
         for (auto [MappedPtr, PhysicalMem] : VirtualMemMaps) {
             UR_CALL(getContext()->urDdiTable.VirtualMem.pfnUnmap(
-                Context, (void *)MappedPtr, PageSize));
+                UR_USE(Context), (void *)MappedPtr, PageSize));
             UR_CALL(
                 getContext()->urDdiTable.PhysicalMem.pfnRelease(PhysicalMem));
         }
         UR_CALL(getContext()->urDdiTable.VirtualMem.pfnFree(
-            Context, (const void *)ShadowBegin, GetShadowSize()));
-        UR_CALL(getContext()->urDdiTable.Context.pfnRelease(Context));
+            UR_USE(Context), (const void *)ShadowBegin, GetShadowSize()));
+        UR_CALL(getContext()->urDdiTable.Context.pfnRelease(UR_USE(Context)));
         return UR_RESULT_SUCCESS;
     }();
     if (!Result) {
@@ -165,13 +168,13 @@ ur_result_t ShadowMemoryGPU::Destory() {
 
     if (LocalShadowOffset != 0) {
         UR_CALL(getContext()->urDdiTable.USM.pfnFree(
-            Context, (void *)LocalShadowOffset));
+            UR_USE(Context), (void *)LocalShadowOffset));
         LocalShadowOffset = 0;
     }
     if (ShadowBegin != 0) {
         UR_CALL(getContext()->urDdiTable.VirtualMem.pfnFree(
-            Context, (const void *)ShadowBegin, GetShadowSize()));
-        UR_CALL(getContext()->urDdiTable.Context.pfnRelease(Context));
+            UR_USE(Context), (const void *)ShadowBegin, GetShadowSize()));
+        UR_CALL(getContext()->urDdiTable.Context.pfnRelease(UR_USE(Context)));
         ShadowBegin = ShadowEnd = 0;
     }
     return UR_RESULT_SUCCESS;
@@ -189,7 +192,7 @@ ur_result_t ShadowMemoryGPU::EnqueuePoisonShadow(ur_queue_handle_t Queue,
     assert(ShadowBegin <= ShadowEnd);
     {
         static const size_t PageSize =
-            GetVirtualMemGranularity(Context, Device);
+            GetVirtualMemGranularity(UR_USE(Context), Device);
 
         ur_physical_mem_properties_t Desc{
             UR_STRUCTURE_TYPE_PHYSICAL_MEM_PROPERTIES, nullptr, 0};
@@ -201,7 +204,7 @@ ur_result_t ShadowMemoryGPU::EnqueuePoisonShadow(ur_queue_handle_t Queue,
             if (VirtualMemMaps.find(MappedPtr) == VirtualMemMaps.end()) {
                 ur_physical_mem_handle_t PhysicalMem{};
                 auto URes = getContext()->urDdiTable.PhysicalMem.pfnCreate(
-                    Context, Device, PageSize, &Desc, &PhysicalMem);
+                    UR_USE(Context), Device, PageSize, &Desc, &PhysicalMem);
                 if (URes != UR_RESULT_SUCCESS) {
                     getContext()->logger.error("urPhysicalMemCreate(): {}",
                                                URes);
@@ -209,8 +212,8 @@ ur_result_t ShadowMemoryGPU::EnqueuePoisonShadow(ur_queue_handle_t Queue,
                 }
 
                 URes = getContext()->urDdiTable.VirtualMem.pfnMap(
-                    Context, (void *)MappedPtr, PageSize, PhysicalMem, 0,
-                    UR_VIRTUAL_MEM_ACCESS_FLAG_READ_WRITE);
+                    UR_USE(Context), (void *)MappedPtr, PageSize, PhysicalMem,
+                    0, UR_VIRTUAL_MEM_ACCESS_FLAG_READ_WRITE);
                 if (URes != UR_RESULT_SUCCESS) {
                     getContext()->logger.error("urVirtualMemMap({}, {}): {}",
                                                (void *)MappedPtr, PageSize,
@@ -258,17 +261,18 @@ ur_result_t ShadowMemoryGPU::AllocLocalShadow(ur_queue_handle_t Queue,
         (NumWG * LocalMemorySize) >> ASAN_SHADOW_SCALE;
     static size_t LastAllocedSize = 0;
     if (RequiredShadowSize > LastAllocedSize) {
-        auto ContextInfo = getAsanInterceptor()->getContextInfo(Context);
+        auto ContextInfo =
+            getAsanInterceptor()->getContextInfo(UR_USE(Context));
         if (LocalShadowOffset) {
             UR_CALL(getContext()->urDdiTable.USM.pfnFree(
-                Context, (void *)LocalShadowOffset));
+                UR_USE(Context), (void *)LocalShadowOffset));
             ContextInfo->Stats.UpdateShadowFreed(LastAllocedSize);
             LocalShadowOffset = 0;
             LastAllocedSize = 0;
         }
 
         UR_CALL(getContext()->urDdiTable.USM.pfnDeviceAlloc(
-            Context, Device, nullptr, nullptr, RequiredShadowSize,
+            UR_USE(Context), Device, nullptr, nullptr, RequiredShadowSize,
             (void **)&LocalShadowOffset));
 
         // Initialize shadow memory
@@ -276,7 +280,7 @@ ur_result_t ShadowMemoryGPU::AllocLocalShadow(ur_queue_handle_t Queue,
             Queue, (void *)LocalShadowOffset, 0, RequiredShadowSize);
         if (URes != UR_RESULT_SUCCESS) {
             UR_CALL(getContext()->urDdiTable.USM.pfnFree(
-                Context, (void *)LocalShadowOffset));
+                UR_USE(Context), (void *)LocalShadowOffset));
             LocalShadowOffset = 0;
             LastAllocedSize = 0;
         }
@@ -298,17 +302,18 @@ ur_result_t ShadowMemoryGPU::AllocPrivateShadow(ur_queue_handle_t Queue,
         (NumWG * ASAN_PRIVATE_SIZE) >> ASAN_SHADOW_SCALE;
     static size_t LastAllocedSize = 0;
     if (RequiredShadowSize > LastAllocedSize) {
-        auto ContextInfo = getAsanInterceptor()->getContextInfo(Context);
+        auto ContextInfo =
+            getAsanInterceptor()->getContextInfo(UR_USE(Context));
         if (PrivateShadowOffset) {
             UR_CALL(getContext()->urDdiTable.USM.pfnFree(
-                Context, (void *)PrivateShadowOffset));
+                UR_USE(Context), (void *)PrivateShadowOffset));
             ContextInfo->Stats.UpdateShadowFreed(LastAllocedSize);
             PrivateShadowOffset = 0;
             LastAllocedSize = 0;
         }
 
         UR_CALL(getContext()->urDdiTable.USM.pfnDeviceAlloc(
-            Context, Device, nullptr, nullptr, RequiredShadowSize,
+            UR_USE(Context), Device, nullptr, nullptr, RequiredShadowSize,
             (void **)&PrivateShadowOffset));
 
         // Initialize shadow memory
@@ -316,7 +321,7 @@ ur_result_t ShadowMemoryGPU::AllocPrivateShadow(ur_queue_handle_t Queue,
             Queue, (void *)PrivateShadowOffset, 0, RequiredShadowSize);
         if (URes != UR_RESULT_SUCCESS) {
             UR_CALL(getContext()->urDdiTable.USM.pfnFree(
-                Context, (void *)PrivateShadowOffset));
+                UR_USE(Context), (void *)PrivateShadowOffset));
             PrivateShadowOffset = 0;
             LastAllocedSize = 0;
         }

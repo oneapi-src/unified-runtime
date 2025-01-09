@@ -15,6 +15,8 @@
 #include "logger/ur_logger.hpp"
 #include "ur_proxy_layer.hpp"
 
+#include "ur_handle_checker.hpp"
+
 #define SANITIZER_COMP_NAME "sanitizer layer"
 
 namespace ur_sanitizer_layer {
@@ -33,6 +35,7 @@ class __urdlllocal context_t : public proxy_layer_context_t,
     ur_dditable_t urDdiTable = {};
     logger::Logger logger;
     SanitizerType enabledType = SanitizerType::None;
+    UrHandleChecker urHandleChecker;
 
     context_t();
     ~context_t();
@@ -48,5 +51,4 @@ class __urdlllocal context_t : public proxy_layer_context_t,
 };
 
 context_t *getContext();
-
 } // namespace ur_sanitizer_layer

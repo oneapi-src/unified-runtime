@@ -179,6 +179,8 @@ if(UR_ENABLE_SANITIZER)
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/ur_sanddi.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/ur_sanitizer_layer.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/ur_sanitizer_layer.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/ur_handle_checker.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/layers/sanitizer/ur_handle_checker.hpp
     )
 
     if(UR_ENABLE_SYMBOLIZER)
