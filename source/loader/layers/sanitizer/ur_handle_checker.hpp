@@ -1,6 +1,10 @@
 /**
- * UR handle checker, used to check if the handle is valid. To detect any possible 
- * use-after-release issues of UR handles.
+ * UR handle checker, used to check if the handle is valid. To detect any 
+ * possible use-after-release issues of UR handles.
+ * 
+ * The checker's reference count does not reperent the actual reference count 
+ * of the handle, but it does reveal the problem of the lack of right amount 
+ * of retain/release calls from upper layers.
  */
 
 #pragma once
@@ -20,7 +24,9 @@ namespace ur_sanitizer_layer {
 class UrHandleChecker {
 
   public:
-    typedef std::variant<ur_context_handle_t, ur_device_handle_t> UrHandleT;
+    typedef std::variant<ur_context_handle_t, ur_kernel_handle_t,
+                         ur_queue_handle_t, ur_program_handle_t>
+        UrHandleT;
 
     UrHandleChecker()
         : logger(logger::create_logger("handle_checker", false, false,
@@ -64,10 +70,22 @@ class UrHandleChecker {
         }
         if (std::holds_alternative<ur_context_handle_t>(UrHandle)) {
             auto handle = std::get<ur_context_handle_t>(UrHandle);
-            logger.info("UrContext {}(RefCount:{}) {}", handle, refCount,
+            logger.info("UrContext {} (RefCount:{}) {}", handle, refCount,
+                        eventMsg);
+        } else if (std::holds_alternative<ur_kernel_handle_t>(UrHandle)) {
+            auto handle = std::get<ur_kernel_handle_t>(UrHandle);
+            logger.info("UrKernel {} (RefCount:{}) {}", handle, refCount,
+                        eventMsg);
+        } else if (std::holds_alternative<ur_queue_handle_t>(UrHandle)) {
+            auto handle = std::get<ur_queue_handle_t>(UrHandle);
+            logger.info("UrQueue {} (RefCount:{}) {}", handle, refCount,
+                        eventMsg);
+        } else if (std::holds_alternative<ur_program_handle_t>(UrHandle)) {
+            auto handle = std::get<ur_program_handle_t>(UrHandle);
+            logger.info("UrProgram {} (RefCount:{}) {}", handle, refCount,
                         eventMsg);
         } else {
-            // TODO: add support for other handle types
+            assert(false && "Unsupported handle type");
         }
     }
 };
