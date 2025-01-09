@@ -485,6 +485,10 @@ ur_result_t urEnqueueUSMFreeExp(ur_queue_handle_t hQueue,
                                 uint32_t numEventsInWaitList,
                                 const ur_event_handle_t *phEventWaitList,
                                 ur_event_handle_t *phEvent);
+ur_result_t urUSMPoolCreateExp(ur_context_handle_t hContext,
+                               ur_device_handle_t hDevice,
+                               ur_usm_pool_desc_t *pPoolDesc,
+                               ur_usm_pool_handle_t *ppPool);
 ur_result_t urUSMPitchedAllocExp(ur_context_handle_t hContext,
                                  ur_device_handle_t hDevice,
                                  const ur_usm_desc_t *pUSMDesc,

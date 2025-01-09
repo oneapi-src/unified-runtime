@@ -628,6 +628,9 @@ etors:
 - name: ENQUEUE_USM_FREE_EXP
   desc: Enumerator for $xEnqueueUSMFreeExp
   value: '253'
+- name: USM_POOL_CREATE_EXP
+  desc: Enumerator for $xUSMPoolCreateExp
+  value: '254'
 ---
 type: enum
 desc: Defines structure types

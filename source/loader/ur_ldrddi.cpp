@@ -6479,6 +6479,52 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFreeExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMPoolCreateExp
+__urdlllocal ur_result_t UR_APICALL urUSMPoolCreateExp(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    ur_device_handle_t hDevice,   ///< [in] handle of the device object
+    ur_usm_pool_desc_t *
+        pPoolDesc, ///< [in] pointer to USM pool descriptor. Can be chained with
+                   ///< ::ur_usm_pool_limits_desc_t
+    ur_usm_pool_handle_t *ppPool ///< [out] pointer to USM memory pool
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    [[maybe_unused]] auto context = getContext();
+
+    // extract platform's function pointer table
+    auto dditable = reinterpret_cast<ur_context_object_t *>(hContext)->dditable;
+    auto pfnPoolCreateExp = dditable->ur.USMExp.pfnPoolCreateExp;
+    if (nullptr == pfnPoolCreateExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    // convert loader handle to platform handle
+    hContext = reinterpret_cast<ur_context_object_t *>(hContext)->handle;
+
+    // convert loader handle to platform handle
+    hDevice = reinterpret_cast<ur_device_object_t *>(hDevice)->handle;
+
+    // forward to device-platform
+    result = pfnPoolCreateExp(hContext, hDevice, pPoolDesc, ppPool);
+
+    if (UR_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    try {
+        // convert platform handle to loader handle
+        *ppPool = reinterpret_cast<ur_usm_pool_handle_t>(
+            context->factories.ur_usm_pool_factory.getInstance(*ppPool,
+                                                               dditable));
+    } catch (std::bad_alloc &) {
+        result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
+    }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMPitchedAllocExp
 __urdlllocal ur_result_t UR_APICALL urUSMPitchedAllocExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
@@ -11232,6 +11278,7 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetUSMExpProcAddrTable(
         if (ur_loader::getContext()->platforms.size() != 1 ||
             ur_loader::getContext()->forceIntercept) {
             // return pointers to loader's DDIs
+            pDdiTable->pfnPoolCreateExp = ur_loader::urUSMPoolCreateExp;
             pDdiTable->pfnPitchedAllocExp = ur_loader::urUSMPitchedAllocExp;
             pDdiTable->pfnImportExp = ur_loader::urUSMImportExp;
             pDdiTable->pfnReleaseExp = ur_loader::urUSMReleaseExp;

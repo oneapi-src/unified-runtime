@@ -123,6 +123,7 @@ set(TEST_SUBDIRECTORIES_DPCXX
     "program"
     "enqueue"
     "integration"
+    "exp_async_alloc"
     "exp_command_buffer"
     "exp_enqueue_native"
     "exp_usm_p2p"

@@ -224,3 +224,31 @@ returns:
     - $X_RESULT_ERROR_INVALID_NULL_HANDLE
     - $X_RESULT_ERROR_INVALID_NULL_POINTER
     - $X_RESULT_ERROR_INVALID_EVENT_WAIT_LIST
+--- #--------------------------------------------------------------------------
+type: function
+desc: "Create USM memory pool with desired properties."
+class: $xUSM
+name: PoolCreateExp
+ordinal: "0"
+details:
+  - "Create a memory pool associated with a single device."
+  - "See also $xUSMPoolCrearte and $x_usm_pool_limits_desc_t."
+params:
+    - type: $x_context_handle_t
+      name: hContext
+      desc: "[in] handle of the context object"
+    - type: $x_device_handle_t
+      name: hDevice
+      desc: "[in] handle of the device object"
+    - type: $x_usm_pool_desc_t*
+      name: pPoolDesc
+      desc: "[in] pointer to USM pool descriptor. Can be chained with $x_usm_pool_limits_desc_t"
+    - type: $x_usm_pool_handle_t*
+      name: ppPool
+      desc: "[out] pointer to USM memory pool"
+returns:
+    - $X_RESULT_ERROR_INVALID_NULL_HANDLE
+    - $X_RESULT_ERROR_INVALID_VALUE
+    - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
+    - $X_RESULT_ERROR_UNSUPPORTED_FEATURE:
+        - "If any device associated with `hContext` reports `false` for $X_DEVICE_INFO_USM_POOL_SUPPORT"

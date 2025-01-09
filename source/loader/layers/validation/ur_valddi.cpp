@@ -7177,6 +7177,63 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFreeExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMPoolCreateExp
+__urdlllocal ur_result_t UR_APICALL urUSMPoolCreateExp(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    ur_device_handle_t hDevice,   ///< [in] handle of the device object
+    ur_usm_pool_desc_t *
+        pPoolDesc, ///< [in] pointer to USM pool descriptor. Can be chained with
+                   ///< ::ur_usm_pool_limits_desc_t
+    ur_usm_pool_handle_t *ppPool ///< [out] pointer to USM memory pool
+) {
+    auto pfnPoolCreateExp = getContext()->urDdiTable.USMExp.pfnPoolCreateExp;
+
+    if (nullptr == pfnPoolCreateExp) {
+        return UR_RESULT_ERROR_UNINITIALIZED;
+    }
+
+    if (getContext()->enableParameterValidation) {
+        if (NULL == hContext) {
+            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
+        }
+
+        if (NULL == hDevice) {
+            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
+        }
+
+        if (NULL == pPoolDesc) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (NULL == ppPool) {
+            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
+        if (UR_USM_POOL_FLAGS_MASK & pPoolDesc->flags) {
+            return UR_RESULT_ERROR_INVALID_ENUMERATION;
+        }
+    }
+
+    if (getContext()->enableLifetimeValidation &&
+        !getContext()->refCountContext->isReferenceValid(hContext)) {
+        getContext()->refCountContext->logInvalidReference(hContext);
+    }
+
+    if (getContext()->enableLifetimeValidation &&
+        !getContext()->refCountContext->isReferenceValid(hDevice)) {
+        getContext()->refCountContext->logInvalidReference(hDevice);
+    }
+
+    ur_result_t result = pfnPoolCreateExp(hContext, hDevice, pPoolDesc, ppPool);
+
+    if (getContext()->enableLeakChecking && result == UR_RESULT_SUCCESS) {
+        getContext()->refCountContext->createRefCount(*ppPool);
+    }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMPitchedAllocExp
 __urdlllocal ur_result_t UR_APICALL urUSMPitchedAllocExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
@@ -12017,6 +12074,9 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetUSMExpProcAddrTable(
     }
 
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    dditable.pfnPoolCreateExp = pDdiTable->pfnPoolCreateExp;
+    pDdiTable->pfnPoolCreateExp = ur_validation_layer::urUSMPoolCreateExp;
 
     dditable.pfnPitchedAllocExp = pDdiTable->pfnPitchedAllocExp;
     pDdiTable->pfnPitchedAllocExp = ur_validation_layer::urUSMPitchedAllocExp;

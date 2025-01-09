@@ -6291,6 +6291,46 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFreeExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMPoolCreateExp
+__urdlllocal ur_result_t UR_APICALL urUSMPoolCreateExp(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    ur_device_handle_t hDevice,   ///< [in] handle of the device object
+    ur_usm_pool_desc_t *
+        pPoolDesc, ///< [in] pointer to USM pool descriptor. Can be chained with
+                   ///< ::ur_usm_pool_limits_desc_t
+    ur_usm_pool_handle_t *ppPool ///< [out] pointer to USM memory pool
+) {
+    auto pfnPoolCreateExp = getContext()->urDdiTable.USMExp.pfnPoolCreateExp;
+
+    if (nullptr == pfnPoolCreateExp) {
+        return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+    }
+
+    ur_usm_pool_create_exp_params_t params = {&hContext, &hDevice, &pPoolDesc,
+                                              &ppPool};
+    uint64_t instance = getContext()->notify_begin(
+        UR_FUNCTION_USM_POOL_CREATE_EXP, "urUSMPoolCreateExp", &params);
+
+    auto &logger = getContext()->logger;
+    logger.info("   ---> urUSMPoolCreateExp\n");
+
+    ur_result_t result = pfnPoolCreateExp(hContext, hDevice, pPoolDesc, ppPool);
+
+    getContext()->notify_end(UR_FUNCTION_USM_POOL_CREATE_EXP,
+                             "urUSMPoolCreateExp", &params, &result, instance);
+
+    if (logger.getLevel() <= logger::Level::INFO) {
+        std::ostringstream args_str;
+        ur::extras::printFunctionParams(
+            args_str, UR_FUNCTION_USM_POOL_CREATE_EXP, &params);
+        logger.info("   <--- urUSMPoolCreateExp({}) -> {};\n", args_str.str(),
+                    result);
+    }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMPitchedAllocExp
 __urdlllocal ur_result_t UR_APICALL urUSMPitchedAllocExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
@@ -10834,6 +10874,9 @@ __urdlllocal ur_result_t UR_APICALL urGetUSMExpProcAddrTable(
     }
 
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    dditable.pfnPoolCreateExp = pDdiTable->pfnPoolCreateExp;
+    pDdiTable->pfnPoolCreateExp = ur_tracing_layer::urUSMPoolCreateExp;
 
     dditable.pfnPitchedAllocExp = pDdiTable->pfnPitchedAllocExp;
     pDdiTable->pfnPitchedAllocExp = ur_tracing_layer::urUSMPitchedAllocExp;

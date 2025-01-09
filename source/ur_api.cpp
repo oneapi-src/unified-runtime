@@ -5780,6 +5780,42 @@ ur_result_t UR_APICALL urEnqueueUSMFreeExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Create USM memory pool with desired properties.
+///
+/// @details
+///     - Create a memory pool associated with a single device.
+///     - See also ::urUSMPoolCrearte and ::ur_usm_pool_limits_desc_t.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hContext`
+///         + `NULL == hDevice`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pPoolDesc`
+///         + `NULL == ppPool`
+///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
+///         + `::UR_USM_POOL_FLAGS_MASK & pPoolDesc->flags`
+///     - ::UR_RESULT_ERROR_INVALID_VALUE
+///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
+///         + If any device associated with `hContext` reports `false` for ::UR_DEVICE_INFO_USM_POOL_SUPPORT
+ur_result_t UR_APICALL urUSMPoolCreateExp(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    ur_device_handle_t hDevice,   ///< [in] handle of the device object
+    ur_usm_pool_desc_t *
+        pPoolDesc, ///< [in] pointer to USM pool descriptor. Can be chained with
+                   ///< ::ur_usm_pool_limits_desc_t
+    ur_usm_pool_handle_t *ppPool ///< [out] pointer to USM memory pool
+) {
+    ur_result_t result = UR_RESULT_SUCCESS;
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief USM allocate pitched memory
 ///
 /// @details

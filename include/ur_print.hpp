@@ -1018,6 +1018,9 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_function_t value) {
     case UR_FUNCTION_ENQUEUE_USM_FREE_EXP:
         os << "UR_FUNCTION_ENQUEUE_USM_FREE_EXP";
         break;
+    case UR_FUNCTION_USM_POOL_CREATE_EXP:
+        os << "UR_FUNCTION_USM_POOL_CREATE_EXP";
+        break;
     default:
         os << "unknown enumerator";
         break;
@@ -16498,6 +16501,413 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_usm_host_alloc_params_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_host_alloc_params_t *params) {
+
+    os << ".hContext = ";
+
+    ur::details::printPtr(os,
+                          *(params->phContext));
+
+    os << ", ";
+    os << ".pUSMDesc = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppUSMDesc));
+
+    os << ", ";
+    os << ".pool = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppool));
+
+    os << ", ";
+    os << ".size = ";
+
+    os << *(params->psize);
+
+    os << ", ";
+    os << ".ppMem = ";
+
+    ur::details::printPtr(os,
+                          *(params->pppMem));
+
+    return os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_usm_device_alloc_params_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_device_alloc_params_t *params) {
+
+    os << ".hContext = ";
+
+    ur::details::printPtr(os,
+                          *(params->phContext));
+
+    os << ", ";
+    os << ".hDevice = ";
+
+    ur::details::printPtr(os,
+                          *(params->phDevice));
+
+    os << ", ";
+    os << ".pUSMDesc = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppUSMDesc));
+
+    os << ", ";
+    os << ".pool = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppool));
+
+    os << ", ";
+    os << ".size = ";
+
+    os << *(params->psize);
+
+    os << ", ";
+    os << ".ppMem = ";
+
+    ur::details::printPtr(os,
+                          *(params->pppMem));
+
+    return os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_usm_shared_alloc_params_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_shared_alloc_params_t *params) {
+
+    os << ".hContext = ";
+
+    ur::details::printPtr(os,
+                          *(params->phContext));
+
+    os << ", ";
+    os << ".hDevice = ";
+
+    ur::details::printPtr(os,
+                          *(params->phDevice));
+
+    os << ", ";
+    os << ".pUSMDesc = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppUSMDesc));
+
+    os << ", ";
+    os << ".pool = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppool));
+
+    os << ", ";
+    os << ".size = ";
+
+    os << *(params->psize);
+
+    os << ", ";
+    os << ".ppMem = ";
+
+    ur::details::printPtr(os,
+                          *(params->pppMem));
+
+    return os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_usm_free_params_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_free_params_t *params) {
+
+    os << ".hContext = ";
+
+    ur::details::printPtr(os,
+                          *(params->phContext));
+
+    os << ", ";
+    os << ".pMem = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppMem));
+
+    return os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_usm_get_mem_alloc_info_params_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_get_mem_alloc_info_params_t *params) {
+
+    os << ".hContext = ";
+
+    ur::details::printPtr(os,
+                          *(params->phContext));
+
+    os << ", ";
+    os << ".pMem = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppMem));
+
+    os << ", ";
+    os << ".propName = ";
+
+    os << *(params->ppropName);
+
+    os << ", ";
+    os << ".propSize = ";
+
+    os << *(params->ppropSize);
+
+    os << ", ";
+    os << ".pPropValue = ";
+    ur::details::printTagged(os, *(params->ppPropValue), *(params->ppropName), *(params->ppropSize));
+
+    os << ", ";
+    os << ".pPropSizeRet = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppPropSizeRet));
+
+    return os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_usm_pool_create_params_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_pool_create_params_t *params) {
+
+    os << ".hContext = ";
+
+    ur::details::printPtr(os,
+                          *(params->phContext));
+
+    os << ", ";
+    os << ".pPoolDesc = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppPoolDesc));
+
+    os << ", ";
+    os << ".ppPool = ";
+
+    ur::details::printPtr(os,
+                          *(params->pppPool));
+
+    return os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_usm_pool_retain_params_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_pool_retain_params_t *params) {
+
+    os << ".pPool = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppPool));
+
+    return os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_usm_pool_release_params_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_pool_release_params_t *params) {
+
+    os << ".pPool = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppPool));
+
+    return os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_usm_pool_get_info_params_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_pool_get_info_params_t *params) {
+
+    os << ".hPool = ";
+
+    ur::details::printPtr(os,
+                          *(params->phPool));
+
+    os << ", ";
+    os << ".propName = ";
+
+    os << *(params->ppropName);
+
+    os << ", ";
+    os << ".propSize = ";
+
+    os << *(params->ppropSize);
+
+    os << ", ";
+    os << ".pPropValue = ";
+    ur::details::printTagged(os, *(params->ppPropValue), *(params->ppropName), *(params->ppropSize));
+
+    os << ", ";
+    os << ".pPropSizeRet = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppPropSizeRet));
+
+    return os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_usm_pool_create_exp_params_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_pool_create_exp_params_t *params) {
+
+    os << ".hContext = ";
+
+    ur::details::printPtr(os,
+                          *(params->phContext));
+
+    os << ", ";
+    os << ".hDevice = ";
+
+    ur::details::printPtr(os,
+                          *(params->phDevice));
+
+    os << ", ";
+    os << ".pPoolDesc = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppPoolDesc));
+
+    os << ", ";
+    os << ".ppPool = ";
+
+    ur::details::printPtr(os,
+                          *(params->pppPool));
+
+    return os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_usm_pitched_alloc_exp_params_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_pitched_alloc_exp_params_t *params) {
+
+    os << ".hContext = ";
+
+    ur::details::printPtr(os,
+                          *(params->phContext));
+
+    os << ", ";
+    os << ".hDevice = ";
+
+    ur::details::printPtr(os,
+                          *(params->phDevice));
+
+    os << ", ";
+    os << ".pUSMDesc = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppUSMDesc));
+
+    os << ", ";
+    os << ".pool = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppool));
+
+    os << ", ";
+    os << ".widthInBytes = ";
+
+    os << *(params->pwidthInBytes);
+
+    os << ", ";
+    os << ".height = ";
+
+    os << *(params->pheight);
+
+    os << ", ";
+    os << ".elementSizeBytes = ";
+
+    os << *(params->pelementSizeBytes);
+
+    os << ", ";
+    os << ".ppMem = ";
+
+    ur::details::printPtr(os,
+                          *(params->pppMem));
+
+    os << ", ";
+    os << ".pResultPitch = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppResultPitch));
+
+    return os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_usm_import_exp_params_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_import_exp_params_t *params) {
+
+    os << ".hContext = ";
+
+    ur::details::printPtr(os,
+                          *(params->phContext));
+
+    os << ", ";
+    os << ".pMem = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppMem));
+
+    os << ", ";
+    os << ".size = ";
+
+    os << *(params->psize);
+
+    return os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Print operator for the ur_usm_release_exp_params_t type
+/// @returns
+///     std::ostream &
+inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_release_exp_params_t *params) {
+
+    os << ".hContext = ";
+
+    ur::details::printPtr(os,
+                          *(params->phContext));
+
+    os << ", ";
+    os << ".pMem = ";
+
+    ur::details::printPtr(os,
+                          *(params->ppMem));
+
+    return os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Print operator for the ur_bindless_images_unsampled_image_handle_destroy_exp_params_t type
 /// @returns
 ///     std::ostream &
@@ -17223,381 +17633,6 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
 
     ur::details::printPtr(os,
                           *(params->pphEvent));
-
-    return os;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the ur_usm_host_alloc_params_t type
-/// @returns
-///     std::ostream &
-inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_host_alloc_params_t *params) {
-
-    os << ".hContext = ";
-
-    ur::details::printPtr(os,
-                          *(params->phContext));
-
-    os << ", ";
-    os << ".pUSMDesc = ";
-
-    ur::details::printPtr(os,
-                          *(params->ppUSMDesc));
-
-    os << ", ";
-    os << ".pool = ";
-
-    ur::details::printPtr(os,
-                          *(params->ppool));
-
-    os << ", ";
-    os << ".size = ";
-
-    os << *(params->psize);
-
-    os << ", ";
-    os << ".ppMem = ";
-
-    ur::details::printPtr(os,
-                          *(params->pppMem));
-
-    return os;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the ur_usm_device_alloc_params_t type
-/// @returns
-///     std::ostream &
-inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_device_alloc_params_t *params) {
-
-    os << ".hContext = ";
-
-    ur::details::printPtr(os,
-                          *(params->phContext));
-
-    os << ", ";
-    os << ".hDevice = ";
-
-    ur::details::printPtr(os,
-                          *(params->phDevice));
-
-    os << ", ";
-    os << ".pUSMDesc = ";
-
-    ur::details::printPtr(os,
-                          *(params->ppUSMDesc));
-
-    os << ", ";
-    os << ".pool = ";
-
-    ur::details::printPtr(os,
-                          *(params->ppool));
-
-    os << ", ";
-    os << ".size = ";
-
-    os << *(params->psize);
-
-    os << ", ";
-    os << ".ppMem = ";
-
-    ur::details::printPtr(os,
-                          *(params->pppMem));
-
-    return os;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the ur_usm_shared_alloc_params_t type
-/// @returns
-///     std::ostream &
-inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_shared_alloc_params_t *params) {
-
-    os << ".hContext = ";
-
-    ur::details::printPtr(os,
-                          *(params->phContext));
-
-    os << ", ";
-    os << ".hDevice = ";
-
-    ur::details::printPtr(os,
-                          *(params->phDevice));
-
-    os << ", ";
-    os << ".pUSMDesc = ";
-
-    ur::details::printPtr(os,
-                          *(params->ppUSMDesc));
-
-    os << ", ";
-    os << ".pool = ";
-
-    ur::details::printPtr(os,
-                          *(params->ppool));
-
-    os << ", ";
-    os << ".size = ";
-
-    os << *(params->psize);
-
-    os << ", ";
-    os << ".ppMem = ";
-
-    ur::details::printPtr(os,
-                          *(params->pppMem));
-
-    return os;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the ur_usm_free_params_t type
-/// @returns
-///     std::ostream &
-inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_free_params_t *params) {
-
-    os << ".hContext = ";
-
-    ur::details::printPtr(os,
-                          *(params->phContext));
-
-    os << ", ";
-    os << ".pMem = ";
-
-    ur::details::printPtr(os,
-                          *(params->ppMem));
-
-    return os;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the ur_usm_get_mem_alloc_info_params_t type
-/// @returns
-///     std::ostream &
-inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_get_mem_alloc_info_params_t *params) {
-
-    os << ".hContext = ";
-
-    ur::details::printPtr(os,
-                          *(params->phContext));
-
-    os << ", ";
-    os << ".pMem = ";
-
-    ur::details::printPtr(os,
-                          *(params->ppMem));
-
-    os << ", ";
-    os << ".propName = ";
-
-    os << *(params->ppropName);
-
-    os << ", ";
-    os << ".propSize = ";
-
-    os << *(params->ppropSize);
-
-    os << ", ";
-    os << ".pPropValue = ";
-    ur::details::printTagged(os, *(params->ppPropValue), *(params->ppropName), *(params->ppropSize));
-
-    os << ", ";
-    os << ".pPropSizeRet = ";
-
-    ur::details::printPtr(os,
-                          *(params->ppPropSizeRet));
-
-    return os;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the ur_usm_pool_create_params_t type
-/// @returns
-///     std::ostream &
-inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_pool_create_params_t *params) {
-
-    os << ".hContext = ";
-
-    ur::details::printPtr(os,
-                          *(params->phContext));
-
-    os << ", ";
-    os << ".pPoolDesc = ";
-
-    ur::details::printPtr(os,
-                          *(params->ppPoolDesc));
-
-    os << ", ";
-    os << ".ppPool = ";
-
-    ur::details::printPtr(os,
-                          *(params->pppPool));
-
-    return os;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the ur_usm_pool_retain_params_t type
-/// @returns
-///     std::ostream &
-inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_pool_retain_params_t *params) {
-
-    os << ".pPool = ";
-
-    ur::details::printPtr(os,
-                          *(params->ppPool));
-
-    return os;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the ur_usm_pool_release_params_t type
-/// @returns
-///     std::ostream &
-inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_pool_release_params_t *params) {
-
-    os << ".pPool = ";
-
-    ur::details::printPtr(os,
-                          *(params->ppPool));
-
-    return os;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the ur_usm_pool_get_info_params_t type
-/// @returns
-///     std::ostream &
-inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_pool_get_info_params_t *params) {
-
-    os << ".hPool = ";
-
-    ur::details::printPtr(os,
-                          *(params->phPool));
-
-    os << ", ";
-    os << ".propName = ";
-
-    os << *(params->ppropName);
-
-    os << ", ";
-    os << ".propSize = ";
-
-    os << *(params->ppropSize);
-
-    os << ", ";
-    os << ".pPropValue = ";
-    ur::details::printTagged(os, *(params->ppPropValue), *(params->ppropName), *(params->ppropSize));
-
-    os << ", ";
-    os << ".pPropSizeRet = ";
-
-    ur::details::printPtr(os,
-                          *(params->ppPropSizeRet));
-
-    return os;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the ur_usm_pitched_alloc_exp_params_t type
-/// @returns
-///     std::ostream &
-inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_pitched_alloc_exp_params_t *params) {
-
-    os << ".hContext = ";
-
-    ur::details::printPtr(os,
-                          *(params->phContext));
-
-    os << ", ";
-    os << ".hDevice = ";
-
-    ur::details::printPtr(os,
-                          *(params->phDevice));
-
-    os << ", ";
-    os << ".pUSMDesc = ";
-
-    ur::details::printPtr(os,
-                          *(params->ppUSMDesc));
-
-    os << ", ";
-    os << ".pool = ";
-
-    ur::details::printPtr(os,
-                          *(params->ppool));
-
-    os << ", ";
-    os << ".widthInBytes = ";
-
-    os << *(params->pwidthInBytes);
-
-    os << ", ";
-    os << ".height = ";
-
-    os << *(params->pheight);
-
-    os << ", ";
-    os << ".elementSizeBytes = ";
-
-    os << *(params->pelementSizeBytes);
-
-    os << ", ";
-    os << ".ppMem = ";
-
-    ur::details::printPtr(os,
-                          *(params->pppMem));
-
-    os << ", ";
-    os << ".pResultPitch = ";
-
-    ur::details::printPtr(os,
-                          *(params->ppResultPitch));
-
-    return os;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the ur_usm_import_exp_params_t type
-/// @returns
-///     std::ostream &
-inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_import_exp_params_t *params) {
-
-    os << ".hContext = ";
-
-    ur::details::printPtr(os,
-                          *(params->phContext));
-
-    os << ", ";
-    os << ".pMem = ";
-
-    ur::details::printPtr(os,
-                          *(params->ppMem));
-
-    os << ", ";
-    os << ".size = ";
-
-    os << *(params->psize);
-
-    return os;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the ur_usm_release_exp_params_t type
-/// @returns
-///     std::ostream &
-inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_usm_release_exp_params_t *params) {
-
-    os << ".hContext = ";
-
-    ur::details::printPtr(os,
-                          *(params->phContext));
-
-    os << ", ";
-    os << ".pMem = ";
-
-    ur::details::printPtr(os,
-                          *(params->ppMem));
 
     return os;
 }
@@ -20301,6 +20336,45 @@ inline ur_result_t UR_APICALL printFunctionParams(std::ostream &os, ur_function_
     case UR_FUNCTION_ENQUEUE_NATIVE_COMMAND_EXP: {
         os << (const struct ur_enqueue_native_command_exp_params_t *)params;
     } break;
+    case UR_FUNCTION_USM_HOST_ALLOC: {
+        os << (const struct ur_usm_host_alloc_params_t *)params;
+    } break;
+    case UR_FUNCTION_USM_DEVICE_ALLOC: {
+        os << (const struct ur_usm_device_alloc_params_t *)params;
+    } break;
+    case UR_FUNCTION_USM_SHARED_ALLOC: {
+        os << (const struct ur_usm_shared_alloc_params_t *)params;
+    } break;
+    case UR_FUNCTION_USM_FREE: {
+        os << (const struct ur_usm_free_params_t *)params;
+    } break;
+    case UR_FUNCTION_USM_GET_MEM_ALLOC_INFO: {
+        os << (const struct ur_usm_get_mem_alloc_info_params_t *)params;
+    } break;
+    case UR_FUNCTION_USM_POOL_CREATE: {
+        os << (const struct ur_usm_pool_create_params_t *)params;
+    } break;
+    case UR_FUNCTION_USM_POOL_RETAIN: {
+        os << (const struct ur_usm_pool_retain_params_t *)params;
+    } break;
+    case UR_FUNCTION_USM_POOL_RELEASE: {
+        os << (const struct ur_usm_pool_release_params_t *)params;
+    } break;
+    case UR_FUNCTION_USM_POOL_GET_INFO: {
+        os << (const struct ur_usm_pool_get_info_params_t *)params;
+    } break;
+    case UR_FUNCTION_USM_POOL_CREATE_EXP: {
+        os << (const struct ur_usm_pool_create_exp_params_t *)params;
+    } break;
+    case UR_FUNCTION_USM_PITCHED_ALLOC_EXP: {
+        os << (const struct ur_usm_pitched_alloc_exp_params_t *)params;
+    } break;
+    case UR_FUNCTION_USM_IMPORT_EXP: {
+        os << (const struct ur_usm_import_exp_params_t *)params;
+    } break;
+    case UR_FUNCTION_USM_RELEASE_EXP: {
+        os << (const struct ur_usm_release_exp_params_t *)params;
+    } break;
     case UR_FUNCTION_BINDLESS_IMAGES_UNSAMPLED_IMAGE_HANDLE_DESTROY_EXP: {
         os << (const struct ur_bindless_images_unsampled_image_handle_destroy_exp_params_t *)params;
     } break;
@@ -20354,42 +20428,6 @@ inline ur_result_t UR_APICALL printFunctionParams(std::ostream &os, ur_function_
     } break;
     case UR_FUNCTION_BINDLESS_IMAGES_SIGNAL_EXTERNAL_SEMAPHORE_EXP: {
         os << (const struct ur_bindless_images_signal_external_semaphore_exp_params_t *)params;
-    } break;
-    case UR_FUNCTION_USM_HOST_ALLOC: {
-        os << (const struct ur_usm_host_alloc_params_t *)params;
-    } break;
-    case UR_FUNCTION_USM_DEVICE_ALLOC: {
-        os << (const struct ur_usm_device_alloc_params_t *)params;
-    } break;
-    case UR_FUNCTION_USM_SHARED_ALLOC: {
-        os << (const struct ur_usm_shared_alloc_params_t *)params;
-    } break;
-    case UR_FUNCTION_USM_FREE: {
-        os << (const struct ur_usm_free_params_t *)params;
-    } break;
-    case UR_FUNCTION_USM_GET_MEM_ALLOC_INFO: {
-        os << (const struct ur_usm_get_mem_alloc_info_params_t *)params;
-    } break;
-    case UR_FUNCTION_USM_POOL_CREATE: {
-        os << (const struct ur_usm_pool_create_params_t *)params;
-    } break;
-    case UR_FUNCTION_USM_POOL_RETAIN: {
-        os << (const struct ur_usm_pool_retain_params_t *)params;
-    } break;
-    case UR_FUNCTION_USM_POOL_RELEASE: {
-        os << (const struct ur_usm_pool_release_params_t *)params;
-    } break;
-    case UR_FUNCTION_USM_POOL_GET_INFO: {
-        os << (const struct ur_usm_pool_get_info_params_t *)params;
-    } break;
-    case UR_FUNCTION_USM_PITCHED_ALLOC_EXP: {
-        os << (const struct ur_usm_pitched_alloc_exp_params_t *)params;
-    } break;
-    case UR_FUNCTION_USM_IMPORT_EXP: {
-        os << (const struct ur_usm_import_exp_params_t *)params;
-    } break;
-    case UR_FUNCTION_USM_RELEASE_EXP: {
-        os << (const struct ur_usm_release_exp_params_t *)params;
     } break;
     case UR_FUNCTION_COMMAND_BUFFER_CREATE_EXP: {
         os << (const struct ur_command_buffer_create_exp_params_t *)params;

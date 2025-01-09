@@ -379,6 +379,7 @@ ur_result_t USMHostMemoryProvider::allocateImpl(void **ResultPtr, size_t Size,
 ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t Context,
                                              ur_usm_pool_desc_t *PoolDesc)
     : Context{Context} {
+  CUmemPoolProps MemPoolProps{}; // Used if native mem pools are used
   const void *pNext = PoolDesc->pNext;
   while (pNext != nullptr) {
     const ur_base_desc_t *BaseDesc = static_cast<const ur_base_desc_t *>(pNext);
@@ -386,9 +387,13 @@ ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t Context,
     case UR_STRUCTURE_TYPE_USM_POOL_LIMITS_DESC: {
       const ur_usm_pool_limits_desc_t *Limits =
           reinterpret_cast<const ur_usm_pool_limits_desc_t *>(BaseDesc);
-      for (auto &config : DisjointPoolConfigs.Configs) {
-        config.MaxPoolableSize = Limits->maxPoolableSize;
-        config.SlabMinSize = Limits->minDriverAllocSize;
+      if (PoolDesc->flags & UR_USM_POOL_FLAG_USE_NATIVE_MEMORY_POOL_EXP) {
+        MemPoolProps.maxSize = Limits->maxPoolableSize;
+      } else {
+        for (auto &config : DisjointPoolConfigs.Configs) {
+          config.MaxPoolableSize = Limits->maxPoolableSize;
+          config.SlabMinSize = Limits->minDriverAllocSize;
+        }
       }
       break;
     }
@@ -397,6 +402,14 @@ ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t Context,
     }
     }
     pNext = BaseDesc->pNext;
+  }
+
+  if (PoolDesc->flags & UR_USM_POOL_FLAG_USE_NATIVE_MEMORY_POOL_EXP) {
+    MemPoolProps.allocType = CU_MEM_ALLOCATION_TYPE_PINNED;
+    MemPoolProps.location.type = CU_MEM_LOCATION_TYPE_HOST; // Alternatives are:
+    UR_CHECK_ERROR(cuMemPoolCreate(&CUmemPool, &MemPoolProps));
+    CUHostMemPool = true;
+    return;
   }
 
   auto MemProvider =
@@ -440,7 +453,7 @@ ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t Context,
   if (!(PoolDesc->flags & UR_USM_POOL_FLAG_USE_NATIVE_MEMORY_POOL_EXP))
     throw;
 
-  CUmemPoolProps MemPoolProps;
+  CUmemPoolProps MemPoolProps{};
 
   const void *pNext = PoolDesc->pNext;
   while (pNext != nullptr) {
@@ -464,22 +477,11 @@ ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t Context,
 
   // TODO: what flags should be used here. Moreover what flags should have
   // UR counterparts?
-  MemPoolProps.allocType =
-      CU_MEM_ALLOCATION_TYPE_PINNED; // Is this valid? CUDA docs say:
-                                     //
-                                     // "This allocation type is 'pinned', i.e.
-                                     // cannot migrate from its current
-                                     // location while the application is
-                                     // actively using it"
-                                     //
-                                     // Alternatives are *_INVALID (default) and
-                                     // *_MAX.
-  MemPoolProps.location.id = Device->getIndex(); // Docs are not clear on what
-                                                 // this id is for. I am
-                                                 // assuming it is used for
-                                                 // device id. I have made a
-                                                 // forum post here:
-                                                 // https://forums.developer.nvidia.com/t/incomplete-description-in-cumemlocation-v1-struct-reference/318701
+  MemPoolProps.allocType = CU_MEM_ALLOCATION_TYPE_PINNED;
+  MemPoolProps.location.id =
+      Device
+          ->getIndex(); // Clarification of what id means here:
+                        // https://forums.developer.nvidia.com/t/incomplete-description-in-cumemlocation-v1-struct-reference/318701
   MemPoolProps.location.type =
       CU_MEM_LOCATION_TYPE_DEVICE; // Alternatives are:
                                    // HOST, HOST_NUMA and HOST_NUMA_CURRENT
@@ -498,28 +500,32 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMPoolCreate(
                    ///< ::ur_usm_pool_limits_desc_t
     ur_usm_pool_handle_t *Pool ///< [out] pointer to USM memory pool
 ) {
-  // Without pool tracking we can't free pool allocations.
-#ifdef UMF_ENABLE_POOL_TRACKING
   if (PoolDesc->flags & UR_USM_POOL_FLAG_ZERO_INITIALIZE_BLOCK) {
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
-  try {
-    *Pool = reinterpret_cast<ur_usm_pool_handle_t>(
-        new ur_usm_pool_handle_t_(Context, PoolDesc));
-  } catch (const UsmAllocationException &Ex) {
-    return Ex.getError();
-  } catch (umf_result_t e) {
-    return umf::umf2urResult(e);
-  } catch (...) {
-    return UR_RESULT_ERROR_UNKNOWN;
-  }
-  return UR_RESULT_SUCCESS;
+  // Host mem pool using CUDA entrypoint
+  if (PoolDesc->flags & UR_USM_POOL_FLAG_USE_NATIVE_MEMORY_POOL_EXP ||
+  // Without pool tracking we can't free pool allocations.
+#ifdef UMF_ENABLE_POOL_TRACKING
+      // UMF mem pool
+      true
 #else
-  std::ignore = Context;
-  std::ignore = PoolDesc;
-  std::ignore = Pool;
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+      false
 #endif
+  ) {
+    try {
+      *Pool = reinterpret_cast<ur_usm_pool_handle_t>(
+          new ur_usm_pool_handle_t_(Context, PoolDesc));
+    } catch (const UsmAllocationException &Ex) {
+      return Ex.getError();
+    } catch (umf_result_t e) {
+      return umf::umf2urResult(e);
+    } catch (...) {
+      return UR_RESULT_ERROR_UNKNOWN;
+    }
+    return UR_RESULT_SUCCESS;
+  }
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urUSMPoolCreateExp(

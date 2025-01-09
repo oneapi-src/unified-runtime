@@ -7403,6 +7403,55 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFreeExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMPoolCreateExp
+__urdlllocal ur_result_t UR_APICALL urUSMPoolCreateExp(
+    ur_context_handle_t hContext, ///< [in] handle of the context object
+    ur_device_handle_t hDevice,   ///< [in] handle of the device object
+    ur_usm_pool_desc_t *
+        pPoolDesc, ///< [in] pointer to USM pool descriptor. Can be chained with
+                   ///< ::ur_usm_pool_limits_desc_t
+    ur_usm_pool_handle_t *ppPool ///< [out] pointer to USM memory pool
+    ) try {
+    ur_result_t result = UR_RESULT_SUCCESS;
+
+    ur_usm_pool_create_exp_params_t params = {&hContext, &hDevice, &pPoolDesc,
+                                              &ppPool};
+
+    auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_before_callback("urUSMPoolCreateExp"));
+    if (beforeCallback) {
+        result = beforeCallback(&params);
+        if (result != UR_RESULT_SUCCESS) {
+            return result;
+        }
+    }
+
+    auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_replace_callback("urUSMPoolCreateExp"));
+    if (replaceCallback) {
+        result = replaceCallback(&params);
+    } else {
+
+        *ppPool = mock::createDummyHandle<ur_usm_pool_handle_t>();
+        result = UR_RESULT_SUCCESS;
+    }
+
+    if (result != UR_RESULT_SUCCESS) {
+        return result;
+    }
+
+    auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
+        mock::getCallbacks().get_after_callback("urUSMPoolCreateExp"));
+    if (afterCallback) {
+        return afterCallback(&params);
+    }
+
+    return result;
+} catch (...) {
+    return exceptionToResult(std::current_exception());
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMPitchedAllocExp
 __urdlllocal ur_result_t UR_APICALL urUSMPitchedAllocExp(
     ur_context_handle_t hContext, ///< [in] handle of the context object
@@ -12140,6 +12189,8 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetUSMExpProcAddrTable(
     }
 
     ur_result_t result = UR_RESULT_SUCCESS;
+
+    pDdiTable->pfnPoolCreateExp = driver::urUSMPoolCreateExp;
 
     pDdiTable->pfnPitchedAllocExp = driver::urUSMPitchedAllocExp;
 

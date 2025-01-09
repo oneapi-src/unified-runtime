@@ -238,6 +238,7 @@ typedef enum ur_function_t {
     UR_FUNCTION_ENQUEUE_USM_SHARED_ALLOC_EXP = 251,                       ///< Enumerator for ::urEnqueueUSMSharedAllocExp
     UR_FUNCTION_ENQUEUE_USM_HOST_ALLOC_EXP = 252,                         ///< Enumerator for ::urEnqueueUSMHostAllocExp
     UR_FUNCTION_ENQUEUE_USM_FREE_EXP = 253,                               ///< Enumerator for ::urEnqueueUSMFreeExp
+    UR_FUNCTION_USM_POOL_CREATE_EXP = 254,                                ///< Enumerator for ::urUSMPoolCreateExp
     /// @cond
     UR_FUNCTION_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -7667,6 +7668,39 @@ urEnqueueUSMFreeExp(
     ur_event_handle_t *phEvent                ///< [out][optional] return an event object that identifies the async alloc
 );
 
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Create USM memory pool with desired properties.
+///
+/// @details
+///     - Create a memory pool associated with a single device.
+///     - See also ::urUSMPoolCrearte and ::ur_usm_pool_limits_desc_t.
+///
+/// @returns
+///     - ::UR_RESULT_SUCCESS
+///     - ::UR_RESULT_ERROR_UNINITIALIZED
+///     - ::UR_RESULT_ERROR_DEVICE_LOST
+///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
+///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `NULL == hContext`
+///         + `NULL == hDevice`
+///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `NULL == pPoolDesc`
+///         + `NULL == ppPool`
+///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
+///         + `::UR_USM_POOL_FLAGS_MASK & pPoolDesc->flags`
+///     - ::UR_RESULT_ERROR_INVALID_VALUE
+///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
+///         + If any device associated with `hContext` reports `false` for ::UR_DEVICE_INFO_USM_POOL_SUPPORT
+UR_APIEXPORT ur_result_t UR_APICALL
+urUSMPoolCreateExp(
+    ur_context_handle_t hContext,  ///< [in] handle of the context object
+    ur_device_handle_t hDevice,    ///< [in] handle of the device object
+    ur_usm_pool_desc_t *pPoolDesc, ///< [in] pointer to USM pool descriptor. Can be chained with
+                                   ///< ::ur_usm_pool_limits_desc_t
+    ur_usm_pool_handle_t *ppPool   ///< [out] pointer to USM memory pool
+);
+
 #if !defined(__GNUC__)
 #pragma endregion
 #endif
@@ -12120,6 +12154,150 @@ typedef struct ur_enqueue_native_command_exp_params_t {
 } ur_enqueue_native_command_exp_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urUSMHostAlloc
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_usm_host_alloc_params_t {
+    ur_context_handle_t *phContext;
+    const ur_usm_desc_t **ppUSMDesc;
+    ur_usm_pool_handle_t *ppool;
+    size_t *psize;
+    void ***pppMem;
+} ur_usm_host_alloc_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urUSMDeviceAlloc
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_usm_device_alloc_params_t {
+    ur_context_handle_t *phContext;
+    ur_device_handle_t *phDevice;
+    const ur_usm_desc_t **ppUSMDesc;
+    ur_usm_pool_handle_t *ppool;
+    size_t *psize;
+    void ***pppMem;
+} ur_usm_device_alloc_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urUSMSharedAlloc
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_usm_shared_alloc_params_t {
+    ur_context_handle_t *phContext;
+    ur_device_handle_t *phDevice;
+    const ur_usm_desc_t **ppUSMDesc;
+    ur_usm_pool_handle_t *ppool;
+    size_t *psize;
+    void ***pppMem;
+} ur_usm_shared_alloc_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urUSMFree
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_usm_free_params_t {
+    ur_context_handle_t *phContext;
+    void **ppMem;
+} ur_usm_free_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urUSMGetMemAllocInfo
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_usm_get_mem_alloc_info_params_t {
+    ur_context_handle_t *phContext;
+    const void **ppMem;
+    ur_usm_alloc_info_t *ppropName;
+    size_t *ppropSize;
+    void **ppPropValue;
+    size_t **ppPropSizeRet;
+} ur_usm_get_mem_alloc_info_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urUSMPoolCreate
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_usm_pool_create_params_t {
+    ur_context_handle_t *phContext;
+    ur_usm_pool_desc_t **ppPoolDesc;
+    ur_usm_pool_handle_t **pppPool;
+} ur_usm_pool_create_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urUSMPoolRetain
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_usm_pool_retain_params_t {
+    ur_usm_pool_handle_t *ppPool;
+} ur_usm_pool_retain_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urUSMPoolRelease
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_usm_pool_release_params_t {
+    ur_usm_pool_handle_t *ppPool;
+} ur_usm_pool_release_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urUSMPoolGetInfo
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_usm_pool_get_info_params_t {
+    ur_usm_pool_handle_t *phPool;
+    ur_usm_pool_info_t *ppropName;
+    size_t *ppropSize;
+    void **ppPropValue;
+    size_t **ppPropSizeRet;
+} ur_usm_pool_get_info_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urUSMPoolCreateExp
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_usm_pool_create_exp_params_t {
+    ur_context_handle_t *phContext;
+    ur_device_handle_t *phDevice;
+    ur_usm_pool_desc_t **ppPoolDesc;
+    ur_usm_pool_handle_t **pppPool;
+} ur_usm_pool_create_exp_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urUSMPitchedAllocExp
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_usm_pitched_alloc_exp_params_t {
+    ur_context_handle_t *phContext;
+    ur_device_handle_t *phDevice;
+    const ur_usm_desc_t **ppUSMDesc;
+    ur_usm_pool_handle_t *ppool;
+    size_t *pwidthInBytes;
+    size_t *pheight;
+    size_t *pelementSizeBytes;
+    void ***pppMem;
+    size_t **ppResultPitch;
+} ur_usm_pitched_alloc_exp_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urUSMImportExp
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_usm_import_exp_params_t {
+    ur_context_handle_t *phContext;
+    void **ppMem;
+    size_t *psize;
+} ur_usm_import_exp_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function parameters for urUSMReleaseExp
+/// @details Each entry is a pointer to the parameter passed to the function;
+///     allowing the callback the ability to modify the parameter's value
+typedef struct ur_usm_release_exp_params_t {
+    ur_context_handle_t *phContext;
+    void **ppMem;
+} ur_usm_release_exp_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urBindlessImagesUnsampledImageHandleDestroyExp
 /// @details Each entry is a pointer to the parameter passed to the function;
 ///     allowing the callback the ability to modify the parameter's value
@@ -12339,139 +12517,6 @@ typedef struct ur_bindless_images_signal_external_semaphore_exp_params_t {
     const ur_event_handle_t **pphEventWaitList;
     ur_event_handle_t **pphEvent;
 } ur_bindless_images_signal_external_semaphore_exp_params_t;
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function parameters for urUSMHostAlloc
-/// @details Each entry is a pointer to the parameter passed to the function;
-///     allowing the callback the ability to modify the parameter's value
-typedef struct ur_usm_host_alloc_params_t {
-    ur_context_handle_t *phContext;
-    const ur_usm_desc_t **ppUSMDesc;
-    ur_usm_pool_handle_t *ppool;
-    size_t *psize;
-    void ***pppMem;
-} ur_usm_host_alloc_params_t;
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function parameters for urUSMDeviceAlloc
-/// @details Each entry is a pointer to the parameter passed to the function;
-///     allowing the callback the ability to modify the parameter's value
-typedef struct ur_usm_device_alloc_params_t {
-    ur_context_handle_t *phContext;
-    ur_device_handle_t *phDevice;
-    const ur_usm_desc_t **ppUSMDesc;
-    ur_usm_pool_handle_t *ppool;
-    size_t *psize;
-    void ***pppMem;
-} ur_usm_device_alloc_params_t;
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function parameters for urUSMSharedAlloc
-/// @details Each entry is a pointer to the parameter passed to the function;
-///     allowing the callback the ability to modify the parameter's value
-typedef struct ur_usm_shared_alloc_params_t {
-    ur_context_handle_t *phContext;
-    ur_device_handle_t *phDevice;
-    const ur_usm_desc_t **ppUSMDesc;
-    ur_usm_pool_handle_t *ppool;
-    size_t *psize;
-    void ***pppMem;
-} ur_usm_shared_alloc_params_t;
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function parameters for urUSMFree
-/// @details Each entry is a pointer to the parameter passed to the function;
-///     allowing the callback the ability to modify the parameter's value
-typedef struct ur_usm_free_params_t {
-    ur_context_handle_t *phContext;
-    void **ppMem;
-} ur_usm_free_params_t;
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function parameters for urUSMGetMemAllocInfo
-/// @details Each entry is a pointer to the parameter passed to the function;
-///     allowing the callback the ability to modify the parameter's value
-typedef struct ur_usm_get_mem_alloc_info_params_t {
-    ur_context_handle_t *phContext;
-    const void **ppMem;
-    ur_usm_alloc_info_t *ppropName;
-    size_t *ppropSize;
-    void **ppPropValue;
-    size_t **ppPropSizeRet;
-} ur_usm_get_mem_alloc_info_params_t;
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function parameters for urUSMPoolCreate
-/// @details Each entry is a pointer to the parameter passed to the function;
-///     allowing the callback the ability to modify the parameter's value
-typedef struct ur_usm_pool_create_params_t {
-    ur_context_handle_t *phContext;
-    ur_usm_pool_desc_t **ppPoolDesc;
-    ur_usm_pool_handle_t **pppPool;
-} ur_usm_pool_create_params_t;
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function parameters for urUSMPoolRetain
-/// @details Each entry is a pointer to the parameter passed to the function;
-///     allowing the callback the ability to modify the parameter's value
-typedef struct ur_usm_pool_retain_params_t {
-    ur_usm_pool_handle_t *ppPool;
-} ur_usm_pool_retain_params_t;
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function parameters for urUSMPoolRelease
-/// @details Each entry is a pointer to the parameter passed to the function;
-///     allowing the callback the ability to modify the parameter's value
-typedef struct ur_usm_pool_release_params_t {
-    ur_usm_pool_handle_t *ppPool;
-} ur_usm_pool_release_params_t;
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function parameters for urUSMPoolGetInfo
-/// @details Each entry is a pointer to the parameter passed to the function;
-///     allowing the callback the ability to modify the parameter's value
-typedef struct ur_usm_pool_get_info_params_t {
-    ur_usm_pool_handle_t *phPool;
-    ur_usm_pool_info_t *ppropName;
-    size_t *ppropSize;
-    void **ppPropValue;
-    size_t **ppPropSizeRet;
-} ur_usm_pool_get_info_params_t;
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function parameters for urUSMPitchedAllocExp
-/// @details Each entry is a pointer to the parameter passed to the function;
-///     allowing the callback the ability to modify the parameter's value
-typedef struct ur_usm_pitched_alloc_exp_params_t {
-    ur_context_handle_t *phContext;
-    ur_device_handle_t *phDevice;
-    const ur_usm_desc_t **ppUSMDesc;
-    ur_usm_pool_handle_t *ppool;
-    size_t *pwidthInBytes;
-    size_t *pheight;
-    size_t *pelementSizeBytes;
-    void ***pppMem;
-    size_t **ppResultPitch;
-} ur_usm_pitched_alloc_exp_params_t;
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function parameters for urUSMImportExp
-/// @details Each entry is a pointer to the parameter passed to the function;
-///     allowing the callback the ability to modify the parameter's value
-typedef struct ur_usm_import_exp_params_t {
-    ur_context_handle_t *phContext;
-    void **ppMem;
-    size_t *psize;
-} ur_usm_import_exp_params_t;
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function parameters for urUSMReleaseExp
-/// @details Each entry is a pointer to the parameter passed to the function;
-///     allowing the callback the ability to modify the parameter's value
-typedef struct ur_usm_release_exp_params_t {
-    ur_context_handle_t *phContext;
-    void **ppMem;
-} ur_usm_release_exp_params_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function parameters for urCommandBufferCreateExp

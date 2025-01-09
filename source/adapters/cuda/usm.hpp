@@ -31,6 +31,7 @@ struct ur_usm_pool_handle_t_ {
   umf::pool_unique_handle_t HostMemPool;
 
   CUmemoryPool CUmemPool{0};
+  bool CUHostMemPool = false;
 
   ur_usm_pool_handle_t_(ur_context_handle_t Context,
                         ur_usm_pool_desc_t *PoolDesc);
@@ -49,6 +50,7 @@ struct ur_usm_pool_handle_t_ {
 
   // To be used if ur_usm_pool_handle_t represents a CUmemoryPool
   bool usesCudaPool() const { return CUmemPool != CUmemoryPool{0}; };
+  bool usesCudaHostPool() const { return CUHostMemPool; };
   CUmemoryPool getCudaPool() { return CUmemPool; };
 };
 

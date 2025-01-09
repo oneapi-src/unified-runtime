@@ -504,6 +504,7 @@
 		urPrintUsmP2pEnablePeerAccessExpParams;
 		urPrintUsmP2pPeerAccessGetInfoExpParams;
 		urPrintUsmPitchedAllocExpParams;
+		urPrintUsmPoolCreateExpParams;
 		urPrintUsmPoolCreateParams;
 		urPrintUsmPoolDesc;
 		urPrintUsmPoolFlags;
@@ -565,6 +566,7 @@
 		urUSMImportExp;
 		urUSMPitchedAllocExp;
 		urUSMPoolCreate;
+		urUSMPoolCreateExp;
 		urUSMPoolGetInfo;
 		urUSMPoolRelease;
 		urUSMPoolRetain;
