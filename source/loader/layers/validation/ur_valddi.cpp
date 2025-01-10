@@ -3898,7 +3898,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetSpecializationConstants(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urKernelGetNativeHandle
 __urdlllocal ur_result_t UR_APICALL urKernelGetNativeHandle(
-    ur_kernel_handle_t hKernel, ///< [in] handle of the kernel.
+    ur_kernel_handle_t hKernel, ///< [in][nocheck] handle of the kernel.
     ur_native_handle_t
         *phNativeKernel ///< [out] a pointer to the native handle of the kernel.
 ) {
@@ -3910,10 +3910,6 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetNativeHandle(
     }
 
     if (getContext()->enableParameterValidation) {
-        if (NULL == hKernel) {
-            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-        }
-
         if (NULL == phNativeKernel) {
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }

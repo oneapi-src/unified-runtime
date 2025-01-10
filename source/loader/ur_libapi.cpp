@@ -4187,14 +4187,11 @@ ur_result_t UR_APICALL urKernelSetSpecializationConstants(
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
 ///     - ::UR_RESULT_ERROR_DEVICE_LOST
 ///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
-///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
-///         + `NULL == hKernel`
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `NULL == phNativeKernel`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
-///         + If the adapter has no underlying equivalent handle.
 ur_result_t UR_APICALL urKernelGetNativeHandle(
-    ur_kernel_handle_t hKernel, ///< [in] handle of the kernel.
+    ur_kernel_handle_t hKernel, ///< [in][nocheck] handle of the kernel.
     ur_native_handle_t
         *phNativeKernel ///< [out] a pointer to the native handle of the kernel.
     ) try {
@@ -4231,7 +4228,6 @@ ur_result_t UR_APICALL urKernelGetNativeHandle(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `NULL == phKernel`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
-///         + If the adapter has no underlying equivalent handle.
 ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
     ur_native_handle_t
         hNativeKernel, ///< [in][nocheck] the native handle of the kernel.

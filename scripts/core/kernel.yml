@@ -495,14 +495,13 @@ params:
     - type: "$x_kernel_handle_t"
       name: hKernel
       desc: |
-            [in] handle of the kernel.
+            [in][nocheck] handle of the kernel.
     - type: $x_native_handle_t*
       name: phNativeKernel
       desc: |
             [out] a pointer to the native handle of the kernel.
 returns:
-    - $X_RESULT_ERROR_UNSUPPORTED_FEATURE:
-        - "If the adapter has no underlying equivalent handle."
+    - $X_RESULT_ERROR_UNSUPPORTED_FEATURE
 --- #--------------------------------------------------------------------------
 type: struct
 desc: "Properties for for $xKernelCreateWithNativeHandle."
@@ -547,8 +546,7 @@ params:
       desc: |
             [out] pointer to the handle of the kernel object created.
 returns:
-    - $X_RESULT_ERROR_UNSUPPORTED_FEATURE:
-        - "If the adapter has no underlying equivalent handle."
+    - $X_RESULT_ERROR_UNSUPPORTED_FEATURE
     - $X_RESULT_ERROR_INVALID_NULL_HANDLE:
         - "If `hProgram == NULL` and the implementation requires a valid program."
 --- #--------------------------------------------------------------------------
