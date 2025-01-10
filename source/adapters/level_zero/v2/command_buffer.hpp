@@ -22,15 +22,15 @@
 #include "queue_api.hpp"
 
 struct command_buffer_profiling_t {
-  ur_exp_command_buffer_sync_point_t NumEvents;
-  ze_kernel_timestamp_result_t *Timestamps;
+  ur_exp_command_buffer_sync_point_t numEvents;
+  ze_kernel_timestamp_result_t *timestamps;
 };
 
 struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   ur_exp_command_buffer_handle_t_(
-      ur_context_handle_t Context, ur_device_handle_t Device,
-      ze_command_list_handle_t CommandList,
-      const ur_exp_command_buffer_desc_t *Desc
+      ur_context_handle_t context, ur_device_handle_t device,
+      ze_command_list_handle_t commandList,
+      const ur_exp_command_buffer_desc_t *desc
   );
   ur_event_handle_t getSignalEvent(ur_event_handle_t *hUserEvent,
                                               ur_command_t commandType);
@@ -43,31 +43,31 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   void cleanupCommandBufferResources();
 
   // UR context associated with this command-buffer
-  ur_context_handle_t Context;
+  ur_context_handle_t context;
   // Device associated with this command buffer
-  ur_device_handle_t Device;
-  ze_command_list_handle_t ZeCommandList;
+  ur_device_handle_t device;
+  v2::raii::ze_command_list_handle_t zeCommandList;
 
   std::vector<ze_event_handle_t> waitList;
   // Indicates if command-buffer commands can be updated after it is closed.
-  bool IsUpdatable = false;
+  bool isUpdatable = false;
   // Indicates if command buffer was finalized.
-  bool IsFinalized = false;
+  bool isFinalized = false;
   // Command-buffer profiling is enabled.
-  bool IsProfilingEnabled = false;
+  bool isProfilingEnabled = false;
   // This list is needed to release all kernels retained by the
   // command_buffer.
-  std::vector<ur_kernel_handle_t> KernelsList;
+  std::vector<ur_kernel_handle_t> kernelsList;
 };
 
 struct ur_exp_command_buffer_command_handle_t_ : public _ur_object {
   ur_exp_command_buffer_command_handle_t_(ur_exp_command_buffer_handle_t,
                                           uint64_t);
 
-  virtual ~ur_exp_command_buffer_command_handle_t_();
+  ~ur_exp_command_buffer_command_handle_t_();
 
   // Command-buffer of this command.
-  ur_exp_command_buffer_handle_t CommandBuffer;
+  ur_exp_command_buffer_handle_t commandBuffer;
   // L0 command ID identifying this command
-  uint64_t CommandId;
+  uint64_t commandId;
 };

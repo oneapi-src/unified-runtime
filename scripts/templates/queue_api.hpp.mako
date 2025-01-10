@@ -19,6 +19,8 @@ from templates import helper as th
  *
  */
 
+// This file was generated basing on scripts/templates/queue_api.hpp.mako
+
 #pragma once
 
 #include <ur_api.h>

@@ -16,48 +16,15 @@
 namespace {
 
 // Checks whether zeCommandListImmediateAppendCommandListsExp can be used for a
-// given Context and Device.
-void checkImmediateAppendSupport(ur_context_handle_t Context,
-                                 ur_device_handle_t Device) {
-  // TODO The L0 driver is not reporting this extension yet. Once it does,
-  // switch to using the variable zeDriverImmediateCommandListAppendFound.
-
-  // Minimum version that supports zeCommandListImmediateAppendCommandListsExp.
-  constexpr uint32_t MinDriverVersion = 30898;
+// given context.
+void checkImmediateAppendSupport(ur_context_handle_t context) {
   bool DriverSupportsImmediateAppend =
-      Context->getPlatform()->isDriverVersionNewerOrSimilar(1, 3,
-                                                            MinDriverVersion);
+      context->getPlatform()->ZeCommandListImmediateAppendExt.Supported;
 
-  // If this environment variable is:
-  //   - Set to 1: the immediate append path will always be enabled as long the
-  //   pre-requisites are met.
-  //   - Set to 0: the immediate append path will always be disabled.
-  //   - Not Defined: The default behaviour will be used which enables the
-  //   immediate append path only for some devices when the pre-requisites are
-  //   met.
-  const char *AppendEnvVarName = "UR_L0_CMD_BUFFER_USE_IMMEDIATE_APPEND_PATH";
-  const char *UrRet = std::getenv(AppendEnvVarName);
-
-  if (!Device->ImmCommandListUsed) {
-    logger::error("Adapter v2 is used but immediate command-lists are currently "
-                  "disabled. Immediate command-lists are "
-                  "required to use the adapter v2.");
-    std::abort();
-  }
   if (!DriverSupportsImmediateAppend) {
     logger::error("Adapter v2 is used but "
                   "the current driver does not support the "
-                  "zeCommandListImmediateAppendCommandListsExp entrypoint. A "
-                  "driver version of at least {} is required to use the "
-                  "immediate append path.", MinDriverVersion);
-    std::abort();
-  }
-
-  const bool EnableAppendPath = !UrRet || std::atoi(UrRet) == 1;
-  if (!Device->isPVC() && !EnableAppendPath) {
-    logger::error("Adapter v2 is used but "
-                  "immediate append support is not enabled."
-                  "Please set {}=1 to enable it.", AppendEnvVarName);
+                  "zeCommandListImmediateAppendCommandListsExp entrypoint.");
     std::abort();
   }
 
@@ -78,30 +45,24 @@ ur_exp_command_buffer_handle_t_::getWaitListView(
 }
 
 ur_exp_command_buffer_handle_t_::ur_exp_command_buffer_handle_t_(
-    ur_context_handle_t Context, ur_device_handle_t Device,
-      ze_command_list_handle_t CommandList,
-      const ur_exp_command_buffer_desc_t *Desc)
-    : Context(Context), Device(Device), ZeCommandList(CommandList),
-      IsUpdatable(Desc ? Desc->isUpdatable : false) {
-  UR_CALL_THROWS(ur::level_zero::urContextRetain(Context));
-  UR_CALL_THROWS(ur::level_zero::urDeviceRetain(Device));
+    ur_context_handle_t context, ur_device_handle_t device,
+      ze_command_list_handle_t commandList,
+      const ur_exp_command_buffer_desc_t *desc)
+    : context(context), device(device), zeCommandList(commandList),
+      isUpdatable(desc ? desc->isUpdatable : false) {
+  UR_CALL_THROWS(ur::level_zero::urContextRetain(context));
+  UR_CALL_THROWS(ur::level_zero::urDeviceRetain(device));
 }
 
 void ur_exp_command_buffer_handle_t_::cleanupCommandBufferResources() {
   // Release the memory allocated to the Context stored in the command_buffer
-  UR_CALL_THROWS(ur::level_zero::urContextRelease(Context));
+  UR_CALL_THROWS(ur::level_zero::urContextRelease(context));
 
   // Release the device
-  UR_CALL_THROWS(ur::level_zero::urDeviceRelease(Device));
+  UR_CALL_THROWS(ur::level_zero::urDeviceRelease(device));
 
-  // Release the memory allocated to the CommandList stored in the
-  // command_buffer
-  if (ZeCommandList) {
-    ZE_CALL_NOCHECK(zeCommandListDestroy, (ZeCommandList));
-  }
-
-  for (auto &AssociatedKernel : KernelsList) {
-    UR_CALL_THROWS(ur::level_zero::urKernelRelease(AssociatedKernel));
+  for (auto &associatedKernel : kernelsList) {
+    UR_CALL_THROWS(ur::level_zero::urKernelRelease(associatedKernel));
   }
 }
 
@@ -109,57 +70,57 @@ namespace ur::level_zero {
 
 /**
  * Creates a L0 command list
- * @param[in] Context The Context associated with the command-list
- * @param[in] Device  The Device associated with the command-list
- * @param[in] IsUpdatable Whether the command-list should be mutable.
- * @param[out] CommandList The L0 command-list created by this function.
+ * @param[in] context The Context associated with the command-list
+ * @param[in] device  The Device associated with the command-list
+ * @param[in] isUpdatable Whether the command-list should be mutable.
+ * @param[out] commandList The L0 command-list created by this function.
  * @return UR_RESULT_SUCCESS or an error code on failure
  */
-ur_result_t createMainCommandList(ur_context_handle_t Context,
-                                  ur_device_handle_t Device,
-                                  bool IsUpdatable,
-                                  ze_command_list_handle_t &CommandList) {
+ur_result_t createMainCommandList(ur_context_handle_t context,
+                                  ur_device_handle_t device,
+                                  bool isUpdatable,
+                                  ze_command_list_handle_t &commandList) {
 
 
   using queue_group_type = ur_device_handle_t_::queue_group_info_t::type;
   // that should be call to queue getZeOrdinal, 
   // but queue is not available while constructing buffer
-  uint32_t QueueGroupOrdinal = Device->QueueGroup[queue_group_type::Compute].ZeOrdinal;
+  uint32_t queueGroupOrdinal = device->QueueGroup[queue_group_type::Compute].ZeOrdinal;
 
-  ZeStruct<ze_command_list_desc_t> ZeCommandListDesc;
-  ZeCommandListDesc.commandQueueGroupOrdinal = QueueGroupOrdinal;
+  ZeStruct<ze_command_list_desc_t> zeCommandListDesc;
+  zeCommandListDesc.commandQueueGroupOrdinal = queueGroupOrdinal;
 
-  ZeCommandListDesc.flags = ZE_COMMAND_LIST_FLAG_IN_ORDER;
+  zeCommandListDesc.flags = ZE_COMMAND_LIST_FLAG_IN_ORDER;
 
-  ZeStruct<ze_mutable_command_list_exp_desc_t> ZeMutableCommandListDesc;
-  if (IsUpdatable) {
-    ZeMutableCommandListDesc.flags = 0;
-    ZeCommandListDesc.pNext = &ZeMutableCommandListDesc;
+  ZeStruct<ze_mutable_command_list_exp_desc_t> zeMutableCommandListDesc;
+  if (isUpdatable) {
+    zeMutableCommandListDesc.flags = 0;
+    zeCommandListDesc.pNext = &zeMutableCommandListDesc;
   }
 
-  ZE2UR_CALL(zeCommandListCreate, (Context->getZeHandle(), Device->ZeDevice,
-                                   &ZeCommandListDesc, &CommandList));
+  ZE2UR_CALL(zeCommandListCreate, (context->getZeHandle(), device->ZeDevice,
+                                   &zeCommandListDesc, &commandList));
 
   return UR_RESULT_SUCCESS;
 }
 
 ur_result_t
-urCommandBufferCreateExp(ur_context_handle_t Context, ur_device_handle_t Device,
-                         const ur_exp_command_buffer_desc_t *CommandBufferDesc,
-                         ur_exp_command_buffer_handle_t *CommandBuffer) {
-  bool IsUpdatable = CommandBufferDesc && CommandBufferDesc->isUpdatable;
-  checkImmediateAppendSupport(Context, Device);
-
-  if (IsUpdatable) {
-    UR_ASSERT(Context->getPlatform()->ZeMutableCmdListExt.Supported,
-              UR_RESULT_ERROR_UNSUPPORTED_FEATURE);
-  }
-  
-  ze_command_list_handle_t ZeCommandList = nullptr;
-  UR_CALL(createMainCommandList(Context, Device, IsUpdatable, ZeCommandList));
+urCommandBufferCreateExp(ur_context_handle_t context, ur_device_handle_t device,
+                         const ur_exp_command_buffer_desc_t *commandBufferDesc,
+                         ur_exp_command_buffer_handle_t *commandBuffer) {
   try {
-    *CommandBuffer = new ur_exp_command_buffer_handle_t_(
-        Context, Device, ZeCommandList, CommandBufferDesc);
+    bool isUpdatable = commandBufferDesc && commandBufferDesc->isUpdatable;
+    checkImmediateAppendSupport(context);
+
+    if (isUpdatable) {
+      UR_ASSERT(context->getPlatform()->ZeMutableCmdListExt.Supported,
+                UR_RESULT_ERROR_UNSUPPORTED_FEATURE);
+    }
+    
+    ze_command_list_handle_t zeCommandList = nullptr;
+    UR_CALL(createMainCommandList(context, device, isUpdatable, zeCommandList));
+    *commandBuffer = new ur_exp_command_buffer_handle_t_(
+        context, device, zeCommandList, commandBufferDesc);
   } catch (const std::bad_alloc &) {
     return exceptionToResult(std::current_exception());
   }
@@ -167,16 +128,20 @@ urCommandBufferCreateExp(ur_context_handle_t Context, ur_device_handle_t Device,
 }
 ur_result_t
 urCommandBufferRetainExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
-  hCommandBuffer->RefCount.increment();
+  try {
+    hCommandBuffer->RefCount.increment();
+  } catch (const std::bad_alloc &) {
+    return exceptionToResult(std::current_exception());
+  }
   return UR_RESULT_SUCCESS;
 }
 
 ur_result_t
 urCommandBufferReleaseExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
-  if (!hCommandBuffer->RefCount.decrementAndTest())
-    return UR_RESULT_SUCCESS;
-
   try {
+    if (!hCommandBuffer->RefCount.decrementAndTest())
+      return UR_RESULT_SUCCESS;
+
     hCommandBuffer->cleanupCommandBufferResources();
   } catch (...) {
     delete hCommandBuffer;
@@ -188,17 +153,20 @@ urCommandBufferReleaseExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
 
 ur_result_t
 urCommandBufferFinalizeExp(ur_exp_command_buffer_handle_t hCommandBuffer)  {
-  UR_ASSERT(hCommandBuffer, UR_RESULT_ERROR_INVALID_NULL_POINTER);
-  UR_ASSERT(!hCommandBuffer->IsFinalized, UR_RESULT_ERROR_INVALID_OPERATION);
+  try {
+    UR_ASSERT(hCommandBuffer, UR_RESULT_ERROR_INVALID_NULL_POINTER);
+    UR_ASSERT(!hCommandBuffer->isFinalized, UR_RESULT_ERROR_INVALID_OPERATION);
 
-  // It is not allowed to append to command list from multiple threads.
-  std::scoped_lock<ur_shared_mutex> Guard(hCommandBuffer->Mutex);
+    // It is not allowed to append to command list from multiple threads.
+    std::scoped_lock<ur_shared_mutex> guard(hCommandBuffer->Mutex);
 
-  // Close the command lists and have them ready for dispatch.
-  ZE2UR_CALL(zeCommandListClose, (hCommandBuffer->ZeCommandList));
+    // Close the command lists and have them ready for dispatch.
+    ZE2UR_CALL(zeCommandListClose, (hCommandBuffer->zeCommandList.get()));
 
-  hCommandBuffer->IsFinalized = true;
-
+    hCommandBuffer->isFinalized = true;
+  } catch (...) {
+    return exceptionToResult(std::current_exception());
+  }
   return UR_RESULT_SUCCESS;
 }
 
@@ -228,41 +196,44 @@ ur_result_t urCommandBufferAppendKernelLaunchExp(
   std::ignore = numKernelAlternatives;
   std::ignore = kernelAlternatives;
   std::ignore = command;
+  try {
+    UR_ASSERT(hKernel, UR_RESULT_ERROR_INVALID_NULL_HANDLE);
+    UR_ASSERT(hKernel->getProgramHandle(), UR_RESULT_ERROR_INVALID_NULL_POINTER);
 
-  UR_ASSERT(hKernel, UR_RESULT_ERROR_INVALID_NULL_HANDLE);
-  UR_ASSERT(hKernel->getProgramHandle(), UR_RESULT_ERROR_INVALID_NULL_POINTER);
+    UR_ASSERT(workDim > 0, UR_RESULT_ERROR_INVALID_WORK_DIMENSION);
+    UR_ASSERT(workDim < 4, UR_RESULT_ERROR_INVALID_WORK_DIMENSION);
 
-  UR_ASSERT(workDim > 0, UR_RESULT_ERROR_INVALID_WORK_DIMENSION);
-  UR_ASSERT(workDim < 4, UR_RESULT_ERROR_INVALID_WORK_DIMENSION);
+    ze_kernel_handle_t hZeKernel = hKernel->getZeHandle(commandBuffer->device);
 
-  ze_kernel_handle_t hZeKernel = hKernel->getZeHandle(commandBuffer->Device);
+    std::scoped_lock<ur_shared_mutex, ur_shared_mutex> lock(commandBuffer->Mutex,
+                                                            hKernel->Mutex);
 
-  std::scoped_lock<ur_shared_mutex, ur_shared_mutex> Lock(commandBuffer->Mutex,
-                                                          hKernel->Mutex);
+    ze_group_count_t zeThreadGroupDimensions{1, 1, 1};
+    uint32_t wg[3]{};
+    UR_CALL(calculateKernelWorkDimensions(hZeKernel, commandBuffer->device,
+                                          zeThreadGroupDimensions, wg, workDim,
+                                          pGlobalWorkSize, pLocalWorkSize));
 
-  ze_group_count_t zeThreadGroupDimensions{1, 1, 1};
-  uint32_t WG[3]{};
-  UR_CALL(calculateKernelWorkDimensions(hZeKernel, commandBuffer->Device,
-                                        zeThreadGroupDimensions, WG, workDim,
-                                        pGlobalWorkSize, pLocalWorkSize));
+    auto waitList = commandBuffer->getWaitListView(nullptr, 0);
 
-  auto waitList = commandBuffer->getWaitListView(nullptr, 0);
+    bool memoryMigrated = false;
+    auto memoryMigrate = [&](void *src, void *dst, size_t size) {
+      ZE2UR_CALL_THROWS(zeCommandListAppendMemoryCopy,
+                        (commandBuffer->zeCommandList.get(), dst, src, size, nullptr,
+                        waitList.second, waitList.first));
+      memoryMigrated = true;
+    };
 
-  bool memoryMigrated = false;
-  auto memoryMigrate = [&](void *src, void *dst, size_t size) {
-    ZE2UR_CALL_THROWS(zeCommandListAppendMemoryCopy,
-                      (commandBuffer->ZeCommandList, dst, src, size, nullptr,
-                       waitList.second, waitList.first));
-    memoryMigrated = true;
-  };
+    UR_CALL(hKernel->prepareForSubmission(commandBuffer->context, commandBuffer->device, pGlobalWorkOffset,
+                                          workDim, wg[0], wg[1], wg[2],
+                                          memoryMigrate));
 
-  UR_CALL(hKernel->prepareForSubmission(commandBuffer->Context, commandBuffer->Device, pGlobalWorkOffset,
-                                        workDim, WG[0], WG[1], WG[2],
-                                        memoryMigrate));
-
-  ZE2UR_CALL(zeCommandListAppendLaunchKernel,
-             (commandBuffer->ZeCommandList, hZeKernel, &zeThreadGroupDimensions,
-              nullptr, waitList.second, waitList.first));
+    ZE2UR_CALL(zeCommandListAppendLaunchKernel,
+              (commandBuffer->zeCommandList.get(), hZeKernel, &zeThreadGroupDimensions,
+                nullptr, waitList.second, waitList.first));
+  } catch (...) {
+    return exceptionToResult(std::current_exception());
+  }
 
   return UR_RESULT_SUCCESS;
 }
@@ -273,7 +244,7 @@ ur_result_t urCommandBufferEnqueueExp(
     ur_event_handle_t *phEvent) {
   try {
     return hQueue->enqueueCommandBuffer(
-        hCommandBuffer->ZeCommandList, phEvent, numEventsInWaitList, phEventWaitList);
+        hCommandBuffer->zeCommandList.get(), phEvent, numEventsInWaitList, phEventWaitList);
   } catch (...) {
     return exceptionToResult(std::current_exception());
   }
@@ -284,25 +255,28 @@ urCommandBufferGetInfoExp(ur_exp_command_buffer_handle_t hCommandBuffer,
                           ur_exp_command_buffer_info_t propName,
                           size_t propSize, void *pPropValue,
                           size_t *pPropSizeRet) {
-  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+  try {
+    UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
 
-  switch (propName) {
-  case UR_EXP_COMMAND_BUFFER_INFO_REFERENCE_COUNT:
-    return ReturnValue(uint32_t{hCommandBuffer->RefCount.load()});
-  case UR_EXP_COMMAND_BUFFER_INFO_DESCRIPTOR: {
-    ur_exp_command_buffer_desc_t Descriptor{};
-    Descriptor.stype = UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_DESC;
-    Descriptor.pNext = nullptr;
-    Descriptor.isUpdatable = hCommandBuffer->IsUpdatable;
-    Descriptor.isInOrder = true;
-    Descriptor.enableProfiling = hCommandBuffer->IsProfilingEnabled;
+    switch (propName) {
+    case UR_EXP_COMMAND_BUFFER_INFO_REFERENCE_COUNT:
+      return ReturnValue(uint32_t{hCommandBuffer->RefCount.load()});
+    case UR_EXP_COMMAND_BUFFER_INFO_DESCRIPTOR: {
+      ur_exp_command_buffer_desc_t Descriptor{};
+      Descriptor.stype = UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_DESC;
+      Descriptor.pNext = nullptr;
+      Descriptor.isUpdatable = hCommandBuffer->isUpdatable;
+      Descriptor.isInOrder = true;
+      Descriptor.enableProfiling = hCommandBuffer->isProfilingEnabled;
 
-    return ReturnValue(Descriptor);
+      return ReturnValue(Descriptor);
+    }
+    default:
+      assert(!"Command-buffer info request not implemented");
+    }
+  } catch (...) {
+    return exceptionToResult(std::current_exception());
   }
-  default:
-    assert(!"Command-buffer info request not implemented");
-  }
-
   return UR_RESULT_ERROR_INVALID_ENUMERATION;
 }
 

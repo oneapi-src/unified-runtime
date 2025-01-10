@@ -15,14 +15,7 @@
 #include <ur_api.h>
 
 #include "../common.hpp"
-#include "../device.hpp"
 
-#include "context.hpp"
-#include "event.hpp"
-#include "event_pool_cache.hpp"
-#include "queue_api.hpp"
-
-#include "ur/ur.hpp"
 
 struct ur_queue_handle_t_ {
   virtual ~ur_queue_handle_t_();
