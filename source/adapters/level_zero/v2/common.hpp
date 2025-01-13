@@ -14,6 +14,7 @@
 #include <ze_api.h>
 
 #include "../common.hpp"
+#include "../ur_interface_loader.hpp"
 #include "logger/ur_logger.hpp"
 
 namespace v2 {
@@ -54,8 +55,7 @@ struct ze_handle_wrapper {
     try {
       reset();
     } catch (...) {
-      // TODO: add appropriate logging or pass the error
-      // to the caller (make the dtor noexcept(false) or use tls?)
+      // logging already done in reset
     }
   }
 
@@ -104,5 +104,95 @@ using ze_context_handle_t =
 using ze_command_list_handle_t =
     ze_handle_wrapper<::ze_command_list_handle_t, zeCommandListDestroy>;
 
+template <typename URHandle, ur_result_t (*retain)(URHandle),
+          ur_result_t (*release)(URHandle)>
+struct ref_counted {
+  ref_counted(URHandle handle) : handle(handle) {
+    if (handle) {
+      retain(handle);
+    }
+  }
+
+  ~ref_counted() {
+    if (handle) {
+      release(handle);
+    }
+  }
+
+  operator URHandle() const { return handle; }
+  URHandle operator->() const { return handle; }
+
+  ref_counted(const ref_counted &) = delete;
+  ref_counted &operator=(const ref_counted &) = delete;
+
+  ref_counted(ref_counted &&other) {
+    handle = other.handle;
+    other.handle = nullptr;
+  }
+
+  ref_counted &operator=(ref_counted &&other) {
+    if (this == &other) {
+      return *this;
+    }
+
+    if (handle) {
+      release(handle);
+    }
+
+    handle = other.handle;
+    other.handle = nullptr;
+    return *this;
+  }
+
+  URHandle get() const { return handle; }
+
+private:
+  URHandle handle;
+};
+
+template <typename URHandle> struct ref_counted_traits;
+
+#define DECLARE_REF_COUNTER_TRAITS(URHandle, retainFn, releaseFn)              \
+  template <> struct ref_counted_traits<URHandle> {                            \
+    static ur_result_t retain(URHandle handle) { return retainFn(handle); }    \
+    static ur_result_t release(URHandle handle) { return releaseFn(handle); }  \
+    static ur_result_t nop(URHandle) { return UR_RESULT_SUCCESS; }             \
+    static ur_result_t validate([[maybe_unused]] URHandle handle) {            \
+      assert(reinterpret_cast<_ur_object *>(handle)->RefCount.load() != 0);    \
+      return UR_RESULT_SUCCESS;                                                \
+    }                                                                          \
+  };
+
+// This version of ref_counted calls retain/release functions.
+template <typename URHandle>
+using rc = ref_counted<URHandle, ref_counted_traits<URHandle>::retain,
+                       ref_counted_traits<URHandle>::release>;
+
+// This version of ref_counted does not call retain/release functions.
+// It is used to avoid circular references, most notably to ur_context_handle_t.
+// This is equivalent to just using URHandle but makes it clear that no ref
+// counting is expected.
+template <typename URHandle>
+using weak = ref_counted<URHandle, ref_counted_traits<URHandle>::nop,
+                         ref_counted_traits<URHandle>::nop>;
+
+// This version of ref_counted validates that the ref count is not zero on every
+// release and retain in debug mode, and does nothing in the release mode.
+// Used for types that should always be alibe during the adapter lifetime (e.g.
+// devices).
+template <typename URHandle>
+using rc_val_only =
+    ref_counted<URHandle, ref_counted_traits<URHandle>::validate,
+                ref_counted_traits<URHandle>::validate>;
+
+DECLARE_REF_COUNTER_TRAITS(::ur_device_handle_t, urDeviceRetain,
+                           urDeviceRelease);
+DECLARE_REF_COUNTER_TRAITS(::ur_context_handle_t, urContextRetain,
+                           urContextRelease);
+DECLARE_REF_COUNTER_TRAITS(::ur_mem_handle_t, urMemRetain, urMemRelease);
+DECLARE_REF_COUNTER_TRAITS(::ur_program_handle_t, urProgramRetain,
+                           urProgramRelease);
+
 } // namespace raii
+
 } // namespace v2

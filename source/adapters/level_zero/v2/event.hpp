@@ -98,13 +98,13 @@ public:
   uint64_t getEventEndTimestamp();
 
 protected:
-  ur_context_handle_t hContext;
+  v2::raii::weak<ur_context_handle_t> hContext;
 
   // non-owning handle to the L0 event
   const ze_event_handle_t hZeEvent;
 
   // queue and commandType that this event is associated with, set by enqueue
-  // commands
+  // commands. DO NOT ref count hQueue here to avoid circular references.
   ur_queue_handle_t hQueue = nullptr;
   ur_command_t commandType = UR_COMMAND_FORCE_UINT32;
 

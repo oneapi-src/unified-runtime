@@ -20,7 +20,7 @@ struct ur_single_device_kernel_t {
                             ze_kernel_handle_t hKernel, bool ownZeHandle);
   ur_result_t release();
 
-  ur_device_handle_t hDevice;
+  v2::raii::rc_val_only<ur_device_handle_t> hDevice;
   v2::raii::ze_kernel_handle_t hKernel;
   mutable ZeCache<ZeStruct<ze_kernel_properties_t>> zeKernelProperties;
 };
@@ -74,9 +74,6 @@ public:
 
   std::vector<char> getSourceAttributes() const;
 
-  // Perform cleanup.
-  ur_result_t release();
-
   // Add a pending memory allocation for which device is not yet known.
   ur_result_t
   addPendingMemoryAllocation(pending_memory_allocation_t allocation);
@@ -92,7 +89,7 @@ public:
 
 private:
   // Keep the program of the kernel.
-  const ur_program_handle_t hProgram;
+  const v2::raii::rc<ur_program_handle_t> hProgram;
 
   // Vector of ur_single_device_kernel_t indexed by deviceIndex().
   std::vector<std::optional<ur_single_device_kernel_t>> deviceKernels;

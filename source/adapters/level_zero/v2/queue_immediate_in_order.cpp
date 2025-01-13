@@ -121,9 +121,9 @@ ur_queue_immediate_in_order_t::queueGetInfo(ur_queue_info_t propName,
   // TODO: consider support for queue properties and size
   switch ((uint32_t)propName) { // cast to avoid warnings on EXT enum values
   case UR_QUEUE_INFO_CONTEXT:
-    return ReturnValue(hContext);
+    return ReturnValue(hContext.get());
   case UR_QUEUE_INFO_DEVICE:
-    return ReturnValue(hDevice);
+    return ReturnValue(hDevice.get());
   case UR_QUEUE_INFO_REFERENCE_COUNT:
     return ReturnValue(uint32_t{RefCount.load()});
   case UR_QUEUE_INFO_FLAGS:

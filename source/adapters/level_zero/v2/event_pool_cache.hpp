@@ -41,7 +41,7 @@ public:
   raii::cache_borrowed_event_pool borrow(DeviceId, event_flags_t flags);
 
 private:
-  ur_context_handle_t hContext;
+  raii::weak<ur_context_handle_t> hContext;
   ur_mutex mutex;
   ProviderCreateFunc providerCreate;
 

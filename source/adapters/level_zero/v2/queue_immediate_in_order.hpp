@@ -36,8 +36,8 @@ struct ur_command_list_handler_t {
 
 struct ur_queue_immediate_in_order_t : _ur_object, public ur_queue_handle_t_ {
 private:
-  ur_context_handle_t hContext;
-  ur_device_handle_t hDevice;
+  v2::raii::rc<ur_context_handle_t> hContext;
+  v2::raii::rc_val_only<ur_device_handle_t> hDevice;
   ur_queue_flags_t flags;
 
   raii::cache_borrowed_event_pool eventPool;

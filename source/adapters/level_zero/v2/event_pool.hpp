@@ -50,7 +50,7 @@ public:
   event_flags_t getFlags() const;
 
 private:
-  ur_context_handle_t hContext;
+  raii::weak<ur_context_handle_t> hContext;
   std::unique_ptr<event_provider> provider;
 
   std::deque<ur_pooled_event_t> events;

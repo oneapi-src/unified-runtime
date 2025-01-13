@@ -56,7 +56,7 @@ public:
 
 private:
   queue_type queueType;
-  ur_context_handle_t urContext;
+  raii::weak<ur_context_handle_t> urContext;
   event_flags_t flags;
 
   std::unique_ptr<provider_pool> createProviderPool();
