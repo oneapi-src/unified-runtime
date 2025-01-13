@@ -53,15 +53,15 @@ ur_exp_command_buffer_handle_t_::ur_exp_command_buffer_handle_t_(
   UR_CALL_THROWS(ur::level_zero::urDeviceRetain(device));
 }
 
-void ur_exp_command_buffer_handle_t_::cleanupCommandBufferResources() {
+ur_exp_command_buffer_handle_t_::~ur_exp_command_buffer_handle_t_() {
   // Release the memory allocated to the Context stored in the command_buffer
-  UR_CALL_THROWS(ur::level_zero::urContextRelease(context));
+  ur::level_zero::urContextRelease(context);
 
   // Release the device
-  UR_CALL_THROWS(ur::level_zero::urDeviceRelease(device));
+  ur::level_zero::urDeviceRelease(device);
 
   for (auto &associatedKernel : kernelsList) {
-    UR_CALL_THROWS(ur::level_zero::urKernelRelease(associatedKernel));
+    ur::level_zero::urKernelRelease(associatedKernel);
   }
 }
 
@@ -140,12 +140,10 @@ urCommandBufferReleaseExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
     if (!hCommandBuffer->RefCount.decrementAndTest())
       return UR_RESULT_SUCCESS;
 
-    hCommandBuffer->cleanupCommandBufferResources();
-  } catch (...) {
     delete hCommandBuffer;
+  } catch (...) {
     return exceptionToResult(std::current_exception());
   }
-  delete hCommandBuffer;
   return UR_RESULT_SUCCESS;
 }
 
