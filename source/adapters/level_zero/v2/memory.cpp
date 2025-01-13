@@ -178,7 +178,7 @@ void *ur_discrete_mem_handle_t::allocateOnDevice(ur_device_handle_t hDevice,
       hContext, hDevice, nullptr, UR_USM_TYPE_DEVICE, size, &ptr));
 
   deviceAllocations[id] =
-      usm_unique_ptr_t(ptr, [hContext = this->hContext](void *ptr) {
+      usm_unique_ptr_t(ptr, [hContext = this->hContext.get()](void *ptr) {
         auto ret = hContext->getDefaultUSMPool()->free(ptr);
         if (ret != UR_RESULT_SUCCESS) {
           logger::error("Failed to free device memory: {}", ret);
@@ -230,7 +230,7 @@ ur_discrete_mem_handle_t::ur_discrete_mem_handle_t(
     devicePtr = allocateOnDevice(hDevice, size);
   } else {
     deviceAllocations[hDevice->Id.value()] = usm_unique_ptr_t(
-        devicePtr, [hContext = this->hContext, ownZePtr](void *ptr) {
+        devicePtr, [hContext = this->hContext.get(), ownZePtr](void *ptr) {
           if (!ownZePtr) {
             return;
           }
@@ -361,22 +361,11 @@ static bool useHostBuffer(ur_context_handle_t hContext) {
              ZE_DEVICE_PROPERTY_FLAG_INTEGRATED;
 }
 
-namespace ur::level_zero {
-ur_result_t urMemRetain(ur_mem_handle_t hMem);
-ur_result_t urMemRelease(ur_mem_handle_t hMem);
-} // namespace ur::level_zero
-
 ur_mem_sub_buffer_t::ur_mem_sub_buffer_t(ur_mem_handle_t hParent, size_t offset,
                                          size_t size,
                                          device_access_mode_t accessMode)
     : ur_mem_handle_t_(hParent->getContext(), size, accessMode),
-      hParent(hParent), offset(offset), size(size) {
-  ur::level_zero::urMemRetain(hParent);
-}
-
-ur_mem_sub_buffer_t::~ur_mem_sub_buffer_t() {
-  ur::level_zero::urMemRelease(hParent);
-}
+      hParent(hParent), offset(offset), size(size) {}
 
 void *ur_mem_sub_buffer_t::getDevicePtr(
     ur_device_handle_t hDevice, device_access_mode_t access, size_t offset,

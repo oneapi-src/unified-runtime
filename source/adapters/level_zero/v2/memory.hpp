@@ -48,7 +48,7 @@ struct ur_mem_handle_t_ : private _ur_object {
 
 protected:
   const device_access_mode_t accessMode;
-  const ur_context_handle_t hContext;
+  const v2::raii::rc<ur_context_handle_t> hContext;
   const size_t size;
 };
 
@@ -140,7 +140,6 @@ private:
   std::vector<usm_unique_ptr_t> deviceAllocations;
 
   // Specifies device on which the latest allocation resides.
-  // If null, there is no allocation.
   ur_device_handle_t activeAllocationDevice = nullptr;
 
   // If not null, copy the buffer content back to this memory on release.
@@ -157,7 +156,6 @@ private:
 struct ur_mem_sub_buffer_t : public ur_mem_handle_t_ {
   ur_mem_sub_buffer_t(ur_mem_handle_t hParent, size_t offset, size_t size,
                       device_access_mode_t accesMode);
-  ~ur_mem_sub_buffer_t();
 
   void *
   getDevicePtr(ur_device_handle_t, device_access_mode_t, size_t offset,
@@ -172,7 +170,7 @@ struct ur_mem_sub_buffer_t : public ur_mem_handle_t_ {
   ur_shared_mutex &getMutex() override;
 
 private:
-  ur_mem_handle_t hParent;
+  v2::raii::rc<ur_mem_handle_t> hParent;
   size_t offset;
   size_t size;
 };

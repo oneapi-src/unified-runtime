@@ -104,7 +104,7 @@ protected:
   const ze_event_handle_t hZeEvent;
 
   // queue and commandType that this event is associated with, set by enqueue
-  // commands
+  // commands.
   ur_queue_handle_t hQueue = nullptr;
   ur_command_t commandType = UR_COMMAND_FORCE_UINT32;
 
@@ -134,3 +134,27 @@ struct ur_native_event_t : ur_event_handle_t_ {
 private:
   v2::raii::ze_event_handle_t zeEvent;
 };
+
+namespace v2 {
+
+inline ur_result_t
+deferredEventRetain([[maybe_unused]] ur_event_handle_t hEvent) {
+  assert(hEvent);
+  assert(reinterpret_cast<_ur_object *>(hEvent)->RefCount.load() == 0);
+  return UR_RESULT_SUCCESS;
+}
+
+inline ur_result_t
+defferedEventRelease([[maybe_unused]] ur_event_handle_t hEvent) {
+  assert(hEvent);
+  assert(reinterpret_cast<_ur_object *>(hEvent)->RefCount.load() == 0);
+  return UR_RESULT_SUCCESS;
+}
+
+// deferredEvents have refCount equal to 0, the only operation that can be
+// called on them is releaseDeferred()
+using deferred_event_handle_t =
+    v2::raii::ref_counted<ur_event_handle_t, deferredEventRetain,
+                          defferedEventRelease>;
+
+} // namespace v2

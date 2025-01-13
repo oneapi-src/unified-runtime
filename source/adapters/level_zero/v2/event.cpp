@@ -154,6 +154,9 @@ ur_result_t ur_event_handle_t_::release() {
   if (isTimestamped() && !getEventEndTimestamp()) {
     // L0 will write end timestamp to this event some time in the future,
     // so we can't release it yet.
+
+    // If this code is being executed, queue has to be valid (queue cannot
+    // be released before all operations complete).
     assert(hQueue);
     hQueue->deferEventFree(this);
     return UR_RESULT_SUCCESS;

@@ -36,7 +36,7 @@ struct ur_command_list_handler_t {
 
 struct ur_queue_immediate_in_order_t : _ur_object, public ur_queue_handle_t_ {
 private:
-  ur_context_handle_t hContext;
+  v2::raii::rc<ur_context_handle_t> hContext;
   ur_device_handle_t hDevice;
   ur_queue_flags_t flags;
 
@@ -46,8 +46,8 @@ private:
 
   std::vector<ze_event_handle_t> waitList;
 
-  std::vector<ur_event_handle_t> deferredEvents;
-  std::vector<ur_kernel_handle_t> submittedKernels;
+  std::vector<deferred_event_handle_t> deferredEvents;
+  std::vector<raii::rc<ur_kernel_handle_t>> submittedKernels;
 
   std::pair<ze_event_handle_t *, uint32_t>
   getWaitListView(const ur_event_handle_t *phWaitEvents,

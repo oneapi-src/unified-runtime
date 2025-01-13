@@ -31,17 +31,10 @@ ur_single_device_kernel_t::ur_single_device_kernel_t(ur_device_handle_t hDevice,
       };
 }
 
-ur_result_t ur_single_device_kernel_t::release() {
-  hKernel.reset();
-  return UR_RESULT_SUCCESS;
-}
-
 ur_kernel_handle_t_::ur_kernel_handle_t_(ur_program_handle_t hProgram,
                                          const char *kernelName)
     : hProgram(hProgram),
       deviceKernels(hProgram->Context->getPlatform()->getNumDevices()) {
-  ur::level_zero::urProgramRetain(hProgram);
-
   for (auto &Dev : hProgram->AssociatedDevices) {
     auto zeDevice = Dev->ZeDevice;
     // Program may be associated with all devices from the context but built
@@ -75,8 +68,6 @@ ur_kernel_handle_t_::ur_kernel_handle_t_(
     const ur_kernel_native_properties_t *pProperties)
     : hProgram(hProgram),
       deviceKernels(context ? context->getPlatform()->getNumDevices() : 0) {
-  ur::level_zero::urProgramRetain(hProgram);
-
   auto ownZeHandle = pProperties ? pProperties->isNativeHandleOwned : false;
 
   ze_kernel_handle_t zeKernel = ur_cast<ze_kernel_handle_t>(hNativeKernel);
@@ -92,24 +83,6 @@ ur_kernel_handle_t_::ur_kernel_handle_t_(
     ownZeHandle = false;
   }
   completeInitialization();
-}
-
-ur_result_t ur_kernel_handle_t_::release() {
-  if (!RefCount.decrementAndTest())
-    return UR_RESULT_SUCCESS;
-
-  // manually release kernels to allow errors to be propagated
-  for (auto &singleDeviceKernelOpt : deviceKernels) {
-    if (singleDeviceKernelOpt.has_value()) {
-      singleDeviceKernelOpt.value().hKernel.reset();
-    }
-  }
-
-  UR_CALL_THROWS(ur::level_zero::urProgramRelease(hProgram));
-
-  delete this;
-
-  return UR_RESULT_SUCCESS;
 }
 
 void ur_kernel_handle_t_::completeInitialization() {
@@ -318,6 +291,15 @@ std::vector<char> ur_kernel_handle_t_::getSourceAttributes() const {
   return attributes;
 }
 
+ur_result_t ur_kernel_handle_t_::release() {
+  if (!RefCount.decrementAndTest())
+    return UR_RESULT_SUCCESS;
+
+  delete this;
+
+  return UR_RESULT_SUCCESS;
+}
+
 namespace ur::level_zero {
 ur_result_t urKernelCreate(ur_program_handle_t hProgram,
                            const char *pKernelName,
@@ -365,8 +347,8 @@ ur_result_t urKernelRetain(
 }
 
 ur_result_t urKernelRelease(
-    /// [in] handle for the Kernel to release
-    ur_kernel_handle_t hKernel) try {
+    ur_kernel_handle_t hKernel ///< [in] handle for the Kernel to release
+    ) try {
   return hKernel->release();
 } catch (...) {
   return exceptionToResult(std::current_exception());

@@ -18,7 +18,6 @@
 struct ur_single_device_kernel_t {
   ur_single_device_kernel_t(ur_device_handle_t hDevice,
                             ze_kernel_handle_t hKernel, bool ownZeHandle);
-  ur_result_t release();
 
   ur_device_handle_t hDevice;
   v2::raii::ze_kernel_handle_t hKernel;
@@ -74,7 +73,7 @@ public:
 
   std::vector<char> getSourceAttributes() const;
 
-  // Perform cleanup.
+  // Decrease the refcount and call destructor if new refcount == 0.
   ur_result_t release();
 
   // Add a pending memory allocation for which device is not yet known.
@@ -92,7 +91,7 @@ public:
 
 private:
   // Keep the program of the kernel.
-  const ur_program_handle_t hProgram;
+  const v2::raii::rc<ur_program_handle_t> hProgram;
 
   // Vector of ur_single_device_kernel_t indexed by deviceIndex().
   std::vector<std::optional<ur_single_device_kernel_t>> deviceKernels;

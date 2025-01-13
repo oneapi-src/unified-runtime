@@ -28,7 +28,6 @@ namespace v2 {
 
 class event_pool {
 public:
-  // store weak reference to the queue as event_pool is part of the queue
   event_pool(ur_context_handle_t hContext,
              std::unique_ptr<event_provider> Provider)
       : hContext(hContext), provider(std::move(Provider)),

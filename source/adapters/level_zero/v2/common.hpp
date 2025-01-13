@@ -14,6 +14,7 @@
 #include <ze_api.h>
 
 #include "../common.hpp"
+#include "../ur_interface_loader.hpp"
 #include "logger/ur_logger.hpp"
 namespace {
 #define DECLARE_DESTROY_FUNCTION(name)                                         \
@@ -118,5 +119,79 @@ using ze_context_handle_t = HANDLE_WRAPPER_TYPE(::ze_context_handle_t,
 using ze_command_list_handle_t = HANDLE_WRAPPER_TYPE(::ze_command_list_handle_t,
                                                      zeCommandListDestroy);
 
+// retain should point to a function that will be called during
+// construction of ref_counted and release to a function that
+// will be called in the destructor.
+template <typename URHandle, ur_result_t (*retain)(URHandle),
+          ur_result_t (*release)(URHandle)>
+struct ref_counted {
+  ref_counted(URHandle handle) : handle(handle) { retain(handle); }
+
+  ~ref_counted() { release(handle); }
+
+  operator URHandle() const { return handle; }
+  URHandle operator->() const { return handle; }
+
+  ref_counted(const ref_counted &) = delete;
+  ref_counted &operator=(const ref_counted &) = delete;
+
+  ref_counted(ref_counted &&other) {
+    handle = other.handle;
+    other.handle = nullptr;
+  }
+
+  ref_counted &operator=(ref_counted &&other) {
+    if (this == &other) {
+      return *this;
+    }
+
+    if (handle) {
+      release(handle);
+    }
+
+    handle = other.handle;
+    other.handle = nullptr;
+    return *this;
+  }
+
+  URHandle get() const { return handle; }
+
+private:
+  URHandle handle;
+};
+
+template <typename URHandle> struct ref_counted_traits;
+
+#define DECLARE_REF_COUNTER_TRAITS(URHandle, retainFn, releaseFn)              \
+  template <> struct ref_counted_traits<URHandle> {                            \
+    static ur_result_t retain(URHandle handle) {                               \
+      assert(handle);                                                          \
+      return retainFn(handle);                                                 \
+    }                                                                          \
+    static ur_result_t release(URHandle handle) {                              \
+      assert(handle);                                                          \
+      return releaseFn(handle);                                                \
+    }                                                                          \
+  };
+
+// This version of ref_counted calls retain/release functions.
+template <typename URHandle>
+using rc = ref_counted<URHandle, ref_counted_traits<URHandle>::retain,
+                       ref_counted_traits<URHandle>::release>;
+
+DECLARE_REF_COUNTER_TRAITS(::ur_context_handle_t,
+                           ur::level_zero::urContextRetain,
+                           ur::level_zero::urContextRelease);
+DECLARE_REF_COUNTER_TRAITS(::ur_mem_handle_t, ur::level_zero::urMemRetain,
+                           ur::level_zero::urMemRelease);
+DECLARE_REF_COUNTER_TRAITS(::ur_program_handle_t,
+                           ur::level_zero::urProgramRetain,
+                           ur::level_zero::urProgramRelease);
+DECLARE_REF_COUNTER_TRAITS(::ur_queue_handle_t, ur::level_zero::urQueueRetain,
+                           ur::level_zero::urQueueRelease);
+DECLARE_REF_COUNTER_TRAITS(::ur_kernel_handle_t, ur::level_zero::urKernelRetain,
+                           ur::level_zero::urKernelRelease);
+
 } // namespace raii
+
 } // namespace v2

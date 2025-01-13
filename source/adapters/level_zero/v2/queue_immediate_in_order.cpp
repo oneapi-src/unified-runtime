@@ -106,7 +106,7 @@ ur_queue_immediate_in_order_t::getSignalEvent(ur_event_handle_t *hUserEvent,
                                               ur_command_t commandType) {
   if (hUserEvent) {
     *hUserEvent = eventPool->allocate();
-    (*hUserEvent)->resetQueueAndCommand(this, commandType);
+    (*hUserEvent)->resetQueueAndCommand(ur_queue_handle_t(this), commandType);
     return *hUserEvent;
   } else {
     return nullptr;
@@ -121,7 +121,7 @@ ur_queue_immediate_in_order_t::queueGetInfo(ur_queue_info_t propName,
   // TODO: consider support for queue properties and size
   switch ((uint32_t)propName) { // cast to avoid warnings on EXT enum values
   case UR_QUEUE_INFO_CONTEXT:
-    return ReturnValue(hContext);
+    return ReturnValue(hContext.get());
   case UR_QUEUE_INFO_DEVICE:
     return ReturnValue(hDevice);
   case UR_QUEUE_INFO_REFERENCE_COUNT:
@@ -162,7 +162,7 @@ ur_result_t ur_queue_immediate_in_order_t::queueRelease() {
 
 void ur_queue_immediate_in_order_t::deferEventFree(ur_event_handle_t hEvent) {
   std::unique_lock<ur_shared_mutex> lock(this->Mutex);
-  deferredEvents.push_back(hEvent);
+  deferredEvents.emplace_back(hEvent);
 }
 
 ur_result_t ur_queue_immediate_in_order_t::queueGetNativeHandle(
@@ -184,16 +184,7 @@ ur_result_t ur_queue_immediate_in_order_t::queueFinish() {
   ZE2UR_CALL(zeCommandListHostSynchronize,
              (handler.commandList.get(), UINT64_MAX));
 
-  // Free deferred events
-  for (auto &hEvent : deferredEvents) {
-    UR_CALL(hEvent->releaseDeferred());
-  }
   deferredEvents.clear();
-
-  // Free deferred kernels
-  for (auto &hKernel : submittedKernels) {
-    UR_CALL(hKernel->release());
-  }
   submittedKernels.clear();
 
   return UR_RESULT_SUCCESS;
@@ -201,7 +192,7 @@ ur_result_t ur_queue_immediate_in_order_t::queueFinish() {
 
 void ur_queue_immediate_in_order_t::recordSubmittedKernel(
     ur_kernel_handle_t hKernel) {
-  submittedKernels.push_back(hKernel);
+  submittedKernels.emplace_back(hKernel);
   hKernel->RefCount.increment();
 }
 
