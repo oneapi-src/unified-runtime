@@ -9,11 +9,11 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
+#include <unordered_set>
 #include <ur/ur.hpp>
 #include <ur_api.h>
 #include <ze_api.h>
 #include <zes_api.h>
-#include <unordered_set>
 
 #include "common.hpp"
 
@@ -27,13 +27,12 @@ struct command_buffer_profiling_t {
 };
 
 struct ur_exp_command_buffer_handle_t_ : public _ur_object {
-  ur_exp_command_buffer_handle_t_(
-      ur_context_handle_t context, ur_device_handle_t device,
-      ze_command_list_handle_t commandList,
-      const ur_exp_command_buffer_desc_t *desc
-  );
+  ur_exp_command_buffer_handle_t_(ur_context_handle_t context,
+                                  ur_device_handle_t device,
+                                  ze_command_list_handle_t commandList,
+                                  const ur_exp_command_buffer_desc_t *desc);
   ur_event_handle_t getSignalEvent(ur_event_handle_t *hUserEvent,
-                                              ur_command_t commandType);
+                                   ur_command_t commandType);
 
   std::pair<ze_event_handle_t *, uint32_t>
   getWaitListView(const ur_event_handle_t *phWaitEvents,

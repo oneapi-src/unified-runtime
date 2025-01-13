@@ -10,8 +10,8 @@
 
 #include "command_buffer.hpp"
 #include "../helpers/kernel_helpers.hpp"
-#include "logger/ur_logger.hpp"
 #include "../ur_interface_loader.hpp"
+#include "logger/ur_logger.hpp"
 
 namespace {
 
@@ -27,10 +27,9 @@ void checkImmediateAppendSupport(ur_context_handle_t context) {
                   "zeCommandListImmediateAppendCommandListsExp entrypoint.");
     std::abort();
   }
-
 }
 
-}
+} // namespace
 
 std::pair<ze_event_handle_t *, uint32_t>
 ur_exp_command_buffer_handle_t_::getWaitListView(
@@ -46,8 +45,8 @@ ur_exp_command_buffer_handle_t_::getWaitListView(
 
 ur_exp_command_buffer_handle_t_::ur_exp_command_buffer_handle_t_(
     ur_context_handle_t context, ur_device_handle_t device,
-      ze_command_list_handle_t commandList,
-      const ur_exp_command_buffer_desc_t *desc)
+    ze_command_list_handle_t commandList,
+    const ur_exp_command_buffer_desc_t *desc)
     : context(context), device(device), zeCommandList(commandList),
       isUpdatable(desc ? desc->isUpdatable : false) {
   UR_CALL_THROWS(ur::level_zero::urContextRetain(context));
@@ -77,15 +76,14 @@ namespace ur::level_zero {
  * @return UR_RESULT_SUCCESS or an error code on failure
  */
 ur_result_t createMainCommandList(ur_context_handle_t context,
-                                  ur_device_handle_t device,
-                                  bool isUpdatable,
+                                  ur_device_handle_t device, bool isUpdatable,
                                   ze_command_list_handle_t &commandList) {
 
-
   using queue_group_type = ur_device_handle_t_::queue_group_info_t::type;
-  // that should be call to queue getZeOrdinal, 
+  // that should be call to queue getZeOrdinal,
   // but queue is not available while constructing buffer
-  uint32_t queueGroupOrdinal = device->QueueGroup[queue_group_type::Compute].ZeOrdinal;
+  uint32_t queueGroupOrdinal =
+      device->QueueGroup[queue_group_type::Compute].ZeOrdinal;
 
   ZeStruct<ze_command_list_desc_t> zeCommandListDesc;
   zeCommandListDesc.commandQueueGroupOrdinal = queueGroupOrdinal;
@@ -116,7 +114,7 @@ urCommandBufferCreateExp(ur_context_handle_t context, ur_device_handle_t device,
       UR_ASSERT(context->getPlatform()->ZeMutableCmdListExt.Supported,
                 UR_RESULT_ERROR_UNSUPPORTED_FEATURE);
     }
-    
+
     ze_command_list_handle_t zeCommandList = nullptr;
     UR_CALL(createMainCommandList(context, device, isUpdatable, zeCommandList));
     *commandBuffer = new ur_exp_command_buffer_handle_t_(
@@ -152,7 +150,7 @@ urCommandBufferReleaseExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
 }
 
 ur_result_t
-urCommandBufferFinalizeExp(ur_exp_command_buffer_handle_t hCommandBuffer)  {
+urCommandBufferFinalizeExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
   try {
     UR_ASSERT(hCommandBuffer, UR_RESULT_ERROR_INVALID_NULL_POINTER);
     UR_ASSERT(!hCommandBuffer->isFinalized, UR_RESULT_ERROR_INVALID_OPERATION);
@@ -180,33 +178,34 @@ ur_result_t urCommandBufferAppendKernelLaunchExp(
     uint32_t numEventsInWaitList, const ur_event_handle_t *eventWaitList,
     ur_exp_command_buffer_sync_point_t *retSyncPoint, ur_event_handle_t *event,
     ur_exp_command_buffer_command_handle_t *command) {
-  //Need to know semantics 
-  // - should they be checked before kernel execution or before kernel appending to list
-  // if latter then it is easy fix, if former then TODO
+  // Need to know semantics
+  //  - should they be checked before kernel execution or before kernel
+  //  appending to list if latter then it is easy fix, if former then TODO
   std::ignore = numEventsInWaitList;
   std::ignore = eventWaitList;
   std::ignore = event;
 
-  //sync mechanic can be ignored, because all lists are in-order
+  // sync mechanic can be ignored, because all lists are in-order
   std::ignore = numSyncPointsInWaitList;
   std::ignore = syncPointWaitList;
   std::ignore = retSyncPoint;
 
-  //TODO
+  // TODO
   std::ignore = numKernelAlternatives;
   std::ignore = kernelAlternatives;
   std::ignore = command;
   try {
     UR_ASSERT(hKernel, UR_RESULT_ERROR_INVALID_NULL_HANDLE);
-    UR_ASSERT(hKernel->getProgramHandle(), UR_RESULT_ERROR_INVALID_NULL_POINTER);
+    UR_ASSERT(hKernel->getProgramHandle(),
+              UR_RESULT_ERROR_INVALID_NULL_POINTER);
 
     UR_ASSERT(workDim > 0, UR_RESULT_ERROR_INVALID_WORK_DIMENSION);
     UR_ASSERT(workDim < 4, UR_RESULT_ERROR_INVALID_WORK_DIMENSION);
 
     ze_kernel_handle_t hZeKernel = hKernel->getZeHandle(commandBuffer->device);
 
-    std::scoped_lock<ur_shared_mutex, ur_shared_mutex> lock(commandBuffer->Mutex,
-                                                            hKernel->Mutex);
+    std::scoped_lock<ur_shared_mutex, ur_shared_mutex> lock(
+        commandBuffer->Mutex, hKernel->Mutex);
 
     ze_group_count_t zeThreadGroupDimensions{1, 1, 1};
     uint32_t wg[3]{};
@@ -219,18 +218,19 @@ ur_result_t urCommandBufferAppendKernelLaunchExp(
     bool memoryMigrated = false;
     auto memoryMigrate = [&](void *src, void *dst, size_t size) {
       ZE2UR_CALL_THROWS(zeCommandListAppendMemoryCopy,
-                        (commandBuffer->zeCommandList.get(), dst, src, size, nullptr,
-                        waitList.second, waitList.first));
+                        (commandBuffer->zeCommandList.get(), dst, src, size,
+                         nullptr, waitList.second, waitList.first));
       memoryMigrated = true;
     };
 
-    UR_CALL(hKernel->prepareForSubmission(commandBuffer->context, commandBuffer->device, pGlobalWorkOffset,
-                                          workDim, wg[0], wg[1], wg[2],
-                                          memoryMigrate));
+    UR_CALL(hKernel->prepareForSubmission(
+        commandBuffer->context, commandBuffer->device, pGlobalWorkOffset,
+        workDim, wg[0], wg[1], wg[2], memoryMigrate));
 
     ZE2UR_CALL(zeCommandListAppendLaunchKernel,
-              (commandBuffer->zeCommandList.get(), hZeKernel, &zeThreadGroupDimensions,
-                nullptr, waitList.second, waitList.first));
+               (commandBuffer->zeCommandList.get(), hZeKernel,
+                &zeThreadGroupDimensions, nullptr, waitList.second,
+                waitList.first));
   } catch (...) {
     return exceptionToResult(std::current_exception());
   }
@@ -243,8 +243,9 @@ ur_result_t urCommandBufferEnqueueExp(
     uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
     ur_event_handle_t *phEvent) {
   try {
-    return hQueue->enqueueCommandBuffer(
-        hCommandBuffer->zeCommandList.get(), phEvent, numEventsInWaitList, phEventWaitList);
+    return hQueue->enqueueCommandBuffer(hCommandBuffer->zeCommandList.get(),
+                                        phEvent, numEventsInWaitList,
+                                        phEventWaitList);
   } catch (...) {
     return exceptionToResult(std::current_exception());
   }

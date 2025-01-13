@@ -380,20 +380,13 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueGenericCopyUnlocked(
   return UR_RESULT_SUCCESS;
 }
 
-
 ur_result_t ur_queue_immediate_in_order_t::enqueueGenericCommandListsExp(
-  uint32_t numCommandLists, 
-  ze_command_list_handle_t *phCommandLists, 
-  ur_event_handle_t *phEvent, 
-  uint32_t numEventsInWaitList, 
-  const ur_event_handle_t *phEventWaitList,
-  ur_command_t callerCommand
-  ) {
-    
-  std::scoped_lock<ur_shared_mutex> Lock(this->Mutex);
-  auto signalEvent =
-      getSignalEvent(phEvent, callerCommand);
+    uint32_t numCommandLists, ze_command_list_handle_t *phCommandLists,
+    ur_event_handle_t *phEvent, uint32_t numEventsInWaitList,
+    const ur_event_handle_t *phEventWaitList, ur_command_t callerCommand) {
 
+  std::scoped_lock<ur_shared_mutex> Lock(this->Mutex);
+  auto signalEvent = getSignalEvent(phEvent, callerCommand);
 
   auto [pWaitEvents, numWaitEvents] =
       getWaitListView(phEventWaitList, numEventsInWaitList);
@@ -404,8 +397,8 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueGenericCommandListsExp(
              (handler.commandList.get(), numCommandLists, phCommandLists,
               zeSignalEvent, numWaitEvents, pWaitEvents));
 
-    return UR_RESULT_SUCCESS;
-  }
+  return UR_RESULT_SUCCESS;
+}
 
 ur_result_t ur_queue_immediate_in_order_t::enqueueMemBufferRead(
     ur_mem_handle_t hBuffer, bool blockingRead, size_t offset, size_t size,
@@ -1129,18 +1122,13 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueTimestampRecordingExp(
 }
 
 ur_result_t ur_queue_immediate_in_order_t::enqueueCommandBuffer(
-  ze_command_list_handle_t commandBufferCommandList, 
-  ur_event_handle_t *phEvent, 
-  uint32_t numEventsInWaitList, 
-  const ur_event_handle_t *phEventWaitList
-  ) {
-    return enqueueGenericCommandListsExp(1, 
-    &commandBufferCommandList, 
-    phEvent, 
-    numEventsInWaitList,
-    phEventWaitList, 
-    UR_COMMAND_COMMAND_BUFFER_ENQUEUE_EXP);
-  }
+    ze_command_list_handle_t commandBufferCommandList,
+    ur_event_handle_t *phEvent, uint32_t numEventsInWaitList,
+    const ur_event_handle_t *phEventWaitList) {
+  return enqueueGenericCommandListsExp(1, &commandBufferCommandList, phEvent,
+                                       numEventsInWaitList, phEventWaitList,
+                                       UR_COMMAND_COMMAND_BUFFER_ENQUEUE_EXP);
+}
 ur_result_t ur_queue_immediate_in_order_t::enqueueKernelLaunchCustomExp(
     ur_kernel_handle_t hKernel, uint32_t workDim,
     const size_t *pGlobalWorkOffset, const size_t *pGlobalWorkSize,
