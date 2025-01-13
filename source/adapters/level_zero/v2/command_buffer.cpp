@@ -45,9 +45,11 @@ ur_exp_command_buffer_handle_t_::getWaitListView(
 
 ur_exp_command_buffer_handle_t_::ur_exp_command_buffer_handle_t_(
     ur_context_handle_t context, ur_device_handle_t device,
-    ze_command_list_handle_t commandList,
+    v2::raii::command_list_unique_handle &&commandList,
     const ur_exp_command_buffer_desc_t *desc)
-    : context(context), device(device), zeCommandList(commandList),
+    : context(context), device(device),
+      zeCommandList(
+          std::forward<v2::raii::command_list_unique_handle>(commandList)),
       isUpdatable(desc ? desc->isUpdatable : false) {
   UR_CALL_THROWS(ur::level_zero::urContextRetain(context));
   UR_CALL_THROWS(ur::level_zero::urDeviceRetain(device));
@@ -115,10 +117,16 @@ urCommandBufferCreateExp(ur_context_handle_t context, ur_device_handle_t device,
                 UR_RESULT_ERROR_UNSUPPORTED_FEATURE);
     }
 
-    ze_command_list_handle_t zeCommandList = nullptr;
-    UR_CALL(createMainCommandList(context, device, isUpdatable, zeCommandList));
+    using queue_group_type = ur_device_handle_t_::queue_group_info_t::type;
+    uint32_t queueGroupOrdinal =
+        device->QueueGroup[queue_group_type::Compute].ZeOrdinal;
+    v2::raii::command_list_unique_handle zeCommandList =
+        context->commandListCache.getRegularCommandList(
+            device->ZeDevice, true, queueGroupOrdinal, true);
+
     *commandBuffer = new ur_exp_command_buffer_handle_t_(
-        context, device, zeCommandList, commandBufferDesc);
+        context, device, std::move(zeCommandList), commandBufferDesc);
+
   } catch (const std::bad_alloc &) {
     return exceptionToResult(std::current_exception());
   }

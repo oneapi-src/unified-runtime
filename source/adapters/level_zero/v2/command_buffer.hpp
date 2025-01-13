@@ -27,10 +27,10 @@ struct command_buffer_profiling_t {
 };
 
 struct ur_exp_command_buffer_handle_t_ : public _ur_object {
-  ur_exp_command_buffer_handle_t_(ur_context_handle_t context,
-                                  ur_device_handle_t device,
-                                  ze_command_list_handle_t commandList,
-                                  const ur_exp_command_buffer_desc_t *desc);
+  ur_exp_command_buffer_handle_t_(
+      ur_context_handle_t context, ur_device_handle_t device,
+      v2::raii::command_list_unique_handle &&commandList,
+      const ur_exp_command_buffer_desc_t *desc);
   ~ur_exp_command_buffer_handle_t_();
   ur_event_handle_t getSignalEvent(ur_event_handle_t *hUserEvent,
                                    ur_command_t commandType);
@@ -43,7 +43,7 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   ur_context_handle_t context;
   // Device associated with this command buffer
   ur_device_handle_t device;
-  v2::raii::ze_command_list_handle_t zeCommandList;
+  v2::raii::command_list_unique_handle zeCommandList;
 
   std::vector<ze_event_handle_t> waitList;
   // Indicates if command-buffer commands can be updated after it is closed.
