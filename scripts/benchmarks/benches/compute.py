@@ -355,3 +355,30 @@ class MemcpyExecute(ComputeBenchmark):
             f"--SrcUSM={self.srcUSM}",
             f"--DstUSM={self.dstUSM}",
         ]
+
+class GraphApiSinKernelSYCL(ComputeBenchmark):
+    def __init__(self, bench):
+        super().__init__(bench, "graph_api_benchmark_sycl", "SinKernel")
+
+    def name(self):
+        return f"graph_api_benchmark_sycl SinKernel"
+
+    def bin_args(self) -> list[str]:
+        return [
+            "--iterations=1000",
+            "--numKernels=100",
+        ]
+        
+class GraphApiSubmitExecute(ComputeBenchmark):
+    def __init__(self, bench):
+        super().__init__(bench, "graph_api_benchmark_sycl", "SubmitExecute")
+
+    def name(self):
+        return f"graph_api_benchmark_sycl SubmitExecute"
+
+    def bin_args(self) -> list[str]:
+        return [
+            "--iterations=1000",
+            "--numKernels=100",
+        ]   
+                
