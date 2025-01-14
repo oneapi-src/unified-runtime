@@ -150,13 +150,36 @@ private:
   URHandle handle;
 };
 
+// This version of ref_counted does not call retain/release functions.
+// It is used to avoid circular references, most notably to ur_context_handle_t.
+// This is equivalent to just using URHandle but makes it clear that no ref
+// counting is expected.
+template <typename URHandle> struct weak {
+  template <ur_result_t (*retain)(URHandle), ur_result_t (*release)(URHandle)>
+  weak(const ref_counted<URHandle, retain, release> &handle)
+      : handle(handle.get()) {}
+
+  operator URHandle() const { return handle; }
+  URHandle operator->() const { return handle; }
+
+  weak(const weak &) = default;
+  weak &operator=(const weak &) = default;
+
+  weak(weak &&other) = default;
+  weak &operator=(weak &&other) = default;
+
+  URHandle get() const { return handle; }
+
+private:
+  URHandle handle;
+};
+
 template <typename URHandle> struct ref_counted_traits;
 
 #define DECLARE_REF_COUNTER_TRAITS(URHandle, retainFn, releaseFn)              \
   template <> struct ref_counted_traits<URHandle> {                            \
     static ur_result_t retain(URHandle handle) { return retainFn(handle); }    \
     static ur_result_t release(URHandle handle) { return releaseFn(handle); }  \
-    static ur_result_t nop(URHandle) { return UR_RESULT_SUCCESS; }             \
     static ur_result_t validate([[maybe_unused]] URHandle handle) {            \
       assert(reinterpret_cast<_ur_object *>(handle)->RefCount.load() != 0);    \
       return UR_RESULT_SUCCESS;                                                \
@@ -167,14 +190,6 @@ template <typename URHandle> struct ref_counted_traits;
 template <typename URHandle>
 using rc = ref_counted<URHandle, ref_counted_traits<URHandle>::retain,
                        ref_counted_traits<URHandle>::release>;
-
-// This version of ref_counted does not call retain/release functions.
-// It is used to avoid circular references, most notably to ur_context_handle_t.
-// This is equivalent to just using URHandle but makes it clear that no ref
-// counting is expected.
-template <typename URHandle>
-using weak = ref_counted<URHandle, ref_counted_traits<URHandle>::nop,
-                         ref_counted_traits<URHandle>::nop>;
 
 // This version of ref_counted validates that the ref count is not zero on every
 // release and retain in debug mode, and does nothing in the release mode.

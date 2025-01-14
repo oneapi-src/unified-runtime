@@ -110,17 +110,20 @@ struct EventPoolTest : public uur::urQueueTestWithParam<ProviderParams> {
         mockVec.push_back(device);
 
         cache = std::unique_ptr<event_pool_cache>(new event_pool_cache(
-            nullptr, MAX_DEVICES,
+            v2::raii::rc_val_only<ur_context_handle_t>(context), MAX_DEVICES,
             [this, params](DeviceId, event_flags_t flags)
                 -> std::unique_ptr<event_provider> {
                 // normally id would be used to find the appropriate device to create the provider
                 switch (params.provider) {
                 case TEST_PROVIDER_COUNTER:
-                    return std::make_unique<provider_counter>(platform, context,
-                                                              device);
+                    return std::make_unique<provider_counter>(
+                        platform,
+                        v2::raii::rc_val_only<ur_context_handle_t>(context),
+                        device);
                 case TEST_PROVIDER_NORMAL:
                     return std::make_unique<provider_normal>(
-                        context, params.queue, flags);
+                        v2::raii::rc_val_only<ur_context_handle_t>(context),
+                        params.queue, flags);
                 }
                 return nullptr;
             }));
