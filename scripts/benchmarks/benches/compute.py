@@ -74,6 +74,26 @@ class ComputeBench(Suite):
             MemcpyExecute(self, 10, 16, 1024, 10000, 0, 1, 1),
             MemcpyExecute(self, 4096, 1, 1024, 10, 0, 1, 0),
             MemcpyExecute(self, 4096, 4, 1024, 10, 0, 1, 0),
+            GraphApiSinKernelSYCL(self, 0, 1),
+            GraphApiSinKernelSYCL(self, 1, 1),
+            GraphApiSinKernelSYCL(self, 0, 10),
+            GraphApiSinKernelSYCL(self, 1, 10),
+            GraphApiSinKernelSYCL(self, 0, 100),
+            GraphApiSinKernelSYCL(self, 1, 100),
+            GraphApiSinKernelSYCL(self, 0, 500),
+            GraphApiSinKernelSYCL(self, 1, 500),
+            GraphApiSubmitExecute(self, 0, 0, 10),
+            GraphApiSubmitExecute(self, 0, 1, 10),
+            GraphApiSubmitExecute(self, 1, 0, 10),
+            GraphApiSubmitExecute(self, 1, 1, 10),
+            GraphApiSubmitExecute(self, 0, 0, 100),
+            GraphApiSubmitExecute(self, 0, 1, 100),
+            GraphApiSubmitExecute(self, 1, 0, 100),
+            GraphApiSubmitExecute(self, 1, 1, 100),
+            GraphApiSubmitExecute(self, 0, 0, 500),
+            GraphApiSubmitExecute(self, 0, 1, 500),
+            GraphApiSubmitExecute(self, 1, 0, 500),
+            GraphApiSubmitExecute(self, 1, 1, 500),
         ]
 
         if options.ur is not None:
@@ -357,7 +377,9 @@ class MemcpyExecute(ComputeBenchmark):
         ]
 
 class GraphApiSinKernelSYCL(ComputeBenchmark):
-    def __init__(self, bench):
+    def __init__(self, bench, graphs, numKernels):
+        self.graphs = graphs
+        self.numKernels = numKernels
         super().__init__(bench, "graph_api_benchmark_sycl", "SinKernel")
 
     def name(self):
@@ -365,12 +387,16 @@ class GraphApiSinKernelSYCL(ComputeBenchmark):
 
     def bin_args(self) -> list[str]:
         return [
-            "--iterations=1000",
-            "--numKernels=100",
+            "--iterations=100",
+            "--numKernels={self.numKernels}",
+            "--withGraphs={self.graphs}",
         ]
         
 class GraphApiSubmitExecute(ComputeBenchmark):
-    def __init__(self, bench):
+    def __init__(self, bench, ioq, submit, numKernels):
+        self.ioq = ioq
+        self.submit = submit
+        self.numKernels = numKernels
         super().__init__(bench, "graph_api_benchmark_sycl", "SubmitExecute")
 
     def name(self):
@@ -378,7 +404,9 @@ class GraphApiSubmitExecute(ComputeBenchmark):
 
     def bin_args(self) -> list[str]:
         return [
-            "--iterations=1000",
-            "--numKernels=100",
+            "--iterations=100",
+            "--submit={self.submit}",
+            "--ioq={self.ioq}",
+            "--numKernels={self.numKernels}",
         ]   
                 
