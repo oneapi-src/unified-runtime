@@ -209,7 +209,7 @@ ur_discrete_mem_handle_t::ur_discrete_mem_handle_t(
     device_access_mode_t accessMode)
     : ur_mem_handle_t_(hContext, size, accessMode),
       deviceAllocations(hContext->getPlatform()->getNumDevices()),
-      activeAllocationDevice(nullptr), hostAllocations() {
+      activeAllocationDevice(std::nullopt), hostAllocations() {
   if (hostPtr) {
     auto initialDevice = hContext->getDevices()[0];
     UR_CALL_THROWS(migrateBufferTo(initialDevice, hostPtr, size));
@@ -247,9 +247,9 @@ ur_discrete_mem_handle_t::~ur_discrete_mem_handle_t() {
     return;
 
   auto srcPtr = ur_cast<char *>(
-      deviceAllocations[activeAllocationDevice->Id.value()].get());
-  synchronousZeCopy(hContext, activeAllocationDevice, writeBackPtr, srcPtr,
-                    getSize());
+      deviceAllocations[activeAllocationDevice.value()->Id.value()].get());
+  synchronousZeCopy(hContext, activeAllocationDevice.value(), writeBackPtr,
+                    srcPtr, getSize());
 }
 
 void *ur_discrete_mem_handle_t::getDevicePtr(
@@ -269,7 +269,7 @@ void *ur_discrete_mem_handle_t::getDevicePtr(
   }
 
   if (!hDevice) {
-    hDevice = activeAllocationDevice;
+    hDevice = activeAllocationDevice.value().get();
   }
 
   char *ptr;
@@ -289,7 +289,8 @@ void *ur_discrete_mem_handle_t::getDevicePtr(
 
   // TODO: see if it's better to migrate the memory to the specified device
   return ur_cast<char *>(
-             deviceAllocations[activeAllocationDevice->Id.value()].get()) +
+             deviceAllocations[activeAllocationDevice.value()->Id.value()]
+                 .get()) +
          offset;
 }
 
@@ -308,7 +309,8 @@ void *ur_discrete_mem_handle_t::mapHostPtr(
   if (activeAllocationDevice && (flags & UR_MAP_FLAG_READ)) {
     auto srcPtr =
         ur_cast<char *>(
-            deviceAllocations[activeAllocationDevice->Id.value()].get()) +
+            deviceAllocations[activeAllocationDevice.value()->Id.value()]
+                .get()) +
         offset;
     migrate(srcPtr, hostAllocations.back().ptr, size);
   }
@@ -327,7 +329,8 @@ void ur_discrete_mem_handle_t::unmapHostPtr(
       if (activeAllocationDevice) {
         devicePtr =
             ur_cast<char *>(
-                deviceAllocations[activeAllocationDevice->Id.value()].get()) +
+                deviceAllocations[activeAllocationDevice.value()->Id.value()]
+                    .get()) +
             hostAllocation.offset;
       } else if (!(hostAllocation.flags &
                    UR_MAP_FLAG_WRITE_INVALIDATE_REGION)) {

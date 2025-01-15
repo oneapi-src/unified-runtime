@@ -140,8 +140,8 @@ private:
   std::vector<usm_unique_ptr_t> deviceAllocations;
 
   // Specifies device on which the latest allocation resides.
-  // If null, there is no allocation.
-  v2::raii::rc_val_only<ur_device_handle_t> activeAllocationDevice = nullptr;
+  std::optional<v2::raii::rc_val_only<ur_device_handle_t>>
+      activeAllocationDevice = std::nullopt;
 
   // If not null, copy the buffer content back to this memory on release.
   void *writeBackPtr = nullptr;

@@ -34,7 +34,8 @@ enum queue_type {
 
 class provider_pool {
 public:
-  provider_pool(ur_context_handle_t, queue_type, event_flags_t flags);
+  provider_pool(raii::weak<ur_context_handle_t>, queue_type,
+                event_flags_t flags);
 
   raii::cache_borrowed_event allocate();
   size_t nfree() const;

@@ -107,17 +107,9 @@ using ze_command_list_handle_t =
 template <typename URHandle, ur_result_t (*retain)(URHandle),
           ur_result_t (*release)(URHandle)>
 struct ref_counted {
-  ref_counted(URHandle handle) : handle(handle) {
-    if (handle) {
-      retain(handle);
-    }
-  }
+  ref_counted(URHandle handle) : handle(handle) { retain(handle); }
 
-  ~ref_counted() {
-    if (handle) {
-      release(handle);
-    }
-  }
+  ~ref_counted() { release(handle); }
 
   operator URHandle() const { return handle; }
   URHandle operator->() const { return handle; }
@@ -178,9 +170,16 @@ template <typename URHandle> struct ref_counted_traits;
 
 #define DECLARE_REF_COUNTER_TRAITS(URHandle, retainFn, releaseFn)              \
   template <> struct ref_counted_traits<URHandle> {                            \
-    static ur_result_t retain(URHandle handle) { return retainFn(handle); }    \
-    static ur_result_t release(URHandle handle) { return releaseFn(handle); }  \
+    static ur_result_t retain(URHandle handle) {                               \
+      assert(handle);                                                          \
+      return retainFn(handle);                                                 \
+    }                                                                          \
+    static ur_result_t release(URHandle handle) {                              \
+      assert(handle);                                                          \
+      return releaseFn(handle);                                                \
+    }                                                                          \
     static ur_result_t validate([[maybe_unused]] URHandle handle) {            \
+      assert(handle);                                                          \
       assert(reinterpret_cast<_ur_object *>(handle)->RefCount.load() != 0);    \
       return UR_RESULT_SUCCESS;                                                \
     }                                                                          \
@@ -200,13 +199,18 @@ using rc_val_only =
     ref_counted<URHandle, ref_counted_traits<URHandle>::validate,
                 ref_counted_traits<URHandle>::validate>;
 
-DECLARE_REF_COUNTER_TRAITS(::ur_device_handle_t, urDeviceRetain,
-                           urDeviceRelease);
-DECLARE_REF_COUNTER_TRAITS(::ur_context_handle_t, urContextRetain,
-                           urContextRelease);
-DECLARE_REF_COUNTER_TRAITS(::ur_mem_handle_t, urMemRetain, urMemRelease);
-DECLARE_REF_COUNTER_TRAITS(::ur_program_handle_t, urProgramRetain,
-                           urProgramRelease);
+DECLARE_REF_COUNTER_TRAITS(::ur_device_handle_t, ur::level_zero::urDeviceRetain,
+                           ur::level_zero::urDeviceRelease);
+DECLARE_REF_COUNTER_TRAITS(::ur_context_handle_t,
+                           ur::level_zero::urContextRetain,
+                           ur::level_zero::urContextRelease);
+DECLARE_REF_COUNTER_TRAITS(::ur_mem_handle_t, ur::level_zero::urMemRetain,
+                           ur::level_zero::urMemRelease);
+DECLARE_REF_COUNTER_TRAITS(::ur_program_handle_t,
+                           ur::level_zero::urProgramRetain,
+                           ur::level_zero::urProgramRelease);
+DECLARE_REF_COUNTER_TRAITS(::ur_queue_handle_t, ur::level_zero::urQueueRetain,
+                           ur::level_zero::urQueueRelease);
 
 } // namespace raii
 

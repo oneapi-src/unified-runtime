@@ -93,20 +93,20 @@ ur_event_handle_t_::ur_event_handle_t_(
     : hContext(hContext), hZeEvent(hZeEvent), flags(flags),
       profilingData(hZeEvent) {}
 
-void ur_event_handle_t_::resetQueueAndCommand(ur_queue_handle_t hQueue,
-                                              ur_command_t commandType) {
+void ur_event_handle_t_::resetQueueAndCommand(
+    v2::raii::weak<ur_queue_handle_t> hQueue, ur_command_t commandType) {
   this->hQueue = hQueue;
   this->commandType = commandType;
   profilingData = event_profiling_data_t(hZeEvent);
 }
 
 void ur_event_handle_t_::recordStartTimestamp() {
-  assert(hQueue); // queue must be set before calling this
+  assert(hQueue.has_value()); // queue must be set before calling this
 
   ur_device_handle_t hDevice;
-  UR_CALL_THROWS(hQueue->queueGetInfo(UR_QUEUE_INFO_DEVICE, sizeof(hDevice),
-                                      reinterpret_cast<void *>(&hDevice),
-                                      nullptr));
+  UR_CALL_THROWS(hQueue.value()->queueGetInfo(
+      UR_QUEUE_INFO_DEVICE, sizeof(hDevice), reinterpret_cast<void *>(&hDevice),
+      nullptr));
 
   profilingData.recordStartTimestamp(hDevice);
 }
@@ -157,8 +157,8 @@ ur_result_t ur_event_handle_t_::release() {
 
     // If this code is being executed, queue has to be valid (queue cannot
     // be released before all operations complete).
-    assert(hQueue);
-    hQueue->deferEventFree(this);
+    assert(hQueue.has_value());
+    hQueue.value()->deferEventFree(this);
     return UR_RESULT_SUCCESS;
   }
 
@@ -182,7 +182,9 @@ ur_event_handle_t_::getEventEndTimestampAndHandle() {
   return {profilingData.eventEndTimestampAddr(), hZeEvent};
 }
 
-ur_queue_handle_t ur_event_handle_t_::getQueue() const { return hQueue; }
+ur_queue_handle_t ur_event_handle_t_::getQueue() const {
+  return hQueue.has_value() ? hQueue.value().get() : nullptr;
+}
 
 ur_context_handle_t ur_event_handle_t_::getContext() const { return hContext; }
 

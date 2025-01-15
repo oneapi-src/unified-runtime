@@ -106,7 +106,9 @@ ur_queue_immediate_in_order_t::getSignalEvent(ur_event_handle_t *hUserEvent,
                                               ur_command_t commandType) {
   if (hUserEvent) {
     *hUserEvent = eventPool->allocate();
-    (*hUserEvent)->resetQueueAndCommand(this, commandType);
+    (*hUserEvent)
+        ->resetQueueAndCommand(raii::rc_val_only<ur_queue_handle_t>(this),
+                               commandType);
     return *hUserEvent;
   } else {
     return nullptr;

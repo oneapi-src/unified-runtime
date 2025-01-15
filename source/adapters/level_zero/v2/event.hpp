@@ -51,7 +51,8 @@ public:
                      ze_event_handle_t hZeEvent, v2::event_flags_t flags);
 
   // Set the queue and command that this event is associated with
-  void resetQueueAndCommand(ur_queue_handle_t hQueue, ur_command_t commandType);
+  void resetQueueAndCommand(v2::raii::weak<ur_queue_handle_t> hQueue,
+                            ur_command_t commandType);
 
   // releases event immediately
   virtual ur_result_t forceRelease() = 0;
@@ -104,8 +105,8 @@ protected:
   const ze_event_handle_t hZeEvent;
 
   // queue and commandType that this event is associated with, set by enqueue
-  // commands. DO NOT ref count hQueue here to avoid circular references.
-  ur_queue_handle_t hQueue = nullptr;
+  // commands.
+  std::optional<v2::raii::weak<ur_queue_handle_t>> hQueue = std::nullopt;
   ur_command_t commandType = UR_COMMAND_FORCE_UINT32;
 
   v2::event_flags_t flags;
