@@ -119,11 +119,11 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
 
     suites = [
         ComputeBench(directory),
-        VelocityBench(directory),
-        SyclBench(directory),
-        LlamaCppBench(directory),
-        UMFSuite(directory),
-        #TestSuite()
+        # VelocityBench(directory),
+        # SyclBench(directory),
+        # LlamaCppBench(directory),
+        # UMFSuite(directory),
+        # #TestSuite()
     ] if not options.dry_run else []
 
     benchmarks = []

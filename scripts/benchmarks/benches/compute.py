@@ -376,19 +376,19 @@ class MemcpyExecute(ComputeBenchmark):
         ]
 
 class GraphApiSinKernelSYCL(ComputeBenchmark):
-    def __init__(self, bench, graphs, numKernels):
-        self.graphs = graphs
+    def __init__(self, bench, withGraphs, numKernels):
+        self.withGraphs = withGraphs
         self.numKernels = numKernels
-        super().__init__(bench, "graph_api_benchmark_sycl", "SinKernel")
+        super().__init__(bench, "graph_api_benchmark_sycl", "SinKernelGraph")
 
     def name(self):
-        return f"graph_api_benchmark_sycl SinKernelSYCL graphs:{self.graphs}, numKernels:{self.numKernels}"
+        return f"graph_api_benchmark_sycl SinKernelGraph graphs:{self.withGraphs}, numKernels:{self.numKernels}"
 
     def bin_args(self) -> list[str]:
         return [
             "--iterations=100",
             "--numKernels={self.numKernels}",
-            "--withGraphs={self.graphs}",
+            "--withGraphs={self.withGraphs}",
         ]
         
 class GraphApiSubmitExecute(ComputeBenchmark):
@@ -396,15 +396,15 @@ class GraphApiSubmitExecute(ComputeBenchmark):
         self.ioq = ioq
         self.submit = submit
         self.numKernels = numKernels
-        super().__init__(bench, "graph_api_benchmark_sycl", "SubmitExecute")
+        super().__init__(bench, "graph_api_benchmark_sycl", "SubmitExecGraph")
 
     def name(self):
-        return f"graph_api_benchmark_sycl SubmitExecuteGraph ioq:{self.ioq}, submit:{self.submit}, numKernels:{self.numKernels}"
+        return f"graph_api_benchmark_sycl SubmitExecGraph ioq:{self.ioq}, submit:{self.submit}, numKernels:{self.numKernels}"
 
     def bin_args(self) -> list[str]:
         return [
             "--iterations=100",
-            "--submit={self.submit}",
+            "--measureSubmit={self.submit}",
             "--ioq={self.ioq}",
             "--numKernels={self.numKernels}",
         ]   
