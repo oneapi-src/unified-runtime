@@ -383,7 +383,7 @@ class GraphApiSinKernelSYCL(ComputeBenchmark):
         super().__init__(bench, "graph_api_benchmark_sycl", "SinKernel")
 
     def name(self):
-        return f"graph_api_benchmark_sycl SinKernel"
+        return f"graph_api_benchmark_sycl SinKernelSYCL graphs:{self.graphs}, numKernels:{self.numKernels}"
 
     def bin_args(self) -> list[str]:
         return [
@@ -400,7 +400,7 @@ class GraphApiSubmitExecute(ComputeBenchmark):
         super().__init__(bench, "graph_api_benchmark_sycl", "SubmitExecute")
 
     def name(self):
-        return f"graph_api_benchmark_sycl SubmitExecute"
+        return f"graph_api_benchmark_sycl SubmitExecuteGraph ioq:{self.ioq}, submit:{self.submit}, numKernels:{self.numKernels}"
 
     def bin_args(self) -> list[str]:
         return [
