@@ -53,46 +53,46 @@ class ComputeBench(Suite):
             return []
 
         benches = [
-            # SubmitKernelL0(self, 0),
-            # SubmitKernelL0(self, 1),
+            SubmitKernelL0(self, 0),
+            SubmitKernelL0(self, 1),
             SubmitKernelSYCL(self, 0),
             SubmitKernelSYCL(self, 1),
-            # QueueInOrderMemcpy(self, 0, 'Device', 'Device', 1024),
-            # QueueInOrderMemcpy(self, 0, 'Host', 'Device', 1024),
-            # QueueMemcpy(self, 'Device', 'Device', 1024),
-            # StreamMemory(self, 'Triad', 10 * 1024, 'Device'),
-            # ExecImmediateCopyQueue(self, 0, 1, 'Device', 'Device', 1024),
-            # ExecImmediateCopyQueue(self, 1, 1, 'Device', 'Host', 1024),
-            # VectorSum(self),
-            # MemcpyExecute(self, 400, 1, 102400, 10, 1, 1, 1),
-            # MemcpyExecute(self, 100, 8, 102400, 10, 1, 1, 1),
-            # MemcpyExecute(self, 400, 8, 1024, 1000, 1, 1, 1),
-            # MemcpyExecute(self, 10, 16, 1024, 10000, 1, 1, 1),
-            # MemcpyExecute(self, 400, 1, 102400, 10, 0, 1, 1),
-            # MemcpyExecute(self, 100, 8, 102400, 10, 0, 1, 1),
-            # MemcpyExecute(self, 400, 8, 1024, 1000, 0, 1, 1),
-            # MemcpyExecute(self, 10, 16, 1024, 10000, 0, 1, 1),
-            # MemcpyExecute(self, 4096, 1, 1024, 10, 0, 1, 0),
-            # MemcpyExecute(self, 4096, 4, 1024, 10, 0, 1, 0),
-            GraphApiSinKernelGraph(self, 0, 10),
-            # GraphApiSinKernelGraph(self, 1, 10),
-            # GraphApiSinKernelGraph(self, 0, 50),
-            # GraphApiSinKernelGraph(self, 1, 50),
-            # GraphApiSinKernelGraph(self, 0, 100),
-            # GraphApiSinKernelGraph(self, 1, 100),
-            # GraphApiSinKernelGraph(self, 0, 500),
-            # GraphApiSinKernelGraph(self, 1, 500),
+            QueueInOrderMemcpy(self, 0, 'Device', 'Device', 1024),
+            QueueInOrderMemcpy(self, 0, 'Host', 'Device', 1024),
+            QueueMemcpy(self, 'Device', 'Device', 1024),
+            StreamMemory(self, 'Triad', 10 * 1024, 'Device'),
+            ExecImmediateCopyQueue(self, 0, 1, 'Device', 'Device', 1024),
+            ExecImmediateCopyQueue(self, 1, 1, 'Device', 'Host', 1024),
+            VectorSum(self),
+            MemcpyExecute(self, 400, 1, 102400, 10, 1, 1, 1),
+            MemcpyExecute(self, 100, 8, 102400, 10, 1, 1, 1),
+            MemcpyExecute(self, 400, 8, 1024, 1000, 1, 1, 1),
+            MemcpyExecute(self, 10, 16, 1024, 10000, 1, 1, 1),
+            MemcpyExecute(self, 400, 1, 102400, 10, 0, 1, 1),
+            MemcpyExecute(self, 100, 8, 102400, 10, 0, 1, 1),
+            MemcpyExecute(self, 400, 8, 1024, 1000, 0, 1, 1),
+            MemcpyExecute(self, 10, 16, 1024, 10000, 0, 1, 1),
+            MemcpyExecute(self, 4096, 1, 1024, 10, 0, 1, 0),
+            MemcpyExecute(self, 4096, 4, 1024, 10, 0, 1, 0),
+            GraphApiSinKernelGraphSYCL(self, 0, 10),
+            GraphApiSinKernelGraphSYCL(self, 1, 10),
+            GraphApiSinKernelGraphSYCL(self, 0, 50),
+            GraphApiSinKernelGraphSYCL(self, 1, 50),
+            GraphApiSinKernelGraphSYCL(self, 0, 100),
+            GraphApiSinKernelGraphSYCL(self, 1, 100),
+            GraphApiSinKernelGraphSYCL(self, 0, 500),
+            GraphApiSinKernelGraphSYCL(self, 1, 500),
             GraphApiSubmitExecGraph(self, 0, 0, 20),
-            # GraphApiSubmitExecGraph(self, 0, 1, 20),
-            # GraphApiSubmitExecGraph(self, 1, 0, 20),
-            # GraphApiSubmitExecGraph(self, 1, 1, 20),
-            # GraphApiSubmitExecGraph(self, 0, 0, 100),
-            # GraphApiSubmitExecGraph(self, 0, 1, 100),
-            # GraphApiSubmitExecGraph(self, 1, 0, 100),
-            # GraphApiSubmitExecGraph(self, 1, 1, 100),
-            # GraphApiSubmitExecGraph(self, 0, 0, 500),
-            # GraphApiSubmitExecGraph(self, 0, 1, 500),
-            # GraphApiSubmitExecGraph(self, 1, 1, 500),
+            GraphApiSubmitExecGraph(self, 0, 1, 20),
+            GraphApiSubmitExecGraph(self, 1, 0, 20),
+            GraphApiSubmitExecGraph(self, 1, 1, 20),
+            GraphApiSubmitExecGraph(self, 0, 0, 100),
+            GraphApiSubmitExecGraph(self, 0, 1, 100),
+            GraphApiSubmitExecGraph(self, 1, 0, 100),
+            GraphApiSubmitExecGraph(self, 1, 1, 100),
+            GraphApiSubmitExecGraph(self, 0, 0, 500),
+            GraphApiSubmitExecGraph(self, 0, 1, 500),
+            GraphApiSubmitExecGraph(self, 1, 1, 500),
         ]
 
         if options.ur is not None:
@@ -141,7 +141,6 @@ class ComputeBenchmark(Benchmark):
         env_vars.update(self.extra_env_vars())
 
         result = self.run_bench(command, env_vars)
-        print("Result: ", result)
         parsed_results = self.parse_output(result)
         ret = []
         for label, median, stddev, unit in parsed_results:
@@ -376,7 +375,7 @@ class MemcpyExecute(ComputeBenchmark):
             f"--DstUSM={self.dstUSM}",
         ]
 
-class GraphApiSinKernelGraph(ComputeBenchmark):
+class GraphApiSinKernelGraphSYCL(ComputeBenchmark):
     def __init__(self, bench, withGraphs, numKernels):
         self.withGraphs = withGraphs
         self.numKernels = numKernels
