@@ -22,7 +22,7 @@ class ComputeBench(Suite):
         if options.sycl is None:
             return
 
-        repo_path = git_clone(self.directory, "compute-benchmarks-repo", "https://github.com/intel/compute-benchmarks.git", "df38bc342641d7e83fbb4fe764a23d21d734e07b")
+        repo_path = git_clone(self.directory, "compute-benchmarks-repo", "https://github.com/intel/compute-benchmarks.git", "4d044abe1769c7999b2fe43b555eb4d089a5efbd")
         build_path = create_build_path(self.directory, 'compute-benchmarks-build')
 
         configure_command = [
