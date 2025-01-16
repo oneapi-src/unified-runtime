@@ -1188,15 +1188,27 @@ ur_result_t ur_usm_pool_handle_t_::allocate(ur_context_handle_t Context,
     UR_CALL(ur::level_zero::urContextRetain(Context));
   }
 
+  const auto Desc =
+      usm::pool_descriptor{this, Context, Device, Type, DeviceReadOnly};
+  logger::debug("enqueueUSMAllocHelper: retrieving an appropriate UMF pool for "
+                "pool descriptor {}",
+                Desc);
   auto umfPool = getPool(
       usm::pool_descriptor{this, Context, Device, Type, DeviceReadOnly});
   if (!umfPool) {
     return UR_RESULT_ERROR_INVALID_ARGUMENT;
   }
 
+  logger::debug(
+      "enqueueUSMAllocHelper: preparing an allocation from the UMF pool {}",
+      umfPool);
+
   *RetMem = umfPoolAlignedMalloc(umfPool, Size, Alignment);
   if (*RetMem == nullptr) {
     auto umfRet = umfPoolGetLastAllocationError(umfPool);
+    logger::error(
+        "enqueueUSMAllocHelper: allocation from the UMF pool {} failed",
+        umfPool);
     return umf::umf2urResult(umfRet);
   }
 
