@@ -9,7 +9,7 @@ from utils.utils import git_clone
 from .base import Benchmark, Suite
 from .result import Result
 from utils.utils import run, create_build_path
-from .options import options
+from options import options
 from .oneapi import get_oneapi
 import shutil
 
@@ -54,7 +54,6 @@ class VelocityBase(Benchmark):
         self.bench_name = name
         self.bin_name = bin_name
         self.unit = unit
-        self.code_path = os.path.join(self.vb.repo_path, self.bench_name, 'SYCL')
 
     def download_deps(self):
         return
@@ -66,6 +65,7 @@ class VelocityBase(Benchmark):
         return []
 
     def setup(self):
+        self.code_path = os.path.join(self.vb.repo_path, self.bench_name, 'SYCL')
         self.download_deps()
         self.benchmark_bin = os.path.join(self.directory, self.bench_name, self.bin_name)
 
@@ -130,12 +130,13 @@ class Hashtable(VelocityBase):
 class Bitcracker(VelocityBase):
     def __init__(self, vb: VelocityBench):
         super().__init__("bitcracker", "bitcracker", vb, "s")
-        self.data_path = os.path.join(vb.repo_path, "bitcracker", "hash_pass")
 
     def name(self):
         return "Velocity-Bench Bitcracker"
 
     def bin_args(self) -> list[str]:
+        self.data_path = os.path.join(self.vb.repo_path, "bitcracker", "hash_pass")
+
         return ["-f", f"{self.data_path}/img_win8_user_hash.txt",
                 "-d", f"{self.data_path}/user_passwords_60000.txt",
                 "-b", "60000"]
@@ -175,7 +176,6 @@ class SobelFilter(VelocityBase):
 class QuickSilver(VelocityBase):
     def __init__(self, vb: VelocityBench):
         super().__init__("QuickSilver", "qs", vb, "MMS/CTT")
-        self.data_path = os.path.join(vb.repo_path, "QuickSilver", "Examples", "AllScattering")
 
     def run(self, env_vars) -> list[Result]:
         # TODO: fix the crash in QuickSilver when UR_L0_USE_IMMEDIATE_COMMANDLISTS=0
@@ -191,6 +191,8 @@ class QuickSilver(VelocityBase):
         return False
 
     def bin_args(self) -> list[str]:
+        self.data_path = os.path.join(self.vb.repo_path, "QuickSilver", "Examples", "AllScattering")
+
         return ["-i", f"{self.data_path}/scatteringOnly.inp"]
 
     def extra_env_vars(self) -> dict:
@@ -266,10 +268,11 @@ class CudaSift(VelocityBase):
 
 class DLCifar(VelocityBase):
     def __init__(self, vb: VelocityBench):
-        self.oneapi = get_oneapi()
         super().__init__("dl-cifar", "dl-cifar_sycl", vb, "s")
 
     def ld_libraries(self):
+        self.oneapi = get_oneapi()
+
         return self.oneapi.ld_libraries()
 
     def download_deps(self):
@@ -294,10 +297,11 @@ class DLCifar(VelocityBase):
 
 class DLMnist(VelocityBase):
     def __init__(self, vb: VelocityBench):
-        self.oneapi = get_oneapi()
         super().__init__("dl-mnist", "dl-mnist-sycl", vb, "s")
 
     def ld_libraries(self):
+        self.oneapi = get_oneapi()
+
         return self.oneapi.ld_libraries()
 
     def download_deps(self):
@@ -337,10 +341,11 @@ class DLMnist(VelocityBase):
 
 class SVM(VelocityBase):
     def __init__(self, vb: VelocityBench):
-        self.oneapi = get_oneapi()
         super().__init__("svm", "svm_sycl", vb, "s")
 
     def ld_libraries(self):
+        self.oneapi = get_oneapi()
+
         return self.oneapi.ld_libraries()
 
     def extra_cmake_args(self):

@@ -200,6 +200,7 @@ jobs:
         --ur ${{ github.workspace }}/ur_install
         --umf ${{ github.workspace }}/umf_build
         --adapter ${{ matrix.adapter.str_name }}
+        --build-compute-runtime
         ${{ inputs.upload_report && '--output-html' || '' }}
         ${{ inputs.bench_script_params }}
 
