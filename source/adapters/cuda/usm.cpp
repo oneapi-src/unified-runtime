@@ -102,7 +102,7 @@ urUSMSharedAlloc(ur_context_handle_t hContext, ur_device_handle_t hDevice,
   return UR_RESULT_SUCCESS;
 }
 
-ur_result_t USMFreeImpl(ur_context_handle_t, void *Pointer) {
+ur_result_t USMFreeImpl(ur_context_handle_t hContext, void *Pointer) {
   ur_result_t Result = UR_RESULT_SUCCESS;
   try {
     unsigned int IsManaged;
@@ -114,14 +114,25 @@ ur_result_t USMFreeImpl(ur_context_handle_t, void *Pointer) {
                                           (CUdeviceptr)Pointer));
     UR_ASSERT(Type == CU_MEMORYTYPE_DEVICE || Type == CU_MEMORYTYPE_HOST,
               UR_RESULT_ERROR_INVALID_MEM_OBJECT);
+
+    std::vector<ur_device_handle_t> Devices = hContext->getDevices();
+    ur_device_handle_t Device0 = Devices[0];
+    umf_memory_provider_handle_t umfCUDAprovider;
+
     if (IsManaged || Type == CU_MEMORYTYPE_DEVICE) {
       // Memory allocated with cuMemAlloc and cuMemAllocManaged must be freed
       // with cuMemFree
-      UR_CHECK_ERROR(cuMemFree((CUdeviceptr)Pointer));
+      umfCUDAprovider = Device0->getUmfCUDAprovider(
+          umf_usm_memory_type_t::UMF_MEMORY_TYPE_DEVICE);
     } else {
       // Memory allocated with cuMemAllocHost must be freed with cuMemFreeHost
-      UR_CHECK_ERROR(cuMemFreeHost(Pointer));
+      umfCUDAprovider = Device0->getUmfCUDAprovider(
+          umf_usm_memory_type_t::UMF_MEMORY_TYPE_HOST);
     }
+
+    umf_result_t umf_result = umfMemoryProviderFree(umfCUDAprovider, Pointer,
+                                                    0 /* size is unknown */);
+    UR_CHECK_ERROR(umf::umf2urResult(umf_result));
   } catch (ur_result_t Err) {
     Result = Err;
   }
@@ -143,7 +154,12 @@ ur_result_t USMDeviceAllocImpl(void **ResultPtr, ur_context_handle_t,
                                uint32_t Alignment) {
   try {
     ScopedContext Active(Device);
-    UR_CHECK_ERROR(cuMemAlloc((CUdeviceptr *)ResultPtr, Size));
+    // UR_CHECK_ERROR(cuMemAlloc((CUdeviceptr *)ResultPtr, Size));
+    umf_memory_provider_handle_t umfCUDAprovider = Device->getUmfCUDAprovider(
+        umf_usm_memory_type_t::UMF_MEMORY_TYPE_DEVICE);
+    umf_result_t umf_result =
+        umfMemoryProviderAlloc(umfCUDAprovider, Size, Alignment, ResultPtr);
+    UR_CHECK_ERROR(umf::umf2urResult(umf_result));
   } catch (ur_result_t Err) {
     return Err;
   }
@@ -164,8 +180,13 @@ ur_result_t USMSharedAllocImpl(void **ResultPtr, ur_context_handle_t,
                                uint32_t Alignment) {
   try {
     ScopedContext Active(Device);
-    UR_CHECK_ERROR(cuMemAllocManaged((CUdeviceptr *)ResultPtr, Size,
-                                     CU_MEM_ATTACH_GLOBAL));
+    // UR_CHECK_ERROR(cuMemAllocManaged((CUdeviceptr *)ResultPtr, Size,
+    // CU_MEM_ATTACH_GLOBAL));
+    umf_memory_provider_handle_t umfCUDAprovider = Device->getUmfCUDAprovider(
+        umf_usm_memory_type_t::UMF_MEMORY_TYPE_SHARED);
+    umf_result_t umf_result =
+        umfMemoryProviderAlloc(umfCUDAprovider, Size, Alignment, ResultPtr);
+    UR_CHECK_ERROR(umf::umf2urResult(umf_result));
   } catch (ur_result_t Err) {
     return Err;
   }
@@ -179,11 +200,18 @@ ur_result_t USMSharedAllocImpl(void **ResultPtr, ur_context_handle_t,
   return UR_RESULT_SUCCESS;
 }
 
-ur_result_t USMHostAllocImpl(void **ResultPtr, ur_context_handle_t,
+ur_result_t USMHostAllocImpl(void **ResultPtr, ur_context_handle_t hContext,
                              ur_usm_host_mem_flags_t, size_t Size,
                              uint32_t Alignment) {
   try {
-    UR_CHECK_ERROR(cuMemAllocHost(ResultPtr, Size));
+    // UR_CHECK_ERROR(cuMemAllocHost(ResultPtr, Size));
+    std::vector<ur_device_handle_t> Devices = hContext->getDevices();
+    ur_device_handle_t Device0 = Devices[0];
+    umf_memory_provider_handle_t umfCUDAprovider = Device0->getUmfCUDAprovider(
+        umf_usm_memory_type_t::UMF_MEMORY_TYPE_HOST);
+    umf_result_t umf_result =
+        umfMemoryProviderAlloc(umfCUDAprovider, Size, Alignment, ResultPtr);
+    UR_CHECK_ERROR(umf::umf2urResult(umf_result));
   } catch (ur_result_t Err) {
     return Err;
   }
