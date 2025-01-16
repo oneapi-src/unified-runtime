@@ -125,8 +125,7 @@ class AdapterRegistry {
     // to load the adapter.
     std::vector<std::vector<fs::path>> adaptersLoadPaths;
 
-    static constexpr std::array<const char *, 5> knownAdapterNames{
-        MAKE_LIBRARY_NAME("ur_adapter_level_zero", "0"),
+    std::vector<const char *> knownAdapterNames{
         MAKE_LIBRARY_NAME("ur_adapter_opencl", "0"),
         MAKE_LIBRARY_NAME("ur_adapter_cuda", "0"),
         MAKE_LIBRARY_NAME("ur_adapter_hip", "0"),
@@ -270,6 +269,13 @@ class AdapterRegistry {
 #else
         bool loaderPreFilter = getenv_tobool("UR_LOADER_PRELOAD_FILTER", true);
 #endif
+        if (getenv_tobool("UR_ADAPTER_LEVEL_ZERO_V2")) {
+            knownAdapterNames.push_back(
+                MAKE_LIBRARY_NAME("ur_adapter_level_zero_v2", "0"));
+        } else {
+            knownAdapterNames.push_back(
+                MAKE_LIBRARY_NAME("ur_adapter_level_zero", "0"));
+        }
         for (const auto &adapterName : knownAdapterNames) {
 
             if (loaderPreFilter) {
