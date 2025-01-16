@@ -87,26 +87,26 @@ uint64_t *event_profiling_data_t::eventEndTimestampAddr() {
   return &recordEventEndTimestamp;
 }
 
-ur_event_handle_t_::ur_event_handle_t_(ur_context_handle_t hContext,
-                                       ze_event_handle_t hZeEvent,
-                                       v2::event_flags_t flags)
+ur_event_handle_t_::ur_event_handle_t_(
+    v2::raii::weak<ur_context_handle_t> hContext, ze_event_handle_t hZeEvent,
+    v2::event_flags_t flags)
     : hContext(hContext), hZeEvent(hZeEvent), flags(flags),
       profilingData(hZeEvent) {}
 
-void ur_event_handle_t_::resetQueueAndCommand(ur_queue_handle_t hQueue,
-                                              ur_command_t commandType) {
+void ur_event_handle_t_::resetQueueAndCommand(
+    v2::raii::weak<ur_queue_handle_t> hQueue, ur_command_t commandType) {
   this->hQueue = hQueue;
   this->commandType = commandType;
   profilingData = event_profiling_data_t(hZeEvent);
 }
 
 void ur_event_handle_t_::recordStartTimestamp() {
-  assert(hQueue); // queue must be set before calling this
+  assert(hQueue.has_value()); // queue must be set before calling this
 
   ur_device_handle_t hDevice;
-  UR_CALL_THROWS(hQueue->queueGetInfo(UR_QUEUE_INFO_DEVICE, sizeof(hDevice),
-                                      reinterpret_cast<void *>(&hDevice),
-                                      nullptr));
+  UR_CALL_THROWS(hQueue.value()->queueGetInfo(
+      UR_QUEUE_INFO_DEVICE, sizeof(hDevice), reinterpret_cast<void *>(&hDevice),
+      nullptr));
 
   profilingData.recordStartTimestamp(hDevice);
 }
@@ -154,8 +154,11 @@ ur_result_t ur_event_handle_t_::release() {
   if (isTimestamped() && !getEventEndTimestamp()) {
     // L0 will write end timestamp to this event some time in the future,
     // so we can't release it yet.
-    assert(hQueue);
-    hQueue->deferEventFree(this);
+
+    // If this code is being executed, queue has to be valid (queue cannot
+    // be released before all operations complete).
+    assert(hQueue.has_value());
+    hQueue.value()->deferEventFree(this);
     return UR_RESULT_SUCCESS;
   }
 
@@ -179,14 +182,16 @@ ur_event_handle_t_::getEventEndTimestampAndHandle() {
   return {profilingData.eventEndTimestampAddr(), hZeEvent};
 }
 
-ur_queue_handle_t ur_event_handle_t_::getQueue() const { return hQueue; }
+ur_queue_handle_t ur_event_handle_t_::getQueue() const {
+  return hQueue.has_value() ? hQueue.value().get() : nullptr;
+}
 
 ur_context_handle_t ur_event_handle_t_::getContext() const { return hContext; }
 
 ur_command_t ur_event_handle_t_::getCommandType() const { return commandType; }
 
 ur_pooled_event_t::ur_pooled_event_t(
-    ur_context_handle_t hContext,
+    v2::raii::weak<ur_context_handle_t> hContext,
     v2::raii::cache_borrowed_event eventAllocation, v2::event_pool *pool)
     : ur_event_handle_t_(hContext, eventAllocation.get(), pool->getFlags()),
       zeEvent(std::move(eventAllocation)), pool(pool) {}
@@ -197,7 +202,8 @@ ur_result_t ur_pooled_event_t::forceRelease() {
 }
 
 ur_native_event_t::ur_native_event_t(
-    ur_native_handle_t hNativeEvent, ur_context_handle_t hContext,
+    ur_native_handle_t hNativeEvent,
+    v2::raii::weak<ur_context_handle_t> hContext,
     const ur_event_native_properties_t *pProperties)
     : ur_event_handle_t_(
           hContext,
@@ -387,7 +393,9 @@ urEventCreateWithNativeHandle(ur_native_handle_t hNativeEvent,
     *phEvent = hContext->nativeEventsPool.allocate();
     ZE2UR_CALL(zeEventHostSignal, ((*phEvent)->getZeEvent()));
   } else {
-    *phEvent = new ur_native_event_t(hNativeEvent, hContext, pProperties);
+    *phEvent = new ur_native_event_t(
+        hNativeEvent, v2::raii::rc_val_only<ur_context_handle_t>(hContext),
+        pProperties);
   }
   return UR_RESULT_SUCCESS;
 } catch (...) {

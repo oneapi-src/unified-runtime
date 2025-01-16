@@ -40,8 +40,6 @@ ur_kernel_handle_t_::ur_kernel_handle_t_(ur_program_handle_t hProgram,
                                          const char *kernelName)
     : hProgram(hProgram),
       deviceKernels(hProgram->Context->getPlatform()->getNumDevices()) {
-  ur::level_zero::urProgramRetain(hProgram);
-
   for (auto &Dev : hProgram->AssociatedDevices) {
     auto zeDevice = Dev->ZeDevice;
     // Program may be associated with all devices from the context but built
@@ -75,8 +73,6 @@ ur_kernel_handle_t_::ur_kernel_handle_t_(
     const ur_kernel_native_properties_t *pProperties)
     : hProgram(hProgram),
       deviceKernels(context ? context->getPlatform()->getNumDevices() : 0) {
-  ur::level_zero::urProgramRetain(hProgram);
-
   auto ownZeHandle = pProperties ? pProperties->isNativeHandleOwned : false;
 
   ze_kernel_handle_t zeKernel = ur_cast<ze_kernel_handle_t>(hNativeKernel);
@@ -92,19 +88,6 @@ ur_kernel_handle_t_::ur_kernel_handle_t_(
     ownZeHandle = false;
   }
   completeInitialization();
-}
-
-ur_result_t ur_kernel_handle_t_::release() {
-  // manually release kernels to allow errors to be propagated
-  for (auto &singleDeviceKernelOpt : deviceKernels) {
-    if (singleDeviceKernelOpt.has_value()) {
-      singleDeviceKernelOpt.value().hKernel.reset();
-    }
-  }
-
-  UR_CALL_THROWS(ur::level_zero::urProgramRelease(hProgram));
-
-  return UR_RESULT_SUCCESS;
 }
 
 void ur_kernel_handle_t_::completeInitialization() {
@@ -365,7 +348,6 @@ ur_result_t urKernelRelease(
   if (!hKernel->RefCount.decrementAndTest())
     return UR_RESULT_SUCCESS;
 
-  hKernel->release();
   delete hKernel;
 
   return UR_RESULT_SUCCESS;

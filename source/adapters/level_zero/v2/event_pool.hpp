@@ -28,10 +28,9 @@ namespace v2 {
 
 class event_pool {
 public:
-  // store weak reference to the queue as event_pool is part of the queue
-  event_pool(ur_context_handle_t hContext,
+  event_pool(raii::weak<ur_context_handle_t> hContext,
              std::unique_ptr<event_provider> Provider)
-      : hContext(hContext), provider(std::move(Provider)),
+      : hContext(std::move(hContext)), provider(std::move(Provider)),
         mutex(std::make_unique<std::mutex>()){};
 
   event_pool(event_pool &&other) = default;
@@ -50,7 +49,7 @@ public:
   event_flags_t getFlags() const;
 
 private:
-  ur_context_handle_t hContext;
+  raii::weak<ur_context_handle_t> hContext;
   std::unique_ptr<event_provider> provider;
 
   std::deque<ur_pooled_event_t> events;

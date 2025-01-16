@@ -34,7 +34,8 @@ enum queue_type {
 
 class provider_pool {
 public:
-  provider_pool(ur_context_handle_t, queue_type, event_flags_t flags);
+  provider_pool(raii::weak<ur_context_handle_t>, queue_type,
+                event_flags_t flags);
 
   raii::cache_borrowed_event allocate();
   size_t nfree() const;
@@ -47,16 +48,16 @@ private:
 // supplies multi-device events for a given context
 class provider_normal : public event_provider {
 public:
-  provider_normal(ur_context_handle_t context, queue_type qtype,
+  provider_normal(raii::weak<ur_context_handle_t> context, queue_type qtype,
                   event_flags_t flags)
-      : queueType(qtype), urContext(context), flags(flags) {}
+      : queueType(qtype), urContext(std::move(context)), flags(flags) {}
 
   raii::cache_borrowed_event allocate() override;
   event_flags_t eventFlags() const override;
 
 private:
   queue_type queueType;
-  ur_context_handle_t urContext;
+  raii::weak<ur_context_handle_t> urContext;
   event_flags_t flags;
 
   std::unique_ptr<provider_pool> createProviderPool();

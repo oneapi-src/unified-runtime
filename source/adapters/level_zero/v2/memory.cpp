@@ -178,7 +178,7 @@ void *ur_discrete_mem_handle_t::allocateOnDevice(ur_device_handle_t hDevice,
       hContext, hDevice, nullptr, UR_USM_TYPE_DEVICE, size, &ptr));
 
   deviceAllocations[id] =
-      usm_unique_ptr_t(ptr, [hContext = this->hContext](void *ptr) {
+      usm_unique_ptr_t(ptr, [hContext = this->hContext.get()](void *ptr) {
         auto ret = hContext->getDefaultUSMPool()->free(ptr);
         if (ret != UR_RESULT_SUCCESS) {
           logger::error("Failed to free device memory: {}", ret);
@@ -209,7 +209,7 @@ ur_discrete_mem_handle_t::ur_discrete_mem_handle_t(
     device_access_mode_t accessMode)
     : ur_mem_handle_t_(hContext, size, accessMode),
       deviceAllocations(hContext->getPlatform()->getNumDevices()),
-      activeAllocationDevice(nullptr), hostAllocations() {
+      activeAllocationDevice(std::nullopt), hostAllocations() {
   if (hostPtr) {
     auto initialDevice = hContext->getDevices()[0];
     UR_CALL_THROWS(migrateBufferTo(initialDevice, hostPtr, size));
@@ -230,7 +230,7 @@ ur_discrete_mem_handle_t::ur_discrete_mem_handle_t(
     devicePtr = allocateOnDevice(hDevice, size);
   } else {
     deviceAllocations[hDevice->Id.value()] = usm_unique_ptr_t(
-        devicePtr, [hContext = this->hContext, ownZePtr](void *ptr) {
+        devicePtr, [hContext = this->hContext.get(), ownZePtr](void *ptr) {
           if (!ownZePtr) {
             return;
           }
@@ -247,9 +247,9 @@ ur_discrete_mem_handle_t::~ur_discrete_mem_handle_t() {
     return;
 
   auto srcPtr = ur_cast<char *>(
-      deviceAllocations[activeAllocationDevice->Id.value()].get());
-  synchronousZeCopy(hContext, activeAllocationDevice, writeBackPtr, srcPtr,
-                    getSize());
+      deviceAllocations[activeAllocationDevice.value()->Id.value()].get());
+  synchronousZeCopy(hContext, activeAllocationDevice.value(), writeBackPtr,
+                    srcPtr, getSize());
 }
 
 void *ur_discrete_mem_handle_t::getDevicePtr(
@@ -269,7 +269,7 @@ void *ur_discrete_mem_handle_t::getDevicePtr(
   }
 
   if (!hDevice) {
-    hDevice = activeAllocationDevice;
+    hDevice = activeAllocationDevice.value().get();
   }
 
   char *ptr;
@@ -289,7 +289,8 @@ void *ur_discrete_mem_handle_t::getDevicePtr(
 
   // TODO: see if it's better to migrate the memory to the specified device
   return ur_cast<char *>(
-             deviceAllocations[activeAllocationDevice->Id.value()].get()) +
+             deviceAllocations[activeAllocationDevice.value()->Id.value()]
+                 .get()) +
          offset;
 }
 
@@ -308,7 +309,8 @@ void *ur_discrete_mem_handle_t::mapHostPtr(
   if (activeAllocationDevice && (flags & UR_MAP_FLAG_READ)) {
     auto srcPtr =
         ur_cast<char *>(
-            deviceAllocations[activeAllocationDevice->Id.value()].get()) +
+            deviceAllocations[activeAllocationDevice.value()->Id.value()]
+                .get()) +
         offset;
     migrate(srcPtr, hostAllocations.back().ptr, size);
   }
@@ -327,7 +329,8 @@ void ur_discrete_mem_handle_t::unmapHostPtr(
       if (activeAllocationDevice) {
         devicePtr =
             ur_cast<char *>(
-                deviceAllocations[activeAllocationDevice->Id.value()].get()) +
+                deviceAllocations[activeAllocationDevice.value()->Id.value()]
+                    .get()) +
             hostAllocation.offset;
       } else if (!(hostAllocation.flags &
                    UR_MAP_FLAG_WRITE_INVALIDATE_REGION)) {
@@ -361,22 +364,11 @@ static bool useHostBuffer(ur_context_handle_t hContext) {
              ZE_DEVICE_PROPERTY_FLAG_INTEGRATED;
 }
 
-namespace ur::level_zero {
-ur_result_t urMemRetain(ur_mem_handle_t hMem);
-ur_result_t urMemRelease(ur_mem_handle_t hMem);
-} // namespace ur::level_zero
-
 ur_mem_sub_buffer_t::ur_mem_sub_buffer_t(ur_mem_handle_t hParent, size_t offset,
                                          size_t size,
                                          device_access_mode_t accessMode)
     : ur_mem_handle_t_(hParent->getContext(), size, accessMode),
-      hParent(hParent), offset(offset), size(size) {
-  ur::level_zero::urMemRetain(hParent);
-}
-
-ur_mem_sub_buffer_t::~ur_mem_sub_buffer_t() {
-  ur::level_zero::urMemRelease(hParent);
-}
+      hParent(hParent), offset(offset), size(size) {}
 
 void *ur_mem_sub_buffer_t::getDevicePtr(
     ur_device_handle_t hDevice, device_access_mode_t access, size_t offset,

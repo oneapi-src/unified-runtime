@@ -24,8 +24,8 @@
 namespace v2 {
 static constexpr int EVENTS_BURST = 64;
 
-provider_pool::provider_pool(ur_context_handle_t context, queue_type queue,
-                             event_flags_t flags) {
+provider_pool::provider_pool(raii::weak<ur_context_handle_t> context,
+                             queue_type queue, event_flags_t flags) {
   ZeStruct<ze_event_pool_desc_t> desc;
   desc.count = EVENTS_BURST;
   desc.flags = ZE_EVENT_POOL_FLAG_HOST_VISIBLE;

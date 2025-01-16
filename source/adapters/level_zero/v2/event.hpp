@@ -47,11 +47,12 @@ private:
 
 struct ur_event_handle_t_ : _ur_object {
 public:
-  ur_event_handle_t_(ur_context_handle_t hContext, ze_event_handle_t hZeEvent,
-                     v2::event_flags_t flags);
+  ur_event_handle_t_(v2::raii::weak<ur_context_handle_t> hContext,
+                     ze_event_handle_t hZeEvent, v2::event_flags_t flags);
 
   // Set the queue and command that this event is associated with
-  void resetQueueAndCommand(ur_queue_handle_t hQueue, ur_command_t commandType);
+  void resetQueueAndCommand(v2::raii::weak<ur_queue_handle_t> hQueue,
+                            ur_command_t commandType);
 
   // releases event immediately
   virtual ur_result_t forceRelease() = 0;
@@ -98,14 +99,14 @@ public:
   uint64_t getEventEndTimestamp();
 
 protected:
-  ur_context_handle_t hContext;
+  v2::raii::weak<ur_context_handle_t> hContext;
 
   // non-owning handle to the L0 event
   const ze_event_handle_t hZeEvent;
 
   // queue and commandType that this event is associated with, set by enqueue
-  // commands
-  ur_queue_handle_t hQueue = nullptr;
+  // commands.
+  std::optional<v2::raii::weak<ur_queue_handle_t>> hQueue = std::nullopt;
   ur_command_t commandType = UR_COMMAND_FORCE_UINT32;
 
   v2::event_flags_t flags;
@@ -113,7 +114,7 @@ protected:
 };
 
 struct ur_pooled_event_t : ur_event_handle_t_ {
-  ur_pooled_event_t(ur_context_handle_t hContext,
+  ur_pooled_event_t(v2::raii::weak<ur_context_handle_t> hContext,
                     v2::raii::cache_borrowed_event eventAllocation,
                     v2::event_pool *pool);
 
@@ -126,7 +127,7 @@ private:
 
 struct ur_native_event_t : ur_event_handle_t_ {
   ur_native_event_t(ur_native_handle_t hNativeEvent,
-                    ur_context_handle_t hContext,
+                    v2::raii::weak<ur_context_handle_t> hContext,
                     const ur_event_native_properties_t *pProperties);
 
   ur_result_t forceRelease() override;

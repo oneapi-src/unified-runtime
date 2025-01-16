@@ -21,8 +21,9 @@
 namespace v2 {
 
 provider_counter::provider_counter(ur_platform_handle_t platform,
-                                   ur_context_handle_t context,
-                                   ur_device_handle_t device) {
+                                   raii::weak<ur_context_handle_t> context,
+                                   raii::rc_val_only<ur_device_handle_t> device)
+    : device(std::move(device)) {
   ZE2UR_CALL_THROWS(zeDriverGetExtensionFunctionAddress,
                     (platform->ZeDriver, "zexCounterBasedEventCreate",
                      (void **)&this->eventCreateFunc));

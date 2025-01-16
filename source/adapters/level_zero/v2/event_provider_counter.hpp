@@ -34,13 +34,15 @@ typedef ze_result_t (*zexCounterBasedEventCreate)(
 
 class provider_counter : public event_provider {
 public:
-  provider_counter(ur_platform_handle_t platform, ur_context_handle_t,
-                   ur_device_handle_t);
+  provider_counter(ur_platform_handle_t platform,
+                   raii::weak<ur_context_handle_t> context,
+                   raii::rc_val_only<ur_device_handle_t> device);
 
   raii::cache_borrowed_event allocate() override;
   event_flags_t eventFlags() const override;
 
 private:
+  raii::rc_val_only<ur_device_handle_t> device;
   ze_context_handle_t translatedContext;
   ze_device_handle_t translatedDevice;
 

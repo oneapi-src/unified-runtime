@@ -106,7 +106,9 @@ ur_queue_immediate_in_order_t::getSignalEvent(ur_event_handle_t *hUserEvent,
                                               ur_command_t commandType) {
   if (hUserEvent) {
     *hUserEvent = eventPool->allocate();
-    (*hUserEvent)->resetQueueAndCommand(this, commandType);
+    (*hUserEvent)
+        ->resetQueueAndCommand(raii::rc_val_only<ur_queue_handle_t>(this),
+                               commandType);
     return *hUserEvent;
   } else {
     return nullptr;
@@ -121,9 +123,9 @@ ur_queue_immediate_in_order_t::queueGetInfo(ur_queue_info_t propName,
   // TODO: consider support for queue properties and size
   switch ((uint32_t)propName) { // cast to avoid warnings on EXT enum values
   case UR_QUEUE_INFO_CONTEXT:
-    return ReturnValue(hContext);
+    return ReturnValue(hContext.get());
   case UR_QUEUE_INFO_DEVICE:
-    return ReturnValue(hDevice);
+    return ReturnValue(hDevice.get());
   case UR_QUEUE_INFO_REFERENCE_COUNT:
     return ReturnValue(uint32_t{RefCount.load()});
   case UR_QUEUE_INFO_FLAGS:

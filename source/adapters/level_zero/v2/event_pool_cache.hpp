@@ -35,13 +35,13 @@ public:
   using ProviderCreateFunc = std::function<std::unique_ptr<event_provider>(
       DeviceId, event_flags_t flags)>;
 
-  event_pool_cache(ur_context_handle_t hContext, size_t max_devices,
+  event_pool_cache(raii::weak<ur_context_handle_t> hContext, size_t max_devices,
                    ProviderCreateFunc);
 
   raii::cache_borrowed_event_pool borrow(DeviceId, event_flags_t flags);
 
 private:
-  ur_context_handle_t hContext;
+  raii::weak<ur_context_handle_t> hContext;
   ur_mutex mutex;
   ProviderCreateFunc providerCreate;
 
