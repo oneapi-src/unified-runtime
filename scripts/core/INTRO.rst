@@ -404,6 +404,10 @@ Specific environment variables can be set to control the behavior of unified run
 
     This environment variable is default enabled on Linux, but default disabled on Windows.
 
+.. envvar:: UR_ADAPTER_LEVEL_ZERO_V2
+
+    If set, UR will use level_zero_v2 instead of the default level_zero.
+
 CTS Environment Variables
 -------------------------
 
