@@ -141,13 +141,16 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   // This list is needed to release all kernels retained by the
   // command_buffer.
   std::vector<ur_kernel_handle_t> KernelsList;
+
+  std::vector<ur_exp_command_buffer_command_handle_t> CommandHandles;
 };
 
 struct ur_exp_command_buffer_command_handle_t_ : public _ur_object {
-  ur_exp_command_buffer_command_handle_t_(ur_exp_command_buffer_handle_t,
-                                          uint64_t);
+  ur_exp_command_buffer_command_handle_t_(
+      ur_exp_command_buffer_handle_t CommandBuffer, uint64_t CommandId)
+      : CommandBuffer(CommandBuffer), CommandId(CommandId) {}
 
-  virtual ~ur_exp_command_buffer_command_handle_t_();
+  virtual ~ur_exp_command_buffer_command_handle_t_() {}
 
   // Command-buffer of this command.
   ur_exp_command_buffer_handle_t CommandBuffer;
