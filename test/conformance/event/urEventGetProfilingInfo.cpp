@@ -12,36 +12,19 @@ using urEventGetProfilingInfoTest =
 TEST_P(urEventGetProfilingInfoTest, Success) {
 
     ur_profiling_info_t info_type = getParam();
-
-    if (info_type == UR_PROFILING_INFO_COMMAND_COMPLETE) {
-        UUR_KNOWN_FAILURE_ON(uur::CUDA{}, uur::HIP{}, uur::LevelZero{},
-                             uur::NativeCPU{});
-    }
-
-    if (info_type == UR_PROFILING_INFO_COMMAND_QUEUED) {
-        UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{},
-                             uur::NativeCPU{});
-    }
-
-    if (info_type == UR_PROFILING_INFO_COMMAND_SUBMIT) {
-        UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{},
-                             uur::NativeCPU{});
-    }
-
     size_t size;
     ASSERT_SUCCESS_OR_OPTIONAL_QUERY(
         urEventGetProfilingInfo(event, info_type, 0, nullptr, &size),
         info_type);
     ASSERT_EQ(size, 8);
 
-    std::vector<uint8_t> data(size);
+    uint64_t time = 0x12341234;
     ASSERT_SUCCESS(
-        urEventGetProfilingInfo(event, info_type, size, data.data(), nullptr));
+        urEventGetProfilingInfo(event, info_type, size, &time, nullptr));
 
-    if (sizeof(size_t) == size) {
-        auto returned_value = reinterpret_cast<size_t *>(data.data());
-        ASSERT_NE(*returned_value, 0);
-    }
+    // Note: In theory it's possible for this test to run when the counter happens to equal
+    // this value, but I assume that's so unlikely as to not worry about it
+    ASSERT_NE(time, 0x12341234);
 }
 
 UUR_DEVICE_TEST_SUITE_P(urEventGetProfilingInfoTest,
@@ -55,49 +38,41 @@ UUR_DEVICE_TEST_SUITE_P(urEventGetProfilingInfoTest,
 using urEventGetProfilingInfoWithTimingComparisonTest = uur::event::urEventTest;
 
 TEST_P(urEventGetProfilingInfoWithTimingComparisonTest, Success) {
-    UUR_KNOWN_FAILURE_ON(uur::CUDA{}, uur::HIP{}, uur::LevelZero{},
-                         uur::LevelZeroV2{}, uur::NativeCPU{});
+    // AMD devices may report a "start" time before the "submit" time
+    UUR_KNOWN_FAILURE_ON(uur::HIP{});
 
-    uint8_t size = 8;
+    // If a and b are supported, asserts that a <= b
+    auto test_timing = [=](ur_profiling_info_t a, ur_profiling_info_t b) {
+        std::stringstream trace{"Profiling Info: "};
+        trace << a << " <= " << b;
+        SCOPED_TRACE(trace.str());
+        uint64_t a_time;
+        auto result =
+            urEventGetProfilingInfo(event, a, sizeof(a_time), &a_time, nullptr);
+        if (result == UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION) {
+            return;
+        }
+        ASSERT_SUCCESS(result);
 
-    std::vector<uint8_t> queued_data(size);
-    ASSERT_SUCCESS(urEventGetProfilingInfo(event,
-                                           UR_PROFILING_INFO_COMMAND_QUEUED,
-                                           size, queued_data.data(), nullptr));
-    auto queued_timing = reinterpret_cast<size_t *>(queued_data.data());
-    ASSERT_NE(*queued_timing, 0);
+        uint64_t b_time;
+        result =
+            urEventGetProfilingInfo(event, b, sizeof(b_time), &b_time, nullptr);
+        if (result == UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION) {
+            return;
+        }
+        ASSERT_SUCCESS(result);
 
-    std::vector<uint8_t> submit_data(size);
-    ASSERT_SUCCESS(urEventGetProfilingInfo(event,
-                                           UR_PROFILING_INFO_COMMAND_SUBMIT,
-                                           size, submit_data.data(), nullptr));
-    auto submit_timing = reinterpret_cast<size_t *>(submit_data.data());
-    ASSERT_NE(*submit_timing, 0);
+        // Note: This assumes that the counter doesn't overflow
+        ASSERT_LE(a_time, b_time);
+    };
 
-    std::vector<uint8_t> start_data(size);
-    ASSERT_SUCCESS(urEventGetProfilingInfo(event,
-                                           UR_PROFILING_INFO_COMMAND_START,
-                                           size, start_data.data(), nullptr));
-    auto start_timing = reinterpret_cast<size_t *>(start_data.data());
-    ASSERT_NE(*start_timing, 0);
-
-    std::vector<uint8_t> end_data(size);
-    ASSERT_SUCCESS(urEventGetProfilingInfo(event, UR_PROFILING_INFO_COMMAND_END,
-                                           size, end_data.data(), nullptr));
-    auto end_timing = reinterpret_cast<size_t *>(end_data.data());
-    ASSERT_NE(*end_timing, 0);
-
-    std::vector<uint8_t> complete_data(size);
-    ASSERT_SUCCESS(
-        urEventGetProfilingInfo(event, UR_PROFILING_INFO_COMMAND_COMPLETE, size,
-                                complete_data.data(), nullptr));
-    auto complete_timing = reinterpret_cast<size_t *>(complete_data.data());
-    ASSERT_NE(*complete_timing, 0);
-
-    ASSERT_LE(*queued_timing, *submit_timing);
-    ASSERT_LT(*submit_timing, *start_timing);
-    ASSERT_LT(*start_timing, *end_timing);
-    ASSERT_LE(*end_timing, *complete_timing);
+    test_timing(UR_PROFILING_INFO_COMMAND_QUEUED,
+                UR_PROFILING_INFO_COMMAND_SUBMIT);
+    test_timing(UR_PROFILING_INFO_COMMAND_SUBMIT,
+                UR_PROFILING_INFO_COMMAND_START);
+    test_timing(UR_PROFILING_INFO_COMMAND_START, UR_PROFILING_INFO_COMMAND_END);
+    test_timing(UR_PROFILING_INFO_COMMAND_END,
+                UR_PROFILING_INFO_COMMAND_COMPLETE);
 }
 
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(
