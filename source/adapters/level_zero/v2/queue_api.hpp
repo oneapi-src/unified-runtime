@@ -10,9 +10,12 @@
  *
  */
 
+// This file was generated basing on scripts/templates/queue_api.hpp.mako
+
 #pragma once
 
 #include <ur_api.h>
+#include <ze_api.h>
 
 struct ur_queue_handle_t_ {
   virtual ~ur_queue_handle_t_();
@@ -157,4 +160,8 @@ struct ur_queue_handle_t_ {
                           const ur_exp_enqueue_native_command_properties_t *,
                           uint32_t, const ur_event_handle_t *,
                           ur_event_handle_t *) = 0;
+
+  virtual ur_result_t enqueueCommandBuffer(ze_command_list_handle_t,
+                                           ur_event_handle_t *, uint32_t,
+                                           const ur_event_handle_t *) = 0;
 };
