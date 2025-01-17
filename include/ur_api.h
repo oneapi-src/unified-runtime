@@ -1656,6 +1656,8 @@ typedef enum ur_device_info_t {
     UR_DEVICE_INFO_USM_POOL_SUPPORT = 119,                           ///< [::ur_bool_t] return true if the device supports USM pooling. Pertains
                                                                      ///< to the `USMPool` entry points and usage of the `pool` parameter of the
                                                                      ///< USM alloc entry points.
+    UR_DEVICE_INFO_PROGRAM_SET_SPECIALIZATION_CONSTANTS = 120,       ///< [::ur_bool_t] support the ::urProgramSetSpecializationConstants entry
+                                                                     ///< point
     UR_DEVICE_INFO_COMMAND_BUFFER_SUPPORT_EXP = 0x1000,              ///< [::ur_bool_t] Returns true if the device supports the use of
                                                                      ///< command-buffers.
     UR_DEVICE_INFO_COMMAND_BUFFER_UPDATE_CAPABILITIES_EXP = 0x1001,  ///< [::ur_device_command_buffer_update_capability_flags_t] Command-buffer
@@ -4726,6 +4728,10 @@ typedef struct ur_specialization_constant_info_t {
 /// @brief Set an array of specialization constants on a Program.
 ///
 /// @details
+///     - This entry point is optional, the application should query for support
+///       with device query
+///       ::UR_DEVICE_INFO_PROGRAM_SET_SPECIALIZATION_CONSTANTS passed to
+///       ::urDeviceGetInfo.
 ///     - The application may call this function from simultaneous threads for
 ///       the same device.
 ///     - The implementation of this function should be thread-safe.
@@ -4745,6 +4751,8 @@ typedef struct ur_specialization_constant_info_t {
 ///         + `NULL == pSpecConstants`
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         + `count == 0`
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
+///         + If ::UR_DEVICE_INFO_PROGRAM_SET_SPECIALIZATION_CONSTANTS query is false
 ///     - ::UR_RESULT_ERROR_INVALID_VALUE
 ///         + A pSpecConstant entry contains a size that does not match that of the specialization constant in the module.
 ///         + A pSpecConstant entry contains a nullptr pValue.
