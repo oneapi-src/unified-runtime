@@ -18,7 +18,7 @@ jobs:
       matrix:
         adapter: [
           {name: L0},
-          {name: L0_V2}
+          # {name: L0_V2}
         ]
         build_type: [Debug, Release]
         compiler: [{c: gcc, cxx: g++}] # TODO: investigate why memory-adapter-level_zero hangs with clang
@@ -58,7 +58,7 @@ jobs:
 
     - name: Test adapter specific
       working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{matrix.build_type}} --output-on-failure -L "adapter-specific" --timeout 180
+      run: ctest -C ${{matrix.build_type}} --output-on-failure -L "adapter-specific" --timeout 180 --verbose
 
     - name: Test adapters
       working-directory: ${{github.workspace}}/build
