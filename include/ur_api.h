@@ -1656,6 +1656,7 @@ typedef enum ur_device_info_t {
     UR_DEVICE_INFO_USM_POOL_SUPPORT = 119,                           ///< [::ur_bool_t] return true if the device supports USM pooling. Pertains
                                                                      ///< to the `USMPool` entry points and usage of the `pool` parameter of the
                                                                      ///< USM alloc entry points.
+    UR_DEVICE_INFO_NUM_COMPUTE_UNITS = 120,                          ///< [uint32_t] the number of compute units for specific backend.
     UR_DEVICE_INFO_COMMAND_BUFFER_SUPPORT_EXP = 0x1000,              ///< [::ur_bool_t] Returns true if the device supports the use of
                                                                      ///< command-buffers.
     UR_DEVICE_INFO_COMMAND_BUFFER_UPDATE_CAPABILITIES_EXP = 0x1001,  ///< [::ur_device_command_buffer_update_capability_flags_t] Command-buffer
