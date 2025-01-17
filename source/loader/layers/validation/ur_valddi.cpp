@@ -9306,54 +9306,6 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferRetainCommandExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferRetainCommandExp(
-    ur_exp_command_buffer_command_handle_t
-        hCommand ///< [in][retain] Handle of the command-buffer command.
-) {
-    auto pfnRetainCommandExp =
-        getContext()->urDdiTable.CommandBufferExp.pfnRetainCommandExp;
-
-    if (nullptr == pfnRetainCommandExp) {
-        return UR_RESULT_ERROR_UNINITIALIZED;
-    }
-
-    if (getContext()->enableParameterValidation) {
-        if (NULL == hCommand) {
-            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-        }
-    }
-
-    ur_result_t result = pfnRetainCommandExp(hCommand);
-
-    return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferReleaseCommandExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseCommandExp(
-    ur_exp_command_buffer_command_handle_t
-        hCommand ///< [in][release] Handle of the command-buffer command.
-) {
-    auto pfnReleaseCommandExp =
-        getContext()->urDdiTable.CommandBufferExp.pfnReleaseCommandExp;
-
-    if (nullptr == pfnReleaseCommandExp) {
-        return UR_RESULT_ERROR_UNINITIALIZED;
-    }
-
-    if (getContext()->enableParameterValidation) {
-        if (NULL == hCommand) {
-            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-        }
-    }
-
-    ur_result_t result = pfnReleaseCommandExp(hCommand);
-
-    return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferUpdateKernelLaunchExp
 __urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
     ur_exp_command_buffer_command_handle_t
@@ -9510,56 +9462,6 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferGetInfoExp(
 
     ur_result_t result = pfnGetInfoExp(hCommandBuffer, propName, propSize,
                                        pPropValue, pPropSizeRet);
-
-    return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferCommandGetInfoExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferCommandGetInfoExp(
-    ur_exp_command_buffer_command_handle_t
-        hCommand, ///< [in] handle of the command-buffer command object
-    ur_exp_command_buffer_command_info_t
-        propName, ///< [in] the name of the command-buffer command property to query
-    size_t
-        propSize, ///< [in] size in bytes of the command-buffer command property value
-    void *
-        pPropValue, ///< [out][optional][typename(propName, propSize)] value of the
-                    ///< command-buffer command property
-    size_t *
-        pPropSizeRet ///< [out][optional] bytes returned in command-buffer command property
-) {
-    auto pfnCommandGetInfoExp =
-        getContext()->urDdiTable.CommandBufferExp.pfnCommandGetInfoExp;
-
-    if (nullptr == pfnCommandGetInfoExp) {
-        return UR_RESULT_ERROR_UNINITIALIZED;
-    }
-
-    if (getContext()->enableParameterValidation) {
-        if (NULL == hCommand) {
-            return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-        }
-
-        if (propSize != 0 && pPropValue == NULL) {
-            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-        }
-
-        if (pPropValue == NULL && pPropSizeRet == NULL) {
-            return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-        }
-
-        if (UR_EXP_COMMAND_BUFFER_COMMAND_INFO_REFERENCE_COUNT < propName) {
-            return UR_RESULT_ERROR_INVALID_ENUMERATION;
-        }
-
-        if (propSize == 0 && pPropValue != NULL) {
-            return UR_RESULT_ERROR_INVALID_SIZE;
-        }
-    }
-
-    ur_result_t result = pfnCommandGetInfoExp(hCommand, propName, propSize,
-                                              pPropValue, pPropSizeRet);
 
     return result;
 }
@@ -10820,14 +10722,6 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
     dditable.pfnEnqueueExp = pDdiTable->pfnEnqueueExp;
     pDdiTable->pfnEnqueueExp = ur_validation_layer::urCommandBufferEnqueueExp;
 
-    dditable.pfnRetainCommandExp = pDdiTable->pfnRetainCommandExp;
-    pDdiTable->pfnRetainCommandExp =
-        ur_validation_layer::urCommandBufferRetainCommandExp;
-
-    dditable.pfnReleaseCommandExp = pDdiTable->pfnReleaseCommandExp;
-    pDdiTable->pfnReleaseCommandExp =
-        ur_validation_layer::urCommandBufferReleaseCommandExp;
-
     dditable.pfnUpdateKernelLaunchExp = pDdiTable->pfnUpdateKernelLaunchExp;
     pDdiTable->pfnUpdateKernelLaunchExp =
         ur_validation_layer::urCommandBufferUpdateKernelLaunchExp;
@@ -10842,10 +10736,6 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
 
     dditable.pfnGetInfoExp = pDdiTable->pfnGetInfoExp;
     pDdiTable->pfnGetInfoExp = ur_validation_layer::urCommandBufferGetInfoExp;
-
-    dditable.pfnCommandGetInfoExp = pDdiTable->pfnCommandGetInfoExp;
-    pDdiTable->pfnCommandGetInfoExp =
-        ur_validation_layer::urCommandBufferCommandGetInfoExp;
 
     return result;
 }

@@ -7272,49 +7272,6 @@ ur_result_t UR_APICALL urCommandBufferEnqueueExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Increment the command object's reference count.
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_UNINITIALIZED
-///     - ::UR_RESULT_ERROR_DEVICE_LOST
-///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
-///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
-///         + `NULL == hCommand`
-///     - ::UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_COMMAND_HANDLE_EXP
-///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
-///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
-ur_result_t UR_APICALL urCommandBufferRetainCommandExp(
-    ur_exp_command_buffer_command_handle_t
-        hCommand ///< [in][retain] Handle of the command-buffer command.
-) {
-    ur_result_t result = UR_RESULT_SUCCESS;
-    return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Decrement the command object's reference count and delete the command
-///        object if the reference count becomes zero.
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_UNINITIALIZED
-///     - ::UR_RESULT_ERROR_DEVICE_LOST
-///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
-///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
-///         + `NULL == hCommand`
-///     - ::UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_COMMAND_HANDLE_EXP
-///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
-///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
-ur_result_t UR_APICALL urCommandBufferReleaseCommandExp(
-    ur_exp_command_buffer_command_handle_t
-        hCommand ///< [in][release] Handle of the command-buffer command.
-) {
-    ur_result_t result = UR_RESULT_SUCCESS;
-    return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Update a kernel launch command in a finalized command-buffer.
 ///
 /// @details
@@ -7470,46 +7427,6 @@ ur_result_t UR_APICALL urCommandBufferGetInfoExp(
                     ///< command-buffer property
     size_t *
         pPropSizeRet ///< [out][optional] bytes returned in command-buffer property
-) {
-    ur_result_t result = UR_RESULT_SUCCESS;
-    return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Get command-buffer object information.
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_UNINITIALIZED
-///     - ::UR_RESULT_ERROR_DEVICE_LOST
-///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
-///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
-///         + `NULL == hCommand`
-///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_EXP_COMMAND_BUFFER_COMMAND_INFO_REFERENCE_COUNT < propName`
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
-///         + If `propName` is not supported by the adapter.
-///     - ::UR_RESULT_ERROR_INVALID_SIZE
-///         + `propSize == 0 && pPropValue != NULL`
-///         + If `propSize` is less than the real number of bytes needed to return the info.
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///         + `propSize != 0 && pPropValue == NULL`
-///         + `pPropValue == NULL && pPropSizeRet == NULL`
-///     - ::UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_COMMAND_HANDLE_EXP
-///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
-///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
-ur_result_t UR_APICALL urCommandBufferCommandGetInfoExp(
-    ur_exp_command_buffer_command_handle_t
-        hCommand, ///< [in] handle of the command-buffer command object
-    ur_exp_command_buffer_command_info_t
-        propName, ///< [in] the name of the command-buffer command property to query
-    size_t
-        propSize, ///< [in] size in bytes of the command-buffer command property value
-    void *
-        pPropValue, ///< [out][optional][typename(propName, propSize)] value of the
-                    ///< command-buffer command property
-    size_t *
-        pPropSizeRet ///< [out][optional] bytes returned in command-buffer command property
 ) {
     ur_result_t result = UR_RESULT_SUCCESS;
     return result;

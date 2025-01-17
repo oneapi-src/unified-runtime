@@ -54,10 +54,6 @@ struct InvalidUpdateTest
             EXPECT_SUCCESS(urUSMFree(context, shared_ptr));
         }
 
-        if (command_handle) {
-            EXPECT_SUCCESS(urCommandBufferReleaseCommandExp(command_handle));
-        }
-
         UUR_RETURN_ON_FATAL_FAILURE(
             urUpdatableCommandBufferExpExecutionTest::TearDown());
     }
@@ -166,9 +162,6 @@ TEST_P(InvalidUpdateTest, NotUpdatableCommandBuffer) {
         urCommandBufferUpdateKernelLaunchExp(test_command_handle, &update_desc);
     EXPECT_EQ(UR_RESULT_ERROR_INVALID_NULL_HANDLE, result);
 
-    if (test_command_handle) {
-        EXPECT_SUCCESS(urCommandBufferReleaseCommandExp(test_command_handle));
-    }
     if (test_cmd_buf_handle) {
         EXPECT_SUCCESS(urCommandBufferReleaseExp(test_cmd_buf_handle));
     }
@@ -291,10 +284,6 @@ struct InvalidUpdateCommandBufferExpExecutionTest : uur::urKernelExecutionTest {
 
         if (shared_ptr) {
             EXPECT_SUCCESS(urUSMFree(context, shared_ptr));
-        }
-
-        if (command_handle) {
-            EXPECT_SUCCESS(urCommandBufferReleaseCommandExp(command_handle));
         }
 
         if (kernel_2) {
