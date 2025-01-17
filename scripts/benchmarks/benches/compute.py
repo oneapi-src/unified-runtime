@@ -22,7 +22,7 @@ class ComputeBench(Suite):
         if options.sycl is None:
             return
 
-        repo_path = git_clone(self.directory, "compute-benchmarks-repo", "https://github.com/intel/compute-benchmarks.git", "df38bc342641d7e83fbb4fe764a23d21d734e07b")
+        repo_path = git_clone(self.directory, "compute-benchmarks-repo", "https://github.com/intel/compute-benchmarks.git", "4d044abe1769c7999b2fe43b555eb4d089a5efbd")
         build_path = create_build_path(self.directory, 'compute-benchmarks-build')
 
         configure_command = [
@@ -74,6 +74,20 @@ class ComputeBench(Suite):
             MemcpyExecute(self, 10, 16, 1024, 10000, 0, 1, 1),
             MemcpyExecute(self, 4096, 1, 1024, 10, 0, 1, 0),
             MemcpyExecute(self, 4096, 4, 1024, 10, 0, 1, 0),
+            GraphApiSinKernelGraphSYCL(self, 0, 10),
+            GraphApiSinKernelGraphSYCL(self, 1, 10),
+            GraphApiSinKernelGraphSYCL(self, 0, 50),
+            GraphApiSinKernelGraphSYCL(self, 1, 50),
+            GraphApiSinKernelGraphSYCL(self, 0, 200),
+            GraphApiSinKernelGraphSYCL(self, 1, 200),
+            GraphApiSubmitExecGraph(self, 0, 0, 20),
+            GraphApiSubmitExecGraph(self, 0, 1, 20),
+            GraphApiSubmitExecGraph(self, 1, 0, 20),
+            GraphApiSubmitExecGraph(self, 1, 1, 20),
+            GraphApiSubmitExecGraph(self, 0, 0, 200),
+            GraphApiSubmitExecGraph(self, 0, 1, 200),
+            GraphApiSubmitExecGraph(self, 1, 0, 200),
+            GraphApiSubmitExecGraph(self, 1, 1, 200),
         ]
 
         if options.ur is not None:
@@ -357,3 +371,37 @@ class MemcpyExecute(ComputeBenchmark):
             f"--SrcUSM={self.srcUSM}",
             f"--DstUSM={self.dstUSM}",
         ]
+
+class GraphApiSinKernelGraphSYCL(ComputeBenchmark):
+    def __init__(self, bench, withGraphs, numKernels):
+        self.withGraphs = withGraphs
+        self.numKernels = numKernels
+        super().__init__(bench, "graph_api_benchmark_sycl", "SinKernelGraph")
+
+    def name(self):
+        return f"graph_api_benchmark_sycl SinKernelGraph graphs:{self.withGraphs}, numKernels:{self.numKernels}"
+
+    def bin_args(self) -> list[str]:
+        return [
+            "--iterations=100",
+            f"--numKernels={self.numKernels}",
+            f"--withGraphs={self.withGraphs}",
+        ]
+        
+class GraphApiSubmitExecGraph(ComputeBenchmark):
+    def __init__(self, bench, ioq, submit, numKernels):
+        self.ioq = ioq
+        self.submit = submit
+        self.numKernels = numKernels
+        super().__init__(bench, "graph_api_benchmark_sycl", "SubmitExecGraph")
+
+    def name(self):
+        return f"graph_api_benchmark_sycl SubmitExecGraph ioq:{self.ioq}, submit:{self.submit}, numKernels:{self.numKernels}"
+
+    def bin_args(self) -> list[str]:
+        return [
+            "--iterations=100",
+            f"--measureSubmit={self.submit}",
+            f"--ioq={self.ioq}",
+            f"--numKernels={self.numKernels}",
+        ]   

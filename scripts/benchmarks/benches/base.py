@@ -32,7 +32,6 @@ class Benchmark:
         if options.ur is not None:
             env_vars_with_forced_adapter.update(
                 {'UR_ADAPTERS_FORCE_LOAD': Benchmark.get_adapter_full_path()})
-
         return run(
             command=command,
             env_vars=env_vars_with_forced_adapter,
