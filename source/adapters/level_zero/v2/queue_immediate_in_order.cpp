@@ -90,7 +90,16 @@ ur_queue_immediate_in_order_t::ur_queue_immediate_in_order_t(
     : hContext(hContext), hDevice(hDevice), flags(pProps ? pProps->flags : 0),
       eventPool(hContext->eventPoolCache.borrow(
           hDevice->Id.value(), eventFlagsFromQueueFlags(flags))),
-      handler(hContext, hDevice, pProps) {}
+      handler(hContext, hDevice, pProps),
+      listManager(
+          hContext, hDevice,
+          hContext->commandListCache.getImmediateCommandList(
+              hDevice->ZeDevice, true, getZeOrdinal(hDevice),
+              true /* always enable copy offload */,
+              ZE_COMMAND_QUEUE_MODE_ASYNCHRONOUS,
+              getZePriority(pProps ? pProps->flags : ur_queue_flags_t{}),
+              getZeIndex(pProps)),
+          eventFlagsFromQueueFlags(flags), this) {}
 
 ur_queue_immediate_in_order_t::ur_queue_immediate_in_order_t(
     ur_context_handle_t hContext, ur_device_handle_t hDevice,
@@ -99,7 +108,16 @@ ur_queue_immediate_in_order_t::ur_queue_immediate_in_order_t(
       eventPool(hContext->eventPoolCache.borrow(
           hDevice->Id.value(), eventFlagsFromQueueFlags(flags))),
       handler(reinterpret_cast<ze_command_list_handle_t>(hNativeHandle),
-              ownZeQueue) {}
+              ownZeQueue),
+      listManager(hContext, hDevice,
+                  raii::command_list_unique_handle(
+                      reinterpret_cast<ze_command_list_handle_t>(hNativeHandle),
+                      [ownZeQueue](ze_command_list_handle_t hZeCommandList) {
+                        if (ownZeQueue) {
+                          zeCommandListDestroy(hZeCommandList);
+                        }
+                      }),
+                  eventFlagsFromQueueFlags(flags)) {}
 
 ur_event_handle_t
 ur_queue_immediate_in_order_t::getSignalEvent(ur_event_handle_t *hUserEvent,

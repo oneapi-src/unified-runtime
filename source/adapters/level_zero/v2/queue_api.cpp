@@ -10,7 +10,8 @@
  *
  */
 
-// This file was generated basing on scripts/templates/queue_api.cpp.mako
+// Do not edit. This file is auto generated from a template:
+// scripts/templates/queue_api.cpp.mako
 
 #include "queue_api.hpp"
 #include "ur_util.hpp"

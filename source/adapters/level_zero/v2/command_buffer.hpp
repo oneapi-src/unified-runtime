@@ -21,6 +21,8 @@
 #include "kernel.hpp"
 #include "queue_api.hpp"
 
+#include "command_list_manager.hpp"
+
 struct command_buffer_profiling_t {
   ur_exp_command_buffer_sync_point_t numEvents;
   ze_kernel_timestamp_result_t *timestamps;
@@ -40,10 +42,7 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
                   uint32_t numWaitEvents);
 
   // UR context associated with this command-buffer
-  ur_context_handle_t context;
-  // Device associated with this command buffer
-  ur_device_handle_t device;
-  v2::raii::command_list_unique_handle zeCommandList;
+  ur_command_list_manager commandListManager;
 
   std::vector<ze_event_handle_t> waitList;
   // Indicates if command-buffer commands can be updated after it is closed.
@@ -52,9 +51,6 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   bool isFinalized = false;
   // Command-buffer profiling is enabled.
   bool isProfilingEnabled = false;
-  // This list is needed to release all kernels retained by the
-  // command_buffer.
-  std::vector<ur_kernel_handle_t> kernelsList;
 };
 
 struct ur_exp_command_buffer_command_handle_t_ : public _ur_object {

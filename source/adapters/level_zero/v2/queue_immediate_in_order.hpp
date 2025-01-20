@@ -19,6 +19,8 @@
 
 #include "ur/ur.hpp"
 
+#include "command_list_manager.hpp"
+
 namespace v2 {
 
 using queue_group_type = ur_device_handle_t_::queue_group_info_t::type;
@@ -36,16 +38,22 @@ struct ur_command_list_handler_t {
 
 struct ur_queue_immediate_in_order_t : _ur_object, public ur_queue_handle_t_ {
 private:
+  // to remove after command_list_manager is complete
   ur_context_handle_t hContext;
+  // to remove after command_list_manager is complete
   ur_device_handle_t hDevice;
   ur_queue_flags_t flags;
 
+  // to remove after command_list_manager is complete
   raii::cache_borrowed_event_pool eventPool;
 
+  // to remove after command_list_manager is complete
   ur_command_list_handler_t handler;
 
+  // to remove after command_list_manager is complete
   std::vector<ze_event_handle_t> waitList;
 
+  ur_command_list_manager listManager;
   std::vector<ur_event_handle_t> deferredEvents;
 
   std::pair<ze_event_handle_t *, uint32_t>
