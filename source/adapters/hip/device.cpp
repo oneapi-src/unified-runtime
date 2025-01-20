@@ -228,13 +228,13 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_IMAGE_SUPPORTED: {
     bool Enabled = false;
 
-    if (std::getenv("UR_HIP_ENABLE_IMAGE_SUPPORT") != nullptr) {
+    if (std::getenv("UR_HIP_ENABLE_IMAGE_SUPPORTED") != nullptr) {
       Enabled = true;
     } else {
       logger::always(
           "Images are not fully supported by the HIP BE, their support is "
           "disabled by default. Their partial support can be activated by "
-          "setting UR_HIP_ENABLE_IMAGE_SUPPORT environment variable at "
+          "setting UR_HIP_ENABLE_IMAGE_SUPPORTED environment variable at "
           "runtime.");
     }
 
@@ -823,17 +823,17 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   }
   case UR_DEVICE_INFO_MAX_IMAGE_LINEAR_WIDTH_EXP: {
     // Default values due to non-existent hipamd queries for linear sizes.
-    constexpr uint32_t MaxLinearWidth{1};
+    constexpr size_t MaxLinearWidth{1};
     return ReturnValue(MaxLinearWidth);
   }
   case UR_DEVICE_INFO_MAX_IMAGE_LINEAR_HEIGHT_EXP: {
     // Default values due to non-existent hipamd queries for linear sizes.
-    constexpr uint32_t MaxLinearHeight{1};
+    constexpr size_t MaxLinearHeight{1};
     return ReturnValue(MaxLinearHeight);
   }
   case UR_DEVICE_INFO_MAX_IMAGE_LINEAR_PITCH_EXP: {
     // Default values due to non-existent hipamd queries for linear sizes.
-    constexpr uint32_t MaxLinearPitch{1};
+    constexpr size_t MaxLinearPitch{1};
     return ReturnValue(MaxLinearPitch);
   }
   case UR_DEVICE_INFO_MIPMAP_SUPPORT_EXP: {
@@ -1070,6 +1070,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_GPU_HW_THREADS_PER_EU:
   case UR_DEVICE_INFO_MAX_MEMORY_BANDWIDTH:
   case UR_DEVICE_INFO_IP_VERSION:
+  case UR_DEVICE_INFO_CLUSTER_LAUNCH_EXP:
     return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
   case UR_DEVICE_INFO_2D_BLOCK_ARRAY_CAPABILITIES_EXP:
     return ReturnValue(
