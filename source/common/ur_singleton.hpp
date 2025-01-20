@@ -76,21 +76,25 @@ public:
 
   void retain(key_tn key) {
     std::lock_guard<std::mutex> lk(mut);
-    auto iter = map.find(getKey(key));
-    assert(iter != map.end());
-    iter->second.ref_count++;
+    if (auto iter = map.find(getKey(key)); iter != map.end()) {
+      iter->second.ref_count++;
+    } else {
+      __builtin_unreachable();
+    }
   }
 
   //////////////////////////////////////////////////////////////////////////
   /// once the key is no longer valid, release the singleton
   void release(key_tn key) {
     std::lock_guard<std::mutex> lk(mut);
-    auto iter = map.find(getKey(key));
-    assert(iter != map.end());
-    if (iter->second.ref_count == 0) {
-      map.erase(iter);
+    if (auto iter = map.find(getKey(key)); iter != map.end()) {
+      if (iter->second.ref_count == 0) {
+        map.erase(iter);
+      } else {
+        iter->second.ref_count--;
+      }
     } else {
-      iter->second.ref_count--;
+      __builtin_unreachable();
     }
   }
 
