@@ -4684,9 +4684,9 @@ inline ur_result_t printTagged(std::ostream &os, const void *ptr,
     os << ")";
   } break;
   case UR_DEVICE_INFO_MAX_IMAGE_LINEAR_WIDTH_EXP: {
-    const size_t *tptr = (const size_t *)ptr;
-    if (sizeof(size_t) > size) {
-      os << "invalid size (is: " << size << ", expected: >=" << sizeof(size_t)
+    const uint32_t *tptr = (const uint32_t *)ptr;
+    if (sizeof(uint32_t) > size) {
+      os << "invalid size (is: " << size << ", expected: >=" << sizeof(uint32_t)
          << ")";
       return UR_RESULT_ERROR_INVALID_SIZE;
     }
@@ -4697,9 +4697,9 @@ inline ur_result_t printTagged(std::ostream &os, const void *ptr,
     os << ")";
   } break;
   case UR_DEVICE_INFO_MAX_IMAGE_LINEAR_HEIGHT_EXP: {
-    const size_t *tptr = (const size_t *)ptr;
-    if (sizeof(size_t) > size) {
-      os << "invalid size (is: " << size << ", expected: >=" << sizeof(size_t)
+    const uint32_t *tptr = (const uint32_t *)ptr;
+    if (sizeof(uint32_t) > size) {
+      os << "invalid size (is: " << size << ", expected: >=" << sizeof(uint32_t)
          << ")";
       return UR_RESULT_ERROR_INVALID_SIZE;
     }
@@ -4710,9 +4710,9 @@ inline ur_result_t printTagged(std::ostream &os, const void *ptr,
     os << ")";
   } break;
   case UR_DEVICE_INFO_MAX_IMAGE_LINEAR_PITCH_EXP: {
-    const size_t *tptr = (const size_t *)ptr;
-    if (sizeof(size_t) > size) {
-      os << "invalid size (is: " << size << ", expected: >=" << sizeof(size_t)
+    const uint32_t *tptr = (const uint32_t *)ptr;
+    if (sizeof(uint32_t) > size) {
+      os << "invalid size (is: " << size << ", expected: >=" << sizeof(uint32_t)
          << ")";
       return UR_RESULT_ERROR_INVALID_SIZE;
     }
