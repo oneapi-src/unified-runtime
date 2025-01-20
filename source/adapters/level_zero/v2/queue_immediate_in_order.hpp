@@ -53,7 +53,7 @@ private:
   // to remove after command_list_manager is complete
   std::vector<ze_event_handle_t> waitList;
 
-  ur_command_list_manager listManager;
+  ur_command_list_manager commandListManager;
   std::vector<ur_event_handle_t> deferredEvents;
 
   std::pair<ze_event_handle_t *, uint32_t>
