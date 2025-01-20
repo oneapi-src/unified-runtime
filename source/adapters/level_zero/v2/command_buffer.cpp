@@ -69,41 +69,6 @@ ur_exp_command_buffer_handle_t_::~ur_exp_command_buffer_handle_t_() {
 
 namespace ur::level_zero {
 
-/**
- * Creates a L0 command list
- * @param[in] context The Context associated with the command-list
- * @param[in] device  The Device associated with the command-list
- * @param[in] isUpdatable Whether the command-list should be mutable.
- * @param[out] commandList The L0 command-list created by this function.
- * @return UR_RESULT_SUCCESS or an error code on failure
- */
-ur_result_t createMainCommandList(ur_context_handle_t context,
-                                  ur_device_handle_t device, bool isUpdatable,
-                                  ze_command_list_handle_t &commandList) {
-
-  using queue_group_type = ur_device_handle_t_::queue_group_info_t::type;
-  // that should be call to queue getZeOrdinal,
-  // but queue is not available while constructing buffer
-  uint32_t queueGroupOrdinal =
-      device->QueueGroup[queue_group_type::Compute].ZeOrdinal;
-
-  ZeStruct<ze_command_list_desc_t> zeCommandListDesc;
-  zeCommandListDesc.commandQueueGroupOrdinal = queueGroupOrdinal;
-
-  zeCommandListDesc.flags = ZE_COMMAND_LIST_FLAG_IN_ORDER;
-
-  ZeStruct<ze_mutable_command_list_exp_desc_t> zeMutableCommandListDesc;
-  if (isUpdatable) {
-    zeMutableCommandListDesc.flags = 0;
-    zeCommandListDesc.pNext = &zeMutableCommandListDesc;
-  }
-
-  ZE2UR_CALL(zeCommandListCreate, (context->getZeHandle(), device->ZeDevice,
-                                   &zeCommandListDesc, &commandList));
-
-  return UR_RESULT_SUCCESS;
-}
-
 ur_result_t
 urCommandBufferCreateExp(ur_context_handle_t context, ur_device_handle_t device,
                          const ur_exp_command_buffer_desc_t *commandBufferDesc,
@@ -112,9 +77,8 @@ urCommandBufferCreateExp(ur_context_handle_t context, ur_device_handle_t device,
     bool isUpdatable = commandBufferDesc && commandBufferDesc->isUpdatable;
     checkImmediateAppendSupport(context);
 
-    if (isUpdatable) {
-      UR_ASSERT(context->getPlatform()->ZeMutableCmdListExt.Supported,
-                UR_RESULT_ERROR_UNSUPPORTED_FEATURE);
+    if (!context->getPlatform()->ZeMutableCmdListExt.Supported) {
+      throw UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
     }
 
     using queue_group_type = ur_device_handle_t_::queue_group_info_t::type;
