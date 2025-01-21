@@ -154,7 +154,10 @@ DeviceType GetDeviceType(ur_context_handle_t Context,
         // FIXME: There's no API querying the address bits of device, so we guess it by the
         // value of device USM pointer (see "USM Allocation Range" in asan_shadow.cpp)
         auto Type = DeviceType::UNKNOWN;
-        if (Ptr >> 48 == 0xff00U) {
+
+        // L0 changes their VA layout.
+        // TODO: update our shadow memory layout/algorithms to accordingly.
+        if (((Ptr >> 52) & 0xff0U) == 0xff0U) {
             Type = DeviceType::GPU_PVC;
         } else {
             Type = DeviceType::GPU_DG2;
