@@ -11,12 +11,9 @@
 
 #include "command_list_cache.hpp"
 #include "common.hpp"
-#include "event.hpp"
 #include "event_pool_cache.hpp"
 #include "queue_api.hpp"
-#include <ur_api.h>
 #include <ze_api.h>
-#include <zes_api.h>
 
 struct ur_command_list_manager : public _ur_object {
 

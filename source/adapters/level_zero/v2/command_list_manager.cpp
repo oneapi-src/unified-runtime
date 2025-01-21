@@ -10,30 +10,9 @@
 
 #include "command_list_manager.hpp"
 #include "../helpers/kernel_helpers.hpp"
-
 #include "../ur_interface_loader.hpp"
-#include "logger/ur_logger.hpp"
-
-#include "../common.hpp"
-#include "../device.hpp"
-
-#include "context.hpp"
-#include "event.hpp"
-#include "event_pool_cache.hpp"
-#include "queue_api.hpp"
-
-#include <ur/ur.hpp>
-#include <ur_api.h>
-
-#include <unordered_set>
-#include <ze_api.h>
-#include <zes_api.h>
-
-#include "common.hpp"
-
 #include "context.hpp"
 #include "kernel.hpp"
-#include "queue_api.hpp"
 
 ur_command_list_manager::ur_command_list_manager(
     ur_context_handle_t context, ur_device_handle_t device,

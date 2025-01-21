@@ -9,19 +9,12 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include <unordered_set>
-#include <ur/ur.hpp>
-#include <ur_api.h>
-#include <ze_api.h>
-#include <zes_api.h>
-
+#include "command_list_manager.hpp"
 #include "common.hpp"
-
 #include "context.hpp"
 #include "kernel.hpp"
 #include "queue_api.hpp"
-
-#include "command_list_manager.hpp"
+#include <ze_api.h>
 
 struct command_buffer_profiling_t {
   ur_exp_command_buffer_sync_point_t numEvents;
