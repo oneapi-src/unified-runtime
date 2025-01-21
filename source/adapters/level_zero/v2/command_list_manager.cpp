@@ -132,15 +132,6 @@ ur_result_t ur_command_list_manager::enqueueGenericCommandListsExp(
   return UR_RESULT_SUCCESS;
 }
 
-ur_result_t ur_command_list_manager::closeCommandList() {
-  // It is not allowed to append to command list from multiple threads.
-  std::scoped_lock<ur_shared_mutex> guard(this->Mutex);
-
-  // Close the command lists and have them ready for dispatch.
-  ZE2UR_CALL(zeCommandListClose, (this->zeCommandList.get()));
-  return UR_RESULT_SUCCESS;
-}
-
 ze_command_list_handle_t ur_command_list_manager::getZeCommandList() {
   return zeCommandList.get();
 }

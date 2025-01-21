@@ -31,18 +31,6 @@ void checkImmediateAppendSupport(ur_context_handle_t context) {
 
 } // namespace
 
-std::pair<ze_event_handle_t *, uint32_t>
-ur_exp_command_buffer_handle_t_::getWaitListView(
-    const ur_event_handle_t *phWaitEvents, uint32_t numWaitEvents) {
-
-  waitList.resize(numWaitEvents);
-  for (uint32_t i = 0; i < numWaitEvents; i++) {
-    waitList[i] = phWaitEvents[i]->getZeEvent();
-  }
-
-  return {waitList.data(), static_cast<uint32_t>(numWaitEvents)};
-}
-
 ur_exp_command_buffer_handle_t_::ur_exp_command_buffer_handle_t_(
     ur_context_handle_t context, ur_device_handle_t device,
     v2::raii::command_list_unique_handle &&commandList,
@@ -51,6 +39,16 @@ ur_exp_command_buffer_handle_t_::ur_exp_command_buffer_handle_t_(
           context, device,
           std::forward<v2::raii::command_list_unique_handle>(commandList)),
       isUpdatable(desc ? desc->isUpdatable : false) {}
+
+
+ur_result_t ur_exp_command_buffer_handle_t_::closeCommandList() {
+  // It is not allowed to append to command list from multiple threads.
+  std::scoped_lock<ur_shared_mutex> guard(this->Mutex);
+
+  // Close the command lists and have them ready for dispatch.
+  ZE2UR_CALL(zeCommandListClose, (this->commandListManager.getZeCommandList()));
+  return UR_RESULT_SUCCESS;
+}
 
 namespace ur::level_zero {
 
@@ -108,7 +106,7 @@ urCommandBufferFinalizeExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
   try {
     UR_ASSERT(hCommandBuffer, UR_RESULT_ERROR_INVALID_NULL_POINTER);
     UR_ASSERT(!hCommandBuffer->isFinalized, UR_RESULT_ERROR_INVALID_OPERATION);
-    hCommandBuffer->commandListManager.closeCommandList();
+    hCommandBuffer->closeCommandList();
 
     hCommandBuffer->isFinalized = true;
   } catch (...) {

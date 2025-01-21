@@ -30,14 +30,12 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   ur_event_handle_t getSignalEvent(ur_event_handle_t *hUserEvent,
                                    ur_command_t commandType);
 
-  std::pair<ze_event_handle_t *, uint32_t>
-  getWaitListView(const ur_event_handle_t *phWaitEvents,
-                  uint32_t numWaitEvents);
-
-  // UR context associated with this command-buffer
   ur_command_list_manager commandListManager;
 
+  ur_result_t closeCommandList();
+
   std::vector<ze_event_handle_t> waitList;
+  
   // Indicates if command-buffer commands can be updated after it is closed.
   bool isUpdatable = false;
   // Indicates if command buffer was finalized.
