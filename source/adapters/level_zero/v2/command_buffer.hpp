@@ -16,25 +16,16 @@
 #include "queue_api.hpp"
 #include <ze_api.h>
 
-struct command_buffer_profiling_t {
-  ur_exp_command_buffer_sync_point_t numEvents;
-  ze_kernel_timestamp_result_t *timestamps;
-};
-
 struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   ur_exp_command_buffer_handle_t_(
       ur_context_handle_t context, ur_device_handle_t device,
       v2::raii::command_list_unique_handle &&commandList,
       const ur_exp_command_buffer_desc_t *desc);
   ~ur_exp_command_buffer_handle_t_() = default;
-  ur_event_handle_t getSignalEvent(ur_event_handle_t *hUserEvent,
-                                   ur_command_t commandType);
 
   ur_command_list_manager commandListManager;
 
   ur_result_t closeCommandList();
-
-  std::vector<ze_event_handle_t> waitList;
 
   // Indicates if command-buffer commands can be updated after it is closed.
   bool isUpdatable = false;
@@ -50,6 +41,7 @@ struct ur_exp_command_buffer_command_handle_t_ : public _ur_object {
 
   ~ur_exp_command_buffer_command_handle_t_();
 
+private:
   // Command-buffer of this command.
   ur_exp_command_buffer_handle_t commandBuffer;
   // L0 command ID identifying this command
