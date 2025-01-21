@@ -34,10 +34,6 @@ struct ur_command_list_manager : public _ur_object {
   ur_result_t appendCommandListImmediate(
       ze_command_list_handle_t commandList, ur_event_handle_t *phEvent,
       uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList);
-  ur_result_t enqueueGenericCommandListsExp(
-      uint32_t numCommandLists, ze_command_list_handle_t *phCommandLists,
-      ur_event_handle_t *phEvent, uint32_t numEventsInWaitList,
-      const ur_event_handle_t *phEventWaitList, ur_command_t callerCommand);
   ze_command_list_handle_t getZeCommandList();
 
 private:
