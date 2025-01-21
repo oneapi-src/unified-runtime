@@ -17,6 +17,8 @@
 #include <mutex>
 #include <unordered_map>
 
+#include "logger/ur_logger.hpp"
+
 //////////////////////////////////////////////////////////////////////////
 /// a abstract factory for creation of singleton objects
 template <typename singleton_tn, typename key_tn> class singleton_factory_t {
@@ -79,7 +81,8 @@ public:
     if (auto iter = map.find(getKey(key)); iter != map.end()) {
       iter->second.ref_count++;
     } else {
-      __builtin_unreachable();
+      logger::error("Invalid singleton key. Aborting.");
+      std::abort();
     }
   }
 
@@ -94,7 +97,8 @@ public:
         iter->second.ref_count--;
       }
     } else {
-      __builtin_unreachable();
+      logger::error("Invalid singleton key. Aborting.");
+      std::abort();
     }
   }
 
