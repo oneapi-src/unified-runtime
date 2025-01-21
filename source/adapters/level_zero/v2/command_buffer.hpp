@@ -26,7 +26,7 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
       ur_context_handle_t context, ur_device_handle_t device,
       v2::raii::command_list_unique_handle &&commandList,
       const ur_exp_command_buffer_desc_t *desc);
-  ~ur_exp_command_buffer_handle_t_();
+  ~ur_exp_command_buffer_handle_t_() = default;
   ur_event_handle_t getSignalEvent(ur_event_handle_t *hUserEvent,
                                    ur_command_t commandType);
 

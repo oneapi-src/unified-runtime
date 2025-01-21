@@ -52,7 +52,6 @@ ur_exp_command_buffer_handle_t_::ur_exp_command_buffer_handle_t_(
           std::forward<v2::raii::command_list_unique_handle>(commandList)),
       isUpdatable(desc ? desc->isUpdatable : false) {}
 
-ur_exp_command_buffer_handle_t_::~ur_exp_command_buffer_handle_t_() {}
 namespace ur::level_zero {
 
 ur_result_t
