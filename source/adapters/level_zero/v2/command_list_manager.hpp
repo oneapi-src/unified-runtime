@@ -36,6 +36,12 @@ struct ur_command_list_manager : public _ur_object {
       uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList);
   ze_command_list_handle_t getZeCommandList();
 
+  std::pair<ze_event_handle_t *, uint32_t>
+  getWaitListView(const ur_event_handle_t *phWaitEvents,
+                  uint32_t numWaitEvents);
+  ur_event_handle_t getSignalEvent(ur_event_handle_t *hUserEvent,
+                                   ur_command_t commandType);
+
 private:
   // UR context associated with this command-buffer
   ur_context_handle_t context;
@@ -45,10 +51,4 @@ private:
   v2::raii::command_list_unique_handle zeCommandList;
   ur_queue_handle_t_ *queue;
   std::vector<ze_event_handle_t> waitList;
-
-  std::pair<ze_event_handle_t *, uint32_t>
-  getWaitListView(const ur_event_handle_t *phWaitEvents,
-                  uint32_t numWaitEvents);
-  ur_event_handle_t getSignalEvent(ur_event_handle_t *hUserEvent,
-                                   ur_command_t commandType);
 };
