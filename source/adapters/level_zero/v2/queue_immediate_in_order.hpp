@@ -39,7 +39,7 @@ private:
   getWaitListView(const ur_event_handle_t *phWaitEvents,
                   uint32_t numWaitEvents);
 
-  ur_event_handle_t getSignalEvent(ur_event_handle_t *hUserEvent,
+  ze_event_handle_t getSignalEvent(ur_event_handle_t *hUserEvent,
                                    ur_command_t commandType);
 
   void deferEventFree(ur_event_handle_t hEvent) override;

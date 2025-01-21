@@ -39,7 +39,7 @@ struct ur_command_list_manager : public _ur_object {
   std::pair<ze_event_handle_t *, uint32_t>
   getWaitListView(const ur_event_handle_t *phWaitEvents,
                   uint32_t numWaitEvents);
-  ur_event_handle_t getSignalEvent(ur_event_handle_t *hUserEvent,
+  ze_event_handle_t getSignalEvent(ur_event_handle_t *hUserEvent,
                                    ur_command_t commandType);
 
 private:

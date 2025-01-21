@@ -44,13 +44,13 @@ ur_command_list_manager::getWaitListView(const ur_event_handle_t *phWaitEvents,
   return {waitList.data(), static_cast<uint32_t>(numWaitEvents)};
 }
 
-ur_event_handle_t
+ze_event_handle_t
 ur_command_list_manager::getSignalEvent(ur_event_handle_t *hUserEvent,
                                         ur_command_t commandType) {
   if (hUserEvent && queue) {
     *hUserEvent = eventPool->allocate();
     (*hUserEvent)->resetQueueAndCommand(queue, commandType);
-    return *hUserEvent;
+    return (*hUserEvent)->getZeEvent();
   } else {
     return nullptr;
   }
@@ -80,7 +80,7 @@ ur_result_t ur_command_list_manager::appendKernelLaunch(
                                         zeThreadGroupDimensions, WG, workDim,
                                         pGlobalWorkSize, pLocalWorkSize));
 
-  auto signalEvent = getSignalEvent(phEvent, UR_COMMAND_KERNEL_LAUNCH);
+  auto zeSignalEvent = getSignalEvent(phEvent, UR_COMMAND_KERNEL_LAUNCH);
 
   auto waitList = getWaitListView(phEventWaitList, numEventsInWaitList);
 
@@ -105,7 +105,6 @@ ur_result_t ur_command_list_manager::appendKernelLaunch(
 
   TRACK_SCOPE_LATENCY(
       "ur_command_list_manager::zeCommandListAppendLaunchKernel");
-  auto zeSignalEvent = signalEvent ? signalEvent->getZeEvent() : nullptr;
   ZE2UR_CALL(zeCommandListAppendLaunchKernel,
              (zeCommandList.get(), hZeKernel, &zeThreadGroupDimensions,
               zeSignalEvent, waitList.second, waitList.first));
