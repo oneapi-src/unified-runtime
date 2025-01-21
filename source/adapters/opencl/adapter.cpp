@@ -22,6 +22,10 @@ ur_adapter_handle_t_::ur_adapter_handle_t_() {
 #ifdef _MSC_VER
   // Loading OpenCL.dll increments the libraries internal reference count.
   auto handle = LoadLibraryA("OpenCL.dll");
+  if (handle == nullptr) {
+    logger::error("Couldn't load libOpenCL.so. Aborting.");
+    std::abort();
+  }
 
 #define CL_CORE_FUNCTION(FUNC)                                                 \
   FUNC = reinterpret_cast<decltype(::FUNC) *>(GetProcAddress(handle, #FUNC));
@@ -34,6 +38,10 @@ ur_adapter_handle_t_::ur_adapter_handle_t_() {
   // Loading libOpenCL.so to get the library handle but don't dlclose it as
   // this causes a segfault when attempting to call any OpenCL entry point.
   auto handle = dlopen("libOpenCL.so", RTLD_LOCAL);
+  if (handle == nullptr) {
+    logger::error("Couldn't load libOpenCL.so. Aborting.");
+    std::abort();
+  }
 
 #define CL_CORE_FUNCTION(FUNC)                                                 \
   FUNC = reinterpret_cast<decltype(::FUNC) *>(dlsym(handle, #FUNC));
