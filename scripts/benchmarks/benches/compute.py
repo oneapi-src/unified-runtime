@@ -9,7 +9,7 @@ import io
 from utils.utils import run, git_clone, create_build_path
 from .base import Benchmark, Suite
 from .result import Result
-from .options import options
+from options import options
 
 class ComputeBench(Suite):
     def __init__(self, directory):
@@ -22,7 +22,7 @@ class ComputeBench(Suite):
         if options.sycl is None:
             return
 
-        repo_path = git_clone(self.directory, "compute-benchmarks-repo", "https://github.com/intel/compute-benchmarks.git", "df38bc342641d7e83fbb4fe764a23d21d734e07b")
+        repo_path = git_clone(self.directory, "compute-benchmarks-repo", "https://github.com/intel/compute-benchmarks.git", "d13e5b4d8dd3d28926a74ab7f67f78c10f708a01")
         build_path = create_build_path(self.directory, 'compute-benchmarks-build')
 
         configure_command = [
@@ -78,8 +78,9 @@ class ComputeBench(Suite):
 
         if options.ur is not None:
             benches += [
-                SubmitKernelUR(self, 0),
-                SubmitKernelUR(self, 1),
+                SubmitKernelUR(self, 0, 0),
+                SubmitKernelUR(self, 1, 0),
+                SubmitKernelUR(self, 1, 1),
             ]
 
         return benches
@@ -180,13 +181,14 @@ class SubmitKernelSYCL(ComputeBenchmark):
         ]
 
 class SubmitKernelUR(ComputeBenchmark):
-    def __init__(self, bench, ioq):
+    def __init__(self, bench, ioq, measureCompletion):
         self.ioq = ioq
+        self.measureCompletion = measureCompletion
         super().__init__(bench, "api_overhead_benchmark_ur", "SubmitKernel")
 
     def name(self):
         order = "in order" if self.ioq else "out of order"
-        return f"api_overhead_benchmark_ur SubmitKernel {order}"
+        return f"api_overhead_benchmark_ur SubmitKernel {order}" + (" with measure completion" if self.measureCompletion else "")
 
     def explicit_group(self):
         return "SubmitKernel"
@@ -195,7 +197,7 @@ class SubmitKernelUR(ComputeBenchmark):
         return [
             f"--Ioq={self.ioq}",
             "--DiscardEvents=0",
-            "--MeasureCompletion=0",
+            f"--MeasureCompletion={self.measureCompletion}",
             "--iterations=100000",
             "--Profiling=0",
             "--NumKernels=10",

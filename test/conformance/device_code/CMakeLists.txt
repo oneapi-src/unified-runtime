@@ -115,7 +115,7 @@ macro(add_device_binary SOURCE_FILE)
             ${AMD_OFFLOAD_ARCH} ${AMD_NOGPULIB} ${DPCXX_BUILD_FLAGS_LIST} 
             ${SOURCE_FILE} -o ${EXE_PATH}
 
-            COMMAND ${CMAKE_COMMAND} -E env ${EXTRA_ENV} ${UR_DEVICE_CODE_EXTRACTOR} --stem="${TRIPLE}.bin" ${EXE_PATH}
+            COMMAND ${CMAKE_COMMAND} -E env ${EXTRA_ENV} ${UR_DEVICE_CODE_EXTRACTOR} -q --stem="${TRIPLE}.bin" ${EXE_PATH}
 
             WORKING_DIRECTORY "${DEVICE_BINARY_DIR}"
             DEPENDS ${SOURCE_FILE}
@@ -159,7 +159,9 @@ add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/saxpy.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/saxpy_usm.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/indexers_usm.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/build_failure.cpp)
+add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/fixed_sg_size.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/fixed_wg_size.cpp)
+add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/max_wg_size.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/sequence.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/standard_types.cpp)
 add_device_binary(${CMAKE_CURRENT_SOURCE_DIR}/subgroup.cpp)
