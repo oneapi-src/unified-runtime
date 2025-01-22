@@ -384,6 +384,7 @@ class param_traits:
     RE_TYPENAME = r".*\[typename\((.+),\s(.+)\)\].*"
     RE_TAGGED   = r".*\[tagged_by\((.+)\)].*"
     RE_BOUNDS   = r".*\[bounds\((.+),\s*(.+)\)].*"
+    RE_ALLOC = r".*\[alloc\].*"
 
     @classmethod
     def is_mbz(cls, item):
@@ -480,6 +481,13 @@ class param_traits:
     def is_release(cls, item):
         try:
             return True if re.match(cls.RE_RELEASE, item['desc']) else False
+        except:
+            return False
+
+    @classmethod
+    def is_alloc(cls, item):
+        try:
+            return True if re.match(cls.RE_ALLOC, item['desc']) else False
         except:
             return False
 
@@ -1542,6 +1550,7 @@ def get_loader_epilogue(specs, namespace, tags, obj, meta):
                         'factory': fty_name,
                         'retain': param_traits.is_retain(item),
                         'release': param_traits.is_release(item),
+                        'alloc': param_traits.is_alloc(item),
                         'range': (range_start, range_end)
                     })
                 else:
@@ -1552,6 +1561,7 @@ def get_loader_epilogue(specs, namespace, tags, obj, meta):
                         'factory': fty_name,
                         'retain': param_traits.is_retain(item),
                         'release': param_traits.is_release(item),
+                        'alloc': param_traits.is_alloc(item),
                         'optional': param_traits.is_optional(item)
                     })
             elif param_traits.is_typename(item):
@@ -1590,6 +1600,7 @@ def get_loader_epilogue(specs, namespace, tags, obj, meta):
                                      'obj': obj_name,
                                      'retain': False,
                                      'release': False,
+                                     'alloc': False,
                                      'typename': typename,
                                      'size': prop_size,
                                      'etors': handle_etors})

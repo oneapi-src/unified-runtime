@@ -48,13 +48,15 @@ public:
   //////////////////////////////////////////////////////////////////////////
   /// default ctor/dtor
   singleton_factory_t() = default;
-  ~singleton_factory_t() = default;
+  ~singleton_factory_t() { assert(map.empty()); }
 
   //////////////////////////////////////////////////////////////////////////
   /// gets a pointer to a unique instance of singleton
   /// if no instance exists, then creates a new instance
   /// the params are forwarded to the ctor of the singleton
   /// the first parameter must be the unique identifier of the instance
+  ///
+  /// The returned instance needs to be released with `release`.
   template <typename... Ts> singleton_tn *getInstance(Ts &&...params) {
     auto key = getKey(params...);
 
@@ -69,8 +71,24 @@ public:
       auto ptr = std::make_unique<singleton_t>(std::forward<Ts>(params)...);
       iter = map.emplace(key, entry_t{std::move(ptr), 0}).first;
     } else {
+      if (iter->second.ref_count == 1) {
+        // asm("int3");
+      }
       iter->second.ref_count++;
     }
+    return iter->second.ptr.get();
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+  /// Gets a pointer to an existing instance
+  ///
+  /// The refcount of the instance will not be incremented; the pointer will
+  /// become invalid if the associated key is `release`'d.
+  singleton_tn *getInstanceNonOwning(key_tn key) {
+    auto map_key = getKey(key);
+    std::lock_guard<std::mutex> lk(mut);
+    auto iter = map.find(map_key);
+    assert(iter != map.end());
     return iter->second.ptr.get();
   }
 

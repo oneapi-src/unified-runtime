@@ -24,8 +24,9 @@ __urdlllocal ur_result_t UR_APICALL urAdapterGet(
     /// zero, otherwise ::UR_RESULT_ERROR_INVALID_SIZE,
     /// will be returned.
     uint32_t NumEntries,
-    /// [out][optional][range(0, NumEntries)] array of handle of adapters.
-    /// If NumEntries is less than the number of adapters available, then
+    /// [out][optional][range(0, NumEntries)][alloc] array of handle of
+    /// adapters. If NumEntries is less than the number of adapters available,
+    /// then
     /// ::urAdapterGet shall only retrieve that number of adapters.
     ur_adapter_handle_t *phAdapters,
     /// [out][optional] returns the total number of adapters available.
@@ -311,8 +312,8 @@ __urdlllocal ur_result_t UR_APICALL urPlatformGetInfo(
         for (size_t i = 0; i < nelements; ++i) {
           if (handles[i] != nullptr) {
             handles[i] = reinterpret_cast<ur_adapter_handle_t>(
-                context->factories.ur_adapter_factory.getInstance(handles[i],
-                                                                  dditable));
+                context->factories.ur_adapter_factory.getInstanceNonOwning(
+                    handles[i]));
           }
         }
       } break;
@@ -391,7 +392,7 @@ __urdlllocal ur_result_t UR_APICALL urPlatformCreateWithNativeHandle(
     ur_adapter_handle_t hAdapter,
     /// [in][optional] pointer to native platform properties struct.
     const ur_platform_native_properties_t *pProperties,
-    /// [out] pointer to the handle of the platform object created.
+    /// [out][alloc] pointer to the handle of the platform object created.
     ur_platform_handle_t *phPlatform) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -467,7 +468,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGet(
     /// Otherwise ::UR_RESULT_ERROR_INVALID_SIZE
     /// will be returned.
     uint32_t NumEntries,
-    /// [out][optional][range(0, NumEntries)] array of handle of devices.
+    /// [out][optional][range(0, NumEntries)][alloc] array of handle of devices.
     /// If NumEntries is less than the number of devices available, then
     /// platform shall only retrieve that number of devices.
     ur_device_handle_t *phDevices,
@@ -559,8 +560,8 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetInfo(
         for (size_t i = 0; i < nelements; ++i) {
           if (handles[i] != nullptr) {
             handles[i] = reinterpret_cast<ur_platform_handle_t>(
-                context->factories.ur_platform_factory.getInstance(handles[i],
-                                                                   dditable));
+                context->factories.ur_platform_factory.getInstanceNonOwning(
+                    handles[i]));
           }
         }
       } break;
@@ -571,8 +572,8 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetInfo(
         for (size_t i = 0; i < nelements; ++i) {
           if (handles[i] != nullptr) {
             handles[i] = reinterpret_cast<ur_device_handle_t>(
-                context->factories.ur_device_factory.getInstance(handles[i],
-                                                                 dditable));
+                context->factories.ur_device_factory.getInstanceNonOwning(
+                    handles[i]));
           }
         }
       } break;
@@ -583,8 +584,8 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetInfo(
         for (size_t i = 0; i < nelements; ++i) {
           if (handles[i] != nullptr) {
             handles[i] = reinterpret_cast<ur_device_handle_t>(
-                context->factories.ur_device_factory.getInstance(handles[i],
-                                                                 dditable));
+                context->factories.ur_device_factory.getInstanceNonOwning(
+                    handles[i]));
           }
         }
       } break;
@@ -595,8 +596,8 @@ __urdlllocal ur_result_t UR_APICALL urDeviceGetInfo(
         for (size_t i = 0; i < nelements; ++i) {
           if (handles[i] != nullptr) {
             handles[i] = reinterpret_cast<ur_device_handle_t>(
-                context->factories.ur_device_factory.getInstance(handles[i],
-                                                                 dditable));
+                context->factories.ur_device_factory.getInstanceNonOwning(
+                    handles[i]));
           }
         }
       } break;
@@ -705,8 +706,8 @@ __urdlllocal ur_result_t UR_APICALL urDevicePartition(
     // convert platform handles to loader handles
     for (size_t i = 0; (nullptr != phSubDevices) && (i < NumDevices); ++i)
       phSubDevices[i] = reinterpret_cast<ur_device_handle_t>(
-          context->factories.ur_device_factory.getInstance(phSubDevices[i],
-                                                           dditable));
+          context->factories.ur_device_factory.getInstanceNonOwning(
+              phSubDevices[i]));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -786,7 +787,7 @@ __urdlllocal ur_result_t UR_APICALL urDeviceCreateWithNativeHandle(
     ur_adapter_handle_t hAdapter,
     /// [in][optional] pointer to native device properties struct.
     const ur_device_native_properties_t *pProperties,
-    /// [out] pointer to the handle of the device object created.
+    /// [out][alloc] pointer to the handle of the device object created.
     ur_device_handle_t *phDevice) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -859,7 +860,7 @@ __urdlllocal ur_result_t UR_APICALL urContextCreate(
     const ur_device_handle_t *phDevices,
     /// [in][optional] pointer to context creation properties.
     const ur_context_properties_t *pProperties,
-    /// [out] pointer to handle of context object created
+    /// [out][alloc] pointer to handle of context object created
     ur_context_handle_t *phContext) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -1003,8 +1004,8 @@ __urdlllocal ur_result_t UR_APICALL urContextGetInfo(
         for (size_t i = 0; i < nelements; ++i) {
           if (handles[i] != nullptr) {
             handles[i] = reinterpret_cast<ur_device_handle_t>(
-                context->factories.ur_device_factory.getInstance(handles[i],
-                                                                 dditable));
+                context->factories.ur_device_factory.getInstanceNonOwning(
+                    handles[i]));
           }
         }
       } break;
@@ -1095,8 +1096,7 @@ __urdlllocal ur_result_t UR_APICALL urContextCreateWithNativeHandle(
   try {
     // convert platform handle to loader handle
     *phContext = reinterpret_cast<ur_context_handle_t>(
-        context->factories.ur_context_factory.getInstance(*phContext,
-                                                          dditable));
+        context->factories.ur_context_factory.getInstanceNonOwning(*phContext));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -1170,7 +1170,7 @@ __urdlllocal ur_result_t UR_APICALL urMemImageCreate(
   try {
     // convert platform handle to loader handle
     *phMem = reinterpret_cast<ur_mem_handle_t>(
-        context->factories.ur_mem_factory.getInstance(*phMem, dditable));
+        context->factories.ur_mem_factory.getInstanceNonOwning(*phMem));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -1213,7 +1213,7 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreate(
   try {
     // convert platform handle to loader handle
     *phBuffer = reinterpret_cast<ur_mem_handle_t>(
-        context->factories.ur_mem_factory.getInstance(*phBuffer, dditable));
+        context->factories.ur_mem_factory.getInstanceNonOwning(*phBuffer));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -1310,7 +1310,7 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferPartition(
   try {
     // convert platform handle to loader handle
     *phMem = reinterpret_cast<ur_mem_handle_t>(
-        context->factories.ur_mem_factory.getInstance(*phMem, dditable));
+        context->factories.ur_mem_factory.getInstanceNonOwning(*phMem));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -1389,7 +1389,7 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreateWithNativeHandle(
   try {
     // convert platform handle to loader handle
     *phMem = reinterpret_cast<ur_mem_handle_t>(
-        context->factories.ur_mem_factory.getInstance(*phMem, dditable));
+        context->factories.ur_mem_factory.getInstanceNonOwning(*phMem));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -1436,7 +1436,7 @@ __urdlllocal ur_result_t UR_APICALL urMemImageCreateWithNativeHandle(
   try {
     // convert platform handle to loader handle
     *phMem = reinterpret_cast<ur_mem_handle_t>(
-        context->factories.ur_mem_factory.getInstance(*phMem, dditable));
+        context->factories.ur_mem_factory.getInstanceNonOwning(*phMem));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -1496,8 +1496,8 @@ __urdlllocal ur_result_t UR_APICALL urMemGetInfo(
         for (size_t i = 0; i < nelements; ++i) {
           if (handles[i] != nullptr) {
             handles[i] = reinterpret_cast<ur_context_handle_t>(
-                context->factories.ur_context_factory.getInstance(handles[i],
-                                                                  dditable));
+                context->factories.ur_context_factory.getInstanceNonOwning(
+                    handles[i]));
           }
         }
       } break;
@@ -1581,8 +1581,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerCreate(
   try {
     // convert platform handle to loader handle
     *phSampler = reinterpret_cast<ur_sampler_handle_t>(
-        context->factories.ur_sampler_factory.getInstance(*phSampler,
-                                                          dditable));
+        context->factories.ur_sampler_factory.getInstanceNonOwning(*phSampler));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -1692,8 +1691,8 @@ __urdlllocal ur_result_t UR_APICALL urSamplerGetInfo(
         for (size_t i = 0; i < nelements; ++i) {
           if (handles[i] != nullptr) {
             handles[i] = reinterpret_cast<ur_context_handle_t>(
-                context->factories.ur_context_factory.getInstance(handles[i],
-                                                                  dditable));
+                context->factories.ur_context_factory.getInstanceNonOwning(
+                    handles[i]));
           }
         }
       } break;
@@ -1772,8 +1771,7 @@ __urdlllocal ur_result_t UR_APICALL urSamplerCreateWithNativeHandle(
   try {
     // convert platform handle to loader handle
     *phSampler = reinterpret_cast<ur_sampler_handle_t>(
-        context->factories.ur_sampler_factory.getInstance(*phSampler,
-                                                          dditable));
+        context->factories.ur_sampler_factory.getInstanceNonOwning(*phSampler));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -1976,8 +1974,8 @@ __urdlllocal ur_result_t UR_APICALL urUSMGetMemAllocInfo(
         for (size_t i = 0; i < nelements; ++i) {
           if (handles[i] != nullptr) {
             handles[i] = reinterpret_cast<ur_device_handle_t>(
-                context->factories.ur_device_factory.getInstance(handles[i],
-                                                                 dditable));
+                context->factories.ur_device_factory.getInstanceNonOwning(
+                    handles[i]));
           }
         }
       } break;
@@ -1988,8 +1986,8 @@ __urdlllocal ur_result_t UR_APICALL urUSMGetMemAllocInfo(
         for (size_t i = 0; i < nelements; ++i) {
           if (handles[i] != nullptr) {
             handles[i] = reinterpret_cast<ur_usm_pool_handle_t>(
-                context->factories.ur_usm_pool_factory.getInstance(handles[i],
-                                                                   dditable));
+                context->factories.ur_usm_pool_factory.getInstanceNonOwning(
+                    handles[i]));
           }
         }
       } break;
@@ -2012,7 +2010,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolCreate(
     /// [in] pointer to USM pool descriptor. Can be chained with
     /// ::ur_usm_pool_limits_desc_t
     ur_usm_pool_desc_t *pPoolDesc,
-    /// [out] pointer to USM memory pool
+    /// [out][alloc] pointer to USM memory pool
     ur_usm_pool_handle_t *ppPool) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -2146,8 +2144,8 @@ __urdlllocal ur_result_t UR_APICALL urUSMPoolGetInfo(
         for (size_t i = 0; i < nelements; ++i) {
           if (handles[i] != nullptr) {
             handles[i] = reinterpret_cast<ur_context_handle_t>(
-                context->factories.ur_context_factory.getInstance(handles[i],
-                                                                  dditable));
+                context->factories.ur_context_factory.getInstanceNonOwning(
+                    handles[i]));
           }
         }
       } break;
@@ -2444,8 +2442,8 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemCreate(
   try {
     // convert platform handle to loader handle
     *phPhysicalMem = reinterpret_cast<ur_physical_mem_handle_t>(
-        context->factories.ur_physical_mem_factory.getInstance(*phPhysicalMem,
-                                                               dditable));
+        context->factories.ur_physical_mem_factory.getInstanceNonOwning(
+            *phPhysicalMem));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -2565,8 +2563,8 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemGetInfo(
         for (size_t i = 0; i < nelements; ++i) {
           if (handles[i] != nullptr) {
             handles[i] = reinterpret_cast<ur_context_handle_t>(
-                context->factories.ur_context_factory.getInstance(handles[i],
-                                                                  dditable));
+                context->factories.ur_context_factory.getInstanceNonOwning(
+                    handles[i]));
           }
         }
       } break;
@@ -2577,8 +2575,8 @@ __urdlllocal ur_result_t UR_APICALL urPhysicalMemGetInfo(
         for (size_t i = 0; i < nelements; ++i) {
           if (handles[i] != nullptr) {
             handles[i] = reinterpret_cast<ur_device_handle_t>(
-                context->factories.ur_device_factory.getInstance(handles[i],
-                                                                 dditable));
+                context->factories.ur_device_factory.getInstanceNonOwning(
+                    handles[i]));
           }
         }
       } break;
@@ -2604,7 +2602,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithIL(
     size_t length,
     /// [in][optional] pointer to program creation properties.
     const ur_program_properties_t *pProperties,
-    /// [out] pointer to handle of program object created.
+    /// [out][alloc] pointer to handle of program object created.
     ur_program_handle_t *phProgram) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -2655,7 +2653,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithBinary(
     const uint8_t **ppBinaries,
     /// [in][optional] pointer to program creation properties.
     const ur_program_properties_t *pProperties,
-    /// [out] pointer to handle of Program object created.
+    /// [out][alloc] pointer to handle of Program object created.
     ur_program_handle_t *phProgram) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -2768,7 +2766,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramLink(
     const ur_program_handle_t *phPrograms,
     /// [in][optional] pointer to linker options null-terminated string.
     const char *pOptions,
-    /// [out] pointer to handle of program object created.
+    /// [out][alloc] pointer to handle of program object created.
     ur_program_handle_t *phProgram) {
   ur_result_t result = UR_RESULT_SUCCESS;
   if (nullptr != phProgram) {
@@ -2992,8 +2990,8 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetInfo(
         for (size_t i = 0; i < nelements; ++i) {
           if (handles[i] != nullptr) {
             handles[i] = reinterpret_cast<ur_context_handle_t>(
-                context->factories.ur_context_factory.getInstance(handles[i],
-                                                                  dditable));
+                context->factories.ur_context_factory.getInstanceNonOwning(
+                    handles[i]));
           }
         }
       } break;
@@ -3004,8 +3002,8 @@ __urdlllocal ur_result_t UR_APICALL urProgramGetInfo(
         for (size_t i = 0; i < nelements; ++i) {
           if (handles[i] != nullptr) {
             handles[i] = reinterpret_cast<ur_device_handle_t>(
-                context->factories.ur_device_factory.getInstance(handles[i],
-                                                                 dditable));
+                context->factories.ur_device_factory.getInstanceNonOwning(
+                    handles[i]));
           }
         }
       } break;
@@ -3098,7 +3096,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramSetSpecializationConstants(
 __urdlllocal ur_result_t UR_APICALL urProgramGetNativeHandle(
     /// [in] handle of the program.
     ur_program_handle_t hProgram,
-    /// [out] a pointer to the native handle of the program.
+    /// [out][alloc] a pointer to the native handle of the program.
     ur_native_handle_t *phNativeProgram) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -3131,7 +3129,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithNativeHandle(
     ur_context_handle_t hContext,
     /// [in][optional] pointer to native program properties struct.
     const ur_program_native_properties_t *pProperties,
-    /// [out] pointer to the handle of the program object created.
+    /// [out][alloc] pointer to the handle of the program object created.
     ur_program_handle_t *phProgram) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -3197,7 +3195,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreate(
   try {
     // convert platform handle to loader handle
     *phKernel = reinterpret_cast<ur_kernel_handle_t>(
-        context->factories.ur_kernel_factory.getInstance(*phKernel, dditable));
+        context->factories.ur_kernel_factory.getInstanceNonOwning(*phKernel));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -3322,8 +3320,8 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetInfo(
         for (size_t i = 0; i < nelements; ++i) {
           if (handles[i] != nullptr) {
             handles[i] = reinterpret_cast<ur_context_handle_t>(
-                context->factories.ur_context_factory.getInstance(handles[i],
-                                                                  dditable));
+                context->factories.ur_context_factory.getInstanceNonOwning(
+                    handles[i]));
           }
         }
       } break;
@@ -3334,8 +3332,8 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetInfo(
         for (size_t i = 0; i < nelements; ++i) {
           if (handles[i] != nullptr) {
             handles[i] = reinterpret_cast<ur_program_handle_t>(
-                context->factories.ur_program_factory.getInstance(handles[i],
-                                                                  dditable));
+                context->factories.ur_program_factory.getInstanceNonOwning(
+                    handles[i]));
           }
         }
       } break;
@@ -3685,7 +3683,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelCreateWithNativeHandle(
     ur_program_handle_t hProgram,
     /// [in][optional] pointer to native kernel properties struct
     const ur_kernel_native_properties_t *pProperties,
-    /// [out] pointer to the handle of the kernel object created.
+    /// [out][alloc] pointer to the handle of the kernel object created.
     ur_kernel_handle_t *phKernel) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -3817,8 +3815,8 @@ __urdlllocal ur_result_t UR_APICALL urQueueGetInfo(
         for (size_t i = 0; i < nelements; ++i) {
           if (handles[i] != nullptr) {
             handles[i] = reinterpret_cast<ur_context_handle_t>(
-                context->factories.ur_context_factory.getInstance(handles[i],
-                                                                  dditable));
+                context->factories.ur_context_factory.getInstanceNonOwning(
+                    handles[i]));
           }
         }
       } break;
@@ -3829,8 +3827,8 @@ __urdlllocal ur_result_t UR_APICALL urQueueGetInfo(
         for (size_t i = 0; i < nelements; ++i) {
           if (handles[i] != nullptr) {
             handles[i] = reinterpret_cast<ur_device_handle_t>(
-                context->factories.ur_device_factory.getInstance(handles[i],
-                                                                 dditable));
+                context->factories.ur_device_factory.getInstanceNonOwning(
+                    handles[i]));
           }
         }
       } break;
@@ -3841,8 +3839,8 @@ __urdlllocal ur_result_t UR_APICALL urQueueGetInfo(
         for (size_t i = 0; i < nelements; ++i) {
           if (handles[i] != nullptr) {
             handles[i] = reinterpret_cast<ur_queue_handle_t>(
-                context->factories.ur_queue_factory.getInstance(handles[i],
-                                                                dditable));
+                context->factories.ur_queue_factory.getInstanceNonOwning(
+                    handles[i]));
           }
         }
       } break;
@@ -3866,7 +3864,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueCreate(
     ur_device_handle_t hDevice,
     /// [in][optional] pointer to queue creation properties.
     const ur_queue_properties_t *pProperties,
-    /// [out] pointer to handle of queue object created
+    /// [out][alloc] pointer to handle of queue object created
     ur_queue_handle_t *phQueue) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -3997,7 +3995,7 @@ __urdlllocal ur_result_t UR_APICALL urQueueCreateWithNativeHandle(
     ur_device_handle_t hDevice,
     /// [in][optional] pointer to native queue properties struct
     const ur_queue_native_properties_t *pProperties,
-    /// [out] pointer to the handle of the queue object created.
+    /// [out][alloc] pointer to the handle of the queue object created.
     ur_queue_handle_t *phQueue) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -4130,8 +4128,8 @@ __urdlllocal ur_result_t UR_APICALL urEventGetInfo(
         for (size_t i = 0; i < nelements; ++i) {
           if (handles[i] != nullptr) {
             handles[i] = reinterpret_cast<ur_queue_handle_t>(
-                context->factories.ur_queue_factory.getInstance(handles[i],
-                                                                dditable));
+                context->factories.ur_queue_factory.getInstanceNonOwning(
+                    handles[i]));
           }
         }
       } break;
@@ -4142,8 +4140,8 @@ __urdlllocal ur_result_t UR_APICALL urEventGetInfo(
         for (size_t i = 0; i < nelements; ++i) {
           if (handles[i] != nullptr) {
             handles[i] = reinterpret_cast<ur_context_handle_t>(
-                context->factories.ur_context_factory.getInstance(handles[i],
-                                                                  dditable));
+                context->factories.ur_context_factory.getInstanceNonOwning(
+                    handles[i]));
           }
         }
       } break;
@@ -4316,7 +4314,7 @@ __urdlllocal ur_result_t UR_APICALL urEventCreateWithNativeHandle(
     ur_context_handle_t hContext,
     /// [in][optional] pointer to native event properties struct
     const ur_event_native_properties_t *pProperties,
-    /// [out] pointer to the handle of the event object created.
+    /// [out][alloc] pointer to the handle of the event object created.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -4430,9 +4428,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunch(
     /// If nullptr, the numEventsInWaitList must be 0, indicating that no wait
     /// event.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// kernel execution instance. If phEventWaitList and phEvent are not
-    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular kernel execution instance. If phEventWaitList and phEvent
+    /// are not NULL, phEvent must not refer to an element of the
+    /// phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -4491,9 +4490,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWait(
     /// previously enqueued commands
     /// must be complete.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// command instance. If phEventWaitList and phEvent are not NULL, phEvent
-    /// must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular command instance. If phEventWaitList and phEvent are not
+    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -4548,9 +4547,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrier(
     /// previously enqueued commands
     /// must be complete.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// command instance. If phEventWaitList and phEvent are not NULL, phEvent
-    /// must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular command instance. If phEventWaitList and phEvent are not
+    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -4614,9 +4613,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferRead(
     /// If nullptr, the numEventsInWaitList must be 0, indicating that this
     /// command does not wait on any event to complete.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// command instance. If phEventWaitList and phEvent are not NULL, phEvent
-    /// must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular command instance. If phEventWaitList and phEvent are not
+    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -4684,9 +4683,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWrite(
     /// If nullptr, the numEventsInWaitList must be 0, indicating that this
     /// command does not wait on any event to complete.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// command instance. If phEventWaitList and phEvent are not NULL, phEvent
-    /// must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular command instance. If phEventWaitList and phEvent are not
+    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -4766,9 +4765,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
     /// If nullptr, the numEventsInWaitList must be 0, indicating that this
     /// command does not wait on any event to complete.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// command instance. If phEventWaitList and phEvent are not NULL, phEvent
-    /// must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular command instance. If phEventWaitList and phEvent are not
+    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -4850,9 +4849,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
     /// If nullptr, the numEventsInWaitList must be 0, indicating that this
     /// command does not wait on any event to complete.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// command instance. If phEventWaitList and phEvent are not NULL, phEvent
-    /// must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular command instance. If phEventWaitList and phEvent are not
+    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -4921,9 +4920,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopy(
     /// If nullptr, the numEventsInWaitList must be 0, indicating that this
     /// command does not wait on any event to complete.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// command instance. If phEventWaitList and phEvent are not NULL, phEvent
-    /// must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular command instance. If phEventWaitList and phEvent are not
+    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -5002,9 +5001,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
     /// If nullptr, the numEventsInWaitList must be 0, indicating that this
     /// command does not wait on any event to complete.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// command instance. If phEventWaitList and phEvent are not NULL, phEvent
-    /// must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular command instance. If phEventWaitList and phEvent are not
+    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -5076,9 +5075,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferFill(
     /// If nullptr, the numEventsInWaitList must be 0, indicating that this
     /// command does not wait on any event to complete.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// command instance. If phEventWaitList and phEvent are not NULL, phEvent
-    /// must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular command instance. If phEventWaitList and phEvent are not
+    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -5151,9 +5150,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageRead(
     /// If nullptr, the numEventsInWaitList must be 0, indicating that this
     /// command does not wait on any event to complete.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// command instance. If phEventWaitList and phEvent are not NULL, phEvent
-    /// must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular command instance. If phEventWaitList and phEvent are not
+    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -5226,9 +5225,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageWrite(
     /// If nullptr, the numEventsInWaitList must be 0, indicating that this
     /// command does not wait on any event to complete.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// command instance. If phEventWaitList and phEvent are not NULL, phEvent
-    /// must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular command instance. If phEventWaitList and phEvent are not
+    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -5299,9 +5298,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemImageCopy(
     /// If nullptr, the numEventsInWaitList must be 0, indicating that this
     /// command does not wait on any event to complete.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// command instance. If phEventWaitList and phEvent are not NULL, phEvent
-    /// must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular command instance. If phEventWaitList and phEvent are not
+    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -5372,9 +5371,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferMap(
     /// If nullptr, the numEventsInWaitList must be 0, indicating that this
     /// command does not wait on any event to complete.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// command instance. If phEventWaitList and phEvent are not NULL, phEvent
-    /// must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular command instance. If phEventWaitList and phEvent are not
+    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
     ur_event_handle_t *phEvent,
     /// [out] return mapped pointer.  TODO: move it before
     /// numEventsInWaitList?
@@ -5439,9 +5438,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemUnmap(
     /// If nullptr, the numEventsInWaitList must be 0, indicating that this
     /// command does not wait on any event to complete.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// command instance. If phEventWaitList and phEvent are not NULL, phEvent
-    /// must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular command instance. If phEventWaitList and phEvent are not
+    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -5507,9 +5506,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill(
     /// If nullptr, the numEventsInWaitList must be 0, indicating that this
     /// command does not wait on any event to complete.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// command instance. If phEventWaitList and phEvent are not NULL, phEvent
-    /// must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular command instance. If phEventWaitList and phEvent are not
+    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -5572,9 +5571,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy(
     /// If nullptr, the numEventsInWaitList must be 0, indicating that this
     /// command does not wait on any event to complete.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// command instance. If phEventWaitList and phEvent are not NULL, phEvent
-    /// must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular command instance. If phEventWaitList and phEvent are not
+    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -5634,9 +5633,9 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMPrefetch(
     /// If nullptr, the numEventsInWaitList must be 0, indicating that this
     /// command does not wait on any event to complete.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// command instance. If phEventWaitList and phEvent are not NULL, phEvent
-    /// must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular command instance. If phEventWaitList and phEvent are not
+    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -5689,8 +5688,8 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMAdvise(
     size_t size,
     /// [in] USM memory advice
     ur_usm_advice_flags_t advice,
-    /// [out][optional] return an event object that identifies this particular
-    /// command instance.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular command instance.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -5750,9 +5749,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMFill2D(
     /// If nullptr, the numEventsInWaitList must be 0, indicating that no wait
     /// event.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// kernel execution instance. If phEventWaitList and phEvent are not
-    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular kernel execution instance. If phEventWaitList and phEvent
+    /// are not NULL, phEvent must not refer to an element of the
+    /// phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -5822,9 +5822,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueUSMMemcpy2D(
     /// If nullptr, the numEventsInWaitList must be 0, indicating that no wait
     /// event.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// kernel execution instance. If phEventWaitList and phEvent are not
-    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular kernel execution instance. If phEventWaitList and phEvent
+    /// are not NULL, phEvent must not refer to an element of the
+    /// phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -5891,9 +5892,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableWrite(
     /// If nullptr, the numEventsInWaitList must be 0, indicating that no wait
     /// event.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// kernel execution instance. If phEventWaitList and phEvent are not
-    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular kernel execution instance. If phEventWaitList and phEvent
+    /// are not NULL, phEvent must not refer to an element of the
+    /// phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -5964,9 +5966,10 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueDeviceGlobalVariableRead(
     /// If nullptr, the numEventsInWaitList must be 0, indicating that no wait
     /// event.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// kernel execution instance. If phEventWaitList and phEvent are not
-    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular kernel execution instance. If phEventWaitList and phEvent
+    /// are not NULL, phEvent must not refer to an element of the
+    /// phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -6038,10 +6041,11 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueReadHostPipe(
     /// If nullptr, the numEventsInWaitList must be 0, indicating that no wait
     /// event.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] returns an event object that identifies this read
-    /// command and can be used to query or queue a wait for this command to
-    /// complete. If phEventWaitList and phEvent are not NULL, phEvent must not
-    /// refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] returns an event object that identifies this
+    /// read command
+    /// and can be used to query or queue a wait for this command to complete.
+    /// If phEventWaitList and phEvent are not NULL, phEvent must not refer to
+    /// an element of the phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -6113,10 +6117,11 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueWriteHostPipe(
     /// If nullptr, the numEventsInWaitList must be 0, indicating that no wait
     /// event.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] returns an event object that identifies this write
-    /// command and can be used to query or queue a wait for this command to
-    /// complete. If phEventWaitList and phEvent are not NULL, phEvent must not
-    /// refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] returns an event object that identifies this
+    /// write command
+    /// and can be used to query or queue a wait for this command to complete.
+    /// If phEventWaitList and phEvent are not NULL, phEvent must not refer to
+    /// an element of the phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -6465,9 +6470,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageCopyExp(
     /// previously enqueued commands
     /// must be complete.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// command instance. If phEventWaitList and phEvent are not NULL, phEvent
-    /// must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular command instance. If phEventWaitList and phEvent are not
+    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -6656,8 +6661,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportExternalMemoryExp(
   try {
     // convert platform handle to loader handle
     *phExternalMem = reinterpret_cast<ur_exp_external_mem_handle_t>(
-        context->factories.ur_exp_external_mem_factory.getInstance(
-            *phExternalMem, dditable));
+        context->factories.ur_exp_external_mem_factory.getInstanceNonOwning(
+            *phExternalMem));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -6834,8 +6839,8 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImportExternalSemaphoreExp(
   try {
     // convert platform handle to loader handle
     *phExternalSemaphore = reinterpret_cast<ur_exp_external_semaphore_handle_t>(
-        context->factories.ur_exp_external_semaphore_factory.getInstance(
-            *phExternalSemaphore, dditable));
+        context->factories.ur_exp_external_semaphore_factory
+            .getInstanceNonOwning(*phExternalSemaphore));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -6907,9 +6912,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesWaitExternalSemaphoreExp(
     /// previously enqueued commands
     /// must be complete.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// command instance. If phEventWaitList and phEvent are not NULL, phEvent
-    /// must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular command instance. If phEventWaitList and phEvent are not
+    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -6979,9 +6984,9 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesSignalExternalSemaphoreExp(
     /// previously enqueued commands
     /// must be complete.
     const ur_event_handle_t *phEventWaitList,
-    /// [out][optional] return an event object that identifies this particular
-    /// command instance. If phEventWaitList and phEvent are not NULL, phEvent
-    /// must not refer to an element of the phEventWaitList array.
+    /// [out][optional][alloc] return an event object that identifies this
+    /// particular command instance. If phEventWaitList and phEvent are not
+    /// NULL, phEvent must not refer to an element of the phEventWaitList array.
     ur_event_handle_t *phEvent) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
@@ -7065,8 +7070,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferCreateExp(
   try {
     // convert platform handle to loader handle
     *phCommandBuffer = reinterpret_cast<ur_exp_command_buffer_handle_t>(
-        context->factories.ur_exp_command_buffer_factory.getInstance(
-            *phCommandBuffer, dditable));
+        context->factories.ur_exp_command_buffer_factory.getInstanceNonOwning(
+            *phCommandBuffer));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -7259,7 +7264,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
     // convert platform handle to loader handle
     if (nullptr != phEvent)
       *phEvent = reinterpret_cast<ur_event_handle_t>(
-          context->factories.ur_event_factory.getInstance(*phEvent, dditable));
+          context->factories.ur_event_factory.getInstanceNonOwning(*phEvent));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -7268,8 +7273,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
     // convert platform handle to loader handle
     if (nullptr != phCommand)
       *phCommand = reinterpret_cast<ur_exp_command_buffer_command_handle_t>(
-          context->factories.ur_exp_command_buffer_command_factory.getInstance(
-              *phCommand, dditable));
+          context->factories.ur_exp_command_buffer_command_factory
+              .getInstanceNonOwning(*phCommand));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -7345,7 +7350,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMMemcpyExp(
     // convert platform handle to loader handle
     if (nullptr != phEvent)
       *phEvent = reinterpret_cast<ur_event_handle_t>(
-          context->factories.ur_event_factory.getInstance(*phEvent, dditable));
+          context->factories.ur_event_factory.getInstanceNonOwning(*phEvent));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -7354,8 +7359,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMMemcpyExp(
     // convert platform handle to loader handle
     if (nullptr != phCommand)
       *phCommand = reinterpret_cast<ur_exp_command_buffer_command_handle_t>(
-          context->factories.ur_exp_command_buffer_command_factory.getInstance(
-              *phCommand, dditable));
+          context->factories.ur_exp_command_buffer_command_factory
+              .getInstanceNonOwning(*phCommand));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -7432,7 +7437,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMFillExp(
     // convert platform handle to loader handle
     if (nullptr != phEvent)
       *phEvent = reinterpret_cast<ur_event_handle_t>(
-          context->factories.ur_event_factory.getInstance(*phEvent, dditable));
+          context->factories.ur_event_factory.getInstanceNonOwning(*phEvent));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -7441,8 +7446,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMFillExp(
     // convert platform handle to loader handle
     if (nullptr != phCommand)
       *phCommand = reinterpret_cast<ur_exp_command_buffer_command_handle_t>(
-          context->factories.ur_exp_command_buffer_command_factory.getInstance(
-              *phCommand, dditable));
+          context->factories.ur_exp_command_buffer_command_factory
+              .getInstanceNonOwning(*phCommand));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -7528,7 +7533,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
     // convert platform handle to loader handle
     if (nullptr != phEvent)
       *phEvent = reinterpret_cast<ur_event_handle_t>(
-          context->factories.ur_event_factory.getInstance(*phEvent, dditable));
+          context->factories.ur_event_factory.getInstanceNonOwning(*phEvent));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -7537,8 +7542,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyExp(
     // convert platform handle to loader handle
     if (nullptr != phCommand)
       *phCommand = reinterpret_cast<ur_exp_command_buffer_command_handle_t>(
-          context->factories.ur_exp_command_buffer_command_factory.getInstance(
-              *phCommand, dditable));
+          context->factories.ur_exp_command_buffer_command_factory
+              .getInstanceNonOwning(*phCommand));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -7619,7 +7624,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
     // convert platform handle to loader handle
     if (nullptr != phEvent)
       *phEvent = reinterpret_cast<ur_event_handle_t>(
-          context->factories.ur_event_factory.getInstance(*phEvent, dditable));
+          context->factories.ur_event_factory.getInstanceNonOwning(*phEvent));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -7628,8 +7633,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteExp(
     // convert platform handle to loader handle
     if (nullptr != phCommand)
       *phCommand = reinterpret_cast<ur_exp_command_buffer_command_handle_t>(
-          context->factories.ur_exp_command_buffer_command_factory.getInstance(
-              *phCommand, dditable));
+          context->factories.ur_exp_command_buffer_command_factory
+              .getInstanceNonOwning(*phCommand));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -7710,7 +7715,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
     // convert platform handle to loader handle
     if (nullptr != phEvent)
       *phEvent = reinterpret_cast<ur_event_handle_t>(
-          context->factories.ur_event_factory.getInstance(*phEvent, dditable));
+          context->factories.ur_event_factory.getInstanceNonOwning(*phEvent));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -7719,8 +7724,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadExp(
     // convert platform handle to loader handle
     if (nullptr != phCommand)
       *phCommand = reinterpret_cast<ur_exp_command_buffer_command_handle_t>(
-          context->factories.ur_exp_command_buffer_command_factory.getInstance(
-              *phCommand, dditable));
+          context->factories.ur_exp_command_buffer_command_factory
+              .getInstanceNonOwning(*phCommand));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -7815,7 +7820,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
     // convert platform handle to loader handle
     if (nullptr != phEvent)
       *phEvent = reinterpret_cast<ur_event_handle_t>(
-          context->factories.ur_event_factory.getInstance(*phEvent, dditable));
+          context->factories.ur_event_factory.getInstanceNonOwning(*phEvent));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -7824,8 +7829,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferCopyRectExp(
     // convert platform handle to loader handle
     if (nullptr != phCommand)
       *phCommand = reinterpret_cast<ur_exp_command_buffer_command_handle_t>(
-          context->factories.ur_exp_command_buffer_command_factory.getInstance(
-              *phCommand, dditable));
+          context->factories.ur_exp_command_buffer_command_factory
+              .getInstanceNonOwning(*phCommand));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -7920,7 +7925,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
     // convert platform handle to loader handle
     if (nullptr != phEvent)
       *phEvent = reinterpret_cast<ur_event_handle_t>(
-          context->factories.ur_event_factory.getInstance(*phEvent, dditable));
+          context->factories.ur_event_factory.getInstanceNonOwning(*phEvent));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -7929,8 +7934,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferWriteRectExp(
     // convert platform handle to loader handle
     if (nullptr != phCommand)
       *phCommand = reinterpret_cast<ur_exp_command_buffer_command_handle_t>(
-          context->factories.ur_exp_command_buffer_command_factory.getInstance(
-              *phCommand, dditable));
+          context->factories.ur_exp_command_buffer_command_factory
+              .getInstanceNonOwning(*phCommand));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -8024,7 +8029,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
     // convert platform handle to loader handle
     if (nullptr != phEvent)
       *phEvent = reinterpret_cast<ur_event_handle_t>(
-          context->factories.ur_event_factory.getInstance(*phEvent, dditable));
+          context->factories.ur_event_factory.getInstanceNonOwning(*phEvent));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -8033,8 +8038,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferReadRectExp(
     // convert platform handle to loader handle
     if (nullptr != phCommand)
       *phCommand = reinterpret_cast<ur_exp_command_buffer_command_handle_t>(
-          context->factories.ur_exp_command_buffer_command_factory.getInstance(
-              *phCommand, dditable));
+          context->factories.ur_exp_command_buffer_command_factory
+              .getInstanceNonOwning(*phCommand));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -8117,7 +8122,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
     // convert platform handle to loader handle
     if (nullptr != phEvent)
       *phEvent = reinterpret_cast<ur_event_handle_t>(
-          context->factories.ur_event_factory.getInstance(*phEvent, dditable));
+          context->factories.ur_event_factory.getInstanceNonOwning(*phEvent));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -8126,8 +8131,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendMemBufferFillExp(
     // convert platform handle to loader handle
     if (nullptr != phCommand)
       *phCommand = reinterpret_cast<ur_exp_command_buffer_command_handle_t>(
-          context->factories.ur_exp_command_buffer_command_factory.getInstance(
-              *phCommand, dditable));
+          context->factories.ur_exp_command_buffer_command_factory
+              .getInstanceNonOwning(*phCommand));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -8203,7 +8208,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMPrefetchExp(
     // convert platform handle to loader handle
     if (nullptr != phEvent)
       *phEvent = reinterpret_cast<ur_event_handle_t>(
-          context->factories.ur_event_factory.getInstance(*phEvent, dditable));
+          context->factories.ur_event_factory.getInstanceNonOwning(*phEvent));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -8212,8 +8217,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMPrefetchExp(
     // convert platform handle to loader handle
     if (nullptr != phCommand)
       *phCommand = reinterpret_cast<ur_exp_command_buffer_command_handle_t>(
-          context->factories.ur_exp_command_buffer_command_factory.getInstance(
-              *phCommand, dditable));
+          context->factories.ur_exp_command_buffer_command_factory
+              .getInstanceNonOwning(*phCommand));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -8289,7 +8294,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMAdviseExp(
     // convert platform handle to loader handle
     if (nullptr != phEvent)
       *phEvent = reinterpret_cast<ur_event_handle_t>(
-          context->factories.ur_event_factory.getInstance(*phEvent, dditable));
+          context->factories.ur_event_factory.getInstanceNonOwning(*phEvent));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -8298,8 +8303,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMAdviseExp(
     // convert platform handle to loader handle
     if (nullptr != phCommand)
       *phCommand = reinterpret_cast<ur_exp_command_buffer_command_handle_t>(
-          context->factories.ur_exp_command_buffer_command_factory.getInstance(
-              *phCommand, dditable));
+          context->factories.ur_exp_command_buffer_command_factory
+              .getInstanceNonOwning(*phCommand));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -8364,7 +8369,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
     // convert platform handle to loader handle
     if (nullptr != phEvent)
       *phEvent = reinterpret_cast<ur_event_handle_t>(
-          context->factories.ur_event_factory.getInstance(*phEvent, dditable));
+          context->factories.ur_event_factory.getInstanceNonOwning(*phEvent));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -8529,8 +8534,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateSignalEventExp(
   try {
     // convert platform handle to loader handle
     *phSignalEvent = reinterpret_cast<ur_event_handle_t>(
-        context->factories.ur_event_factory.getInstance(*phSignalEvent,
-                                                        dditable));
+        context->factories.ur_event_factory.getInstanceNonOwning(
+            *phSignalEvent));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -8729,7 +8734,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueCooperativeKernelLaunchExp(
     // convert platform handle to loader handle
     if (nullptr != phEvent)
       *phEvent = reinterpret_cast<ur_event_handle_t>(
-          context->factories.ur_event_factory.getInstance(*phEvent, dditable));
+          context->factories.ur_event_factory.getInstanceNonOwning(*phEvent));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -8840,7 +8845,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueTimestampRecordingExp(
   try {
     // convert platform handle to loader handle
     *phEvent = reinterpret_cast<ur_event_handle_t>(
-        context->factories.ur_event_factory.getInstance(*phEvent, dditable));
+        context->factories.ur_event_factory.getInstanceNonOwning(*phEvent));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -8924,7 +8929,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
     // convert platform handle to loader handle
     if (nullptr != phEvent)
       *phEvent = reinterpret_cast<ur_event_handle_t>(
-          context->factories.ur_event_factory.getInstance(*phEvent, dditable));
+          context->factories.ur_event_factory.getInstanceNonOwning(*phEvent));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -9057,8 +9062,8 @@ __urdlllocal ur_result_t UR_APICALL urProgramLinkExp(
     // convert platform handle to loader handle
     if (nullptr != phProgram)
       *phProgram = reinterpret_cast<ur_program_handle_t>(
-          context->factories.ur_program_factory.getInstance(*phProgram,
-                                                            dditable));
+          context->factories.ur_program_factory.getInstanceNonOwning(
+              *phProgram));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -9277,7 +9282,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueEventsWaitWithBarrierExt(
     // convert platform handle to loader handle
     if (nullptr != phEvent)
       *phEvent = reinterpret_cast<ur_event_handle_t>(
-          context->factories.ur_event_factory.getInstance(*phEvent, dditable));
+          context->factories.ur_event_factory.getInstanceNonOwning(*phEvent));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -9355,7 +9360,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueNativeCommandExp(
     // convert platform handle to loader handle
     if (nullptr != phEvent)
       *phEvent = reinterpret_cast<ur_event_handle_t>(
-          context->factories.ur_event_factory.getInstance(*phEvent, dditable));
+          context->factories.ur_event_factory.getInstanceNonOwning(*phEvent));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -9428,8 +9433,8 @@ __urdlllocal ur_result_t UR_APICALL urTensorMapEncodeIm2ColExp(
   try {
     // convert platform handle to loader handle
     *hTensorMap = reinterpret_cast<ur_exp_tensor_map_handle_t>(
-        context->factories.ur_exp_tensor_map_factory.getInstance(*hTensorMap,
-                                                                 dditable));
+        context->factories.ur_exp_tensor_map_factory.getInstanceNonOwning(
+            *hTensorMap));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }
@@ -9497,8 +9502,8 @@ __urdlllocal ur_result_t UR_APICALL urTensorMapEncodeTiledExp(
   try {
     // convert platform handle to loader handle
     *hTensorMap = reinterpret_cast<ur_exp_tensor_map_handle_t>(
-        context->factories.ur_exp_tensor_map_factory.getInstance(*hTensorMap,
-                                                                 dditable));
+        context->factories.ur_exp_tensor_map_factory.getInstanceNonOwning(
+            *hTensorMap));
   } catch (std::bad_alloc &) {
     result = UR_RESULT_ERROR_OUT_OF_HOST_MEMORY;
   }

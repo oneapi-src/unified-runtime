@@ -322,7 +322,12 @@ namespace ur_loader
         %endif
         %if not item['release'] and not item['retain'] and not '_native_object_' in item['obj'] or th.make_func_name(n, tags, obj) == 'urPlatformCreateWithNativeHandle':
         try
-        {
+        {<%
+                def getInstanceCall(handle):
+                    if item['alloc']:
+                        return "getInstance( {}, dditable )".format(handle)
+                    return "getInstanceNonOwning( {} )".format(handle)
+            %>
             %if 'typename' in item:
             if (${item['name']} != nullptr) {
                 switch (${item['typename']}) {
@@ -333,7 +338,7 @@ namespace ur_loader
                             for (size_t i = 0; i < nelements; ++i) {
                                 if (handles[i] != nullptr) {
                                     handles[i] = reinterpret_cast<${etor['type']}>(
-                                        context->factories.${etor['factory']}.getInstance( handles[i], dditable ) );
+                                        context->factories.${etor['factory']}.${getInstanceCall("handles[i]")} );
                                 }
                             }
                         } break;
@@ -345,16 +350,16 @@ namespace ur_loader
             // convert platform handles to loader handles
             for( size_t i = ${item['range'][0]}; ( nullptr != ${item['name']} ) && ( i < ${item['range'][1]} ); ++i )
                 ${item['name']}[ i ] = reinterpret_cast<${item['type']}>(
-                    context->factories.${item['factory']}.getInstance( ${item['name']}[ i ], dditable ) );
+                    context->factories.${item['factory']}.${getInstanceCall(item['name'] + "[ i ]")} );
             %else:
             // convert platform handle to loader handle
             %if item['optional'] or th.always_wrap_outputs(obj):
             if( nullptr != ${item['name']} )
                 *${item['name']} = reinterpret_cast<${item['type']}>(
-                    context->factories.${item['factory']}.getInstance( *${item['name']}, dditable ) );
+                    context->factories.${item['factory']}.${getInstanceCall("*" + item['name'])} );
             %else:
             *${item['name']} = reinterpret_cast<${item['type']}>(
-                context->factories.${item['factory']}.getInstance( *${item['name']}, dditable ) );
+                context->factories.${item['factory']}.${getInstanceCall("*" + item['name'])} );
             %endif
             %endif
         }

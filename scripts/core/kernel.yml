@@ -545,7 +545,7 @@ params:
     - type: "$x_kernel_handle_t*"
       name: phKernel
       desc: |
-            [out] pointer to the handle of the kernel object created.
+            [out][alloc] pointer to the handle of the kernel object created.
 returns:
     - $X_RESULT_ERROR_UNSUPPORTED_FEATURE:
         - "If the adapter has no underlying equivalent handle."
