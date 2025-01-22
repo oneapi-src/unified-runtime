@@ -228,8 +228,10 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueEventsWait(
         (commandListManager.getZeCommandList(), numWaitEvents, pWaitEvents));
   }
 
-  ZE2UR_CALL(zeCommandListAppendSignalEvent,
-             (commandListManager.getZeCommandList(), zeSignalEvent));
+  if (zeSignalEvent) {
+    ZE2UR_CALL(zeCommandListAppendSignalEvent,
+               (commandListManager.getZeCommandList(), zeSignalEvent));
+  }
   return UR_RESULT_SUCCESS;
 }
 
@@ -595,8 +597,10 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueMemBufferMap(
     ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
                (commandListManager.getZeCommandList(), waitList.second,
                 waitList.first));
-    ZE2UR_CALL(zeCommandListAppendSignalEvent,
-               (commandListManager.getZeCommandList(), zeSignalEvent));
+    if (zeSignalEvent) {
+      ZE2UR_CALL(zeCommandListAppendSignalEvent,
+                 (commandListManager.getZeCommandList(), zeSignalEvent));
+    }
   }
 
   if (blockingMap) {
@@ -632,10 +636,10 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueMemUnmap(
                        nullptr, waitList.second, waitList.first));
     memoryMigrated = true;
   });
-
-  ZE2UR_CALL(zeCommandListAppendSignalEvent,
-             (commandListManager.getZeCommandList(), zeSignalEvent));
-
+  if (zeSignalEvent) {
+    ZE2UR_CALL(zeCommandListAppendSignalEvent,
+               (commandListManager.getZeCommandList(), zeSignalEvent));
+  }
   return UR_RESULT_SUCCESS;
 }
 
@@ -741,9 +745,10 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueUSMPrefetch(
   // TODO: figure out how to translate "flags"
   ZE2UR_CALL(zeCommandListAppendMemoryPrefetch,
              (commandListManager.getZeCommandList(), pMem, size));
-
-  ZE2UR_CALL(zeCommandListAppendSignalEvent,
-             (commandListManager.getZeCommandList(), zeSignalEvent));
+  if (zeSignalEvent) {
+    ZE2UR_CALL(zeCommandListAppendSignalEvent,
+               (commandListManager.getZeCommandList(), zeSignalEvent));
+  }
 
   return UR_RESULT_SUCCESS;
 }
@@ -775,9 +780,10 @@ ur_queue_immediate_in_order_t::enqueueUSMAdvise(const void *pMem, size_t size,
              (commandListManager.getZeCommandList(), this->hDevice->ZeDevice,
               pMem, size, zeAdvice));
 
-  ZE2UR_CALL(zeCommandListAppendSignalEvent,
-             (commandListManager.getZeCommandList(), zeSignalEvent));
-
+  if (zeSignalEvent) {
+    ZE2UR_CALL(zeCommandListAppendSignalEvent,
+               (commandListManager.getZeCommandList(), zeSignalEvent));
+  }
   return UR_RESULT_SUCCESS;
 }
 
