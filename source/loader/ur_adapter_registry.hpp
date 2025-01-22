@@ -263,7 +263,7 @@ class AdapterRegistry {
                         backend, platformBackendName);
                     acceptLibrary = false;
                     continue;
-                }else if ( backend.front() == '*' &&  ( hasDevice[cpu] or hasDevice[fpga] ) &&
+                }else if ( backend.front() == '*' &&  !( hasDevice[gpu] or hasDevice[any] ) &&
                   (platformBackendName.find("level_zero") != std::string::npos  ||
                    platformBackendName.find("cuda") != std::string::npos  ||
                    platformBackendName.find("hip") != std::string::npos  ) ){
