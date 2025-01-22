@@ -184,8 +184,13 @@ class AdapterRegistry {
         using EnvVarMap = std::map<std::string, std::vector<std::string>>;
         EnvVarMap mapODS =
             odsEnvMap.has_value() ? odsEnvMap.value() : EnvVarMap{{"*", {"*"}}};
+        // if hasDeivce[1~5] corresponds to cpu, gpu, fpga, *, invalid device
+        // By default, each entry is false, it's flipped to true if requested by ONEAPI_DEVICE_SELECTOR
+        bool hasDevice[5];
+        enum DeviceType {cpu, gpu, fpga, any, invalid};
         for (auto &termPair : mapODS) {
             std::string backend = termPair.first;
+            std::vector<std::string> devices = termPair.second;
             // TODO: Figure out how to process all ODS errors rather than returning
             // on the first error.
             if (backend.empty()) {
@@ -223,6 +228,21 @@ class AdapterRegistry {
                               backend);
                 continue;
             }
+            
+            // Verify which devices are requested by ONEAPI_DEVICE_SELECTOR
+            for(int idev = 0; idev < 5; idev ++) hasDevice[idev] = false;
+            for(unsigned long int idev = 0; idev < devices.size(); idev++){
+                if(strcmp(devices[idev].c_str(), "cpu") == 0) hasDevice[cpu] = true;
+                else if(strcmp(devices[idev].c_str(), "gpu") == 0) hasDevice[gpu] = true;
+                else if(strcmp(devices[idev].c_str(), "fpga") == 0) hasDevice[fpga] = true;
+                else if(strcmp(devices[idev].c_str(), "*") == 0) hasDevice[any] = true;
+                else {
+                    hasDevice[invalid] = true;
+                    logger::debug("ONEAPI_DEVICE_SELECTOR Pre-Filter with illegal "
+                              "device '{}' ",
+                              devices[idev]);
+                }
+            }
 
             // case-insensitive comparison by converting both tolower
             std::transform(platformBackendName.begin(),
@@ -234,6 +254,7 @@ class AdapterRegistry {
             std::size_t nameFound = platformBackendName.find(backend);
 
             bool backendFound = nameFound != std::string::npos;
+
             if (termType == AcceptFilter) {
                 if (backend.front() != '*' && !backendFound) {
                     logger::debug(
@@ -242,8 +263,17 @@ class AdapterRegistry {
                         backend, platformBackendName);
                     acceptLibrary = false;
                     continue;
-                } else if (backend.front() == '*' || backendFound) {
-                    return UR_RESULT_SUCCESS;
+                }else if ( backend.front() == '*' &&  ( hasDevice[cpu] or hasDevice[fpga] ) &&
+                  (platformBackendName.find("level_zero") != std::string::npos  ||
+                   platformBackendName.find("cuda") != std::string::npos  ||
+                   platformBackendName.find("hip") != std::string::npos  ) ){
+                      //level_zero, cuda, hip backends only supports gpu devices
+                      //if no gpu devices are requested, reject the platformBackendName
+                      acceptLibrary = false;
+                      continue;
+                }else if ( backend.front() == '*' || backendFound ) {
+                    acceptLibrary = true;
+                    continue;
                 }
             } else {
                 if (backendFound || backend.front() == '*') {
@@ -256,6 +286,7 @@ class AdapterRegistry {
                 }
             }
         }
+
         if (acceptLibrary) {
             return UR_RESULT_SUCCESS;
         }
