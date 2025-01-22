@@ -25,7 +25,7 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
 
   ur_command_list_manager commandListManager;
 
-  ur_result_t closeCommandList();
+  ur_result_t finalizeCommandBuffer();
 
   // Indicates if command-buffer commands can be updated after it is closed.
   bool isUpdatable = false;
@@ -39,9 +39,9 @@ struct ur_exp_command_buffer_command_handle_t_ : public _ur_object {
   ur_exp_command_buffer_command_handle_t_(ur_exp_command_buffer_handle_t,
                                           uint64_t);
 
+private:
   ~ur_exp_command_buffer_command_handle_t_();
 
-private:
   // Command-buffer of this command.
   ur_exp_command_buffer_handle_t commandBuffer;
   // L0 command ID identifying this command

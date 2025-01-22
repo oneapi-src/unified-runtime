@@ -83,7 +83,7 @@ ur_queue_immediate_in_order_t::ur_queue_immediate_in_order_t(
               reinterpret_cast<ze_command_list_handle_t>(hNativeHandle),
               [ownZeQueue](ze_command_list_handle_t hZeCommandList) {
                 if (ownZeQueue) {
-                  zeCommandListDestroy(hZeCommandList);
+                  ZE_CALL_NOCHECK(zeCommandListDestroy, (hZeCommandList));
                 }
               }),
           eventFlagsFromQueueFlags(flags)) {}
@@ -1022,7 +1022,7 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueTimestampRecordingExp(
   if (!phEvent && !*phEvent) {
     return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
   }
-
+  getSignalEvent(phEvent, UR_COMMAND_TIMESTAMP_RECORDING_EXP);
   auto [pWaitEvents, numWaitEvents] =
       getWaitListView(phEventWaitList, numEventsInWaitList);
 
