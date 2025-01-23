@@ -37,7 +37,6 @@ EXPORTS
 	urCommandBufferAppendUSMPrefetchExp
 	urCommandBufferCommandGetInfoExp
 	urCommandBufferCreateExp
-	urCommandBufferEnqueueExp
 	urCommandBufferFinalizeExp
 	urCommandBufferGetInfoExp
 	urCommandBufferReleaseCommandExp
@@ -64,6 +63,7 @@ EXPORTS
 	urDeviceRelease
 	urDeviceRetain
 	urDeviceSelectBinary
+	urEnqueueCommandBufferExp
 	urEnqueueCooperativeKernelLaunchExp
 	urEnqueueDeviceGlobalVariableRead
 	urEnqueueDeviceGlobalVariableWrite
@@ -219,7 +219,6 @@ EXPORTS
 	urPrintCommandBufferAppendUsmPrefetchExpParams
 	urPrintCommandBufferCommandGetInfoExpParams
 	urPrintCommandBufferCreateExpParams
-	urPrintCommandBufferEnqueueExpParams
 	urPrintCommandBufferFinalizeExpParams
 	urPrintCommandBufferGetInfoExpParams
 	urPrintCommandBufferReleaseCommandExpParams
@@ -265,6 +264,7 @@ EXPORTS
 	urPrintDeviceSelectBinaryParams
 	urPrintDeviceType
 	urPrintDeviceUsmAccessCapabilityFlags
+	urPrintEnqueueCommandBufferExpParams
 	urPrintEnqueueCooperativeKernelLaunchExpParams
 	urPrintEnqueueDeviceGlobalVariableReadParams
 	urPrintEnqueueDeviceGlobalVariableWriteParams

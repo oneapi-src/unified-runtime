@@ -269,6 +269,11 @@ public:
   enqueueTimestampRecordingExp(bool blocking, uint32_t numEventsInWaitList,
                                const ur_event_handle_t *phEventWaitList,
                                ur_event_handle_t *phEvent) override;
+  ur_result_t
+  enqueueCommandBufferExp(ur_exp_command_buffer_handle_t hCommandBuffer,
+                          uint32_t numEventsInWaitList,
+                          const ur_event_handle_t *phEventWaitList,
+                          ur_event_handle_t *phEvent) override;
   ur_result_t enqueueKernelLaunchCustomExp(
       ur_kernel_handle_t hKernel, uint32_t workDim,
       const size_t *pGlobalWorkOffset, const size_t *pGlobalWorkSize,

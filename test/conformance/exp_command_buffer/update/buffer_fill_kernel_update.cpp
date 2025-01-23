@@ -86,7 +86,7 @@ UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(BufferFillCommandTest);
 // buffer.
 TEST_P(BufferFillCommandTest, UpdateParameters) {
   // Run command-buffer prior to update an verify output
-  ASSERT_SUCCESS(urCommandBufferEnqueueExp(updatable_cmd_buf_handle, queue, 0,
+  ASSERT_SUCCESS(urEnqueueCommandBufferExp(queue, updatable_cmd_buf_handle, 0,
                                            nullptr, nullptr));
   ASSERT_SUCCESS(urQueueFinish(queue));
   ValidateBuffer(buffer, buffer_size, val);
@@ -139,7 +139,7 @@ TEST_P(BufferFillCommandTest, UpdateParameters) {
   // Update kernel and enqueue command-buffer again
   ASSERT_SUCCESS(
       urCommandBufferUpdateKernelLaunchExp(command_handle, &update_desc));
-  ASSERT_SUCCESS(urCommandBufferEnqueueExp(updatable_cmd_buf_handle, queue, 0,
+  ASSERT_SUCCESS(urEnqueueCommandBufferExp(queue, updatable_cmd_buf_handle, 0,
                                            nullptr, nullptr));
   ASSERT_SUCCESS(urQueueFinish(queue));
 
@@ -149,7 +149,7 @@ TEST_P(BufferFillCommandTest, UpdateParameters) {
 
 // Test updating the global size so that the fill outputs to a larger buffer
 TEST_P(BufferFillCommandTest, UpdateGlobalSize) {
-  ASSERT_SUCCESS(urCommandBufferEnqueueExp(updatable_cmd_buf_handle, queue, 0,
+  ASSERT_SUCCESS(urEnqueueCommandBufferExp(queue, updatable_cmd_buf_handle, 0,
                                            nullptr, nullptr));
   ASSERT_SUCCESS(urQueueFinish(queue));
   ValidateBuffer(buffer, sizeof(val) * global_size, val);
@@ -191,7 +191,7 @@ TEST_P(BufferFillCommandTest, UpdateGlobalSize) {
 
   ASSERT_SUCCESS(
       urCommandBufferUpdateKernelLaunchExp(command_handle, &update_desc));
-  ASSERT_SUCCESS(urCommandBufferEnqueueExp(updatable_cmd_buf_handle, queue, 0,
+  ASSERT_SUCCESS(urEnqueueCommandBufferExp(queue, updatable_cmd_buf_handle, 0,
                                            nullptr, nullptr));
   ASSERT_SUCCESS(urQueueFinish(queue));
 
@@ -201,7 +201,7 @@ TEST_P(BufferFillCommandTest, UpdateGlobalSize) {
 // Test updating the input & output kernel arguments and global
 // size, by calling update individually for each of these configurations.
 TEST_P(BufferFillCommandTest, SeparateUpdateCalls) {
-  ASSERT_SUCCESS(urCommandBufferEnqueueExp(updatable_cmd_buf_handle, queue, 0,
+  ASSERT_SUCCESS(urEnqueueCommandBufferExp(queue, updatable_cmd_buf_handle, 0,
                                            nullptr, nullptr));
   ASSERT_SUCCESS(urQueueFinish(queue));
   ValidateBuffer(buffer, sizeof(val) * global_size, val);
@@ -291,7 +291,7 @@ TEST_P(BufferFillCommandTest, SeparateUpdateCalls) {
   ASSERT_SUCCESS(urCommandBufferUpdateKernelLaunchExp(
       command_handle, &global_size_update_desc));
 
-  ASSERT_SUCCESS(urCommandBufferEnqueueExp(updatable_cmd_buf_handle, queue, 0,
+  ASSERT_SUCCESS(urEnqueueCommandBufferExp(queue, updatable_cmd_buf_handle, 0,
                                            nullptr, nullptr));
   ASSERT_SUCCESS(urQueueFinish(queue));
 
@@ -301,7 +301,7 @@ TEST_P(BufferFillCommandTest, SeparateUpdateCalls) {
 // Test calling update twice on the same command-handle updating the
 // input value, and verifying that it's the second call which persists.
 TEST_P(BufferFillCommandTest, OverrideUpdate) {
-  ASSERT_SUCCESS(urCommandBufferEnqueueExp(updatable_cmd_buf_handle, queue, 0,
+  ASSERT_SUCCESS(urEnqueueCommandBufferExp(queue, updatable_cmd_buf_handle, 0,
                                            nullptr, nullptr));
   ASSERT_SUCCESS(urQueueFinish(queue));
   ValidateBuffer(buffer, sizeof(val) * global_size, val);
@@ -364,7 +364,7 @@ TEST_P(BufferFillCommandTest, OverrideUpdate) {
   ASSERT_SUCCESS(urCommandBufferUpdateKernelLaunchExp(command_handle,
                                                       &second_update_desc));
 
-  ASSERT_SUCCESS(urCommandBufferEnqueueExp(updatable_cmd_buf_handle, queue, 0,
+  ASSERT_SUCCESS(urEnqueueCommandBufferExp(queue, updatable_cmd_buf_handle, 0,
                                            nullptr, nullptr));
   ASSERT_SUCCESS(urQueueFinish(queue));
 
@@ -375,7 +375,7 @@ TEST_P(BufferFillCommandTest, OverrideUpdate) {
 // ur_exp_command_buffer_update_value_arg_desc_t instances updating the same
 // argument, and checking that the last one in the list persists.
 TEST_P(BufferFillCommandTest, OverrideArgList) {
-  ASSERT_SUCCESS(urCommandBufferEnqueueExp(updatable_cmd_buf_handle, queue, 0,
+  ASSERT_SUCCESS(urEnqueueCommandBufferExp(queue, updatable_cmd_buf_handle, 0,
                                            nullptr, nullptr));
   ASSERT_SUCCESS(urQueueFinish(queue));
   ValidateBuffer(buffer, sizeof(val) * global_size, val);
@@ -421,7 +421,7 @@ TEST_P(BufferFillCommandTest, OverrideArgList) {
   ASSERT_SUCCESS(urCommandBufferUpdateKernelLaunchExp(command_handle,
                                                       &second_update_desc));
 
-  ASSERT_SUCCESS(urCommandBufferEnqueueExp(updatable_cmd_buf_handle, queue, 0,
+  ASSERT_SUCCESS(urEnqueueCommandBufferExp(queue, updatable_cmd_buf_handle, 0,
                                            nullptr, nullptr));
   ASSERT_SUCCESS(urQueueFinish(queue));
 

@@ -54,7 +54,7 @@ TEST_P(urCommandBufferReleaseCommandExpTest, ReleaseCmdBufBeforeHandle) {
 
   // Ref count of `updatable_cmd_buf_handle` but shouldn't be destroyed
   // until all handles as destroyed.
-  EXPECT_SUCCESS(urCommandBufferEnqueueExp(updatable_cmd_buf_handle, queue, 0,
+  EXPECT_SUCCESS(urEnqueueCommandBufferExp(queue, updatable_cmd_buf_handle, 0,
                                            nullptr, nullptr));
   EXPECT_SUCCESS(urQueueFinish(queue));
   updatable_cmd_buf_handle = nullptr;
@@ -68,14 +68,14 @@ TEST_P(urCommandBufferReleaseCommandExpTest, ReleaseCmdBufMultipleHandles) {
   command_handle = nullptr;
 
   // Ref count of `updatable_cmd_buf_handle` but should still be above zero
-  EXPECT_SUCCESS(urCommandBufferEnqueueExp(updatable_cmd_buf_handle, queue, 0,
+  EXPECT_SUCCESS(urEnqueueCommandBufferExp(queue, updatable_cmd_buf_handle, 0,
                                            nullptr, nullptr));
   EXPECT_SUCCESS(urQueueFinish(queue));
 
   // Ref count of `updatable_cmd_buf_handle` but shouldn't be destroyed
   // until all handles as destroyed.
   EXPECT_SUCCESS(urCommandBufferReleaseExp(updatable_cmd_buf_handle));
-  EXPECT_SUCCESS(urCommandBufferEnqueueExp(updatable_cmd_buf_handle, queue, 0,
+  EXPECT_SUCCESS(urEnqueueCommandBufferExp(queue, updatable_cmd_buf_handle, 0,
                                            nullptr, nullptr));
   EXPECT_SUCCESS(urQueueFinish(queue));
   updatable_cmd_buf_handle = nullptr;
