@@ -159,10 +159,10 @@ DeviceType GetDeviceType(ur_context_handle_t Context,
 
     // L0 changes their VA layout.
     // TODO: update our shadow memory layout/algorithms to accordingly.
-    if (((Ptr >> 52) & 0xff0U) == 0xff0U) {
-      Type = DeviceType::GPU_PVC;
-    } else {
+    if ((Ptr >> 48) == 0xffffU) {
       Type = DeviceType::GPU_DG2;
+    } else {
+      Type = DeviceType::GPU_PVC;
     }
     Result = getContext()->urDdiTable.USM.pfnFree(Context, (void *)Ptr);
     assert(Result == UR_RESULT_SUCCESS &&
