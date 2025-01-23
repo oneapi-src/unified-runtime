@@ -61,6 +61,11 @@ struct ur_context_handle_t_ : _ur_object {
 
   ur_context_handle_t_(ze_context_handle_t ZeContext) : ZeContext{ZeContext} {}
 
+  ~ur_context_handle_t_() {
+    fprintf(stderr, ">>> L0 ur_context_handle_t_ destructor called !!!\n");
+    abort();
+  }
+
   // A L0 context handle is primarily used during creation and management of
   // resources that may be used by multiple devices.
   // This field is only set at ur_context_handle_t creation time, and cannot
