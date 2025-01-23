@@ -103,16 +103,6 @@ ur_result_t urKernelSetSpecializationConstants(
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
-ur_result_t urKernelGetSuggestedLocalWorkSize(ur_kernel_handle_t hKernel,
-                                              ur_queue_handle_t hQueue,
-                                              uint32_t numWorkDim,
-                                              const size_t *pGlobalWorkOffset,
-                                              const size_t *pGlobalWorkSize,
-                                              size_t *pSuggestedLocalWorkSize) {
-  logger::error("{} function not implemented!", __FUNCTION__);
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-}
-
 ur_result_t urEventSetCallback(ur_event_handle_t hEvent,
                                ur_execution_info_t execStatus,
                                ur_event_callback_t pfnNotify, void *pUserData) {
@@ -480,14 +470,6 @@ ur_result_t urCommandBufferCommandGetInfoExp(
     ur_exp_command_buffer_command_handle_t hCommand,
     ur_exp_command_buffer_command_info_t propName, size_t propSize,
     void *pPropValue, size_t *pPropSizeRet) {
-  logger::error("{} function not implemented!", __FUNCTION__);
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-}
-
-ur_result_t urKernelSuggestMaxCooperativeGroupCountExp(
-    ur_kernel_handle_t hKernel, ur_device_handle_t hDevice, uint32_t workDim,
-    const size_t *pLocalWorkSize, size_t dynamicSharedMemorySize,
-    uint32_t *pGroupCountRet) {
   logger::error("{} function not implemented!", __FUNCTION__);
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }

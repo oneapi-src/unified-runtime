@@ -789,6 +789,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     return ReturnValue(ur_bool_t{false});
   }
 
+  case UR_DEVICE_INFO_PROGRAM_SET_SPECIALIZATION_CONSTANTS: {
+    return ReturnValue(ur_bool_t{false});
+  }
+
   case UR_DEVICE_INFO_ATOMIC_MEMORY_ORDER_CAPABILITIES: {
     ur_memory_order_capability_flags_t Capabilities =
         UR_MEMORY_ORDER_CAPABILITY_FLAG_RELAXED |
@@ -903,7 +907,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_GLOBAL_VARIABLE_SUPPORT:
     return ReturnValue(ur_bool_t{false});
   case UR_DEVICE_INFO_USM_POOL_SUPPORT:
+#ifdef UMF_ENABLE_POOL_TRACKING
     return ReturnValue(ur_bool_t{true});
+#else
+    return ReturnValue(ur_bool_t{false});
+#endif
   case UR_DEVICE_INFO_BFLOAT16:
     return ReturnValue(true);
   case UR_DEVICE_INFO_ASYNC_BARRIER:

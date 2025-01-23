@@ -30,7 +30,7 @@ function(add_cppformat name)
     else()
         # Split args into 2 parts (in Windows the list is probably too long)
         list(SUBLIST ARGN 0 250 selected_files_1)
-        list(SUBLIST ARGN 251 -1 selected_files_2)
+        list(SUBLIST ARGN 250 -1 selected_files_2)
         add_custom_target(cppformat-${name}
             COMMAND ${CLANG_FORMAT} --style=file --i ${selected_files_1}
             COMMAND ${CLANG_FORMAT} --style=file --i ${selected_files_2}
@@ -83,7 +83,7 @@ set(CFI_FLAGS "")
 if (CFI_HAS_CFI_SANITIZE)
     # cfi-icall requires called functions in shared libraries to also be built with cfi-icall, which we can't
     # guarantee. -fsanitize=cfi depends on -flto
-    set(CFI_FLAGS "-flto -fsanitize=cfi -fno-sanitize=cfi-icall -fsanitize-ignorelist=${CMAKE_SOURCE_DIR}/sanitizer-ignorelist.txt")
+    set(CFI_FLAGS "-flto -fsanitize=cfi -fno-sanitize=cfi-icall -fsanitize-ignorelist=${PROJECT_SOURCE_DIR}/sanitizer-ignorelist.txt")
 endif()
 
 function(add_ur_target_compile_options name)
