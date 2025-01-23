@@ -1615,9 +1615,9 @@ typedef struct ur_platform_native_properties_t {
   ur_structure_type_t stype;
   /// [in,out][optional] pointer to extension-specific structure
   void *pNext;
-  /// [in] Indicates UR owns the native handle or if it came from an
-  /// interoperability operation in the application that asked to not
-  /// transfer the ownership to the unified-runtime.
+  /// [in] If true then ownership of the native handle is transferred to
+  /// the resultant object. This means the object will be responsible for
+  /// releasing the native resources at the end of its lifetime.
   bool isNativeHandleOwned;
 
 } ur_platform_native_properties_t;
@@ -2198,6 +2198,9 @@ typedef enum ur_device_info_t {
   /// to the `USMPool` entry points and usage of the `pool` parameter of the
   /// USM alloc entry points.
   UR_DEVICE_INFO_USM_POOL_SUPPORT = 119,
+  /// [::ur_bool_t] support the ::urProgramSetSpecializationConstants entry
+  /// point
+  UR_DEVICE_INFO_PROGRAM_SET_SPECIALIZATION_CONSTANTS = 120,
   /// [::ur_bool_t] Returns true if the device supports the use of
   /// command-buffers.
   UR_DEVICE_INFO_COMMAND_BUFFER_SUPPORT_EXP = 0x1000,
@@ -2696,9 +2699,9 @@ typedef struct ur_device_native_properties_t {
   ur_structure_type_t stype;
   /// [in,out][optional] pointer to extension-specific structure
   void *pNext;
-  /// [in] Indicates UR owns the native handle or if it came from an
-  /// interoperability operation in the application that asked to not
-  /// transfer the ownership to the unified-runtime.
+  /// [in] If true then ownership of the native handle is transferred to
+  /// the resultant object. This means the object will be responsible for
+  /// releasing the native resources at the end of its lifetime.
   bool isNativeHandleOwned;
 
 } ur_device_native_properties_t;
@@ -3076,9 +3079,9 @@ typedef struct ur_context_native_properties_t {
   ur_structure_type_t stype;
   /// [in,out][optional] pointer to extension-specific structure
   void *pNext;
-  /// [in] Indicates UR owns the native handle or if it came from an
-  /// interoperability operation in the application that asked to not transfer
-  /// the ownership to the unified-runtime.
+  /// [in] If true then ownership of the native handle is transferred to
+  /// the resultant object. This means the object will be responsible for
+  /// releasing the native resources at the end of its lifetime.
   bool isNativeHandleOwned;
 
 } ur_context_native_properties_t;
@@ -3697,9 +3700,9 @@ typedef struct ur_mem_native_properties_t {
   ur_structure_type_t stype;
   /// [in,out][optional] pointer to extension-specific structure
   void *pNext;
-  /// [in] Indicates UR owns the native handle or if it came from an
-  /// interoperability operation in the application that asked to not
-  /// transfer the ownership to the unified-runtime.
+  /// [in] If true then ownership of the native handle is transferred to
+  /// the resultant object. This means the object will be responsible for
+  /// releasing the native resources at the end of its lifetime.
   bool isNativeHandleOwned;
 
 } ur_mem_native_properties_t;
@@ -4103,9 +4106,9 @@ typedef struct ur_sampler_native_properties_t {
   ur_structure_type_t stype;
   /// [in,out][optional] pointer to extension-specific structure
   void *pNext;
-  /// [in] Indicates UR owns the native handle or if it came from an
-  /// interoperability operation in the application that asked to not
-  /// transfer the ownership to the unified-runtime.
+  /// [in] If true then ownership of the native handle is transferred to
+  /// the resultant object. This means the object will be responsible for
+  /// releasing the native resources at the end of its lifetime.
   bool isNativeHandleOwned;
 
 } ur_sampler_native_properties_t;
@@ -5739,6 +5742,10 @@ typedef struct ur_specialization_constant_info_t {
 /// @brief Set an array of specialization constants on a Program.
 ///
 /// @details
+///     - This entry point is optional, the application should query for support
+///       with device query
+///       ::UR_DEVICE_INFO_PROGRAM_SET_SPECIALIZATION_CONSTANTS passed to
+///       ::urDeviceGetInfo.
 ///     - The application may call this function from simultaneous threads for
 ///       the same device.
 ///     - The implementation of this function should be thread-safe.
@@ -5758,6 +5765,9 @@ typedef struct ur_specialization_constant_info_t {
 ///         + `NULL == pSpecConstants`
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         + `count == 0`
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
+///         + If ::UR_DEVICE_INFO_PROGRAM_SET_SPECIALIZATION_CONSTANTS query is
+///         false
 ///     - ::UR_RESULT_ERROR_INVALID_VALUE
 ///         + A pSpecConstant entry contains a size that does not match that of
 ///         the specialization constant in the module.
@@ -5811,9 +5821,9 @@ typedef struct ur_program_native_properties_t {
   ur_structure_type_t stype;
   /// [in,out][optional] pointer to extension-specific structure
   void *pNext;
-  /// [in] Indicates UR owns the native handle or if it came from an
-  /// interoperability operation in the application that asked to not
-  /// transfer the ownership to the unified-runtime.
+  /// [in] If true then ownership of the native handle is transferred to
+  /// the resultant object. This means the object will be responsible for
+  /// releasing the native resources at the end of its lifetime.
   bool isNativeHandleOwned;
 
 } ur_program_native_properties_t;
@@ -6480,9 +6490,9 @@ typedef struct ur_kernel_native_properties_t {
   ur_structure_type_t stype;
   /// [in,out][optional] pointer to extension-specific structure
   void *pNext;
-  /// [in] Indicates UR owns the native handle or if it came from an
-  /// interoperability operation in the application that asked to not transfer
-  /// the ownership to the unified-runtime.
+  /// [in] If true then ownership of the native handle is transferred to
+  /// the resultant object. This means the object will be responsible for
+  /// releasing the native resources at the end of its lifetime.
   bool isNativeHandleOwned;
 
 } ur_kernel_native_properties_t;
@@ -6875,9 +6885,9 @@ typedef struct ur_queue_native_properties_t {
   ur_structure_type_t stype;
   /// [in,out][optional] pointer to extension-specific structure
   void *pNext;
-  /// [in] Indicates UR owns the native handle or if it came from an
-  /// interoperability operation in the application that asked to not transfer
-  /// the ownership to the unified-runtime.
+  /// [in] If true then ownership of the native handle is transferred to
+  /// the resultant object. This means the object will be responsible for
+  /// releasing the native resources at the end of its lifetime.
   bool isNativeHandleOwned;
 
 } ur_queue_native_properties_t;
@@ -7301,9 +7311,9 @@ typedef struct ur_event_native_properties_t {
   ur_structure_type_t stype;
   /// [in,out][optional] pointer to extension-specific structure
   void *pNext;
-  /// [in] Indicates UR owns the native handle or if it came from an
-  /// interoperability operation in the application that asked to not transfer
-  /// the ownership to the unified-runtime.
+  /// [in] If true then ownership of the native handle is transferred to
+  /// the resultant object. This means the object will be responsible for
+  /// releasing the native resources at the end of its lifetime.
   bool isNativeHandleOwned;
 
 } ur_event_native_properties_t;
