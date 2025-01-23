@@ -21,18 +21,20 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
       ur_context_handle_t context, ur_device_handle_t device,
       v2::raii::command_list_unique_handle &&commandList,
       const ur_exp_command_buffer_desc_t *desc);
+
   ~ur_exp_command_buffer_handle_t_() = default;
 
   ur_command_list_manager commandListManager;
 
   ur_result_t finalizeCommandBuffer();
-
   // Indicates if command-buffer commands can be updated after it is closed.
-  bool isUpdatable = false;
+  const bool isUpdatable = false;
+  // Command-buffer profiling is enabled.
+  const bool isProfilingEnabled = false;
+
+private:
   // Indicates if command buffer was finalized.
   bool isFinalized = false;
-  // Command-buffer profiling is enabled.
-  bool isProfilingEnabled = false;
 };
 
 struct ur_exp_command_buffer_command_handle_t_ : public _ur_object {
