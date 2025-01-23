@@ -15,6 +15,6 @@
 #include "common.hpp"
 #include "device.hpp"
 
-struct ur_platform_handle_t_ {
+struct ur_platform_handle_t_ : native_cpu::object_base {
   ur_device_handle_t_ TheDevice{this};
 };

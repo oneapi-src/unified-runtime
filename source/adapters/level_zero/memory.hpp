@@ -96,11 +96,11 @@ struct ur_mem_handle_t_ : _ur_object {
 
 protected:
   ur_mem_handle_t_(mem_type_t type, ur_context_handle_t Context)
-      : UrContext{Context}, UrDevice{nullptr}, mem_type(type) {}
+      : _ur_object(), UrContext{Context}, UrDevice{nullptr}, mem_type(type) {}
 
   ur_mem_handle_t_(mem_type_t type, ur_context_handle_t Context,
                    ur_device_handle_t Device)
-      : UrContext{Context}, UrDevice(Device), mem_type(type) {}
+      : _ur_object(), UrContext{Context}, UrDevice(Device), mem_type(type) {}
 };
 
 struct _ur_buffer final : ur_mem_handle_t_ {

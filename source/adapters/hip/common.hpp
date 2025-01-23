@@ -239,3 +239,8 @@ inline static unsigned getMemoryType(hipPointerAttribute_t hipPointerAttrs) {
   return hipPointerAttrs.memoryType;
 #endif
 }
+
+struct hip_ddi_getter {
+  static ur_dditable_t *value();
+};
+using ur_object_t_ = ur_handle_base_t_<hip_ddi_getter>;

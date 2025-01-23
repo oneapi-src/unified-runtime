@@ -48,9 +48,9 @@ commandHandleReleaseInternal(ur_exp_command_buffer_command_handle_t Command) {
 
 ur_exp_command_buffer_handle_t_::ur_exp_command_buffer_handle_t_(
     ur_context_handle_t hContext, ur_device_handle_t hDevice, bool IsUpdatable)
-    : Context(hContext), Device(hDevice), IsUpdatable(IsUpdatable),
-      HIPGraph{nullptr}, HIPGraphExec{nullptr}, RefCountInternal{1},
-      RefCountExternal{1}, NextSyncPoint{0} {
+    : ur_object_t_(), Context(hContext), Device(hDevice),
+      IsUpdatable(IsUpdatable), HIPGraph{nullptr}, HIPGraphExec{nullptr},
+      RefCountInternal{1}, RefCountExternal{1}, NextSyncPoint{0} {
   urContextRetain(hContext);
   urDeviceRetain(hDevice);
 }
@@ -80,8 +80,9 @@ ur_exp_command_buffer_command_handle_t_::
         const size_t *GlobalWorkOffsetPtr, const size_t *GlobalWorkSizePtr,
         const size_t *LocalWorkSizePtr, uint32_t NumKernelAlternatives,
         ur_kernel_handle_t *KernelAlternatives)
-    : CommandBuffer(CommandBuffer), Kernel(Kernel), Node(Node), Params(Params),
-      WorkDim(WorkDim), RefCountInternal(1), RefCountExternal(1) {
+    : ur_object_t_(), CommandBuffer(CommandBuffer), Kernel(Kernel), Node(Node),
+      Params(Params), WorkDim(WorkDim), RefCountInternal(1),
+      RefCountExternal(1) {
   CommandBuffer->incrementInternalReferenceCount();
 
   const size_t CopySize = sizeof(size_t) * WorkDim;

@@ -8,6 +8,8 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+#pragma once
+
 #include <ur_api.h>
 #include <ur_ddi.h>
 
@@ -768,4 +770,8 @@ urTensorMapEncodeTiledExp(ur_device_handle_t hDevice,
 #ifdef UR_STATIC_ADAPTER_LEVEL_ZERO
 ur_result_t urAdapterGetDdiTables(ur_dditable_t *ddi);
 #endif
+
+struct ddi_getter {
+  static ur_dditable_t *value();
+};
 } // namespace ur::level_zero
