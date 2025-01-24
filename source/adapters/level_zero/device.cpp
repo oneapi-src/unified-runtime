@@ -867,6 +867,14 @@ ur_result_t urDeviceGetInfo(
     return ReturnValue(int32_t(ZeDeviceNumIndices));
   } break;
   case UR_DEVICE_INFO_GPU_EU_COUNT: {
+    ze_device_properties_t DeviceProp = {ZE_STRUCTURE_TYPE_DEVICE_PROPERTIES};
+    ze_eu_count_ext_t EuCountDesc = {ZE_STRUCTURE_TYPE_EU_COUNT_EXT};
+    DeviceProp.pNext = &EuCountDesc;
+    ZE2UR_CALL(zeDeviceGetProperties, (ZeDevice, &DeviceProp));
+    if (DeviceProp.pNext &&
+        EuCountDesc.stype == ZE_STRUCTURE_TYPE_EU_COUNT_EXT) {
+      return ReturnValue(uint32_t{EuCountDesc.numTotalEUs});
+    }
     uint32_t count = Device->ZeDeviceProperties->numEUsPerSubslice *
                      Device->ZeDeviceProperties->numSubslicesPerSlice *
                      Device->ZeDeviceProperties->numSlices;
