@@ -26,6 +26,7 @@ private:
   ur_platform_handle_t Platform;
   hipEvent_t EvBase; // HIP event used as base counter
   uint32_t DeviceIndex;
+  uint32_t NumComputeUnits{0};
 
   int MaxWorkGroupSize{0};
   int MaxBlockDimX{0};
@@ -41,6 +42,9 @@ public:
       : HIPDevice(HipDevice), RefCount{1}, Platform(Platform), EvBase(EvBase),
         DeviceIndex(DeviceIndex) {
 
+    UR_CHECK_ERROR(hipDeviceGetAttribute(
+        reinterpret_cast<int *>(&NumComputeUnits),
+        hipDeviceAttributeMultiprocessorCount, HIPDevice));
     UR_CHECK_ERROR(hipDeviceGetAttribute(
         &MaxWorkGroupSize, hipDeviceAttributeMaxThreadsPerBlock, HIPDevice));
     UR_CHECK_ERROR(hipDeviceGetAttribute(
@@ -84,6 +88,8 @@ public:
   int getDeviceMaxLocalMem() const noexcept { return DeviceMaxLocalMem; };
 
   int getManagedMemSupport() const noexcept { return ManagedMemSupport; };
+
+  uint32_t getNumComputeUnits() const noexcept { return NumComputeUnits; };
 
   int getConcurrentManagedAccess() const noexcept {
     return ConcurrentManagedAccess;

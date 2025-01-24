@@ -161,24 +161,56 @@ urKernelRelease(ur_kernel_handle_t hKernel) {
   return UR_RESULT_SUCCESS;
 }
 
-// TODO(ur): Not implemented on hip atm. Also, need to add tests for this
-// feature.
-UR_APIEXPORT ur_result_t UR_APICALL
-urKernelGetNativeHandle(ur_kernel_handle_t, ur_native_handle_t *) {
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-}
-
 UR_APIEXPORT ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
     ur_kernel_handle_t hKernel, ur_device_handle_t hDevice, uint32_t workDim,
     const size_t *pLocalWorkSize, size_t dynamicSharedMemorySize,
     uint32_t *pGroupCountRet) {
-  std::ignore = hKernel;
+  UR_ASSERT(hKernel, UR_RESULT_ERROR_INVALID_KERNEL);
+
   std::ignore = hDevice;
-  std::ignore = workDim;
-  std::ignore = pLocalWorkSize;
-  std::ignore = dynamicSharedMemorySize;
-  std::ignore = pGroupCountRet;
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+
+  size_t localWorkSize = pLocalWorkSize[0];
+  localWorkSize *= (workDim >= 2 ? pLocalWorkSize[1] : 1);
+  localWorkSize *= (workDim == 3 ? pLocalWorkSize[2] : 1);
+
+  // We need to set the active current device for this kernel explicitly here,
+  // because the occupancy querying API does not take device parameter.
+  ur_device_handle_t Device = hKernel->getProgram()->getDevice();
+  ScopedDevice Active(Device);
+  try {
+    // We need to calculate max num of work-groups using per-device semantics.
+
+    int MaxNumActiveGroupsPerCU{0};
+    UR_CHECK_ERROR(hipOccupancyMaxActiveBlocksPerMultiprocessor(
+        &MaxNumActiveGroupsPerCU, hKernel->get(), localWorkSize,
+        dynamicSharedMemorySize));
+    detail::ur::assertion(MaxNumActiveGroupsPerCU >= 0);
+    // Handle the case where we can't have all SMs active with at least 1 group
+    // per SM. In that case, the device is still able to run 1 work-group, hence
+    // we will manually check if it is possible with the available HW resources.
+    if (MaxNumActiveGroupsPerCU == 0) {
+      size_t MaxWorkGroupSize{};
+      urKernelGetGroupInfo(
+          hKernel, Device, UR_KERNEL_GROUP_INFO_WORK_GROUP_SIZE,
+          sizeof(MaxWorkGroupSize), &MaxWorkGroupSize, nullptr);
+      size_t MaxLocalSizeBytes{};
+      urDeviceGetInfo(Device, UR_DEVICE_INFO_LOCAL_MEM_SIZE,
+                      sizeof(MaxLocalSizeBytes), &MaxLocalSizeBytes, nullptr);
+      if (localWorkSize > MaxWorkGroupSize ||
+          dynamicSharedMemorySize > MaxLocalSizeBytes)
+        *pGroupCountRet = 0;
+      else
+        *pGroupCountRet = 1;
+    } else {
+      // Multiply by the number of SMs (CUs = compute units) on the device in
+      // order to retreive the total number of groups/blocks that can be
+      // launched.
+      *pGroupCountRet = Device->getNumComputeUnits() * MaxNumActiveGroupsPerCU;
+    }
+  } catch (ur_result_t Err) {
+    return Err;
+  }
+  return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urKernelSetArgValue(
