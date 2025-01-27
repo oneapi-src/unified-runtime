@@ -28,7 +28,9 @@ target_include_directories(ur_common PUBLIC
 
 message(STATUS "Download Unified Memory Framework from github.com")
 if (NOT DEFINED UMF_REPO)
-    set(UMF_REPO "https://github.com/oneapi-src/unified-memory-framework.git")
+    #set(UMF_REPO "https://github.com/oneapi-src/unified-memory-framework.git")
+    set(UMF_REPO "https://github.com/bratpiorka/unified-memory-framework.git")
+
 endif()
 
 if (NOT DEFINED UMF_TAG)
@@ -37,7 +39,8 @@ if (NOT DEFINED UMF_TAG)
     # Date:   Fri Feb 7 14:43:25 2025 +0100
     # Merge pull request #1084 from lukaszstolarczuk/fix-icx-build
     # Fix icx build
-    set(UMF_TAG v0.11.0-dev2)
+    #set(UMF_TAG v0.11.0-dev2)
+    set(UMF_TAG 34f9eefdb4cc399b3288439b21ce982a0083a23f)
 endif()
 
 message(STATUS "Will fetch Unified Memory Framework from ${UMF_REPO}")
@@ -121,5 +124,5 @@ add_library(${PROJECT_NAME}::umf ALIAS ur_umf)
 target_link_libraries(ur_umf INTERFACE
     umf::umf
     umf::headers
-    umf::disjoint_pool
+    #umf::disjoint_pool
 )
