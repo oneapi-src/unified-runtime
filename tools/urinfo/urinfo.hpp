@@ -355,11 +355,12 @@ inline void printDeviceInfos(ur_device_handle_t hDevice,
   std::cout << prefix;
   printDeviceInfo<uint32_t>(hDevice, UR_DEVICE_INFO_IMAGE_PITCH_ALIGN_EXP);
   std::cout << prefix;
-  printDeviceInfo<size_t>(hDevice, UR_DEVICE_INFO_MAX_IMAGE_LINEAR_WIDTH_EXP);
+  printDeviceInfo<uint32_t>(hDevice, UR_DEVICE_INFO_MAX_IMAGE_LINEAR_WIDTH_EXP);
   std::cout << prefix;
-  printDeviceInfo<size_t>(hDevice, UR_DEVICE_INFO_MAX_IMAGE_LINEAR_HEIGHT_EXP);
+  printDeviceInfo<uint32_t>(hDevice,
+                            UR_DEVICE_INFO_MAX_IMAGE_LINEAR_HEIGHT_EXP);
   std::cout << prefix;
-  printDeviceInfo<size_t>(hDevice, UR_DEVICE_INFO_MAX_IMAGE_LINEAR_PITCH_EXP);
+  printDeviceInfo<uint32_t>(hDevice, UR_DEVICE_INFO_MAX_IMAGE_LINEAR_PITCH_EXP);
   std::cout << prefix;
   printDeviceInfo<ur_bool_t>(hDevice, UR_DEVICE_INFO_MIPMAP_SUPPORT_EXP);
   std::cout << prefix;

@@ -30,6 +30,24 @@ inline std::ostream &operator<<(std::ostream &out, const Result &result) {
   return out;
 }
 
+#define UUR_RETURN_ON_FATAL_FAILURE(...)                                       \
+  __VA_ARGS__;                                                                 \
+  if (this->HasFatalFailure() || this->IsSkipped()) {                          \
+    return;                                                                    \
+  }                                                                            \
+  (void)0
+
+#define UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(ret)                                 \
+  do {                                                                         \
+    auto status = ret;                                                         \
+    if (status == UR_RESULT_ERROR_UNSUPPORTED_FEATURE ||                       \
+        status == UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION) {                   \
+      GTEST_SKIP();                                                            \
+    } else {                                                                   \
+      ASSERT_EQ(status, UR_RESULT_SUCCESS);                                    \
+    }                                                                          \
+  } while (0)
+
 } // namespace uur
 
 #ifndef ASSERT_EQ_RESULT

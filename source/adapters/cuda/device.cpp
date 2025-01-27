@@ -285,14 +285,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_IMAGE_SUPPORTED: {
     bool Enabled = false;
 
-    if (std::getenv("SYCL_PI_CUDA_ENABLE_IMAGE_SUPPORT") != nullptr ||
-        std::getenv("UR_CUDA_ENABLE_IMAGE_SUPPORT") != nullptr) {
+    if (std::getenv("SYCL_PI_CUDA_ENABLE_IMAGE_SUPPORTED") != nullptr ||
+        std::getenv("UR_CUDA_ENABLE_IMAGE_SUPPORTED") != nullptr) {
       Enabled = true;
     } else {
       logger::always(
           "Images are not fully supported by the CUDA BE, their support is "
           "disabled by default. Their partial support can be activated by "
-          "setting UR_CUDA_ENABLE_IMAGE_SUPPORT environment variable at "
+          "setting UR_CUDA_ENABLE_IMAGE_SUPPORTED environment variable at "
           "runtime.");
     }
 
