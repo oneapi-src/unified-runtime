@@ -288,6 +288,12 @@ public:
 
     return it->second.get();
   }
+
+  bool hasPool(umf_memory_pool_handle_t hPool) noexcept {
+    return std::any_of(
+        descToPoolMap.begin(), descToPoolMap.end(),
+        [&](const auto &Pair) { return Pair.second.get() == hPool; });
+  }
 };
 
 } // namespace usm
