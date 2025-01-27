@@ -118,12 +118,19 @@ TEST_P(urUSMDeviceAllocTest, InvalidNullPtrResult) {
 }
 
 TEST_P(urUSMDeviceAllocTest, InvalidUSMSize) {
-  UUR_KNOWN_FAILURE_ON(uur::CUDA{}, uur::HIP{}, uur::LevelZero{},
-                       uur::NativeCPU{});
+  UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{});
+
+  size_t max_size;
+  ASSERT_SUCCESS(urDeviceGetInfo(device, UR_DEVICE_INFO_MAX_MEM_ALLOC_SIZE,
+                                 sizeof(max_size), &max_size, nullptr));
+  if (max_size == std::numeric_limits<size_t>::max()) {
+    GTEST_SKIP() << "Device has no max allocation size";
+  }
 
   void *ptr = nullptr;
-  ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_USM_SIZE,
-                   urUSMDeviceAlloc(context, device, nullptr, pool, -1, &ptr));
+  ASSERT_EQ_RESULT(
+      UR_RESULT_ERROR_INVALID_USM_SIZE,
+      urUSMDeviceAlloc(context, device, nullptr, pool, max_size + 1, &ptr));
 }
 
 TEST_P(urUSMDeviceAllocTest, InvalidValueAlignPowerOfTwo) {
