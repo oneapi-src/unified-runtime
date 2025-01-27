@@ -185,9 +185,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
         &MaxNumActiveGroupsPerCU, hKernel->get(), localWorkSize,
         dynamicSharedMemorySize));
     detail::ur::assertion(MaxNumActiveGroupsPerCU >= 0);
-    // Handle the case where we can't have all SMs active with at least 1 group
-    // per SM. In that case, the device is still able to run 1 work-group, hence
-    // we will manually check if it is possible with the available HW resources.
+    // Handle the case where we can't have all work-group processors (WGPs)
+    // active with at least 1 group per WGP. In that case, the device is still
+    // able to run 1 work-group, hence we will manually check if it is possible
+    // with the available HW resources.
     if (MaxNumActiveGroupsPerCU == 0) {
       size_t MaxWorkGroupSize{};
       urKernelGetGroupInfo(
@@ -202,8 +203,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urKernelSuggestMaxCooperativeGroupCountExp(
       else
         *pGroupCountRet = 1;
     } else {
-      // Multiply by the number of SMs (CUs = compute units) on the device in
-      // order to retreive the total number of groups/blocks that can be
+      // Multiply by the number of WGPs (CUs = compute units) on the device in
+      // order to retrieve the total number of groups/blocks that can be
       // launched.
       *pGroupCountRet = Device->getNumComputeUnits() * MaxNumActiveGroupsPerCU;
     }
