@@ -28,14 +28,11 @@ target_include_directories(ur_common PUBLIC
 
 message(STATUS "Download Unified Memory Framework from github.com")
 if (NOT DEFINED UMF_REPO)
-    set(UMF_REPO "https://github.com/oneapi-src/unified-memory-framework.git")
+    set(UMF_REPO "https://github.com/bratpiorka/unified-memory-framework.git")
 endif()
 
 if (NOT DEFINED UMF_TAG)
-    # Tagger: Łukasz Stolarczuk <lukasz.stolarczuk@intel.com>
-    # Date:   Fri Jan 10 13:30:49 2025 +0100
-    # 0.10.1 release
-    set(UMF_TAG v0.10.1)
+    set(UMF_TAG 2b294b76351788122037da5868831662f4dbebbe)
 endif()
 
 message(STATUS "Will fetch Unified Memory Framework from ${UMF_REPO}")
@@ -119,5 +116,4 @@ add_library(${PROJECT_NAME}::umf ALIAS ur_umf)
 target_link_libraries(ur_umf INTERFACE
     umf::umf
     umf::headers
-    umf::disjoint_pool
 )
