@@ -388,6 +388,8 @@ ur_result_t ContextReleaseHelper(ur_context_handle_t Context) {
   ze_context_handle_t DestroyZeContext =
       Context->OwnNativeHandle ? Context->ZeContext : nullptr;
 
+  fprintf(stderr, ">>> L0 ContextReleaseHelper() called !!!\n");
+
   // Clean up any live memory associated with Context
   ur_result_t Result = Context->finalize();
 
