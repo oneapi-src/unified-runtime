@@ -86,7 +86,7 @@ struct urMemImageCreateTestWithImageFormatParam
   }
 };
 
-UUR_DEVICE_TEST_SUITE_P(
+UUR_DEVICE_TEST_SUITE_WITH_PARAM(
     urMemImageCreateTestWithImageFormatParam,
     ::testing::ValuesIn(
         urMemImageCreateTestWithImageFormatParam::makeImageFormats()),

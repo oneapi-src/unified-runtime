@@ -132,7 +132,7 @@ static std::unordered_map<ur_device_info_t, size_t> device_info_size_map = {
 
 using urDeviceGetInfoTest = uur::urDeviceTestWithParam<ur_device_info_t>;
 
-UUR_DEVICE_TEST_SUITE_P(
+UUR_DEVICE_TEST_SUITE_WITH_PARAM(
     urDeviceGetInfoTest,
     ::testing::Values(
 
@@ -258,7 +258,7 @@ UUR_DEVICE_TEST_SUITE_P(
     uur::deviceTestWithParamPrinter<ur_device_info_t>);
 
 using urDeviceGetInfoSingleTest = uur::urDeviceTest;
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urDeviceGetInfoSingleTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(urDeviceGetInfoSingleTest);
 
 bool doesReturnArray(ur_device_info_t info_type) {
   if (info_type == UR_DEVICE_INFO_SUPPORTED_PARTITIONS ||
