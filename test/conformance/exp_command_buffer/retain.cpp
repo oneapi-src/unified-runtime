@@ -9,7 +9,7 @@
 using urCommandBufferRetainExpTest =
     uur::command_buffer::urCommandBufferExpTest;
 
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urCommandBufferRetainExpTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(urCommandBufferRetainExpTest);
 
 TEST_P(urCommandBufferRetainExpTest, Success) {
   uint32_t prev_ref_count = 0;
@@ -33,7 +33,7 @@ TEST_P(urCommandBufferRetainExpTest, InvalidNullHandle) {
 using urCommandBufferRetainCommandExpTest =
     uur::command_buffer::urCommandBufferCommandExpTest;
 
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urCommandBufferRetainCommandExpTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(urCommandBufferRetainCommandExpTest);
 
 TEST_P(urCommandBufferRetainCommandExpTest, Success) {
   uint32_t prev_ref_count = 0;
