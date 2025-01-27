@@ -58,11 +58,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     return ReturnValue(VendorId);
   }
   case UR_DEVICE_INFO_MAX_COMPUTE_UNITS: {
-    int ComputeUnits = 0;
-    UR_CHECK_ERROR(hipDeviceGetAttribute(
-        &ComputeUnits, hipDeviceAttributeMultiprocessorCount, hDevice->get()));
-    detail::ur::assertion(ComputeUnits >= 0);
-    return ReturnValue(static_cast<uint32_t>(ComputeUnits));
+    return ReturnValue(hDevice->getNumComputeUnits());
   }
   case UR_DEVICE_INFO_MAX_WORK_ITEM_DIMENSIONS: {
     return ReturnValue(MaxWorkItemDimensions);
