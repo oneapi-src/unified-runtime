@@ -16,6 +16,7 @@
 #include <umf/memory_pool_ops.h>
 #include <umf/memory_provider.h>
 #include <umf/memory_provider_ops.h>
+#include <umf/providers/provider_cuda.h>
 #include <ur_api.h>
 
 #include "logger/ur_logger.hpp"
@@ -277,6 +278,39 @@ inline ur_result_t umf2urResult(umf_result_t umfResult) {
   default:
     return UR_RESULT_ERROR_UNKNOWN;
   };
+}
+
+inline umf_result_t createUmfCUDAprovider(
+    umf_cuda_memory_provider_params_handle_t cu_memory_provider_params,
+    int cuDevice, void *cuContext, umf_usm_memory_type_t memType,
+    umf_memory_provider_handle_t *provider) {
+  umf_result_t umf_result = umfCUDAMemoryProviderParamsSetContext(
+      cu_memory_provider_params, cuContext);
+  if (umf_result != UMF_RESULT_SUCCESS) {
+    return umf_result;
+  }
+
+  umf_result =
+      umfCUDAMemoryProviderParamsSetDevice(cu_memory_provider_params, cuDevice);
+  if (umf_result != UMF_RESULT_SUCCESS) {
+    return umf_result;
+  }
+
+  umf_result = umfCUDAMemoryProviderParamsSetMemoryType(
+      cu_memory_provider_params, memType);
+  if (umf_result != UMF_RESULT_SUCCESS) {
+    return umf_result;
+  }
+
+  umf_memory_provider_handle_t umfCUDAprovider = nullptr;
+  umf_result = umfMemoryProviderCreate(
+      umfCUDAMemoryProviderOps(), cu_memory_provider_params, &umfCUDAprovider);
+  if (umf_result != UMF_RESULT_SUCCESS) {
+    return umf_result;
+  }
+
+  *provider = umfCUDAprovider;
+  return UMF_RESULT_SUCCESS;
 }
 
 } // namespace umf

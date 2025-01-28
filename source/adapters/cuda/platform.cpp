@@ -13,6 +13,7 @@
 #include "common.hpp"
 #include "context.hpp"
 #include "device.hpp"
+#include "umf_helpers.hpp"
 
 #include <cassert>
 #include <cuda.h>
@@ -109,6 +110,51 @@ urPlatformGet(ur_adapter_handle_t *, uint32_t, uint32_t NumEntries,
             for (int i = 0; i < NumDevices; ++i) {
               Platform.Devices.clear();
             }
+            Result = Err;
+            throw Err;
+          } catch (...) {
+            Result = UR_RESULT_ERROR_OUT_OF_RESOURCES;
+            throw;
+          }
+
+          try {
+            umf_cuda_memory_provider_params_handle_t cu_memory_provider_params =
+                nullptr;
+            umf_result_t umf_result =
+                umfCUDAMemoryProviderParamsCreate(&cu_memory_provider_params);
+            if (umf_result != UMF_RESULT_SUCCESS) {
+              Result = umf::umf2urResult(umf_result);
+              throw Result;
+            }
+
+            for (int i = 0; i < NumDevices; ++i) {
+              ur_device_handle_t_ *device_handle = Platform.Devices[i].get();
+              CUdevice device = device_handle->get();
+              CUcontext context = device_handle->getNativeContext();
+
+              // create UMF CUDA memory provider for the device memory
+              // (UMF_MEMORY_TYPE_DEVICE)
+              umf_result = umf::createUmfCUDAprovider(
+                  cu_memory_provider_params, device, context,
+                  UMF_MEMORY_TYPE_DEVICE, &device_handle->memoryProviderDevice);
+              if (umf_result != UMF_RESULT_SUCCESS) {
+                Result = umf::umf2urResult(umf_result);
+                throw Result;
+              }
+
+              // create UMF CUDA memory provider for the shared memory
+              // (UMF_MEMORY_TYPE_SHARED)
+              umf_result = umf::createUmfCUDAprovider(
+                  cu_memory_provider_params, device, context,
+                  UMF_MEMORY_TYPE_SHARED, &device_handle->memoryProviderShared);
+              if (umf_result != UMF_RESULT_SUCCESS) {
+                Result = umf::umf2urResult(umf_result);
+                throw Result;
+              }
+            }
+
+            umfCUDAMemoryProviderParamsDestroy(cu_memory_provider_params);
+          } catch (ur_result_t Err) {
             Result = Err;
             throw Err;
           } catch (...) {

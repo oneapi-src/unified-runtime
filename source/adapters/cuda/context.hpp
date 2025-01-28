@@ -19,6 +19,7 @@
 
 #include "common.hpp"
 #include "device.hpp"
+#include "umf_helpers.hpp"
 
 #include <umf/memory_pool.h>
 
@@ -86,10 +87,47 @@ struct ur_context_handle_t_ {
   std::vector<ur_device_handle_t> Devices;
   std::atomic_uint32_t RefCount;
 
+  // UMF CUDA memory provider for the host memory (UMF_MEMORY_TYPE_HOST)
+  umf_memory_provider_handle_t memoryProviderHost = nullptr;
+
   ur_context_handle_t_(const ur_device_handle_t *Devs, uint32_t NumDevices)
       : Devices{Devs, Devs + NumDevices}, RefCount{1} {
     for (auto &Dev : Devices) {
       urDeviceRetain(Dev);
+    }
+
+    ur_result_t Result = UR_RESULT_SUCCESS;
+
+    try {
+      ur_device_handle_t_ *device_handle = Devices[0];
+      CUcontext context0 = device_handle->getNativeContext();
+
+      umf_cuda_memory_provider_params_handle_t cu_memory_provider_params =
+          nullptr;
+      umf_result_t umf_result =
+          umfCUDAMemoryProviderParamsCreate(&cu_memory_provider_params);
+      if (umf_result != UMF_RESULT_SUCCESS) {
+        Result = umf::umf2urResult(umf_result);
+        throw Result;
+      }
+
+      // create UMF CUDA memory provider for the host memory
+      // (UMF_MEMORY_TYPE_HOST)
+      umf_result = umf::createUmfCUDAprovider(
+          cu_memory_provider_params, 0 /* cuDevice */, context0,
+          UMF_MEMORY_TYPE_HOST, &memoryProviderHost);
+      if (umf_result != UMF_RESULT_SUCCESS) {
+        Result = umf::umf2urResult(umf_result);
+        throw Result;
+      }
+
+      umfCUDAMemoryProviderParamsDestroy(cu_memory_provider_params);
+    } catch (ur_result_t Err) {
+      Result = Err;
+      throw Err;
+    } catch (...) {
+      Result = UR_RESULT_ERROR_OUT_OF_RESOURCES;
+      throw;
     }
   };
 
