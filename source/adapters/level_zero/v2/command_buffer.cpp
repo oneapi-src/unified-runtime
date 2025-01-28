@@ -18,14 +18,11 @@ namespace {
 // Checks whether zeCommandListImmediateAppendCommandListsExp can be used for a
 // given context.
 void checkImmediateAppendSupport(ur_context_handle_t context) {
-  bool DriverSupportsImmediateAppend =
-      context->getPlatform()->ZeCommandListImmediateAppendExt.Supported;
-
-  if (!DriverSupportsImmediateAppend) {
+  if (!context->getPlatform()->ZeCommandListImmediateAppendExt.Supported) {
     logger::error("Adapter v2 is used but "
                   "the current driver does not support the "
                   "zeCommandListImmediateAppendCommandListsExp entrypoint.");
-    std::abort();
+    throw UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 }
 
