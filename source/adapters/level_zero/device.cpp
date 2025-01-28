@@ -873,8 +873,8 @@ ur_result_t urDeviceGetInfo(
     EuCountDesc.stype = ZE_STRUCTURE_TYPE_EU_COUNT_EXT;
     DeviceProp.pNext = (void *)&EuCountDesc;
     ZE2UR_CALL(zeDeviceGetProperties, (ZeDevice, &DeviceProp));
-    if (DeviceProp.pNext &&
-        EuCountDesc.stype == ZE_STRUCTURE_TYPE_EU_COUNT_EXT) {
+    if (Device->Platform->ZeDriverEuCountExtensionFound &&
+        EuCountDesc.numTotalEUs > 0) {
       return ReturnValue(uint32_t{EuCountDesc.numTotalEUs});
     }
     uint32_t count = Device->ZeDeviceProperties->numEUsPerSubslice *
