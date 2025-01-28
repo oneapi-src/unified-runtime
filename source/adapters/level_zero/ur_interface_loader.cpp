@@ -127,7 +127,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
       ur::level_zero::urCommandBufferAppendUSMPrefetchExp;
   pDdiTable->pfnAppendUSMAdviseExp =
       ur::level_zero::urCommandBufferAppendUSMAdviseExp;
-  pDdiTable->pfnEnqueueExp = ur::level_zero::urCommandBufferEnqueueExp;
   pDdiTable->pfnRetainCommandExp =
       ur::level_zero::urCommandBufferRetainCommandExp;
   pDdiTable->pfnReleaseCommandExp =
@@ -216,6 +215,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urGetEnqueueExpProcAddrTable(
 
   pDdiTable->pfnKernelLaunchCustomExp =
       ur::level_zero::urEnqueueKernelLaunchCustomExp;
+  pDdiTable->pfnCommandBufferExp = ur::level_zero::urEnqueueCommandBufferExp;
   pDdiTable->pfnCooperativeKernelLaunchExp =
       ur::level_zero::urEnqueueCooperativeKernelLaunchExp;
   pDdiTable->pfnTimestampRecordingExp =

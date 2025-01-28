@@ -137,6 +137,10 @@ struct ur_queue_handle_t_ {
   virtual ur_result_t bindlessImagesSignalExternalSemaphoreExp(
       ur_exp_external_semaphore_handle_t, bool, uint64_t, uint32_t,
       const ur_event_handle_t *, ur_event_handle_t *) = 0;
+  virtual ur_result_t enqueueCommandBufferExp(ur_exp_command_buffer_handle_t,
+                                              uint32_t,
+                                              const ur_event_handle_t *,
+                                              ur_event_handle_t *) = 0;
   virtual ur_result_t enqueueCooperativeKernelLaunchExp(
       ur_kernel_handle_t, uint32_t, const size_t *, const size_t *,
       const size_t *, uint32_t, const ur_event_handle_t *,

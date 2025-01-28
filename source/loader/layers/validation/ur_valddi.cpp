@@ -8773,12 +8773,12 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferAppendUSMAdviseExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferEnqueueExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
-    /// [in] Handle of the command-buffer object.
-    ur_exp_command_buffer_handle_t hCommandBuffer,
+/// @brief Intercept function for urEnqueueCommandBufferExp
+__urdlllocal ur_result_t UR_APICALL urEnqueueCommandBufferExp(
     /// [in] The queue to submit this command-buffer for execution.
     ur_queue_handle_t hQueue,
+    /// [in] Handle of the command-buffer object.
+    ur_exp_command_buffer_handle_t hCommandBuffer,
     /// [in] Size of the event wait list.
     uint32_t numEventsInWaitList,
     /// [in][optional][range(0, numEventsInWaitList)] pointer to a list of
@@ -8791,17 +8791,18 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
     /// not NULL, phEvent must not refer to an element of the phEventWaitList
     /// array.
     ur_event_handle_t *phEvent) {
-  auto pfnEnqueueExp = getContext()->urDdiTable.CommandBufferExp.pfnEnqueueExp;
+  auto pfnCommandBufferExp =
+      getContext()->urDdiTable.EnqueueExp.pfnCommandBufferExp;
 
-  if (nullptr == pfnEnqueueExp) {
+  if (nullptr == pfnCommandBufferExp) {
     return UR_RESULT_ERROR_UNINITIALIZED;
   }
 
   if (getContext()->enableParameterValidation) {
-    if (NULL == hCommandBuffer)
+    if (NULL == hQueue)
       return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
 
-    if (NULL == hQueue)
+    if (NULL == hCommandBuffer)
       return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
 
     if (phEventWaitList == NULL && numEventsInWaitList > 0)
@@ -8824,8 +8825,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
     getContext()->refCountContext->logInvalidReference(hQueue);
   }
 
-  ur_result_t result = pfnEnqueueExp(
-      hCommandBuffer, hQueue, numEventsInWaitList, phEventWaitList, phEvent);
+  ur_result_t result = pfnCommandBufferExp(
+      hQueue, hCommandBuffer, numEventsInWaitList, phEventWaitList, phEvent);
 
   return result;
 }
@@ -10259,9 +10260,6 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
   pDdiTable->pfnAppendUSMAdviseExp =
       ur_validation_layer::urCommandBufferAppendUSMAdviseExp;
 
-  dditable.pfnEnqueueExp = pDdiTable->pfnEnqueueExp;
-  pDdiTable->pfnEnqueueExp = ur_validation_layer::urCommandBufferEnqueueExp;
-
   dditable.pfnRetainCommandExp = pDdiTable->pfnRetainCommandExp;
   pDdiTable->pfnRetainCommandExp =
       ur_validation_layer::urCommandBufferRetainCommandExp;
@@ -10488,6 +10486,10 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetEnqueueExpProcAddrTable(
   dditable.pfnKernelLaunchCustomExp = pDdiTable->pfnKernelLaunchCustomExp;
   pDdiTable->pfnKernelLaunchCustomExp =
       ur_validation_layer::urEnqueueKernelLaunchCustomExp;
+
+  dditable.pfnCommandBufferExp = pDdiTable->pfnCommandBufferExp;
+  pDdiTable->pfnCommandBufferExp =
+      ur_validation_layer::urEnqueueCommandBufferExp;
 
   dditable.pfnCooperativeKernelLaunchExp =
       pDdiTable->pfnCooperativeKernelLaunchExp;
