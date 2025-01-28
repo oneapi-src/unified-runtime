@@ -1128,20 +1128,11 @@ inline std::ostream &operator<<(std::ostream &os, enum ur_function_t value) {
   case UR_FUNCTION_DEVICE_GET_SELECTED:
     os << "UR_FUNCTION_DEVICE_GET_SELECTED";
     break;
-  case UR_FUNCTION_COMMAND_BUFFER_RETAIN_COMMAND_EXP:
-    os << "UR_FUNCTION_COMMAND_BUFFER_RETAIN_COMMAND_EXP";
-    break;
-  case UR_FUNCTION_COMMAND_BUFFER_RELEASE_COMMAND_EXP:
-    os << "UR_FUNCTION_COMMAND_BUFFER_RELEASE_COMMAND_EXP";
-    break;
   case UR_FUNCTION_COMMAND_BUFFER_UPDATE_KERNEL_LAUNCH_EXP:
     os << "UR_FUNCTION_COMMAND_BUFFER_UPDATE_KERNEL_LAUNCH_EXP";
     break;
   case UR_FUNCTION_COMMAND_BUFFER_GET_INFO_EXP:
     os << "UR_FUNCTION_COMMAND_BUFFER_GET_INFO_EXP";
-    break;
-  case UR_FUNCTION_COMMAND_BUFFER_COMMAND_GET_INFO_EXP:
-    os << "UR_FUNCTION_COMMAND_BUFFER_COMMAND_GET_INFO_EXP";
     break;
   case UR_FUNCTION_ENQUEUE_TIMESTAMP_RECORDING_EXP:
     os << "UR_FUNCTION_ENQUEUE_TIMESTAMP_RECORDING_EXP";
@@ -19187,40 +19178,6 @@ operator<<(std::ostream &os,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the ur_command_buffer_retain_command_exp_params_t
-/// type
-/// @returns
-///     std::ostream &
-inline std::ostream &operator<<(
-    std::ostream &os,
-    [[maybe_unused]] const struct ur_command_buffer_retain_command_exp_params_t
-        *params) {
-
-  os << ".hCommand = ";
-
-  ur::details::printPtr(os, *(params->phCommand));
-
-  return os;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the ur_command_buffer_release_command_exp_params_t
-/// type
-/// @returns
-///     std::ostream &
-inline std::ostream &operator<<(
-    std::ostream &os,
-    [[maybe_unused]] const struct ur_command_buffer_release_command_exp_params_t
-        *params) {
-
-  os << ".hCommand = ";
-
-  ur::details::printPtr(os, *(params->phCommand));
-
-  return os;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Print operator for the
 /// ur_command_buffer_update_kernel_launch_exp_params_t type
 /// @returns
@@ -19311,42 +19268,6 @@ operator<<(std::ostream &os,
   os << ".hCommandBuffer = ";
 
   ur::details::printPtr(os, *(params->phCommandBuffer));
-
-  os << ", ";
-  os << ".propName = ";
-
-  os << *(params->ppropName);
-
-  os << ", ";
-  os << ".propSize = ";
-
-  os << *(params->ppropSize);
-
-  os << ", ";
-  os << ".pPropValue = ";
-  ur::details::printTagged(os, *(params->ppPropValue), *(params->ppropName),
-                           *(params->ppropSize));
-
-  os << ", ";
-  os << ".pPropSizeRet = ";
-
-  ur::details::printPtr(os, *(params->ppPropSizeRet));
-
-  return os;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the
-/// ur_command_buffer_command_get_info_exp_params_t type
-/// @returns
-///     std::ostream &
-inline std::ostream &
-operator<<(std::ostream &os, [[maybe_unused]] const struct
-           ur_command_buffer_command_get_info_exp_params_t *params) {
-
-  os << ".hCommand = ";
-
-  ur::details::printPtr(os, *(params->phCommand));
 
   os << ", ";
   os << ".propName = ";
@@ -20819,12 +20740,6 @@ inline ur_result_t UR_APICALL printFunctionParams(std::ostream &os,
   case UR_FUNCTION_COMMAND_BUFFER_ENQUEUE_EXP: {
     os << (const struct ur_command_buffer_enqueue_exp_params_t *)params;
   } break;
-  case UR_FUNCTION_COMMAND_BUFFER_RETAIN_COMMAND_EXP: {
-    os << (const struct ur_command_buffer_retain_command_exp_params_t *)params;
-  } break;
-  case UR_FUNCTION_COMMAND_BUFFER_RELEASE_COMMAND_EXP: {
-    os << (const struct ur_command_buffer_release_command_exp_params_t *)params;
-  } break;
   case UR_FUNCTION_COMMAND_BUFFER_UPDATE_KERNEL_LAUNCH_EXP: {
     os << (const struct ur_command_buffer_update_kernel_launch_exp_params_t *)
             params;
@@ -20839,10 +20754,6 @@ inline ur_result_t UR_APICALL printFunctionParams(std::ostream &os,
   } break;
   case UR_FUNCTION_COMMAND_BUFFER_GET_INFO_EXP: {
     os << (const struct ur_command_buffer_get_info_exp_params_t *)params;
-  } break;
-  case UR_FUNCTION_COMMAND_BUFFER_COMMAND_GET_INFO_EXP: {
-    os << (const struct ur_command_buffer_command_get_info_exp_params_t *)
-            params;
   } break;
   case UR_FUNCTION_TENSOR_MAP_ENCODE_IM_2_COL_EXP: {
     os << (const struct ur_tensor_map_encode_im_2_col_exp_params_t *)params;
