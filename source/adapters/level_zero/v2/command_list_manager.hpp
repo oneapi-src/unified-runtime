@@ -43,7 +43,7 @@ struct ur_command_list_manager : public _ur_object {
 private:
   // UR context associated with this command-buffer
   ur_context_handle_t context;
-  // Device associated with this command buffer
+  // Device associated with this command-buffer
   ur_device_handle_t device;
   v2::raii::cache_borrowed_event_pool eventPool;
   v2::raii::command_list_unique_handle zeCommandList;

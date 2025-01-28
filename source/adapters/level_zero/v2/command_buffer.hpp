@@ -33,7 +33,7 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   const bool isProfilingEnabled = false;
 
 private:
-  // Indicates if command buffer was finalized.
+  // Indicates if command-buffer was finalized.
   bool isFinalized = false;
 };
 
