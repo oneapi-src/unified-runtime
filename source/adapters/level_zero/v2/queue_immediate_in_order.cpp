@@ -605,6 +605,7 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueMemBufferMap(
                (commandListManager.getZeCommandList(), waitList.second,
                 waitList.first));
   }
+
   if (zeSignalEvent) {
     ZE2UR_CALL(zeCommandListAppendSignalEvent,
                (commandListManager.getZeCommandList(), zeSignalEvent));
