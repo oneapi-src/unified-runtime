@@ -1064,6 +1064,8 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueGenericCommandListsExp(
     uint32_t numCommandLists, ze_command_list_handle_t *phCommandLists,
     ur_event_handle_t *phEvent, uint32_t numEventsInWaitList,
     const ur_event_handle_t *phEventWaitList, ur_command_t callerCommand) {
+  TRACK_SCOPE_LATENCY(
+      "ur_queue_immediate_in_order_t::enqueueGenericCommandListsExp");
 
   std::scoped_lock<ur_shared_mutex> Lock(this->Mutex);
   auto zeSignalEvent = getSignalEvent(phEvent, callerCommand);

@@ -55,7 +55,8 @@ urCommandBufferCreateExp(ur_context_handle_t context, ur_device_handle_t device,
                          ur_exp_command_buffer_handle_t *commandBuffer) try {
   checkImmediateAppendSupport(context);
 
-  if (!context->getPlatform()->ZeMutableCmdListExt.Supported) {
+  if (commandBufferDesc->isUpdatable &&
+      !context->getPlatform()->ZeMutableCmdListExt.Supported) {
     throw UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
@@ -112,9 +113,9 @@ ur_result_t urCommandBufferAppendKernelLaunchExp(
     uint32_t numEventsInWaitList, const ur_event_handle_t *eventWaitList,
     ur_exp_command_buffer_sync_point_t *retSyncPoint, ur_event_handle_t *event,
     ur_exp_command_buffer_command_handle_t *command) try {
-  // Need to know semantics
-  //  - should they be checked before kernel execution or before kernel
-  //  appending to list if latter then it is easy fix, if former then TODO
+  // TODO: These parameters aren't implemented in V1 yet, and are a fair amount
+  // of work. Need to know semantics: should they be checked before kernel
+  // execution (difficult) or before kernel appending to list (easy fix).
   std::ignore = numEventsInWaitList;
   std::ignore = eventWaitList;
   std::ignore = event;

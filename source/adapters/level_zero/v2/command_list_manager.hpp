@@ -47,6 +47,6 @@ private:
   ur_device_handle_t device;
   v2::raii::cache_borrowed_event_pool eventPool;
   v2::raii::command_list_unique_handle zeCommandList;
-  ur_queue_handle_t_ *queue;
+  ur_queue_handle_t queue;
   std::vector<ze_event_handle_t> waitList;
 };
