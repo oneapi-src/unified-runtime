@@ -184,13 +184,13 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
       for (unsigned g2 = 0; g2 < numWG2; g2++) {
         for (unsigned g1 = 0; g1 < numWG1; g1++) {
           Tasks.schedule([state, kernel = *hKernel, numWG0, g1, g2,
-                                numParallelThreads](size_t threadId) mutable {
-                for (unsigned g0 = 0; g0 < numWG0; g0++) {
-                  kernel.handleLocalArgs(numParallelThreads, threadId);
-                  state.update(g0, g1, g2);
-                  kernel._subhandler(kernel.getArgs().data(), &state);
-                }
-              });
+                          numParallelThreads](size_t threadId) mutable {
+            for (unsigned g0 = 0; g0 < numWG0; g0++) {
+              kernel.handleLocalArgs(numParallelThreads, threadId);
+              state.update(g0, g1, g2);
+              kernel._subhandler(kernel.getArgs().data(), &state);
+            }
+          });
         }
       }
     } else {
@@ -217,23 +217,23 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
       for (unsigned thread = 0; groupsPerThread && thread < numParallelThreads;
            thread++) {
         Tasks.schedule([groups, thread, groupsPerThread,
-                              kernel = *hKernel](size_t threadId) {
-              for (unsigned i = 0; i < groupsPerThread; i++) {
-                auto index = thread * groupsPerThread + i;
-                groups[index](threadId, kernel);
-              }
-            });
+                        kernel = *hKernel](size_t threadId) {
+          for (unsigned i = 0; i < groupsPerThread; i++) {
+            auto index = thread * groupsPerThread + i;
+            groups[index](threadId, kernel);
+          }
+        });
       }
       // schedule the remaining tasks
       if (remainder) {
         Tasks.schedule([groups, remainder,
-                              scheduled = numParallelThreads * groupsPerThread,
-                              kernel = *hKernel](size_t threadId) {
-              for (unsigned i = 0; i < remainder; i++) {
-                auto index = scheduled + i;
-                groups[index](threadId, kernel);
-              }
-            });
+                        scheduled = numParallelThreads * groupsPerThread,
+                        kernel = *hKernel](size_t threadId) {
+          for (unsigned i = 0; i < remainder; i++) {
+            auto index = scheduled + i;
+            groups[index](threadId, kernel);
+          }
+        });
       }
     }
   }
