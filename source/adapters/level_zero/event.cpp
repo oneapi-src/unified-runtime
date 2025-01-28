@@ -888,6 +888,12 @@ ur_result_t
 urEventRelease(/** [in] handle of the event object */ ur_event_handle_t Event) {
   Event->RefCountExternal--;
   UR_CALL(urEventReleaseInternal(Event));
+  // If this is a Completed Event Wait Out Event, then we need to cleanup the
+  // event at user release and not at the time of completion.
+  if (Event && Event->CommandType == UR_COMMAND_EVENTS_WAIT &&
+      Event->Completed) {
+    UR_CALL(CleanupCompletedEvent((Event), false, false));
+  }
 
   return UR_RESULT_SUCCESS;
 }
