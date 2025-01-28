@@ -40,12 +40,13 @@ ur_exp_command_buffer_handle_t_::ur_exp_command_buffer_handle_t_(
           std::forward<v2::raii::command_list_unique_handle>(commandList)),
       isUpdatable(desc ? desc->isUpdatable : false) {}
 
-ur_result_t ur_exp_command_buffer_handle_t_::closeCommandList() {
+ur_result_t ur_exp_command_buffer_handle_t_::finalizeCommandBuffer() {
   // It is not allowed to append to command list from multiple threads.
   std::scoped_lock<ur_shared_mutex> guard(this->Mutex);
-
+  UR_ASSERT(!isFinalized, UR_RESULT_ERROR_INVALID_OPERATION);
   // Close the command lists and have them ready for dispatch.
   ZE2UR_CALL(zeCommandListClose, (this->commandListManager.getZeCommandList()));
+  isFinalized = true;
   return UR_RESULT_SUCCESS;
 }
 
@@ -72,7 +73,7 @@ urCommandBufferCreateExp(ur_context_handle_t context, ur_device_handle_t device,
       context, device, std::move(zeCommandList), commandBufferDesc);
   return UR_RESULT_SUCCESS;
 
-} catch (const std::bad_alloc &) {
+} catch (...) {
   return exceptionToResult(std::current_exception());
 }
 
@@ -80,7 +81,7 @@ ur_result_t
 urCommandBufferRetainExp(ur_exp_command_buffer_handle_t hCommandBuffer) try {
   hCommandBuffer->RefCount.increment();
   return UR_RESULT_SUCCESS;
-} catch (const std::bad_alloc &) {
+} catch (...) {
   return exceptionToResult(std::current_exception());
 }
 
@@ -98,10 +99,7 @@ urCommandBufferReleaseExp(ur_exp_command_buffer_handle_t hCommandBuffer) try {
 ur_result_t
 urCommandBufferFinalizeExp(ur_exp_command_buffer_handle_t hCommandBuffer) try {
   UR_ASSERT(hCommandBuffer, UR_RESULT_ERROR_INVALID_NULL_POINTER);
-  UR_ASSERT(!hCommandBuffer->isFinalized, UR_RESULT_ERROR_INVALID_OPERATION);
-  hCommandBuffer->closeCommandList();
-
-  hCommandBuffer->isFinalized = true;
+  UR_CALL(hCommandBuffer->finalizeCommandBuffer());
   return UR_RESULT_SUCCESS;
 } catch (...) {
   return exceptionToResult(std::current_exception());

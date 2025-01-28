@@ -83,7 +83,7 @@ ur_queue_immediate_in_order_t::ur_queue_immediate_in_order_t(
               reinterpret_cast<ze_command_list_handle_t>(hNativeHandle),
               [ownZeQueue](ze_command_list_handle_t hZeCommandList) {
                 if (ownZeQueue) {
-                  zeCommandListDestroy(hZeCommandList);
+                  ZE_CALL_NOCHECK(zeCommandListDestroy, (hZeCommandList));
                 }
               }),
           eventFlagsFromQueueFlags(flags)) {}
@@ -235,9 +235,8 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueEventsWait(
         (commandListManager.getZeCommandList(), numWaitEvents, pWaitEvents));
   }
 
-    ZE2UR_CALL(
-        zeCommandListAppendSignalEvent,
-        (commandListManager.getZeCommandList(), zeSignalEvent));
+  ZE2UR_CALL(zeCommandListAppendSignalEvent,
+             (commandListManager.getZeCommandList(), zeSignalEvent));
   return UR_RESULT_SUCCESS;
 }
 
@@ -601,12 +600,19 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueMemBufferMap(
   if (!memoryMigrated && waitList.second) {
     // If memory was not migrated, we need to wait on the events here.
     ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
+<<<<<<< HEAD
                (handler.commandList.get(), waitList.second, waitList.first));
   }
 
   if (signalEvent) {
     ZE2UR_CALL(zeCommandListAppendSignalEvent,
                (handler.commandList.get(), signalEvent->getZeEvent()));
+=======
+               (commandListManager.getZeCommandList(), waitList.second,
+                waitList.first));
+    ZE2UR_CALL(zeCommandListAppendSignalEvent,
+               (commandListManager.getZeCommandList(), zeSignalEvent));
+>>>>>>> 9f53547f (Remove not needed structs and reformat code)
   }
 
   if (blockingMap) {
@@ -643,10 +649,8 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueMemUnmap(
     memoryMigrated = true;
   });
 
-    ZE2UR_CALL(
-        zeCommandListAppendSignalEvent,
-        (commandListManager.getZeCommandList(), zeSignalEvent));
-  
+  ZE2UR_CALL(zeCommandListAppendSignalEvent,
+             (commandListManager.getZeCommandList(), zeSignalEvent));
 
   return UR_RESULT_SUCCESS;
 }
@@ -754,10 +758,8 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueUSMPrefetch(
   ZE2UR_CALL(zeCommandListAppendMemoryPrefetch,
              (commandListManager.getZeCommandList(), pMem, size));
 
-    ZE2UR_CALL(
-        zeCommandListAppendSignalEvent,
-        (commandListManager.getZeCommandList(), zeSignalEvent));
-  
+  ZE2UR_CALL(zeCommandListAppendSignalEvent,
+             (commandListManager.getZeCommandList(), zeSignalEvent));
 
   return UR_RESULT_SUCCESS;
 }
@@ -789,9 +791,8 @@ ur_queue_immediate_in_order_t::enqueueUSMAdvise(const void *pMem, size_t size,
              (commandListManager.getZeCommandList(), this->hDevice->ZeDevice,
               pMem, size, zeAdvice));
 
-    ZE2UR_CALL(
-        zeCommandListAppendSignalEvent,
-        (commandListManager.getZeCommandList(), zeSignalEvent));
+  ZE2UR_CALL(zeCommandListAppendSignalEvent,
+             (commandListManager.getZeCommandList(), zeSignalEvent));
 
   return UR_RESULT_SUCCESS;
 }
@@ -1037,11 +1038,10 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueTimestampRecordingExp(
 
   std::scoped_lock<ur_shared_mutex> lock(this->Mutex);
 
-
   if (!phEvent && !*phEvent) {
     return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
   }
-
+  getSignalEvent(phEvent, UR_COMMAND_TIMESTAMP_RECORDING_EXP);
   auto [pWaitEvents, numWaitEvents] =
       getWaitListView(phEventWaitList, numEventsInWaitList);
 
