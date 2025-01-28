@@ -213,18 +213,19 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
       }
       auto numGroups = groups.size();
       auto groupsPerThread = numGroups / numParallelThreads;
-      auto remainder = numGroups % numParallelThreads;
-      for (unsigned thread = 0; groupsPerThread && thread < numParallelThreads;
-           thread++) {
-        Tasks.schedule([groups, thread, groupsPerThread,
-                        kernel = *hKernel](size_t threadId) {
-          for (unsigned i = 0; i < groupsPerThread; i++) {
-            auto index = thread * groupsPerThread + i;
-            groups[index](threadId, kernel);
-          }
-        });
+      if (groupsPerThread) {
+        for (unsigned thread = 0; thread < numParallelThreads; thread++) {
+          Tasks.schedule([groups, thread, groupsPerThread,
+                          kernel = *hKernel](size_t threadId) {
+            for (unsigned i = 0; i < groupsPerThread; i++) {
+              auto index = thread * groupsPerThread + i;
+              groups[index](threadId, kernel);
+            }
+          });
+        }
       }
       // schedule the remaining tasks
+      auto remainder = numGroups % numParallelThreads;
       if (remainder) {
         Tasks.schedule([groups, remainder,
                         scheduled = numParallelThreads * groupsPerThread,
