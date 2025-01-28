@@ -13,7 +13,7 @@
 
 #include "common.hpp"
 
-struct ur_device_handle_t_ {
+struct ur_device_handle_t_ : ur_object_t_ {
 private:
   using native_type = CUdevice;
 
@@ -37,8 +37,8 @@ private:
 public:
   ur_device_handle_t_(native_type cuDevice, CUcontext cuContext, CUevent evBase,
                       ur_platform_handle_t platform, uint32_t DevIndex)
-      : CuDevice(cuDevice), CuContext(cuContext), EvBase(evBase), RefCount{1},
-        Platform(platform), DeviceIndex{DevIndex} {
+      : ur_object_t_(), CuDevice(cuDevice), CuContext(cuContext),
+        EvBase(evBase), RefCount{1}, Platform(platform), DeviceIndex{DevIndex} {
 
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &MaxRegsPerBlock, CU_DEVICE_ATTRIBUTE_MAX_REGISTERS_PER_BLOCK,

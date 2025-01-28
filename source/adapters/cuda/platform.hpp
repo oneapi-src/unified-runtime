@@ -12,6 +12,6 @@
 #include <ur/ur.hpp>
 #include <vector>
 
-struct ur_platform_handle_t_ {
+struct ur_platform_handle_t_ : ur_object_t_ {
   std::vector<std::unique_ptr<ur_device_handle_t_>> Devices;
 };

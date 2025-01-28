@@ -8,6 +8,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "common.hpp"
 #include <ur_api.h>
 #include <ur_ddi.h>
 
@@ -447,3 +448,36 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetProgramExpProcAddrTable(
   return UR_RESULT_SUCCESS;
 }
 } // extern "C"
+
+ur_dditable_t *native_cpu::native_cpu_ddi_getter::value() {
+  static std::once_flag flag;
+  static ur_dditable_t table;
+
+  std::call_once(flag, []() {
+    urGetGlobalProcAddrTable(UR_API_VERSION_CURRENT, &table.Global);
+    urGetBindlessImagesExpProcAddrTable(UR_API_VERSION_CURRENT,
+                                        &table.BindlessImagesExp);
+    urGetCommandBufferExpProcAddrTable(UR_API_VERSION_CURRENT,
+                                       &table.CommandBufferExp);
+    urGetContextProcAddrTable(UR_API_VERSION_CURRENT, &table.Context);
+    urGetEnqueueProcAddrTable(UR_API_VERSION_CURRENT, &table.Enqueue);
+    urGetEnqueueExpProcAddrTable(UR_API_VERSION_CURRENT, &table.EnqueueExp);
+    urGetEventProcAddrTable(UR_API_VERSION_CURRENT, &table.Event);
+    urGetKernelProcAddrTable(UR_API_VERSION_CURRENT, &table.Kernel);
+    urGetKernelExpProcAddrTable(UR_API_VERSION_CURRENT, &table.KernelExp);
+    urGetMemProcAddrTable(UR_API_VERSION_CURRENT, &table.Mem);
+    urGetPhysicalMemProcAddrTable(UR_API_VERSION_CURRENT, &table.PhysicalMem);
+    urGetPlatformProcAddrTable(UR_API_VERSION_CURRENT, &table.Platform);
+    urGetProgramProcAddrTable(UR_API_VERSION_CURRENT, &table.Program);
+    urGetProgramExpProcAddrTable(UR_API_VERSION_CURRENT, &table.ProgramExp);
+    urGetQueueProcAddrTable(UR_API_VERSION_CURRENT, &table.Queue);
+    urGetSamplerProcAddrTable(UR_API_VERSION_CURRENT, &table.Sampler);
+    urGetTensorMapExpProcAddrTable(UR_API_VERSION_CURRENT, &table.TensorMapExp);
+    urGetUSMProcAddrTable(UR_API_VERSION_CURRENT, &table.USM);
+    urGetUSMExpProcAddrTable(UR_API_VERSION_CURRENT, &table.USMExp);
+    urGetUsmP2PExpProcAddrTable(UR_API_VERSION_CURRENT, &table.UsmP2PExp);
+    urGetVirtualMemProcAddrTable(UR_API_VERSION_CURRENT, &table.VirtualMem);
+    urGetDeviceProcAddrTable(UR_API_VERSION_CURRENT, &table.Device);
+  });
+  return &table;
+}
