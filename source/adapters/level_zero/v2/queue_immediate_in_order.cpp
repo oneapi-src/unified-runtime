@@ -114,7 +114,7 @@ ur_queue_immediate_in_order_t::queueGetInfo(ur_queue_info_t propName,
     return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
   case UR_QUEUE_INFO_EMPTY: {
     auto status = ZE_CALL_NOCHECK(zeCommandListHostSynchronize,
-                                  (handler.commandList.get(), 0));
+                                  (commandListManager.getZeCommandList(), 0));
     if (status == ZE_RESULT_SUCCESS) {
       return ReturnValue(true);
     } else if (status == ZE_RESULT_NOT_READY) {
@@ -235,8 +235,10 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueEventsWait(
         (commandListManager.getZeCommandList(), numWaitEvents, pWaitEvents));
   }
 
-  ZE2UR_CALL(zeCommandListAppendSignalEvent,
-             (commandListManager.getZeCommandList(), zeSignalEvent));
+  if (zeSignalEvent) {
+    ZE2UR_CALL(zeCommandListAppendSignalEvent,
+               (commandListManager.getZeCommandList(), zeSignalEvent));
+  }
   return UR_RESULT_SUCCESS;
 }
 
@@ -600,19 +602,12 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueMemBufferMap(
   if (!memoryMigrated && waitList.second) {
     // If memory was not migrated, we need to wait on the events here.
     ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
-<<<<<<< HEAD
-               (handler.commandList.get(), waitList.second, waitList.first));
-  }
-
-  if (signalEvent) {
-    ZE2UR_CALL(zeCommandListAppendSignalEvent,
-               (handler.commandList.get(), signalEvent->getZeEvent()));
-=======
                (commandListManager.getZeCommandList(), waitList.second,
                 waitList.first));
+  }
+  if (zeSignalEvent) {
     ZE2UR_CALL(zeCommandListAppendSignalEvent,
                (commandListManager.getZeCommandList(), zeSignalEvent));
->>>>>>> 9f53547f (Remove not needed structs and reformat code)
   }
 
   if (blockingMap) {
@@ -648,10 +643,10 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueMemUnmap(
                        nullptr, waitList.second, waitList.first));
     memoryMigrated = true;
   });
-
-  ZE2UR_CALL(zeCommandListAppendSignalEvent,
-             (commandListManager.getZeCommandList(), zeSignalEvent));
-
+  if (zeSignalEvent) {
+    ZE2UR_CALL(zeCommandListAppendSignalEvent,
+               (commandListManager.getZeCommandList(), zeSignalEvent));
+  }
   return UR_RESULT_SUCCESS;
 }
 
@@ -757,9 +752,10 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueUSMPrefetch(
   // TODO: figure out how to translate "flags"
   ZE2UR_CALL(zeCommandListAppendMemoryPrefetch,
              (commandListManager.getZeCommandList(), pMem, size));
-
-  ZE2UR_CALL(zeCommandListAppendSignalEvent,
-             (commandListManager.getZeCommandList(), zeSignalEvent));
+  if (zeSignalEvent) {
+    ZE2UR_CALL(zeCommandListAppendSignalEvent,
+               (commandListManager.getZeCommandList(), zeSignalEvent));
+  }
 
   return UR_RESULT_SUCCESS;
 }
@@ -791,9 +787,10 @@ ur_queue_immediate_in_order_t::enqueueUSMAdvise(const void *pMem, size_t size,
              (commandListManager.getZeCommandList(), this->hDevice->ZeDevice,
               pMem, size, zeAdvice));
 
-  ZE2UR_CALL(zeCommandListAppendSignalEvent,
-             (commandListManager.getZeCommandList(), zeSignalEvent));
-
+  if (zeSignalEvent) {
+    ZE2UR_CALL(zeCommandListAppendSignalEvent,
+               (commandListManager.getZeCommandList(), zeSignalEvent));
+  }
   return UR_RESULT_SUCCESS;
 }
 
