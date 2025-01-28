@@ -1,4 +1,4 @@
-//===--------- command_list_cache.hpp - Level Zero Adapter ---------------===//
+//===--------- command_list_manager.hpp - Level Zero Adapter --------------===//
 //
 // Copyright (C) 2024 Intel Corporation
 //
@@ -31,9 +31,7 @@ struct ur_command_list_manager : public _ur_object {
                                  uint32_t numEventsInWaitList,
                                  const ur_event_handle_t *phEventWaitList,
                                  ur_event_handle_t *phEvent);
-  ur_result_t appendCommandListImmediate(
-      ze_command_list_handle_t commandList, ur_event_handle_t *phEvent,
-      uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList);
+
   ze_command_list_handle_t getZeCommandList();
 
   std::pair<ze_event_handle_t *, uint32_t>

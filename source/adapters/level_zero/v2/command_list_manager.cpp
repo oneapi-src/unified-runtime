@@ -1,4 +1,4 @@
-//===--------- command_list_cache.hpp - Level Zero Adapter ---------------===//
+//===--------- command_list_manager.cpp - Level Zero Adapter --------------===//
 //
 // Copyright (C) 2024 Intel Corporation
 //

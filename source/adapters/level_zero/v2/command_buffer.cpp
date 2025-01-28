@@ -111,9 +111,7 @@ ur_result_t urCommandBufferAppendKernelLaunchExp(
     const ur_exp_command_buffer_sync_point_t *syncPointWaitList,
     uint32_t numEventsInWaitList, const ur_event_handle_t *eventWaitList,
     ur_exp_command_buffer_sync_point_t *retSyncPoint, ur_event_handle_t *event,
-    ur_exp_command_buffer_command_handle_t *command)
-
-    try {
+    ur_exp_command_buffer_command_handle_t *command) try {
   // Need to know semantics
   //  - should they be checked before kernel execution or before kernel
   //  appending to list if latter then it is easy fix, if former then TODO
