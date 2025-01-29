@@ -110,6 +110,11 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   // This flag must be set to false if at least one copy command has been
   // added to `ZeCopyCommandList`
   bool MCopyCommandListEmpty = true;
+  // This flag must be set to false if at least one copy command has been
+  // added to `ZeComputeCommandList`
+  bool MComputeCommandListEmpty = true;
+  // This flag tracks if the previous node submission was compute or copy type.
+  bool WasPrevCopyCommandList = false;
   // [WaitEvent Path only] Level Zero fences for each queue the command-buffer
   // has been enqueued to. These should be destroyed when the command-buffer is
   // released.
