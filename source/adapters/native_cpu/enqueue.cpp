@@ -275,7 +275,7 @@ static inline ur_result_t
 withTimingEvent(ur_command_t command_type, ur_queue_handle_t hQueue,
                 uint32_t numEventsInWaitList,
                 const ur_event_handle_t *phEventWaitList,
-                ur_event_handle_t *phEvent, T &f) {
+                ur_event_handle_t *phEvent, T &&f) {
   urEventWait(numEventsInWaitList, phEventWaitList);
   ur_event_handle_t event;
   if (phEvent) {
