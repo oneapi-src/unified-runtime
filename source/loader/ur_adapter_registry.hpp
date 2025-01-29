@@ -28,16 +28,17 @@ public:
     try {
       forceLoadedAdaptersOpt = getenv_to_vec("UR_ADAPTERS_FORCE_LOAD");
     } catch (const std::invalid_argument &e) {
-      logger::error(e.what());
+      URLOG(ERR, "{}", e.what());
     }
 
     if (forceLoadedAdaptersOpt.has_value()) {
       for (const auto &s : forceLoadedAdaptersOpt.value()) {
         auto path = fs::path(s);
         if (path.filename().extension() == STATIC_LIBRARY_EXTENSION) {
-          logger::warning("UR_ADAPTERS_FORCE_LOAD contains a path to a static"
-                          "library {}, it will be skipped",
-                          s);
+          URLOG(WARN,
+                "UR_ADAPTERS_FORCE_LOAD contains a path to a static"
+                "library {}, it will be skipped",
+                s);
           continue;
         }
 
@@ -45,16 +46,17 @@ public:
         try {
           exists = fs::exists(path);
         } catch (std::exception &e) {
-          logger::error(e.what());
+          URLOG(ERR, "{}", e.what());
         }
 
         if (exists) {
           forceLoaded = true;
           adaptersLoadPaths.emplace_back(std::vector{std::move(path)});
         } else {
-          logger::warning("Detected nonexistent path {} in environment "
-                          "variable UR_ADAPTERS_FORCE_LOAD",
-                          s);
+          URLOG(WARN,
+                "Detected nonexistent path {} in environment "
+                "variable UR_ADAPTERS_FORCE_LOAD",
+                s);
         }
       }
     } else {
@@ -137,7 +139,7 @@ private:
     try {
       pathStringsOpt = getenv_to_vec("UR_ADAPTERS_SEARCH_PATH");
     } catch (const std::invalid_argument &e) {
-      logger::error(e.what());
+      URLOG(ERR, "{}", e.what());
       return std::nullopt;
     }
 
@@ -148,9 +150,10 @@ private:
         if (fs::exists(path)) {
           paths.emplace_back(path);
         } else {
-          logger::warning("Detected nonexistent path {} in environmental "
-                          "variable UR_ADAPTERS_SEARCH_PATH",
-                          s);
+          URLOG(WARN,
+                "Detected nonexistent path {} in environmental "
+                "variable UR_ADAPTERS_SEARCH_PATH",
+                s);
         }
       }
     }
@@ -169,12 +172,12 @@ private:
     } catch (...) {
       // If the selector is malformed, then we ignore selector and return
       // success.
-      logger::error("ERROR: missing backend, format of filter = "
-                    "'[!]backend:filterStrings'");
+      URLOG(ERR, "ERROR: missing backend, format of filter = "
+                 "'[!]backend:filterStrings'");
       return UR_RESULT_SUCCESS;
     }
-    logger::debug("getenv_to_map parsed env var and {} a map",
-                  (odsEnvMap.has_value() ? "produced" : "failed to produce"));
+    URLOG(DEBUG, "getenv_to_map parsed env var and {} a map",
+          (odsEnvMap.has_value() ? "produced" : "failed to produce"));
 
     // if the ODS env var is not set at all, then pretend it was set to the
     // default
@@ -188,24 +191,24 @@ private:
       if (backend.empty()) {
         // FIXME: never true because getenv_to_map rejects this case
         // malformed term: missing backend -- output ERROR, then continue
-        logger::error("ERROR: missing backend, format of filter = "
-                      "'[!]backend:filterStrings'");
+        URLOG(ERR, "ERROR: missing backend, format of filter = "
+                   "'[!]backend:filterStrings'");
         continue;
       }
-      logger::debug("ONEAPI_DEVICE_SELECTOR Pre-Filter with backend '{}' "
-                    "and platform library name '{}'",
-                    backend, platformBackendName);
+      URLOG(DEBUG,
+            "ONEAPI_DEVICE_SELECTOR Pre-Filter with backend '{}' "
+            "and platform library name '{}'",
+            backend, platformBackendName);
       enum FilterType {
         AcceptFilter,
         DiscardFilter,
       } termType = (backend.front() != '!') ? AcceptFilter : DiscardFilter;
-      logger::debug(
-          "termType is {}",
-          (termType != AcceptFilter ? "DiscardFilter" : "AcceptFilter"));
+      URLOG(DEBUG, "termType is {}",
+            (termType != AcceptFilter ? "DiscardFilter" : "AcceptFilter"));
       if (termType != AcceptFilter) {
-        logger::debug("DEBUG: backend was '{}'", backend);
+        URLOG(DEBUG, "DEBUG: backend was '{}'", backend);
         backend.erase(backend.cbegin());
-        logger::debug("DEBUG: backend now '{}'", backend);
+        URLOG(DEBUG, "DEBUG: backend now '{}'", backend);
       }
 
       // Verify that the backend string is valid, otherwise ignore the backend.
@@ -214,9 +217,10 @@ private:
           (strcmp(backend.c_str(), "opencl") != 0) &&
           (strcmp(backend.c_str(), "cuda") != 0) &&
           (strcmp(backend.c_str(), "hip") != 0)) {
-        logger::debug("ONEAPI_DEVICE_SELECTOR Pre-Filter with illegal "
-                      "backend '{}' ",
-                      backend);
+        URLOG(DEBUG,
+              "ONEAPI_DEVICE_SELECTOR Pre-Filter with illegal "
+              "backend '{}' ",
+              backend);
         continue;
       }
 
@@ -231,9 +235,10 @@ private:
       bool backendFound = nameFound != std::string::npos;
       if (termType == AcceptFilter) {
         if (backend.front() != '*' && !backendFound) {
-          logger::debug("The ONEAPI_DEVICE_SELECTOR backend name '{}' was not "
-                        "found in the platform library name '{}'",
-                        backend, platformBackendName);
+          URLOG(DEBUG,
+                "The ONEAPI_DEVICE_SELECTOR backend name '{}' was not "
+                "found in the platform library name '{}'",
+                backend, platformBackendName);
           acceptLibrary = false;
           continue;
         } else if (backend.front() == '*' || backendFound) {
@@ -242,9 +247,10 @@ private:
       } else {
         if (backendFound || backend.front() == '*') {
           acceptLibrary = false;
-          logger::debug("The ONEAPI_DEVICE_SELECTOR backend name for discard "
-                        "'{}' was found in the platform library name '{}'",
-                        backend, platformBackendName);
+          URLOG(DEBUG,
+                "The ONEAPI_DEVICE_SELECTOR backend name for discard "
+                "'{}' was found in the platform library name '{}'",
+                backend, platformBackendName);
           continue;
         }
       }
@@ -267,9 +273,10 @@ private:
 
       if (loaderPreFilter) {
         if (readPreFilterODS(adapterName) != UR_RESULT_SUCCESS) {
-          logger::debug("The adapter '{}' was removed based on the "
-                        "pre-filter from ONEAPI_DEVICE_SELECTOR.",
-                        adapterName);
+          URLOG(DEBUG,
+                "The adapter '{}' was removed based on the "
+                "pre-filter from ONEAPI_DEVICE_SELECTOR.",
+                adapterName);
           continue;
         }
       }

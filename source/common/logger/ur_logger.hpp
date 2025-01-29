@@ -53,6 +53,22 @@ template <typename... Args>
 inline void always(const char *format, Args &&...args) {
   get_logger().always(format, std::forward<Args>(args)...);
 }
+#ifdef SRC_PATH_SIZE
+#define SHORT_FILE ((__FILE__) + (SRC_PATH_SIZE))
+#else
+#define SHORT_FILE __FILE__
+#endif
+
+#define URLOG_IMPL(level, format, ...)                                         \
+  {                                                                            \
+    ::logger::get_logger().log(logger::Level::level, format " <{}:{}>",        \
+                               __VA_ARGS__);                                   \
+  }
+#define URLOG(...) URLOG_IMPL(__VA_ARGS__, SHORT_FILE, __LINE__)
+
+#define URLOG_ALWAYS_IMPL(format, ...)                                         \
+  { ::logger::get_logger().always(format " <{}:{}>", __VA_ARGS__); }
+#define URLOG_ALWAYS(...) URLOG_ALWAYS_IMPL(__VA_ARGS__, SHORT_FILE, __LINE__)
 
 template <typename... Args>
 inline void debug(const logger::LegacyMessage &p, const char *format,
