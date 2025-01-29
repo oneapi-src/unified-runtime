@@ -63,6 +63,23 @@ static native_cpu::state getResizedState(const native_cpu::NDRDescT &ndr,
 }
 #endif
 
+class LaunchInfoLocalArgs {
+  native_cpu::state state;
+  const size_t numParallelThreads;
+
+public:
+  LaunchInfoLocalArgs(const native_cpu::state &state_, unsigned g0_,
+                      unsigned g1_, unsigned g2_, size_t numParallelThreads_)
+      : state(state_), numParallelThreads(numParallelThreads_) {
+    state.update(g0_, g1_, g2_);
+  }
+
+  void operator()(size_t threadId, ur_kernel_handle_t_ kernel) {
+    kernel.handleLocalArgs(numParallelThreads, threadId);
+    kernel._subhandler(kernel.getArgs().data(), &state);
+  }
+};
+
 UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
     ur_queue_handle_t hQueue, ur_kernel_handle_t hKernel, uint32_t workDim,
     const size_t *pGlobalWorkOffset, const size_t *pGlobalWorkSize,
@@ -108,7 +125,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
   const size_t numParallelThreads = tp.num_threads();
   hKernel->updateMemPool(numParallelThreads);
   std::vector<std::future<void>> futures;
-  std::vector<std::function<void(size_t, ur_kernel_handle_t_)>> groups;
+  std::vector<LaunchInfoLocalArgs> groups;
   auto numWG0 = ndr.GlobalSize[0] / ndr.LocalSize[0];
   auto numWG1 = ndr.GlobalSize[1] / ndr.LocalSize[1];
   auto numWG2 = ndr.GlobalSize[2] / ndr.LocalSize[2];
@@ -199,16 +216,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
       // Split dimension 0 across the threadpool
       // Here we try to create groups of workgroups in order to reduce
       // synchronization overhead
+      groups.reserve(numWG0 * numWG1 * numWG2);
       for (unsigned g2 = 0; g2 < numWG2; g2++) {
         for (unsigned g1 = 0; g1 < numWG1; g1++) {
           for (unsigned g0 = 0; g0 < numWG0; g0++) {
-            groups.push_back(
-                [state, g0, g1, g2, numParallelThreads](
-                    size_t threadId, ur_kernel_handle_t_ kernel) mutable {
-                  kernel.handleLocalArgs(numParallelThreads, threadId);
-                  state.update(g0, g1, g2);
-                  kernel._subhandler(kernel.getArgs().data(), &state);
-                });
+            groups.emplace_back(state, g0, g1, g2, numParallelThreads);
           }
         }
       }
@@ -218,7 +230,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
       for (unsigned thread = 0; thread < numParallelThreads; thread++) {
         futures.emplace_back(
             tp.schedule_task([groups, thread, groupsPerThread,
-                              kernel = *hKernel](size_t threadId) {
+                              kernel = *hKernel](size_t threadId) mutable {
               for (unsigned i = 0; i < groupsPerThread; i++) {
                 auto index = thread * groupsPerThread + i;
                 groups[index](threadId, kernel);
@@ -231,7 +243,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
         futures.emplace_back(
             tp.schedule_task([groups, remainder,
                               scheduled = numParallelThreads * groupsPerThread,
-                              kernel = *hKernel](size_t threadId) {
+                              kernel = *hKernel](size_t threadId) mutable {
               for (unsigned i = 0; i < remainder; i++) {
                 auto index = scheduled + i;
                 groups[index](threadId, kernel);
@@ -258,12 +270,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
   return UR_RESULT_SUCCESS;
 }
 
-template <class T> static inline
-ur_result_t withTimingEvent(ur_command_t command_type, ur_queue_handle_t hQueue,
-                            uint32_t numEventsInWaitList,
-                            const ur_event_handle_t *phEventWaitList,
-                            ur_event_handle_t *phEvent,
-                            T &f) {
+template <class T>
+static inline ur_result_t
+withTimingEvent(ur_command_t command_type, ur_queue_handle_t hQueue,
+                uint32_t numEventsInWaitList,
+                const ur_event_handle_t *phEventWaitList,
+                ur_event_handle_t *phEvent, T &f) {
   urEventWait(numEventsInWaitList, phEventWaitList);
   ur_event_handle_t event;
   if (phEvent) {
