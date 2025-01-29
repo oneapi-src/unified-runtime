@@ -636,7 +636,7 @@ ur_result_t urUSMGetMemAllocInfo(
       MemAllocaType = UR_USM_TYPE_SHARED;
       break;
     default:
-      logger::error("urUSMGetMemAllocInfo: unexpected usm memory type");
+      URLOG(ERR, "urUSMGetMemAllocInfo: unexpected usm memory type");
       return UR_RESULT_ERROR_INVALID_VALUE;
     }
     return ReturnValue(MemAllocaType);
@@ -694,7 +694,7 @@ ur_result_t urUSMGetMemAllocInfo(
     return UR_RESULT_ERROR_INVALID_VALUE;
   }
   default:
-    logger::error("urUSMGetMemAllocInfo: unsupported ParamName");
+    URLOG(ERR, "urUSMGetMemAllocInfo: unsupported ParamName");
     return UR_RESULT_ERROR_INVALID_VALUE;
   }
   return UR_RESULT_SUCCESS;
@@ -975,7 +975,7 @@ umf_result_t L0MemoryProvider::open_ipc_handle(void *IpcData, void **Ptr) {
     memcpy(&fdRemote, &zeIpcData->zeHandle, sizeof(fdRemote));
     fdLocal = ur_duplicate_fd(zeIpcData->pid, fdRemote);
     if (fdLocal == -1) {
-      logger::error("duplicating file descriptor from IPC handle failed");
+      URLOG(ERR, "duplicating file descriptor from IPC handle failed");
       return UMF_RESULT_ERROR_MEMORY_PROVIDER_SPECIFIC;
     }
 
@@ -1056,7 +1056,7 @@ ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t Context,
       break;
     }
     default: {
-      logger::error("urUSMPoolCreate: unexpected chained stype");
+      URLOG(ERR, "urUSMPoolCreate: unexpected chained stype");
       throw UsmAllocationException(UR_RESULT_ERROR_INVALID_ARGUMENT);
     }
     }

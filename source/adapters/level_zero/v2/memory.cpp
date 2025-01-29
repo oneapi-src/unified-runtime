@@ -97,7 +97,7 @@ ur_integrated_mem_handle_t::ur_integrated_mem_handle_t(
     this->ptr = usm_unique_ptr_t(rawPtr, [hContext](void *ptr) {
       auto ret = hContext->getDefaultUSMPool()->free(ptr);
       if (ret != UR_RESULT_SUCCESS) {
-        logger::error("Failed to free host memory: {}", ret);
+        URLOG(ERR, "Failed to free host memory: {}", ret);
       }
     });
 
@@ -178,7 +178,7 @@ void *ur_discrete_mem_handle_t::allocateOnDevice(ur_device_handle_t hDevice,
       usm_unique_ptr_t(ptr, [hContext = this->hContext](void *ptr) {
         auto ret = hContext->getDefaultUSMPool()->free(ptr);
         if (ret != UR_RESULT_SUCCESS) {
-          logger::error("Failed to free device memory: {}", ret);
+          URLOG(ERR, "Failed to free device memory: {}", ret);
         }
       });
 
@@ -306,7 +306,7 @@ void *ur_discrete_mem_handle_t::mapHostPtr(
         if (ownsAlloc) {
           auto ret = hContext->getDefaultUSMPool()->free(p);
           if (ret != UR_RESULT_SUCCESS) {
-            logger::error("Failed to mapped memory: {}", ret);
+            URLOG(ERR, "Failed to mapped memory: {}", ret);
           }
         }
       });

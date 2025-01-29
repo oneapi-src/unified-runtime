@@ -122,9 +122,10 @@ ur_queue_immediate_in_order_t::queueGetInfo(ur_queue_info_t propName,
     }
   }
   default:
-    logger::error("Unsupported ParamName in urQueueGetInfo: "
-                  "ParamName=ParamName={}(0x{})",
-                  propName, logger::toHex(propName));
+    URLOG(ERR,
+          "Unsupported ParamName in urQueueGetInfo: "
+          "ParamName=ParamName={}(0x{})",
+          propName, logger::toHex(propName));
     return UR_RESULT_ERROR_INVALID_VALUE;
   }
 

@@ -117,9 +117,10 @@ ur_result_t enqueueMemCopyHelper(ur_command_t CommandType,
   const auto &ZeCommandList = CommandList->first;
   const auto &WaitList = (*Event)->WaitList;
 
-  logger::debug("calling zeCommandListAppendMemoryCopy() with"
-                "  ZeEvent {}",
-                ur_cast<std::uintptr_t>(ZeEvent));
+  URLOG(DEBUG,
+        "calling zeCommandListAppendMemoryCopy() with"
+        "  ZeEvent {}",
+        ur_cast<std::uintptr_t>(ZeEvent));
   printZeEventList(WaitList);
 
   ZE2UR_CALL(zeCommandListAppendMemoryCopy,
@@ -170,9 +171,10 @@ ur_result_t enqueueMemCopyRectHelper(
   const auto &ZeCommandList = CommandList->first;
   const auto &WaitList = (*Event)->WaitList;
 
-  logger::debug("calling zeCommandListAppendMemoryCopy() with"
-                "  ZeEvent {}",
-                ur_cast<std::uintptr_t>(ZeEvent));
+  URLOG(DEBUG,
+        "calling zeCommandListAppendMemoryCopy() with"
+        "  ZeEvent {}",
+        ur_cast<std::uintptr_t>(ZeEvent));
   printZeEventList(WaitList);
 
   auto ZeParams = ur2zeRegionParams(SrcOrigin, DstOrigin, Region, SrcRowPitch,
@@ -184,7 +186,7 @@ ur_result_t enqueueMemCopyRectHelper(
               ZeParams.srcPitch, ZeParams.srcSlicePitch, ZeEvent,
               WaitList.Length, WaitList.ZeEventList));
 
-  logger::debug("calling zeCommandListAppendMemoryCopyRegion()");
+  URLOG(DEBUG, "calling zeCommandListAppendMemoryCopyRegion()");
 
   UR_CALL(Queue->executeCommandList(CommandList, Blocking, OkToBatch));
 
@@ -259,9 +261,10 @@ static ur_result_t enqueueMemFillHelper(ur_command_t CommandType,
                (ZeCommandList, Ptr, Pattern, PatternSize, Size, ZeEvent,
                 WaitList.Length, WaitList.ZeEventList));
 
-    logger::debug("calling zeCommandListAppendMemoryFill() with"
-                  "  ZeEvent {}",
-                  ur_cast<uint64_t>(ZeEvent));
+    URLOG(DEBUG,
+          "calling zeCommandListAppendMemoryFill() with"
+          "  ZeEvent {}",
+          ur_cast<uint64_t>(ZeEvent));
     printZeEventList(WaitList);
 
     // Execute command list asynchronously, as the event will be used
@@ -281,9 +284,10 @@ static ur_result_t enqueueMemFillHelper(ur_command_t CommandType,
                   WaitList.Length, WaitList.ZeEventList));
     }
 
-    logger::debug("calling zeCommandListAppendMemoryCopy() with"
-                  "  ZeEvent {}",
-                  ur_cast<uint64_t>(ZeEvent));
+    URLOG(DEBUG,
+          "calling zeCommandListAppendMemoryCopy() with"
+          "  ZeEvent {}",
+          ur_cast<uint64_t>(ZeEvent));
     printZeEventList(WaitList);
 
     // Execute command list synchronously.
@@ -466,7 +470,7 @@ static ur_result_t enqueueMemImageCommandHelper(
                 ur_cast<ze_image_handle_t>(ZeHandleSrc), &ZeDstRegion,
                 &ZeSrcRegion, ZeEvent, 0, nullptr));
   } else {
-    logger::error("enqueueMemImageUpdate: unsupported image command type");
+    URLOG(ERR, "enqueueMemImageUpdate: unsupported image command type");
     return UR_RESULT_ERROR_INVALID_OPERATION;
   }
 
@@ -1043,7 +1047,7 @@ ur_result_t urEnqueueMemBufferMap(
     // False as the second value in pair means that mapping was not inserted
     // because mapping already exists.
     if (!Res.second) {
-      logger::error("urEnqueueMemBufferMap: duplicate mapping detected");
+      URLOG(ERR, "urEnqueueMemBufferMap: duplicate mapping detected");
       return UR_RESULT_ERROR_INVALID_VALUE;
     }
 
@@ -1104,7 +1108,7 @@ ur_result_t urEnqueueMemBufferMap(
   // False as the second value in pair means that mapping was not inserted
   // because mapping already exists.
   if (!Res.second) {
-    logger::error("urEnqueueMemBufferMap: duplicate mapping detected");
+    URLOG(ERR, "urEnqueueMemBufferMap: duplicate mapping detected");
     return UR_RESULT_ERROR_INVALID_VALUE;
   }
   return UR_RESULT_SUCCESS;
@@ -1158,7 +1162,7 @@ ur_result_t urEnqueueMemUnmap(
     std::scoped_lock<ur_shared_mutex> Guard(Buffer->Mutex);
     auto It = Buffer->Mappings.find(MappedPtr);
     if (It == Buffer->Mappings.end()) {
-      logger::error("urEnqueueMemUnmap: unknown memory mapping");
+      URLOG(ERR, "urEnqueueMemUnmap: unknown memory mapping");
       return UR_RESULT_ERROR_INVALID_VALUE;
     }
     MapInfo = It->second;
@@ -1513,13 +1517,13 @@ static ur_result_t ur2zeImageDesc(const ur_image_format_t *ImageFormat,
       ZeImageFormatLayout = ZE_IMAGE_FORMAT_LAYOUT_32_32_32_32;
       break;
     default:
-      logger::error("urMemImageCreate: unexpected data type Size\n");
+      URLOG(ERR, "urMemImageCreate: unexpected data type Size\n");
       return UR_RESULT_ERROR_UNSUPPORTED_IMAGE_FORMAT;
     }
     break;
   }
   default:
-    logger::error("format layout = {}", ImageFormat->channelOrder);
+    URLOG(ERR, "format layout = {}", ImageFormat->channelOrder);
     return UR_RESULT_ERROR_UNSUPPORTED_IMAGE_FORMAT;
     break;
   }
@@ -1548,7 +1552,7 @@ static ur_result_t ur2zeImageDesc(const ur_image_format_t *ImageFormat,
     ZeImageType = ZE_IMAGE_TYPE_2DARRAY;
     break;
   default:
-    logger::error("urMemImageCreate: unsupported image type");
+    URLOG(ERR, "urMemImageCreate: unsupported image type");
     return UR_RESULT_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR;
   }
 
@@ -2339,8 +2343,8 @@ ur_result_t _ur_buffer::getBufferZeHandle(char *&ZeHandle,
     }
   }
 
-  logger::debug("getZeHandle(pi_device{{{}}}) = {}", (void *)Device,
-                (void *)Allocation.ZeHandle);
+  URLOG(DEBUG, "getZeHandle(pi_device{{{}}}) = {}", (void *)Device,
+        (void *)Allocation.ZeHandle);
   return UR_RESULT_SUCCESS;
 }
 

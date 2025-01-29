@@ -106,7 +106,7 @@ ur_result_t mapCLErrorToUR(cl_int Result) {
 }
 
 void cl_adapter::die(const char *Message) {
-  logger::always("ur_die: {}", Message);
+  URLOG_ALWAYS("ur_die: {}", Message);
   std::terminate();
 }
 
