@@ -140,6 +140,8 @@ class GBench(ComputeUMFBenchmark):
         return list_split[self.idx_pool], list_split[self.idx_config]
 
     def get_mean(self, datarow):
+        print("col nr:", self.col_statistics_time, "row:", datarow, "\nmean:", datarow[self.col_statistics_time])
+
         return float(datarow[self.col_statistics_time])
 
     def parse_output(self, output):
@@ -147,6 +149,8 @@ class GBench(ComputeUMFBenchmark):
         reader = csv.reader(csv_file)
 
         data_row = next(reader, None)
+        print("header:", data_row)
+
         if data_row is None:
             raise ValueError("Benchmark output does not contain data.")
 
@@ -188,6 +192,8 @@ class GBenchPreloaded(GBench):
         reader = csv.reader(csv_file)
 
         data_row = next(reader, None)
+        print("header:", data_row)
+
         if data_row is None:
             raise ValueError("Benchmark output does not contain data.")
 
