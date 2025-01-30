@@ -126,10 +126,10 @@ def main(directory, additional_env_vars, save_name, compare_names, filter):
         options.extra_env_vars.update(cr.env_vars())
 
     suites = [
-        ComputeBench(directory),
-        VelocityBench(directory),
-        SyclBench(directory),
-        LlamaCppBench(directory),
+        # ComputeBench(directory),
+        # VelocityBench(directory),
+        # SyclBench(directory),
+        # LlamaCppBench(directory),
         UMFSuite(directory),
         #TestSuite()
     ] if not options.dry_run else []

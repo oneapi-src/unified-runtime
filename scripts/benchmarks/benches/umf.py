@@ -155,6 +155,8 @@ class GBench(ComputeUMFBenchmark):
                 full_name = row[self.col_name]
                 pool, config = self.get_pool_and_config(full_name)
                 mean = self.get_mean(row)
+                print("\tMY OUTPUT", pool, config, "mean", mean)
+
                 results.append((config, pool, mean))
             except KeyError as e:
                 raise ValueError(f"Error parsing output: {e}")
@@ -196,6 +198,8 @@ class GBenchPreloaded(GBench):
                 mean = self.get_mean(row)
                 updated_pool = self.get_preloaded_name(pool)
                 updated_config = self.get_preloaded_name(config)
+                print("PRE MY OUTPUT", updated_config, updated_pool, "preload mean", mean)
+
 
                 results.append((updated_config, updated_pool, mean))
             except KeyError as e:
