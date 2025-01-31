@@ -232,3 +232,10 @@ class GBenchJemalloc(GBenchGlibc):
 
     def extra_env_vars(self) -> dict:
         return {"LD_PRELOAD": "libjemalloc.so"}
+    
+class GBenchTbbProxy(GBenchGlibc):
+    def __init__(self, bench):
+        super().__init__(bench, replacing_lib="tbbProxy")
+
+    def extra_env_vars(self) -> dict:
+        return {"LD_PRELOAD": "libtbbmalloc_proxy.so"}
