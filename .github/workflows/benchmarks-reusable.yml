@@ -204,6 +204,10 @@ jobs:
           }')
         echo "CORES=$CORES" >> $GITHUB_ENV
 
+    - name: Find TBB
+      run: |
+        dpkg -L libtbb-dev
+
     - name: Run benchmarks
       working-directory: ${{ github.workspace }}/ur-repo/
       id: benchmarks
