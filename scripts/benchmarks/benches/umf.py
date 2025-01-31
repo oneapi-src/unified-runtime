@@ -39,6 +39,7 @@ class UMFSuite(Suite):
             GBench(self),
             GBenchUmfProxy(self),
             GBenchJemalloc(self),
+            GBenchTbbProxy(self),
         ]
 
         return benches
