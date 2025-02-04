@@ -8383,9 +8383,12 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferUpdateKernelLaunchExp
 __urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
-    /// [in] Handle of the command-buffer kernel command to update.
-    ur_exp_command_buffer_command_handle_t hCommand,
-    /// [in] Struct defining how the kernel command is to be updated.
+    /// [in] Handle of the command-buffer object.
+    ur_exp_command_buffer_handle_t hCommandBuffer,
+    /// [in] Length of pUpdateKernelLaunch.
+    uint32_t numKernelUpdates,
+    /// [in][range(0, numKernelUpdates)]  List of structs defining how a
+    /// kernel commands are to be updated.
     const ur_exp_command_buffer_update_kernel_launch_desc_t
         *pUpdateKernelLaunch) {
   ur_result_t result = UR_RESULT_SUCCESS;
@@ -8394,7 +8397,7 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
 
   // extract platform's function pointer table
   auto dditable =
-      reinterpret_cast<ur_exp_command_buffer_command_object_t *>(hCommand)
+      reinterpret_cast<ur_exp_command_buffer_object_t *>(hCommandBuffer)
           ->dditable;
   auto pfnUpdateKernelLaunchExp =
       dditable->ur.CommandBufferExp.pfnUpdateKernelLaunchExp;
@@ -8402,14 +8405,18 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
     return UR_RESULT_ERROR_UNINITIALIZED;
 
   // convert loader handle to platform handle
-  hCommand =
-      reinterpret_cast<ur_exp_command_buffer_command_object_t *>(hCommand)
+  hCommandBuffer =
+      reinterpret_cast<ur_exp_command_buffer_object_t *>(hCommandBuffer)
           ->handle;
 
   // Deal with any struct parameters that have handle members we need to
   // convert.
   auto pUpdateKernelLaunchLocal = *pUpdateKernelLaunch;
 
+  pUpdateKernelLaunchLocal.hCommand =
+      reinterpret_cast<ur_exp_command_buffer_command_object_t *>(
+          pUpdateKernelLaunchLocal.hCommand)
+          ->handle;
   if (pUpdateKernelLaunchLocal.hNewKernel)
     pUpdateKernelLaunchLocal.hNewKernel =
         reinterpret_cast<ur_kernel_object_t *>(
@@ -8435,7 +8442,8 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
   pUpdateKernelLaunch = &pUpdateKernelLaunchLocal;
 
   // forward to device-platform
-  result = pfnUpdateKernelLaunchExp(hCommand, pUpdateKernelLaunch);
+  result = pfnUpdateKernelLaunchExp(hCommandBuffer, numKernelUpdates,
+                                    pUpdateKernelLaunch);
 
   return result;
 }
