@@ -174,6 +174,7 @@ ur_result_t getEventsFromSyncPoints(
  * If necessary, it creates a signal event and appends it to the previous
  * command list (copy or compute), to indicate when it's finished executing.
  * @param[in] CommandBuffer The CommandBuffer where the command is appended.
+ * @param[in] ZeCommandList the CommandList that's currently in use.
  * @param[in] IsCopy A boolean indicating if the current command uses copy
  * engine.
  * @param[out] WaitEventList The list of event for the future command list to
@@ -181,10 +182,13 @@ ur_result_t getEventsFromSyncPoints(
  * @return UR_RESULT_SUCCESS or an error code on failure
  */
 ur_result_t createSyncPointBetweenCopyAndCompute(
-    ur_exp_command_buffer_handle_t CommandBuffer, bool IsCopy,
+    ur_exp_command_buffer_handle_t CommandBuffer,
+    ze_command_list_handle_t ZeCommandList, bool IsCopy,
     std::vector<ze_event_handle_t> &WaitEventList) {
 
-  if (!CommandBuffer->IsInOrderCmdList) {
+  // Skip in cases when we're not using Copy engine or it's not in-order path.
+  if (!CommandBuffer->IsInOrderCmdList || !CommandBuffer->ZeCopyCommandList ||
+      (IsCopy && ZeCommandList != CommandBuffer->ZeCopyCommandList)) {
     return UR_RESULT_SUCCESS;
   }
 
@@ -229,6 +233,33 @@ ur_result_t createSyncPointBetweenCopyAndCompute(
 }
 
 /**
+ * Calls createSyncPointBetweenCopyAndCompute() to create a signal event
+ * if required and appends it as a wait event to ZeComputeCommandList.
+ * @param[in] CommandBuffer The CommandBuffer where the command is appended.
+ * @return UR_RESULT_SUCCESS or an error code on failure
+ */
+ur_result_t
+appendWaitBetweenCopyAndCompute(ur_exp_command_buffer_handle_t CommandBuffer) {
+
+  // Skip in case Copy engine is not used.
+  if (!CommandBuffer->ZeCopyCommandList) {
+    return UR_RESULT_SUCCESS;
+  }
+
+  std::vector<ze_event_handle_t> ZeEventList;
+  UR_CALL(createSyncPointBetweenCopyAndCompute(
+      CommandBuffer, CommandBuffer->ZeComputeCommandList, false /*isCopy=*/,
+      ZeEventList));
+
+  if (!ZeEventList.empty()) {
+    ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
+               (CommandBuffer->ZeComputeCommandList, 1, ZeEventList.data()));
+  }
+
+  return UR_RESULT_SUCCESS;
+}
+
+/**
  * If needed, creates a sync point for a given command and returns the L0
  * events associated with the sync point.
  * This operations is skipped if the command-buffer is in order.
@@ -236,8 +267,8 @@ ur_result_t createSyncPointBetweenCopyAndCompute(
  * @param[in] CommandBuffer The CommandBuffer where the command is appended.
  * @param[in] NumSyncPointsInWaitList Number of sync points that are
  * dependencies for the command.
- * @param[in] SyncPointWaitList List of sync point that are dependencies for the
- * command.
+ * @param[in] SyncPointWaitList List of sync point that are dependencies for
+ * the command.
  * @param[in] HostVisible Whether the event associated with the sync point
  * should be host visible.
  * @param[out][optional] RetSyncPoint The new sync point.
@@ -284,8 +315,8 @@ ur_result_t createSyncPointAndGetZeEvents(
 }
 
 // Shared by all memory read/write/copy UR interfaces.
-// Helper function for common code when enqueuing memory operations to a command
-// buffer.
+// Helper function for common code when enqueuing memory operations to a
+// command buffer.
 ur_result_t enqueueCommandBufferMemCopyHelper(
     ur_command_t CommandType, ur_exp_command_buffer_handle_t CommandBuffer,
     void *Dst, const void *Src, size_t Size, bool PreferCopyEngine,
@@ -302,10 +333,8 @@ ur_result_t enqueueCommandBufferMemCopyHelper(
   ze_command_list_handle_t ZeCommandList =
       CommandBuffer->chooseCommandList(PreferCopyEngine);
 
-  if (ZeCommandList == CommandBuffer->ZeCopyCommandList) {
-    UR_CALL(createSyncPointBetweenCopyAndCompute(
-        CommandBuffer, true /*isCopy=*/, ZeEventList));
-  }
+  UR_CALL(createSyncPointBetweenCopyAndCompute(CommandBuffer, ZeCommandList,
+                                               true /*isCopy=*/, ZeEventList));
 
   ZE2UR_CALL(zeCommandListAppendMemoryCopy,
              (ZeCommandList, Dst, Src, Size, ZeLaunchEvent, ZeEventList.size(),
@@ -314,8 +343,8 @@ ur_result_t enqueueCommandBufferMemCopyHelper(
   return UR_RESULT_SUCCESS;
 }
 
-// Helper function for common code when enqueuing rectangular memory operations
-// to a command-buffer.
+// Helper function for common code when enqueuing rectangular memory
+// operations to a command-buffer.
 ur_result_t enqueueCommandBufferMemCopyRectHelper(
     ur_command_t CommandType, ur_exp_command_buffer_handle_t CommandBuffer,
     void *Dst, const void *Src, ur_rect_offset_t SrcOrigin,
@@ -365,10 +394,8 @@ ur_result_t enqueueCommandBufferMemCopyRectHelper(
   ze_command_list_handle_t ZeCommandList =
       CommandBuffer->chooseCommandList(PreferCopyEngine);
 
-  if (ZeCommandList == CommandBuffer->ZeCopyCommandList) {
-    UR_CALL(createSyncPointBetweenCopyAndCompute(
-        CommandBuffer, true /*isCopy=*/, ZeEventList));
-  }
+  UR_CALL(createSyncPointBetweenCopyAndCompute(CommandBuffer, ZeCommandList,
+                                               true /*isCopy=*/, ZeEventList));
 
   ZE2UR_CALL(zeCommandListAppendMemoryCopyRegion,
              (ZeCommandList, Dst, &ZeDstRegion, DstPitch, DstSlicePitch, Src,
@@ -402,10 +429,8 @@ ur_result_t enqueueCommandBufferFillHelper(
   ze_command_list_handle_t ZeCommandList =
       CommandBuffer->chooseCommandList(PreferCopyEngine);
 
-  if (ZeCommandList == CommandBuffer->ZeCopyCommandList) {
-    UR_CALL(createSyncPointBetweenCopyAndCompute(
-        CommandBuffer, true /*isCopy=*/, ZeEventList));
-  }
+  UR_CALL(createSyncPointBetweenCopyAndCompute(CommandBuffer, ZeCommandList,
+                                               true /*isCopy=*/, ZeEventList));
 
   ZE2UR_CALL(zeCommandListAppendMemoryFill,
              (ZeCommandList, Ptr, Pattern, PatternSize, Size, ZeLaunchEvent,
@@ -1149,10 +1174,9 @@ ur_result_t urCommandBufferAppendKernelLaunchExp(
       UR_COMMAND_KERNEL_LAUNCH, CommandBuffer, NumSyncPointsInWaitList,
       SyncPointWaitList, false, RetSyncPoint, ZeEventList, ZeLaunchEvent));
 
-  if (CommandBuffer->ZeCopyCommandList) {
-    UR_CALL(createSyncPointBetweenCopyAndCompute(
-        CommandBuffer, false /*isCopy=*/, ZeEventList));
-  }
+  UR_CALL(createSyncPointBetweenCopyAndCompute(
+      CommandBuffer, CommandBuffer->ZeComputeCommandList, false /*isCopy=*/,
+      ZeEventList));
 
   ZE2UR_CALL(zeCommandListAppendLaunchKernel,
              (CommandBuffer->ZeComputeCommandList, ZeKernel,
@@ -1385,16 +1409,9 @@ ur_result_t urCommandBufferAppendUSMPrefetchExp(
   std::ignore = Flags;
 
   if (CommandBuffer->IsInOrderCmdList) {
-    if (CommandBuffer->ZeCopyCommandList) {
-      std::vector<ze_event_handle_t> ZeEventList;
-      UR_CALL(createSyncPointBetweenCopyAndCompute(
-          CommandBuffer, false /*isCopy=*/, ZeEventList));
-      if (!ZeEventList.empty()) {
-        ZE2UR_CALL(
-            zeCommandListAppendWaitOnEvents,
-            (CommandBuffer->ZeComputeCommandList, 1, ZeEventList.data()));
-      }
-    }
+    // Sync if copy engine is used in in-order path.
+    UR_CALL(appendWaitBetweenCopyAndCompute(CommandBuffer));
+
     // Add the prefetch command to the command buffer.
     // Note that L0 does not handle migration flags.
     ZE2UR_CALL(zeCommandListAppendMemoryPrefetch,
@@ -1465,16 +1482,9 @@ ur_result_t urCommandBufferAppendUSMAdviseExp(
   ze_memory_advice_t ZeAdvice = static_cast<ze_memory_advice_t>(Value);
 
   if (CommandBuffer->IsInOrderCmdList) {
-    if (CommandBuffer->ZeCopyCommandList) {
-      std::vector<ze_event_handle_t> ZeEventList;
-      UR_CALL(createSyncPointBetweenCopyAndCompute(
-          CommandBuffer, false /*isCopy=*/, ZeEventList));
-      if (!ZeEventList.empty()) {
-        ZE2UR_CALL(
-            zeCommandListAppendWaitOnEvents,
-            (CommandBuffer->ZeComputeCommandList, 1, ZeEventList.data()));
-      }
-    }
+    // Sync if copy engine is used in in-order path.
+    UR_CALL(appendWaitBetweenCopyAndCompute(CommandBuffer));
+
     ZE2UR_CALL(zeCommandListAppendMemAdvise,
                (CommandBuffer->ZeComputeCommandList,
                 CommandBuffer->Device->ZeDevice, Mem, Size, ZeAdvice));
