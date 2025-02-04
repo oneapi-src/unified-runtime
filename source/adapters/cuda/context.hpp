@@ -100,6 +100,21 @@ CreateHostMemoryProvider(ur_device_handle_t_ *DeviceHandle,
   return UR_RESULT_SUCCESS;
 }
 
+static ur_result_t
+CreateHostMemoryPool(umf_memory_provider_handle_t MemoryProviderHost,
+                     umf_memory_pool_handle_t *MemoryPoolHost) {
+
+  umf_memory_pool_handle_t _MemoryPoolHost = nullptr;
+
+  umf_result_t UmfResult =
+      umf::createMemoryProxyPool(MemoryProviderHost, &_MemoryPoolHost);
+  UMF_RETURN_UR_ERROR(UmfResult);
+
+  *MemoryPoolHost = _MemoryPoolHost;
+
+  return UR_RESULT_SUCCESS;
+}
+
 struct ur_context_handle_t_ {
 
   struct deleter_data {
@@ -112,8 +127,10 @@ struct ur_context_handle_t_ {
   std::vector<ur_device_handle_t> Devices;
   std::atomic_uint32_t RefCount;
 
-  // UMF CUDA memory provider for the host memory (UMF_MEMORY_TYPE_HOST)
+  // UMF CUDA memory provider and pool for the host memory
+  // (UMF_MEMORY_TYPE_HOST)
   umf_memory_provider_handle_t MemoryProviderHost = nullptr;
+  umf_memory_pool_handle_t MemoryPoolHost = nullptr;
 
   ur_context_handle_t_(const ur_device_handle_t *Devs, uint32_t NumDevices)
       : Devices{Devs, Devs + NumDevices}, RefCount{1} {
@@ -125,9 +142,13 @@ struct ur_context_handle_t_ {
     // (UMF_MEMORY_TYPE_HOST) from any device (Devices[0] is used here, because
     // it is guaranteed to exist).
     UR_CHECK_ERROR(CreateHostMemoryProvider(Devices[0], &MemoryProviderHost));
+    UR_CHECK_ERROR(CreateHostMemoryPool(MemoryProviderHost, &MemoryPoolHost));
   };
 
   ~ur_context_handle_t_() {
+    if (MemoryPoolHost) {
+      umfPoolDestroy(MemoryPoolHost);
+    }
     if (MemoryProviderHost) {
       umfMemoryProviderDestroy(MemoryProviderHost);
     }

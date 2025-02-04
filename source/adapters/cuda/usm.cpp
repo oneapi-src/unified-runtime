@@ -125,18 +125,17 @@ ur_result_t USMFreeImpl(ur_context_handle_t hContext, void *Pointer) {
     UR_ASSERT(DeviceOrdinal < NumDevices, UR_RESULT_ERROR_INVALID_DEVICE);
 
     ur_device_handle_t Device = Platform->Devices[DeviceOrdinal].get();
-    umf_memory_provider_handle_t MemoryProvider;
+    umf_memory_pool_handle_t MemoryPool;
 
     if (IsManaged) {
-      MemoryProvider = Device->MemoryProviderShared;
+      MemoryPool = Device->MemoryPoolShared;
     } else if (Type == CU_MEMORYTYPE_DEVICE) {
-      MemoryProvider = Device->MemoryProviderDevice;
+      MemoryPool = Device->MemoryPoolDevice;
     } else {
-      MemoryProvider = hContext->MemoryProviderHost;
+      MemoryPool = hContext->MemoryPoolHost;
     }
 
-    UMF_CHECK_ERROR(umfMemoryProviderFree(MemoryProvider, Pointer,
-                                          0 /* size is unknown */));
+    UMF_CHECK_ERROR(umfPoolFree(MemoryPool, Pointer));
   } catch (ur_result_t Err) {
     Result = Err;
   }
@@ -158,8 +157,8 @@ ur_result_t USMDeviceAllocImpl(void **ResultPtr, ur_context_handle_t,
                                uint32_t Alignment) {
   try {
     ScopedContext Active(Device);
-    UMF_CHECK_ERROR(umfMemoryProviderAlloc(Device->MemoryProviderDevice, Size,
-                                           Alignment, ResultPtr));
+    *ResultPtr = umfPoolMalloc(Device->MemoryPoolDevice, Size);
+    UMF_CHECK_PTR(*ResultPtr);
   } catch (ur_result_t Err) {
     return Err;
   }
@@ -180,8 +179,8 @@ ur_result_t USMSharedAllocImpl(void **ResultPtr, ur_context_handle_t,
                                uint32_t Alignment) {
   try {
     ScopedContext Active(Device);
-    UMF_CHECK_ERROR(umfMemoryProviderAlloc(Device->MemoryProviderShared, Size,
-                                           Alignment, ResultPtr));
+    *ResultPtr = umfPoolMalloc(Device->MemoryPoolShared, Size);
+    UMF_CHECK_PTR(*ResultPtr);
   } catch (ur_result_t Err) {
     return Err;
   }
@@ -199,8 +198,8 @@ ur_result_t USMHostAllocImpl(void **ResultPtr, ur_context_handle_t hContext,
                              ur_usm_host_mem_flags_t, size_t Size,
                              uint32_t Alignment) {
   try {
-    UMF_CHECK_ERROR(umfMemoryProviderAlloc(hContext->MemoryProviderHost, Size,
-                                           Alignment, ResultPtr));
+    *ResultPtr = umfPoolMalloc(hContext->MemoryPoolHost, Size);
+    UMF_CHECK_PTR(*ResultPtr);
   } catch (ur_result_t Err) {
     return Err;
   }
