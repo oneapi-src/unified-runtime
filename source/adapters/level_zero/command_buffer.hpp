@@ -9,6 +9,7 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
+#include <optional>
 #include <ur/ur.hpp>
 #include <ur_api.h>
 #include <ze_api.h>
@@ -43,10 +44,6 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
 
   ur_exp_command_buffer_sync_point_t getNextSyncPoint() const {
     return NextSyncPoint;
-  }
-
-  bool isFirstNode() const {
-    return MComputeCommandListEmpty && MCopyCommandListEmpty;
   }
 
   // Indicates if a copy engine is available for use
@@ -114,11 +111,8 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   // This flag must be set to false if at least one copy command has been
   // added to `ZeCopyCommandList`
   bool MCopyCommandListEmpty = true;
-  // This flag must be set to false if at least one compute command has been
-  // added to `ZeComputeCommandList`
-  bool MComputeCommandListEmpty = true;
-  // This flag tracks if the previous node submission was compute or copy type.
-  bool MWasPrevCopyCommandList = false;
+  // This flag tracks if the previous node submission was of a copy type.
+  std::optional<bool> MWasPrevCopyCommandList;
   // [WaitEvent Path only] Level Zero fences for each queue the command-buffer
   // has been enqueued to. These should be destroyed when the command-buffer is
   // released.

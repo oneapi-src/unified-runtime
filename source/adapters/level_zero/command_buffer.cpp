@@ -175,8 +175,6 @@ ur_result_t getEventsFromSyncPoints(
  * command list (copy or compute), to indicate when it's finished executing.
  * @param[in] CommandType The type of the command.
  * @param[in] CommandBuffer The CommandBuffer where the command is appended.
- * @param[in] IsFirstNode A boolean inidicating if the current node is at the
- * beginning of the command list.
  * @param[in] isCopy A boolean indicating if the current command uses copy
  * engine.
  * @param[out] ZeSignalPrevCommandEvent The event which signals when the
@@ -185,16 +183,22 @@ ur_result_t getEventsFromSyncPoints(
  */
 ur_result_t createSyncPointBetweenCopyAndCompute(
     ur_command_t CommandType, ur_exp_command_buffer_handle_t CommandBuffer,
-    bool IsFirstNode, bool IsCopy,
-    ze_event_handle_t &ZeSignalPrevCommandEvent) {
-  if (IsFirstNode) {
-    CommandBuffer->MCopyCommandListEmpty = !IsCopy;
-    CommandBuffer->MComputeCommandListEmpty = IsCopy;
+    bool IsCopy, ze_event_handle_t &ZeSignalPrevCommandEvent) {
+
+  // Skip synchronization for the first node in a graph or if the current
+  // command list matches the previous one.
+  if (!CommandBuffer->MWasPrevCopyCommandList.has_value()) {
     CommandBuffer->MWasPrevCopyCommandList = IsCopy;
     return UR_RESULT_SUCCESS;
-  } else if (CommandBuffer->MWasPrevCopyCommandList == IsCopy) {
+  } else if (IsCopy == CommandBuffer->MWasPrevCopyCommandList) {
     return UR_RESULT_SUCCESS;
   }
+
+  /*
+   * If the current CommandList differs from the previously used one, we must
+   * append ZeSignalPrevCommandEvent to the previous CommandList to track when
+   * its execution is complete.
+   */
 
   ur_event_handle_t SignalPrevCommandEvent = nullptr;
   UR_CALL(EventCreate(CommandBuffer->Context, nullptr /*Queue*/,
@@ -299,10 +303,6 @@ ur_result_t enqueueCommandBufferMemCopyHelper(
       CommandType, CommandBuffer, NumSyncPointsInWaitList, SyncPointWaitList,
       false, RetSyncPoint, ZeEventList, ZeLaunchEvent));
 
-  // The chooseCommandList() will modify MComputeCommandListEmpty and
-  // MCopyCommandListEmpty so isFirstNode needs to be called beforehand.
-  bool IsFirstNode{CommandBuffer->isFirstNode()};
-
   ze_command_list_handle_t ZeCommandList =
       CommandBuffer->chooseCommandList(PreferCopyEngine);
 
@@ -312,7 +312,7 @@ ur_result_t enqueueCommandBufferMemCopyHelper(
       ZeCommandList == CommandBuffer->ZeCopyCommandList) {
     ze_event_handle_t ZeSignalPrevCommandEvent = nullptr;
     UR_CALL(createSyncPointBetweenCopyAndCompute(CommandType, CommandBuffer,
-                                                 IsFirstNode, true /*isCopy=*/,
+                                                 true /*isCopy=*/,
                                                  ZeSignalPrevCommandEvent));
     if (ZeSignalPrevCommandEvent) {
       ZeEventList.push_back(ZeSignalPrevCommandEvent);
@@ -373,10 +373,6 @@ ur_result_t enqueueCommandBufferMemCopyRectHelper(
       CommandType, CommandBuffer, NumSyncPointsInWaitList, SyncPointWaitList,
       false, RetSyncPoint, ZeEventList, ZeLaunchEvent));
 
-  // The chooseCommandList() will modify MComputeCommandListEmpty and
-  // MCopyCommandListEmpty so isFirstNode needs to be called beforehand.
-  bool IsFirstNode{CommandBuffer->isFirstNode()};
-
   ze_command_list_handle_t ZeCommandList =
       CommandBuffer->chooseCommandList(PreferCopyEngine);
 
@@ -386,7 +382,7 @@ ur_result_t enqueueCommandBufferMemCopyRectHelper(
       ZeCommandList == CommandBuffer->ZeCopyCommandList) {
     ze_event_handle_t ZeSignalPrevCommandEvent = nullptr;
     UR_CALL(createSyncPointBetweenCopyAndCompute(CommandType, CommandBuffer,
-                                                 IsFirstNode, true /*isCopy=*/,
+                                                 true /*isCopy=*/,
                                                  ZeSignalPrevCommandEvent));
     if (ZeSignalPrevCommandEvent) {
       ZeEventList.push_back(ZeSignalPrevCommandEvent);
@@ -422,10 +418,6 @@ ur_result_t enqueueCommandBufferFillHelper(
   UR_CALL(
       preferCopyEngineForFill(CommandBuffer, PatternSize, PreferCopyEngine));
 
-  // The chooseCommandList() will modify MComputeCommandListEmpty and
-  // MCopyCommandListEmpty so isFirstNode needs to be called beforehand.
-  bool IsFirstNode{CommandBuffer->isFirstNode()};
-
   ze_command_list_handle_t ZeCommandList =
       CommandBuffer->chooseCommandList(PreferCopyEngine);
 
@@ -435,7 +427,7 @@ ur_result_t enqueueCommandBufferFillHelper(
       ZeCommandList == CommandBuffer->ZeCopyCommandList) {
     ze_event_handle_t ZeSignalPrevCommandEvent = nullptr;
     UR_CALL(createSyncPointBetweenCopyAndCompute(CommandType, CommandBuffer,
-                                                 IsFirstNode, true /*isCopy=*/,
+                                                 true /*isCopy=*/,
                                                  ZeSignalPrevCommandEvent));
     if (ZeSignalPrevCommandEvent) {
       ZeEventList.push_back(ZeSignalPrevCommandEvent);
@@ -590,7 +582,6 @@ ur_exp_command_buffer_handle_t_::chooseCommandList(bool PreferCopyEngine) {
     MCopyCommandListEmpty = false;
     return ZeCopyCommandList;
   }
-  MComputeCommandListEmpty = false;
   return ZeComputeCommandList;
 }
 
@@ -1190,8 +1181,8 @@ ur_result_t urCommandBufferAppendKernelLaunchExp(
   if (CommandBuffer->IsInOrderCmdList && CommandBuffer->ZeCopyCommandList) {
     ze_event_handle_t ZeSignalPrevCommandEvent = nullptr;
     UR_CALL(createSyncPointBetweenCopyAndCompute(
-        UR_COMMAND_KERNEL_LAUNCH, CommandBuffer, CommandBuffer->isFirstNode(),
-        false /*isCopy=*/, ZeSignalPrevCommandEvent));
+        UR_COMMAND_KERNEL_LAUNCH, CommandBuffer, false /*isCopy=*/,
+        ZeSignalPrevCommandEvent));
     if (ZeSignalPrevCommandEvent) {
       ZeEventList.push_back(ZeSignalPrevCommandEvent);
     }
@@ -1433,8 +1424,8 @@ ur_result_t urCommandBufferAppendUSMPrefetchExp(
     if (CommandBuffer->ZeCopyCommandList) {
       ze_event_handle_t ZeSignalPrevCommandEvent = nullptr;
       UR_CALL(createSyncPointBetweenCopyAndCompute(
-          UR_COMMAND_KERNEL_LAUNCH, CommandBuffer, CommandBuffer->isFirstNode(),
-          false /*isCopy=*/, ZeSignalPrevCommandEvent));
+          UR_COMMAND_KERNEL_LAUNCH, CommandBuffer, false /*isCopy=*/,
+          ZeSignalPrevCommandEvent));
       if (ZeSignalPrevCommandEvent) {
         ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
                    (CommandBuffer->ZeComputeCommandList, 1,
@@ -1468,7 +1459,6 @@ ur_result_t urCommandBufferAppendUSMPrefetchExp(
     ZE2UR_CALL(zeCommandListAppendSignalEvent,
                (CommandBuffer->ZeComputeCommandList, ZeLaunchEvent));
   }
-  CommandBuffer->MComputeCommandListEmpty = false;
 
   return UR_RESULT_SUCCESS;
 }
@@ -1517,8 +1507,8 @@ ur_result_t urCommandBufferAppendUSMAdviseExp(
     if (CommandBuffer->ZeCopyCommandList) {
       ze_event_handle_t ZeSignalPrevCommandEvent = nullptr;
       UR_CALL(createSyncPointBetweenCopyAndCompute(
-          UR_COMMAND_KERNEL_LAUNCH, CommandBuffer, CommandBuffer->isFirstNode(),
-          false /*isCopy=*/, ZeSignalPrevCommandEvent));
+          UR_COMMAND_KERNEL_LAUNCH, CommandBuffer, false /*isCopy=*/,
+          ZeSignalPrevCommandEvent));
       if (ZeSignalPrevCommandEvent) {
         ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
                    (CommandBuffer->ZeComputeCommandList, 1,
@@ -1550,7 +1540,6 @@ ur_result_t urCommandBufferAppendUSMAdviseExp(
     ZE2UR_CALL(zeCommandListAppendSignalEvent,
                (CommandBuffer->ZeComputeCommandList, ZeLaunchEvent));
   }
-  CommandBuffer->MComputeCommandListEmpty = false;
 
   return UR_RESULT_SUCCESS;
 }
