@@ -14,7 +14,6 @@
 #include "context.hpp"
 #include "enqueue.hpp"
 #include "memory.hpp"
-#include "umf_helpers.hpp"
 
 /// Creates a UR Memory object using a CUDA memory allocation.
 /// Can trigger a manual copy depending on the mode.
@@ -50,8 +49,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
           cuMemHostRegister(HostPtr, size, CU_MEMHOSTREGISTER_DEVICEMAP));
       AllocMode = BufferMem::AllocMode::UseHostPtr;
     } else if (flags & UR_MEM_FLAG_ALLOC_HOST_POINTER) {
-      UMF_CHECK_ERROR(umfMemoryProviderAlloc(hContext->MemoryProviderHost, size,
-                                             0, &HostPtr));
+      UR_CHECK_ERROR(cuMemAllocHost(&HostPtr, size));
       AllocMode = BufferMem::AllocMode::AllocHostPtr;
     } else if (flags & UR_MEM_FLAG_ALLOC_COPY_HOST_POINTER) {
       AllocMode = BufferMem::AllocMode::CopyIn;
@@ -442,8 +440,7 @@ ur_result_t allocateMemObjOnDeviceIfNeeded(ur_mem_handle_t Mem,
                                        CU_MEMHOSTALLOC_DEVICEMAP));
       UR_CHECK_ERROR(cuMemHostGetDevicePointer(&DevPtr, Buffer.HostPtr, 0));
     } else {
-      UMF_CHECK_ERROR(umfMemoryProviderAlloc(hDevice->MemoryProviderDevice,
-                                             Buffer.Size, 0, (void **)&DevPtr));
+      UR_CHECK_ERROR(cuMemAlloc(&DevPtr, Buffer.Size));
     }
   } else {
     CUarray ImageArray{};
