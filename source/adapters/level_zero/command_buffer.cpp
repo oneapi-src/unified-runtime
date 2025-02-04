@@ -175,22 +175,20 @@ ur_result_t getEventsFromSyncPoints(
  * command list (copy or compute), to indicate when it's finished executing.
  * @param[in] CommandBuffer The CommandBuffer where the command is appended.
  * @param[in] ZeCommandList the CommandList that's currently in use.
- * @param[in] IsCopy A boolean indicating if the current command uses copy
- * engine.
  * @param[out] WaitEventList The list of event for the future command list to
  * wait on before execution.
  * @return UR_RESULT_SUCCESS or an error code on failure
  */
 ur_result_t createSyncPointBetweenCopyAndCompute(
     ur_exp_command_buffer_handle_t CommandBuffer,
-    ze_command_list_handle_t ZeCommandList, bool IsCopy,
+    ze_command_list_handle_t ZeCommandList,
     std::vector<ze_event_handle_t> &WaitEventList) {
 
-  // Skip in cases when we're not using Copy engine or it's not in-order path.
-  if (!CommandBuffer->IsInOrderCmdList || !CommandBuffer->ZeCopyCommandList ||
-      (IsCopy && ZeCommandList != CommandBuffer->ZeCopyCommandList)) {
+  if (!CommandBuffer->IsInOrderCmdList || !CommandBuffer->ZeCopyCommandList) {
     return UR_RESULT_SUCCESS;
   }
+
+  bool IsCopy{ZeCommandList == CommandBuffer->ZeCopyCommandList};
 
   // Skip synchronization for the first node in a graph or if the current
   // command list matches the previous one.
@@ -206,7 +204,6 @@ ur_result_t createSyncPointBetweenCopyAndCompute(
    * append a signal event to the previous CommandList to track when
    * its execution is complete.
    */
-
   ur_event_handle_t SignalPrevCommandEvent = nullptr;
   UR_CALL(EventCreate(CommandBuffer->Context, nullptr /*Queue*/,
                       false /*IsMultiDevice*/, false, &SignalPrevCommandEvent,
@@ -248,8 +245,7 @@ appendWaitBetweenCopyAndCompute(ur_exp_command_buffer_handle_t CommandBuffer) {
 
   std::vector<ze_event_handle_t> ZeEventList;
   UR_CALL(createSyncPointBetweenCopyAndCompute(
-      CommandBuffer, CommandBuffer->ZeComputeCommandList, false /*isCopy=*/,
-      ZeEventList));
+      CommandBuffer, CommandBuffer->ZeComputeCommandList, ZeEventList));
 
   if (!ZeEventList.empty()) {
     ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
@@ -334,7 +330,7 @@ ur_result_t enqueueCommandBufferMemCopyHelper(
       CommandBuffer->chooseCommandList(PreferCopyEngine);
 
   UR_CALL(createSyncPointBetweenCopyAndCompute(CommandBuffer, ZeCommandList,
-                                               true /*isCopy=*/, ZeEventList));
+                                               ZeEventList));
 
   ZE2UR_CALL(zeCommandListAppendMemoryCopy,
              (ZeCommandList, Dst, Src, Size, ZeLaunchEvent, ZeEventList.size(),
@@ -395,7 +391,7 @@ ur_result_t enqueueCommandBufferMemCopyRectHelper(
       CommandBuffer->chooseCommandList(PreferCopyEngine);
 
   UR_CALL(createSyncPointBetweenCopyAndCompute(CommandBuffer, ZeCommandList,
-                                               true /*isCopy=*/, ZeEventList));
+                                               ZeEventList));
 
   ZE2UR_CALL(zeCommandListAppendMemoryCopyRegion,
              (ZeCommandList, Dst, &ZeDstRegion, DstPitch, DstSlicePitch, Src,
@@ -430,7 +426,7 @@ ur_result_t enqueueCommandBufferFillHelper(
       CommandBuffer->chooseCommandList(PreferCopyEngine);
 
   UR_CALL(createSyncPointBetweenCopyAndCompute(CommandBuffer, ZeCommandList,
-                                               true /*isCopy=*/, ZeEventList));
+                                               ZeEventList));
 
   ZE2UR_CALL(zeCommandListAppendMemoryFill,
              (ZeCommandList, Ptr, Pattern, PatternSize, Size, ZeLaunchEvent,
@@ -1175,8 +1171,7 @@ ur_result_t urCommandBufferAppendKernelLaunchExp(
       SyncPointWaitList, false, RetSyncPoint, ZeEventList, ZeLaunchEvent));
 
   UR_CALL(createSyncPointBetweenCopyAndCompute(
-      CommandBuffer, CommandBuffer->ZeComputeCommandList, false /*isCopy=*/,
-      ZeEventList));
+      CommandBuffer, CommandBuffer->ZeComputeCommandList, ZeEventList));
 
   ZE2UR_CALL(zeCommandListAppendLaunchKernel,
              (CommandBuffer->ZeComputeCommandList, ZeKernel,
