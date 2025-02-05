@@ -25,7 +25,8 @@ inline bool isTearDowned = false;
 class Sink {
 public:
   template <typename... Args>
-  void log(Level level, const char *fmt, const char *fileline, Args &&...args) {
+  void log(Level level, const char *filename, const char *lineno,
+           const char *fmt, Args &&...args) {
     std::ostringstream buffer;
     if (!skip_prefix && level != Level::QUIET) {
       buffer << "<" << logger_name << ">"
@@ -33,7 +34,7 @@ public:
     }
     format(buffer, fmt, std::forward<Args &&>(args)...);
     if (add_fileline) {
-      buffer << " <" << fileline << ">";
+      buffer << " <" << filename << ":" << lineno << ">";
     }
     if (!skip_linebreak) {
       buffer << "\n";
@@ -56,6 +57,7 @@ public:
   }
 
   void setFlushLevel(logger::Level level) { this->flush_level = level; }
+  void setFileline(bool fileline) { add_fileline = fileline; }
 
   virtual ~Sink() = default;
 
@@ -64,9 +66,9 @@ protected:
   logger::Level flush_level;
 
   Sink(std::string logger_name, bool skip_prefix = false,
-       bool skip_linebreak = false, bool add_file_and_line = false)
+       bool skip_linebreak = false)
       : logger_name(std::move(logger_name)), skip_prefix(skip_prefix),
-        skip_linebreak(skip_linebreak), add_fileline(add_file_and_line) {
+        skip_linebreak(skip_linebreak), add_fileline(false) {
     ostream = nullptr;
     flush_level = logger::Level::ERR;
   }
@@ -83,7 +85,7 @@ private:
   std::string logger_name;
   const bool skip_prefix;
   const bool skip_linebreak;
-  const bool add_fileline;
+  bool add_fileline;
   std::mutex output_mutex;
   const char *error_prefix = "Log message syntax error: ";
 
@@ -141,7 +143,8 @@ private:
       }
 
       if (*fmt == '\0') {
-        std::cerr << error_prefix << "Too many arguments!" << std::endl;
+        std::cerr << error_prefix
+                  << "Too many arguments! first excessive:" << arg << std::endl;
         // ignore all left arguments and finalize message
         format(buffer, fmt);
         return;
