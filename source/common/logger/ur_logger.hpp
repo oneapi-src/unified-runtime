@@ -43,6 +43,11 @@ template <typename T> inline std::string toHex(T t) {
   return s.str();
 }
 
+inline bool str_to_bool(const std::string str) {
+  return str == "true" || str == "TRUE" || str == "yes" || str == "YES" ||
+         str == "y" || str == "Y" || str == "on" || str == "ON" || str == "1";
+}
+
 /// @brief Create an instance of the logger with parameters obtained from the
 /// respective
 ///        environment variable or with default configuration if the env var is
@@ -74,8 +79,10 @@ inline Logger create_logger(std::string logger_name, bool skip_prefix,
                  ::toupper);
   const auto default_flush_level = Level::ERR;
   const std::string default_output = "stderr";
+  const bool default_fileline = false;
   auto level = default_log_level;
   auto flush_level = default_flush_level;
+  bool fileline = default_fileline;
   std::unique_ptr<Sink> sink;
 
   auto env_var_name = "UR_LOG_" + logger_name;
@@ -98,6 +105,13 @@ inline Logger create_logger(std::string logger_name, bool skip_prefix,
     if (kv != map->end()) {
       auto value = kv->second.front();
       flush_level = str_to_level(std::move(value));
+      map->erase(kv);
+    }
+
+    kv = map->find("fileline");
+    if (kv != map->end()) {
+      auto value = kv->second.front();
+      fileline = str_to_bool(std::move(value));
       map->erase(kv);
     }
 
@@ -129,6 +143,7 @@ inline Logger create_logger(std::string logger_name, bool skip_prefix,
                                                skip_prefix, skip_linebreak));
   }
   sink->setFlushLevel(flush_level);
+  sink->setFileline(fileline);
 
   return Logger(level, std::move(sink));
 }
