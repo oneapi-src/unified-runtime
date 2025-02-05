@@ -8179,78 +8179,6 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferRetainCommandExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferRetainCommandExp(
-    /// [in][retain] Handle of the command-buffer command.
-    ur_exp_command_buffer_command_handle_t hCommand) {
-  auto pfnRetainCommandExp =
-      getContext()->urDdiTable.CommandBufferExp.pfnRetainCommandExp;
-
-  if (nullptr == pfnRetainCommandExp)
-    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-
-  ur_command_buffer_retain_command_exp_params_t params = {&hCommand};
-  uint64_t instance =
-      getContext()->notify_begin(UR_FUNCTION_COMMAND_BUFFER_RETAIN_COMMAND_EXP,
-                                 "urCommandBufferRetainCommandExp", &params);
-
-  auto &logger = getContext()->logger;
-  logger.info("   ---> urCommandBufferRetainCommandExp\n");
-
-  ur_result_t result = pfnRetainCommandExp(hCommand);
-
-  getContext()->notify_end(UR_FUNCTION_COMMAND_BUFFER_RETAIN_COMMAND_EXP,
-                           "urCommandBufferRetainCommandExp", &params, &result,
-                           instance);
-
-  if (logger.getLevel() <= logger::Level::INFO) {
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_RETAIN_COMMAND_EXP, &params);
-    logger.info("   <--- urCommandBufferRetainCommandExp({}) -> {};\n",
-                args_str.str(), result);
-  }
-
-  return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferReleaseCommandExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseCommandExp(
-    /// [in][release] Handle of the command-buffer command.
-    ur_exp_command_buffer_command_handle_t hCommand) {
-  auto pfnReleaseCommandExp =
-      getContext()->urDdiTable.CommandBufferExp.pfnReleaseCommandExp;
-
-  if (nullptr == pfnReleaseCommandExp)
-    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-
-  ur_command_buffer_release_command_exp_params_t params = {&hCommand};
-  uint64_t instance =
-      getContext()->notify_begin(UR_FUNCTION_COMMAND_BUFFER_RELEASE_COMMAND_EXP,
-                                 "urCommandBufferReleaseCommandExp", &params);
-
-  auto &logger = getContext()->logger;
-  logger.info("   ---> urCommandBufferReleaseCommandExp\n");
-
-  ur_result_t result = pfnReleaseCommandExp(hCommand);
-
-  getContext()->notify_end(UR_FUNCTION_COMMAND_BUFFER_RELEASE_COMMAND_EXP,
-                           "urCommandBufferReleaseCommandExp", &params, &result,
-                           instance);
-
-  if (logger.getLevel() <= logger::Level::INFO) {
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_RELEASE_COMMAND_EXP, &params);
-    logger.info("   <--- urCommandBufferReleaseCommandExp({}) -> {};\n",
-                args_str.str(), result);
-  }
-
-  return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferUpdateKernelLaunchExp
 __urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
     /// [in] Handle of the command-buffer kernel command to update.
@@ -8413,53 +8341,6 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferGetInfoExp(
     ur::extras::printFunctionParams(
         args_str, UR_FUNCTION_COMMAND_BUFFER_GET_INFO_EXP, &params);
     logger.info("   <--- urCommandBufferGetInfoExp({}) -> {};\n",
-                args_str.str(), result);
-  }
-
-  return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferCommandGetInfoExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferCommandGetInfoExp(
-    /// [in] handle of the command-buffer command object
-    ur_exp_command_buffer_command_handle_t hCommand,
-    /// [in] the name of the command-buffer command property to query
-    ur_exp_command_buffer_command_info_t propName,
-    /// [in] size in bytes of the command-buffer command property value
-    size_t propSize,
-    /// [out][optional][typename(propName, propSize)] value of the
-    /// command-buffer command property
-    void *pPropValue,
-    /// [out][optional] bytes returned in command-buffer command property
-    size_t *pPropSizeRet) {
-  auto pfnCommandGetInfoExp =
-      getContext()->urDdiTable.CommandBufferExp.pfnCommandGetInfoExp;
-
-  if (nullptr == pfnCommandGetInfoExp)
-    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-
-  ur_command_buffer_command_get_info_exp_params_t params = {
-      &hCommand, &propName, &propSize, &pPropValue, &pPropSizeRet};
-  uint64_t instance = getContext()->notify_begin(
-      UR_FUNCTION_COMMAND_BUFFER_COMMAND_GET_INFO_EXP,
-      "urCommandBufferCommandGetInfoExp", &params);
-
-  auto &logger = getContext()->logger;
-  logger.info("   ---> urCommandBufferCommandGetInfoExp\n");
-
-  ur_result_t result = pfnCommandGetInfoExp(hCommand, propName, propSize,
-                                            pPropValue, pPropSizeRet);
-
-  getContext()->notify_end(UR_FUNCTION_COMMAND_BUFFER_COMMAND_GET_INFO_EXP,
-                           "urCommandBufferCommandGetInfoExp", &params, &result,
-                           instance);
-
-  if (logger.getLevel() <= logger::Level::INFO) {
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_COMMAND_BUFFER_COMMAND_GET_INFO_EXP, &params);
-    logger.info("   <--- urCommandBufferCommandGetInfoExp({}) -> {};\n",
                 args_str.str(), result);
   }
 
@@ -9203,168 +9084,6 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueNativeCommandExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urTensorMapEncodeIm2ColExp
-__urdlllocal ur_result_t UR_APICALL urTensorMapEncodeIm2ColExp(
-    /// [in] Handle of the device object.
-    ur_device_handle_t hDevice,
-    /// [in] Data type of the tensor object.
-    ur_exp_tensor_map_data_type_flags_t TensorMapType,
-    /// [in] Dimensionality of tensor; must be at least 3.
-    uint32_t TensorRank,
-    /// [in] Starting address of memory region described by tensor.
-    void *GlobalAddress,
-    /// [in] Array containing tensor size (number of elements) along each of
-    /// the TensorRank dimensions.
-    const uint64_t *GlobalDim,
-    /// [in] Array containing stride size (in bytes) along each of the
-    /// TensorRank - 1 dimensions.
-    const uint64_t *GlobalStrides,
-    /// [in] Array containing DHW dimensions of lower box corner.
-    const int *PixelBoxLowerCorner,
-    /// [in] Array containing DHW dimensions of upper box corner.
-    const int *PixelBoxUpperCorner,
-    /// [in] Number of channels per pixel.
-    uint32_t ChannelsPerPixel,
-    /// [in] Number of pixels per column.
-    uint32_t PixelsPerColumn,
-    /// [in] Array containing traversal stride in each of the TensorRank
-    /// dimensions.
-    const uint32_t *ElementStrides,
-    /// [in] Type of interleaved layout the tensor addresses
-    ur_exp_tensor_map_interleave_flags_t Interleave,
-    /// [in] Bank swizzling pattern inside shared memory
-    ur_exp_tensor_map_swizzle_flags_t Swizzle,
-    /// [in] L2 promotion size.
-    ur_exp_tensor_map_l2_promotion_flags_t L2Promotion,
-    /// [in] Indicates whether zero or special NaN constant will be used to
-    /// fill out-of-bounds elements.
-    ur_exp_tensor_map_oob_fill_flags_t OobFill,
-    /// [out] Handle of the tensor map object.
-    ur_exp_tensor_map_handle_t *hTensorMap) {
-  auto pfnEncodeIm2ColExp =
-      getContext()->urDdiTable.TensorMapExp.pfnEncodeIm2ColExp;
-
-  if (nullptr == pfnEncodeIm2ColExp)
-    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-
-  ur_tensor_map_encode_im_2_col_exp_params_t params = {&hDevice,
-                                                       &TensorMapType,
-                                                       &TensorRank,
-                                                       &GlobalAddress,
-                                                       &GlobalDim,
-                                                       &GlobalStrides,
-                                                       &PixelBoxLowerCorner,
-                                                       &PixelBoxUpperCorner,
-                                                       &ChannelsPerPixel,
-                                                       &PixelsPerColumn,
-                                                       &ElementStrides,
-                                                       &Interleave,
-                                                       &Swizzle,
-                                                       &L2Promotion,
-                                                       &OobFill,
-                                                       &hTensorMap};
-  uint64_t instance =
-      getContext()->notify_begin(UR_FUNCTION_TENSOR_MAP_ENCODE_IM_2_COL_EXP,
-                                 "urTensorMapEncodeIm2ColExp", &params);
-
-  auto &logger = getContext()->logger;
-  logger.info("   ---> urTensorMapEncodeIm2ColExp\n");
-
-  ur_result_t result = pfnEncodeIm2ColExp(
-      hDevice, TensorMapType, TensorRank, GlobalAddress, GlobalDim,
-      GlobalStrides, PixelBoxLowerCorner, PixelBoxUpperCorner, ChannelsPerPixel,
-      PixelsPerColumn, ElementStrides, Interleave, Swizzle, L2Promotion,
-      OobFill, hTensorMap);
-
-  getContext()->notify_end(UR_FUNCTION_TENSOR_MAP_ENCODE_IM_2_COL_EXP,
-                           "urTensorMapEncodeIm2ColExp", &params, &result,
-                           instance);
-
-  if (logger.getLevel() <= logger::Level::INFO) {
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_TENSOR_MAP_ENCODE_IM_2_COL_EXP, &params);
-    logger.info("   <--- urTensorMapEncodeIm2ColExp({}) -> {};\n",
-                args_str.str(), result);
-  }
-
-  return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urTensorMapEncodeTiledExp
-__urdlllocal ur_result_t UR_APICALL urTensorMapEncodeTiledExp(
-    /// [in] Handle of the device object.
-    ur_device_handle_t hDevice,
-    /// [in] Data type of the tensor object.
-    ur_exp_tensor_map_data_type_flags_t TensorMapType,
-    /// [in] Dimensionality of tensor; must be at least 3.
-    uint32_t TensorRank,
-    /// [in] Starting address of memory region described by tensor.
-    void *GlobalAddress,
-    /// [in] Array containing tensor size (number of elements) along each of
-    /// the TensorRank dimensions.
-    const uint64_t *GlobalDim,
-    /// [in] Array containing stride size (in bytes) along each of the
-    /// TensorRank - 1 dimensions.
-    const uint64_t *GlobalStrides,
-    /// [in] Array containing traversal box size (number of elments) along
-    /// each of the TensorRank dimensions. Specifies how many elements to be
-    /// traversed along each tensor dimension.
-    const uint32_t *BoxDim,
-    /// [in] Array containing traversal stride in each of the TensorRank
-    /// dimensions.
-    const uint32_t *ElementStrides,
-    /// [in] Type of interleaved layout the tensor addresses
-    ur_exp_tensor_map_interleave_flags_t Interleave,
-    /// [in] Bank swizzling pattern inside shared memory
-    ur_exp_tensor_map_swizzle_flags_t Swizzle,
-    /// [in] L2 promotion size.
-    ur_exp_tensor_map_l2_promotion_flags_t L2Promotion,
-    /// [in] Indicates whether zero or special NaN constant will be used to
-    /// fill out-of-bounds elements.
-    ur_exp_tensor_map_oob_fill_flags_t OobFill,
-    /// [out] Handle of the tensor map object.
-    ur_exp_tensor_map_handle_t *hTensorMap) {
-  auto pfnEncodeTiledExp =
-      getContext()->urDdiTable.TensorMapExp.pfnEncodeTiledExp;
-
-  if (nullptr == pfnEncodeTiledExp)
-    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-
-  ur_tensor_map_encode_tiled_exp_params_t params = {
-      &hDevice,    &TensorMapType, &TensorRank,  &GlobalAddress,
-      &GlobalDim,  &GlobalStrides, &BoxDim,      &ElementStrides,
-      &Interleave, &Swizzle,       &L2Promotion, &OobFill,
-      &hTensorMap};
-  uint64_t instance =
-      getContext()->notify_begin(UR_FUNCTION_TENSOR_MAP_ENCODE_TILED_EXP,
-                                 "urTensorMapEncodeTiledExp", &params);
-
-  auto &logger = getContext()->logger;
-  logger.info("   ---> urTensorMapEncodeTiledExp\n");
-
-  ur_result_t result =
-      pfnEncodeTiledExp(hDevice, TensorMapType, TensorRank, GlobalAddress,
-                        GlobalDim, GlobalStrides, BoxDim, ElementStrides,
-                        Interleave, Swizzle, L2Promotion, OobFill, hTensorMap);
-
-  getContext()->notify_end(UR_FUNCTION_TENSOR_MAP_ENCODE_TILED_EXP,
-                           "urTensorMapEncodeTiledExp", &params, &result,
-                           instance);
-
-  if (logger.getLevel() <= logger::Level::INFO) {
-    std::ostringstream args_str;
-    ur::extras::printFunctionParams(
-        args_str, UR_FUNCTION_TENSOR_MAP_ENCODE_TILED_EXP, &params);
-    logger.info("   <--- urTensorMapEncodeTiledExp({}) -> {};\n",
-                args_str.str(), result);
-  }
-
-  return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's Global table
 ///        with current process' addresses
 ///
@@ -9602,14 +9321,6 @@ __urdlllocal ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
   dditable.pfnEnqueueExp = pDdiTable->pfnEnqueueExp;
   pDdiTable->pfnEnqueueExp = ur_tracing_layer::urCommandBufferEnqueueExp;
 
-  dditable.pfnRetainCommandExp = pDdiTable->pfnRetainCommandExp;
-  pDdiTable->pfnRetainCommandExp =
-      ur_tracing_layer::urCommandBufferRetainCommandExp;
-
-  dditable.pfnReleaseCommandExp = pDdiTable->pfnReleaseCommandExp;
-  pDdiTable->pfnReleaseCommandExp =
-      ur_tracing_layer::urCommandBufferReleaseCommandExp;
-
   dditable.pfnUpdateKernelLaunchExp = pDdiTable->pfnUpdateKernelLaunchExp;
   pDdiTable->pfnUpdateKernelLaunchExp =
       ur_tracing_layer::urCommandBufferUpdateKernelLaunchExp;
@@ -9624,10 +9335,6 @@ __urdlllocal ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
 
   dditable.pfnGetInfoExp = pDdiTable->pfnGetInfoExp;
   pDdiTable->pfnGetInfoExp = ur_tracing_layer::urCommandBufferGetInfoExp;
-
-  dditable.pfnCommandGetInfoExp = pDdiTable->pfnCommandGetInfoExp;
-  pDdiTable->pfnCommandGetInfoExp =
-      ur_tracing_layer::urCommandBufferCommandGetInfoExp;
 
   return result;
 }
@@ -10369,40 +10076,6 @@ __urdlllocal ur_result_t UR_APICALL urGetSamplerProcAddrTable(
   return result;
 }
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Exported function for filling application's TensorMapExp table
-///        with current process' addresses
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-__urdlllocal ur_result_t UR_APICALL urGetTensorMapExpProcAddrTable(
-    /// [in] API version requested
-    ur_api_version_t version,
-    /// [in,out] pointer to table of DDI function pointers
-    ur_tensor_map_exp_dditable_t *pDdiTable) {
-  auto &dditable = ur_tracing_layer::getContext()->urDdiTable.TensorMapExp;
-
-  if (nullptr == pDdiTable)
-    return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-
-  if (UR_MAJOR_VERSION(ur_tracing_layer::getContext()->version) !=
-          UR_MAJOR_VERSION(version) ||
-      UR_MINOR_VERSION(ur_tracing_layer::getContext()->version) >
-          UR_MINOR_VERSION(version))
-    return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
-
-  ur_result_t result = UR_RESULT_SUCCESS;
-
-  dditable.pfnEncodeIm2ColExp = pDdiTable->pfnEncodeIm2ColExp;
-  pDdiTable->pfnEncodeIm2ColExp = ur_tracing_layer::urTensorMapEncodeIm2ColExp;
-
-  dditable.pfnEncodeTiledExp = pDdiTable->pfnEncodeTiledExp;
-  pDdiTable->pfnEncodeTiledExp = ur_tracing_layer::urTensorMapEncodeTiledExp;
-
-  return result;
-}
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's USM table
 ///        with current process' addresses
 ///
@@ -10735,11 +10408,6 @@ ur_result_t context_t::init(ur_dditable_t *dditable,
   if (UR_RESULT_SUCCESS == result) {
     result = ur_tracing_layer::urGetSamplerProcAddrTable(UR_API_VERSION_CURRENT,
                                                          &dditable->Sampler);
-  }
-
-  if (UR_RESULT_SUCCESS == result) {
-    result = ur_tracing_layer::urGetTensorMapExpProcAddrTable(
-        UR_API_VERSION_CURRENT, &dditable->TensorMapExp);
   }
 
   if (UR_RESULT_SUCCESS == result) {

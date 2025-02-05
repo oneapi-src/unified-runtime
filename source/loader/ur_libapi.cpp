@@ -1943,7 +1943,7 @@ ur_result_t UR_APICALL urMemGetInfo(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hMemory`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_IMAGE_INFO_DEPTH < propName`
+///         + `::UR_IMAGE_INFO_NUM_SAMPLES < propName`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
 ///         + If `propName` is not supported by the adapter.
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
@@ -3798,7 +3798,7 @@ ur_result_t UR_APICALL urKernelSetArgLocal(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hKernel`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_KERNEL_INFO_NUM_REGS < propName`
+///         + `::UR_KERNEL_INFO_SPILL_MEM_SIZE < propName`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
 ///         + If `propName` is not supported by the adapter.
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
@@ -7120,7 +7120,7 @@ ur_result_t UR_APICALL urBindlessImagesImageCopyExp(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_IMAGE_INFO_DEPTH < propName`
+///         + `::UR_IMAGE_INFO_NUM_SAMPLES < propName`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
 ///         + If `propName` is not supported by the adapter.
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
@@ -8741,59 +8741,6 @@ ur_result_t UR_APICALL urCommandBufferEnqueueExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Increment the command object's reference count.
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_UNINITIALIZED
-///     - ::UR_RESULT_ERROR_DEVICE_LOST
-///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
-///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
-///         + `NULL == hCommand`
-///     - ::UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_COMMAND_HANDLE_EXP
-///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
-///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
-ur_result_t UR_APICALL urCommandBufferRetainCommandExp(
-    /// [in][retain] Handle of the command-buffer command.
-    ur_exp_command_buffer_command_handle_t hCommand) try {
-  auto pfnRetainCommandExp =
-      ur_lib::getContext()->urDdiTable.CommandBufferExp.pfnRetainCommandExp;
-  if (nullptr == pfnRetainCommandExp)
-    return UR_RESULT_ERROR_UNINITIALIZED;
-
-  return pfnRetainCommandExp(hCommand);
-} catch (...) {
-  return exceptionToResult(std::current_exception());
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Decrement the command object's reference count and delete the command
-///        object if the reference count becomes zero.
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_UNINITIALIZED
-///     - ::UR_RESULT_ERROR_DEVICE_LOST
-///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
-///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
-///         + `NULL == hCommand`
-///     - ::UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_COMMAND_HANDLE_EXP
-///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
-///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
-ur_result_t UR_APICALL urCommandBufferReleaseCommandExp(
-    /// [in][release] Handle of the command-buffer command.
-    ur_exp_command_buffer_command_handle_t hCommand) try {
-  auto pfnReleaseCommandExp =
-      ur_lib::getContext()->urDdiTable.CommandBufferExp.pfnReleaseCommandExp;
-  if (nullptr == pfnReleaseCommandExp)
-    return UR_RESULT_ERROR_UNINITIALIZED;
-
-  return pfnReleaseCommandExp(hCommand);
-} catch (...) {
-  return exceptionToResult(std::current_exception());
-}
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Update a kernel launch command in a finalized command-buffer.
 ///
 /// @details
@@ -8838,7 +8785,7 @@ ur_result_t UR_APICALL urCommandBufferReleaseCommandExp(
 ///         is not nullptr.
 ///     - ::UR_RESULT_ERROR_INVALID_OPERATION
 ///         + If ::ur_exp_command_buffer_desc_t::isUpdatable was not set to true
-///         on creation of the command buffer `hCommand` belongs to.
+///         on creation of the command-buffer `hCommand` belongs to.
 ///         + If the command-buffer `hCommand` belongs to has not been
 ///         finalized.
 ///     - ::UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_COMMAND_HANDLE_EXP
@@ -8901,7 +8848,7 @@ ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
 ///         supported by the device associated with `hCommand`.
 ///     - ::UR_RESULT_ERROR_INVALID_OPERATION
 ///         + If ::ur_exp_command_buffer_desc_t::isUpdatable was not set to true
-///         on creation of the command buffer `hCommand` belongs to.
+///         on creation of the command-buffer `hCommand` belongs to.
 ///         + If the command-buffer `hCommand` belongs to has not been
 ///         finalized.
 ///         + If no `phEvent` parameter was set on creation of the command
@@ -8941,7 +8888,7 @@ ur_result_t UR_APICALL urCommandBufferUpdateSignalEventExp(
 ///         supported by the device associated with `hCommand`.
 ///     - ::UR_RESULT_ERROR_INVALID_OPERATION
 ///         + If ::ur_exp_command_buffer_desc_t::isUpdatable was not set to true
-///         on creation of the command buffer `hCommand` belongs to.
+///         on creation of the command-buffer `hCommand` belongs to.
 ///         + If the command-buffer `hCommand` belongs to has not been
 ///         finalized.
 ///     - ::UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_COMMAND_HANDLE_EXP
@@ -9015,53 +8962,6 @@ ur_result_t UR_APICALL urCommandBufferGetInfoExp(
 
   return pfnGetInfoExp(hCommandBuffer, propName, propSize, pPropValue,
                        pPropSizeRet);
-} catch (...) {
-  return exceptionToResult(std::current_exception());
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Get command-buffer object information.
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_UNINITIALIZED
-///     - ::UR_RESULT_ERROR_DEVICE_LOST
-///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
-///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
-///         + `NULL == hCommand`
-///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_EXP_COMMAND_BUFFER_COMMAND_INFO_REFERENCE_COUNT < propName`
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
-///         + If `propName` is not supported by the adapter.
-///     - ::UR_RESULT_ERROR_INVALID_SIZE
-///         + `propSize == 0 && pPropValue != NULL`
-///         + If `propSize` is less than the real number of bytes needed to
-///         return the info.
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///         + `propSize != 0 && pPropValue == NULL`
-///         + `pPropValue == NULL && pPropSizeRet == NULL`
-///     - ::UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_COMMAND_HANDLE_EXP
-///     - ::UR_RESULT_ERROR_OUT_OF_RESOURCES
-///     - ::UR_RESULT_ERROR_OUT_OF_HOST_MEMORY
-ur_result_t UR_APICALL urCommandBufferCommandGetInfoExp(
-    /// [in] handle of the command-buffer command object
-    ur_exp_command_buffer_command_handle_t hCommand,
-    /// [in] the name of the command-buffer command property to query
-    ur_exp_command_buffer_command_info_t propName,
-    /// [in] size in bytes of the command-buffer command property value
-    size_t propSize,
-    /// [out][optional][typename(propName, propSize)] value of the
-    /// command-buffer command property
-    void *pPropValue,
-    /// [out][optional] bytes returned in command-buffer command property
-    size_t *pPropSizeRet) try {
-  auto pfnCommandGetInfoExp =
-      ur_lib::getContext()->urDdiTable.CommandBufferExp.pfnCommandGetInfoExp;
-  if (nullptr == pfnCommandGetInfoExp)
-    return UR_RESULT_ERROR_UNINITIALIZED;
-
-  return pfnCommandGetInfoExp(hCommand, propName, propSize, pPropValue,
-                              pPropSizeRet);
 } catch (...) {
   return exceptionToResult(std::current_exception());
 }
@@ -9826,160 +9726,6 @@ ur_result_t UR_APICALL urEnqueueNativeCommandExp(
   return pfnNativeCommandExp(hQueue, pfnNativeEnqueue, data, numMemsInMemList,
                              phMemList, pProperties, numEventsInWaitList,
                              phEventWaitList, phEvent);
-} catch (...) {
-  return exceptionToResult(std::current_exception());
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Encode tensor map with image data
-///
-/// @details
-///     - Map encode using im2col.
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_UNINITIALIZED
-///     - ::UR_RESULT_ERROR_DEVICE_LOST
-///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
-///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
-///         + `NULL == hDevice`
-///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_EXP_TENSOR_MAP_DATA_TYPE_FLAGS_MASK & TensorMapType`
-///         + `::UR_EXP_TENSOR_MAP_INTERLEAVE_FLAGS_MASK & Interleave`
-///         + `::UR_EXP_TENSOR_MAP_SWIZZLE_FLAGS_MASK & Swizzle`
-///         + `::UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAGS_MASK & L2Promotion`
-///         + `::UR_EXP_TENSOR_MAP_OOB_FILL_FLAGS_MASK & OobFill`
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///         + `NULL == GlobalAddress`
-///         + `NULL == GlobalDim`
-///         + `NULL == GlobalStrides`
-///         + `NULL == PixelBoxLowerCorner`
-///         + `NULL == PixelBoxUpperCorner`
-///         + `NULL == ElementStrides`
-///         + `NULL == hTensorMap`
-///     - ::UR_RESULT_ERROR_INVALID_ARGUMENT
-///         + `TensorRank < 3`
-ur_result_t UR_APICALL urTensorMapEncodeIm2ColExp(
-    /// [in] Handle of the device object.
-    ur_device_handle_t hDevice,
-    /// [in] Data type of the tensor object.
-    ur_exp_tensor_map_data_type_flags_t TensorMapType,
-    /// [in] Dimensionality of tensor; must be at least 3.
-    uint32_t TensorRank,
-    /// [in] Starting address of memory region described by tensor.
-    void *GlobalAddress,
-    /// [in] Array containing tensor size (number of elements) along each of
-    /// the TensorRank dimensions.
-    const uint64_t *GlobalDim,
-    /// [in] Array containing stride size (in bytes) along each of the
-    /// TensorRank - 1 dimensions.
-    const uint64_t *GlobalStrides,
-    /// [in] Array containing DHW dimensions of lower box corner.
-    const int *PixelBoxLowerCorner,
-    /// [in] Array containing DHW dimensions of upper box corner.
-    const int *PixelBoxUpperCorner,
-    /// [in] Number of channels per pixel.
-    uint32_t ChannelsPerPixel,
-    /// [in] Number of pixels per column.
-    uint32_t PixelsPerColumn,
-    /// [in] Array containing traversal stride in each of the TensorRank
-    /// dimensions.
-    const uint32_t *ElementStrides,
-    /// [in] Type of interleaved layout the tensor addresses
-    ur_exp_tensor_map_interleave_flags_t Interleave,
-    /// [in] Bank swizzling pattern inside shared memory
-    ur_exp_tensor_map_swizzle_flags_t Swizzle,
-    /// [in] L2 promotion size.
-    ur_exp_tensor_map_l2_promotion_flags_t L2Promotion,
-    /// [in] Indicates whether zero or special NaN constant will be used to
-    /// fill out-of-bounds elements.
-    ur_exp_tensor_map_oob_fill_flags_t OobFill,
-    /// [out] Handle of the tensor map object.
-    ur_exp_tensor_map_handle_t *hTensorMap) try {
-  auto pfnEncodeIm2ColExp =
-      ur_lib::getContext()->urDdiTable.TensorMapExp.pfnEncodeIm2ColExp;
-  if (nullptr == pfnEncodeIm2ColExp)
-    return UR_RESULT_ERROR_UNINITIALIZED;
-
-  return pfnEncodeIm2ColExp(hDevice, TensorMapType, TensorRank, GlobalAddress,
-                            GlobalDim, GlobalStrides, PixelBoxLowerCorner,
-                            PixelBoxUpperCorner, ChannelsPerPixel,
-                            PixelsPerColumn, ElementStrides, Interleave,
-                            Swizzle, L2Promotion, OobFill, hTensorMap);
-} catch (...) {
-  return exceptionToResult(std::current_exception());
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Encode tensor map with tiled data
-///
-/// @details
-///     - Tiled map encode.
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_UNINITIALIZED
-///     - ::UR_RESULT_ERROR_DEVICE_LOST
-///     - ::UR_RESULT_ERROR_ADAPTER_SPECIFIC
-///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
-///         + `NULL == hDevice`
-///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_EXP_TENSOR_MAP_DATA_TYPE_FLAGS_MASK & TensorMapType`
-///         + `::UR_EXP_TENSOR_MAP_INTERLEAVE_FLAGS_MASK & Interleave`
-///         + `::UR_EXP_TENSOR_MAP_SWIZZLE_FLAGS_MASK & Swizzle`
-///         + `::UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAGS_MASK & L2Promotion`
-///         + `::UR_EXP_TENSOR_MAP_OOB_FILL_FLAGS_MASK & OobFill`
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///         + `NULL == GlobalAddress`
-///         + `NULL == GlobalDim`
-///         + `NULL == GlobalStrides`
-///         + `NULL == BoxDim`
-///         + `NULL == ElementStrides`
-///         + `NULL == hTensorMap`
-///     - ::UR_RESULT_ERROR_INVALID_ARGUMENT
-///         + `TensorRank < 3`
-ur_result_t UR_APICALL urTensorMapEncodeTiledExp(
-    /// [in] Handle of the device object.
-    ur_device_handle_t hDevice,
-    /// [in] Data type of the tensor object.
-    ur_exp_tensor_map_data_type_flags_t TensorMapType,
-    /// [in] Dimensionality of tensor; must be at least 3.
-    uint32_t TensorRank,
-    /// [in] Starting address of memory region described by tensor.
-    void *GlobalAddress,
-    /// [in] Array containing tensor size (number of elements) along each of
-    /// the TensorRank dimensions.
-    const uint64_t *GlobalDim,
-    /// [in] Array containing stride size (in bytes) along each of the
-    /// TensorRank - 1 dimensions.
-    const uint64_t *GlobalStrides,
-    /// [in] Array containing traversal box size (number of elments) along
-    /// each of the TensorRank dimensions. Specifies how many elements to be
-    /// traversed along each tensor dimension.
-    const uint32_t *BoxDim,
-    /// [in] Array containing traversal stride in each of the TensorRank
-    /// dimensions.
-    const uint32_t *ElementStrides,
-    /// [in] Type of interleaved layout the tensor addresses
-    ur_exp_tensor_map_interleave_flags_t Interleave,
-    /// [in] Bank swizzling pattern inside shared memory
-    ur_exp_tensor_map_swizzle_flags_t Swizzle,
-    /// [in] L2 promotion size.
-    ur_exp_tensor_map_l2_promotion_flags_t L2Promotion,
-    /// [in] Indicates whether zero or special NaN constant will be used to
-    /// fill out-of-bounds elements.
-    ur_exp_tensor_map_oob_fill_flags_t OobFill,
-    /// [out] Handle of the tensor map object.
-    ur_exp_tensor_map_handle_t *hTensorMap) try {
-  auto pfnEncodeTiledExp =
-      ur_lib::getContext()->urDdiTable.TensorMapExp.pfnEncodeTiledExp;
-  if (nullptr == pfnEncodeTiledExp)
-    return UR_RESULT_ERROR_UNINITIALIZED;
-
-  return pfnEncodeTiledExp(hDevice, TensorMapType, TensorRank, GlobalAddress,
-                           GlobalDim, GlobalStrides, BoxDim, ElementStrides,
-                           Interleave, Swizzle, L2Promotion, OobFill,
-                           hTensorMap);
 } catch (...) {
   return exceptionToResult(std::current_exception());
 }

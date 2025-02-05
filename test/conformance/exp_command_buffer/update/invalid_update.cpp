@@ -53,10 +53,6 @@ struct InvalidUpdateTest
       EXPECT_SUCCESS(urUSMFree(context, shared_ptr));
     }
 
-    if (command_handle) {
-      EXPECT_SUCCESS(urCommandBufferReleaseCommandExp(command_handle));
-    }
-
     UUR_RETURN_ON_FATAL_FAILURE(
         urUpdatableCommandBufferExpExecutionTest::TearDown());
   }
@@ -72,7 +68,7 @@ struct InvalidUpdateTest
   bool finalized = false;
 };
 
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(InvalidUpdateTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(InvalidUpdateTest);
 
 // Test error code is returned if command-buffer not finalized
 TEST_P(InvalidUpdateTest, NotFinalizedCommandBuffer) {
@@ -119,7 +115,7 @@ TEST_P(InvalidUpdateTest, NotUpdatableCommandBuffer) {
 
   // Append a kernel commands to command-buffer and close command-buffer
   // Should be an error because we are trying to get command handle but
-  // command buffer is not updatable.
+  // command-buffer is not updatable.
   ur_exp_command_buffer_command_handle_t test_command_handle = nullptr;
   ASSERT_EQ_RESULT(urCommandBufferAppendKernelLaunchExp(
                        test_cmd_buf_handle, kernel, n_dimensions,
@@ -165,9 +161,6 @@ TEST_P(InvalidUpdateTest, NotUpdatableCommandBuffer) {
       urCommandBufferUpdateKernelLaunchExp(test_command_handle, &update_desc);
   EXPECT_EQ(UR_RESULT_ERROR_INVALID_NULL_HANDLE, result);
 
-  if (test_command_handle) {
-    EXPECT_SUCCESS(urCommandBufferReleaseCommandExp(test_command_handle));
-  }
   if (test_cmd_buf_handle) {
     EXPECT_SUCCESS(urCommandBufferReleaseExp(test_cmd_buf_handle));
   }
@@ -287,10 +280,6 @@ struct InvalidUpdateCommandBufferExpExecutionTest : uur::urKernelExecutionTest {
       EXPECT_SUCCESS(urUSMFree(context, shared_ptr));
     }
 
-    if (command_handle) {
-      EXPECT_SUCCESS(urCommandBufferReleaseCommandExp(command_handle));
-    }
-
     if (kernel_2) {
       ASSERT_SUCCESS(urKernelRelease(kernel_2));
     }
@@ -312,7 +301,7 @@ struct InvalidUpdateCommandBufferExpExecutionTest : uur::urKernelExecutionTest {
       0;
 };
 
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(InvalidUpdateCommandBufferExpExecutionTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(InvalidUpdateCommandBufferExpExecutionTest);
 
 // Test error reported if device doesn't support updating kernel args
 TEST_P(InvalidUpdateCommandBufferExpExecutionTest, KernelArg) {

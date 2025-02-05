@@ -11,10 +11,14 @@
 struct urSamplerCreateTestWithParam
     : public uur::urContextTestWithParam<uur::SamplerCreateParamT> {
   void SetUp() override {
-    UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA"});
-
     UUR_RETURN_ON_FATAL_FAILURE(
         uur::urContextTestWithParam<uur::SamplerCreateParamT>::SetUp());
+
+    bool image_support = false;
+    ASSERT_SUCCESS(uur::GetDeviceImageSupport(device, image_support));
+    if (!image_support) {
+      GTEST_SKIP() << "Device doesn't support images";
+    }
 
     ur_sampler_desc_t sampler_desc{
         UR_STRUCTURE_TYPE_SAMPLER_DESC, /* stype */
@@ -30,6 +34,7 @@ struct urSamplerCreateTestWithParam
         ret == UR_RESULT_ERROR_UNINITIALIZED) {
       GTEST_SKIP() << "urSamplerCreate not supported";
     }
+    ASSERT_SUCCESS(ret);
   }
 
   void TearDown() override {
@@ -38,7 +43,7 @@ struct urSamplerCreateTestWithParam
   }
 };
 
-UUR_DEVICE_TEST_SUITE_P(
+UUR_DEVICE_TEST_SUITE_WITH_PARAM(
     urSamplerCreateTestWithParam,
     ::testing::Combine(
         ::testing::Values(true, false),
@@ -72,7 +77,7 @@ TEST_P(urSamplerCreateTestWithParam, Success) {
 }
 
 using urSamplerCreateTest = uur::urContextTest;
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urSamplerCreateTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(urSamplerCreateTest);
 
 TEST_P(urSamplerCreateTest, InvalidNullHandleContext) {
   ur_sampler_desc_t sampler_desc{

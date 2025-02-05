@@ -7,7 +7,7 @@
 #include <uur/known_failure.h>
 
 using urDeviceCreateWithNativeHandleTest = uur::urDeviceTest;
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urDeviceCreateWithNativeHandleTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(urDeviceCreateWithNativeHandleTest);
 
 TEST_P(urDeviceCreateWithNativeHandleTest, Success) {
   ur_native_handle_t native_handle = 0;
@@ -29,7 +29,7 @@ TEST_P(urDeviceCreateWithNativeHandleTest, Success) {
                                  &dev_id, nullptr));
 }
 
-TEST_F(urDeviceCreateWithNativeHandleTest,
+TEST_P(urDeviceCreateWithNativeHandleTest,
        SuccessWithExplicitUnOwnedNativeHandle) {
   ur_native_handle_t native_handle = 0;
   UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(

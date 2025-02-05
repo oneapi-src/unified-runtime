@@ -251,7 +251,7 @@ struct urCommandBufferKernelHandleUpdateTest
   std::shared_ptr<TestFill2DKernel> FillUSM2DKernel;
 };
 
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urCommandBufferKernelHandleUpdateTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(urCommandBufferKernelHandleUpdateTest);
 
 /* Tests that it is possible to update the kernel handle of a command-buffer
  * node. This test launches a Saxpy kernel using a command-buffer and then
@@ -262,13 +262,13 @@ TEST_P(urCommandBufferKernelHandleUpdateTest, Success) {
   std::vector<ur_kernel_handle_t> KernelAlternatives = {
       FillUSM2DKernel->Kernel};
 
-  uur::raii::CommandBufferCommand CommandHandle;
+  ur_exp_command_buffer_command_handle_t CommandHandle;
   ASSERT_SUCCESS(urCommandBufferAppendKernelLaunchExp(
       updatable_cmd_buf_handle, SaxpyKernel->Kernel, SaxpyKernel->NDimensions,
       &(SaxpyKernel->GlobalOffset), &(SaxpyKernel->GlobalSize),
       &(SaxpyKernel->LocalSize), KernelAlternatives.size(),
       KernelAlternatives.data(), 0, nullptr, 0, nullptr, nullptr, nullptr,
-      CommandHandle.ptr()));
+      &CommandHandle));
   ASSERT_NE(CommandHandle, nullptr);
 
   ASSERT_SUCCESS(urCommandBufferFinalizeExp(updatable_cmd_buf_handle));
@@ -292,13 +292,13 @@ TEST_P(urCommandBufferKernelHandleUpdateTest, UpdateAgain) {
   std::vector<ur_kernel_handle_t> KernelAlternatives = {
       FillUSM2DKernel->Kernel};
 
-  uur::raii::CommandBufferCommand CommandHandle;
+  ur_exp_command_buffer_command_handle_t CommandHandle;
   ASSERT_SUCCESS(urCommandBufferAppendKernelLaunchExp(
       updatable_cmd_buf_handle, SaxpyKernel->Kernel, SaxpyKernel->NDimensions,
       &(SaxpyKernel->GlobalOffset), &(SaxpyKernel->GlobalSize),
       &(SaxpyKernel->LocalSize), KernelAlternatives.size(),
       KernelAlternatives.data(), 0, nullptr, 0, nullptr, nullptr, nullptr,
-      CommandHandle.ptr()));
+      &CommandHandle));
   ASSERT_NE(CommandHandle, nullptr);
 
   ASSERT_SUCCESS(urCommandBufferFinalizeExp(updatable_cmd_buf_handle));
@@ -331,13 +331,13 @@ TEST_P(urCommandBufferKernelHandleUpdateTest, RestoreOriginalKernel) {
   std::vector<ur_kernel_handle_t> KernelAlternatives = {
       FillUSM2DKernel->Kernel};
 
-  uur::raii::CommandBufferCommand CommandHandle;
+  ur_exp_command_buffer_command_handle_t CommandHandle;
   ASSERT_SUCCESS(urCommandBufferAppendKernelLaunchExp(
       updatable_cmd_buf_handle, SaxpyKernel->Kernel, SaxpyKernel->NDimensions,
       &(SaxpyKernel->GlobalOffset), &(SaxpyKernel->GlobalSize),
       &(SaxpyKernel->LocalSize), KernelAlternatives.size(),
       KernelAlternatives.data(), 0, nullptr, 0, nullptr, nullptr, nullptr,
-      CommandHandle.ptr()));
+      &CommandHandle));
   ASSERT_NE(CommandHandle, nullptr);
 
   ASSERT_SUCCESS(urCommandBufferFinalizeExp(updatable_cmd_buf_handle));
@@ -364,13 +364,12 @@ TEST_P(urCommandBufferKernelHandleUpdateTest, RestoreOriginalKernel) {
 }
 
 TEST_P(urCommandBufferKernelHandleUpdateTest, KernelAlternativeNotRegistered) {
-
-  uur::raii::CommandBufferCommand CommandHandle;
+  ur_exp_command_buffer_command_handle_t CommandHandle;
   ASSERT_SUCCESS(urCommandBufferAppendKernelLaunchExp(
       updatable_cmd_buf_handle, SaxpyKernel->Kernel, SaxpyKernel->NDimensions,
       &(SaxpyKernel->GlobalOffset), &(SaxpyKernel->GlobalSize),
       &(SaxpyKernel->LocalSize), 0, nullptr, 0, nullptr, 0, nullptr, nullptr,
-      nullptr, CommandHandle.ptr()));
+      nullptr, &CommandHandle));
   ASSERT_NE(CommandHandle, nullptr);
 
   ASSERT_SUCCESS(urCommandBufferFinalizeExp(updatable_cmd_buf_handle));
@@ -400,19 +399,19 @@ TEST_P(urCommandBufferKernelHandleUpdateTest,
 
 using urCommandBufferValidUpdateParametersTest =
     urCommandBufferKernelHandleUpdateTest;
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urCommandBufferValidUpdateParametersTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(urCommandBufferValidUpdateParametersTest);
 
 // Test that updating the dimensions of a kernel command does not cause an
 // error.
 TEST_P(urCommandBufferValidUpdateParametersTest,
        UpdateDimensionsWithoutUpdatingKernel) {
 
-  uur::raii::CommandBufferCommand CommandHandle;
+  ur_exp_command_buffer_command_handle_t CommandHandle;
   ASSERT_SUCCESS(urCommandBufferAppendKernelLaunchExp(
       updatable_cmd_buf_handle, FillUSM2DKernel->Kernel,
       FillUSM2DKernel->NDimensions, FillUSM2DKernel->GlobalOffset.data(),
       FillUSM2DKernel->GlobalSize.data(), FillUSM2DKernel->LocalSize.data(), 0,
-      nullptr, 0, nullptr, 0, nullptr, nullptr, nullptr, CommandHandle.ptr()));
+      nullptr, 0, nullptr, 0, nullptr, nullptr, nullptr, &CommandHandle));
   ASSERT_NE(CommandHandle, nullptr);
 
   ASSERT_SUCCESS(urCommandBufferFinalizeExp(updatable_cmd_buf_handle));
@@ -446,13 +445,13 @@ TEST_P(urCommandBufferValidUpdateParametersTest, UpdateOnlyLocalWorkSize) {
   std::vector<ur_kernel_handle_t> KernelAlternatives = {
       FillUSM2DKernel->Kernel};
 
-  uur::raii::CommandBufferCommand CommandHandle;
+  ur_exp_command_buffer_command_handle_t CommandHandle;
   ASSERT_SUCCESS(urCommandBufferAppendKernelLaunchExp(
       updatable_cmd_buf_handle, SaxpyKernel->Kernel, SaxpyKernel->NDimensions,
       &(SaxpyKernel->GlobalOffset), &(SaxpyKernel->GlobalSize),
       &(SaxpyKernel->LocalSize), KernelAlternatives.size(),
       KernelAlternatives.data(), 0, nullptr, 0, nullptr, nullptr, nullptr,
-      CommandHandle.ptr()));
+      &CommandHandle));
   ASSERT_NE(CommandHandle, nullptr);
 
   ASSERT_SUCCESS(urCommandBufferFinalizeExp(updatable_cmd_buf_handle));
@@ -479,13 +478,13 @@ TEST_P(urCommandBufferValidUpdateParametersTest, SuccessNullptrHandle) {
   std::vector<ur_kernel_handle_t> KernelAlternatives = {
       FillUSM2DKernel->Kernel};
 
-  uur::raii::CommandBufferCommand CommandHandle;
+  ur_exp_command_buffer_command_handle_t CommandHandle;
   ASSERT_SUCCESS(urCommandBufferAppendKernelLaunchExp(
       updatable_cmd_buf_handle, SaxpyKernel->Kernel, SaxpyKernel->NDimensions,
       &(SaxpyKernel->GlobalOffset), &(SaxpyKernel->GlobalSize),
       &(SaxpyKernel->LocalSize), KernelAlternatives.size(),
       KernelAlternatives.data(), 0, nullptr, 0, nullptr, nullptr, nullptr,
-      CommandHandle.ptr()));
+      &CommandHandle));
   ASSERT_NE(CommandHandle, nullptr);
 
   ASSERT_SUCCESS(urCommandBufferFinalizeExp(updatable_cmd_buf_handle));

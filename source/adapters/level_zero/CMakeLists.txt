@@ -45,7 +45,6 @@ if(UR_BUILD_ADAPTER_L0)
         ${CMAKE_CURRENT_SOURCE_DIR}/program.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/queue.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/sampler.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/tensor_map.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/image.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/helpers/kernel_helpers.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/helpers/memory_helpers.cpp
@@ -143,9 +142,10 @@ if(UR_BUILD_ADAPTER_L0_V2)
         ${CMAKE_CURRENT_SOURCE_DIR}/usm_p2p.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/virtual_mem.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../ur/ur.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/tensor_map.cpp
         # v2-only sources
+        ${CMAKE_CURRENT_SOURCE_DIR}/v2/command_buffer.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/v2/command_list_cache.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/v2/command_list_manager.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/v2/context.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/v2/event_pool_cache.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/v2/event_pool.hpp
@@ -159,7 +159,9 @@ if(UR_BUILD_ADAPTER_L0_V2)
         ${CMAKE_CURRENT_SOURCE_DIR}/v2/queue_immediate_in_order.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/v2/usm.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/v2/api.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/v2/command_buffer.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/v2/command_list_cache.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/v2/command_list_manager.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/v2/context.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/v2/event_pool_cache.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/v2/event_pool.cpp

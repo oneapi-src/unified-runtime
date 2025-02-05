@@ -47,10 +47,6 @@ struct KernelCommandEventSyncUpdateTest
       }
     }
 
-    if (command_handle) {
-      EXPECT_SUCCESS(urCommandBufferReleaseCommandExp(command_handle));
-    }
-
     UUR_RETURN_ON_FATAL_FAILURE(
         urUpdatableCommandBufferExpExecutionTest::TearDown());
   }
@@ -68,7 +64,7 @@ struct KernelCommandEventSyncUpdateTest
   static constexpr size_t A = 2;
 };
 
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(KernelCommandEventSyncUpdateTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(KernelCommandEventSyncUpdateTest);
 
 // Tests updating the signal and wait event dependencies of the saxpy
 // command in a command-buffer.

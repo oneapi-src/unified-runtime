@@ -17,11 +17,6 @@ struct LocalMemoryUpdateTestBase
     UUR_RETURN_ON_FATAL_FAILURE(
         urUpdatableCommandBufferExpExecutionTest::SetUp());
 
-    if (backend == UR_PLATFORM_BACKEND_LEVEL_ZERO) {
-      GTEST_SKIP()
-          << "Local memory argument update not supported on Level Zero.";
-    }
-
     // HIP has extra args for local memory so we define an offset for arg
     // indices here for updating
     hip_arg_offset = backend == UR_PLATFORM_BACKEND_HIP ? 3 : 0;
@@ -136,18 +131,10 @@ struct LocalMemoryUpdateTest : LocalMemoryUpdateTestBase {
     ASSERT_SUCCESS(urCommandBufferFinalizeExp(updatable_cmd_buf_handle));
   }
 
-  void TearDown() override {
-    if (command_handle) {
-      EXPECT_SUCCESS(urCommandBufferReleaseCommandExp(command_handle));
-    }
-
-    UUR_RETURN_ON_FATAL_FAILURE(LocalMemoryUpdateTestBase::TearDown());
-  }
-
   ur_exp_command_buffer_command_handle_t command_handle = nullptr;
 };
 
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(LocalMemoryUpdateTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(LocalMemoryUpdateTest);
 
 // Test updating A,X,Y parameters to new values and local memory parameters
 // to original values.
@@ -391,6 +378,8 @@ TEST_P(LocalMemoryUpdateTest, UpdateParametersEmptyLocalSize) {
 // Test updating A,X,Y parameters to new values and local memory parameters
 // to new smaller values.
 TEST_P(LocalMemoryUpdateTest, UpdateParametersSmallerLocalSize) {
+  UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+
   // Run command-buffer prior to update an verify output
   ASSERT_SUCCESS(urCommandBufferEnqueueExp(updatable_cmd_buf_handle, queue, 0,
                                            nullptr, nullptr));
@@ -888,21 +877,12 @@ struct LocalMemoryMultiUpdateTest : LocalMemoryUpdateTestBase {
     ASSERT_SUCCESS(urCommandBufferFinalizeExp(updatable_cmd_buf_handle));
   }
 
-  void TearDown() override {
-    for (auto &handle : command_handles) {
-      if (handle) {
-        EXPECT_SUCCESS(urCommandBufferReleaseCommandExp(handle));
-      }
-    }
-    UUR_RETURN_ON_FATAL_FAILURE(LocalMemoryUpdateTestBase::TearDown());
-  }
-
   static constexpr size_t nodes = 1024;
   static constexpr uint32_t A = 42;
   std::array<ur_exp_command_buffer_command_handle_t, nodes> command_handles{};
 };
 
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(LocalMemoryMultiUpdateTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(LocalMemoryMultiUpdateTest);
 
 // Test updating A,X,Y parameters to new values and local memory parameters
 // to original values.
@@ -1197,19 +1177,10 @@ struct LocalMemoryUpdateTestOutOfOrder : LocalMemoryUpdateTestBaseOutOfOrder {
     ASSERT_SUCCESS(urCommandBufferFinalizeExp(updatable_cmd_buf_handle));
   }
 
-  void TearDown() override {
-    if (command_handle) {
-      EXPECT_SUCCESS(urCommandBufferReleaseCommandExp(command_handle));
-    }
-
-    UUR_RETURN_ON_FATAL_FAILURE(
-        LocalMemoryUpdateTestBaseOutOfOrder::TearDown());
-  }
-
   ur_exp_command_buffer_command_handle_t command_handle = nullptr;
 };
 
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(LocalMemoryUpdateTestOutOfOrder);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(LocalMemoryUpdateTestOutOfOrder);
 
 // Test updating A,X,Y parameters to new values and local memory to larger
 // values when the kernel arguments were added out of order.

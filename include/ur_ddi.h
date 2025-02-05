@@ -1597,16 +1597,6 @@ typedef ur_result_t(UR_APICALL *ur_pfnCommandBufferEnqueueExp_t)(
     const ur_event_handle_t *, ur_event_handle_t *);
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Function-pointer for urCommandBufferRetainCommandExp
-typedef ur_result_t(UR_APICALL *ur_pfnCommandBufferRetainCommandExp_t)(
-    ur_exp_command_buffer_command_handle_t);
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function-pointer for urCommandBufferReleaseCommandExp
-typedef ur_result_t(UR_APICALL *ur_pfnCommandBufferReleaseCommandExp_t)(
-    ur_exp_command_buffer_command_handle_t);
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Function-pointer for urCommandBufferUpdateKernelLaunchExp
 typedef ur_result_t(UR_APICALL *ur_pfnCommandBufferUpdateKernelLaunchExp_t)(
     ur_exp_command_buffer_command_handle_t,
@@ -1630,12 +1620,6 @@ typedef ur_result_t(UR_APICALL *ur_pfnCommandBufferGetInfoExp_t)(
     void *, size_t *);
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Function-pointer for urCommandBufferCommandGetInfoExp
-typedef ur_result_t(UR_APICALL *ur_pfnCommandBufferCommandGetInfoExp_t)(
-    ur_exp_command_buffer_command_handle_t,
-    ur_exp_command_buffer_command_info_t, size_t, void *, size_t *);
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Table of CommandBufferExp functions pointers
 typedef struct ur_command_buffer_exp_dditable_t {
   ur_pfnCommandBufferCreateExp_t pfnCreateExp;
@@ -1656,13 +1640,10 @@ typedef struct ur_command_buffer_exp_dditable_t {
   ur_pfnCommandBufferAppendUSMPrefetchExp_t pfnAppendUSMPrefetchExp;
   ur_pfnCommandBufferAppendUSMAdviseExp_t pfnAppendUSMAdviseExp;
   ur_pfnCommandBufferEnqueueExp_t pfnEnqueueExp;
-  ur_pfnCommandBufferRetainCommandExp_t pfnRetainCommandExp;
-  ur_pfnCommandBufferReleaseCommandExp_t pfnReleaseCommandExp;
   ur_pfnCommandBufferUpdateKernelLaunchExp_t pfnUpdateKernelLaunchExp;
   ur_pfnCommandBufferUpdateSignalEventExp_t pfnUpdateSignalEventExp;
   ur_pfnCommandBufferUpdateWaitEventsExp_t pfnUpdateWaitEventsExp;
   ur_pfnCommandBufferGetInfoExp_t pfnGetInfoExp;
-  ur_pfnCommandBufferCommandGetInfoExp_t pfnCommandGetInfoExp;
 } ur_command_buffer_exp_dditable_t;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1684,51 +1665,6 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
 /// @brief Function-pointer for urGetCommandBufferExpProcAddrTable
 typedef ur_result_t(UR_APICALL *ur_pfnGetCommandBufferExpProcAddrTable_t)(
     ur_api_version_t, ur_command_buffer_exp_dditable_t *);
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function-pointer for urTensorMapEncodeIm2ColExp
-typedef ur_result_t(UR_APICALL *ur_pfnTensorMapEncodeIm2ColExp_t)(
-    ur_device_handle_t, ur_exp_tensor_map_data_type_flags_t, uint32_t, void *,
-    const uint64_t *, const uint64_t *, const int *, const int *, uint32_t,
-    uint32_t, const uint32_t *, ur_exp_tensor_map_interleave_flags_t,
-    ur_exp_tensor_map_swizzle_flags_t, ur_exp_tensor_map_l2_promotion_flags_t,
-    ur_exp_tensor_map_oob_fill_flags_t, ur_exp_tensor_map_handle_t *);
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function-pointer for urTensorMapEncodeTiledExp
-typedef ur_result_t(UR_APICALL *ur_pfnTensorMapEncodeTiledExp_t)(
-    ur_device_handle_t, ur_exp_tensor_map_data_type_flags_t, uint32_t, void *,
-    const uint64_t *, const uint64_t *, const uint32_t *, const uint32_t *,
-    ur_exp_tensor_map_interleave_flags_t, ur_exp_tensor_map_swizzle_flags_t,
-    ur_exp_tensor_map_l2_promotion_flags_t, ur_exp_tensor_map_oob_fill_flags_t,
-    ur_exp_tensor_map_handle_t *);
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Table of TensorMapExp functions pointers
-typedef struct ur_tensor_map_exp_dditable_t {
-  ur_pfnTensorMapEncodeIm2ColExp_t pfnEncodeIm2ColExp;
-  ur_pfnTensorMapEncodeTiledExp_t pfnEncodeTiledExp;
-} ur_tensor_map_exp_dditable_t;
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Exported function for filling application's TensorMapExp table
-///        with current process' addresses
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_UNINITIALIZED
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-UR_DLLEXPORT ur_result_t UR_APICALL urGetTensorMapExpProcAddrTable(
-    /// [in] API version requested
-    ur_api_version_t version,
-    /// [in,out] pointer to table of DDI function pointers
-    ur_tensor_map_exp_dditable_t *pDdiTable);
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function-pointer for urGetTensorMapExpProcAddrTable
-typedef ur_result_t(UR_APICALL *ur_pfnGetTensorMapExpProcAddrTable_t)(
-    ur_api_version_t, ur_tensor_map_exp_dditable_t *);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Function-pointer for urUsmP2PEnablePeerAccessExp
@@ -1948,7 +1884,6 @@ typedef struct ur_dditable_t {
   ur_usm_dditable_t USM;
   ur_usm_exp_dditable_t USMExp;
   ur_command_buffer_exp_dditable_t CommandBufferExp;
-  ur_tensor_map_exp_dditable_t TensorMapExp;
   ur_usm_p2p_exp_dditable_t UsmP2PExp;
   ur_virtual_mem_dditable_t VirtualMem;
   ur_device_dditable_t Device;

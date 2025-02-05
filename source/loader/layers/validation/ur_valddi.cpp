@@ -1470,7 +1470,7 @@ __urdlllocal ur_result_t UR_APICALL urMemImageGetInfo(
     if (pPropValue == NULL && pPropSizeRet == NULL)
       return UR_RESULT_ERROR_INVALID_NULL_POINTER;
 
-    if (UR_IMAGE_INFO_DEPTH < propName)
+    if (UR_IMAGE_INFO_NUM_SAMPLES < propName)
       return UR_RESULT_ERROR_INVALID_ENUMERATION;
 
     if (propSize == 0 && pPropValue != NULL)
@@ -3315,7 +3315,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelGetInfo(
     if (pPropValue == NULL && pPropSizeRet == NULL)
       return UR_RESULT_ERROR_INVALID_NULL_POINTER;
 
-    if (UR_KERNEL_INFO_NUM_REGS < propName)
+    if (UR_KERNEL_INFO_SPILL_MEM_SIZE < propName)
       return UR_RESULT_ERROR_INVALID_ENUMERATION;
 
     if (propSize == 0 && pPropValue != NULL)
@@ -7069,7 +7069,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageGetInfoExp(
     if (pPropValue == NULL && pPropSizeRet == NULL)
       return UR_RESULT_ERROR_INVALID_NULL_POINTER;
 
-    if (UR_IMAGE_INFO_DEPTH < propName)
+    if (UR_IMAGE_INFO_NUM_SAMPLES < propName)
       return UR_RESULT_ERROR_INVALID_ENUMERATION;
   }
 
@@ -8831,50 +8831,6 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferRetainCommandExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferRetainCommandExp(
-    /// [in][retain] Handle of the command-buffer command.
-    ur_exp_command_buffer_command_handle_t hCommand) {
-  auto pfnRetainCommandExp =
-      getContext()->urDdiTable.CommandBufferExp.pfnRetainCommandExp;
-
-  if (nullptr == pfnRetainCommandExp) {
-    return UR_RESULT_ERROR_UNINITIALIZED;
-  }
-
-  if (getContext()->enableParameterValidation) {
-    if (NULL == hCommand)
-      return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-  }
-
-  ur_result_t result = pfnRetainCommandExp(hCommand);
-
-  return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferReleaseCommandExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseCommandExp(
-    /// [in][release] Handle of the command-buffer command.
-    ur_exp_command_buffer_command_handle_t hCommand) {
-  auto pfnReleaseCommandExp =
-      getContext()->urDdiTable.CommandBufferExp.pfnReleaseCommandExp;
-
-  if (nullptr == pfnReleaseCommandExp) {
-    return UR_RESULT_ERROR_UNINITIALIZED;
-  }
-
-  if (getContext()->enableParameterValidation) {
-    if (NULL == hCommand)
-      return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-  }
-
-  ur_result_t result = pfnReleaseCommandExp(hCommand);
-
-  return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferUpdateKernelLaunchExp
 __urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
     /// [in] Handle of the command-buffer kernel command to update.
@@ -9015,50 +8971,6 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferGetInfoExp(
 
   ur_result_t result = pfnGetInfoExp(hCommandBuffer, propName, propSize,
                                      pPropValue, pPropSizeRet);
-
-  return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferCommandGetInfoExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferCommandGetInfoExp(
-    /// [in] handle of the command-buffer command object
-    ur_exp_command_buffer_command_handle_t hCommand,
-    /// [in] the name of the command-buffer command property to query
-    ur_exp_command_buffer_command_info_t propName,
-    /// [in] size in bytes of the command-buffer command property value
-    size_t propSize,
-    /// [out][optional][typename(propName, propSize)] value of the
-    /// command-buffer command property
-    void *pPropValue,
-    /// [out][optional] bytes returned in command-buffer command property
-    size_t *pPropSizeRet) {
-  auto pfnCommandGetInfoExp =
-      getContext()->urDdiTable.CommandBufferExp.pfnCommandGetInfoExp;
-
-  if (nullptr == pfnCommandGetInfoExp) {
-    return UR_RESULT_ERROR_UNINITIALIZED;
-  }
-
-  if (getContext()->enableParameterValidation) {
-    if (NULL == hCommand)
-      return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-
-    if (propSize != 0 && pPropValue == NULL)
-      return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-
-    if (pPropValue == NULL && pPropSizeRet == NULL)
-      return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-
-    if (UR_EXP_COMMAND_BUFFER_COMMAND_INFO_REFERENCE_COUNT < propName)
-      return UR_RESULT_ERROR_INVALID_ENUMERATION;
-
-    if (propSize == 0 && pPropValue != NULL)
-      return UR_RESULT_ERROR_INVALID_SIZE;
-  }
-
-  ur_result_t result = pfnCommandGetInfoExp(hCommand, propName, propSize,
-                                            pPropValue, pPropSizeRet);
 
   return result;
 }
@@ -9817,206 +9729,6 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueNativeCommandExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urTensorMapEncodeIm2ColExp
-__urdlllocal ur_result_t UR_APICALL urTensorMapEncodeIm2ColExp(
-    /// [in] Handle of the device object.
-    ur_device_handle_t hDevice,
-    /// [in] Data type of the tensor object.
-    ur_exp_tensor_map_data_type_flags_t TensorMapType,
-    /// [in] Dimensionality of tensor; must be at least 3.
-    uint32_t TensorRank,
-    /// [in] Starting address of memory region described by tensor.
-    void *GlobalAddress,
-    /// [in] Array containing tensor size (number of elements) along each of
-    /// the TensorRank dimensions.
-    const uint64_t *GlobalDim,
-    /// [in] Array containing stride size (in bytes) along each of the
-    /// TensorRank - 1 dimensions.
-    const uint64_t *GlobalStrides,
-    /// [in] Array containing DHW dimensions of lower box corner.
-    const int *PixelBoxLowerCorner,
-    /// [in] Array containing DHW dimensions of upper box corner.
-    const int *PixelBoxUpperCorner,
-    /// [in] Number of channels per pixel.
-    uint32_t ChannelsPerPixel,
-    /// [in] Number of pixels per column.
-    uint32_t PixelsPerColumn,
-    /// [in] Array containing traversal stride in each of the TensorRank
-    /// dimensions.
-    const uint32_t *ElementStrides,
-    /// [in] Type of interleaved layout the tensor addresses
-    ur_exp_tensor_map_interleave_flags_t Interleave,
-    /// [in] Bank swizzling pattern inside shared memory
-    ur_exp_tensor_map_swizzle_flags_t Swizzle,
-    /// [in] L2 promotion size.
-    ur_exp_tensor_map_l2_promotion_flags_t L2Promotion,
-    /// [in] Indicates whether zero or special NaN constant will be used to
-    /// fill out-of-bounds elements.
-    ur_exp_tensor_map_oob_fill_flags_t OobFill,
-    /// [out] Handle of the tensor map object.
-    ur_exp_tensor_map_handle_t *hTensorMap) {
-  auto pfnEncodeIm2ColExp =
-      getContext()->urDdiTable.TensorMapExp.pfnEncodeIm2ColExp;
-
-  if (nullptr == pfnEncodeIm2ColExp) {
-    return UR_RESULT_ERROR_UNINITIALIZED;
-  }
-
-  if (getContext()->enableParameterValidation) {
-    if (NULL == hDevice)
-      return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-
-    if (NULL == GlobalAddress)
-      return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-
-    if (NULL == GlobalDim)
-      return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-
-    if (NULL == GlobalStrides)
-      return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-
-    if (NULL == PixelBoxLowerCorner)
-      return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-
-    if (NULL == PixelBoxUpperCorner)
-      return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-
-    if (NULL == ElementStrides)
-      return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-
-    if (NULL == hTensorMap)
-      return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-
-    if (UR_EXP_TENSOR_MAP_DATA_TYPE_FLAGS_MASK & TensorMapType)
-      return UR_RESULT_ERROR_INVALID_ENUMERATION;
-
-    if (UR_EXP_TENSOR_MAP_INTERLEAVE_FLAGS_MASK & Interleave)
-      return UR_RESULT_ERROR_INVALID_ENUMERATION;
-
-    if (UR_EXP_TENSOR_MAP_SWIZZLE_FLAGS_MASK & Swizzle)
-      return UR_RESULT_ERROR_INVALID_ENUMERATION;
-
-    if (UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAGS_MASK & L2Promotion)
-      return UR_RESULT_ERROR_INVALID_ENUMERATION;
-
-    if (UR_EXP_TENSOR_MAP_OOB_FILL_FLAGS_MASK & OobFill)
-      return UR_RESULT_ERROR_INVALID_ENUMERATION;
-
-    if (TensorRank < 3)
-      return UR_RESULT_ERROR_INVALID_ARGUMENT;
-  }
-
-  if (getContext()->enableLifetimeValidation &&
-      !getContext()->refCountContext->isReferenceValid(hDevice)) {
-    getContext()->refCountContext->logInvalidReference(hDevice);
-  }
-
-  ur_result_t result = pfnEncodeIm2ColExp(
-      hDevice, TensorMapType, TensorRank, GlobalAddress, GlobalDim,
-      GlobalStrides, PixelBoxLowerCorner, PixelBoxUpperCorner, ChannelsPerPixel,
-      PixelsPerColumn, ElementStrides, Interleave, Swizzle, L2Promotion,
-      OobFill, hTensorMap);
-
-  return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urTensorMapEncodeTiledExp
-__urdlllocal ur_result_t UR_APICALL urTensorMapEncodeTiledExp(
-    /// [in] Handle of the device object.
-    ur_device_handle_t hDevice,
-    /// [in] Data type of the tensor object.
-    ur_exp_tensor_map_data_type_flags_t TensorMapType,
-    /// [in] Dimensionality of tensor; must be at least 3.
-    uint32_t TensorRank,
-    /// [in] Starting address of memory region described by tensor.
-    void *GlobalAddress,
-    /// [in] Array containing tensor size (number of elements) along each of
-    /// the TensorRank dimensions.
-    const uint64_t *GlobalDim,
-    /// [in] Array containing stride size (in bytes) along each of the
-    /// TensorRank - 1 dimensions.
-    const uint64_t *GlobalStrides,
-    /// [in] Array containing traversal box size (number of elments) along
-    /// each of the TensorRank dimensions. Specifies how many elements to be
-    /// traversed along each tensor dimension.
-    const uint32_t *BoxDim,
-    /// [in] Array containing traversal stride in each of the TensorRank
-    /// dimensions.
-    const uint32_t *ElementStrides,
-    /// [in] Type of interleaved layout the tensor addresses
-    ur_exp_tensor_map_interleave_flags_t Interleave,
-    /// [in] Bank swizzling pattern inside shared memory
-    ur_exp_tensor_map_swizzle_flags_t Swizzle,
-    /// [in] L2 promotion size.
-    ur_exp_tensor_map_l2_promotion_flags_t L2Promotion,
-    /// [in] Indicates whether zero or special NaN constant will be used to
-    /// fill out-of-bounds elements.
-    ur_exp_tensor_map_oob_fill_flags_t OobFill,
-    /// [out] Handle of the tensor map object.
-    ur_exp_tensor_map_handle_t *hTensorMap) {
-  auto pfnEncodeTiledExp =
-      getContext()->urDdiTable.TensorMapExp.pfnEncodeTiledExp;
-
-  if (nullptr == pfnEncodeTiledExp) {
-    return UR_RESULT_ERROR_UNINITIALIZED;
-  }
-
-  if (getContext()->enableParameterValidation) {
-    if (NULL == hDevice)
-      return UR_RESULT_ERROR_INVALID_NULL_HANDLE;
-
-    if (NULL == GlobalAddress)
-      return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-
-    if (NULL == GlobalDim)
-      return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-
-    if (NULL == GlobalStrides)
-      return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-
-    if (NULL == BoxDim)
-      return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-
-    if (NULL == ElementStrides)
-      return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-
-    if (NULL == hTensorMap)
-      return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-
-    if (UR_EXP_TENSOR_MAP_DATA_TYPE_FLAGS_MASK & TensorMapType)
-      return UR_RESULT_ERROR_INVALID_ENUMERATION;
-
-    if (UR_EXP_TENSOR_MAP_INTERLEAVE_FLAGS_MASK & Interleave)
-      return UR_RESULT_ERROR_INVALID_ENUMERATION;
-
-    if (UR_EXP_TENSOR_MAP_SWIZZLE_FLAGS_MASK & Swizzle)
-      return UR_RESULT_ERROR_INVALID_ENUMERATION;
-
-    if (UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAGS_MASK & L2Promotion)
-      return UR_RESULT_ERROR_INVALID_ENUMERATION;
-
-    if (UR_EXP_TENSOR_MAP_OOB_FILL_FLAGS_MASK & OobFill)
-      return UR_RESULT_ERROR_INVALID_ENUMERATION;
-
-    if (TensorRank < 3)
-      return UR_RESULT_ERROR_INVALID_ARGUMENT;
-  }
-
-  if (getContext()->enableLifetimeValidation &&
-      !getContext()->refCountContext->isReferenceValid(hDevice)) {
-    getContext()->refCountContext->logInvalidReference(hDevice);
-  }
-
-  ur_result_t result =
-      pfnEncodeTiledExp(hDevice, TensorMapType, TensorRank, GlobalAddress,
-                        GlobalDim, GlobalStrides, BoxDim, ElementStrides,
-                        Interleave, Swizzle, L2Promotion, OobFill, hTensorMap);
-
-  return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's Global table
 ///        with current process' addresses
 ///
@@ -10262,14 +9974,6 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
   dditable.pfnEnqueueExp = pDdiTable->pfnEnqueueExp;
   pDdiTable->pfnEnqueueExp = ur_validation_layer::urCommandBufferEnqueueExp;
 
-  dditable.pfnRetainCommandExp = pDdiTable->pfnRetainCommandExp;
-  pDdiTable->pfnRetainCommandExp =
-      ur_validation_layer::urCommandBufferRetainCommandExp;
-
-  dditable.pfnReleaseCommandExp = pDdiTable->pfnReleaseCommandExp;
-  pDdiTable->pfnReleaseCommandExp =
-      ur_validation_layer::urCommandBufferReleaseCommandExp;
-
   dditable.pfnUpdateKernelLaunchExp = pDdiTable->pfnUpdateKernelLaunchExp;
   pDdiTable->pfnUpdateKernelLaunchExp =
       ur_validation_layer::urCommandBufferUpdateKernelLaunchExp;
@@ -10284,10 +9988,6 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
 
   dditable.pfnGetInfoExp = pDdiTable->pfnGetInfoExp;
   pDdiTable->pfnGetInfoExp = ur_validation_layer::urCommandBufferGetInfoExp;
-
-  dditable.pfnCommandGetInfoExp = pDdiTable->pfnCommandGetInfoExp;
-  pDdiTable->pfnCommandGetInfoExp =
-      ur_validation_layer::urCommandBufferCommandGetInfoExp;
 
   return result;
 }
@@ -11047,42 +10747,6 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetSamplerProcAddrTable(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Exported function for filling application's TensorMapExp table
-///        with current process' addresses
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-UR_DLLEXPORT ur_result_t UR_APICALL urGetTensorMapExpProcAddrTable(
-    /// [in] API version requested
-    ur_api_version_t version,
-    /// [in,out] pointer to table of DDI function pointers
-    ur_tensor_map_exp_dditable_t *pDdiTable) {
-  auto &dditable = ur_validation_layer::getContext()->urDdiTable.TensorMapExp;
-
-  if (nullptr == pDdiTable)
-    return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-
-  if (UR_MAJOR_VERSION(ur_validation_layer::getContext()->version) !=
-          UR_MAJOR_VERSION(version) ||
-      UR_MINOR_VERSION(ur_validation_layer::getContext()->version) >
-          UR_MINOR_VERSION(version))
-    return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
-
-  ur_result_t result = UR_RESULT_SUCCESS;
-
-  dditable.pfnEncodeIm2ColExp = pDdiTable->pfnEncodeIm2ColExp;
-  pDdiTable->pfnEncodeIm2ColExp =
-      ur_validation_layer::urTensorMapEncodeIm2ColExp;
-
-  dditable.pfnEncodeTiledExp = pDdiTable->pfnEncodeTiledExp;
-  pDdiTable->pfnEncodeTiledExp = ur_validation_layer::urTensorMapEncodeTiledExp;
-
-  return result;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Exported function for filling application's USM table
 ///        with current process' addresses
 ///
@@ -11436,11 +11100,6 @@ ur_result_t context_t::init(ur_dditable_t *dditable,
   if (UR_RESULT_SUCCESS == result) {
     result = ur_validation_layer::urGetSamplerProcAddrTable(
         UR_API_VERSION_CURRENT, &dditable->Sampler);
-  }
-
-  if (UR_RESULT_SUCCESS == result) {
-    result = ur_validation_layer::urGetTensorMapExpProcAddrTable(
-        UR_API_VERSION_CURRENT, &dditable->TensorMapExp);
   }
 
   if (UR_RESULT_SUCCESS == result) {

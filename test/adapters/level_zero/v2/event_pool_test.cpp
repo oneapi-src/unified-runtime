@@ -16,6 +16,7 @@
 #include "event_provider.hpp"
 #include "event_provider_counter.hpp"
 #include "event_provider_normal.hpp"
+#include "queue_handle.hpp"
 #include "uur/fixtures.h"
 #include "ze_api.h"
 
@@ -146,8 +147,8 @@ static ProviderParams test_cases[] = {
     //{TEST_PROVIDER_COUNTER, EVENT_COUNTER, QUEUE_IMMEDIATE},
 };
 
-UUR_DEVICE_TEST_SUITE_P(EventPoolTest, testing::ValuesIn(test_cases),
-                        printParams<EventPoolTest>);
+UUR_DEVICE_TEST_SUITE_WITH_PARAM(EventPoolTest, testing::ValuesIn(test_cases),
+                                 printParams<EventPoolTest>);
 
 TEST_P(EventPoolTest, InvalidDevice) {
   auto pool = cache->borrow(MAX_DEVICES, getParam().flags);
@@ -164,7 +165,7 @@ TEST_P(EventPoolTest, Basic) {
       auto pool = cache->borrow(device->Id.value(), getParam().flags);
 
       first = pool->allocate();
-      first->resetQueueAndCommand(queue, UR_COMMAND_KERNEL_LAUNCH);
+      first->resetQueueAndCommand(&queue->get(), UR_COMMAND_KERNEL_LAUNCH);
       zeFirst = first->getZeEvent();
 
       urEventRelease(first);
@@ -175,7 +176,7 @@ TEST_P(EventPoolTest, Basic) {
       auto pool = cache->borrow(device->Id.value(), getParam().flags);
 
       second = pool->allocate();
-      first->resetQueueAndCommand(queue, UR_COMMAND_KERNEL_LAUNCH);
+      first->resetQueueAndCommand(&queue->get(), UR_COMMAND_KERNEL_LAUNCH);
       zeSecond = second->getZeEvent();
 
       urEventRelease(second);
@@ -195,7 +196,8 @@ TEST_P(EventPoolTest, Threaded) {
         std::vector<ur_event_handle_t> events;
         for (int i = 0; i < 100; ++i) {
           events.push_back(pool->allocate());
-          events.back()->resetQueueAndCommand(queue, UR_COMMAND_KERNEL_LAUNCH);
+          events.back()->resetQueueAndCommand(&queue->get(),
+                                              UR_COMMAND_KERNEL_LAUNCH);
         }
         for (int i = 0; i < 100; ++i) {
           urEventRelease(events[i]);
@@ -214,7 +216,7 @@ TEST_P(EventPoolTest, ProviderNormalUseMostFreePool) {
   std::list<ur_event_handle_t> events;
   for (int i = 0; i < 128; ++i) {
     auto event = pool->allocate();
-    event->resetQueueAndCommand(queue, UR_COMMAND_KERNEL_LAUNCH);
+    event->resetQueueAndCommand(&queue->get(), UR_COMMAND_KERNEL_LAUNCH);
     events.push_back(event);
   }
   auto frontZeHandle = events.front()->getZeEvent();
@@ -224,7 +226,7 @@ TEST_P(EventPoolTest, ProviderNormalUseMostFreePool) {
   }
   for (int i = 0; i < 8; ++i) {
     auto e = pool->allocate();
-    e->resetQueueAndCommand(queue, UR_COMMAND_KERNEL_LAUNCH);
+    e->resetQueueAndCommand(&queue->get(), UR_COMMAND_KERNEL_LAUNCH);
     events.push_back(e);
   }
 
@@ -238,8 +240,9 @@ TEST_P(EventPoolTest, ProviderNormalUseMostFreePool) {
 
 using EventPoolTestWithQueue = uur::urQueueTestWithParam<ProviderParams>;
 
-UUR_DEVICE_TEST_SUITE_P(EventPoolTestWithQueue, testing::ValuesIn(test_cases),
-                        printParams<EventPoolTest>);
+UUR_DEVICE_TEST_SUITE_WITH_PARAM(EventPoolTestWithQueue,
+                                 testing::ValuesIn(test_cases),
+                                 printParams<EventPoolTest>);
 
 // TODO: actual min version is unknown, retest after drivers on CI are
 // updated.
