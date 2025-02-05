@@ -28,53 +28,10 @@ inline Logger &get_logger(std::string name = "common",
 
 inline void init(const std::string &name) { get_logger(name.c_str()); }
 
-template <typename... Args>
-inline void debug(const char *format, Args &&...args) {
-  get_logger().log(Level::DEBUG, format, std::forward<Args>(args)...);
-}
-
-template <typename... Args>
-inline void info(const char *format, Args &&...args) {
-  get_logger().log(Level::INFO, format, std::forward<Args>(args)...);
-}
-
-template <typename... Args>
-inline void warning(const char *format, Args &&...args) {
-  get_logger().log(Level::WARN, format, std::forward<Args>(args)...);
-}
-
-template <typename... Args>
-inline void error(const char *format, Args &&...args) {
-  get_logger().log(Level::ERR, format, std::forward<Args>(args)...);
-}
-
-template <typename... Args>
-inline void always(const char *format, Args &&...args) {
-  get_logger().always(format, std::forward<Args>(args)...);
-}
-
 #define URLOG(...) URLOG_(::logger::get_logger(), __VA_ARGS__)
 #define URLOG_ALWAYS(...) URLOG_ALWAYS_(::logger::get_logger(), __VA_ARGS__)
 #define URLOG_CTX(...) URLOG_(getContext()->logger, __VA_ARGS__)
 #define URLOG_CTX_ALWAYS(...) URLOG_(getContext()->logger, QUIET, __VA_ARGS__)
-
-template <typename... Args>
-inline void debug(const LegacyMessage &p, Args &&...args) {
-  get_logger().log(p, Level::DEBUG, std::forward<Args>(args)...);
-}
-
-template <typename... Args> inline void info(LegacyMessage p, Args &&...args) {
-  get_logger().log(p, Level::INFO, std::forward<Args>(args)...);
-}
-
-template <typename... Args>
-inline void warning(LegacyMessage p, Args &&...args) {
-  get_logger().log(p, Level::WARN, std::forward<Args>(args)...);
-}
-
-template <typename... Args> inline void error(LegacyMessage p, Args &&...args) {
-  get_logger().log(p, Level::ERR, std::forward<Args>(args)...);
-}
 
 inline void setLevel(Level level) { get_logger().setLevel(level); }
 
