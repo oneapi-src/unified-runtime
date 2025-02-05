@@ -35,52 +35,6 @@ public:
     }
   }
 
-  template <typename... Args> void debug(Args &&...args) {
-    log(Level::DEBUG, std::forward<Args>(args)...);
-  }
-
-  template <typename... Args> void info(Args &&...args) {
-    log(Level::INFO, std::forward<Args>(args)...);
-  }
-
-  template <typename... Args> void warning(Args &&...args) {
-    log(Level::WARN, std::forward<Args>(args)...);
-  }
-
-  template <typename... Args> void warn(Args &&...args) {
-    warning(std::forward<Args>(args)...);
-  }
-
-  template <typename... Args> void error(Args &&...args) {
-    log(Level::ERR, std::forward<Args>(args)...);
-  }
-
-  template <typename... Args> void always(Args &&...args) {
-    if (sink) {
-      sink->log(Level::QUIET, std::forward<Args>(args)...);
-    }
-  }
-
-  template <typename... Args>
-  void debug(const LegacyMessage &p, Args &&...args) {
-    log(p, Level::DEBUG, std::forward<Args>(args)...);
-  }
-
-  template <typename... Args>
-  void info(const LegacyMessage &p, Args &&...args) {
-    log(p, Level::INFO, std::forward<Args>(args)...);
-  }
-
-  template <typename... Args>
-  void warning(const LegacyMessage &p, Args &&...args) {
-    log(p, Level::WARN, std::forward<Args>(args)...);
-  }
-
-  template <typename... Args>
-  void error(const LegacyMessage &p, Args &&...args) {
-    log(p, Level::ERR, std::forward<Args>(args)...);
-  }
-
   template <typename... Args>
   void log(Level level, const char *filename, const char *lineno,
            const char *format, Args &&...args) {
@@ -136,6 +90,6 @@ private:
   }
 
 #define URLOG_ALWAYS_(logger_instance, ...)                                    \
-  { (logger_instance).always(SHORT_FILE, UR_STR(__LINE__), __VA_ARGS__); }
+  URLOG_(logger_instance, QUIET, __VA_ARGS__)
 
 #endif /* UR_LOGGER_DETAILS_HPP */
