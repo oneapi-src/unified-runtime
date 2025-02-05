@@ -25,14 +25,19 @@ inline bool isTearDowned = false;
 class Sink {
 public:
   template <typename... Args>
-  void log(logger::Level level, const char *fmt, Args &&...args) {
+  void log(Level level, const char *fmt, const char *fileline, Args &&...args) {
     std::ostringstream buffer;
-    if (!skip_prefix && level != logger::Level::QUIET) {
+    if (!skip_prefix && level != Level::QUIET) {
       buffer << "<" << logger_name << ">"
              << "[" << level_to_str(level) << "]: ";
     }
-
     format(buffer, fmt, std::forward<Args &&>(args)...);
+    if (add_fileline) {
+      buffer << " <" << fileline << ">";
+    }
+    if (!skip_linebreak) {
+      buffer << "\n";
+    }
 // This is a temporary workaround on windows, where UR adapter is teardowned
 // before the UR loader, which will result in access violation when we use print
 // function as the overrided print function was already released with the UR
@@ -59,9 +64,9 @@ protected:
   logger::Level flush_level;
 
   Sink(std::string logger_name, bool skip_prefix = false,
-       bool skip_linebreak = false)
+       bool skip_linebreak = false, bool add_file_and_line = false)
       : logger_name(std::move(logger_name)), skip_prefix(skip_prefix),
-        skip_linebreak(skip_linebreak) {
+        skip_linebreak(skip_linebreak), add_fileline(add_file_and_line) {
     ostream = nullptr;
     flush_level = logger::Level::ERR;
   }
@@ -76,8 +81,9 @@ protected:
 
 private:
   std::string logger_name;
-  bool skip_prefix;
-  bool skip_linebreak;
+  const bool skip_prefix;
+  const bool skip_linebreak;
+  const bool add_fileline;
   std::mutex output_mutex;
   const char *error_prefix = "Log message syntax error: ";
 
@@ -103,9 +109,6 @@ private:
                     << std::endl;
         }
       }
-    }
-    if (!skip_linebreak) {
-      buffer << "\n";
     }
   }
 

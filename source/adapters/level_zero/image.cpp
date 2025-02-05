@@ -1055,8 +1055,10 @@ ur_result_t urBindlessImagesMipmapGetLevelExp(
   std::ignore = hImageMem;
   std::ignore = mipmapLevel;
   std::ignore = phImageMem;
-  logger::error(logger::LegacyMessage("[UR][L0] {} function not implemented!"),
-                "{} function not implemented!", __FUNCTION__);
+  logger::get_logger().log(
+      logger::LegacyMessage("[UR][L0] {} function not implemented!"),
+      logger::Level::ERR, SHORT_FILE, UR_STR(__LINE__),
+      "{} function not implemented!", __FUNCTION__);
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
@@ -1214,8 +1216,9 @@ ur_result_t urBindlessImagesImportExternalSemaphoreExp(
 
   auto UrPlatform = hContext->getPlatform();
   if (UrPlatform->ZeExternalSemaphoreExt.Supported == false) {
-    logger::error(logger::LegacyMessage("[UR][L0] "),
-                  " {} function not supported!", __FUNCTION__);
+    logger::get_logger().log(logger::LegacyMessage("[UR][L0] "),
+                             logger::Level::ERR, SHORT_FILE, UR_STR(__LINE__),
+                             " {} function not supported!", __FUNCTION__);
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
   ze_intel_external_semaphore_exp_desc_t SemDesc = {
@@ -1271,8 +1274,9 @@ ur_result_t urBindlessImagesReleaseExternalSemaphoreExp(
   std::ignore = hDevice;
   auto UrPlatform = hContext->getPlatform();
   if (UrPlatform->ZeExternalSemaphoreExt.Supported == false) {
-    logger::error(logger::LegacyMessage("[UR][L0] "),
-                  " {} function not supported!", __FUNCTION__);
+    logger::get_logger().log(logger::LegacyMessage("[UR][L0] "),
+                             logger::Level::ERR, SHORT_FILE, UR_STR(__LINE__),
+                             " {} function not supported!", __FUNCTION__);
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
   ZE2UR_CALL(
@@ -1288,8 +1292,9 @@ ur_result_t urBindlessImagesWaitExternalSemaphoreExp(
     const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent) {
   auto UrPlatform = hQueue->Context->getPlatform();
   if (UrPlatform->ZeExternalSemaphoreExt.Supported == false) {
-    logger::error(logger::LegacyMessage("[UR][L0] "),
-                  " {} function not supported!", __FUNCTION__);
+    logger::get_logger().log(logger::LegacyMessage("[UR][L0] "),
+                             logger::Level::ERR, SHORT_FILE, UR_STR(__LINE__),
+                             " {} function not supported!", __FUNCTION__);
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
@@ -1350,8 +1355,9 @@ ur_result_t urBindlessImagesSignalExternalSemaphoreExp(
   std::ignore = phEvent;
   auto UrPlatform = hQueue->Context->getPlatform();
   if (UrPlatform->ZeExternalSemaphoreExt.Supported == false) {
-    logger::error(logger::LegacyMessage("[UR][L0] "),
-                  " {} function not supported!", __FUNCTION__);
+    logger::get_logger().log(logger::LegacyMessage("[UR][L0] "),
+                             logger::Level::ERR, SHORT_FILE, UR_STR(__LINE__),
+                             " {} function not supported!", __FUNCTION__);
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 

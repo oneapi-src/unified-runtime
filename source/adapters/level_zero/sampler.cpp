@@ -148,8 +148,10 @@ ur_result_t urSamplerGetInfo(
   std::ignore = PropValueSize;
   std::ignore = PropValue;
   std::ignore = PropSizeRet;
-  logger::error(logger::LegacyMessage("[UR][L0] {} function not implemented!"),
-                "{} function not implemented!", __FUNCTION__);
+  logger::get_logger().log(
+      logger::LegacyMessage("[UR][L0] {} function not implemented!"),
+      logger::Level::ERR, SHORT_FILE, UR_STR(__LINE__),
+      "{} function not implemented!", __FUNCTION__);
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
@@ -160,8 +162,10 @@ ur_result_t urSamplerGetNativeHandle(
     ur_native_handle_t *NativeSampler) {
   std::ignore = Sampler;
   std::ignore = NativeSampler;
-  logger::error(logger::LegacyMessage("[UR][L0] {} function not implemented!"),
-                "{} function not implemented!", __FUNCTION__);
+  logger::get_logger().log(
+      logger::LegacyMessage("[UR][L0] {} function not implemented!"),
+      logger::Level::ERR, SHORT_FILE, UR_STR(__LINE__),
+      "{} function not implemented!", __FUNCTION__);
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
@@ -178,8 +182,10 @@ ur_result_t urSamplerCreateWithNativeHandle(
   std::ignore = Context;
   std::ignore = Properties;
   std::ignore = Sampler;
-  logger::error(logger::LegacyMessage("[UR][L0] {} function not implemented!"),
-                "{} function not implemented!", __FUNCTION__);
+  logger::get_logger().log(
+      logger::LegacyMessage("[UR][L0] {} function not implemented!"),
+      logger::Level::ERR, SHORT_FILE, UR_STR(__LINE__),
+      "{} function not implemented!", __FUNCTION__);
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 } // namespace ur::level_zero

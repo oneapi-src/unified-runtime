@@ -1445,8 +1445,10 @@ ur_result_t urEnqueueUSMFill2D(
   std::ignore = NumEventsInWaitList;
   std::ignore = EventWaitList;
   std::ignore = OutEvent;
-  logger::error(logger::LegacyMessage("[UR][L0] {} function not implemented!"),
-                "{} function not implemented!", __FUNCTION__);
+  logger::get_logger().log(
+      logger::LegacyMessage("[UR][L0] {} function not implemented!"),
+      logger::Level::ERR, SHORT_FILE, UR_STR(__LINE__),
+      "{} function not implemented!", __FUNCTION__);
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
@@ -1967,8 +1969,10 @@ ur_result_t urMemImageGetInfo(
   std::ignore = PropSize;
   std::ignore = ImgInfo;
   std::ignore = PropSizeRet;
-  logger::error(logger::LegacyMessage("[UR][L0] {} function not implemented!"),
-                "{} function not implemented!", __FUNCTION__);
+  logger::get_logger().log(
+      logger::LegacyMessage("[UR][L0] {} function not implemented!"),
+      logger::Level::ERR, SHORT_FILE, UR_STR(__LINE__),
+      "{} function not implemented!", __FUNCTION__);
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
@@ -2021,8 +2025,10 @@ ur_result_t urEnqueueReadHostPipe(ur_queue_handle_t hQueue,
   std::ignore = numEventsInWaitList;
   std::ignore = phEventWaitList;
   std::ignore = phEvent;
-  logger::error(logger::LegacyMessage("[UR][L0] {} function not implemented!"),
-                "{} function not implemented!", __FUNCTION__);
+  logger::get_logger().log(
+      logger::LegacyMessage("[UR][L0] {} function not implemented!"),
+      logger::Level::ERR, SHORT_FILE, UR_STR(__LINE__),
+      "{} function not implemented!", __FUNCTION__);
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
@@ -2042,8 +2048,10 @@ ur_result_t urEnqueueWriteHostPipe(ur_queue_handle_t hQueue,
   std::ignore = numEventsInWaitList;
   std::ignore = phEventWaitList;
   std::ignore = phEvent;
-  logger::error(logger::LegacyMessage("[UR][L0] {} function not implemented!"),
-                "{} function not implemented!", __FUNCTION__);
+  logger::get_logger().log(
+      logger::LegacyMessage("[UR][L0] {} function not implemented!"),
+      logger::Level::ERR, SHORT_FILE, UR_STR(__LINE__),
+      "{} function not implemented!", __FUNCTION__);
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 

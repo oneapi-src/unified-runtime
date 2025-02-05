@@ -1158,8 +1158,10 @@ ur_result_t urKernelSetSpecializationConstants(
   std::ignore = Kernel;
   std::ignore = Count;
   std::ignore = SpecConstants;
-  logger::error(logger::LegacyMessage("[UR][L0] {} function not implemented!"),
-                "{} function not implemented!", __FUNCTION__);
+  logger::get_logger().log(
+      logger::LegacyMessage("[UR][L0] {} function not implemented!"),
+      logger::Level::ERR, SHORT_FILE, UR_STR(__LINE__),
+      "{} function not implemented!", __FUNCTION__);
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
