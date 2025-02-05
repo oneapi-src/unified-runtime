@@ -126,9 +126,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
   hKernel->updateMemPool(numParallelThreads);
   std::vector<std::future<void>> futures;
   std::vector<LaunchInfoLocalArgs> groups;
-  auto numWG0 = ndr.GlobalSize[0] / ndr.LocalSize[0];
-  auto numWG1 = ndr.GlobalSize[1] / ndr.LocalSize[1];
-  auto numWG2 = ndr.GlobalSize[2] / ndr.LocalSize[2];
+  const auto numWG0 = ndr.GlobalSize[0] / ndr.LocalSize[0];
+  const auto numWG1 = ndr.GlobalSize[1] / ndr.LocalSize[1];
+  const auto numWG2 = ndr.GlobalSize[2] / ndr.LocalSize[2];
   native_cpu::state state(ndr.GlobalSize[0], ndr.GlobalSize[1],
                           ndr.GlobalSize[2], ndr.LocalSize[0], ndr.LocalSize[1],
                           ndr.LocalSize[2], ndr.GlobalOffset[0],
