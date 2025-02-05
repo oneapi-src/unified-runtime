@@ -41,18 +41,18 @@ ur_result_t setupContext(ur_context_handle_t Context, uint32_t numDevices,
       UR_CALL(getAsanInterceptor()->insertDevice(hDevice, DI));
       DI->Type = GetDeviceType(Context, hDevice);
       if (DI->Type == DeviceType::UNKNOWN) {
-        getContext()->logger.error("Unsupport device");
+        URLOG_CTX(ERR, "Unsupport device");
         return UR_RESULT_ERROR_INVALID_DEVICE;
       }
       if (DI->Type != DeviceType) {
-        getContext()->logger.error("Different device type in the same context");
+        URLOG_CTX(ERR, "Different device type in the same context");
         return UR_RESULT_ERROR_INVALID_DEVICE;
       }
-      getContext()->logger.info(
-          "DeviceInfo {} (Type={}, IsSupportSharedSystemUSM={})",
-          (void *)DI->Handle, ToString(DI->Type), DI->IsSupportSharedSystemUSM);
-      getContext()->logger.info("Add {} into context {}", (void *)DI->Handle,
-                                (void *)Context);
+      URLOG_CTX(INFO, "DeviceInfo {} (Type={}, IsSupportSharedSystemUSM={})",
+                (void *)DI->Handle, ToString(DI->Type),
+                DI->IsSupportSharedSystemUSM);
+      URLOG_CTX(INFO, "Add {} into context {}", (void *)DI->Handle,
+                (void *)Context);
       DI->Shadow = ShadowMemory;
       CI->DeviceList.emplace_back(hDevice);
       CI->AllocInfosMap[hDevice];
@@ -112,7 +112,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMHostAlloc(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urUSMHostAlloc");
+  URLOG_CTX(DEBUG, "==== urUSMHostAlloc");
 
   return getAsanInterceptor()->allocateMemory(hContext, nullptr, pUSMDesc, pool,
                                               size, AllocType::HOST_USM, ppMem);
@@ -139,7 +139,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMDeviceAlloc(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urUSMDeviceAlloc");
+  URLOG_CTX(DEBUG, "==== urUSMDeviceAlloc");
 
   return getAsanInterceptor()->allocateMemory(
       hContext, hDevice, pUSMDesc, pool, size, AllocType::DEVICE_USM, ppMem);
@@ -166,7 +166,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMSharedAlloc(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urUSMSharedAlloc");
+  URLOG_CTX(DEBUG, "==== urUSMSharedAlloc");
 
   return getAsanInterceptor()->allocateMemory(
       hContext, hDevice, pUSMDesc, pool, size, AllocType::SHARED_USM, ppMem);
@@ -185,7 +185,7 @@ __urdlllocal ur_result_t UR_APICALL urUSMFree(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urUSMFree");
+  URLOG_CTX(DEBUG, "==== urUSMFree");
 
   return getAsanInterceptor()->releaseMemory(hContext, pMem);
 }
@@ -210,7 +210,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithIL(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urProgramCreateWithIL");
+  URLOG_CTX(DEBUG, "==== urProgramCreateWithIL");
 
   UR_CALL(
       pfnProgramCreateWithIL(hContext, pIL, length, pProperties, phProgram));
@@ -246,7 +246,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithBinary(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urProgramCreateWithBinary");
+  URLOG_CTX(DEBUG, "==== urProgramCreateWithBinary");
 
   UR_CALL(pfnProgramCreateWithBinary(hContext, numDevices, phDevices, pLengths,
                                      ppBinaries, pProperties, phProgram));
@@ -273,7 +273,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramCreateWithNativeHandle(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urProgramCreateWithNativeHandle");
+  URLOG_CTX(DEBUG, "==== urProgramCreateWithNativeHandle");
 
   UR_CALL(pfnProgramCreateWithNativeHandle(hNativeProgram, hContext,
                                            pProperties, phProgram));
@@ -294,7 +294,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramRetain(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urProgramRetain");
+  URLOG_CTX(DEBUG, "==== urProgramRetain");
 
   UR_CALL(pfnRetain(hProgram));
 
@@ -321,7 +321,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuild(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urProgramBuild");
+  URLOG_CTX(DEBUG, "==== urProgramBuild");
 
   UR_CALL(pfnProgramBuild(hContext, hProgram, pOptions));
 
@@ -347,7 +347,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramBuildExp(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urProgramBuildExp");
+  URLOG_CTX(DEBUG, "==== urProgramBuildExp");
 
   UR_CALL(pfnBuildExp(hProgram, numDevices, phDevices, pOptions));
   UR_CALL(getAsanInterceptor()->registerProgram(hProgram));
@@ -374,7 +374,7 @@ __urdlllocal ur_result_t UR_APICALL urProgramLink(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urProgramLink");
+  URLOG_CTX(DEBUG, "==== urProgramLink");
 
   UR_CALL(pfnProgramLink(hContext, count, phPrograms, pOptions, phProgram));
 
@@ -407,7 +407,7 @@ ur_result_t UR_APICALL urProgramLinkExp(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urProgramLinkExp");
+  URLOG_CTX(DEBUG, "==== urProgramLinkExp");
 
   UR_CALL(pfnProgramLinkExp(hContext, numDevices, phDevices, count, phPrograms,
                             pOptions, phProgram));
@@ -429,7 +429,7 @@ ur_result_t UR_APICALL urProgramRelease(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urProgramRelease");
+  URLOG_CTX(DEBUG, "==== urProgramRelease");
 
   UR_CALL(pfnProgramRelease(hProgram));
 
@@ -487,7 +487,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueKernelLaunch(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urEnqueueKernelLaunch");
+  URLOG_CTX(DEBUG, "==== urEnqueueKernelLaunch");
 
   LaunchInfo LaunchInfo(GetContext(hQueue), GetDevice(hQueue), pGlobalWorkSize,
                         pLocalWorkSize, pGlobalWorkOffset, workDim);
@@ -530,7 +530,7 @@ __urdlllocal ur_result_t UR_APICALL urContextCreate(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urContextCreate");
+  URLOG_CTX(DEBUG, "==== urContextCreate");
 
   ur_result_t result = pfnCreate(numDevices, phDevices, pProperties, phContext);
 
@@ -562,7 +562,7 @@ __urdlllocal ur_result_t UR_APICALL urContextCreateWithNativeHandle(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urContextCreateWithNativeHandle");
+  URLOG_CTX(DEBUG, "==== urContextCreateWithNativeHandle");
 
   ur_result_t result = pfnCreateWithNativeHandle(
       hNativeContext, hAdapter, numDevices, phDevices, pProperties, phContext);
@@ -585,7 +585,7 @@ __urdlllocal ur_result_t UR_APICALL urContextRetain(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urContextRetain");
+  URLOG_CTX(DEBUG, "==== urContextRetain");
 
   UR_CALL(pfnRetain(hContext));
 
@@ -607,7 +607,7 @@ __urdlllocal ur_result_t UR_APICALL urContextRelease(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urContextRelease");
+  URLOG_CTX(DEBUG, "==== urContextRelease");
 
   UR_CALL(pfnRelease(hContext));
 
@@ -643,7 +643,7 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferCreate(
     return UR_RESULT_ERROR_INVALID_NULL_POINTER;
   }
 
-  getContext()->logger.debug("==== urMemBufferCreate");
+  URLOG_CTX(DEBUG, "==== urMemBufferCreate");
 
   void *Host = nullptr;
   if (pProperties) {
@@ -697,7 +697,7 @@ __urdlllocal ur_result_t UR_APICALL urMemGetInfo(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urMemGetInfo");
+  URLOG_CTX(DEBUG, "==== urMemGetInfo");
 
   if (auto MemBuffer = getAsanInterceptor()->getMemBuffer(hMemory)) {
     UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
@@ -730,7 +730,7 @@ __urdlllocal ur_result_t UR_APICALL urMemRetain(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urMemRetain");
+  URLOG_CTX(DEBUG, "==== urMemRetain");
 
   if (auto MemBuffer = getAsanInterceptor()->getMemBuffer(hMem)) {
     MemBuffer->RefCount++;
@@ -752,7 +752,7 @@ __urdlllocal ur_result_t UR_APICALL urMemRelease(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urMemRelease");
+  URLOG_CTX(DEBUG, "==== urMemRelease");
 
   if (auto MemBuffer = getAsanInterceptor()->getMemBuffer(hMem)) {
     if (--MemBuffer->RefCount != 0) {
@@ -787,7 +787,7 @@ __urdlllocal ur_result_t UR_APICALL urMemBufferPartition(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urMemBufferPartition");
+  URLOG_CTX(DEBUG, "==== urMemBufferPartition");
 
   if (auto ParentBuffer = getAsanInterceptor()->getMemBuffer(hBuffer)) {
     if (ParentBuffer->Size < (pRegion->origin + pRegion->size)) {
@@ -818,7 +818,7 @@ __urdlllocal ur_result_t UR_APICALL urMemGetNativeHandle(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urMemGetNativeHandle");
+  URLOG_CTX(DEBUG, "==== urMemGetNativeHandle");
 
   if (auto MemBuffer = getAsanInterceptor()->getMemBuffer(hMem)) {
     char *Handle = nullptr;
@@ -862,7 +862,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferRead(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urEnqueueMemBufferRead");
+  URLOG_CTX(DEBUG, "==== urEnqueueMemBufferRead");
 
   if (auto MemBuffer = getAsanInterceptor()->getMemBuffer(hBuffer)) {
     ur_device_handle_t Device = GetDevice(hQueue);
@@ -910,7 +910,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWrite(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urEnqueueMemBufferWrite");
+  URLOG_CTX(DEBUG, "==== urEnqueueMemBufferWrite");
 
   if (auto MemBuffer = getAsanInterceptor()->getMemBuffer(hBuffer)) {
     ur_device_handle_t Device = GetDevice(hQueue);
@@ -972,7 +972,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferReadRect(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urEnqueueMemBufferReadRect");
+  URLOG_CTX(DEBUG, "==== urEnqueueMemBufferReadRect");
 
   if (auto MemBuffer = getAsanInterceptor()->getMemBuffer(hBuffer)) {
     char *SrcHandle = nullptr;
@@ -1037,7 +1037,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferWriteRect(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urEnqueueMemBufferWriteRect");
+  URLOG_CTX(DEBUG, "==== urEnqueueMemBufferWriteRect");
 
   if (auto MemBuffer = getAsanInterceptor()->getMemBuffer(hBuffer)) {
     char *DstHandle = nullptr;
@@ -1089,7 +1089,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopy(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urEnqueueMemBufferCopy");
+  URLOG_CTX(DEBUG, "==== urEnqueueMemBufferCopy");
 
   auto SrcBuffer = getAsanInterceptor()->getMemBuffer(hBufferSrc);
   auto DstBuffer = getAsanInterceptor()->getMemBuffer(hBufferDst);
@@ -1157,7 +1157,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferCopyRect(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urEnqueueMemBufferCopyRect");
+  URLOG_CTX(DEBUG, "==== urEnqueueMemBufferCopyRect");
 
   auto SrcBuffer = getAsanInterceptor()->getMemBuffer(hBufferSrc);
   auto DstBuffer = getAsanInterceptor()->getMemBuffer(hBufferDst);
@@ -1219,7 +1219,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferFill(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urEnqueueMemBufferFill");
+  URLOG_CTX(DEBUG, "==== urEnqueueMemBufferFill");
 
   if (auto MemBuffer = getAsanInterceptor()->getMemBuffer(hBuffer)) {
     char *Handle = nullptr;
@@ -1271,7 +1271,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemBufferMap(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urEnqueueMemBufferMap");
+  URLOG_CTX(DEBUG, "==== urEnqueueMemBufferMap");
 
   if (auto MemBuffer = getAsanInterceptor()->getMemBuffer(hBuffer)) {
 
@@ -1358,7 +1358,7 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueMemUnmap(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urEnqueueMemUnmap");
+  URLOG_CTX(DEBUG, "==== urEnqueueMemUnmap");
 
   if (auto MemBuffer = getAsanInterceptor()->getMemBuffer(hMem)) {
     MemBuffer::Mapping Mapping{};
@@ -1403,7 +1403,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelRetain(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urKernelRetain");
+  URLOG_CTX(DEBUG, "==== urKernelRetain");
 
   UR_CALL(pfnRetain(hKernel));
 
@@ -1424,7 +1424,7 @@ __urdlllocal ur_result_t urKernelRelease(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urKernelRelease");
+  URLOG_CTX(DEBUG, "==== urKernelRelease");
 
   auto &KernelInfo = getAsanInterceptor()->getOrCreateKernelInfo(hKernel);
   if (--KernelInfo.RefCount == 0) {
@@ -1454,7 +1454,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgValue(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urKernelSetArgValue");
+  URLOG_CTX(DEBUG, "==== urKernelSetArgValue");
 
   std::shared_ptr<MemBuffer> MemBuffer;
   if (argSize == sizeof(ur_mem_handle_t) &&
@@ -1487,7 +1487,7 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgMemObj(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug("==== urKernelSetArgMemObj");
+  URLOG_CTX(DEBUG, "==== urKernelSetArgMemObj");
 
   std::shared_ptr<MemBuffer> MemBuffer;
   if ((MemBuffer = getAsanInterceptor()->getMemBuffer(hArgValue))) {
@@ -1518,8 +1518,8 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgLocal(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug(
-      "==== urKernelSetArgLocal (argIndex={}, argSize={})", argIndex, argSize);
+  URLOG_CTX(DEBUG, "==== urKernelSetArgLocal (argIndex={}, argSize={})",
+            argIndex, argSize);
 
   {
     auto &KI = getAsanInterceptor()->getOrCreateKernelInfo(hKernel);
@@ -1554,9 +1554,8 @@ __urdlllocal ur_result_t UR_APICALL urKernelSetArgPointer(
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
-  getContext()->logger.debug(
-      "==== urKernelSetArgPointer (argIndex={}, pArgValue={})", argIndex,
-      pArgValue);
+  URLOG_CTX(DEBUG, "==== urKernelSetArgPointer (argIndex={}, pArgValue={})",
+            argIndex, pArgValue);
 
   std::shared_ptr<KernelInfo> KI;
   if (getAsanInterceptor()->getOptions().DetectKernelArguments) {
@@ -1939,7 +1938,7 @@ template <class A, class B> struct NotSupportedApi;
 template <class MsgType, class R, class... A>
 struct NotSupportedApi<MsgType, R (*)(A...)> {
   R static ReportError(A...) {
-    getContext()->logger.error(MsgType::value);
+    URLOG_CTX(ERR, MsgType::value);
     return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 };
@@ -2066,7 +2065,7 @@ __urdlllocal ur_result_t UR_APICALL urGetVirtualMemProcAddrTable(
 ur_result_t initAsanDDITable(ur_dditable_t *dditable) {
   ur_result_t result = UR_RESULT_SUCCESS;
 
-  getContext()->logger.always("==== DeviceSanitizer: ASAN");
+  URLOG_CTX_ALWAYS("==== DeviceSanitizer: ASAN");
 
   if (UR_RESULT_SUCCESS == result) {
     result = ur_sanitizer_layer::asan::urGetGlobalProcAddrTable(
@@ -2129,7 +2128,7 @@ ur_result_t initAsanDDITable(ur_dditable_t *dditable) {
   }
 
   if (result != UR_RESULT_SUCCESS) {
-    getContext()->logger.error("Initialize ASAN DDI table failed: {}", result);
+    URLOG_CTX(ERR, "Initialize ASAN DDI table failed: {}", result);
   }
 
   return result;

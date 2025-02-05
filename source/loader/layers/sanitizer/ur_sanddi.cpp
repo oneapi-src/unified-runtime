@@ -24,9 +24,9 @@ ur_result_t context_t::init(ur_dditable_t *dditable,
   bool msanEnabled = enabledLayerNames.count("UR_LAYER_MSAN");
 
   if (asanEnabled && msanEnabled) {
-    getContext()->logger.warning(
-        "Enabling ASAN and MSAN at the same time is not "
-        "supported.");
+    URLOG_CTX(WARN, SHORT_FILE, UR_STR(__LINE__),
+              "Enabling ASAN and MSAN at the same time is not "
+              "supported.");
     return UR_RESULT_SUCCESS;
   } else if (asanEnabled) {
     enabledType = SanitizerType::AddressSanitizer;

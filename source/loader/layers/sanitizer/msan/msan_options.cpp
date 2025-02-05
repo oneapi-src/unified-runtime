@@ -31,7 +31,7 @@ MsanOptions::MsanOptions() {
     std::stringstream SS;
     SS << "<SANITIZER>[ERROR]: ";
     SS << e.what();
-    getContext()->logger.always(SS.str().c_str());
+    URLOG_CTX_ALWAYS(SHORT_FILE, UR_STR(__LINE__), SS.str().c_str());
     die("Sanitizer failed to parse options.\n");
   }
 
@@ -78,7 +78,7 @@ MsanOptions::MsanOptions() {
           SS << " \"" << S << "\"";
         }
         SS << ".";
-        getContext()->logger.error(SS.str().c_str());
+        URLOG_CTX(ERR, SS.str().c_str());
         die("Sanitizer failed to parse options.\n");
       }
     }

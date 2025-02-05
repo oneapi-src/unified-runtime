@@ -16,11 +16,10 @@ namespace logger {
 
 Logger create_logger(std::string logger_name, bool skip_prefix = false,
                      bool skip_linebreak = false,
-                     logger::Level default_log_level = logger::Level::QUIET);
+                     Level default_log_level = Level::QUIET);
 
-inline Logger &
-get_logger(std::string name = "common",
-           logger::Level default_log_level = logger::Level::QUIET) {
+inline Logger &get_logger(std::string name = "common",
+                          Level default_log_level = Level::QUIET) {
   static Logger logger =
       create_logger(std::move(name), /*skip_prefix*/ false,
                     /*slip_linebreak*/ false, default_log_level);
@@ -31,73 +30,55 @@ inline void init(const std::string &name) { get_logger(name.c_str()); }
 
 template <typename... Args>
 inline void debug(const char *format, Args &&...args) {
-  get_logger().log(logger::Level::DEBUG, format, std::forward<Args>(args)...);
+  get_logger().log(Level::DEBUG, format, std::forward<Args>(args)...);
 }
 
 template <typename... Args>
 inline void info(const char *format, Args &&...args) {
-  get_logger().log(logger::Level::INFO, format, std::forward<Args>(args)...);
+  get_logger().log(Level::INFO, format, std::forward<Args>(args)...);
 }
 
 template <typename... Args>
 inline void warning(const char *format, Args &&...args) {
-  get_logger().log(logger::Level::WARN, format, std::forward<Args>(args)...);
+  get_logger().log(Level::WARN, format, std::forward<Args>(args)...);
 }
 
 template <typename... Args>
 inline void error(const char *format, Args &&...args) {
-  get_logger().log(logger::Level::ERR, format, std::forward<Args>(args)...);
+  get_logger().log(Level::ERR, format, std::forward<Args>(args)...);
 }
 
 template <typename... Args>
 inline void always(const char *format, Args &&...args) {
   get_logger().always(format, std::forward<Args>(args)...);
 }
-#ifdef SRC_PATH_SIZE
-#define SHORT_FILE ((__FILE__) + (SRC_PATH_SIZE))
-#else
-#define SHORT_FILE __FILE__
-#endif
 
-#define URLOG_IMPL(level, format, ...)                                         \
-  {                                                                            \
-    ::logger::get_logger().log(logger::Level::level, format " <{}:{}>",        \
-                               __VA_ARGS__);                                   \
-  }
-#define URLOG(...) URLOG_IMPL(__VA_ARGS__, SHORT_FILE, __LINE__)
-
-#define URLOG_ALWAYS_IMPL(format, ...)                                         \
-  { ::logger::get_logger().always(format " <{}:{}>", __VA_ARGS__); }
-#define URLOG_ALWAYS(...) URLOG_ALWAYS_IMPL(__VA_ARGS__, SHORT_FILE, __LINE__)
+#define URLOG(...) URLOG_(::logger::get_logger(), __VA_ARGS__)
+#define URLOG_ALWAYS(...) URLOG_ALWAYS_(::logger::get_logger(), __VA_ARGS__)
+#define URLOG_CTX(...) URLOG_(getContext()->logger, __VA_ARGS__)
+#define URLOG_CTX_ALWAYS(...) URLOG_(getContext()->logger, QUIET, __VA_ARGS__)
 
 template <typename... Args>
-inline void debug(const logger::LegacyMessage &p, const char *format,
-                  Args &&...args) {
-  get_logger().log(p, logger::Level::DEBUG, format,
-                   std::forward<Args>(args)...);
+inline void debug(const LegacyMessage &p, Args &&...args) {
+  get_logger().log(p, Level::DEBUG, std::forward<Args>(args)...);
+}
+
+template <typename... Args> inline void info(LegacyMessage p, Args &&...args) {
+  get_logger().log(p, Level::INFO, std::forward<Args>(args)...);
 }
 
 template <typename... Args>
-inline void info(logger::LegacyMessage p, const char *format, Args &&...args) {
-  get_logger().log(p, logger::Level::INFO, format, std::forward<Args>(args)...);
+inline void warning(LegacyMessage p, Args &&...args) {
+  get_logger().log(p, Level::WARN, std::forward<Args>(args)...);
 }
 
-template <typename... Args>
-inline void warning(logger::LegacyMessage p, const char *format,
-                    Args &&...args) {
-  get_logger().log(p, logger::Level::WARN, format, std::forward<Args>(args)...);
+template <typename... Args> inline void error(LegacyMessage p, Args &&...args) {
+  get_logger().log(p, Level::ERR, std::forward<Args>(args)...);
 }
 
-template <typename... Args>
-inline void error(logger::LegacyMessage p, const char *format, Args &&...args) {
-  get_logger().log(p, logger::Level::ERR, format, std::forward<Args>(args)...);
-}
+inline void setLevel(Level level) { get_logger().setLevel(level); }
 
-inline void setLevel(logger::Level level) { get_logger().setLevel(level); }
-
-inline void setFlushLevel(logger::Level level) {
-  get_logger().setFlushLevel(level);
-}
+inline void setFlushLevel(Level level) { get_logger().setFlushLevel(level); }
 
 template <typename T> inline std::string toHex(T t) {
   std::stringstream s;
@@ -131,23 +112,22 @@ template <typename T> inline std::string toHex(T t) {
 ///                            to be printed immediately as they occur
 ///             - output: stderr
 inline Logger create_logger(std::string logger_name, bool skip_prefix,
-                            bool skip_linebreak,
-                            logger::Level default_log_level) {
+                            bool skip_linebreak, Level default_log_level) {
   std::transform(logger_name.begin(), logger_name.end(), logger_name.begin(),
                  ::toupper);
-  const auto default_flush_level = logger::Level::ERR;
+  const auto default_flush_level = Level::ERR;
   const std::string default_output = "stderr";
   auto level = default_log_level;
   auto flush_level = default_flush_level;
-  std::unique_ptr<logger::Sink> sink;
+  std::unique_ptr<Sink> sink;
 
   auto env_var_name = "UR_LOG_" + logger_name;
   try {
     auto map = getenv_to_map(env_var_name.c_str());
     if (!map.has_value()) {
       return Logger(default_log_level,
-                    std::make_unique<logger::StderrSink>(
-                        std::move(logger_name), skip_prefix, skip_linebreak));
+                    std::make_unique<StderrSink>(std::move(logger_name),
+                                                 skip_prefix, skip_linebreak));
     }
 
     auto kv = map->find("level");
@@ -175,8 +155,8 @@ inline Logger create_logger(std::string logger_name, bool skip_prefix,
       std::cerr << "Wrong logger environment variable parameter: '"
                 << map->begin()->first << "'. Default logger options are set.";
       return Logger(default_log_level,
-                    std::make_unique<logger::StderrSink>(
-                        std::move(logger_name), skip_prefix, skip_linebreak));
+                    std::make_unique<StderrSink>(std::move(logger_name),
+                                                 skip_prefix, skip_linebreak));
     }
 
     sink = values.size() == 2 ? sink_from_str(logger_name, values[0], values[1],
@@ -188,8 +168,8 @@ inline Logger create_logger(std::string logger_name, bool skip_prefix,
               << env_var_name << "' environment variable:\n"
               << e.what() << std::endl;
     return Logger(default_log_level,
-                  std::make_unique<logger::StderrSink>(
-                      std::move(logger_name), skip_prefix, skip_linebreak));
+                  std::make_unique<StderrSink>(std::move(logger_name),
+                                               skip_prefix, skip_linebreak));
   }
   sink->setFlushLevel(flush_level);
 
