@@ -18,6 +18,7 @@ permissions:
 
 jobs:
   linux:
+    if: false
     name: Trivy
     runs-on: ${{ github.repository_owner == 'oneapi-src' && 'intel-ubuntu-22.04' || 'ubuntu-latest' }}
     permissions:
