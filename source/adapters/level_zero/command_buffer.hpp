@@ -73,7 +73,7 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
 
   // UR context associated with this command-buffer
   ur_context_handle_t Context;
-  // Device associated with this command buffer
+  // Device associated with this command-buffer
   ur_device_handle_t Device;
   // Level Zero command list handle that has the compute engine commands for
   // this command-buffer.
@@ -129,7 +129,7 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
 
   // Indicates if command-buffer commands can be updated after it is closed.
   bool IsUpdatable = false;
-  // Indicates if command buffer was finalized.
+  // Indicates if command-buffer was finalized.
   bool IsFinalized = false;
   // Command-buffer profiling is enabled.
   bool IsProfilingEnabled = false;
@@ -141,13 +141,21 @@ struct ur_exp_command_buffer_handle_t_ : public _ur_object {
   // This list is needed to release all kernels retained by the
   // command_buffer.
   std::vector<ur_kernel_handle_t> KernelsList;
+  // Track whether synchronization is required when updating the command-buffer
+  // Set this value to true when a command-buffer is enqueued, and false after
+  // any fence or event synchronization to avoid repeated calls to synchronize.
+  bool NeedsUpdateSynchronization = false;
+  // Track handle objects to free when command-buffer is destroyed.
+  std::vector<std::unique_ptr<ur_exp_command_buffer_command_handle_t_>>
+      CommandHandles;
 };
 
 struct ur_exp_command_buffer_command_handle_t_ : public _ur_object {
-  ur_exp_command_buffer_command_handle_t_(ur_exp_command_buffer_handle_t,
-                                          uint64_t);
+  ur_exp_command_buffer_command_handle_t_(
+      ur_exp_command_buffer_handle_t CommandBuffer, uint64_t CommandId)
+      : CommandBuffer(CommandBuffer), CommandId(CommandId) {}
 
-  virtual ~ur_exp_command_buffer_command_handle_t_();
+  virtual ~ur_exp_command_buffer_command_handle_t_() {}
 
   // Command-buffer of this command.
   ur_exp_command_buffer_handle_t CommandBuffer;

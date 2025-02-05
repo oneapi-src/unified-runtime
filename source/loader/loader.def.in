@@ -35,14 +35,11 @@ EXPORTS
 	urCommandBufferAppendUSMFillExp
 	urCommandBufferAppendUSMMemcpyExp
 	urCommandBufferAppendUSMPrefetchExp
-	urCommandBufferCommandGetInfoExp
 	urCommandBufferCreateExp
 	urCommandBufferEnqueueExp
 	urCommandBufferFinalizeExp
 	urCommandBufferGetInfoExp
-	urCommandBufferReleaseCommandExp
 	urCommandBufferReleaseExp
-	urCommandBufferRetainCommandExp
 	urCommandBufferRetainExp
 	urCommandBufferUpdateKernelLaunchExp
 	urCommandBufferUpdateSignalEventExp
@@ -119,7 +116,6 @@ EXPORTS
 	urGetProgramProcAddrTable
 	urGetQueueProcAddrTable
 	urGetSamplerProcAddrTable
-	urGetTensorMapExpProcAddrTable
 	urGetUSMExpProcAddrTable
 	urGetUSMProcAddrTable
 	urGetUsmP2PExpProcAddrTable
@@ -217,14 +213,11 @@ EXPORTS
 	urPrintCommandBufferAppendUsmFillExpParams
 	urPrintCommandBufferAppendUsmMemcpyExpParams
 	urPrintCommandBufferAppendUsmPrefetchExpParams
-	urPrintCommandBufferCommandGetInfoExpParams
 	urPrintCommandBufferCreateExpParams
 	urPrintCommandBufferEnqueueExpParams
 	urPrintCommandBufferFinalizeExpParams
 	urPrintCommandBufferGetInfoExpParams
-	urPrintCommandBufferReleaseCommandExpParams
 	urPrintCommandBufferReleaseExpParams
-	urPrintCommandBufferRetainCommandExpParams
 	urPrintCommandBufferRetainExpParams
 	urPrintCommandBufferUpdateKernelLaunchExpParams
 	urPrintCommandBufferUpdateSignalEventExpParams
@@ -333,11 +326,6 @@ EXPORTS
 	urPrintExpSamplerCubemapFilterMode
 	urPrintExpSamplerCubemapProperties
 	urPrintExpSamplerMipProperties
-	urPrintExpTensorMapDataTypeFlags
-	urPrintExpTensorMapInterleaveFlags
-	urPrintExpTensorMapL2PromotionFlags
-	urPrintExpTensorMapOobFillFlags
-	urPrintExpTensorMapSwizzleFlags
 	urPrintExpWin32Handle
 	urPrintFunction
 	urPrintFunctionParams
@@ -474,8 +462,6 @@ EXPORTS
 	urPrintSamplerRetainParams
 	urPrintSpecializationConstantInfo
 	urPrintStructureType
-	urPrintTensorMapEncodeIm_2ColExpParams
-	urPrintTensorMapEncodeTiledExpParams
 	urPrintUsmAdviceFlags
 	urPrintUsmAllocInfo
 	urPrintUsmAllocLocationDesc
@@ -546,8 +532,6 @@ EXPORTS
 	urSamplerGetNativeHandle
 	urSamplerRelease
 	urSamplerRetain
-	urTensorMapEncodeIm2ColExp
-	urTensorMapEncodeTiledExp
 	urUSMDeviceAlloc
 	urUSMFree
 	urUSMGetMemAllocInfo

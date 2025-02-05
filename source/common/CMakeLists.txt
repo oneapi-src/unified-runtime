@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2023 Intel Corporation
+# Copyright (C) 2022-2025 Intel Corporation
 # Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
 # See LICENSE.TXT
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
@@ -23,7 +23,7 @@ add_library(${PROJECT_NAME}::common ALIAS ur_common)
 
 target_include_directories(ur_common PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 )
 
 message(STATUS "Download Unified Memory Framework from github.com")
@@ -32,10 +32,11 @@ if (NOT DEFINED UMF_REPO)
 endif()
 
 if (NOT DEFINED UMF_TAG)
-    # tag v0.10.0
-    # Tagger: Łukasz Stolarczuk <lukasz.stolarczuk@intel.com>
-    # Date:   Mon Dec 9 17:01:43 2024 +0100
-    set(UMF_TAG v0.10.0)
+    # commit 6709535de92933d6bfc1e1d19a324f17afec3877
+    # Author: Rafał Rudnicki <rafal.rudnicki@intel.com>
+    # Date:   Mon Jan 27 10:57:57 2025 +0100
+    # Merge pull request #1056 from lukaszstolarczuk/hwloc-revert-examples-win
+    set(UMF_TAG 6709535de92933d6bfc1e1d19a324f17afec3877)
 endif()
 
 message(STATUS "Will fetch Unified Memory Framework from ${UMF_REPO}")
@@ -64,7 +65,7 @@ else()
   set(UMF_BUILD_EXAMPLES OFF CACHE INTERNAL "Build UMF examples")
   set(UMF_BUILD_SHARED_LIBRARY ${UMF_BUILD_SHARED_LIBRARY} CACHE INTERNAL "Build UMF shared library")
   set(UMF_BUILD_LIBUMF_POOL_DISJOINT ON CACHE INTERNAL "Build Disjoint Pool")
-  set(UMF_BUILD_CUDA_PROVIDER OFF CACHE INTERNAL "Build UMF CUDA provider")
+  set(UMF_BUILD_CUDA_PROVIDER ON CACHE INTERNAL "Build UMF CUDA provider")
 
   FetchContent_MakeAvailable(unified-memory-framework)
   FetchContent_GetProperties(unified-memory-framework)

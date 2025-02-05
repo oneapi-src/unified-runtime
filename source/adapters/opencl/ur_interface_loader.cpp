@@ -159,6 +159,7 @@ urGetMemProcAddrTable(ur_api_version_t Version, ur_mem_dditable_t *pDdiTable) {
   pDdiTable->pfnGetNativeHandle = urMemGetNativeHandle;
   pDdiTable->pfnImageCreate = urMemImageCreate;
   pDdiTable->pfnImageGetInfo = urMemImageGetInfo;
+  pDdiTable->pfnImageCreateWithNativeHandle = urMemImageCreateWithNativeHandle;
   pDdiTable->pfnRelease = urMemRelease;
   pDdiTable->pfnRetain = urMemRetain;
   return UR_RESULT_SUCCESS;
@@ -307,9 +308,6 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
   pDdiTable->pfnEnqueueExp = urCommandBufferEnqueueExp;
   pDdiTable->pfnUpdateKernelLaunchExp = urCommandBufferUpdateKernelLaunchExp;
   pDdiTable->pfnGetInfoExp = urCommandBufferGetInfoExp;
-  pDdiTable->pfnCommandGetInfoExp = urCommandBufferCommandGetInfoExp;
-  pDdiTable->pfnReleaseCommandExp = urCommandBufferReleaseCommandExp;
-  pDdiTable->pfnRetainCommandExp = urCommandBufferRetainCommandExp;
   pDdiTable->pfnUpdateWaitEventsExp = urCommandBufferUpdateWaitEventsExp;
   pDdiTable->pfnUpdateSignalEventExp = urCommandBufferUpdateSignalEventExp;
 
@@ -425,19 +423,6 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetKernelExpProcAddrTable(
       urKernelSuggestMaxCooperativeGroupCountExp;
 
   return UR_RESULT_SUCCESS;
-}
-
-UR_APIEXPORT ur_result_t UR_APICALL urGetTensorMapExpProcAddrTable(
-    ur_api_version_t version, ur_tensor_map_exp_dditable_t *pDdiTable) {
-  auto result = validateProcInputs(version, pDdiTable);
-  if (UR_RESULT_SUCCESS != result) {
-    return result;
-  }
-
-  pDdiTable->pfnEncodeIm2ColExp = urTensorMapEncodeIm2ColExp;
-  pDdiTable->pfnEncodeTiledExp = urTensorMapEncodeTiledExp;
-
-  return result;
 }
 
 UR_DLLEXPORT ur_result_t UR_APICALL urGetProgramExpProcAddrTable(

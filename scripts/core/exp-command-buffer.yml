@@ -289,8 +289,9 @@ params:
 returns:
     - $X_RESULT_ERROR_INVALID_CONTEXT
     - $X_RESULT_ERROR_INVALID_DEVICE
-    - $X_RESULT_ERROR_INVALID_OPERATION:
-        - "If `pCommandBufferDesc->isUpdatable` is true and `hDevice` does not support UR_DEVICE_INFO_COMMAND_BUFFER_UPDATE_SUPPORT_EXP."
+    - $X_RESULT_ERROR_UNSUPPORTED_FEATURE:
+        - "If `pCommandBufferDesc->isUpdatable` is true and `hDevice` returns 0
+        for the $X_DEVICE_INFO_COMMAND_BUFFER_UPDATE_CAPABILITIES_EXP query."
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
 --- #--------------------------------------------------------------------------
@@ -1164,32 +1165,6 @@ returns:
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
 --- #--------------------------------------------------------------------------
 type: function
-desc: "Increment the command object's reference count."
-class: $xCommandBuffer
-name: RetainCommandExp
-params:
-    - type: $x_exp_command_buffer_command_handle_t
-      name: hCommand
-      desc: "[in][retain] Handle of the command-buffer command."
-returns:
-    - $X_RESULT_ERROR_INVALID_COMMAND_BUFFER_COMMAND_HANDLE_EXP
-    - $X_RESULT_ERROR_OUT_OF_RESOURCES
-    - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
---- #--------------------------------------------------------------------------
-type: function
-desc: "Decrement the command object's reference count and delete the command object if the reference count becomes zero."
-class: $xCommandBuffer
-name: ReleaseCommandExp
-params:
-    - type: $x_exp_command_buffer_command_handle_t
-      name: hCommand
-      desc: "[in][release] Handle of the command-buffer command."
-returns:
-    - $X_RESULT_ERROR_INVALID_COMMAND_BUFFER_COMMAND_HANDLE_EXP
-    - $X_RESULT_ERROR_OUT_OF_RESOURCES
-    - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
---- #--------------------------------------------------------------------------
-type: function
 desc: "Update a kernel launch command in a finalized command-buffer."
 details: "This entry-point is synchronous and may block if the command-buffer is executing when the entry-point is called."
 class: $xCommandBuffer
@@ -1203,11 +1178,16 @@ params:
       desc: "[in] Struct defining how the kernel command is to be updated."
 returns:
     - $X_RESULT_ERROR_UNSUPPORTED_FEATURE:
-        - "If update functionality is not supported by the device."
+        - "If $X_DEVICE_COMMAND_BUFFER_UPDATE_CAPABILITY_FLAG_KERNEL_ARGUMENTS is not supported by the device, but any of `pUpdateKernelLaunch->numNewMemObjArgs`, `pUpdateKernelLaunch->numNewPointerArgs`, or `pUpdateKernelLaunch->numNewValueArgs` are not zero."
+        - "If $X_DEVICE_COMMAND_BUFFER_UPDATE_CAPABILITY_FLAG_LOCAL_WORK_SIZE is not supported by the device but `pUpdateKernelLaunch->pNewLocalWorkSize` is not nullptr."
+        - "If $X_DEVICE_COMMAND_BUFFER_UPDATE_CAPABILITY_FLAG_LOCAL_WORK_SIZE is not supported by the device but `pUpdateKernelLaunch->pNewLocalWorkSize` is nullptr and `pUpdateKernelLaunch->pNewGlobalWorkSize` is not nullptr."
+        - "If $X_DEVICE_COMMAND_BUFFER_UPDATE_CAPABILITY_FLAG_GLOBAL_WORK_SIZE is not supported by the device but `pUpdateKernelLaunch->pNewGlobalWorkSize` is not nullptr"
+        - "If $X_DEVICE_COMMAND_BUFFER_UPDATE_CAPABILITY_FLAG_GLOBAL_WORK_OFFSET is not supported by the device but `pUpdateKernelLaunch->pNewGlobalWorkOffset` is not nullptr."
+        - "If $X_DEVICE_COMMAND_BUFFER_UPDATE_CAPABILITY_FLAG_KERNEL_HANDLE is not supported by the device but `pUpdateKernelLaunch->hNewKernel` is not nullptr."
     - $X_RESULT_ERROR_INVALID_OPERATION:
-        - "If $x_exp_command_buffer_desc_t::isUpdatable was not set to true on creation of the command buffer `hCommand` belongs to."
+        - "If $x_exp_command_buffer_desc_t::isUpdatable was not set to true on creation of the command-buffer `hCommand` belongs to."
         - "If the command-buffer `hCommand` belongs to has not been finalized."
-    - $X_RESULT_ERROR_INVALID_COMMAND_BUFFER_COMMAND_HANDLE_EXP
+    - $X_RESULT_ERROR_INVALID_COMMAND_BUFFER_COMMAND_HANDLE_EXP:
         - "If `hCommand` is not a kernel execution command."
     - $X_RESULT_ERROR_INVALID_MEM_OBJECT
     - $X_RESULT_ERROR_INVALID_KERNEL_ARGUMENT_INDEX
@@ -1218,7 +1198,7 @@ returns:
     - $X_RESULT_ERROR_INVALID_WORK_GROUP_SIZE
     - $X_RESULT_ERROR_INVALID_VALUE:
         - "If `pUpdateKernelLaunch->hNewKernel` was not passed to the `hKernel` or `phKernelAlternatives` parameters of $xCommandBufferAppendKernelLaunchExp when this command was created."
-        - "If `pUpdateKernelLaunch->newWorkDim` is different from the current workDim in `hCommand` and, pUpdateKernelLaunch->pNewGlobalWorkSize, or pUpdateKernelLaunch->pNewGlobalWorkOffset are nullptr."
+        - "If `pUpdateKernelLaunch->newWorkDim` is different from the current workDim in `hCommand` and, `pUpdateKernelLaunch->pNewGlobalWorkSize`, or `pUpdateKernelLaunch->pNewGlobalWorkOffset` are nullptr."
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
 --- #--------------------------------------------------------------------------
@@ -1236,9 +1216,9 @@ params:
       desc: "[out] Event to be signaled."
 returns:
     - $X_RESULT_ERROR_UNSUPPORTED_FEATURE:
-        - "If UR_DEVICE_COMMAND_BUFFER_UPDATE_CAPABILITY_FLAG_EVENTS is not supported by the device associated with `hCommand`."
+        - "If $X_DEVICE_COMMAND_BUFFER_UPDATE_CAPABILITY_FLAG_EVENTS is not supported by the device associated with `hCommand`."
     - $X_RESULT_ERROR_INVALID_OPERATION:
-        - "If $x_exp_command_buffer_desc_t::isUpdatable was not set to true on creation of the command buffer `hCommand` belongs to."
+        - "If $x_exp_command_buffer_desc_t::isUpdatable was not set to true on creation of the command-buffer `hCommand` belongs to."
         - "If the command-buffer `hCommand` belongs to has not been finalized."
         - "If no `phEvent` parameter was set on creation of the command associated with `hCommand`."
     - $X_RESULT_ERROR_INVALID_COMMAND_BUFFER_COMMAND_HANDLE_EXP
@@ -1262,9 +1242,9 @@ params:
       desc: "[in][optional][range(0, numEventsInWaitList)] pointer to a list of events that must be complete before the command execution. If nullptr, the numEventsInWaitList must be 0, indicating no wait events."
 returns:
     - $X_RESULT_ERROR_UNSUPPORTED_FEATURE:
-        - "If UR_DEVICE_COMMAND_BUFFER_UPDATE_CAPABILITY_FLAG_EVENTS is not supported by the device associated with `hCommand`."
+        - "If $X_DEVICE_COMMAND_BUFFER_UPDATE_CAPABILITY_FLAG_EVENTS is not supported by the device associated with `hCommand`."
     - $X_RESULT_ERROR_INVALID_OPERATION:
-        - "If $x_exp_command_buffer_desc_t::isUpdatable was not set to true on creation of the command buffer `hCommand` belongs to."
+        - "If $x_exp_command_buffer_desc_t::isUpdatable was not set to true on creation of the command-buffer `hCommand` belongs to."
         - "If the command-buffer `hCommand` belongs to has not been finalized."
     - $X_RESULT_ERROR_INVALID_COMMAND_BUFFER_COMMAND_HANDLE_EXP
     - $X_RESULT_ERROR_INVALID_EVENT_WAIT_LIST:
@@ -1305,38 +1285,5 @@ returns:
         - "`propSize != 0 && pPropValue == NULL`"
         - "`pPropValue == NULL && pPropSizeRet == NULL`"
     - $X_RESULT_ERROR_INVALID_COMMAND_BUFFER_EXP
-    - $X_RESULT_ERROR_OUT_OF_RESOURCES
-    - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY
---- #--------------------------------------------------------------------------
-type: function
-desc: "Get command-buffer object information."
-class: $xCommandBuffer
-name: CommandGetInfoExp
-params:
-    - type: $x_exp_command_buffer_command_handle_t
-      name: hCommand
-      desc: "[in] handle of the command-buffer command object"
-    - type: $x_exp_command_buffer_command_info_t
-      name: propName
-      desc: "[in] the name of the command-buffer command property to query"
-    - type: size_t
-      name: propSize
-      desc: "[in] size in bytes of the command-buffer command property value"
-    - type: void*
-      name: pPropValue
-      desc: "[out][optional][typename(propName, propSize)] value of the command-buffer command property"
-    - type: size_t*
-      name: pPropSizeRet
-      desc: "[out][optional] bytes returned in command-buffer command property"
-returns:
-    - $X_RESULT_ERROR_UNSUPPORTED_ENUMERATION:
-        - "If `propName` is not supported by the adapter."
-    - $X_RESULT_ERROR_INVALID_SIZE:
-        - "`propSize == 0 && pPropValue != NULL`"
-        - "If `propSize` is less than the real number of bytes needed to return the info."
-    - $X_RESULT_ERROR_INVALID_NULL_POINTER:
-        - "`propSize != 0 && pPropValue == NULL`"
-        - "`pPropValue == NULL && pPropSizeRet == NULL`"
-    - $X_RESULT_ERROR_INVALID_COMMAND_BUFFER_COMMAND_HANDLE_EXP
     - $X_RESULT_ERROR_OUT_OF_RESOURCES
     - $X_RESULT_ERROR_OUT_OF_HOST_MEMORY

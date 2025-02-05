@@ -102,26 +102,41 @@ urUSMSharedAlloc(ur_context_handle_t hContext, ur_device_handle_t hDevice,
   return UR_RESULT_SUCCESS;
 }
 
-ur_result_t USMFreeImpl(ur_context_handle_t, void *Pointer) {
+ur_result_t USMFreeImpl(ur_context_handle_t hContext, void *Pointer) {
   ur_result_t Result = UR_RESULT_SUCCESS;
   try {
     unsigned int IsManaged;
     unsigned int Type;
-    void *AttributeValues[2] = {&IsManaged, &Type};
-    CUpointer_attribute Attributes[2] = {CU_POINTER_ATTRIBUTE_IS_MANAGED,
-                                         CU_POINTER_ATTRIBUTE_MEMORY_TYPE};
-    UR_CHECK_ERROR(cuPointerGetAttributes(2, Attributes, AttributeValues,
-                                          (CUdeviceptr)Pointer));
+    unsigned int DeviceOrdinal;
+    const int NumAttributes = 3;
+    void *AttributeValues[NumAttributes] = {&IsManaged, &Type, &DeviceOrdinal};
+
+    CUpointer_attribute Attributes[NumAttributes] = {
+        CU_POINTER_ATTRIBUTE_IS_MANAGED, CU_POINTER_ATTRIBUTE_MEMORY_TYPE,
+        CU_POINTER_ATTRIBUTE_DEVICE_ORDINAL};
+    UR_CHECK_ERROR(cuPointerGetAttributes(
+        NumAttributes, Attributes, AttributeValues, (CUdeviceptr)Pointer));
     UR_ASSERT(Type == CU_MEMORYTYPE_DEVICE || Type == CU_MEMORYTYPE_HOST,
               UR_RESULT_ERROR_INVALID_MEM_OBJECT);
-    if (IsManaged || Type == CU_MEMORYTYPE_DEVICE) {
-      // Memory allocated with cuMemAlloc and cuMemAllocManaged must be freed
-      // with cuMemFree
-      UR_CHECK_ERROR(cuMemFree((CUdeviceptr)Pointer));
+
+    std::vector<ur_device_handle_t> ContextDevices = hContext->getDevices();
+    ur_platform_handle_t Platform = ContextDevices[0]->getPlatform();
+    unsigned int NumDevices = Platform->Devices.size();
+    UR_ASSERT(DeviceOrdinal < NumDevices, UR_RESULT_ERROR_INVALID_DEVICE);
+
+    ur_device_handle_t Device = Platform->Devices[DeviceOrdinal].get();
+    umf_memory_provider_handle_t MemoryProvider;
+
+    if (IsManaged) {
+      MemoryProvider = Device->MemoryProviderShared;
+    } else if (Type == CU_MEMORYTYPE_DEVICE) {
+      MemoryProvider = Device->MemoryProviderDevice;
     } else {
-      // Memory allocated with cuMemAllocHost must be freed with cuMemFreeHost
-      UR_CHECK_ERROR(cuMemFreeHost(Pointer));
+      MemoryProvider = hContext->MemoryProviderHost;
     }
+
+    UMF_CHECK_ERROR(umfMemoryProviderFree(MemoryProvider, Pointer,
+                                          0 /* size is unknown */));
   } catch (ur_result_t Err) {
     Result = Err;
   }
@@ -143,7 +158,8 @@ ur_result_t USMDeviceAllocImpl(void **ResultPtr, ur_context_handle_t,
                                uint32_t Alignment) {
   try {
     ScopedContext Active(Device);
-    UR_CHECK_ERROR(cuMemAlloc((CUdeviceptr *)ResultPtr, Size));
+    UMF_CHECK_ERROR(umfMemoryProviderAlloc(Device->MemoryProviderDevice, Size,
+                                           Alignment, ResultPtr));
   } catch (ur_result_t Err) {
     return Err;
   }
@@ -164,8 +180,8 @@ ur_result_t USMSharedAllocImpl(void **ResultPtr, ur_context_handle_t,
                                uint32_t Alignment) {
   try {
     ScopedContext Active(Device);
-    UR_CHECK_ERROR(cuMemAllocManaged((CUdeviceptr *)ResultPtr, Size,
-                                     CU_MEM_ATTACH_GLOBAL));
+    UMF_CHECK_ERROR(umfMemoryProviderAlloc(Device->MemoryProviderShared, Size,
+                                           Alignment, ResultPtr));
   } catch (ur_result_t Err) {
     return Err;
   }
@@ -179,11 +195,12 @@ ur_result_t USMSharedAllocImpl(void **ResultPtr, ur_context_handle_t,
   return UR_RESULT_SUCCESS;
 }
 
-ur_result_t USMHostAllocImpl(void **ResultPtr, ur_context_handle_t,
+ur_result_t USMHostAllocImpl(void **ResultPtr, ur_context_handle_t hContext,
                              ur_usm_host_mem_flags_t, size_t Size,
                              uint32_t Alignment) {
   try {
-    UR_CHECK_ERROR(cuMemAllocHost(ResultPtr, Size));
+    UMF_CHECK_ERROR(umfMemoryProviderAlloc(hContext->MemoryProviderHost, Size,
+                                           Alignment, ResultPtr));
   } catch (ur_result_t Err) {
     return Err;
   }
@@ -439,12 +456,13 @@ bool ur_usm_pool_handle_t_::hasUMFPool(umf_memory_pool_t *umf_pool) {
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urUSMPoolCreate(
-    ur_context_handle_t Context, ///< [in] handle of the context object
-    ur_usm_pool_desc_t
-        *PoolDesc, ///< [in] pointer to USM pool descriptor. Can be chained with
-                   ///< ::ur_usm_pool_limits_desc_t
-    ur_usm_pool_handle_t *Pool ///< [out] pointer to USM memory pool
-) {
+    /// [in] handle of the context object
+    ur_context_handle_t Context,
+    /// [in] pointer to USM pool descriptor. Can be chained with
+    /// ::ur_usm_pool_limits_desc_t
+    ur_usm_pool_desc_t *PoolDesc,
+    /// [out] pointer to USM memory pool
+    ur_usm_pool_handle_t *Pool) {
   // Without pool tracking we can't free pool allocations.
 #ifdef UMF_ENABLE_POOL_TRACKING
   if (PoolDesc->flags & UR_USM_POOL_FLAG_ZERO_INITIALIZE_BLOCK) {
@@ -470,15 +488,15 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMPoolCreate(
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urUSMPoolRetain(
-    ur_usm_pool_handle_t Pool ///< [in] pointer to USM memory pool
-) {
+    /// [in] pointer to USM memory pool
+    ur_usm_pool_handle_t Pool) {
   Pool->incrementReferenceCount();
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urUSMPoolRelease(
-    ur_usm_pool_handle_t Pool ///< [in] pointer to USM memory pool
-) {
+    /// [in] pointer to USM memory pool
+    ur_usm_pool_handle_t Pool) {
   if (Pool->decrementReferenceCount() > 0) {
     return UR_RESULT_SUCCESS;
   }
@@ -488,14 +506,16 @@ UR_APIEXPORT ur_result_t UR_APICALL urUSMPoolRelease(
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL urUSMPoolGetInfo(
-    ur_usm_pool_handle_t hPool,  ///< [in] handle of the USM memory pool
-    ur_usm_pool_info_t propName, ///< [in] name of the pool property to query
-    size_t propSize, ///< [in] size in bytes of the pool property value provided
-    void *pPropValue, ///< [out][optional][typename(propName, propSize)] value
-                      ///< of the pool property
-    size_t *pPropSizeRet ///< [out][optional] size in bytes returned in pool
-                         ///< property value
-) {
+    /// [in] handle of the USM memory pool
+    ur_usm_pool_handle_t hPool,
+    /// [in] name of the pool property to query
+    ur_usm_pool_info_t propName,
+    /// [in] size in bytes of the pool property value provided
+    size_t propSize,
+    /// [out][optional][typename(propName, propSize)] value of the pool property
+    void *pPropValue,
+    /// [out][optional] size in bytes returned in pool property value
+    size_t *pPropSizeRet) {
   UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
 
   switch (propName) {

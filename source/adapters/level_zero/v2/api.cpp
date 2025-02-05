@@ -103,16 +103,6 @@ ur_result_t urKernelSetSpecializationConstants(
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
-ur_result_t urKernelGetSuggestedLocalWorkSize(ur_kernel_handle_t hKernel,
-                                              ur_queue_handle_t hQueue,
-                                              uint32_t numWorkDim,
-                                              const size_t *pGlobalWorkOffset,
-                                              const size_t *pGlobalWorkSize,
-                                              size_t *pSuggestedLocalWorkSize) {
-  logger::error("{} function not implemented!", __FUNCTION__);
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-}
-
 ur_result_t urEventSetCallback(ur_event_handle_t hEvent,
                                ur_execution_info_t execStatus,
                                ur_event_callback_t pfnNotify, void *pUserData) {
@@ -245,47 +235,6 @@ ur_result_t urBindlessImagesImportExternalSemaphoreExp(
 ur_result_t urBindlessImagesReleaseExternalSemaphoreExp(
     ur_context_handle_t hContext, ur_device_handle_t hDevice,
     ur_exp_external_semaphore_handle_t hExternalSemaphore) {
-  logger::error("{} function not implemented!", __FUNCTION__);
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-}
-
-ur_result_t
-urCommandBufferCreateExp(ur_context_handle_t hContext,
-                         ur_device_handle_t hDevice,
-                         const ur_exp_command_buffer_desc_t *pCommandBufferDesc,
-                         ur_exp_command_buffer_handle_t *phCommandBuffer) {
-  logger::error("{} function not implemented!", __FUNCTION__);
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-}
-
-ur_result_t
-urCommandBufferRetainExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
-  logger::error("{} function not implemented!", __FUNCTION__);
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-}
-
-ur_result_t
-urCommandBufferReleaseExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
-  logger::error("{} function not implemented!", __FUNCTION__);
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-}
-
-ur_result_t
-urCommandBufferFinalizeExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
-  logger::error("{} function not implemented!", __FUNCTION__);
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-}
-
-ur_result_t urCommandBufferAppendKernelLaunchExp(
-    ur_exp_command_buffer_handle_t hCommandBuffer, ur_kernel_handle_t hKernel,
-    uint32_t workDim, const size_t *pGlobalWorkOffset,
-    const size_t *pGlobalWorkSize, const size_t *pLocalWorkSize,
-    uint32_t numKernelAlternatives, ur_kernel_handle_t *phKernelAlternatives,
-    uint32_t numSyncPointsInWaitList,
-    const ur_exp_command_buffer_sync_point_t *pSyncPointWaitList,
-    uint32_t NumEventsInWaitList, const ur_event_handle_t *phEventWaitList,
-    ur_exp_command_buffer_sync_point_t *pSyncPoint, ur_event_handle_t *phEvent,
-    ur_exp_command_buffer_command_handle_t *phCommand) {
   logger::error("{} function not implemented!", __FUNCTION__);
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
@@ -425,39 +374,10 @@ ur_result_t urCommandBufferAppendUSMAdviseExp(
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
-ur_result_t urCommandBufferEnqueueExp(
-    ur_exp_command_buffer_handle_t hCommandBuffer, ur_queue_handle_t hQueue,
-    uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
-    ur_event_handle_t *phEvent) {
-  logger::error("{} function not implemented!", __FUNCTION__);
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-}
-
-ur_result_t urCommandBufferRetainCommandExp(
-    ur_exp_command_buffer_command_handle_t hCommand) {
-  logger::error("{} function not implemented!", __FUNCTION__);
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-}
-
-ur_result_t urCommandBufferReleaseCommandExp(
-    ur_exp_command_buffer_command_handle_t hCommand) {
-  logger::error("{} function not implemented!", __FUNCTION__);
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-}
-
 ur_result_t urCommandBufferUpdateKernelLaunchExp(
     ur_exp_command_buffer_command_handle_t hCommand,
     const ur_exp_command_buffer_update_kernel_launch_desc_t
         *pUpdateKernelLaunch) {
-  logger::error("{} function not implemented!", __FUNCTION__);
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-}
-
-ur_result_t
-urCommandBufferGetInfoExp(ur_exp_command_buffer_handle_t hCommandBuffer,
-                          ur_exp_command_buffer_info_t propName,
-                          size_t propSize, void *pPropValue,
-                          size_t *pPropSizeRet) {
   logger::error("{} function not implemented!", __FUNCTION__);
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
@@ -472,33 +392,6 @@ ur_result_t urCommandBufferUpdateSignalEventExp(
 ur_result_t urCommandBufferUpdateWaitEventsExp(
     ur_exp_command_buffer_command_handle_t hCommand,
     uint32_t NumEventsInWaitList, const ur_event_handle_t *phEventWaitList) {
-  logger::error("{} function not implemented!", __FUNCTION__);
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-}
-
-ur_result_t urCommandBufferCommandGetInfoExp(
-    ur_exp_command_buffer_command_handle_t hCommand,
-    ur_exp_command_buffer_command_info_t propName, size_t propSize,
-    void *pPropValue, size_t *pPropSizeRet) {
-  logger::error("{} function not implemented!", __FUNCTION__);
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-}
-
-ur_result_t urKernelSuggestMaxCooperativeGroupCountExp(
-    ur_kernel_handle_t hKernel, ur_device_handle_t hDevice, uint32_t workDim,
-    const size_t *pLocalWorkSize, size_t dynamicSharedMemorySize,
-    uint32_t *pGroupCountRet) {
-  logger::error("{} function not implemented!", __FUNCTION__);
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-}
-
-ur_result_t urUSMImportExp(ur_context_handle_t hContext, void *pMem,
-                           size_t size) {
-  logger::error("{} function not implemented!", __FUNCTION__);
-  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-}
-
-ur_result_t urUSMReleaseExp(ur_context_handle_t hContext, void *pMem) {
   logger::error("{} function not implemented!", __FUNCTION__);
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }

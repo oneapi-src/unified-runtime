@@ -46,34 +46,6 @@ ur_result_t enqueueEventsWait(ur_queue_handle_t CommandQueue, CUstream Stream,
   }
 }
 
-template <typename PtrT>
-void getUSMHostOrDevicePtr(PtrT USMPtr, CUmemorytype *OutMemType,
-                           CUdeviceptr *OutDevPtr, PtrT *OutHostPtr) {
-  // do not throw if cuPointerGetAttribute returns CUDA_ERROR_INVALID_VALUE
-  // checks with PI_CHECK_ERROR are not suggested
-  CUresult Ret = cuPointerGetAttribute(
-      OutMemType, CU_POINTER_ATTRIBUTE_MEMORY_TYPE, (CUdeviceptr)USMPtr);
-  // ARRAY, UNIFIED types are not supported!
-  assert(*OutMemType != CU_MEMORYTYPE_ARRAY &&
-         *OutMemType != CU_MEMORYTYPE_UNIFIED);
-
-  // pointer not known to the CUDA subsystem (possibly a system allocated ptr)
-  if (Ret == CUDA_ERROR_INVALID_VALUE) {
-    *OutMemType = CU_MEMORYTYPE_HOST;
-    *OutDevPtr = 0;
-    *OutHostPtr = USMPtr;
-
-    // todo: resets the above "non-stick" error
-  } else if (Ret == CUDA_SUCCESS) {
-    *OutDevPtr = (*OutMemType == CU_MEMORYTYPE_DEVICE)
-                     ? reinterpret_cast<CUdeviceptr>(USMPtr)
-                     : 0;
-    *OutHostPtr = (*OutMemType == CU_MEMORYTYPE_HOST) ? USMPtr : nullptr;
-  } else {
-    UR_CHECK_ERROR(Ret);
-  }
-}
-
 ur_result_t setCuMemAdvise(CUdeviceptr DevPtr, size_t Size,
                            ur_usm_advice_flags_t URAdviceFlags,
                            CUdevice Device) {
@@ -492,11 +464,11 @@ enqueueKernelLaunch(ur_queue_handle_t hQueue, ur_kernel_handle_t hKernel,
       UR_CHECK_ERROR(RetImplEvent->start());
     }
 
-    auto &ArgIndices = hKernel->getArgIndices();
+    auto &ArgPointers = hKernel->getArgPointers();
     UR_CHECK_ERROR(cuLaunchKernel(
         CuFunc, BlocksPerGrid[0], BlocksPerGrid[1], BlocksPerGrid[2],
         ThreadsPerBlock[0], ThreadsPerBlock[1], ThreadsPerBlock[2], LocalSize,
-        CuStream, const_cast<void **>(ArgIndices.data()), nullptr));
+        CuStream, const_cast<void **>(ArgPointers.data()), nullptr));
 
     if (phEvent) {
       UR_CHECK_ERROR(RetImplEvent->record());
@@ -680,7 +652,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
       UR_CHECK_ERROR(RetImplEvent->start());
     }
 
-    auto &ArgIndices = hKernel->getArgIndices();
+    auto &ArgPointers = hKernel->getArgPointers();
 
     CUlaunchConfig launch_config;
     launch_config.gridDimX = BlocksPerGrid[0];
@@ -696,7 +668,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunchCustomExp(
     launch_config.numAttrs = launch_attribute.size();
 
     UR_CHECK_ERROR(cuLaunchKernelEx(&launch_config, CuFunc,
-                                    const_cast<void **>(ArgIndices.data()),
+                                    const_cast<void **>(ArgPointers.data()),
                                     nullptr));
 
     if (phEvent) {

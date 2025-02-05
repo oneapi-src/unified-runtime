@@ -98,26 +98,26 @@ ur_result_t setHipMemAdvise(const void *DevPtr, const size_t Size,
   constexpr size_t DeviceFlagCount = 6;
 #endif
   static constexpr std::array<ur_to_hip_advice_t, DeviceFlagCount>
-      URToHIPMemAdviseDeviceFlags {
-    std::make_pair(UR_USM_ADVICE_FLAG_SET_READ_MOSTLY,
-                   hipMemAdviseSetReadMostly),
-        std::make_pair(UR_USM_ADVICE_FLAG_CLEAR_READ_MOSTLY,
-                       hipMemAdviseUnsetReadMostly),
-        std::make_pair(UR_USM_ADVICE_FLAG_SET_PREFERRED_LOCATION,
-                       hipMemAdviseSetPreferredLocation),
-        std::make_pair(UR_USM_ADVICE_FLAG_CLEAR_PREFERRED_LOCATION,
-                       hipMemAdviseUnsetPreferredLocation),
-        std::make_pair(UR_USM_ADVICE_FLAG_SET_ACCESSED_BY_DEVICE,
-                       hipMemAdviseSetAccessedBy),
-        std::make_pair(UR_USM_ADVICE_FLAG_CLEAR_ACCESSED_BY_DEVICE,
-                       hipMemAdviseUnsetAccessedBy),
+      URToHIPMemAdviseDeviceFlags{
+          std::make_pair(UR_USM_ADVICE_FLAG_SET_READ_MOSTLY,
+                         hipMemAdviseSetReadMostly),
+          std::make_pair(UR_USM_ADVICE_FLAG_CLEAR_READ_MOSTLY,
+                         hipMemAdviseUnsetReadMostly),
+          std::make_pair(UR_USM_ADVICE_FLAG_SET_PREFERRED_LOCATION,
+                         hipMemAdviseSetPreferredLocation),
+          std::make_pair(UR_USM_ADVICE_FLAG_CLEAR_PREFERRED_LOCATION,
+                         hipMemAdviseUnsetPreferredLocation),
+          std::make_pair(UR_USM_ADVICE_FLAG_SET_ACCESSED_BY_DEVICE,
+                         hipMemAdviseSetAccessedBy),
+          std::make_pair(UR_USM_ADVICE_FLAG_CLEAR_ACCESSED_BY_DEVICE,
+                         hipMemAdviseUnsetAccessedBy),
 #if defined(__HIP_PLATFORM_AMD__)
-        std::make_pair(UR_USM_ADVICE_FLAG_SET_NON_COHERENT_MEMORY,
-                       hipMemAdviseSetCoarseGrain),
-        std::make_pair(UR_USM_ADVICE_FLAG_CLEAR_NON_COHERENT_MEMORY,
-                       hipMemAdviseUnsetCoarseGrain),
+          std::make_pair(UR_USM_ADVICE_FLAG_SET_NON_COHERENT_MEMORY,
+                         hipMemAdviseSetCoarseGrain),
+          std::make_pair(UR_USM_ADVICE_FLAG_CLEAR_NON_COHERENT_MEMORY,
+                         hipMemAdviseUnsetCoarseGrain),
 #endif
-  };
+      };
   for (const auto &[URAdvice, HIPAdvice] : URToHIPMemAdviseDeviceFlags) {
     if (URAdviceFlags & URAdvice) {
       UR_CHECK_ERROR(hipMemAdvise(DevPtr, Size, HIPAdvice, Device));
@@ -308,7 +308,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
       }
     }
 
-    auto ArgIndices = hKernel->getArgIndices();
+    auto ArgPointers = hKernel->getArgPointers();
 
     // If migration of mem across buffer is needed, an event must be associated
     // with this command, implicitly if phEvent is nullptr
@@ -322,7 +322,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
     UR_CHECK_ERROR(hipModuleLaunchKernel(
         HIPFunc, BlocksPerGrid[0], BlocksPerGrid[1], BlocksPerGrid[2],
         ThreadsPerBlock[0], ThreadsPerBlock[1], ThreadsPerBlock[2],
-        hKernel->getLocalSize(), HIPStream, ArgIndices.data(), nullptr));
+        hKernel->getLocalSize(), HIPStream, ArgPointers.data(), nullptr));
 
     if (phEvent) {
       UR_CHECK_ERROR(RetImplEvent->record());

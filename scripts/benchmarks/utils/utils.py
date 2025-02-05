@@ -10,10 +10,10 @@ import subprocess
 
 import tarfile
 import urllib # nosec B404
-from benches.options import options
+from options import options
 from pathlib import Path
 
-def run(command, env_vars={}, cwd=None, add_sycl=False, ld_library=[]):
+def run(command, env_vars={}, cwd=None, add_sycl=False, ld_library=[], timeout=options.timeout):
     try:
         if isinstance(command, str):
             command = command.split()
@@ -32,7 +32,7 @@ def run(command, env_vars={}, cwd=None, add_sycl=False, ld_library=[]):
 
         env.update(env_vars)
 
-        result = subprocess.run(command, cwd=cwd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, timeout=options.timeout) # nosec B603
+        result = subprocess.run(command, cwd=cwd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, timeout=timeout) # nosec B603
 
         if options.verbose:
             print(result.stdout.decode())

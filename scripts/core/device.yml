@@ -443,6 +443,10 @@ etors:
       desc: "[$x_bool_t] return true if the device supports the `EnqueueDeviceGlobalVariableWrite` and `EnqueueDeviceGlobalVariableRead` entry points."
     - name: USM_POOL_SUPPORT
       desc: "[$x_bool_t] return true if the device supports USM pooling. Pertains to the `USMPool` entry points and usage of the `pool` parameter of the USM alloc entry points."
+    - name: NUM_COMPUTE_UNITS
+      desc: "[uint32_t] the number of compute units for specific backend."
+    - name: PROGRAM_SET_SPECIALIZATION_CONSTANTS
+      desc: "[$x_bool_t] support the $xProgramSetSpecializationConstants entry point"
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Retrieves various information about device"
@@ -803,10 +807,10 @@ base: $x_base_properties_t
 members:
     - type: bool
       name: isNativeHandleOwned
-      desc: >
-          [in] Indicates UR owns the native handle or if it came from an
-          interoperability operation in the application that asked to not
-          transfer the ownership to the unified-runtime.
+      desc: |
+            [in] If true then ownership of the native handle is transferred to
+            the resultant object. This means the object will be responsible for
+            releasing the native resources at the end of its lifetime.
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Create runtime device object from native device handle."

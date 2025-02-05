@@ -2,8 +2,10 @@
  *
  * Copyright (C) 2022 Intel Corporation
  *
- * Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
+ * Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM
+ * Exceptions.
  * See LICENSE.TXT
+ *
  * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
  *
  * @file ur_ddi.h
@@ -95,8 +97,10 @@ typedef struct ur_platform_dditable_t
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
 UR_DLLEXPORT ur_result_t UR_APICALL
 urGetPlatformProcAddrTable(
-    ur_api_version_t version,                       ///< [in] API version requested
-    ur_platform_dditable_t* pDdiTable               ///< [in,out] pointer to table of DDI function pointers
+     /// [in] API version requested
+    ur_api_version_t version,
+     /// [in,out] pointer to table of DDI function pointers
+    ur_platform_dditable_t* pDdiTable
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -187,8 +191,10 @@ typedef struct ur_context_dditable_t
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
 UR_DLLEXPORT ur_result_t UR_APICALL
 urGetContextProcAddrTable(
-    ur_api_version_t version,                       ///< [in] API version requested
-    ur_context_dditable_t* pDdiTable                ///< [in,out] pointer to table of DDI function pointers
+     /// [in] API version requested
+    ur_api_version_t version,
+     /// [in,out] pointer to table of DDI function pointers
+    ur_context_dditable_t* pDdiTable
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -287,8 +293,10 @@ typedef struct ur_event_dditable_t
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
 UR_DLLEXPORT ur_result_t UR_APICALL
 urGetEventProcAddrTable(
-    ur_api_version_t version,                       ///< [in] API version requested
-    ur_event_dditable_t* pDdiTable                  ///< [in,out] pointer to table of DDI function pointers
+     /// [in] API version requested
+    ur_api_version_t version,
+     /// [in,out] pointer to table of DDI function pointers
+    ur_event_dditable_t* pDdiTable
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -453,8 +461,10 @@ typedef struct ur_program_dditable_t
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
 UR_DLLEXPORT ur_result_t UR_APICALL
 urGetProgramProcAddrTable(
-    ur_api_version_t version,                       ///< [in] API version requested
-    ur_program_dditable_t* pDdiTable                ///< [in,out] pointer to table of DDI function pointers
+     /// [in] API version requested
+    ur_api_version_t version,
+     /// [in,out] pointer to table of DDI function pointers
+    ur_program_dditable_t* pDdiTable
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -514,8 +524,10 @@ typedef struct ur_program_exp_dditable_t
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
 UR_DLLEXPORT ur_result_t UR_APICALL
 urGetProgramExpProcAddrTable(
-    ur_api_version_t version,                       ///< [in] API version requested
-    ur_program_exp_dditable_t* pDdiTable            ///< [in,out] pointer to table of DDI function pointers
+     /// [in] API version requested
+    ur_api_version_t version,
+     /// [in,out] pointer to table of DDI function pointers
+    ur_program_exp_dditable_t* pDdiTable
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -702,8 +714,10 @@ typedef struct ur_kernel_dditable_t
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
 UR_DLLEXPORT ur_result_t UR_APICALL
 urGetKernelProcAddrTable(
-    ur_api_version_t version,                       ///< [in] API version requested
-    ur_kernel_dditable_t* pDdiTable                 ///< [in,out] pointer to table of DDI function pointers
+     /// [in] API version requested
+    ur_api_version_t version,
+     /// [in,out] pointer to table of DDI function pointers
+    ur_kernel_dditable_t* pDdiTable
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -742,8 +756,10 @@ typedef struct ur_kernel_exp_dditable_t
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
 UR_DLLEXPORT ur_result_t UR_APICALL
 urGetKernelExpProcAddrTable(
-    ur_api_version_t version,                       ///< [in] API version requested
-    ur_kernel_exp_dditable_t* pDdiTable             ///< [in,out] pointer to table of DDI function pointers
+     /// [in] API version requested
+    ur_api_version_t version,
+     /// [in,out] pointer to table of DDI function pointers
+    ur_kernel_exp_dditable_t* pDdiTable
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -839,8 +855,10 @@ typedef struct ur_queue_dditable_t
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
 UR_DLLEXPORT ur_result_t UR_APICALL
 urGetQueueProcAddrTable(
-    ur_api_version_t version,                       ///< [in] API version requested
-    ur_queue_dditable_t* pDdiTable                  ///< [in,out] pointer to table of DDI function pointers
+     /// [in] API version requested
+    ur_api_version_t version,
+     /// [in,out] pointer to table of DDI function pointers
+    ur_queue_dditable_t* pDdiTable
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -919,8 +937,10 @@ typedef struct ur_sampler_dditable_t
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
 UR_DLLEXPORT ur_result_t UR_APICALL
 urGetSamplerProcAddrTable(
-    ur_api_version_t version,                       ///< [in] API version requested
-    ur_sampler_dditable_t* pDdiTable                ///< [in,out] pointer to table of DDI function pointers
+     /// [in] API version requested
+    ur_api_version_t version,
+     /// [in,out] pointer to table of DDI function pointers
+    ur_sampler_dditable_t* pDdiTable
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1048,8 +1068,10 @@ typedef struct ur_mem_dditable_t
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
 UR_DLLEXPORT ur_result_t UR_APICALL
 urGetMemProcAddrTable(
-    ur_api_version_t version,                       ///< [in] API version requested
-    ur_mem_dditable_t* pDdiTable                    ///< [in,out] pointer to table of DDI function pointers
+     /// [in] API version requested
+    ur_api_version_t version,
+     /// [in,out] pointer to table of DDI function pointers
+    ur_mem_dditable_t* pDdiTable
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1112,8 +1134,10 @@ typedef struct ur_physical_mem_dditable_t
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
 UR_DLLEXPORT ur_result_t UR_APICALL
 urGetPhysicalMemProcAddrTable(
-    ur_api_version_t version,                       ///< [in] API version requested
-    ur_physical_mem_dditable_t* pDdiTable           ///< [in,out] pointer to table of DDI function pointers
+     /// [in] API version requested
+    ur_api_version_t version,
+     /// [in,out] pointer to table of DDI function pointers
+    ur_physical_mem_dditable_t* pDdiTable
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1183,8 +1207,10 @@ typedef struct ur_global_dditable_t
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
 UR_DLLEXPORT ur_result_t UR_APICALL
 urGetGlobalProcAddrTable(
-    ur_api_version_t version,                       ///< [in] API version requested
-    ur_global_dditable_t* pDdiTable                 ///< [in,out] pointer to table of DDI function pointers
+     /// [in] API version requested
+    ur_api_version_t version,
+     /// [in,out] pointer to table of DDI function pointers
+    ur_global_dditable_t* pDdiTable
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1600,8 +1626,10 @@ typedef struct ur_enqueue_dditable_t
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
 UR_DLLEXPORT ur_result_t UR_APICALL
 urGetEnqueueProcAddrTable(
-    ur_api_version_t version,                       ///< [in] API version requested
-    ur_enqueue_dditable_t* pDdiTable                ///< [in,out] pointer to table of DDI function pointers
+     /// [in] API version requested
+    ur_api_version_t version,
+     /// [in,out] pointer to table of DDI function pointers
+    ur_enqueue_dditable_t* pDdiTable
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1686,8 +1714,10 @@ typedef struct ur_enqueue_exp_dditable_t
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
 UR_DLLEXPORT ur_result_t UR_APICALL
 urGetEnqueueExpProcAddrTable(
-    ur_api_version_t version,                       ///< [in] API version requested
-    ur_enqueue_exp_dditable_t* pDdiTable            ///< [in,out] pointer to table of DDI function pointers
+     /// [in] API version requested
+    ur_api_version_t version,
+     /// [in,out] pointer to table of DDI function pointers
+    ur_enqueue_exp_dditable_t* pDdiTable
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1917,8 +1947,10 @@ typedef struct ur_bindless_images_exp_dditable_t
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
 UR_DLLEXPORT ur_result_t UR_APICALL
 urGetBindlessImagesExpProcAddrTable(
-    ur_api_version_t version,                       ///< [in] API version requested
-    ur_bindless_images_exp_dditable_t* pDdiTable    ///< [in,out] pointer to table of DDI function pointers
+     /// [in] API version requested
+    ur_api_version_t version,
+     /// [in,out] pointer to table of DDI function pointers
+    ur_bindless_images_exp_dditable_t* pDdiTable
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2034,8 +2066,10 @@ typedef struct ur_usm_dditable_t
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
 UR_DLLEXPORT ur_result_t UR_APICALL
 urGetUSMProcAddrTable(
-    ur_api_version_t version,                       ///< [in] API version requested
-    ur_usm_dditable_t* pDdiTable                    ///< [in,out] pointer to table of DDI function pointers
+     /// [in] API version requested
+    ur_api_version_t version,
+     /// [in,out] pointer to table of DDI function pointers
+    ur_usm_dditable_t* pDdiTable
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2094,8 +2128,10 @@ typedef struct ur_usm_exp_dditable_t
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
 UR_DLLEXPORT ur_result_t UR_APICALL
 urGetUSMExpProcAddrTable(
-    ur_api_version_t version,                       ///< [in] API version requested
-    ur_usm_exp_dditable_t* pDdiTable                ///< [in,out] pointer to table of DDI function pointers
+     /// [in] API version requested
+    ur_api_version_t version,
+     /// [in,out] pointer to table of DDI function pointers
+    ur_usm_exp_dditable_t* pDdiTable
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2364,18 +2400,6 @@ typedef ur_result_t (UR_APICALL *ur_pfnCommandBufferEnqueueExp_t)(
     );
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Function-pointer for urCommandBufferRetainCommandExp 
-typedef ur_result_t (UR_APICALL *ur_pfnCommandBufferRetainCommandExp_t)(
-    ur_exp_command_buffer_command_handle_t
-    );
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function-pointer for urCommandBufferReleaseCommandExp 
-typedef ur_result_t (UR_APICALL *ur_pfnCommandBufferReleaseCommandExp_t)(
-    ur_exp_command_buffer_command_handle_t
-    );
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Function-pointer for urCommandBufferUpdateKernelLaunchExp 
 typedef ur_result_t (UR_APICALL *ur_pfnCommandBufferUpdateKernelLaunchExp_t)(
     ur_exp_command_buffer_command_handle_t,
@@ -2408,16 +2432,6 @@ typedef ur_result_t (UR_APICALL *ur_pfnCommandBufferGetInfoExp_t)(
     );
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Function-pointer for urCommandBufferCommandGetInfoExp 
-typedef ur_result_t (UR_APICALL *ur_pfnCommandBufferCommandGetInfoExp_t)(
-    ur_exp_command_buffer_command_handle_t,
-    ur_exp_command_buffer_command_info_t,
-    size_t,
-    void*,
-    size_t*
-    );
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Table of CommandBufferExp functions pointers
 typedef struct ur_command_buffer_exp_dditable_t
 {
@@ -2438,13 +2452,10 @@ typedef struct ur_command_buffer_exp_dditable_t
     ur_pfnCommandBufferAppendUSMPrefetchExp_t                   pfnAppendUSMPrefetchExp;
     ur_pfnCommandBufferAppendUSMAdviseExp_t                     pfnAppendUSMAdviseExp;
     ur_pfnCommandBufferEnqueueExp_t                             pfnEnqueueExp;
-    ur_pfnCommandBufferRetainCommandExp_t                       pfnRetainCommandExp;
-    ur_pfnCommandBufferReleaseCommandExp_t                      pfnReleaseCommandExp;
     ur_pfnCommandBufferUpdateKernelLaunchExp_t                  pfnUpdateKernelLaunchExp;
     ur_pfnCommandBufferUpdateSignalEventExp_t                   pfnUpdateSignalEventExp;
     ur_pfnCommandBufferUpdateWaitEventsExp_t                    pfnUpdateWaitEventsExp;
     ur_pfnCommandBufferGetInfoExp_t                             pfnGetInfoExp;
-    ur_pfnCommandBufferCommandGetInfoExp_t                      pfnCommandGetInfoExp;
 } ur_command_buffer_exp_dditable_t;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2458,8 +2469,10 @@ typedef struct ur_command_buffer_exp_dditable_t
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
 UR_DLLEXPORT ur_result_t UR_APICALL
 urGetCommandBufferExpProcAddrTable(
-    ur_api_version_t version,                       ///< [in] API version requested
-    ur_command_buffer_exp_dditable_t* pDdiTable     ///< [in,out] pointer to table of DDI function pointers
+     /// [in] API version requested
+    ur_api_version_t version,
+     /// [in,out] pointer to table of DDI function pointers
+    ur_command_buffer_exp_dditable_t* pDdiTable
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2467,75 +2480,6 @@ urGetCommandBufferExpProcAddrTable(
 typedef ur_result_t (UR_APICALL *ur_pfnGetCommandBufferExpProcAddrTable_t)(
     ur_api_version_t,
     ur_command_buffer_exp_dditable_t*
-    );
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function-pointer for urTensorMapEncodeIm2ColExp 
-typedef ur_result_t (UR_APICALL *ur_pfnTensorMapEncodeIm2ColExp_t)(
-    ur_device_handle_t,
-    ur_exp_tensor_map_data_type_flags_t,
-    uint32_t,
-    void*,
-    const uint64_t*,
-    const uint64_t*,
-    const int*,
-    const int*,
-    uint32_t,
-    uint32_t,
-    const uint32_t*,
-    ur_exp_tensor_map_interleave_flags_t,
-    ur_exp_tensor_map_swizzle_flags_t,
-    ur_exp_tensor_map_l2_promotion_flags_t,
-    ur_exp_tensor_map_oob_fill_flags_t,
-    ur_exp_tensor_map_handle_t*
-    );
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function-pointer for urTensorMapEncodeTiledExp 
-typedef ur_result_t (UR_APICALL *ur_pfnTensorMapEncodeTiledExp_t)(
-    ur_device_handle_t,
-    ur_exp_tensor_map_data_type_flags_t,
-    uint32_t,
-    void*,
-    const uint64_t*,
-    const uint64_t*,
-    const uint32_t*,
-    const uint32_t*,
-    ur_exp_tensor_map_interleave_flags_t,
-    ur_exp_tensor_map_swizzle_flags_t,
-    ur_exp_tensor_map_l2_promotion_flags_t,
-    ur_exp_tensor_map_oob_fill_flags_t,
-    ur_exp_tensor_map_handle_t*
-    );
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Table of TensorMapExp functions pointers
-typedef struct ur_tensor_map_exp_dditable_t
-{
-    ur_pfnTensorMapEncodeIm2ColExp_t                            pfnEncodeIm2ColExp;
-    ur_pfnTensorMapEncodeTiledExp_t                             pfnEncodeTiledExp;
-} ur_tensor_map_exp_dditable_t;
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Exported function for filling application's TensorMapExp table
-///        with current process' addresses
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_UNINITIALIZED
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-UR_DLLEXPORT ur_result_t UR_APICALL
-urGetTensorMapExpProcAddrTable(
-    ur_api_version_t version,                       ///< [in] API version requested
-    ur_tensor_map_exp_dditable_t* pDdiTable         ///< [in,out] pointer to table of DDI function pointers
-    );
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Function-pointer for urGetTensorMapExpProcAddrTable
-typedef ur_result_t (UR_APICALL *ur_pfnGetTensorMapExpProcAddrTable_t)(
-    ur_api_version_t,
-    ur_tensor_map_exp_dditable_t*
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2583,8 +2527,10 @@ typedef struct ur_usm_p2p_exp_dditable_t
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
 UR_DLLEXPORT ur_result_t UR_APICALL
 urGetUsmP2PExpProcAddrTable(
-    ur_api_version_t version,                       ///< [in] API version requested
-    ur_usm_p2p_exp_dditable_t* pDdiTable            ///< [in,out] pointer to table of DDI function pointers
+     /// [in] API version requested
+    ur_api_version_t version,
+     /// [in,out] pointer to table of DDI function pointers
+    ur_usm_p2p_exp_dditable_t* pDdiTable
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2686,8 +2632,10 @@ typedef struct ur_virtual_mem_dditable_t
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
 UR_DLLEXPORT ur_result_t UR_APICALL
 urGetVirtualMemProcAddrTable(
-    ur_api_version_t version,                       ///< [in] API version requested
-    ur_virtual_mem_dditable_t* pDdiTable            ///< [in,out] pointer to table of DDI function pointers
+     /// [in] API version requested
+    ur_api_version_t version,
+     /// [in,out] pointer to table of DDI function pointers
+    ur_virtual_mem_dditable_t* pDdiTable
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2798,8 +2746,10 @@ typedef struct ur_device_dditable_t
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
 UR_DLLEXPORT ur_result_t UR_APICALL
 urGetDeviceProcAddrTable(
-    ur_api_version_t version,                       ///< [in] API version requested
-    ur_device_dditable_t* pDdiTable                 ///< [in,out] pointer to table of DDI function pointers
+     /// [in] API version requested
+    ur_api_version_t version,
+     /// [in,out] pointer to table of DDI function pointers
+    ur_device_dditable_t* pDdiTable
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2831,7 +2781,6 @@ typedef struct ur_dditable_t
     ur_usm_dditable_t                   USM;
     ur_usm_exp_dditable_t               USMExp;
     ur_command_buffer_exp_dditable_t    CommandBufferExp;
-    ur_tensor_map_exp_dditable_t        TensorMapExp;
     ur_usm_p2p_exp_dditable_t           UsmP2PExp;
     ur_virtual_mem_dditable_t           VirtualMem;
     ur_device_dditable_t                Device;

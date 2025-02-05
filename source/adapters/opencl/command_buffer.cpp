@@ -11,31 +11,6 @@
 #include "command_buffer.hpp"
 #include "common.hpp"
 
-namespace {
-ur_result_t
-commandBufferReleaseInternal(ur_exp_command_buffer_handle_t CommandBuffer) {
-  if (CommandBuffer->decrementInternalReferenceCount() != 0) {
-    return UR_RESULT_SUCCESS;
-  }
-
-  delete CommandBuffer;
-  return UR_RESULT_SUCCESS;
-}
-
-ur_result_t
-commandHandleReleaseInternal(ur_exp_command_buffer_command_handle_t Command) {
-  if (Command->decrementInternalReferenceCount() != 0) {
-    return UR_RESULT_SUCCESS;
-  }
-
-  // Decrement parent command-buffer internal ref count
-  commandBufferReleaseInternal(Command->hCommandBuffer);
-
-  delete Command;
-  return UR_RESULT_SUCCESS;
-}
-} // end anonymous namespace
-
 /// The ur_exp_command_buffer_handle_t_ destructor calls CL release
 /// command-buffer to free the underlying object.
 ur_exp_command_buffer_handle_t_::~ur_exp_command_buffer_handle_t_() {
@@ -78,7 +53,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferCreateExp(
   bool DeviceSupportsUpdate = UpdateCapabilities > 0;
 
   if (IsUpdatable && !DeviceSupportsUpdate) {
-    return UR_RESULT_ERROR_INVALID_OPERATION;
+    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
 
   cl_command_buffer_properties_khr Properties[3] = {
@@ -92,7 +67,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferCreateExp(
 
   try {
     auto URCommandBuffer = std::make_unique<ur_exp_command_buffer_handle_t_>(
-        Queue, hContext, CLCommandBuffer, IsUpdatable);
+        Queue, hContext, hDevice, CLCommandBuffer, IsUpdatable);
     *phCommandBuffer = URCommandBuffer.release();
   } catch (...) {
     return UR_RESULT_ERROR_OUT_OF_RESOURCES;
@@ -104,22 +79,17 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferCreateExp(
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urCommandBufferRetainExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
-  hCommandBuffer->incrementInternalReferenceCount();
-  hCommandBuffer->incrementExternalReferenceCount();
+  hCommandBuffer->incrementReferenceCount();
   return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
 urCommandBufferReleaseExp(ur_exp_command_buffer_handle_t hCommandBuffer) {
-  if (hCommandBuffer->decrementExternalReferenceCount() == 0) {
-    // External ref count has reached zero, internal release of created
-    // commands.
-    for (auto Command : hCommandBuffer->CommandHandles) {
-      commandHandleReleaseInternal(Command);
-    }
+  if (hCommandBuffer->decrementReferenceCount() == 0) {
+    delete hCommandBuffer;
   }
 
-  return commandBufferReleaseInternal(hCommandBuffer);
+  return UR_RESULT_SUCCESS;
 }
 
 UR_APIEXPORT ur_result_t UR_APICALL
@@ -185,15 +155,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferAppendKernelLaunchExp(
       pSyncPointWaitList, pSyncPoint, OutCommandHandle));
 
   try {
-    auto URCommandHandle =
-        std::make_unique<ur_exp_command_buffer_command_handle_t_>(
-            hCommandBuffer, CommandHandle, hKernel, workDim,
-            pLocalWorkSize != nullptr);
-    ur_exp_command_buffer_command_handle_t Handle = URCommandHandle.release();
-    hCommandBuffer->CommandHandles.push_back(Handle);
+    auto Handle = std::make_unique<ur_exp_command_buffer_command_handle_t_>(
+        hCommandBuffer, CommandHandle, hKernel, workDim,
+        pLocalWorkSize != nullptr);
     if (phCommandHandle) {
-      *phCommandHandle = Handle;
+      *phCommandHandle = Handle.get();
     }
+
+    hCommandBuffer->CommandHandles.push_back(std::move(Handle));
   } catch (...) {
     return UR_RESULT_ERROR_OUT_OF_RESOURCES;
   }
@@ -469,19 +438,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferEnqueueExp(
   return UR_RESULT_SUCCESS;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferRetainCommandExp(
-    ur_exp_command_buffer_command_handle_t hCommand) {
-  hCommand->incrementExternalReferenceCount();
-  hCommand->incrementInternalReferenceCount();
-  return UR_RESULT_SUCCESS;
-}
-
-UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferReleaseCommandExp(
-    ur_exp_command_buffer_command_handle_t hCommand) {
-  hCommand->decrementExternalReferenceCount();
-  return commandHandleReleaseInternal(hCommand);
-}
-
 namespace {
 void updateKernelPointerArgs(
     std::vector<cl_mutable_dispatch_arg_khr> &CLUSMArgs,
@@ -540,6 +496,64 @@ void updateKernelArgs(std::vector<cl_mutable_dispatch_arg_khr> &CLArgs,
   }
 }
 
+ur_result_t validateCommandDesc(
+    ur_exp_command_buffer_command_handle_t Command,
+    const ur_exp_command_buffer_update_kernel_launch_desc_t *UpdateDesc) {
+  // Kernel handle updates are not yet supported.
+  if (UpdateDesc->hNewKernel && UpdateDesc->hNewKernel != Command->Kernel) {
+    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+  }
+
+  // Error if work-dim has changed but a new global size/offset hasn't been set
+  if (UpdateDesc->newWorkDim != Command->WorkDim &&
+      (!UpdateDesc->pNewGlobalWorkOffset || !UpdateDesc->pNewGlobalWorkSize)) {
+    return UR_RESULT_ERROR_INVALID_OPERATION;
+  }
+
+  // Verify that the device supports updating the aspects of the kernel that
+  // the user is requesting.
+  ur_device_handle_t URDevice = Command->hCommandBuffer->hDevice;
+  cl_device_id CLDevice = cl_adapter::cast<cl_device_id>(URDevice);
+
+  ur_device_command_buffer_update_capability_flags_t UpdateCapabilities = 0;
+  CL_RETURN_ON_FAILURE(
+      getDeviceCommandBufferUpdateCapabilities(CLDevice, UpdateCapabilities));
+
+  size_t *NewGlobalWorkOffset = UpdateDesc->pNewGlobalWorkOffset;
+  UR_ASSERT(
+      !NewGlobalWorkOffset ||
+          (UpdateCapabilities &
+           UR_DEVICE_COMMAND_BUFFER_UPDATE_CAPABILITY_FLAG_GLOBAL_WORK_OFFSET),
+      UR_RESULT_ERROR_UNSUPPORTED_FEATURE);
+
+  size_t *NewLocalWorkSize = UpdateDesc->pNewLocalWorkSize;
+  UR_ASSERT(
+      !NewLocalWorkSize ||
+          (UpdateCapabilities &
+           UR_DEVICE_COMMAND_BUFFER_UPDATE_CAPABILITY_FLAG_LOCAL_WORK_SIZE),
+      UR_RESULT_ERROR_UNSUPPORTED_FEATURE);
+
+  size_t *NewGlobalWorkSize = UpdateDesc->pNewGlobalWorkSize;
+  UR_ASSERT(
+      !NewGlobalWorkSize ||
+          (UpdateCapabilities &
+           UR_DEVICE_COMMAND_BUFFER_UPDATE_CAPABILITY_FLAG_GLOBAL_WORK_SIZE),
+      UR_RESULT_ERROR_UNSUPPORTED_FEATURE);
+  UR_ASSERT(
+      !(NewGlobalWorkSize && !NewLocalWorkSize) ||
+          (UpdateCapabilities &
+           UR_DEVICE_COMMAND_BUFFER_UPDATE_CAPABILITY_FLAG_LOCAL_WORK_SIZE),
+      UR_RESULT_ERROR_UNSUPPORTED_FEATURE);
+
+  UR_ASSERT(
+      (!UpdateDesc->numNewMemObjArgs && !UpdateDesc->numNewPointerArgs &&
+       !UpdateDesc->numNewValueArgs) ||
+          (UpdateCapabilities &
+           UR_DEVICE_COMMAND_BUFFER_UPDATE_CAPABILITY_FLAG_KERNEL_ARGUMENTS),
+      UR_RESULT_ERROR_UNSUPPORTED_FEATURE);
+
+  return UR_RESULT_SUCCESS;
+}
 } // end anonymous namespace
 
 UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
@@ -547,11 +561,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
     const ur_exp_command_buffer_update_kernel_launch_desc_t
         *pUpdateKernelLaunch) {
 
-  // Kernel handle updates are not yet supported.
-  if (pUpdateKernelLaunch->hNewKernel &&
-      pUpdateKernelLaunch->hNewKernel != hCommand->Kernel) {
-    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
-  }
+  UR_RETURN_ON_FAILURE(validateCommandDesc(hCommand, pUpdateKernelLaunch));
 
   ur_exp_command_buffer_handle_t hCommandBuffer = hCommand->hCommandBuffer;
   cl_context CLContext = cl_adapter::cast<cl_context>(hCommandBuffer->hContext);
@@ -564,12 +574,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
 
   if (!hCommandBuffer->IsFinalized || !hCommandBuffer->IsUpdatable)
     return UR_RESULT_ERROR_INVALID_OPERATION;
-
-  if (pUpdateKernelLaunch->newWorkDim != hCommand->WorkDim &&
-      (!pUpdateKernelLaunch->pNewGlobalWorkOffset ||
-       !pUpdateKernelLaunch->pNewGlobalWorkSize)) {
-    return UR_RESULT_ERROR_INVALID_OPERATION;
-  }
 
   // Find the CL USM pointer arguments to the kernel to update
   std::vector<cl_mutable_dispatch_arg_khr> CLUSMArgs;
@@ -651,7 +655,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferGetInfoExp(
 
   switch (propName) {
   case UR_EXP_COMMAND_BUFFER_INFO_REFERENCE_COUNT:
-    return ReturnValue(hCommandBuffer->getExternalReferenceCount());
+    return ReturnValue(hCommandBuffer->getReferenceCount());
   case UR_EXP_COMMAND_BUFFER_INFO_DESCRIPTOR: {
     ur_exp_command_buffer_desc_t Descriptor{};
     Descriptor.stype = UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_DESC;
@@ -664,22 +668,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferGetInfoExp(
   }
   default:
     assert(!"Command-buffer info request not implemented");
-  }
-
-  return UR_RESULT_ERROR_INVALID_ENUMERATION;
-}
-
-UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferCommandGetInfoExp(
-    ur_exp_command_buffer_command_handle_t hCommand,
-    ur_exp_command_buffer_command_info_t propName, size_t propSize,
-    void *pPropValue, size_t *pPropSizeRet) {
-  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
-
-  switch (propName) {
-  case UR_EXP_COMMAND_BUFFER_COMMAND_INFO_REFERENCE_COUNT:
-    return ReturnValue(hCommand->getExternalReferenceCount());
-  default:
-    assert(!"Command-buffer command info request not implemented");
   }
 
   return UR_RESULT_ERROR_INVALID_ENUMERATION;

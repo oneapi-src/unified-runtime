@@ -14,10 +14,12 @@
 #include "context.hpp"
 #include "enqueue.hpp"
 #include "memory.hpp"
+#include "umf_helpers.hpp"
 
 /// Creates a UR Memory object using a CUDA memory allocation.
 /// Can trigger a manual copy depending on the mode.
-/// \TODO Implement USE_HOST_PTR using cuHostRegister - See #9789
+/// \TODO Implement USE_HOST_PTR using cuHostRegister
+/// https://github.com/intel/llvm/issues/9789
 ///
 UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
     ur_context_handle_t hContext, ur_mem_flags_t flags, size_t size,
@@ -48,7 +50,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
           cuMemHostRegister(HostPtr, size, CU_MEMHOSTREGISTER_DEVICEMAP));
       AllocMode = BufferMem::AllocMode::UseHostPtr;
     } else if (flags & UR_MEM_FLAG_ALLOC_HOST_POINTER) {
-      UR_CHECK_ERROR(cuMemAllocHost(&HostPtr, size));
+      UMF_CHECK_ERROR(umfMemoryProviderAlloc(hContext->MemoryProviderHost, size,
+                                             0, &HostPtr));
       AllocMode = BufferMem::AllocMode::AllocHostPtr;
     } else if (flags & UR_MEM_FLAG_ALLOC_COPY_HOST_POINTER) {
       AllocMode = BufferMem::AllocMode::CopyIn;
@@ -439,7 +442,8 @@ ur_result_t allocateMemObjOnDeviceIfNeeded(ur_mem_handle_t Mem,
                                        CU_MEMHOSTALLOC_DEVICEMAP));
       UR_CHECK_ERROR(cuMemHostGetDevicePointer(&DevPtr, Buffer.HostPtr, 0));
     } else {
-      UR_CHECK_ERROR(cuMemAlloc(&DevPtr, Buffer.Size));
+      UMF_CHECK_ERROR(umfMemoryProviderAlloc(hDevice->MemoryProviderDevice,
+                                             Buffer.Size, 0, (void **)&DevPtr));
     }
   } else {
     CUarray ImageArray{};

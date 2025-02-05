@@ -2,8 +2,10 @@
  *
  * Copyright (C) 2023-2024 Intel Corporation
  *
- * Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
+ * Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM
+ * Exceptions.
  * See LICENSE.TXT
+ *
  * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
  *
  * @file ur_print.hpp
@@ -43,7 +45,6 @@ template <> struct is_handle<ur_exp_external_semaphore_handle_t> : std::true_typ
 template <> struct is_handle<ur_exp_win32_handle_t> : std::true_type {};
 template <> struct is_handle<ur_exp_command_buffer_handle_t> : std::true_type {};
 template <> struct is_handle<ur_exp_command_buffer_command_handle_t> : std::true_type {};
-template <> struct is_handle<ur_exp_tensor_map_handle_t> : std::true_type {};
 template <typename T>
 inline constexpr bool is_handle_v = is_handle<T>::value;
 template <typename T> inline ur_result_t printPtr(std::ostream &os, const T *ptr);
@@ -841,12 +842,6 @@ template <typename T> inline ur_result_t printTagged(std::ostream &os, const voi
 
 
 
-
-
-
-
-
-
     
     inline ur_result_t printUnion(
         std::ostream &os,
@@ -893,27 +888,6 @@ template <typename T> inline ur_result_t printTagged(std::ostream &os, const voi
     template<> inline ur_result_t printFlag<ur_exp_enqueue_native_command_flag_t>(std::ostream &os, uint32_t flag);
 
 
-
-
-
-
-
-
-
-
-    template<> inline ur_result_t printFlag<ur_exp_tensor_map_data_type_flag_t>(std::ostream &os, uint32_t flag);
-
-
-    template<> inline ur_result_t printFlag<ur_exp_tensor_map_interleave_flag_t>(std::ostream &os, uint32_t flag);
-
-
-    template<> inline ur_result_t printFlag<ur_exp_tensor_map_l2_promotion_flag_t>(std::ostream &os, uint32_t flag);
-
-
-    template<> inline ur_result_t printFlag<ur_exp_tensor_map_swizzle_flag_t>(std::ostream &os, uint32_t flag);
-
-
-    template<> inline ur_result_t printFlag<ur_exp_tensor_map_oob_fill_flag_t>(std::ostream &os, uint32_t flag);
 
 
 
@@ -1056,11 +1030,6 @@ template <typename T> inline ur_result_t printTagged(std::ostream &os, const voi
     inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_exp_enqueue_ext_properties_t params);
     inline std::ostream &operator<<(std::ostream &os, enum ur_exp_enqueue_native_command_flag_t value);
     inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_exp_enqueue_native_command_properties_t params);
-    inline std::ostream &operator<<(std::ostream &os, enum ur_exp_tensor_map_data_type_flag_t value);
-    inline std::ostream &operator<<(std::ostream &os, enum ur_exp_tensor_map_interleave_flag_t value);
-    inline std::ostream &operator<<(std::ostream &os, enum ur_exp_tensor_map_l2_promotion_flag_t value);
-    inline std::ostream &operator<<(std::ostream &os, enum ur_exp_tensor_map_swizzle_flag_t value);
-    inline std::ostream &operator<<(std::ostream &os, enum ur_exp_tensor_map_oob_fill_flag_t value);
 
     ///////////////////////////////////////////////////////////////////////////////
     /// @brief Print operator for the ur_function_t type
@@ -1581,20 +1550,11 @@ template <typename T> inline ur_result_t printTagged(std::ostream &os, const voi
                 case UR_FUNCTION_DEVICE_GET_SELECTED:
                     os << "UR_FUNCTION_DEVICE_GET_SELECTED";
                     break;
-                case UR_FUNCTION_COMMAND_BUFFER_RETAIN_COMMAND_EXP:
-                    os << "UR_FUNCTION_COMMAND_BUFFER_RETAIN_COMMAND_EXP";
-                    break;
-                case UR_FUNCTION_COMMAND_BUFFER_RELEASE_COMMAND_EXP:
-                    os << "UR_FUNCTION_COMMAND_BUFFER_RELEASE_COMMAND_EXP";
-                    break;
                 case UR_FUNCTION_COMMAND_BUFFER_UPDATE_KERNEL_LAUNCH_EXP:
                     os << "UR_FUNCTION_COMMAND_BUFFER_UPDATE_KERNEL_LAUNCH_EXP";
                     break;
                 case UR_FUNCTION_COMMAND_BUFFER_GET_INFO_EXP:
                     os << "UR_FUNCTION_COMMAND_BUFFER_GET_INFO_EXP";
-                    break;
-                case UR_FUNCTION_COMMAND_BUFFER_COMMAND_GET_INFO_EXP:
-                    os << "UR_FUNCTION_COMMAND_BUFFER_COMMAND_GET_INFO_EXP";
                     break;
                 case UR_FUNCTION_ENQUEUE_TIMESTAMP_RECORDING_EXP:
                     os << "UR_FUNCTION_ENQUEUE_TIMESTAMP_RECORDING_EXP";
@@ -1667,12 +1627,6 @@ template <typename T> inline ur_result_t printTagged(std::ostream &os, const voi
                     break;
                 case UR_FUNCTION_ENQUEUE_EVENTS_WAIT_WITH_BARRIER_EXT:
                     os << "UR_FUNCTION_ENQUEUE_EVENTS_WAIT_WITH_BARRIER_EXT";
-                    break;
-                case UR_FUNCTION_TENSOR_MAP_ENCODE_IM_2_COL_EXP:
-                    os << "UR_FUNCTION_TENSOR_MAP_ENCODE_IM_2_COL_EXP";
-                    break;
-                case UR_FUNCTION_TENSOR_MAP_ENCODE_TILED_EXP:
-                    os << "UR_FUNCTION_TENSOR_MAP_ENCODE_TILED_EXP";
                     break;
                 case UR_FUNCTION_PHYSICAL_MEM_GET_INFO:
                     os << "UR_FUNCTION_PHYSICAL_MEM_GET_INFO";
@@ -3419,6 +3373,12 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_device_binary_
                 case UR_DEVICE_INFO_USM_POOL_SUPPORT:
                     os << "UR_DEVICE_INFO_USM_POOL_SUPPORT";
                     break;
+                case UR_DEVICE_INFO_NUM_COMPUTE_UNITS:
+                    os << "UR_DEVICE_INFO_NUM_COMPUTE_UNITS";
+                    break;
+                case UR_DEVICE_INFO_PROGRAM_SET_SPECIALIZATION_CONSTANTS:
+                    os << "UR_DEVICE_INFO_PROGRAM_SET_SPECIALIZATION_CONSTANTS";
+                    break;
                 case UR_DEVICE_INFO_COMMAND_BUFFER_SUPPORT_EXP:
                     os << "UR_DEVICE_INFO_COMMAND_BUFFER_SUPPORT_EXP";
                     break;
@@ -5132,6 +5092,34 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_device_binary_
                     os << ")";
                 } break;
                 case UR_DEVICE_INFO_USM_POOL_SUPPORT: {
+                    const ur_bool_t *tptr = (const ur_bool_t *)ptr;
+                    if (sizeof(ur_bool_t) > size) {
+                        os << "invalid size (is: " << size << ", expected: >=" << sizeof(ur_bool_t) << ")";
+                        return UR_RESULT_ERROR_INVALID_SIZE;
+                    }
+                    os << (const void *)(tptr) << " (";
+                    
+        os << 
+                        *tptr
+                    ;
+
+                    os << ")";
+                } break;
+                case UR_DEVICE_INFO_NUM_COMPUTE_UNITS: {
+                    const uint32_t *tptr = (const uint32_t *)ptr;
+                    if (sizeof(uint32_t) > size) {
+                        os << "invalid size (is: " << size << ", expected: >=" << sizeof(uint32_t) << ")";
+                        return UR_RESULT_ERROR_INVALID_SIZE;
+                    }
+                    os << (const void *)(tptr) << " (";
+                    
+        os << 
+                        *tptr
+                    ;
+
+                    os << ")";
+                } break;
+                case UR_DEVICE_INFO_PROGRAM_SET_SPECIALIZATION_CONSTANTS: {
                     const ur_bool_t *tptr = (const ur_bool_t *)ptr;
                     if (sizeof(ur_bool_t) > size) {
                         os << "invalid size (is: " << size << ", expected: >=" << sizeof(ur_bool_t) << ")";
@@ -7100,6 +7088,15 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_context_native
                 case UR_IMAGE_INFO_DEPTH:
                     os << "UR_IMAGE_INFO_DEPTH";
                     break;
+                case UR_IMAGE_INFO_ARRAY_SIZE:
+                    os << "UR_IMAGE_INFO_ARRAY_SIZE";
+                    break;
+                case UR_IMAGE_INFO_NUM_MIP_LEVELS:
+                    os << "UR_IMAGE_INFO_NUM_MIP_LEVELS";
+                    break;
+                case UR_IMAGE_INFO_NUM_SAMPLES:
+                    os << "UR_IMAGE_INFO_NUM_SAMPLES";
+                    break;
                 default:
                     os << "unknown enumerator";
                     break;
@@ -7204,6 +7201,48 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_context_native
                     const size_t *tptr = (const size_t *)ptr;
                     if (sizeof(size_t) > size) {
                         os << "invalid size (is: " << size << ", expected: >=" << sizeof(size_t) << ")";
+                        return UR_RESULT_ERROR_INVALID_SIZE;
+                    }
+                    os << (const void *)(tptr) << " (";
+                    
+        os << 
+                        *tptr
+                    ;
+
+                    os << ")";
+                } break;
+                case UR_IMAGE_INFO_ARRAY_SIZE: {
+                    const size_t *tptr = (const size_t *)ptr;
+                    if (sizeof(size_t) > size) {
+                        os << "invalid size (is: " << size << ", expected: >=" << sizeof(size_t) << ")";
+                        return UR_RESULT_ERROR_INVALID_SIZE;
+                    }
+                    os << (const void *)(tptr) << " (";
+                    
+        os << 
+                        *tptr
+                    ;
+
+                    os << ")";
+                } break;
+                case UR_IMAGE_INFO_NUM_MIP_LEVELS: {
+                    const uint32_t *tptr = (const uint32_t *)ptr;
+                    if (sizeof(uint32_t) > size) {
+                        os << "invalid size (is: " << size << ", expected: >=" << sizeof(uint32_t) << ")";
+                        return UR_RESULT_ERROR_INVALID_SIZE;
+                    }
+                    os << (const void *)(tptr) << " (";
+                    
+        os << 
+                        *tptr
+                    ;
+
+                    os << ")";
+                } break;
+                case UR_IMAGE_INFO_NUM_SAMPLES: {
+                    const uint32_t *tptr = (const uint32_t *)ptr;
+                    if (sizeof(uint32_t) > size) {
+                        os << "invalid size (is: " << size << ", expected: >=" << sizeof(uint32_t) << ")";
                         return UR_RESULT_ERROR_INVALID_SIZE;
                     }
                     os << (const void *)(tptr) << " (";
@@ -9745,6 +9784,9 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_kernel_arg_loc
                 case UR_KERNEL_INFO_NUM_REGS:
                     os << "UR_KERNEL_INFO_NUM_REGS";
                     break;
+                case UR_KERNEL_INFO_SPILL_MEM_SIZE:
+                    os << "UR_KERNEL_INFO_SPILL_MEM_SIZE";
+                    break;
                 default:
                     os << "unknown enumerator";
                     break;
@@ -9840,6 +9882,23 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_kernel_arg_loc
                     ;
 
                     os << ")";
+                } break;
+                case UR_KERNEL_INFO_SPILL_MEM_SIZE: {
+                    
+                    const uint32_t *tptr = (const uint32_t *)ptr;
+                            os << "{";
+                            size_t nelems = size / sizeof(uint32_t);
+                            for (size_t i = 0; i < nelems; ++i) {
+                                if (i != 0) {
+                                    os << ", ";
+                                }
+                                
+        os << 
+                                    tptr[i]
+                                ;
+
+                            }
+                            os << "}";
                 } break;
                 default:
                     os << "unknown enumerator";
@@ -11509,6 +11568,9 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_event_native_p
                 case UR_EXP_IMAGE_COPY_FLAG_DEVICE_TO_DEVICE:
                     os << "UR_EXP_IMAGE_COPY_FLAG_DEVICE_TO_DEVICE";
                     break;
+                case UR_EXP_IMAGE_COPY_FLAG_HOST_TO_HOST:
+                    os << "UR_EXP_IMAGE_COPY_FLAG_HOST_TO_HOST";
+                    break;
                 default:
                     os << "unknown enumerator";
                     break;
@@ -11552,6 +11614,16 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_event_native_p
                     first = false;
                 }
                 os << UR_EXP_IMAGE_COPY_FLAG_DEVICE_TO_DEVICE;
+            }
+            
+            if ((val & UR_EXP_IMAGE_COPY_FLAG_HOST_TO_HOST) == (uint32_t)UR_EXP_IMAGE_COPY_FLAG_HOST_TO_HOST) {
+                val ^= (uint32_t)UR_EXP_IMAGE_COPY_FLAG_HOST_TO_HOST;
+                if (!first) {
+                    os << " | ";
+                } else {
+                    first = false;
+                }
+                os << UR_EXP_IMAGE_COPY_FLAG_HOST_TO_HOST;
             }
         if (val != 0) {
             std::bitset<32> bits(val);
@@ -12979,504 +13051,6 @@ inline std::ostream &operator<<(std::ostream &os, const struct ur_exp_enqueue_na
     os << "}";
     return os;
 }
-    ///////////////////////////////////////////////////////////////////////////////
-    /// @brief Print operator for the ur_exp_tensor_map_data_type_flag_t type
-    /// @returns
-    ///     std::ostream &
-    inline std::ostream &operator<<(std::ostream &os, enum ur_exp_tensor_map_data_type_flag_t value) {
-        switch (value) {
-                case UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT8:
-                    os << "UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT8";
-                    break;
-                case UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT16:
-                    os << "UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT16";
-                    break;
-                case UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT32:
-                    os << "UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT32";
-                    break;
-                case UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_INT32:
-                    os << "UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_INT32";
-                    break;
-                case UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT64:
-                    os << "UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT64";
-                    break;
-                case UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_INT64:
-                    os << "UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_INT64";
-                    break;
-                case UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT16:
-                    os << "UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT16";
-                    break;
-                case UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT32:
-                    os << "UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT32";
-                    break;
-                case UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT64:
-                    os << "UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT64";
-                    break;
-                case UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_BFLOAT16:
-                    os << "UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_BFLOAT16";
-                    break;
-                case UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT32_FTZ:
-                    os << "UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT32_FTZ";
-                    break;
-                case UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_TFLOAT32:
-                    os << "UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_TFLOAT32";
-                    break;
-                case UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_TFLOAT32_FTZ:
-                    os << "UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_TFLOAT32_FTZ";
-                    break;
-                default:
-                    os << "unknown enumerator";
-                    break;
-        }
-        return os;
-    }
-
-    namespace ur::details {
-    ///////////////////////////////////////////////////////////////////////////////
-    /// @brief Print ur_exp_tensor_map_data_type_flag_t flag
-    template<>
-    inline ur_result_t printFlag<ur_exp_tensor_map_data_type_flag_t>(std::ostream &os, uint32_t flag) {
-        uint32_t val = flag;
-        bool first = true;
-            
-            if ((val & UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT8) == (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT8) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT8;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT8;
-            }
-            
-            if ((val & UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT16) == (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT16) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT16;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT16;
-            }
-            
-            if ((val & UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT32) == (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT32) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT32;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT32;
-            }
-            
-            if ((val & UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_INT32) == (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_INT32) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_INT32;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_INT32;
-            }
-            
-            if ((val & UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT64) == (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT64) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT64;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_UINT64;
-            }
-            
-            if ((val & UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_INT64) == (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_INT64) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_INT64;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_INT64;
-            }
-            
-            if ((val & UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT16) == (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT16) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT16;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT16;
-            }
-            
-            if ((val & UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT32) == (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT32) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT32;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT32;
-            }
-            
-            if ((val & UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT64) == (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT64) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT64;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT64;
-            }
-            
-            if ((val & UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_BFLOAT16) == (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_BFLOAT16) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_BFLOAT16;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_BFLOAT16;
-            }
-            
-            if ((val & UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT32_FTZ) == (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT32_FTZ) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT32_FTZ;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_FLOAT32_FTZ;
-            }
-            
-            if ((val & UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_TFLOAT32) == (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_TFLOAT32) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_TFLOAT32;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_TFLOAT32;
-            }
-            
-            if ((val & UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_TFLOAT32_FTZ) == (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_TFLOAT32_FTZ) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_TFLOAT32_FTZ;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_DATA_TYPE_FLAG_TFLOAT32_FTZ;
-            }
-        if (val != 0) {
-            std::bitset<32> bits(val);
-            if (!first) {
-                os << " | ";
-            }
-            os << "unknown bit flags " << bits;
-        } else if (first) {
-            os << "0";
-        }
-        return UR_RESULT_SUCCESS;
-    }
-    } // namespace ur::details
-    ///////////////////////////////////////////////////////////////////////////////
-    /// @brief Print operator for the ur_exp_tensor_map_interleave_flag_t type
-    /// @returns
-    ///     std::ostream &
-    inline std::ostream &operator<<(std::ostream &os, enum ur_exp_tensor_map_interleave_flag_t value) {
-        switch (value) {
-                case UR_EXP_TENSOR_MAP_INTERLEAVE_FLAG_NONE:
-                    os << "UR_EXP_TENSOR_MAP_INTERLEAVE_FLAG_NONE";
-                    break;
-                case UR_EXP_TENSOR_MAP_INTERLEAVE_FLAG_16B:
-                    os << "UR_EXP_TENSOR_MAP_INTERLEAVE_FLAG_16B";
-                    break;
-                case UR_EXP_TENSOR_MAP_INTERLEAVE_FLAG_32B:
-                    os << "UR_EXP_TENSOR_MAP_INTERLEAVE_FLAG_32B";
-                    break;
-                default:
-                    os << "unknown enumerator";
-                    break;
-        }
-        return os;
-    }
-
-    namespace ur::details {
-    ///////////////////////////////////////////////////////////////////////////////
-    /// @brief Print ur_exp_tensor_map_interleave_flag_t flag
-    template<>
-    inline ur_result_t printFlag<ur_exp_tensor_map_interleave_flag_t>(std::ostream &os, uint32_t flag) {
-        uint32_t val = flag;
-        bool first = true;
-            
-            if ((val & UR_EXP_TENSOR_MAP_INTERLEAVE_FLAG_NONE) == (uint32_t)UR_EXP_TENSOR_MAP_INTERLEAVE_FLAG_NONE) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_INTERLEAVE_FLAG_NONE;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_INTERLEAVE_FLAG_NONE;
-            }
-            
-            if ((val & UR_EXP_TENSOR_MAP_INTERLEAVE_FLAG_16B) == (uint32_t)UR_EXP_TENSOR_MAP_INTERLEAVE_FLAG_16B) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_INTERLEAVE_FLAG_16B;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_INTERLEAVE_FLAG_16B;
-            }
-            
-            if ((val & UR_EXP_TENSOR_MAP_INTERLEAVE_FLAG_32B) == (uint32_t)UR_EXP_TENSOR_MAP_INTERLEAVE_FLAG_32B) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_INTERLEAVE_FLAG_32B;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_INTERLEAVE_FLAG_32B;
-            }
-        if (val != 0) {
-            std::bitset<32> bits(val);
-            if (!first) {
-                os << " | ";
-            }
-            os << "unknown bit flags " << bits;
-        } else if (first) {
-            os << "0";
-        }
-        return UR_RESULT_SUCCESS;
-    }
-    } // namespace ur::details
-    ///////////////////////////////////////////////////////////////////////////////
-    /// @brief Print operator for the ur_exp_tensor_map_l2_promotion_flag_t type
-    /// @returns
-    ///     std::ostream &
-    inline std::ostream &operator<<(std::ostream &os, enum ur_exp_tensor_map_l2_promotion_flag_t value) {
-        switch (value) {
-                case UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_NONE:
-                    os << "UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_NONE";
-                    break;
-                case UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_64B:
-                    os << "UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_64B";
-                    break;
-                case UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_128B:
-                    os << "UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_128B";
-                    break;
-                case UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_256B:
-                    os << "UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_256B";
-                    break;
-                default:
-                    os << "unknown enumerator";
-                    break;
-        }
-        return os;
-    }
-
-    namespace ur::details {
-    ///////////////////////////////////////////////////////////////////////////////
-    /// @brief Print ur_exp_tensor_map_l2_promotion_flag_t flag
-    template<>
-    inline ur_result_t printFlag<ur_exp_tensor_map_l2_promotion_flag_t>(std::ostream &os, uint32_t flag) {
-        uint32_t val = flag;
-        bool first = true;
-            
-            if ((val & UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_NONE) == (uint32_t)UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_NONE) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_NONE;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_NONE;
-            }
-            
-            if ((val & UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_64B) == (uint32_t)UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_64B) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_64B;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_64B;
-            }
-            
-            if ((val & UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_128B) == (uint32_t)UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_128B) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_128B;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_128B;
-            }
-            
-            if ((val & UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_256B) == (uint32_t)UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_256B) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_256B;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_L2_PROMOTION_FLAG_256B;
-            }
-        if (val != 0) {
-            std::bitset<32> bits(val);
-            if (!first) {
-                os << " | ";
-            }
-            os << "unknown bit flags " << bits;
-        } else if (first) {
-            os << "0";
-        }
-        return UR_RESULT_SUCCESS;
-    }
-    } // namespace ur::details
-    ///////////////////////////////////////////////////////////////////////////////
-    /// @brief Print operator for the ur_exp_tensor_map_swizzle_flag_t type
-    /// @returns
-    ///     std::ostream &
-    inline std::ostream &operator<<(std::ostream &os, enum ur_exp_tensor_map_swizzle_flag_t value) {
-        switch (value) {
-                case UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_NONE:
-                    os << "UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_NONE";
-                    break;
-                case UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_32B:
-                    os << "UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_32B";
-                    break;
-                case UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_64B:
-                    os << "UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_64B";
-                    break;
-                case UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_128B:
-                    os << "UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_128B";
-                    break;
-                default:
-                    os << "unknown enumerator";
-                    break;
-        }
-        return os;
-    }
-
-    namespace ur::details {
-    ///////////////////////////////////////////////////////////////////////////////
-    /// @brief Print ur_exp_tensor_map_swizzle_flag_t flag
-    template<>
-    inline ur_result_t printFlag<ur_exp_tensor_map_swizzle_flag_t>(std::ostream &os, uint32_t flag) {
-        uint32_t val = flag;
-        bool first = true;
-            
-            if ((val & UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_NONE) == (uint32_t)UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_NONE) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_NONE;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_NONE;
-            }
-            
-            if ((val & UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_32B) == (uint32_t)UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_32B) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_32B;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_32B;
-            }
-            
-            if ((val & UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_64B) == (uint32_t)UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_64B) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_64B;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_64B;
-            }
-            
-            if ((val & UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_128B) == (uint32_t)UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_128B) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_128B;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_SWIZZLE_FLAG_128B;
-            }
-        if (val != 0) {
-            std::bitset<32> bits(val);
-            if (!first) {
-                os << " | ";
-            }
-            os << "unknown bit flags " << bits;
-        } else if (first) {
-            os << "0";
-        }
-        return UR_RESULT_SUCCESS;
-    }
-    } // namespace ur::details
-    ///////////////////////////////////////////////////////////////////////////////
-    /// @brief Print operator for the ur_exp_tensor_map_oob_fill_flag_t type
-    /// @returns
-    ///     std::ostream &
-    inline std::ostream &operator<<(std::ostream &os, enum ur_exp_tensor_map_oob_fill_flag_t value) {
-        switch (value) {
-                case UR_EXP_TENSOR_MAP_OOB_FILL_FLAG_NONE:
-                    os << "UR_EXP_TENSOR_MAP_OOB_FILL_FLAG_NONE";
-                    break;
-                case UR_EXP_TENSOR_MAP_OOB_FILL_FLAG_REQUEST_ZERO_FMA:
-                    os << "UR_EXP_TENSOR_MAP_OOB_FILL_FLAG_REQUEST_ZERO_FMA";
-                    break;
-                default:
-                    os << "unknown enumerator";
-                    break;
-        }
-        return os;
-    }
-
-    namespace ur::details {
-    ///////////////////////////////////////////////////////////////////////////////
-    /// @brief Print ur_exp_tensor_map_oob_fill_flag_t flag
-    template<>
-    inline ur_result_t printFlag<ur_exp_tensor_map_oob_fill_flag_t>(std::ostream &os, uint32_t flag) {
-        uint32_t val = flag;
-        bool first = true;
-            
-            if ((val & UR_EXP_TENSOR_MAP_OOB_FILL_FLAG_NONE) == (uint32_t)UR_EXP_TENSOR_MAP_OOB_FILL_FLAG_NONE) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_OOB_FILL_FLAG_NONE;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_OOB_FILL_FLAG_NONE;
-            }
-            
-            if ((val & UR_EXP_TENSOR_MAP_OOB_FILL_FLAG_REQUEST_ZERO_FMA) == (uint32_t)UR_EXP_TENSOR_MAP_OOB_FILL_FLAG_REQUEST_ZERO_FMA) {
-                val ^= (uint32_t)UR_EXP_TENSOR_MAP_OOB_FILL_FLAG_REQUEST_ZERO_FMA;
-                if (!first) {
-                    os << " | ";
-                } else {
-                    first = false;
-                }
-                os << UR_EXP_TENSOR_MAP_OOB_FILL_FLAG_REQUEST_ZERO_FMA;
-            }
-        if (val != 0) {
-            std::bitset<32> bits(val);
-            if (!first) {
-                os << " | ";
-            }
-            os << "unknown bit flags " << bits;
-        } else if (first) {
-            os << "0";
-        }
-        return UR_RESULT_SUCCESS;
-    }
-    } // namespace ur::details
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -24662,44 +24236,6 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
 
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the ur_command_buffer_retain_command_exp_params_t type
-/// @returns
-///     std::ostream &
-inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_command_buffer_retain_command_exp_params_t *params) {
-    
-        
-    
-        os << ".hCommand = ";
-        
-        ur::details::printPtr(os, 
-            *(params->phCommand)
-        );
-
-
-    return os;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the ur_command_buffer_release_command_exp_params_t type
-/// @returns
-///     std::ostream &
-inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_command_buffer_release_command_exp_params_t *params) {
-    
-        
-    
-        os << ".hCommand = ";
-        
-        ur::details::printPtr(os, 
-            *(params->phCommand)
-        );
-
-
-    return os;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Print operator for the ur_command_buffer_update_kernel_launch_exp_params_t type
 /// @returns
 ///     std::ostream &
@@ -24854,369 +24390,6 @@ inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct 
         
         ur::details::printPtr(os, 
             *(params->ppPropSizeRet)
-        );
-
-
-    return os;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the ur_command_buffer_command_get_info_exp_params_t type
-/// @returns
-///     std::ostream &
-inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_command_buffer_command_get_info_exp_params_t *params) {
-    
-        
-    
-        os << ".hCommand = ";
-        
-        ur::details::printPtr(os, 
-            *(params->phCommand)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".propName = ";
-        
-        os << 
-            *(params->ppropName)
-        ;
-
-
-        
-    
-        os << ", ";
-        os << ".propSize = ";
-        
-        os << 
-            *(params->ppropSize)
-        ;
-
-
-        
-    
-        os << ", ";
-        os << ".pPropValue = ";
-        ur::details::printTagged(os, *(params->ppPropValue), *(params->ppropName), *(params->ppropSize));
-
-        
-    
-        os << ", ";
-        os << ".pPropSizeRet = ";
-        
-        ur::details::printPtr(os, 
-            *(params->ppPropSizeRet)
-        );
-
-
-    return os;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the ur_tensor_map_encode_im_2_col_exp_params_t type
-/// @returns
-///     std::ostream &
-inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_tensor_map_encode_im_2_col_exp_params_t *params) {
-    
-        
-    
-        os << ".hDevice = ";
-        
-        ur::details::printPtr(os, 
-            *(params->phDevice)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".TensorMapType = ";
-        
-        ur::details::printFlag<ur_exp_tensor_map_data_type_flag_t>(os, 
-            *(params->pTensorMapType)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".TensorRank = ";
-        
-        os << 
-            *(params->pTensorRank)
-        ;
-
-
-        
-    
-        os << ", ";
-        os << ".GlobalAddress = ";
-        
-        ur::details::printPtr(os, 
-            *(params->pGlobalAddress)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".GlobalDim = ";
-        
-        ur::details::printPtr(os, 
-            *(params->pGlobalDim)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".GlobalStrides = ";
-        
-        ur::details::printPtr(os, 
-            *(params->pGlobalStrides)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".PixelBoxLowerCorner = ";
-        
-        ur::details::printPtr(os, 
-            *(params->pPixelBoxLowerCorner)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".PixelBoxUpperCorner = ";
-        
-        ur::details::printPtr(os, 
-            *(params->pPixelBoxUpperCorner)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".ChannelsPerPixel = ";
-        
-        os << 
-            *(params->pChannelsPerPixel)
-        ;
-
-
-        
-    
-        os << ", ";
-        os << ".PixelsPerColumn = ";
-        
-        os << 
-            *(params->pPixelsPerColumn)
-        ;
-
-
-        
-    
-        os << ", ";
-        os << ".ElementStrides = ";
-        
-        ur::details::printPtr(os, 
-            *(params->pElementStrides)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".Interleave = ";
-        
-        ur::details::printFlag<ur_exp_tensor_map_interleave_flag_t>(os, 
-            *(params->pInterleave)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".Swizzle = ";
-        
-        ur::details::printFlag<ur_exp_tensor_map_swizzle_flag_t>(os, 
-            *(params->pSwizzle)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".L2Promotion = ";
-        
-        ur::details::printFlag<ur_exp_tensor_map_l2_promotion_flag_t>(os, 
-            *(params->pL2Promotion)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".OobFill = ";
-        
-        ur::details::printFlag<ur_exp_tensor_map_oob_fill_flag_t>(os, 
-            *(params->pOobFill)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".hTensorMap = ";
-        
-        ur::details::printPtr(os, 
-            *(params->phTensorMap)
-        );
-
-
-    return os;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Print operator for the ur_tensor_map_encode_tiled_exp_params_t type
-/// @returns
-///     std::ostream &
-inline std::ostream &operator<<(std::ostream &os, [[maybe_unused]] const struct ur_tensor_map_encode_tiled_exp_params_t *params) {
-    
-        
-    
-        os << ".hDevice = ";
-        
-        ur::details::printPtr(os, 
-            *(params->phDevice)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".TensorMapType = ";
-        
-        ur::details::printFlag<ur_exp_tensor_map_data_type_flag_t>(os, 
-            *(params->pTensorMapType)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".TensorRank = ";
-        
-        os << 
-            *(params->pTensorRank)
-        ;
-
-
-        
-    
-        os << ", ";
-        os << ".GlobalAddress = ";
-        
-        ur::details::printPtr(os, 
-            *(params->pGlobalAddress)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".GlobalDim = ";
-        
-        ur::details::printPtr(os, 
-            *(params->pGlobalDim)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".GlobalStrides = ";
-        
-        ur::details::printPtr(os, 
-            *(params->pGlobalStrides)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".BoxDim = ";
-        
-        ur::details::printPtr(os, 
-            *(params->pBoxDim)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".ElementStrides = ";
-        
-        ur::details::printPtr(os, 
-            *(params->pElementStrides)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".Interleave = ";
-        
-        ur::details::printFlag<ur_exp_tensor_map_interleave_flag_t>(os, 
-            *(params->pInterleave)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".Swizzle = ";
-        
-        ur::details::printFlag<ur_exp_tensor_map_swizzle_flag_t>(os, 
-            *(params->pSwizzle)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".L2Promotion = ";
-        
-        ur::details::printFlag<ur_exp_tensor_map_l2_promotion_flag_t>(os, 
-            *(params->pL2Promotion)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".OobFill = ";
-        
-        ur::details::printFlag<ur_exp_tensor_map_oob_fill_flag_t>(os, 
-            *(params->pOobFill)
-        );
-
-
-        
-    
-        os << ", ";
-        os << ".hTensorMap = ";
-        
-        ur::details::printPtr(os, 
-            *(params->phTensorMap)
         );
 
 
@@ -26798,12 +25971,6 @@ inline ur_result_t UR_APICALL printFunctionParams(std::ostream &os, ur_function_
         case UR_FUNCTION_COMMAND_BUFFER_ENQUEUE_EXP: {
             os << (const struct ur_command_buffer_enqueue_exp_params_t *)params;
         } break;
-        case UR_FUNCTION_COMMAND_BUFFER_RETAIN_COMMAND_EXP: {
-            os << (const struct ur_command_buffer_retain_command_exp_params_t *)params;
-        } break;
-        case UR_FUNCTION_COMMAND_BUFFER_RELEASE_COMMAND_EXP: {
-            os << (const struct ur_command_buffer_release_command_exp_params_t *)params;
-        } break;
         case UR_FUNCTION_COMMAND_BUFFER_UPDATE_KERNEL_LAUNCH_EXP: {
             os << (const struct ur_command_buffer_update_kernel_launch_exp_params_t *)params;
         } break;
@@ -26815,15 +25982,6 @@ inline ur_result_t UR_APICALL printFunctionParams(std::ostream &os, ur_function_
         } break;
         case UR_FUNCTION_COMMAND_BUFFER_GET_INFO_EXP: {
             os << (const struct ur_command_buffer_get_info_exp_params_t *)params;
-        } break;
-        case UR_FUNCTION_COMMAND_BUFFER_COMMAND_GET_INFO_EXP: {
-            os << (const struct ur_command_buffer_command_get_info_exp_params_t *)params;
-        } break;
-        case UR_FUNCTION_TENSOR_MAP_ENCODE_IM_2_COL_EXP: {
-            os << (const struct ur_tensor_map_encode_im_2_col_exp_params_t *)params;
-        } break;
-        case UR_FUNCTION_TENSOR_MAP_ENCODE_TILED_EXP: {
-            os << (const struct ur_tensor_map_encode_tiled_exp_params_t *)params;
         } break;
         case UR_FUNCTION_USM_P2P_ENABLE_PEER_ACCESS_EXP: {
             os << (const struct ur_usm_p2p_enable_peer_access_exp_params_t *)params;

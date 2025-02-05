@@ -90,7 +90,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemRelease(ur_mem_handle_t hMem) {
 
 /// Creates a UR Memory object using a HIP memory allocation.
 /// Can trigger a manual copy depending on the mode.
-/// \TODO Implement USE_HOST_PTR using hipHostRegister - See #9789
+/// \TODO Implement USE_HOST_PTR using hipHostRegister
+/// https://github.com/intel/llvm/issues/9789
 UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
     ur_context_handle_t hContext, ur_mem_flags_t flags, size_t size,
     const ur_buffer_properties_t *pProperties, ur_mem_handle_t *phBuffer) {
@@ -301,6 +302,9 @@ UR_APIEXPORT ur_result_t UR_APICALL
 urMemGetNativeHandle(ur_mem_handle_t hMem, ur_device_handle_t Device,
                      ur_native_handle_t *phNativeMem) {
   UR_ASSERT(Device != nullptr, UR_RESULT_ERROR_INVALID_NULL_HANDLE);
+  if (hMem->isImage()) {
+    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+  }
 #if defined(__HIP_PLATFORM_NVIDIA__)
   if (sizeof(BufferMem::native_type) > sizeof(ur_native_handle_t)) {
     // Check that all the upper bits that cannot be represented by

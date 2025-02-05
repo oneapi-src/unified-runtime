@@ -289,9 +289,6 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
   pDdiTable->pfnEnqueueExp = urCommandBufferEnqueueExp;
   pDdiTable->pfnUpdateKernelLaunchExp = urCommandBufferUpdateKernelLaunchExp;
   pDdiTable->pfnGetInfoExp = urCommandBufferGetInfoExp;
-  pDdiTable->pfnCommandGetInfoExp = urCommandBufferCommandGetInfoExp;
-  pDdiTable->pfnReleaseCommandExp = urCommandBufferReleaseCommandExp;
-  pDdiTable->pfnRetainCommandExp = urCommandBufferRetainCommandExp;
   pDdiTable->pfnUpdateWaitEventsExp = urCommandBufferUpdateWaitEventsExp;
   pDdiTable->pfnUpdateSignalEventExp = urCommandBufferUpdateSignalEventExp;
 
@@ -374,10 +371,10 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetUSMExpProcAddrTable(
 }
 
 UR_DLLEXPORT ur_result_t UR_APICALL urGetVirtualMemProcAddrTable(
-    ur_api_version_t version, ///< [in] API version requested
-    ur_virtual_mem_dditable_t
-        *pDdiTable ///< [in,out] pointer to table of DDI function pointers
-) {
+    /// [in] API version requested
+    ur_api_version_t version,
+    /// [in,out] pointer to table of DDI function pointers
+    ur_virtual_mem_dditable_t *pDdiTable) {
   auto retVal = validateProcInputs(version, pDdiTable);
   if (UR_RESULT_SUCCESS != retVal) {
     return retVal;
@@ -418,19 +415,6 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetKernelExpProcAddrTable(
   pDdiTable->pfnSuggestMaxCooperativeGroupCountExp = nullptr;
 
   return UR_RESULT_SUCCESS;
-}
-
-UR_APIEXPORT ur_result_t UR_APICALL urGetTensorMapExpProcAddrTable(
-    ur_api_version_t version, ur_tensor_map_exp_dditable_t *pDdiTable) {
-  auto result = validateProcInputs(version, pDdiTable);
-  if (UR_RESULT_SUCCESS != result) {
-    return result;
-  }
-
-  pDdiTable->pfnEncodeIm2ColExp = urTensorMapEncodeIm2ColExp;
-  pDdiTable->pfnEncodeTiledExp = urTensorMapEncodeTiledExp;
-
-  return result;
 }
 
 UR_DLLEXPORT ur_result_t UR_APICALL urGetProgramExpProcAddrTable(
