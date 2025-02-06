@@ -6001,6 +6001,388 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueWriteHostPipe(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urEnqueueUSMDeviceAllocExp
+__urdlllocal ur_result_t UR_APICALL urEnqueueUSMDeviceAllocExp(
+    /// [in] handle of the queue object
+    ur_queue_handle_t hQueue,
+    /// [in][optional] USM pool descriptor
+    ur_usm_pool_handle_t pPool,
+    /// [in] minimum size in bytes of the USM memory object to be allocated
+    const size_t size,
+    /// [in][optional] pointer to the enqueue async alloc properties
+    const ur_exp_async_usm_alloc_properties_t *pProperties,
+    /// [in] size of the event wait list
+    uint32_t numEventsInWaitList,
+    /// [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    /// events that must be complete before the kernel execution.
+    /// If nullptr, the numEventsInWaitList must be 0, indicating no wait
+    /// events.
+    const ur_event_handle_t *phEventWaitList,
+    /// [out] pointer to USM memory object
+    void **ppMem,
+    /// [out][optional] return an event object that identifies the async alloc
+    ur_event_handle_t *phEvent) {
+  auto pfnUSMDeviceAllocExp =
+      getContext()->urDdiTable.EnqueueExp.pfnUSMDeviceAllocExp;
+
+  if (nullptr == pfnUSMDeviceAllocExp)
+    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+
+  ur_enqueue_usm_device_alloc_exp_params_t params = {
+      &hQueue,          &pPool, &size,   &pProperties, &numEventsInWaitList,
+      &phEventWaitList, &ppMem, &phEvent};
+  uint64_t instance =
+      getContext()->notify_begin(UR_FUNCTION_ENQUEUE_USM_DEVICE_ALLOC_EXP,
+                                 "urEnqueueUSMDeviceAllocExp", &params);
+
+  auto &logger = getContext()->logger;
+  logger.info("   ---> urEnqueueUSMDeviceAllocExp\n");
+
+  ur_result_t result = pfnUSMDeviceAllocExp(hQueue, pPool, size, pProperties,
+                                            numEventsInWaitList,
+                                            phEventWaitList, ppMem, phEvent);
+
+  getContext()->notify_end(UR_FUNCTION_ENQUEUE_USM_DEVICE_ALLOC_EXP,
+                           "urEnqueueUSMDeviceAllocExp", &params, &result,
+                           instance);
+
+  if (logger.getLevel() <= logger::Level::INFO) {
+    std::ostringstream args_str;
+    ur::extras::printFunctionParams(
+        args_str, UR_FUNCTION_ENQUEUE_USM_DEVICE_ALLOC_EXP, &params);
+    logger.info("   <--- urEnqueueUSMDeviceAllocExp({}) -> {};\n",
+                args_str.str(), result);
+  }
+
+  return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urEnqueueUSMSharedAllocExp
+__urdlllocal ur_result_t UR_APICALL urEnqueueUSMSharedAllocExp(
+    /// [in] handle of the queue object
+    ur_queue_handle_t hQueue,
+    /// [in][optional] USM pool descriptor
+    ur_usm_pool_handle_t pPool,
+    /// [in] minimum size in bytes of the USM memory object to be allocated
+    const size_t size,
+    /// [in][optional] pointer to the enqueue async alloc properties
+    const ur_exp_async_usm_alloc_properties_t *pProperties,
+    /// [in] size of the event wait list
+    uint32_t numEventsInWaitList,
+    /// [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    /// events that must be complete before the kernel execution.
+    /// If nullptr, the numEventsInWaitList must be 0, indicating no wait
+    /// events.
+    const ur_event_handle_t *phEventWaitList,
+    /// [out] pointer to USM memory object
+    void **ppMem,
+    /// [out][optional] return an event object that identifies the async alloc
+    ur_event_handle_t *phEvent) {
+  auto pfnUSMSharedAllocExp =
+      getContext()->urDdiTable.EnqueueExp.pfnUSMSharedAllocExp;
+
+  if (nullptr == pfnUSMSharedAllocExp)
+    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+
+  ur_enqueue_usm_shared_alloc_exp_params_t params = {
+      &hQueue,          &pPool, &size,   &pProperties, &numEventsInWaitList,
+      &phEventWaitList, &ppMem, &phEvent};
+  uint64_t instance =
+      getContext()->notify_begin(UR_FUNCTION_ENQUEUE_USM_SHARED_ALLOC_EXP,
+                                 "urEnqueueUSMSharedAllocExp", &params);
+
+  auto &logger = getContext()->logger;
+  logger.info("   ---> urEnqueueUSMSharedAllocExp\n");
+
+  ur_result_t result = pfnUSMSharedAllocExp(hQueue, pPool, size, pProperties,
+                                            numEventsInWaitList,
+                                            phEventWaitList, ppMem, phEvent);
+
+  getContext()->notify_end(UR_FUNCTION_ENQUEUE_USM_SHARED_ALLOC_EXP,
+                           "urEnqueueUSMSharedAllocExp", &params, &result,
+                           instance);
+
+  if (logger.getLevel() <= logger::Level::INFO) {
+    std::ostringstream args_str;
+    ur::extras::printFunctionParams(
+        args_str, UR_FUNCTION_ENQUEUE_USM_SHARED_ALLOC_EXP, &params);
+    logger.info("   <--- urEnqueueUSMSharedAllocExp({}) -> {};\n",
+                args_str.str(), result);
+  }
+
+  return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urEnqueueUSMHostAllocExp
+__urdlllocal ur_result_t UR_APICALL urEnqueueUSMHostAllocExp(
+    /// [in] handle of the queue object
+    ur_queue_handle_t hQueue,
+    /// [in][optional] USM pool descriptor
+    ur_usm_pool_handle_t pPool,
+    /// [in] minimum size in bytes of the USM memory object to be allocated
+    const size_t size,
+    /// [in][optional] pointer to the enqueue async alloc properties
+    const ur_exp_async_usm_alloc_properties_t *pProperties,
+    /// [in] size of the event wait list
+    uint32_t numEventsInWaitList,
+    /// [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    /// events that must be complete before the kernel execution.
+    /// If nullptr, the numEventsInWaitList must be 0, indicating no wait
+    /// events.
+    const ur_event_handle_t *phEventWaitList,
+    /// [out] pointer to USM memory object
+    void **ppMem,
+    /// [out][optional] return an event object that identifies the async alloc
+    ur_event_handle_t *phEvent) {
+  auto pfnUSMHostAllocExp =
+      getContext()->urDdiTable.EnqueueExp.pfnUSMHostAllocExp;
+
+  if (nullptr == pfnUSMHostAllocExp)
+    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+
+  ur_enqueue_usm_host_alloc_exp_params_t params = {
+      &hQueue,          &pPool, &size,   &pProperties, &numEventsInWaitList,
+      &phEventWaitList, &ppMem, &phEvent};
+  uint64_t instance =
+      getContext()->notify_begin(UR_FUNCTION_ENQUEUE_USM_HOST_ALLOC_EXP,
+                                 "urEnqueueUSMHostAllocExp", &params);
+
+  auto &logger = getContext()->logger;
+  logger.info("   ---> urEnqueueUSMHostAllocExp\n");
+
+  ur_result_t result =
+      pfnUSMHostAllocExp(hQueue, pPool, size, pProperties, numEventsInWaitList,
+                         phEventWaitList, ppMem, phEvent);
+
+  getContext()->notify_end(UR_FUNCTION_ENQUEUE_USM_HOST_ALLOC_EXP,
+                           "urEnqueueUSMHostAllocExp", &params, &result,
+                           instance);
+
+  if (logger.getLevel() <= logger::Level::INFO) {
+    std::ostringstream args_str;
+    ur::extras::printFunctionParams(
+        args_str, UR_FUNCTION_ENQUEUE_USM_HOST_ALLOC_EXP, &params);
+    logger.info("   <--- urEnqueueUSMHostAllocExp({}) -> {};\n", args_str.str(),
+                result);
+  }
+
+  return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urEnqueueUSMFreeExp
+__urdlllocal ur_result_t UR_APICALL urEnqueueUSMFreeExp(
+    /// [in] handle of the queue object
+    ur_queue_handle_t hQueue,
+    /// [in][optional] USM pool descriptor
+    ur_usm_pool_handle_t pPool,
+    /// [in] pointer to USM memory object
+    void *pMem,
+    /// [in] size of the event wait list
+    uint32_t numEventsInWaitList,
+    /// [in][optional][range(0, numEventsInWaitList)] pointer to a list of
+    /// events that must be complete before the kernel execution.
+    /// If nullptr, the numEventsInWaitList must be 0, indicating no wait
+    /// events.
+    const ur_event_handle_t *phEventWaitList,
+    /// [out][optional] return an event object that identifies the async alloc
+    ur_event_handle_t *phEvent) {
+  auto pfnUSMFreeExp = getContext()->urDdiTable.EnqueueExp.pfnUSMFreeExp;
+
+  if (nullptr == pfnUSMFreeExp)
+    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+
+  ur_enqueue_usm_free_exp_params_t params = {
+      &hQueue, &pPool, &pMem, &numEventsInWaitList, &phEventWaitList, &phEvent};
+  uint64_t instance = getContext()->notify_begin(
+      UR_FUNCTION_ENQUEUE_USM_FREE_EXP, "urEnqueueUSMFreeExp", &params);
+
+  auto &logger = getContext()->logger;
+  logger.info("   ---> urEnqueueUSMFreeExp\n");
+
+  ur_result_t result = pfnUSMFreeExp(hQueue, pPool, pMem, numEventsInWaitList,
+                                     phEventWaitList, phEvent);
+
+  getContext()->notify_end(UR_FUNCTION_ENQUEUE_USM_FREE_EXP,
+                           "urEnqueueUSMFreeExp", &params, &result, instance);
+
+  if (logger.getLevel() <= logger::Level::INFO) {
+    std::ostringstream args_str;
+    ur::extras::printFunctionParams(args_str, UR_FUNCTION_ENQUEUE_USM_FREE_EXP,
+                                    &params);
+    logger.info("   <--- urEnqueueUSMFreeExp({}) -> {};\n", args_str.str(),
+                result);
+  }
+
+  return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMPoolCreateExp
+__urdlllocal ur_result_t UR_APICALL urUSMPoolCreateExp(
+    /// [in] handle of the context object
+    ur_context_handle_t hContext,
+    /// [in] handle of the device object
+    ur_device_handle_t hDevice,
+    /// [in] pointer to USM pool descriptor. Can be chained with
+    /// ::ur_usm_pool_limits_desc_t
+    ur_usm_pool_desc_t *pPoolDesc,
+    /// [out] pointer to USM memory pool
+    ur_usm_pool_handle_t *pPool) {
+  auto pfnPoolCreateExp = getContext()->urDdiTable.USMExp.pfnPoolCreateExp;
+
+  if (nullptr == pfnPoolCreateExp)
+    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+
+  ur_usm_pool_create_exp_params_t params = {&hContext, &hDevice, &pPoolDesc,
+                                            &pPool};
+  uint64_t instance = getContext()->notify_begin(
+      UR_FUNCTION_USM_POOL_CREATE_EXP, "urUSMPoolCreateExp", &params);
+
+  auto &logger = getContext()->logger;
+  logger.info("   ---> urUSMPoolCreateExp\n");
+
+  ur_result_t result = pfnPoolCreateExp(hContext, hDevice, pPoolDesc, pPool);
+
+  getContext()->notify_end(UR_FUNCTION_USM_POOL_CREATE_EXP,
+                           "urUSMPoolCreateExp", &params, &result, instance);
+
+  if (logger.getLevel() <= logger::Level::INFO) {
+    std::ostringstream args_str;
+    ur::extras::printFunctionParams(args_str, UR_FUNCTION_USM_POOL_CREATE_EXP,
+                                    &params);
+    logger.info("   <--- urUSMPoolCreateExp({}) -> {};\n", args_str.str(),
+                result);
+  }
+
+  return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMPoolDestroyExp
+__urdlllocal ur_result_t UR_APICALL urUSMPoolDestroyExp(
+    /// [in] handle of the context object
+    ur_context_handle_t hContext,
+    /// [in] handle of the device object
+    ur_device_handle_t hDevice,
+    /// [in] handle to USM memory pool to be destroyed
+    ur_usm_pool_handle_t hPool) {
+  auto pfnPoolDestroyExp = getContext()->urDdiTable.USMExp.pfnPoolDestroyExp;
+
+  if (nullptr == pfnPoolDestroyExp)
+    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+
+  ur_usm_pool_destroy_exp_params_t params = {&hContext, &hDevice, &hPool};
+  uint64_t instance = getContext()->notify_begin(
+      UR_FUNCTION_USM_POOL_DESTROY_EXP, "urUSMPoolDestroyExp", &params);
+
+  auto &logger = getContext()->logger;
+  logger.info("   ---> urUSMPoolDestroyExp\n");
+
+  ur_result_t result = pfnPoolDestroyExp(hContext, hDevice, hPool);
+
+  getContext()->notify_end(UR_FUNCTION_USM_POOL_DESTROY_EXP,
+                           "urUSMPoolDestroyExp", &params, &result, instance);
+
+  if (logger.getLevel() <= logger::Level::INFO) {
+    std::ostringstream args_str;
+    ur::extras::printFunctionParams(args_str, UR_FUNCTION_USM_POOL_DESTROY_EXP,
+                                    &params);
+    logger.info("   <--- urUSMPoolDestroyExp({}) -> {};\n", args_str.str(),
+                result);
+  }
+
+  return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMPoolSetThresholdExp
+__urdlllocal ur_result_t UR_APICALL urUSMPoolSetThresholdExp(
+    /// [in] handle of the context object
+    ur_context_handle_t hContext,
+    /// [in] handle of the device object
+    ur_device_handle_t hDevice,
+    /// [in] handle to USM memory pool for the threshold to be set
+    ur_usm_pool_handle_t hPool,
+    /// [in] release threshold to be set
+    size_t newThreshold) {
+  auto pfnPoolSetThresholdExp =
+      getContext()->urDdiTable.USMExp.pfnPoolSetThresholdExp;
+
+  if (nullptr == pfnPoolSetThresholdExp)
+    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+
+  ur_usm_pool_set_threshold_exp_params_t params = {&hContext, &hDevice, &hPool,
+                                                   &newThreshold};
+  uint64_t instance =
+      getContext()->notify_begin(UR_FUNCTION_USM_POOL_SET_THRESHOLD_EXP,
+                                 "urUSMPoolSetThresholdExp", &params);
+
+  auto &logger = getContext()->logger;
+  logger.info("   ---> urUSMPoolSetThresholdExp\n");
+
+  ur_result_t result =
+      pfnPoolSetThresholdExp(hContext, hDevice, hPool, newThreshold);
+
+  getContext()->notify_end(UR_FUNCTION_USM_POOL_SET_THRESHOLD_EXP,
+                           "urUSMPoolSetThresholdExp", &params, &result,
+                           instance);
+
+  if (logger.getLevel() <= logger::Level::INFO) {
+    std::ostringstream args_str;
+    ur::extras::printFunctionParams(
+        args_str, UR_FUNCTION_USM_POOL_SET_THRESHOLD_EXP, &params);
+    logger.info("   <--- urUSMPoolSetThresholdExp({}) -> {};\n", args_str.str(),
+                result);
+  }
+
+  return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intercept function for urUSMPoolGetDefaultDevicePoolExp
+__urdlllocal ur_result_t UR_APICALL urUSMPoolGetDefaultDevicePoolExp(
+    /// [in] handle of the context object
+    ur_context_handle_t hContext,
+    /// [in] handle of the device object
+    ur_device_handle_t hDevice,
+    /// [out] pointer to USM memory pool
+    ur_usm_pool_handle_t *pPool) {
+  auto pfnPoolGetDefaultDevicePoolExp =
+      getContext()->urDdiTable.USMExp.pfnPoolGetDefaultDevicePoolExp;
+
+  if (nullptr == pfnPoolGetDefaultDevicePoolExp)
+    return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+
+  ur_usm_pool_get_default_device_pool_exp_params_t params = {&hContext,
+                                                             &hDevice, &pPool};
+  uint64_t instance = getContext()->notify_begin(
+      UR_FUNCTION_USM_POOL_GET_DEFAULT_DEVICE_POOL_EXP,
+      "urUSMPoolGetDefaultDevicePoolExp", &params);
+
+  auto &logger = getContext()->logger;
+  logger.info("   ---> urUSMPoolGetDefaultDevicePoolExp\n");
+
+  ur_result_t result = pfnPoolGetDefaultDevicePoolExp(hContext, hDevice, pPool);
+
+  getContext()->notify_end(UR_FUNCTION_USM_POOL_GET_DEFAULT_DEVICE_POOL_EXP,
+                           "urUSMPoolGetDefaultDevicePoolExp", &params, &result,
+                           instance);
+
+  if (logger.getLevel() <= logger::Level::INFO) {
+    std::ostringstream args_str;
+    ur::extras::printFunctionParams(
+        args_str, UR_FUNCTION_USM_POOL_GET_DEFAULT_DEVICE_POOL_EXP, &params);
+    logger.info("   <--- urUSMPoolGetDefaultDevicePoolExp({}) -> {};\n",
+                args_str.str(), result);
+  }
+
+  return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urUSMPitchedAllocExp
 __urdlllocal ur_result_t UR_APICALL urUSMPitchedAllocExp(
     /// [in] handle of the context object
@@ -9533,6 +9915,20 @@ __urdlllocal ur_result_t UR_APICALL urGetEnqueueExpProcAddrTable(
   pDdiTable->pfnKernelLaunchCustomExp =
       ur_tracing_layer::urEnqueueKernelLaunchCustomExp;
 
+  dditable.pfnUSMDeviceAllocExp = pDdiTable->pfnUSMDeviceAllocExp;
+  pDdiTable->pfnUSMDeviceAllocExp =
+      ur_tracing_layer::urEnqueueUSMDeviceAllocExp;
+
+  dditable.pfnUSMSharedAllocExp = pDdiTable->pfnUSMSharedAllocExp;
+  pDdiTable->pfnUSMSharedAllocExp =
+      ur_tracing_layer::urEnqueueUSMSharedAllocExp;
+
+  dditable.pfnUSMHostAllocExp = pDdiTable->pfnUSMHostAllocExp;
+  pDdiTable->pfnUSMHostAllocExp = ur_tracing_layer::urEnqueueUSMHostAllocExp;
+
+  dditable.pfnUSMFreeExp = pDdiTable->pfnUSMFreeExp;
+  pDdiTable->pfnUSMFreeExp = ur_tracing_layer::urEnqueueUSMFreeExp;
+
   dditable.pfnCooperativeKernelLaunchExp =
       pDdiTable->pfnCooperativeKernelLaunchExp;
   pDdiTable->pfnCooperativeKernelLaunchExp =
@@ -10155,6 +10551,21 @@ __urdlllocal ur_result_t UR_APICALL urGetUSMExpProcAddrTable(
     return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
 
   ur_result_t result = UR_RESULT_SUCCESS;
+
+  dditable.pfnPoolCreateExp = pDdiTable->pfnPoolCreateExp;
+  pDdiTable->pfnPoolCreateExp = ur_tracing_layer::urUSMPoolCreateExp;
+
+  dditable.pfnPoolDestroyExp = pDdiTable->pfnPoolDestroyExp;
+  pDdiTable->pfnPoolDestroyExp = ur_tracing_layer::urUSMPoolDestroyExp;
+
+  dditable.pfnPoolSetThresholdExp = pDdiTable->pfnPoolSetThresholdExp;
+  pDdiTable->pfnPoolSetThresholdExp =
+      ur_tracing_layer::urUSMPoolSetThresholdExp;
+
+  dditable.pfnPoolGetDefaultDevicePoolExp =
+      pDdiTable->pfnPoolGetDefaultDevicePoolExp;
+  pDdiTable->pfnPoolGetDefaultDevicePoolExp =
+      ur_tracing_layer::urUSMPoolGetDefaultDevicePoolExp;
 
   dditable.pfnPitchedAllocExp = pDdiTable->pfnPitchedAllocExp;
   pDdiTable->pfnPitchedAllocExp = ur_tracing_layer::urUSMPitchedAllocExp;
