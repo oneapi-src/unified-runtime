@@ -1334,7 +1334,7 @@ ur_queue_handle_t_::executeCommandList(ur_command_list_ptr_t CommandList,
       Device->Platform->ContextsMutex, std::defer_lock);
 
   if (IndirectAccessTrackingEnabled) {
-    // We are going to submit kernels for execution. If indirect access flag is
+    // We are going to submit kernels for execution.  If indirect access flag is
     // set for a kernel then we need to make a snapshot of existing memory
     // allocations in all contexts in the platform. We need to lock the mutex
     // guarding the list of contexts in the platform to prevent creation of new
