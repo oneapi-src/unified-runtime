@@ -28,7 +28,7 @@ target_include_directories(ur_common PUBLIC
 
 message(STATUS "Download Unified Memory Framework from github.com")
 if (NOT DEFINED UMF_REPO)
-    set(UMF_REPO "https://github.com/oneapi-src/unified-memory-framework.git")
+    set(UMF_REPO "https://github.com/vinser52/unified-memory-framework.git")
 endif()
 
 if (NOT DEFINED UMF_TAG)
@@ -36,7 +36,7 @@ if (NOT DEFINED UMF_TAG)
     # Author: Rafał Rudnicki <rafal.rudnicki@intel.com>
     # Date:   Mon Jan 27 10:57:57 2025 +0100
     # Merge pull request #1056 from lukaszstolarczuk/hwloc-revert-examples-win
-    set(UMF_TAG 6709535de92933d6bfc1e1d19a324f17afec3877)
+    set(UMF_TAG 63c5902cc8db77db8d5d28535ef9daae812646f1)
 endif()
 
 message(STATUS "Will fetch Unified Memory Framework from ${UMF_REPO}")
