@@ -9810,98 +9810,6 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferEnqueueExp(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferRetainCommandExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferRetainCommandExp(
-    /// [in][retain] Handle of the command-buffer command.
-    ur_exp_command_buffer_command_handle_t hCommand) try {
-  ur_result_t result = UR_RESULT_SUCCESS;
-
-  ur_command_buffer_retain_command_exp_params_t params = {&hCommand};
-
-  auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-      mock::getCallbacks().get_before_callback(
-          "urCommandBufferRetainCommandExp"));
-  if (beforeCallback) {
-    result = beforeCallback(&params);
-    if (result != UR_RESULT_SUCCESS) {
-      return result;
-    }
-  }
-
-  auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-      mock::getCallbacks().get_replace_callback(
-          "urCommandBufferRetainCommandExp"));
-  if (replaceCallback) {
-    result = replaceCallback(&params);
-  } else {
-
-    mock::retainDummyHandle(hCommand);
-    result = UR_RESULT_SUCCESS;
-  }
-
-  if (result != UR_RESULT_SUCCESS) {
-    return result;
-  }
-
-  auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-      mock::getCallbacks().get_after_callback(
-          "urCommandBufferRetainCommandExp"));
-  if (afterCallback) {
-    return afterCallback(&params);
-  }
-
-  return result;
-} catch (...) {
-  return exceptionToResult(std::current_exception());
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferReleaseCommandExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferReleaseCommandExp(
-    /// [in][release] Handle of the command-buffer command.
-    ur_exp_command_buffer_command_handle_t hCommand) try {
-  ur_result_t result = UR_RESULT_SUCCESS;
-
-  ur_command_buffer_release_command_exp_params_t params = {&hCommand};
-
-  auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-      mock::getCallbacks().get_before_callback(
-          "urCommandBufferReleaseCommandExp"));
-  if (beforeCallback) {
-    result = beforeCallback(&params);
-    if (result != UR_RESULT_SUCCESS) {
-      return result;
-    }
-  }
-
-  auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-      mock::getCallbacks().get_replace_callback(
-          "urCommandBufferReleaseCommandExp"));
-  if (replaceCallback) {
-    result = replaceCallback(&params);
-  } else {
-
-    mock::releaseDummyHandle(hCommand);
-    result = UR_RESULT_SUCCESS;
-  }
-
-  if (result != UR_RESULT_SUCCESS) {
-    return result;
-  }
-
-  auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-      mock::getCallbacks().get_after_callback(
-          "urCommandBufferReleaseCommandExp"));
-  if (afterCallback) {
-    return afterCallback(&params);
-  }
-
-  return result;
-} catch (...) {
-  return exceptionToResult(std::current_exception());
-}
-
-///////////////////////////////////////////////////////////////////////////////
 /// @brief Intercept function for urCommandBufferUpdateKernelLaunchExp
 __urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
     /// [in] Handle of the command-buffer kernel command to update.
@@ -10094,61 +10002,6 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferGetInfoExp(
 
   auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
       mock::getCallbacks().get_after_callback("urCommandBufferGetInfoExp"));
-  if (afterCallback) {
-    return afterCallback(&params);
-  }
-
-  return result;
-} catch (...) {
-  return exceptionToResult(std::current_exception());
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urCommandBufferCommandGetInfoExp
-__urdlllocal ur_result_t UR_APICALL urCommandBufferCommandGetInfoExp(
-    /// [in] handle of the command-buffer command object
-    ur_exp_command_buffer_command_handle_t hCommand,
-    /// [in] the name of the command-buffer command property to query
-    ur_exp_command_buffer_command_info_t propName,
-    /// [in] size in bytes of the command-buffer command property value
-    size_t propSize,
-    /// [out][optional][typename(propName, propSize)] value of the
-    /// command-buffer command property
-    void *pPropValue,
-    /// [out][optional] bytes returned in command-buffer command property
-    size_t *pPropSizeRet) try {
-  ur_result_t result = UR_RESULT_SUCCESS;
-
-  ur_command_buffer_command_get_info_exp_params_t params = {
-      &hCommand, &propName, &propSize, &pPropValue, &pPropSizeRet};
-
-  auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-      mock::getCallbacks().get_before_callback(
-          "urCommandBufferCommandGetInfoExp"));
-  if (beforeCallback) {
-    result = beforeCallback(&params);
-    if (result != UR_RESULT_SUCCESS) {
-      return result;
-    }
-  }
-
-  auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-      mock::getCallbacks().get_replace_callback(
-          "urCommandBufferCommandGetInfoExp"));
-  if (replaceCallback) {
-    result = replaceCallback(&params);
-  } else {
-
-    result = UR_RESULT_SUCCESS;
-  }
-
-  if (result != UR_RESULT_SUCCESS) {
-    return result;
-  }
-
-  auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-      mock::getCallbacks().get_after_callback(
-          "urCommandBufferCommandGetInfoExp"));
   if (afterCallback) {
     return afterCallback(&params);
   }
@@ -11015,175 +10868,6 @@ __urdlllocal ur_result_t UR_APICALL urEnqueueNativeCommandExp(
   return exceptionToResult(std::current_exception());
 }
 
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urTensorMapEncodeIm2ColExp
-__urdlllocal ur_result_t UR_APICALL urTensorMapEncodeIm2ColExp(
-    /// [in] Handle of the device object.
-    ur_device_handle_t hDevice,
-    /// [in] Data type of the tensor object.
-    ur_exp_tensor_map_data_type_flags_t TensorMapType,
-    /// [in] Dimensionality of tensor; must be at least 3.
-    uint32_t TensorRank,
-    /// [in] Starting address of memory region described by tensor.
-    void *GlobalAddress,
-    /// [in] Array containing tensor size (number of elements) along each of
-    /// the TensorRank dimensions.
-    const uint64_t *GlobalDim,
-    /// [in] Array containing stride size (in bytes) along each of the
-    /// TensorRank - 1 dimensions.
-    const uint64_t *GlobalStrides,
-    /// [in] Array containing DHW dimensions of lower box corner.
-    const int *PixelBoxLowerCorner,
-    /// [in] Array containing DHW dimensions of upper box corner.
-    const int *PixelBoxUpperCorner,
-    /// [in] Number of channels per pixel.
-    uint32_t ChannelsPerPixel,
-    /// [in] Number of pixels per column.
-    uint32_t PixelsPerColumn,
-    /// [in] Array containing traversal stride in each of the TensorRank
-    /// dimensions.
-    const uint32_t *ElementStrides,
-    /// [in] Type of interleaved layout the tensor addresses
-    ur_exp_tensor_map_interleave_flags_t Interleave,
-    /// [in] Bank swizzling pattern inside shared memory
-    ur_exp_tensor_map_swizzle_flags_t Swizzle,
-    /// [in] L2 promotion size.
-    ur_exp_tensor_map_l2_promotion_flags_t L2Promotion,
-    /// [in] Indicates whether zero or special NaN constant will be used to
-    /// fill out-of-bounds elements.
-    ur_exp_tensor_map_oob_fill_flags_t OobFill,
-    /// [out] Handle of the tensor map object.
-    ur_exp_tensor_map_handle_t *hTensorMap) try {
-  ur_result_t result = UR_RESULT_SUCCESS;
-
-  ur_tensor_map_encode_im_2_col_exp_params_t params = {&hDevice,
-                                                       &TensorMapType,
-                                                       &TensorRank,
-                                                       &GlobalAddress,
-                                                       &GlobalDim,
-                                                       &GlobalStrides,
-                                                       &PixelBoxLowerCorner,
-                                                       &PixelBoxUpperCorner,
-                                                       &ChannelsPerPixel,
-                                                       &PixelsPerColumn,
-                                                       &ElementStrides,
-                                                       &Interleave,
-                                                       &Swizzle,
-                                                       &L2Promotion,
-                                                       &OobFill,
-                                                       &hTensorMap};
-
-  auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-      mock::getCallbacks().get_before_callback("urTensorMapEncodeIm2ColExp"));
-  if (beforeCallback) {
-    result = beforeCallback(&params);
-    if (result != UR_RESULT_SUCCESS) {
-      return result;
-    }
-  }
-
-  auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-      mock::getCallbacks().get_replace_callback("urTensorMapEncodeIm2ColExp"));
-  if (replaceCallback) {
-    result = replaceCallback(&params);
-  } else {
-
-    *hTensorMap = mock::createDummyHandle<ur_exp_tensor_map_handle_t>();
-    result = UR_RESULT_SUCCESS;
-  }
-
-  if (result != UR_RESULT_SUCCESS) {
-    return result;
-  }
-
-  auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-      mock::getCallbacks().get_after_callback("urTensorMapEncodeIm2ColExp"));
-  if (afterCallback) {
-    return afterCallback(&params);
-  }
-
-  return result;
-} catch (...) {
-  return exceptionToResult(std::current_exception());
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Intercept function for urTensorMapEncodeTiledExp
-__urdlllocal ur_result_t UR_APICALL urTensorMapEncodeTiledExp(
-    /// [in] Handle of the device object.
-    ur_device_handle_t hDevice,
-    /// [in] Data type of the tensor object.
-    ur_exp_tensor_map_data_type_flags_t TensorMapType,
-    /// [in] Dimensionality of tensor; must be at least 3.
-    uint32_t TensorRank,
-    /// [in] Starting address of memory region described by tensor.
-    void *GlobalAddress,
-    /// [in] Array containing tensor size (number of elements) along each of
-    /// the TensorRank dimensions.
-    const uint64_t *GlobalDim,
-    /// [in] Array containing stride size (in bytes) along each of the
-    /// TensorRank - 1 dimensions.
-    const uint64_t *GlobalStrides,
-    /// [in] Array containing traversal box size (number of elments) along
-    /// each of the TensorRank dimensions. Specifies how many elements to be
-    /// traversed along each tensor dimension.
-    const uint32_t *BoxDim,
-    /// [in] Array containing traversal stride in each of the TensorRank
-    /// dimensions.
-    const uint32_t *ElementStrides,
-    /// [in] Type of interleaved layout the tensor addresses
-    ur_exp_tensor_map_interleave_flags_t Interleave,
-    /// [in] Bank swizzling pattern inside shared memory
-    ur_exp_tensor_map_swizzle_flags_t Swizzle,
-    /// [in] L2 promotion size.
-    ur_exp_tensor_map_l2_promotion_flags_t L2Promotion,
-    /// [in] Indicates whether zero or special NaN constant will be used to
-    /// fill out-of-bounds elements.
-    ur_exp_tensor_map_oob_fill_flags_t OobFill,
-    /// [out] Handle of the tensor map object.
-    ur_exp_tensor_map_handle_t *hTensorMap) try {
-  ur_result_t result = UR_RESULT_SUCCESS;
-
-  ur_tensor_map_encode_tiled_exp_params_t params = {
-      &hDevice,    &TensorMapType, &TensorRank,  &GlobalAddress,
-      &GlobalDim,  &GlobalStrides, &BoxDim,      &ElementStrides,
-      &Interleave, &Swizzle,       &L2Promotion, &OobFill,
-      &hTensorMap};
-
-  auto beforeCallback = reinterpret_cast<ur_mock_callback_t>(
-      mock::getCallbacks().get_before_callback("urTensorMapEncodeTiledExp"));
-  if (beforeCallback) {
-    result = beforeCallback(&params);
-    if (result != UR_RESULT_SUCCESS) {
-      return result;
-    }
-  }
-
-  auto replaceCallback = reinterpret_cast<ur_mock_callback_t>(
-      mock::getCallbacks().get_replace_callback("urTensorMapEncodeTiledExp"));
-  if (replaceCallback) {
-    result = replaceCallback(&params);
-  } else {
-
-    *hTensorMap = mock::createDummyHandle<ur_exp_tensor_map_handle_t>();
-    result = UR_RESULT_SUCCESS;
-  }
-
-  if (result != UR_RESULT_SUCCESS) {
-    return result;
-  }
-
-  auto afterCallback = reinterpret_cast<ur_mock_callback_t>(
-      mock::getCallbacks().get_after_callback("urTensorMapEncodeTiledExp"));
-  if (afterCallback) {
-    return afterCallback(&params);
-  }
-
-  return result;
-} catch (...) {
-  return exceptionToResult(std::current_exception());
-}
-
 } // namespace driver
 
 #if defined(__cplusplus)
@@ -11364,10 +11048,6 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
 
   pDdiTable->pfnEnqueueExp = driver::urCommandBufferEnqueueExp;
 
-  pDdiTable->pfnRetainCommandExp = driver::urCommandBufferRetainCommandExp;
-
-  pDdiTable->pfnReleaseCommandExp = driver::urCommandBufferReleaseCommandExp;
-
   pDdiTable->pfnUpdateKernelLaunchExp =
       driver::urCommandBufferUpdateKernelLaunchExp;
 
@@ -11378,8 +11058,6 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
       driver::urCommandBufferUpdateWaitEventsExp;
 
   pDdiTable->pfnGetInfoExp = driver::urCommandBufferGetInfoExp;
-
-  pDdiTable->pfnCommandGetInfoExp = driver::urCommandBufferCommandGetInfoExp;
 
   return result;
 } catch (...) {
@@ -11959,36 +11637,6 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetSamplerProcAddrTable(
 
   pDdiTable->pfnCreateWithNativeHandle =
       driver::urSamplerCreateWithNativeHandle;
-
-  return result;
-} catch (...) {
-  return exceptionToResult(std::current_exception());
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// @brief Exported function for filling application's TensorMapExp table
-///        with current process' addresses
-///
-/// @returns
-///     - ::UR_RESULT_SUCCESS
-///     - ::UR_RESULT_ERROR_INVALID_NULL_POINTER
-///     - ::UR_RESULT_ERROR_UNSUPPORTED_VERSION
-UR_DLLEXPORT ur_result_t UR_APICALL urGetTensorMapExpProcAddrTable(
-    /// [in] API version requested
-    ur_api_version_t version,
-    /// [in,out] pointer to table of DDI function pointers
-    ur_tensor_map_exp_dditable_t *pDdiTable) try {
-  if (nullptr == pDdiTable)
-    return UR_RESULT_ERROR_INVALID_NULL_POINTER;
-
-  if (driver::d_context.version < version)
-    return UR_RESULT_ERROR_UNSUPPORTED_VERSION;
-
-  ur_result_t result = UR_RESULT_SUCCESS;
-
-  pDdiTable->pfnEncodeIm2ColExp = driver::urTensorMapEncodeIm2ColExp;
-
-  pDdiTable->pfnEncodeTiledExp = driver::urTensorMapEncodeTiledExp;
 
   return result;
 } catch (...) {

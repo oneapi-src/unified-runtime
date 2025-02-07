@@ -10,6 +10,7 @@
 
 struct urKernelGetSubGroupInfoFixedSubGroupSizeTest : uur::urKernelTest {
   void SetUp() override {
+    // See https://github.com/oneapi-src/unified-runtime/issues/2514
     UUR_KNOWN_FAILURE_ON(uur::CUDA{}, uur::HIP{}, uur::OpenCL{},
                          uur::LevelZero{}, uur::LevelZeroV2{});
     program_name = "fixed_sg_size";
@@ -19,8 +20,7 @@ struct urKernelGetSubGroupInfoFixedSubGroupSizeTest : uur::urKernelTest {
   // This value correlates to sub_group_size<8> in fixed_sg_size.cpp.
   uint32_t num_sub_groups{8};
 };
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(
-    urKernelGetSubGroupInfoFixedSubGroupSizeTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(urKernelGetSubGroupInfoFixedSubGroupSizeTest);
 
 TEST_P(urKernelGetSubGroupInfoFixedSubGroupSizeTest,
        SuccessCompileNumSubGroups) {
@@ -43,7 +43,7 @@ TEST_P(urKernelGetSubGroupInfoFixedSubGroupSizeTest,
 struct urKernelGetSubGroupInfoTest : uur::urKernelTest {
   void SetUp() override { UUR_RETURN_ON_FATAL_FAILURE(urKernelTest::SetUp()); }
 };
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urKernelGetSubGroupInfoTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(urKernelGetSubGroupInfoTest);
 
 TEST_P(urKernelGetSubGroupInfoTest, SuccessMaxSubGroupSize) {
   ur_kernel_sub_group_info_t property_name =

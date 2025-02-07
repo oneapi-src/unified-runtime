@@ -61,10 +61,6 @@ struct BufferFillCommandTest
       EXPECT_SUCCESS(urMemRelease(new_buffer));
     }
 
-    if (command_handle) {
-      EXPECT_SUCCESS(urCommandBufferReleaseCommandExp(command_handle));
-    }
-
     UUR_RETURN_ON_FATAL_FAILURE(
         urUpdatableCommandBufferExpExecutionTest::TearDown());
   }
@@ -80,7 +76,7 @@ struct BufferFillCommandTest
   ur_exp_command_buffer_command_handle_t command_handle = nullptr;
 };
 
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(BufferFillCommandTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(BufferFillCommandTest);
 
 // Update kernel arguments to fill with a new scalar value to a new output
 // buffer.

@@ -9,7 +9,7 @@
 #include <uur/known_failure.h>
 
 using urKernelGetInfoTest = uur::urKernelTest;
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urKernelGetInfoTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(urKernelGetInfoTest);
 
 TEST_P(urKernelGetInfoTest, SuccessFunctionName) {
   ur_kernel_info_t property_name = UR_KERNEL_INFO_FUNCTION_NAME;
@@ -132,6 +132,22 @@ TEST_P(urKernelGetInfoTest, SuccessNumRegs) {
   ASSERT_EQ(property_size, sizeof(uint32_t));
 
   std::vector<char> property_value(property_size);
+  ASSERT_SUCCESS(urKernelGetInfo(kernel, property_name, property_size,
+                                 property_value.data(), nullptr));
+}
+
+TEST_P(urKernelGetInfoTest, SuccessSpillMemSize) {
+  UUR_KNOWN_FAILURE_ON(uur::HIP{}, uur::OpenCL{});
+
+  ur_kernel_info_t property_name = UR_KERNEL_INFO_SPILL_MEM_SIZE;
+  size_t property_size = 0;
+
+  ASSERT_SUCCESS_OR_OPTIONAL_QUERY(
+      urKernelGetInfo(kernel, property_name, 0, nullptr, &property_size),
+      property_name);
+  ASSERT_EQ(property_size, sizeof(uint32_t));
+
+  std::vector<uint32_t> property_value(property_size / sizeof(uint32_t));
   ASSERT_SUCCESS(urKernelGetInfo(kernel, property_name, property_size,
                                  property_value.data(), nullptr));
 }

@@ -9,7 +9,7 @@
 #include <uur/known_failure.h>
 
 using urMemGetInfoTest = uur::urMemBufferTest;
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urMemGetInfoTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(urMemGetInfoTest);
 
 TEST_P(urMemGetInfoTest, SuccessSize) {
   UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
@@ -113,10 +113,10 @@ struct urMemGetInfoImageTest : uur::urMemImageTest {
     uur::urMemImageTest::SetUp();
   }
 };
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urMemGetInfoImageTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(urMemGetInfoImageTest);
 
 TEST_P(urMemGetInfoImageTest, SuccessSize) {
-  UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::OpenCL{"UHD Graphics"});
+  UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
 
   ur_mem_info_t property_name = UR_MEM_INFO_SIZE;
   size_t property_size = 0;
@@ -135,7 +135,9 @@ TEST_P(urMemGetInfoImageTest, SuccessSize) {
                                      image_desc.arraySize * image_desc.width *
                                      image_desc.height * image_desc.depth;
 
-  ASSERT_EQ(image_size_bytes, expected_image_size);
+  // Make sure the driver has allocated enough space to hold the image (the
+  // actual size may be padded out to above the requested size)
+  ASSERT_GE(image_size_bytes, expected_image_size);
 }
 
 TEST_P(urMemGetInfoImageTest, SuccessContext) {

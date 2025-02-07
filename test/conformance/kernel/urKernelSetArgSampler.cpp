@@ -10,8 +10,6 @@
 struct urKernelSetArgSamplerTestWithParam
     : uur::urBaseKernelTestWithParam<uur::SamplerCreateParamT> {
   void SetUp() {
-    UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA"});
-
     const auto param = getParam();
     const auto normalized = std::get<0>(param);
     const auto addr_mode = std::get<1>(param);
@@ -28,6 +26,12 @@ struct urKernelSetArgSamplerTestWithParam
     program_name = "image_copy";
     UUR_RETURN_ON_FATAL_FAILURE(
         uur::urBaseKernelTestWithParam<uur::SamplerCreateParamT>::SetUp());
+
+    bool image_support = false;
+    ASSERT_SUCCESS(uur::GetDeviceImageSupport(device, image_support));
+    if (!image_support) {
+      GTEST_SKIP() << "Device doesn't support images";
+    }
 
     auto ret = urSamplerCreate(context, &sampler_desc, &sampler);
     if (ret == UR_RESULT_ERROR_UNSUPPORTED_FEATURE ||
@@ -52,7 +56,7 @@ struct urKernelSetArgSamplerTestWithParam
   ur_sampler_handle_t sampler = nullptr;
 };
 
-UUR_DEVICE_TEST_SUITE_P(
+UUR_DEVICE_TEST_SUITE_WITH_PARAM(
     urKernelSetArgSamplerTestWithParam,
     ::testing::Combine(
         ::testing::Values(true, false),
@@ -72,10 +76,14 @@ TEST_P(urKernelSetArgSamplerTestWithParam, Success) {
 
 struct urKernelSetArgSamplerTest : uur::urBaseKernelTest {
   void SetUp() {
-    UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA"});
-
     program_name = "image_copy";
     UUR_RETURN_ON_FATAL_FAILURE(urBaseKernelTest::SetUp());
+
+    bool image_support = false;
+    ASSERT_SUCCESS(uur::GetDeviceImageSupport(device, image_support));
+    if (!image_support) {
+      GTEST_SKIP() << "Device doesn't support images";
+    }
 
     ur_sampler_desc_t sampler_desc = {
         UR_STRUCTURE_TYPE_SAMPLER_DESC,   /* sType */
@@ -106,7 +114,7 @@ struct urKernelSetArgSamplerTest : uur::urBaseKernelTest {
   ur_sampler_handle_t sampler = nullptr;
 };
 
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urKernelSetArgSamplerTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(urKernelSetArgSamplerTest);
 
 TEST_P(urKernelSetArgSamplerTest, SuccessWithProps) {
   ur_kernel_arg_sampler_properties_t props{

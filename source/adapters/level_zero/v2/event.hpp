@@ -15,6 +15,7 @@
 #include <ur_api.h>
 #include <ze_api.h>
 
+#include "adapters/level_zero/v2/queue_api.hpp"
 #include "common.hpp"
 #include "event_provider.hpp"
 
@@ -47,15 +48,24 @@ private:
 
 struct ur_event_handle_t_ : _ur_object {
 public:
-  ur_event_handle_t_(ur_context_handle_t hContext, ze_event_handle_t hZeEvent,
-                     v2::event_flags_t flags);
+  // cache_borrowed_event is used for pooled events, whilst ze_event_handle_t is
+  // used for native events
+  using event_variant =
+      std::variant<v2::raii::cache_borrowed_event, v2::raii::ze_event_handle_t>;
+
+  ur_event_handle_t_(ur_context_handle_t hContext,
+                     v2::raii::cache_borrowed_event eventAllocation,
+                     v2::event_pool *pool);
+
+  ur_event_handle_t_(ur_context_handle_t hContext,
+                     ur_native_handle_t hNativeEvent,
+                     const ur_event_native_properties_t *pProperties);
 
   // Set the queue and command that this event is associated with
-  void resetQueueAndCommand(ur_queue_handle_t hQueue, ur_command_t commandType);
+  void resetQueueAndCommand(ur_queue_t_ *hQueue, ur_command_t commandType);
 
   // releases event immediately
-  virtual ur_result_t forceRelease() = 0;
-  virtual ~ur_event_handle_t_() = default;
+  ur_result_t forceRelease();
 
   void reset();
   ze_event_handle_t getZeEvent() const;
@@ -77,7 +87,7 @@ public:
   bool isProfilingEnabled() const;
 
   // Queue associated with this event. Can be nullptr (for native events)
-  ur_queue_handle_t getQueue() const;
+  ur_queue_t_ *getQueue() const;
 
   // Context associated with this event
   ur_context_handle_t getContext() const;
@@ -97,40 +107,22 @@ public:
   uint64_t getEventStartTimestmap() const;
   uint64_t getEventEndTimestamp();
 
+private:
+  ur_event_handle_t_(ur_context_handle_t hContext, event_variant hZeEvent,
+                     v2::event_flags_t flags, v2::event_pool *pool);
+
 protected:
   ur_context_handle_t hContext;
 
-  // non-owning handle to the L0 event
-  const ze_event_handle_t hZeEvent;
+  // Pool is used if and only if this is a pooled event
+  v2::event_pool *event_pool = nullptr;
+  event_variant hZeEvent;
 
   // queue and commandType that this event is associated with, set by enqueue
   // commands
-  ur_queue_handle_t hQueue = nullptr;
+  ur_queue_t_ *hQueue = nullptr;
   ur_command_t commandType = UR_COMMAND_FORCE_UINT32;
 
   v2::event_flags_t flags;
   event_profiling_data_t profilingData;
-};
-
-struct ur_pooled_event_t : ur_event_handle_t_ {
-  ur_pooled_event_t(ur_context_handle_t hContext,
-                    v2::raii::cache_borrowed_event eventAllocation,
-                    v2::event_pool *pool);
-
-  ur_result_t forceRelease() override;
-
-private:
-  v2::raii::cache_borrowed_event zeEvent;
-  v2::event_pool *pool;
-};
-
-struct ur_native_event_t : ur_event_handle_t_ {
-  ur_native_event_t(ur_native_handle_t hNativeEvent,
-                    ur_context_handle_t hContext,
-                    const ur_event_native_properties_t *pProperties);
-
-  ur_result_t forceRelease() override;
-
-private:
-  v2::raii::ze_event_handle_t zeEvent;
 };

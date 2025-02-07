@@ -45,7 +45,7 @@ struct urAdapterTest : ::testing::Test,
 
 // In the vein of urAdapterTest and urDeviceTest this is a parameterized
 // platform fixture which can be instantiated via
-// UUR_INSTANTIATE_PLATFORM_TEST_SUITE_P to run tests on each discovered
+// UUR_INSTANTIATE_PLATFORM_TEST_SUITE to run tests on each discovered
 // platform.
 struct urPlatformTest : ::testing::Test,
                         ::testing::WithParamInterface<ur_platform_handle_t> {
@@ -90,9 +90,6 @@ struct urAllDevicesTest : urPlatformTest {
   }
 
   void TearDown() override {
-    for (auto &device : devices) {
-      EXPECT_SUCCESS(urDeviceRelease(device));
-    }
     UUR_RETURN_ON_FATAL_FAILURE(urPlatformTest::TearDown());
   }
 
@@ -113,7 +110,7 @@ struct urDeviceTest : ::testing::Test,
 };
 } // namespace uur
 
-#define UUR_INSTANTIATE_ADAPTER_TEST_SUITE_P(FIXTURE)                          \
+#define UUR_INSTANTIATE_ADAPTER_TEST_SUITE(FIXTURE)                            \
   INSTANTIATE_TEST_SUITE_P(                                                    \
       , FIXTURE,                                                               \
       ::testing::ValuesIn(uur::AdapterEnvironment::instance->adapters),        \
@@ -121,7 +118,7 @@ struct urDeviceTest : ::testing::Test,
         return uur::GetAdapterBackendName(info.param);                         \
       })
 
-#define UUR_INSTANTIATE_PLATFORM_TEST_SUITE_P(FIXTURE)                         \
+#define UUR_INSTANTIATE_PLATFORM_TEST_SUITE(FIXTURE)                           \
   INSTANTIATE_TEST_SUITE_P(                                                    \
       , FIXTURE,                                                               \
       ::testing::ValuesIn(uur::PlatformEnvironment::instance->platforms),      \
@@ -129,7 +126,7 @@ struct urDeviceTest : ::testing::Test,
         return uur::GetPlatformNameWithID(info.param);                         \
       })
 
-#define UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(FIXTURE)                           \
+#define UUR_INSTANTIATE_DEVICE_TEST_SUITE(FIXTURE)                             \
   INSTANTIATE_TEST_SUITE_P(                                                    \
       , FIXTURE,                                                               \
       ::testing::ValuesIn(uur::DevicesEnvironment::instance->devices),         \
@@ -160,9 +157,6 @@ struct urAllDevicesTestWithParam : urPlatformTestWithParam<T> {
   }
 
   void TearDown() override {
-    for (auto &device : devices) {
-      EXPECT_SUCCESS(urDeviceRelease(device));
-    }
     UUR_RETURN_ON_FATAL_FAILURE(urPlatformTestWithParam<T>::TearDown());
   }
 
@@ -205,8 +199,14 @@ struct urContextTest : urDeviceTest {
 
 struct urSamplerTest : urContextTest {
   void SetUp() override {
-    UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA"});
     UUR_RETURN_ON_FATAL_FAILURE(urContextTest::SetUp());
+
+    bool image_support = false;
+    ASSERT_SUCCESS(uur::GetDeviceImageSupport(device, image_support));
+    if (!image_support) {
+      GTEST_SKIP() << "Device doesn't support images";
+    }
+
     sampler_desc = {
         UR_STRUCTURE_TYPE_SAMPLER_DESC,   /* stype */
         nullptr,                          /* pNext */
@@ -295,7 +295,7 @@ struct urMemImageTest : urContextTest {
 
 } // namespace uur
 
-#define UUR_PLATFORM_TEST_SUITE_P(FIXTURE, VALUES, PRINTER)                    \
+#define UUR_PLATFORM_TEST_SUITE_WITH_PARAM(FIXTURE, VALUES, PRINTER)           \
   INSTANTIATE_TEST_SUITE_P(                                                    \
       , FIXTURE,                                                               \
       testing::Combine(                                                        \
@@ -303,7 +303,7 @@ struct urMemImageTest : urContextTest {
           VALUES),                                                             \
       PRINTER)
 
-#define UUR_DEVICE_TEST_SUITE_P(FIXTURE, VALUES, PRINTER)                      \
+#define UUR_DEVICE_TEST_SUITE_WITH_PARAM(FIXTURE, VALUES, PRINTER)             \
   INSTANTIATE_TEST_SUITE_P(                                                    \
       , FIXTURE,                                                               \
       testing::Combine(                                                        \
@@ -330,8 +330,14 @@ template <class T> struct urContextTestWithParam : urDeviceTestWithParam<T> {
 
 template <class T> struct urSamplerTestWithParam : urContextTestWithParam<T> {
   void SetUp() override {
-    UUR_KNOWN_FAILURE_ON(uur::OpenCL{"Intel(R) FPGA"});
     UUR_RETURN_ON_FATAL_FAILURE(urContextTestWithParam<T>::SetUp());
+
+    bool image_support = false;
+    ASSERT_SUCCESS(uur::GetDeviceImageSupport(this->device, image_support));
+    if (!image_support) {
+      GTEST_SKIP() << "Device doesn't support images";
+    }
+
     sampler_desc = {
         UR_STRUCTURE_TYPE_SAMPLER_DESC,   /* stype */
         nullptr,                          /* pNext */
@@ -356,44 +362,6 @@ template <class T> struct urSamplerTestWithParam : urContextTestWithParam<T> {
 
   ur_sampler_handle_t sampler = nullptr;
   ur_sampler_desc_t sampler_desc;
-};
-
-template <class T> struct urMemImageTestWithParam : urContextTestWithParam<T> {
-  void SetUp() override {
-    UUR_RETURN_ON_FATAL_FAILURE(urContextTestWithParam<T>::SetUp());
-    ur_bool_t imageSupported = false;
-    ASSERT_SUCCESS(urDeviceGetInfo(this->device, UR_DEVICE_INFO_IMAGE_SUPPORTED,
-                                   sizeof(ur_bool_t), &imageSupported,
-                                   nullptr));
-    if (!imageSupported) {
-      GTEST_SKIP();
-    }
-    UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(
-        urMemImageCreate(this->context, UR_MEM_FLAG_READ_WRITE, &format, &desc,
-                         nullptr, &image));
-    ASSERT_NE(nullptr, image);
-  }
-
-  void TearDown() override {
-    if (image) {
-      EXPECT_SUCCESS(urMemRelease(image));
-    }
-    UUR_RETURN_ON_FATAL_FAILURE(urContextTestWithParam<T>::TearDown());
-  }
-  ur_mem_handle_t image = nullptr;
-  ur_image_format_t format = {UR_IMAGE_CHANNEL_ORDER_RGBA,
-                              UR_IMAGE_CHANNEL_TYPE_FLOAT};
-  ur_image_desc_t desc = {UR_STRUCTURE_TYPE_IMAGE_DESC, // stype
-                          nullptr,                      // pNext
-                          UR_MEM_TYPE_IMAGE1D,          // mem object type
-                          1024,                         // image width
-                          1,                            // image height
-                          1,                            // image depth
-                          1,                            // array size
-                          0,                            // row pitch
-                          0,                            // slice pitch
-                          0,                            // mip levels
-                          0};                           // num samples
 };
 
 struct urQueueTest : urContextTest {

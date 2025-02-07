@@ -20,7 +20,7 @@ struct urEnqueueKernelLaunchTest : uur::urKernelExecutionTest {
   size_t global_offset = 0;
   size_t n_dimensions = 1;
 };
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueKernelLaunchTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(urEnqueueKernelLaunchTest);
 
 struct urEnqueueKernelLaunchKernelWgSizeTest : uur::urKernelExecutionTest {
   void SetUp() override {
@@ -36,13 +36,14 @@ struct urEnqueueKernelLaunchKernelWgSizeTest : uur::urKernelExecutionTest {
   std::array<size_t, 3> wg_size{2, 4, 8};
   size_t n_dimensions = 3;
 };
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueKernelLaunchKernelWgSizeTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(urEnqueueKernelLaunchKernelWgSizeTest);
 
 // Note: Due to an issue with HIP, the subgroup test is not generated
 struct urEnqueueKernelLaunchKernelSubGroupTest : uur::urKernelExecutionTest {
   void SetUp() override {
-    UUR_KNOWN_FAILURE_ON(uur::CUDA{}, uur::HIP{}, uur::LevelZero{},
-                         uur::LevelZeroV2{});
+    // Subgroup size of 8 isn't supported on the Data Center GPU Max
+    UUR_KNOWN_FAILURE_ON(uur::HIP{}, uur::LevelZero{"Data Center GPU Max"},
+                         uur::LevelZeroV2{"Data Center GPU Max"});
 
     program_name = "subgroup";
     UUR_RETURN_ON_FATAL_FAILURE(urKernelExecutionTest::SetUp());
@@ -52,7 +53,7 @@ struct urEnqueueKernelLaunchKernelSubGroupTest : uur::urKernelExecutionTest {
   std::array<size_t, 3> global_offset{0, 0, 0};
   size_t n_dimensions = 3;
 };
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueKernelLaunchKernelSubGroupTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(urEnqueueKernelLaunchKernelSubGroupTest);
 
 struct urEnqueueKernelLaunchKernelStandardTest : uur::urKernelExecutionTest {
   void SetUp() override {
@@ -64,7 +65,7 @@ struct urEnqueueKernelLaunchKernelStandardTest : uur::urKernelExecutionTest {
   size_t global_size = 1;
   size_t offset = 0;
 };
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueKernelLaunchKernelStandardTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(urEnqueueKernelLaunchKernelStandardTest);
 
 TEST_P(urEnqueueKernelLaunchTest, Success) {
   ur_mem_handle_t buffer = nullptr;
@@ -191,7 +192,7 @@ TEST_P(urEnqueueKernelLaunchKernelWgSizeTest, NonMatchingLocalSize) {
 }
 
 TEST_P(urEnqueueKernelLaunchKernelSubGroupTest, Success) {
-  UUR_KNOWN_FAILURE_ON(uur::LevelZero{});
+  UUR_KNOWN_FAILURE_ON(uur::CUDA{});
 
   ur_mem_handle_t buffer = nullptr;
   AddBuffer1DArg(sizeof(size_t), &buffer);
@@ -301,7 +302,7 @@ static std::vector<testParametersEnqueueKernel> test_cases{// 1D
                                                            {1027, 1, 19, 3},
                                                            {1, 53, 19, 3},
                                                            {256, 79, 8, 3}};
-UUR_DEVICE_TEST_SUITE_P(
+UUR_DEVICE_TEST_SUITE_WITH_PARAM(
     urEnqueueKernelLaunchTestWithParam, testing::ValuesIn(test_cases),
     printKernelLaunchTestString<urEnqueueKernelLaunchTestWithParam>);
 
@@ -348,7 +349,7 @@ struct urEnqueueKernelLaunchWithUSM : uur::urKernelExecutionTest {
   size_t alloc_size = 0;
   void *usmPtr = nullptr;
 };
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueKernelLaunchWithUSM);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(urEnqueueKernelLaunchWithUSM);
 
 TEST_P(urEnqueueKernelLaunchWithUSM, Success) {
   size_t work_dim = 1;
@@ -375,6 +376,41 @@ TEST_P(urEnqueueKernelLaunchWithUSM, Success) {
   // verify fill worked
   for (size_t i = 0; i < global_size; i++) {
     ASSERT_EQ(ptr[i], fill_val);
+  }
+}
+
+TEST_P(urEnqueueKernelLaunchWithUSM, WithMemcpy) {
+  UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
+
+  size_t work_dim = 1;
+  size_t global_offset = 0;
+  size_t global_size = alloc_size / sizeof(uint32_t);
+  uint32_t fill_val = 42;
+
+  ASSERT_SUCCESS(urKernelSetArgPointer(kernel, 0, nullptr, usmPtr));
+  ASSERT_SUCCESS(
+      urKernelSetArgValue(kernel, 1, sizeof(fill_val), nullptr, &fill_val));
+
+  std::vector<uint32_t> input(global_size, 0);
+  std::vector<uint32_t> data(global_size);
+
+  ASSERT_SUCCESS(urEnqueueUSMMemcpy(queue, false, usmPtr, input.data(),
+                                    alloc_size, 0, nullptr, nullptr));
+
+  ur_event_handle_t kernel_evt;
+  ASSERT_SUCCESS(urEnqueueKernelLaunch(queue, kernel, work_dim, &global_offset,
+                                       &global_size, nullptr, 0, nullptr,
+                                       &kernel_evt));
+
+  ur_event_handle_t memcpy_event;
+  ASSERT_SUCCESS(urEnqueueUSMMemcpy(queue, false, data.data(), usmPtr,
+                                    alloc_size, 1, &kernel_evt, &memcpy_event));
+
+  ASSERT_SUCCESS(urEventWait(1, &memcpy_event));
+
+  // verify fill worked
+  for (size_t i = 0; i < global_size; i++) {
+    ASSERT_EQ(data[i], fill_val);
   }
 }
 
@@ -437,7 +473,7 @@ struct urEnqueueKernelLaunchWithVirtualMemory : uur::urKernelExecutionTest {
   ur_physical_mem_handle_t physical_mem = nullptr;
   void *virtual_ptr = nullptr;
 };
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueKernelLaunchWithVirtualMemory);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(urEnqueueKernelLaunchWithVirtualMemory);
 
 TEST_P(urEnqueueKernelLaunchWithVirtualMemory, Success) {
   UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
@@ -514,7 +550,7 @@ struct urEnqueueKernelLaunchMultiDeviceTest
   size_t global_offset = 0;
   size_t n_dimensions = 1;
 };
-UUR_INSTANTIATE_PLATFORM_TEST_SUITE_P(urEnqueueKernelLaunchMultiDeviceTest);
+UUR_INSTANTIATE_PLATFORM_TEST_SUITE(urEnqueueKernelLaunchMultiDeviceTest);
 
 // TODO: rewrite this test, right now it only works for a single queue
 // (the context is only created for one device)
@@ -602,7 +638,7 @@ struct urEnqueueKernelLaunchUSMLinkedList
   ur_queue_handle_t queue = nullptr;
 };
 
-UUR_DEVICE_TEST_SUITE_P(
+UUR_DEVICE_TEST_SUITE_WITH_PARAM(
     urEnqueueKernelLaunchUSMLinkedList,
     testing::ValuesIn(uur::BoolTestParam::makeBoolParam("UsePool")),
     uur::deviceTestWithParamPrinter<uur::BoolTestParam>);

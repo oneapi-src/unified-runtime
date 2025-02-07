@@ -296,9 +296,6 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
   pDdiTable->pfnAppendMemBufferFillExp = urCommandBufferAppendMemBufferFillExp;
   pDdiTable->pfnUpdateKernelLaunchExp = urCommandBufferUpdateKernelLaunchExp;
   pDdiTable->pfnGetInfoExp = urCommandBufferGetInfoExp;
-  pDdiTable->pfnCommandGetInfoExp = urCommandBufferCommandGetInfoExp;
-  pDdiTable->pfnReleaseCommandExp = urCommandBufferReleaseCommandExp;
-  pDdiTable->pfnRetainCommandExp = urCommandBufferRetainCommandExp;
   pDdiTable->pfnUpdateWaitEventsExp = urCommandBufferUpdateWaitEventsExp;
   pDdiTable->pfnUpdateSignalEventExp = urCommandBufferUpdateSignalEventExp;
 
@@ -318,19 +315,50 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetUsmP2PExpProcAddrTable(
   return retVal;
 }
 
-// TODO: Implement
 UR_DLLEXPORT ur_result_t UR_APICALL urGetBindlessImagesExpProcAddrTable(
-    ur_api_version_t, ur_bindless_images_exp_dditable_t *) {
-  // This needs to return UR_RESULT_SUCCESS or else the platform can't be
-  // initialized
+    ur_api_version_t version, ur_bindless_images_exp_dditable_t *pDdiTable) {
+  auto result = validateProcInputs(version, pDdiTable);
+  if (UR_RESULT_SUCCESS != result) {
+    return result;
+  }
+  pDdiTable->pfnUnsampledImageHandleDestroyExp =
+      urBindlessImagesUnsampledImageHandleDestroyExp;
+  pDdiTable->pfnSampledImageHandleDestroyExp =
+      urBindlessImagesSampledImageHandleDestroyExp;
+  pDdiTable->pfnImageAllocateExp = urBindlessImagesImageAllocateExp;
+  pDdiTable->pfnImageFreeExp = urBindlessImagesImageFreeExp;
+  pDdiTable->pfnUnsampledImageCreateExp =
+      urBindlessImagesUnsampledImageCreateExp;
+  pDdiTable->pfnSampledImageCreateExp = urBindlessImagesSampledImageCreateExp;
+  pDdiTable->pfnImageCopyExp = urBindlessImagesImageCopyExp;
+  pDdiTable->pfnImageGetInfoExp = urBindlessImagesImageGetInfoExp;
+  pDdiTable->pfnMipmapGetLevelExp = urBindlessImagesMipmapGetLevelExp;
+  pDdiTable->pfnMipmapFreeExp = urBindlessImagesMipmapFreeExp;
+  pDdiTable->pfnImportExternalMemoryExp =
+      urBindlessImagesImportExternalMemoryExp;
+  pDdiTable->pfnMapExternalArrayExp = urBindlessImagesMapExternalArrayExp;
+  pDdiTable->pfnMapExternalLinearMemoryExp =
+      urBindlessImagesMapExternalLinearMemoryExp;
+  pDdiTable->pfnReleaseExternalMemoryExp =
+      urBindlessImagesReleaseExternalMemoryExp;
+  pDdiTable->pfnImportExternalSemaphoreExp =
+      urBindlessImagesImportExternalSemaphoreExp;
+  pDdiTable->pfnReleaseExternalSemaphoreExp =
+      urBindlessImagesReleaseExternalSemaphoreExp;
+  pDdiTable->pfnWaitExternalSemaphoreExp =
+      urBindlessImagesWaitExternalSemaphoreExp;
+  pDdiTable->pfnSignalExternalSemaphoreExp =
+      urBindlessImagesSignalExternalSemaphoreExp;
   return UR_RESULT_SUCCESS;
 }
 
-// TODO: Implement
-UR_DLLEXPORT ur_result_t UR_APICALL
-urGetUSMExpProcAddrTable(ur_api_version_t, ur_usm_exp_dditable_t *) {
-  // This needs to return UR_RESULT_SUCCESS or else the platform can't be
-  // initialized
+UR_DLLEXPORT ur_result_t UR_APICALL urGetUSMExpProcAddrTable(
+    ur_api_version_t version, ur_usm_exp_dditable_t *pDdiTable) {
+  auto result = validateProcInputs(version, pDdiTable);
+  if (UR_RESULT_SUCCESS != result) {
+    return result;
+  }
+  pDdiTable->pfnPitchedAllocExp = urUSMPitchedAllocExp;
   return UR_RESULT_SUCCESS;
 }
 
@@ -399,19 +427,6 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetKernelExpProcAddrTable(
       urKernelSuggestMaxCooperativeGroupCountExp;
 
   return UR_RESULT_SUCCESS;
-}
-
-UR_APIEXPORT ur_result_t UR_APICALL urGetTensorMapExpProcAddrTable(
-    ur_api_version_t version, ur_tensor_map_exp_dditable_t *pDdiTable) {
-  auto result = validateProcInputs(version, pDdiTable);
-  if (UR_RESULT_SUCCESS != result) {
-    return result;
-  }
-
-  pDdiTable->pfnEncodeIm2ColExp = urTensorMapEncodeIm2ColExp;
-  pDdiTable->pfnEncodeTiledExp = urTensorMapEncodeTiledExp;
-
-  return result;
 }
 
 UR_DLLEXPORT ur_result_t UR_APICALL urGetProgramExpProcAddrTable(

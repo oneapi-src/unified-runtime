@@ -15,7 +15,7 @@ struct urPlatformCreateWithNativeHandleTest : uur::urPlatformTest {
   }
   ur_adapter_handle_t adapter = nullptr;
 };
-UUR_INSTANTIATE_PLATFORM_TEST_SUITE_P(urPlatformCreateWithNativeHandleTest);
+UUR_INSTANTIATE_PLATFORM_TEST_SUITE(urPlatformCreateWithNativeHandleTest);
 
 TEST_P(urPlatformCreateWithNativeHandleTest, Success) {
   ur_native_handle_t native_handle = 0;
@@ -37,7 +37,7 @@ TEST_P(urPlatformCreateWithNativeHandleTest, Success) {
   ASSERT_EQ(input_platform_name, created_platform_name);
 }
 
-TEST_F(urPlatformCreateWithNativeHandleTest,
+TEST_P(urPlatformCreateWithNativeHandleTest,
        SuccessWithExplicitUnOwnedNativeHandle) {
   ur_native_handle_t native_handle = 0;
 

@@ -20,7 +20,7 @@ struct urKernelGetGroupInfoFixedWorkGroupSizeTest : uur::urKernelTest {
   // In UR, this is on the left, so we reverse the order of these values.
   std::array<size_t, 3> work_group_size{2, 4, 8};
 };
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urKernelGetGroupInfoFixedWorkGroupSizeTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(urKernelGetGroupInfoFixedWorkGroupSizeTest);
 
 TEST_P(urKernelGetGroupInfoFixedWorkGroupSizeTest,
        SuccessCompileWorkGroupSize) {
@@ -46,8 +46,9 @@ TEST_P(urKernelGetGroupInfoFixedWorkGroupSizeTest,
 
 struct urKernelGetGroupInfoMaxWorkGroupSizeTest : uur::urKernelTest {
   void SetUp() override {
-    UUR_KNOWN_FAILURE_ON(uur::CUDA{}, uur::HIP{},
-                         uur::OpenCL{"12th Gen", "13th Gen", "Intel(R) Xeon"});
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{}, uur::HIP{});
+    // see https://github.com/oneapi-src/unified-runtime/issues/2644
+    UUR_KNOWN_FAILURE_ON(uur::OpenCL{"12th Gen", "13th Gen", "Intel(R) Xeon"});
     program_name = "max_wg_size";
     UUR_RETURN_ON_FATAL_FAILURE(urKernelTest::SetUp());
   }
@@ -59,7 +60,7 @@ struct urKernelGetGroupInfoMaxWorkGroupSizeTest : uur::urKernelTest {
   std::array<size_t, 3> max_work_group_size{2, 4, 8};
   size_t max_linear_work_group_size{64};
 };
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urKernelGetGroupInfoMaxWorkGroupSizeTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(urKernelGetGroupInfoMaxWorkGroupSizeTest);
 
 TEST_P(urKernelGetGroupInfoMaxWorkGroupSizeTest,
        SuccessCompileMaxWorkGroupSize) {
@@ -101,7 +102,7 @@ TEST_P(urKernelGetGroupInfoMaxWorkGroupSizeTest,
 }
 
 using urKernelGetGroupInfoTest = uur::urKernelTest;
-UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urKernelGetGroupInfoTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE(urKernelGetGroupInfoTest);
 
 TEST_P(urKernelGetGroupInfoTest, SuccessGlobalWorkSize) {
   ur_kernel_group_info_t property_name = UR_KERNEL_GROUP_INFO_GLOBAL_WORK_SIZE;

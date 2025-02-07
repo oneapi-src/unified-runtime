@@ -128,10 +128,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
   pDdiTable->pfnAppendUSMAdviseExp =
       ur::level_zero::urCommandBufferAppendUSMAdviseExp;
   pDdiTable->pfnEnqueueExp = ur::level_zero::urCommandBufferEnqueueExp;
-  pDdiTable->pfnRetainCommandExp =
-      ur::level_zero::urCommandBufferRetainCommandExp;
-  pDdiTable->pfnReleaseCommandExp =
-      ur::level_zero::urCommandBufferReleaseCommandExp;
   pDdiTable->pfnUpdateKernelLaunchExp =
       ur::level_zero::urCommandBufferUpdateKernelLaunchExp;
   pDdiTable->pfnUpdateSignalEventExp =
@@ -139,8 +135,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urGetCommandBufferExpProcAddrTable(
   pDdiTable->pfnUpdateWaitEventsExp =
       ur::level_zero::urCommandBufferUpdateWaitEventsExp;
   pDdiTable->pfnGetInfoExp = ur::level_zero::urCommandBufferGetInfoExp;
-  pDdiTable->pfnCommandGetInfoExp =
-      ur::level_zero::urCommandBufferCommandGetInfoExp;
 
   return result;
 }
@@ -425,19 +419,6 @@ UR_APIEXPORT ur_result_t UR_APICALL urGetSamplerProcAddrTable(
   return result;
 }
 
-UR_APIEXPORT ur_result_t UR_APICALL urGetTensorMapExpProcAddrTable(
-    ur_api_version_t version, ur_tensor_map_exp_dditable_t *pDdiTable) {
-  auto result = validateProcInputs(version, pDdiTable);
-  if (UR_RESULT_SUCCESS != result) {
-    return result;
-  }
-
-  pDdiTable->pfnEncodeIm2ColExp = ur::level_zero::urTensorMapEncodeIm2ColExp;
-  pDdiTable->pfnEncodeTiledExp = ur::level_zero::urTensorMapEncodeTiledExp;
-
-  return result;
-}
-
 UR_APIEXPORT ur_result_t UR_APICALL
 urGetUSMProcAddrTable(ur_api_version_t version, ur_usm_dditable_t *pDdiTable) {
   auto result = validateProcInputs(version, pDdiTable);
@@ -607,10 +588,6 @@ ur_result_t urAdapterGetDdiTables(ur_dditable_t *ddi) {
     return result;
   result = ur::level_zero::urGetSamplerProcAddrTable(UR_API_VERSION_CURRENT,
                                                      &ddi->Sampler);
-  if (result != UR_RESULT_SUCCESS)
-    return result;
-  result = ur::level_zero::urGetTensorMapExpProcAddrTable(
-      UR_API_VERSION_CURRENT, &ddi->TensorMapExp);
   if (result != UR_RESULT_SUCCESS)
     return result;
   result =
