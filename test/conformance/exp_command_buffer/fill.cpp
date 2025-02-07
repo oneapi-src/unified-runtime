@@ -14,7 +14,6 @@ struct testParametersFill {
 struct urCommandBufferFillCommandsTest
     : uur::command_buffer::urCommandBufferExpTestWithParam<testParametersFill> {
   void SetUp() override {
-    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
     UUR_RETURN_ON_FATAL_FAILURE(
         uur::command_buffer::urCommandBufferExpTestWithParam<
             testParametersFill>::SetUp());
@@ -105,6 +104,7 @@ UUR_DEVICE_TEST_SUITE_WITH_PARAM(
     printFillTestString<urCommandBufferFillCommandsTest>);
 
 TEST_P(urCommandBufferFillCommandsTest, Buffer) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
   ASSERT_SUCCESS(urCommandBufferAppendMemBufferFillExp(
       cmd_buf_handle, buffer, pattern.data(), pattern_size, 0, size, 0, nullptr,
       0, nullptr, &sync_point, nullptr, nullptr));
@@ -124,6 +124,7 @@ TEST_P(urCommandBufferFillCommandsTest, Buffer) {
 }
 
 TEST_P(urCommandBufferFillCommandsTest, USM) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
   ASSERT_SUCCESS(urCommandBufferAppendUSMFillExp(
       cmd_buf_handle, device_ptr, pattern.data(), pattern_size, size, 0,
       nullptr, 0, nullptr, &sync_point, nullptr, nullptr));
