@@ -56,7 +56,7 @@ urCommandBufferCreateExp(ur_context_handle_t context, ur_device_handle_t device,
                          ur_exp_command_buffer_handle_t *commandBuffer) try {
   checkImmediateAppendSupport(context);
 
-  if (commandBufferDesc != nullptr && commandBufferDesc->isUpdatable &&
+  if (commandBufferDesc->isUpdatable &&
       !context->getPlatform()->ZeMutableCmdListExt.Supported) {
     throw UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
   }
