@@ -427,12 +427,15 @@ ur_result_t urUSMGetMemAllocInfo(
     size_t *PropValueSizeRet) {
   auto UMFPool = umfPoolByPtr(Ptr);
   if (!UMFPool) {
+    logger::error(
+        "urUSMGetMemAllocInfo: failed to retrieve UMF pool for ptr {}", Ptr);
     return UR_RESULT_ERROR_INVALID_VALUE;
   }
 
   usm_umf_pool_tag_t *Tag = nullptr;
   auto UmfRet = umfPoolGetTag(UMFPool, reinterpret_cast<void **>(&Tag));
   if (UmfRet) {
+    logger::error("urUSMGetMemAllocInfo: failed to retrieve UMF pool tag");
     return umf::umf2urResult(UmfRet);
   }
 
