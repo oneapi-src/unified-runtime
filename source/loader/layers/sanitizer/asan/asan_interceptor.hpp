@@ -360,6 +360,8 @@ class AsanInterceptor {
     std::shared_ptr<ShadowMemory>
     getOrCreateShadowMemory(ur_device_handle_t Device, DeviceType Type);
 
+    ur_shared_mutex KernelLaunchMutex;
+
   private:
     ur_result_t updateShadowMemory(std::shared_ptr<ContextInfo> &ContextInfo,
                                    std::shared_ptr<DeviceInfo> &DeviceInfo,
