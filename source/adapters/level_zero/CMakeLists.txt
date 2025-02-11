@@ -54,6 +54,7 @@ if(UR_BUILD_ADAPTER_L0)
     )
     install_ur_library(ur_adapter_level_zero)
 
+    target_compile_definitions(ur_adapter_level_zero PUBLIC UR_STATIC_LEVEL_ZERO)
     if(UR_STATIC_ADAPTER_L0)
         target_compile_definitions(ur_adapter_level_zero PUBLIC UR_STATIC_ADAPTER_LEVEL_ZERO)
 

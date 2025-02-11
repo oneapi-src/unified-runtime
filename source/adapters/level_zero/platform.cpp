@@ -345,7 +345,7 @@ ur_result_t ur_platform_handle_t_::initialize() {
   // Check if mutable command list extension is supported and initialize
   // function pointers.
   if (MutableCommandListSpecExtensionSupported) {
-#ifdef UR_STATIC_ADAPTER_LEVEL_ZERO
+#ifdef UR_STATIC_LEVEL_ZERO
     ZeMutableCmdListExt.zexCommandListGetNextCommandIdExp =
         zeCommandListGetNextCommandIdExp;
     ZeMutableCmdListExt.zexCommandListUpdateMutableCommandsExp =

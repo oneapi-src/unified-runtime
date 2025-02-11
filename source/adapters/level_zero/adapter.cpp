@@ -335,7 +335,7 @@ ur_adapter_handle_t_::ur_adapter_handle_t_()
     // Dynamically load the new L0 apis separately.
     // This must be done to avoid attempting to use symbols that do
     // not exist in older loader runtimes.
-#ifndef UR_STATIC_ADAPTER_LEVEL_ZERO
+#ifndef UR_STATIC_LEVEL_ZERO
 #ifdef _WIN32
     GlobalAdapter->processHandle = GetModuleHandle(NULL);
 #else
@@ -414,7 +414,7 @@ ur_adapter_handle_t_::ur_adapter_handle_t_()
       }
 
       if (useInitDrivers) {
-#ifdef UR_STATIC_ADAPTER_LEVEL_ZERO
+#ifdef UR_STATIC_LEVEL_ZERO
         GlobalAdapter->initDriversFunctionPtr = zeInitDrivers;
 #else
         GlobalAdapter->initDriversFunctionPtr =
@@ -482,7 +482,7 @@ ur_adapter_handle_t_::ur_adapter_handle_t_()
       ZesInitNeeded = true;
     }
     if (ZesInitNeeded) {
-#ifdef UR_STATIC_ADAPTER_LEVEL_ZERO
+#ifdef UR_STATIC_LEVEL_ZERO
       GlobalAdapter->getDeviceByUUIdFunctionPtr = zesDriverGetDeviceByUuidExp;
       GlobalAdapter->getSysManDriversFunctionPtr = zesDriverGet;
       GlobalAdapter->sysManInitFunctionPtr = zesInit;
