@@ -37,15 +37,13 @@ if (NOT DEFINED LEVEL_ZERO_LIBRARY OR NOT DEFINED LEVEL_ZERO_INCLUDE_DIR)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++98-compat-extra-semi")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-warning-option")
     endif()
-    if(UR_STATIC_ADAPTER_L0)
-        set(BUILD_STATIC ON)
-    endif()
+    set(BUILD_STATIC ON)
 
     if (UR_LEVEL_ZERO_LOADER_REPO STREQUAL "")
         set(UR_LEVEL_ZERO_LOADER_REPO "https://github.com/nrspruit/level-zero.git")
     endif()
     if (UR_LEVEL_ZERO_LOADER_TAG STREQUAL "")
-        set(UR_LEVEL_ZERO_LOADER_TAG 57295a21ab26f1e3b3ad5e7198a6d787fcb0e71c)
+        set(UR_LEVEL_ZERO_LOADER_TAG aec89b8c7244ce03306127a4c72ce554aaa19143)
     endif()
 
     # Disable due to a bug https://github.com/oneapi-src/level-zero/issues/104
