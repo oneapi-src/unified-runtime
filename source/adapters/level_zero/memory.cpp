@@ -1290,7 +1290,6 @@ ur_result_t urEnqueueUSMPrefetch(
     /// [in,out][optional] return an event object that identifies this
     /// particular command instance.
     ur_event_handle_t *OutEvent) {
-  std::ignore = Flags;
   // Lock automatically releases when this goes out of scope.
   std::scoped_lock<ur_shared_mutex> lock(Queue->Mutex);
 
@@ -1305,7 +1304,7 @@ ur_result_t urEnqueueUSMPrefetch(
   _ur_ze_event_list_t TmpWaitList;
   UR_CALL(TmpWaitList.createAndRetainUrZeEventList(
       NumEventsInWaitList, EventWaitList, Queue, UseCopyEngine));
-
+  
   // Get a new command list to be used on this call
   ur_command_list_ptr_t CommandList{};
   // TODO: Change UseCopyEngine argument to 'true' once L0 backend
@@ -1330,8 +1329,14 @@ ur_result_t urEnqueueUSMPrefetch(
     ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
                (ZeCommandList, WaitList.Length, WaitList.ZeEventList));
   }
-  // TODO: figure out how to translate "flags"
-  ZE2UR_CALL(zeCommandListAppendMemoryPrefetch, (ZeCommandList, Mem, Size));
+
+  if (Flags == UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE) {
+    ZE2UR_CALL(zeCommandListAppendMemoryPrefetch, (ZeCommandList, Mem, Size));
+  } else {
+    // L0 does not suppot migrating from device to host yet: skip procedure
+    logger::warning("urEnqueueUSMPrefetch: Prefetch from device to host not yet"
+                    " supported by level zero");
+  }
 
   // TODO: Level Zero does not have a completion "event" with the prefetch API,
   // so manually add command to signal our event.

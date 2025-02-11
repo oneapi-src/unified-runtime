@@ -1304,13 +1304,18 @@ ur_result_t urCommandBufferAppendUSMPrefetchExp(
   std::ignore = EventWaitList;
   std::ignore = Event;
   std::ignore = Command;
-  std::ignore = Flags;
 
   if (CommandBuffer->IsInOrderCmdList) {
-    // Add the prefetch command to the command-buffer.
-    // Note that L0 does not handle migration flags.
-    ZE2UR_CALL(zeCommandListAppendMemoryPrefetch,
-               (CommandBuffer->ZeComputeCommandList, Mem, Size));
+    if (Flags == UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE) {
+      // Add the prefetch command to the command-buffer.
+      ZE2UR_CALL(zeCommandListAppendMemoryPrefetch,
+                (CommandBuffer->ZeComputeCommandList, Mem, Size));
+    } else {
+      // L0 currently does not handle migration flags -- All other migration
+      // behavior is ignored:
+      logger::warning("USM migration from device to host is not currently "
+                      "supported by level zero.");
+    }
   } else {
     std::vector<ze_event_handle_t> ZeEventList;
     ze_event_handle_t ZeLaunchEvent = nullptr;
@@ -1324,10 +1329,16 @@ ur_result_t urCommandBufferAppendUSMPrefetchExp(
                   ZeEventList.data()));
     }
 
-    // Add the prefetch command to the command-buffer.
-    // Note that L0 does not handle migration flags.
-    ZE2UR_CALL(zeCommandListAppendMemoryPrefetch,
-               (CommandBuffer->ZeComputeCommandList, Mem, Size));
+    if (Flags == UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE) {
+      // Add the prefetch command to the command buffer.
+      ZE2UR_CALL(zeCommandListAppendMemoryPrefetch,
+                (CommandBuffer->ZeComputeCommandList, Mem, Size));
+    } else {
+      // L0 currently does not handle migration flags -- All other migration
+      // behavior is ignored:
+      logger::warning("USM migration from device to host is not currently "
+                      "supported by level zero.");
+    }
 
     // Level Zero does not have a completion "event" with the prefetch API,
     // so manually add command to signal our event.

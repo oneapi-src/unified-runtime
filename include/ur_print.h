@@ -20,16 +20,14 @@
 extern "C" {
 #endif
 
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_function_t enum
 /// @returns
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintFunction(enum ur_function_t value,
-                                                    char *buffer,
-                                                    const size_t buff_size,
-                                                    size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintFunction(enum ur_function_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_structure_type_t enum
@@ -37,9 +35,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintFunction(enum ur_function_t value,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintStructureType(enum ur_structure_type_t value, char *buffer,
-                     const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintStructureType(enum ur_structure_type_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_result_t enum
@@ -47,10 +43,7 @@ urPrintStructureType(enum ur_structure_type_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintResult(enum ur_result_t value,
-                                                  char *buffer,
-                                                  const size_t buff_size,
-                                                  size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintResult(enum ur_result_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_base_properties_t struct
@@ -58,9 +51,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintResult(enum ur_result_t value,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintBaseProperties(const struct ur_base_properties_t params, char *buffer,
-                      const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBaseProperties(const struct ur_base_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_base_desc_t struct
@@ -68,9 +59,7 @@ urPrintBaseProperties(const struct ur_base_properties_t params, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintBaseDesc(const struct ur_base_desc_t params, char *buffer,
-                const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBaseDesc(const struct ur_base_desc_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_rect_offset_t struct
@@ -78,9 +67,7 @@ urPrintBaseDesc(const struct ur_base_desc_t params, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintRectOffset(const struct ur_rect_offset_t params, char *buffer,
-                  const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintRectOffset(const struct ur_rect_offset_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_rect_region_t struct
@@ -88,9 +75,7 @@ urPrintRectOffset(const struct ur_rect_offset_t params, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintRectRegion(const struct ur_rect_region_t params, char *buffer,
-                  const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintRectRegion(const struct ur_rect_region_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_init_flag_t enum
@@ -98,9 +83,7 @@ urPrintRectRegion(const struct ur_rect_region_t params, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintDeviceInitFlags(enum ur_device_init_flag_t value, char *buffer,
-                       const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceInitFlags(enum ur_device_init_flag_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_loader_config_info_t enum
@@ -108,9 +91,7 @@ urPrintDeviceInitFlags(enum ur_device_init_flag_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintLoaderConfigInfo(enum ur_loader_config_info_t value, char *buffer,
-                        const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigInfo(enum ur_loader_config_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_code_location_t struct
@@ -118,9 +99,7 @@ urPrintLoaderConfigInfo(enum ur_loader_config_info_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintCodeLocation(const struct ur_code_location_t params, char *buffer,
-                    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCodeLocation(const struct ur_code_location_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_adapter_info_t enum
@@ -128,9 +107,7 @@ urPrintCodeLocation(const struct ur_code_location_t params, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintAdapterInfo(enum ur_adapter_info_t value, char *buffer,
-                   const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintAdapterInfo(enum ur_adapter_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_adapter_backend_t enum
@@ -138,9 +115,7 @@ urPrintAdapterInfo(enum ur_adapter_info_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintAdapterBackend(enum ur_adapter_backend_t value, char *buffer,
-                      const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintAdapterBackend(enum ur_adapter_backend_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_platform_info_t enum
@@ -148,9 +123,7 @@ urPrintAdapterBackend(enum ur_adapter_backend_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintPlatformInfo(enum ur_platform_info_t value, char *buffer,
-                    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintPlatformInfo(enum ur_platform_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_api_version_t enum
@@ -158,9 +131,7 @@ urPrintPlatformInfo(enum ur_platform_info_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintApiVersion(enum ur_api_version_t value, char *buffer,
-                  const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintApiVersion(enum ur_api_version_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_platform_native_properties_t struct
@@ -168,9 +139,7 @@ urPrintApiVersion(enum ur_api_version_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintPlatformNativeProperties(
-    const struct ur_platform_native_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintPlatformNativeProperties(const struct ur_platform_native_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_platform_backend_t enum
@@ -178,9 +147,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintPlatformNativeProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintPlatformBackend(enum ur_platform_backend_t value, char *buffer,
-                       const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintPlatformBackend(enum ur_platform_backend_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_binary_t struct
@@ -188,9 +155,7 @@ urPrintPlatformBackend(enum ur_platform_backend_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintDeviceBinary(const struct ur_device_binary_t params, char *buffer,
-                    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceBinary(const struct ur_device_binary_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_type_t enum
@@ -198,9 +163,7 @@ urPrintDeviceBinary(const struct ur_device_binary_t params, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintDeviceType(enum ur_device_type_t value, char *buffer,
-                  const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceType(enum ur_device_type_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_info_t enum
@@ -208,9 +171,7 @@ urPrintDeviceType(enum ur_device_type_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintDeviceInfo(enum ur_device_info_t value, char *buffer,
-                  const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceInfo(enum ur_device_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_affinity_domain_flag_t enum
@@ -218,9 +179,7 @@ urPrintDeviceInfo(enum ur_device_info_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceAffinityDomainFlags(
-    enum ur_device_affinity_domain_flag_t value, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceAffinityDomainFlags(enum ur_device_affinity_domain_flag_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_partition_t enum
@@ -228,9 +187,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceAffinityDomainFlags(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintDevicePartition(enum ur_device_partition_t value, char *buffer,
-                       const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDevicePartition(enum ur_device_partition_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_partition_property_t struct
@@ -238,9 +195,7 @@ urPrintDevicePartition(enum ur_device_partition_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintDevicePartitionProperty(
-    const struct ur_device_partition_property_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDevicePartitionProperty(const struct ur_device_partition_property_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_partition_properties_t struct
@@ -248,9 +203,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintDevicePartitionProperty(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintDevicePartitionProperties(
-    const struct ur_device_partition_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDevicePartitionProperties(const struct ur_device_partition_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_fp_capability_flag_t enum
@@ -258,9 +211,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintDevicePartitionProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceFpCapabilityFlags(
-    enum ur_device_fp_capability_flag_t value, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceFpCapabilityFlags(enum ur_device_fp_capability_flag_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_mem_cache_type_t enum
@@ -268,9 +219,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceFpCapabilityFlags(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintDeviceMemCacheType(enum ur_device_mem_cache_type_t value, char *buffer,
-                          const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceMemCacheType(enum ur_device_mem_cache_type_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_local_mem_type_t enum
@@ -278,9 +227,7 @@ urPrintDeviceMemCacheType(enum ur_device_mem_cache_type_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintDeviceLocalMemType(enum ur_device_local_mem_type_t value, char *buffer,
-                          const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceLocalMemType(enum ur_device_local_mem_type_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_exec_capability_flag_t enum
@@ -288,9 +235,7 @@ urPrintDeviceLocalMemType(enum ur_device_local_mem_type_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceExecCapabilityFlags(
-    enum ur_device_exec_capability_flag_t value, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceExecCapabilityFlags(enum ur_device_exec_capability_flag_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_native_properties_t struct
@@ -298,9 +243,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceExecCapabilityFlags(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceNativeProperties(
-    const struct ur_device_native_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceNativeProperties(const struct ur_device_native_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_memory_order_capability_flag_t enum
@@ -308,9 +251,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceNativeProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintMemoryOrderCapabilityFlags(
-    enum ur_memory_order_capability_flag_t value, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintMemoryOrderCapabilityFlags(enum ur_memory_order_capability_flag_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_memory_scope_capability_flag_t enum
@@ -318,9 +259,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintMemoryOrderCapabilityFlags(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintMemoryScopeCapabilityFlags(
-    enum ur_memory_scope_capability_flag_t value, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintMemoryScopeCapabilityFlags(enum ur_memory_scope_capability_flag_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_usm_access_capability_flag_t enum
@@ -328,9 +267,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintMemoryScopeCapabilityFlags(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceUsmAccessCapabilityFlags(
-    enum ur_device_usm_access_capability_flag_t value, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceUsmAccessCapabilityFlags(enum ur_device_usm_access_capability_flag_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_context_flag_t enum
@@ -338,9 +275,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceUsmAccessCapabilityFlags(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintContextFlags(enum ur_context_flag_t value, char *buffer,
-                    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintContextFlags(enum ur_context_flag_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_context_properties_t struct
@@ -348,9 +283,7 @@ urPrintContextFlags(enum ur_context_flag_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintContextProperties(
-    const struct ur_context_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintContextProperties(const struct ur_context_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_context_info_t enum
@@ -358,9 +291,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintContextProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintContextInfo(enum ur_context_info_t value, char *buffer,
-                   const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintContextInfo(enum ur_context_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_context_native_properties_t struct
@@ -368,9 +299,7 @@ urPrintContextInfo(enum ur_context_info_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintContextNativeProperties(
-    const struct ur_context_native_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintContextNativeProperties(const struct ur_context_native_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_mem_flag_t enum
@@ -378,10 +307,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintContextNativeProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintMemFlags(enum ur_mem_flag_t value,
-                                                    char *buffer,
-                                                    const size_t buff_size,
-                                                    size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintMemFlags(enum ur_mem_flag_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_mem_type_t enum
@@ -389,10 +315,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintMemFlags(enum ur_mem_flag_t value,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintMemType(enum ur_mem_type_t value,
-                                                   char *buffer,
-                                                   const size_t buff_size,
-                                                   size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintMemType(enum ur_mem_type_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_mem_info_t enum
@@ -400,10 +323,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintMemType(enum ur_mem_type_t value,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintMemInfo(enum ur_mem_info_t value,
-                                                   char *buffer,
-                                                   const size_t buff_size,
-                                                   size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintMemInfo(enum ur_mem_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_image_channel_order_t enum
@@ -411,9 +331,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintMemInfo(enum ur_mem_info_t value,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintImageChannelOrder(enum ur_image_channel_order_t value, char *buffer,
-                         const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintImageChannelOrder(enum ur_image_channel_order_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_image_channel_type_t enum
@@ -421,9 +339,7 @@ urPrintImageChannelOrder(enum ur_image_channel_order_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintImageChannelType(enum ur_image_channel_type_t value, char *buffer,
-                        const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintImageChannelType(enum ur_image_channel_type_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_image_info_t enum
@@ -431,10 +347,7 @@ urPrintImageChannelType(enum ur_image_channel_type_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintImageInfo(enum ur_image_info_t value,
-                                                     char *buffer,
-                                                     const size_t buff_size,
-                                                     size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintImageInfo(enum ur_image_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_image_format_t struct
@@ -442,9 +355,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintImageInfo(enum ur_image_info_t value,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintImageFormat(const struct ur_image_format_t params, char *buffer,
-                   const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintImageFormat(const struct ur_image_format_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_image_desc_t struct
@@ -452,9 +363,7 @@ urPrintImageFormat(const struct ur_image_format_t params, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintImageDesc(const struct ur_image_desc_t params, char *buffer,
-                 const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintImageDesc(const struct ur_image_desc_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_buffer_properties_t struct
@@ -462,9 +371,7 @@ urPrintImageDesc(const struct ur_image_desc_t params, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintBufferProperties(const struct ur_buffer_properties_t params,
-                        char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBufferProperties(const struct ur_buffer_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_buffer_channel_properties_t struct
@@ -472,9 +379,7 @@ urPrintBufferProperties(const struct ur_buffer_properties_t params,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintBufferChannelProperties(
-    const struct ur_buffer_channel_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBufferChannelProperties(const struct ur_buffer_channel_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_buffer_alloc_location_properties_t struct
@@ -482,9 +387,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintBufferChannelProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintBufferAllocLocationProperties(
-    const struct ur_buffer_alloc_location_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBufferAllocLocationProperties(const struct ur_buffer_alloc_location_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_buffer_region_t struct
@@ -492,9 +395,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintBufferAllocLocationProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintBufferRegion(const struct ur_buffer_region_t params, char *buffer,
-                    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBufferRegion(const struct ur_buffer_region_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_buffer_create_type_t enum
@@ -502,9 +403,7 @@ urPrintBufferRegion(const struct ur_buffer_region_t params, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintBufferCreateType(enum ur_buffer_create_type_t value, char *buffer,
-                        const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBufferCreateType(enum ur_buffer_create_type_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_mem_native_properties_t struct
@@ -512,9 +411,7 @@ urPrintBufferCreateType(enum ur_buffer_create_type_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintMemNativeProperties(
-    const struct ur_mem_native_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintMemNativeProperties(const struct ur_mem_native_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_sampler_filter_mode_t enum
@@ -522,9 +419,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintMemNativeProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintSamplerFilterMode(enum ur_sampler_filter_mode_t value, char *buffer,
-                         const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerFilterMode(enum ur_sampler_filter_mode_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_sampler_addressing_mode_t enum
@@ -532,9 +427,7 @@ urPrintSamplerFilterMode(enum ur_sampler_filter_mode_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerAddressingMode(
-    enum ur_sampler_addressing_mode_t value, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerAddressingMode(enum ur_sampler_addressing_mode_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_sampler_info_t enum
@@ -542,9 +435,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerAddressingMode(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintSamplerInfo(enum ur_sampler_info_t value, char *buffer,
-                   const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerInfo(enum ur_sampler_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_sampler_desc_t struct
@@ -552,9 +443,7 @@ urPrintSamplerInfo(enum ur_sampler_info_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintSamplerDesc(const struct ur_sampler_desc_t params, char *buffer,
-                   const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerDesc(const struct ur_sampler_desc_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_sampler_native_properties_t struct
@@ -562,9 +451,7 @@ urPrintSamplerDesc(const struct ur_sampler_desc_t params, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerNativeProperties(
-    const struct ur_sampler_native_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerNativeProperties(const struct ur_sampler_native_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_host_mem_flag_t enum
@@ -572,9 +459,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerNativeProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintUsmHostMemFlags(enum ur_usm_host_mem_flag_t value, char *buffer,
-                       const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmHostMemFlags(enum ur_usm_host_mem_flag_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_device_mem_flag_t enum
@@ -582,9 +467,7 @@ urPrintUsmHostMemFlags(enum ur_usm_host_mem_flag_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintUsmDeviceMemFlags(enum ur_usm_device_mem_flag_t value, char *buffer,
-                         const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmDeviceMemFlags(enum ur_usm_device_mem_flag_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_pool_flag_t enum
@@ -592,9 +475,7 @@ urPrintUsmDeviceMemFlags(enum ur_usm_device_mem_flag_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintUsmPoolFlags(enum ur_usm_pool_flag_t value, char *buffer,
-                    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmPoolFlags(enum ur_usm_pool_flag_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_type_t enum
@@ -602,10 +483,7 @@ urPrintUsmPoolFlags(enum ur_usm_pool_flag_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmType(enum ur_usm_type_t value,
-                                                   char *buffer,
-                                                   const size_t buff_size,
-                                                   size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmType(enum ur_usm_type_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_alloc_info_t enum
@@ -613,9 +491,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmType(enum ur_usm_type_t value,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintUsmAllocInfo(enum ur_usm_alloc_info_t value, char *buffer,
-                    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmAllocInfo(enum ur_usm_alloc_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_advice_flag_t enum
@@ -623,9 +499,7 @@ urPrintUsmAllocInfo(enum ur_usm_alloc_info_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintUsmAdviceFlags(enum ur_usm_advice_flag_t value, char *buffer,
-                      const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmAdviceFlags(enum ur_usm_advice_flag_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_desc_t struct
@@ -633,9 +507,7 @@ urPrintUsmAdviceFlags(enum ur_usm_advice_flag_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintUsmDesc(const struct ur_usm_desc_t params, char *buffer,
-               const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmDesc(const struct ur_usm_desc_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_host_desc_t struct
@@ -643,9 +515,7 @@ urPrintUsmDesc(const struct ur_usm_desc_t params, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintUsmHostDesc(const struct ur_usm_host_desc_t params, char *buffer,
-                   const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmHostDesc(const struct ur_usm_host_desc_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_device_desc_t struct
@@ -653,9 +523,7 @@ urPrintUsmHostDesc(const struct ur_usm_host_desc_t params, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintUsmDeviceDesc(const struct ur_usm_device_desc_t params, char *buffer,
-                     const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmDeviceDesc(const struct ur_usm_device_desc_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_alloc_location_desc_t struct
@@ -663,9 +531,7 @@ urPrintUsmDeviceDesc(const struct ur_usm_device_desc_t params, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmAllocLocationDesc(
-    const struct ur_usm_alloc_location_desc_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmAllocLocationDesc(const struct ur_usm_alloc_location_desc_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_pool_desc_t struct
@@ -673,9 +539,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmAllocLocationDesc(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintUsmPoolDesc(const struct ur_usm_pool_desc_t params, char *buffer,
-                   const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmPoolDesc(const struct ur_usm_pool_desc_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_pool_limits_desc_t struct
@@ -683,9 +547,7 @@ urPrintUsmPoolDesc(const struct ur_usm_pool_desc_t params, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmPoolLimitsDesc(
-    const struct ur_usm_pool_limits_desc_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmPoolLimitsDesc(const struct ur_usm_pool_limits_desc_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_pool_info_t enum
@@ -693,9 +555,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmPoolLimitsDesc(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintUsmPoolInfo(enum ur_usm_pool_info_t value, char *buffer,
-                   const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmPoolInfo(enum ur_usm_pool_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_virtual_mem_granularity_info_t enum
@@ -703,9 +563,7 @@ urPrintUsmPoolInfo(enum ur_usm_pool_info_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemGranularityInfo(
-    enum ur_virtual_mem_granularity_info_t value, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemGranularityInfo(enum ur_virtual_mem_granularity_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_virtual_mem_access_flag_t enum
@@ -713,9 +571,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemGranularityInfo(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemAccessFlags(
-    enum ur_virtual_mem_access_flag_t value, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemAccessFlags(enum ur_virtual_mem_access_flag_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_virtual_mem_info_t enum
@@ -723,9 +579,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemAccessFlags(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintVirtualMemInfo(enum ur_virtual_mem_info_t value, char *buffer,
-                      const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemInfo(enum ur_virtual_mem_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_physical_mem_flag_t enum
@@ -733,9 +587,7 @@ urPrintVirtualMemInfo(enum ur_virtual_mem_info_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintPhysicalMemFlags(enum ur_physical_mem_flag_t value, char *buffer,
-                        const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintPhysicalMemFlags(enum ur_physical_mem_flag_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_physical_mem_properties_t struct
@@ -743,9 +595,7 @@ urPrintPhysicalMemFlags(enum ur_physical_mem_flag_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintPhysicalMemProperties(
-    const struct ur_physical_mem_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintPhysicalMemProperties(const struct ur_physical_mem_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_physical_mem_info_t enum
@@ -753,9 +603,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintPhysicalMemProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintPhysicalMemInfo(enum ur_physical_mem_info_t value, char *buffer,
-                       const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintPhysicalMemInfo(enum ur_physical_mem_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_metadata_type_t enum
@@ -763,9 +611,7 @@ urPrintPhysicalMemInfo(enum ur_physical_mem_info_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintProgramMetadataType(enum ur_program_metadata_type_t value, char *buffer,
-                           const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramMetadataType(enum ur_program_metadata_type_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_metadata_t struct
@@ -773,9 +619,7 @@ urPrintProgramMetadataType(enum ur_program_metadata_type_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintProgramMetadata(const struct ur_program_metadata_t params, char *buffer,
-                       const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramMetadata(const struct ur_program_metadata_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_properties_t struct
@@ -783,9 +627,7 @@ urPrintProgramMetadata(const struct ur_program_metadata_t params, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramProperties(
-    const struct ur_program_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramProperties(const struct ur_program_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_info_t enum
@@ -793,9 +635,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintProgramInfo(enum ur_program_info_t value, char *buffer,
-                   const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramInfo(enum ur_program_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_build_status_t enum
@@ -803,9 +643,7 @@ urPrintProgramInfo(enum ur_program_info_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintProgramBuildStatus(enum ur_program_build_status_t value, char *buffer,
-                          const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramBuildStatus(enum ur_program_build_status_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_binary_type_t enum
@@ -813,9 +651,7 @@ urPrintProgramBuildStatus(enum ur_program_build_status_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintProgramBinaryType(enum ur_program_binary_type_t value, char *buffer,
-                         const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramBinaryType(enum ur_program_binary_type_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_build_info_t enum
@@ -823,9 +659,7 @@ urPrintProgramBinaryType(enum ur_program_binary_type_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintProgramBuildInfo(enum ur_program_build_info_t value, char *buffer,
-                        const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramBuildInfo(enum ur_program_build_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_specialization_constant_info_t struct
@@ -833,9 +667,7 @@ urPrintProgramBuildInfo(enum ur_program_build_info_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintSpecializationConstantInfo(
-    const struct ur_specialization_constant_info_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintSpecializationConstantInfo(const struct ur_specialization_constant_info_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_native_properties_t struct
@@ -843,9 +675,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintSpecializationConstantInfo(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramNativeProperties(
-    const struct ur_program_native_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramNativeProperties(const struct ur_program_native_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_arg_value_properties_t struct
@@ -853,9 +683,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramNativeProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelArgValueProperties(
-    const struct ur_kernel_arg_value_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelArgValueProperties(const struct ur_kernel_arg_value_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_arg_local_properties_t struct
@@ -863,9 +691,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelArgValueProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelArgLocalProperties(
-    const struct ur_kernel_arg_local_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelArgLocalProperties(const struct ur_kernel_arg_local_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_info_t enum
@@ -873,9 +699,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelArgLocalProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintKernelInfo(enum ur_kernel_info_t value, char *buffer,
-                  const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelInfo(enum ur_kernel_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_group_info_t enum
@@ -883,9 +707,7 @@ urPrintKernelInfo(enum ur_kernel_info_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintKernelGroupInfo(enum ur_kernel_group_info_t value, char *buffer,
-                       const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelGroupInfo(enum ur_kernel_group_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_sub_group_info_t enum
@@ -893,9 +715,7 @@ urPrintKernelGroupInfo(enum ur_kernel_group_info_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintKernelSubGroupInfo(enum ur_kernel_sub_group_info_t value, char *buffer,
-                          const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelSubGroupInfo(enum ur_kernel_sub_group_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_cache_config_t enum
@@ -903,9 +723,7 @@ urPrintKernelSubGroupInfo(enum ur_kernel_sub_group_info_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintKernelCacheConfig(enum ur_kernel_cache_config_t value, char *buffer,
-                         const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelCacheConfig(enum ur_kernel_cache_config_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_exec_info_t enum
@@ -913,9 +731,7 @@ urPrintKernelCacheConfig(enum ur_kernel_cache_config_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintKernelExecInfo(enum ur_kernel_exec_info_t value, char *buffer,
-                      const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelExecInfo(enum ur_kernel_exec_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_arg_pointer_properties_t struct
@@ -923,9 +739,7 @@ urPrintKernelExecInfo(enum ur_kernel_exec_info_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelArgPointerProperties(
-    const struct ur_kernel_arg_pointer_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelArgPointerProperties(const struct ur_kernel_arg_pointer_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_exec_info_properties_t struct
@@ -933,9 +747,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelArgPointerProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelExecInfoProperties(
-    const struct ur_kernel_exec_info_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelExecInfoProperties(const struct ur_kernel_exec_info_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_arg_sampler_properties_t struct
@@ -943,9 +755,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelExecInfoProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelArgSamplerProperties(
-    const struct ur_kernel_arg_sampler_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelArgSamplerProperties(const struct ur_kernel_arg_sampler_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_arg_mem_obj_properties_t struct
@@ -953,9 +763,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelArgSamplerProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelArgMemObjProperties(
-    const struct ur_kernel_arg_mem_obj_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelArgMemObjProperties(const struct ur_kernel_arg_mem_obj_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_native_properties_t struct
@@ -963,9 +771,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelArgMemObjProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelNativeProperties(
-    const struct ur_kernel_native_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelNativeProperties(const struct ur_kernel_native_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_queue_info_t enum
@@ -973,10 +779,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelNativeProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueInfo(enum ur_queue_info_t value,
-                                                     char *buffer,
-                                                     const size_t buff_size,
-                                                     size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueInfo(enum ur_queue_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_queue_flag_t enum
@@ -984,9 +787,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueInfo(enum ur_queue_info_t value,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintQueueFlags(enum ur_queue_flag_t value, char *buffer,
-                  const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueFlags(enum ur_queue_flag_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_queue_properties_t struct
@@ -994,9 +795,7 @@ urPrintQueueFlags(enum ur_queue_flag_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintQueueProperties(const struct ur_queue_properties_t params, char *buffer,
-                       const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueProperties(const struct ur_queue_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_queue_index_properties_t struct
@@ -1004,9 +803,7 @@ urPrintQueueProperties(const struct ur_queue_properties_t params, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueIndexProperties(
-    const struct ur_queue_index_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueIndexProperties(const struct ur_queue_index_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_queue_native_desc_t struct
@@ -1014,9 +811,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueIndexProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintQueueNativeDesc(const struct ur_queue_native_desc_t params, char *buffer,
-                       const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueNativeDesc(const struct ur_queue_native_desc_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_queue_native_properties_t struct
@@ -1024,9 +819,7 @@ urPrintQueueNativeDesc(const struct ur_queue_native_desc_t params, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueNativeProperties(
-    const struct ur_queue_native_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueNativeProperties(const struct ur_queue_native_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_command_t enum
@@ -1034,10 +827,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueNativeProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintCommand(enum ur_command_t value,
-                                                   char *buffer,
-                                                   const size_t buff_size,
-                                                   size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCommand(enum ur_command_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_event_status_t enum
@@ -1045,9 +835,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintCommand(enum ur_command_t value,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintEventStatus(enum ur_event_status_t value, char *buffer,
-                   const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEventStatus(enum ur_event_status_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_event_info_t enum
@@ -1055,10 +843,7 @@ urPrintEventStatus(enum ur_event_status_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEventInfo(enum ur_event_info_t value,
-                                                     char *buffer,
-                                                     const size_t buff_size,
-                                                     size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEventInfo(enum ur_event_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_profiling_info_t enum
@@ -1066,9 +851,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEventInfo(enum ur_event_info_t value,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintProfilingInfo(enum ur_profiling_info_t value, char *buffer,
-                     const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProfilingInfo(enum ur_profiling_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_event_native_properties_t struct
@@ -1076,9 +859,7 @@ urPrintProfilingInfo(enum ur_profiling_info_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEventNativeProperties(
-    const struct ur_event_native_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEventNativeProperties(const struct ur_event_native_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_execution_info_t enum
@@ -1086,9 +867,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEventNativeProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintExecutionInfo(enum ur_execution_info_t value, char *buffer,
-                     const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExecutionInfo(enum ur_execution_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_map_flag_t enum
@@ -1096,10 +875,7 @@ urPrintExecutionInfo(enum ur_execution_info_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintMapFlags(enum ur_map_flag_t value,
-                                                    char *buffer,
-                                                    const size_t buff_size,
-                                                    size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintMapFlags(enum ur_map_flag_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_migration_flag_t enum
@@ -1107,9 +883,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintMapFlags(enum ur_map_flag_t value,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintUsmMigrationFlags(enum ur_usm_migration_flag_t value, char *buffer,
-                         const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmMigrationFlags(enum ur_usm_migration_flag_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_device_2d_block_array_capability_flag_t enum
@@ -1117,10 +891,7 @@ urPrintUsmMigrationFlags(enum ur_usm_migration_flag_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintExpDevice_2dBlockArrayCapabilityFlags(
-    enum ur_exp_device_2d_block_array_capability_flag_t value, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpDevice_2dBlockArrayCapabilityFlags(enum ur_exp_device_2d_block_array_capability_flag_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_image_copy_flag_t enum
@@ -1128,9 +899,7 @@ urPrintExpDevice_2dBlockArrayCapabilityFlags(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintExpImageCopyFlags(enum ur_exp_image_copy_flag_t value, char *buffer,
-                         const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpImageCopyFlags(enum ur_exp_image_copy_flag_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_sampler_cubemap_filter_mode_t enum
@@ -1138,9 +907,7 @@ urPrintExpImageCopyFlags(enum ur_exp_image_copy_flag_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintExpSamplerCubemapFilterMode(
-    enum ur_exp_sampler_cubemap_filter_mode_t value, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpSamplerCubemapFilterMode(enum ur_exp_sampler_cubemap_filter_mode_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_external_mem_type_t enum
@@ -1148,9 +915,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintExpSamplerCubemapFilterMode(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintExpExternalMemType(enum ur_exp_external_mem_type_t value, char *buffer,
-                          const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpExternalMemType(enum ur_exp_external_mem_type_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_external_semaphore_type_t enum
@@ -1158,9 +923,7 @@ urPrintExpExternalMemType(enum ur_exp_external_mem_type_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintExpExternalSemaphoreType(
-    enum ur_exp_external_semaphore_type_t value, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpExternalSemaphoreType(enum ur_exp_external_semaphore_type_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_file_descriptor_t struct
@@ -1168,9 +931,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintExpExternalSemaphoreType(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintExpFileDescriptor(
-    const struct ur_exp_file_descriptor_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpFileDescriptor(const struct ur_exp_file_descriptor_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_win32_handle_t struct
@@ -1178,9 +939,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintExpFileDescriptor(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintExpWin32Handle(const struct ur_exp_win32_handle_t params, char *buffer,
-                      const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpWin32Handle(const struct ur_exp_win32_handle_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_sampler_mip_properties_t struct
@@ -1188,9 +947,7 @@ urPrintExpWin32Handle(const struct ur_exp_win32_handle_t params, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintExpSamplerMipProperties(
-    const struct ur_exp_sampler_mip_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpSamplerMipProperties(const struct ur_exp_sampler_mip_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_sampler_addr_modes_t struct
@@ -1198,9 +955,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintExpSamplerMipProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintExpSamplerAddrModes(
-    const struct ur_exp_sampler_addr_modes_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpSamplerAddrModes(const struct ur_exp_sampler_addr_modes_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_sampler_cubemap_properties_t struct
@@ -1208,9 +963,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintExpSamplerAddrModes(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintExpSamplerCubemapProperties(
-    const struct ur_exp_sampler_cubemap_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpSamplerCubemapProperties(const struct ur_exp_sampler_cubemap_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_external_mem_desc_t struct
@@ -1218,9 +971,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintExpSamplerCubemapProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintExpExternalMemDesc(
-    const struct ur_exp_external_mem_desc_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpExternalMemDesc(const struct ur_exp_external_mem_desc_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_external_semaphore_desc_t struct
@@ -1228,9 +979,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintExpExternalMemDesc(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintExpExternalSemaphoreDesc(
-    const struct ur_exp_external_semaphore_desc_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpExternalSemaphoreDesc(const struct ur_exp_external_semaphore_desc_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_image_copy_region_t struct
@@ -1238,9 +987,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintExpExternalSemaphoreDesc(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintExpImageCopyRegion(
-    const struct ur_exp_image_copy_region_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpImageCopyRegion(const struct ur_exp_image_copy_region_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_command_buffer_update_capability_flag_t enum
@@ -1248,10 +995,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintExpImageCopyRegion(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintDeviceCommandBufferUpdateCapabilityFlags(
-    enum ur_device_command_buffer_update_capability_flag_t value, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceCommandBufferUpdateCapabilityFlags(enum ur_device_command_buffer_update_capability_flag_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_command_buffer_info_t enum
@@ -1259,9 +1003,7 @@ urPrintDeviceCommandBufferUpdateCapabilityFlags(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintExpCommandBufferInfo(
-    enum ur_exp_command_buffer_info_t value, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpCommandBufferInfo(enum ur_exp_command_buffer_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_command_buffer_command_info_t enum
@@ -1269,9 +1011,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintExpCommandBufferInfo(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintExpCommandBufferCommandInfo(
-    enum ur_exp_command_buffer_command_info_t value, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpCommandBufferCommandInfo(enum ur_exp_command_buffer_command_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_command_buffer_desc_t struct
@@ -1279,9 +1019,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintExpCommandBufferCommandInfo(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintExpCommandBufferDesc(
-    const struct ur_exp_command_buffer_desc_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpCommandBufferDesc(const struct ur_exp_command_buffer_desc_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_command_buffer_update_memobj_arg_desc_t struct
@@ -1289,9 +1027,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintExpCommandBufferDesc(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintExpCommandBufferUpdateMemobjArgDesc(
-    const struct ur_exp_command_buffer_update_memobj_arg_desc_t params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpCommandBufferUpdateMemobjArgDesc(const struct ur_exp_command_buffer_update_memobj_arg_desc_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_command_buffer_update_pointer_arg_desc_t struct
@@ -1299,9 +1035,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintExpCommandBufferUpdateMemobjArgDesc(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintExpCommandBufferUpdatePointerArgDesc(
-    const struct ur_exp_command_buffer_update_pointer_arg_desc_t params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpCommandBufferUpdatePointerArgDesc(const struct ur_exp_command_buffer_update_pointer_arg_desc_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_command_buffer_update_value_arg_desc_t struct
@@ -1309,9 +1043,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintExpCommandBufferUpdatePointerArgDesc(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintExpCommandBufferUpdateValueArgDesc(
-    const struct ur_exp_command_buffer_update_value_arg_desc_t params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpCommandBufferUpdateValueArgDesc(const struct ur_exp_command_buffer_update_value_arg_desc_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_command_buffer_update_kernel_launch_desc_t struct
@@ -1319,10 +1051,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintExpCommandBufferUpdateValueArgDesc(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintExpCommandBufferUpdateKernelLaunchDesc(
-    const struct ur_exp_command_buffer_update_kernel_launch_desc_t params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpCommandBufferUpdateKernelLaunchDesc(const struct ur_exp_command_buffer_update_kernel_launch_desc_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_launch_property_id_t enum
@@ -1330,9 +1059,7 @@ urPrintExpCommandBufferUpdateKernelLaunchDesc(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintExpLaunchPropertyId(enum ur_exp_launch_property_id_t value, char *buffer,
-                           const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpLaunchPropertyId(enum ur_exp_launch_property_id_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_launch_property_t struct
@@ -1340,9 +1067,7 @@ urPrintExpLaunchPropertyId(enum ur_exp_launch_property_id_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintExpLaunchProperty(
-    const struct ur_exp_launch_property_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpLaunchProperty(const struct ur_exp_launch_property_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_peer_info_t enum
@@ -1350,9 +1075,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintExpLaunchProperty(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintExpPeerInfo(enum ur_exp_peer_info_t value, char *buffer,
-                   const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpPeerInfo(enum ur_exp_peer_info_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_enqueue_ext_flag_t enum
@@ -1360,9 +1083,7 @@ urPrintExpPeerInfo(enum ur_exp_peer_info_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintExpEnqueueExtFlags(enum ur_exp_enqueue_ext_flag_t value, char *buffer,
-                          const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpEnqueueExtFlags(enum ur_exp_enqueue_ext_flag_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_enqueue_ext_properties_t struct
@@ -1370,9 +1091,7 @@ urPrintExpEnqueueExtFlags(enum ur_exp_enqueue_ext_flag_t value, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintExpEnqueueExtProperties(
-    const struct ur_exp_enqueue_ext_properties_t params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpEnqueueExtProperties(const struct ur_exp_enqueue_ext_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_enqueue_native_command_flag_t enum
@@ -1380,9 +1099,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintExpEnqueueExtProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintExpEnqueueNativeCommandFlags(
-    enum ur_exp_enqueue_native_command_flag_t value, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpEnqueueNativeCommandFlags(enum ur_exp_enqueue_native_command_flag_t value, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_exp_enqueue_native_command_properties_t struct
@@ -1390,9 +1107,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintExpEnqueueNativeCommandFlags(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintExpEnqueueNativeCommandProperties(
-    const struct ur_exp_enqueue_native_command_properties_t params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintExpEnqueueNativeCommandProperties(const struct ur_exp_enqueue_native_command_properties_t params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_loader_config_create_params_t struct
@@ -1400,9 +1115,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintExpEnqueueNativeCommandProperties(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigCreateParams(
-    const struct ur_loader_config_create_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigCreateParams(const struct ur_loader_config_create_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_loader_config_retain_params_t struct
@@ -1410,9 +1123,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigCreateParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigRetainParams(
-    const struct ur_loader_config_retain_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigRetainParams(const struct ur_loader_config_retain_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_loader_config_release_params_t struct
@@ -1420,9 +1131,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigRetainParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigReleaseParams(
-    const struct ur_loader_config_release_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigReleaseParams(const struct ur_loader_config_release_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_loader_config_get_info_params_t struct
@@ -1430,9 +1139,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigReleaseParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigGetInfoParams(
-    const struct ur_loader_config_get_info_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigGetInfoParams(const struct ur_loader_config_get_info_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_loader_config_enable_layer_params_t struct
@@ -1440,9 +1147,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigGetInfoParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigEnableLayerParams(
-    const struct ur_loader_config_enable_layer_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigEnableLayerParams(const struct ur_loader_config_enable_layer_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_loader_config_set_code_location_callback_params_t struct
@@ -1450,10 +1155,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigEnableLayerParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintLoaderConfigSetCodeLocationCallbackParams(
-    const struct ur_loader_config_set_code_location_callback_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigSetCodeLocationCallbackParams(const struct ur_loader_config_set_code_location_callback_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_loader_config_set_mocking_enabled_params_t struct
@@ -1461,9 +1163,7 @@ urPrintLoaderConfigSetCodeLocationCallbackParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigSetMockingEnabledParams(
-    const struct ur_loader_config_set_mocking_enabled_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigSetMockingEnabledParams(const struct ur_loader_config_set_mocking_enabled_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_platform_get_params_t struct
@@ -1471,9 +1171,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderConfigSetMockingEnabledParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintPlatformGetParams(
-    const struct ur_platform_get_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintPlatformGetParams(const struct ur_platform_get_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_platform_get_info_params_t struct
@@ -1481,9 +1179,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintPlatformGetParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintPlatformGetInfoParams(
-    const struct ur_platform_get_info_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintPlatformGetInfoParams(const struct ur_platform_get_info_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_platform_get_native_handle_params_t struct
@@ -1491,9 +1187,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintPlatformGetInfoParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintPlatformGetNativeHandleParams(
-    const struct ur_platform_get_native_handle_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintPlatformGetNativeHandleParams(const struct ur_platform_get_native_handle_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_platform_create_with_native_handle_params_t struct
@@ -1501,9 +1195,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintPlatformGetNativeHandleParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintPlatformCreateWithNativeHandleParams(
-    const struct ur_platform_create_with_native_handle_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintPlatformCreateWithNativeHandleParams(const struct ur_platform_create_with_native_handle_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_platform_get_api_version_params_t struct
@@ -1511,9 +1203,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintPlatformCreateWithNativeHandleParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintPlatformGetApiVersionParams(
-    const struct ur_platform_get_api_version_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintPlatformGetApiVersionParams(const struct ur_platform_get_api_version_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_platform_get_backend_option_params_t struct
@@ -1521,9 +1211,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintPlatformGetApiVersionParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintPlatformGetBackendOptionParams(
-    const struct ur_platform_get_backend_option_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintPlatformGetBackendOptionParams(const struct ur_platform_get_backend_option_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_context_create_params_t struct
@@ -1531,9 +1219,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintPlatformGetBackendOptionParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintContextCreateParams(
-    const struct ur_context_create_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintContextCreateParams(const struct ur_context_create_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_context_retain_params_t struct
@@ -1541,9 +1227,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintContextCreateParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintContextRetainParams(
-    const struct ur_context_retain_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintContextRetainParams(const struct ur_context_retain_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_context_release_params_t struct
@@ -1551,9 +1235,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintContextRetainParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintContextReleaseParams(
-    const struct ur_context_release_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintContextReleaseParams(const struct ur_context_release_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_context_get_info_params_t struct
@@ -1561,9 +1243,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintContextReleaseParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintContextGetInfoParams(
-    const struct ur_context_get_info_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintContextGetInfoParams(const struct ur_context_get_info_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_context_get_native_handle_params_t struct
@@ -1571,9 +1251,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintContextGetInfoParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintContextGetNativeHandleParams(
-    const struct ur_context_get_native_handle_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintContextGetNativeHandleParams(const struct ur_context_get_native_handle_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_context_create_with_native_handle_params_t struct
@@ -1581,9 +1259,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintContextGetNativeHandleParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintContextCreateWithNativeHandleParams(
-    const struct ur_context_create_with_native_handle_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintContextCreateWithNativeHandleParams(const struct ur_context_create_with_native_handle_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_context_set_extended_deleter_params_t struct
@@ -1591,9 +1267,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintContextCreateWithNativeHandleParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintContextSetExtendedDeleterParams(
-    const struct ur_context_set_extended_deleter_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintContextSetExtendedDeleterParams(const struct ur_context_set_extended_deleter_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_event_get_info_params_t struct
@@ -1601,9 +1275,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintContextSetExtendedDeleterParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEventGetInfoParams(
-    const struct ur_event_get_info_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEventGetInfoParams(const struct ur_event_get_info_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_event_get_profiling_info_params_t struct
@@ -1611,9 +1283,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEventGetInfoParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEventGetProfilingInfoParams(
-    const struct ur_event_get_profiling_info_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEventGetProfilingInfoParams(const struct ur_event_get_profiling_info_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_event_wait_params_t struct
@@ -1621,9 +1291,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEventGetProfilingInfoParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintEventWaitParams(const struct ur_event_wait_params_t *params,
-                       char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEventWaitParams(const struct ur_event_wait_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_event_retain_params_t struct
@@ -1631,9 +1299,7 @@ urPrintEventWaitParams(const struct ur_event_wait_params_t *params,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEventRetainParams(
-    const struct ur_event_retain_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEventRetainParams(const struct ur_event_retain_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_event_release_params_t struct
@@ -1641,9 +1307,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEventRetainParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEventReleaseParams(
-    const struct ur_event_release_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEventReleaseParams(const struct ur_event_release_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_event_get_native_handle_params_t struct
@@ -1651,9 +1315,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEventReleaseParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEventGetNativeHandleParams(
-    const struct ur_event_get_native_handle_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEventGetNativeHandleParams(const struct ur_event_get_native_handle_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_event_create_with_native_handle_params_t struct
@@ -1661,9 +1323,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEventGetNativeHandleParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEventCreateWithNativeHandleParams(
-    const struct ur_event_create_with_native_handle_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEventCreateWithNativeHandleParams(const struct ur_event_create_with_native_handle_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_event_set_callback_params_t struct
@@ -1671,9 +1331,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEventCreateWithNativeHandleParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEventSetCallbackParams(
-    const struct ur_event_set_callback_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEventSetCallbackParams(const struct ur_event_set_callback_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_create_with_il_params_t struct
@@ -1681,9 +1339,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEventSetCallbackParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramCreateWithIlParams(
-    const struct ur_program_create_with_il_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramCreateWithIlParams(const struct ur_program_create_with_il_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_create_with_binary_params_t struct
@@ -1691,9 +1347,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramCreateWithIlParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramCreateWithBinaryParams(
-    const struct ur_program_create_with_binary_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramCreateWithBinaryParams(const struct ur_program_create_with_binary_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_build_params_t struct
@@ -1701,9 +1355,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramCreateWithBinaryParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramBuildParams(
-    const struct ur_program_build_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramBuildParams(const struct ur_program_build_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_build_exp_params_t struct
@@ -1711,9 +1363,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramBuildParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramBuildExpParams(
-    const struct ur_program_build_exp_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramBuildExpParams(const struct ur_program_build_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_compile_params_t struct
@@ -1721,9 +1371,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramBuildExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramCompileParams(
-    const struct ur_program_compile_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramCompileParams(const struct ur_program_compile_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_compile_exp_params_t struct
@@ -1731,9 +1379,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramCompileParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramCompileExpParams(
-    const struct ur_program_compile_exp_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramCompileExpParams(const struct ur_program_compile_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_link_params_t struct
@@ -1741,9 +1387,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramCompileExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramLinkParams(
-    const struct ur_program_link_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramLinkParams(const struct ur_program_link_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_link_exp_params_t struct
@@ -1751,9 +1395,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramLinkParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramLinkExpParams(
-    const struct ur_program_link_exp_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramLinkExpParams(const struct ur_program_link_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_retain_params_t struct
@@ -1761,9 +1403,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramLinkExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramRetainParams(
-    const struct ur_program_retain_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramRetainParams(const struct ur_program_retain_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_release_params_t struct
@@ -1771,9 +1411,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramRetainParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramReleaseParams(
-    const struct ur_program_release_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramReleaseParams(const struct ur_program_release_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_get_function_pointer_params_t struct
@@ -1781,9 +1419,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramReleaseParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramGetFunctionPointerParams(
-    const struct ur_program_get_function_pointer_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramGetFunctionPointerParams(const struct ur_program_get_function_pointer_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_get_global_variable_pointer_params_t struct
@@ -1791,10 +1427,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramGetFunctionPointerParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintProgramGetGlobalVariablePointerParams(
-    const struct ur_program_get_global_variable_pointer_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramGetGlobalVariablePointerParams(const struct ur_program_get_global_variable_pointer_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_get_info_params_t struct
@@ -1802,9 +1435,7 @@ urPrintProgramGetGlobalVariablePointerParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramGetInfoParams(
-    const struct ur_program_get_info_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramGetInfoParams(const struct ur_program_get_info_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_get_build_info_params_t struct
@@ -1812,9 +1443,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramGetInfoParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramGetBuildInfoParams(
-    const struct ur_program_get_build_info_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramGetBuildInfoParams(const struct ur_program_get_build_info_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_set_specialization_constants_params_t struct
@@ -1822,10 +1451,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramGetBuildInfoParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintProgramSetSpecializationConstantsParams(
-    const struct ur_program_set_specialization_constants_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramSetSpecializationConstantsParams(const struct ur_program_set_specialization_constants_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_get_native_handle_params_t struct
@@ -1833,9 +1459,7 @@ urPrintProgramSetSpecializationConstantsParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramGetNativeHandleParams(
-    const struct ur_program_get_native_handle_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramGetNativeHandleParams(const struct ur_program_get_native_handle_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_program_create_with_native_handle_params_t struct
@@ -1843,9 +1467,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramGetNativeHandleParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramCreateWithNativeHandleParams(
-    const struct ur_program_create_with_native_handle_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramCreateWithNativeHandleParams(const struct ur_program_create_with_native_handle_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_create_params_t struct
@@ -1853,9 +1475,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintProgramCreateWithNativeHandleParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelCreateParams(
-    const struct ur_kernel_create_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelCreateParams(const struct ur_kernel_create_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_get_info_params_t struct
@@ -1863,9 +1483,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelCreateParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelGetInfoParams(
-    const struct ur_kernel_get_info_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelGetInfoParams(const struct ur_kernel_get_info_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_get_group_info_params_t struct
@@ -1873,9 +1491,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelGetInfoParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelGetGroupInfoParams(
-    const struct ur_kernel_get_group_info_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelGetGroupInfoParams(const struct ur_kernel_get_group_info_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_get_sub_group_info_params_t struct
@@ -1883,9 +1499,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelGetGroupInfoParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelGetSubGroupInfoParams(
-    const struct ur_kernel_get_sub_group_info_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelGetSubGroupInfoParams(const struct ur_kernel_get_sub_group_info_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_retain_params_t struct
@@ -1893,9 +1507,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelGetSubGroupInfoParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelRetainParams(
-    const struct ur_kernel_retain_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelRetainParams(const struct ur_kernel_retain_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_release_params_t struct
@@ -1903,9 +1515,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelRetainParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelReleaseParams(
-    const struct ur_kernel_release_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelReleaseParams(const struct ur_kernel_release_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_get_native_handle_params_t struct
@@ -1913,9 +1523,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelReleaseParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelGetNativeHandleParams(
-    const struct ur_kernel_get_native_handle_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelGetNativeHandleParams(const struct ur_kernel_get_native_handle_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_create_with_native_handle_params_t struct
@@ -1923,9 +1531,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelGetNativeHandleParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelCreateWithNativeHandleParams(
-    const struct ur_kernel_create_with_native_handle_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelCreateWithNativeHandleParams(const struct ur_kernel_create_with_native_handle_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_get_suggested_local_work_size_params_t struct
@@ -1933,10 +1539,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelCreateWithNativeHandleParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintKernelGetSuggestedLocalWorkSizeParams(
-    const struct ur_kernel_get_suggested_local_work_size_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelGetSuggestedLocalWorkSizeParams(const struct ur_kernel_get_suggested_local_work_size_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_set_arg_value_params_t struct
@@ -1944,9 +1547,7 @@ urPrintKernelGetSuggestedLocalWorkSizeParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelSetArgValueParams(
-    const struct ur_kernel_set_arg_value_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelSetArgValueParams(const struct ur_kernel_set_arg_value_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_set_arg_local_params_t struct
@@ -1954,9 +1555,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelSetArgValueParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelSetArgLocalParams(
-    const struct ur_kernel_set_arg_local_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelSetArgLocalParams(const struct ur_kernel_set_arg_local_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_set_arg_pointer_params_t struct
@@ -1964,9 +1563,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelSetArgLocalParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelSetArgPointerParams(
-    const struct ur_kernel_set_arg_pointer_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelSetArgPointerParams(const struct ur_kernel_set_arg_pointer_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_set_exec_info_params_t struct
@@ -1974,9 +1571,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelSetArgPointerParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelSetExecInfoParams(
-    const struct ur_kernel_set_exec_info_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelSetExecInfoParams(const struct ur_kernel_set_exec_info_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_set_arg_sampler_params_t struct
@@ -1984,9 +1579,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelSetExecInfoParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelSetArgSamplerParams(
-    const struct ur_kernel_set_arg_sampler_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelSetArgSamplerParams(const struct ur_kernel_set_arg_sampler_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_set_arg_mem_obj_params_t struct
@@ -1994,9 +1587,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelSetArgSamplerParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelSetArgMemObjParams(
-    const struct ur_kernel_set_arg_mem_obj_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelSetArgMemObjParams(const struct ur_kernel_set_arg_mem_obj_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_kernel_set_specialization_constants_params_t struct
@@ -2004,23 +1595,15 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelSetArgMemObjParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintKernelSetSpecializationConstantsParams(
-    const struct ur_kernel_set_specialization_constants_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelSetSpecializationConstantsParams(const struct ur_kernel_set_specialization_constants_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Print ur_kernel_suggest_max_cooperative_group_count_exp_params_t
-/// struct
+/// @brief Print ur_kernel_suggest_max_cooperative_group_count_exp_params_t struct
 /// @returns
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintKernelSuggestMaxCooperativeGroupCountExpParams(
-    const struct ur_kernel_suggest_max_cooperative_group_count_exp_params_t
-        *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintKernelSuggestMaxCooperativeGroupCountExpParams(const struct ur_kernel_suggest_max_cooperative_group_count_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_queue_get_info_params_t struct
@@ -2028,9 +1611,7 @@ urPrintKernelSuggestMaxCooperativeGroupCountExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueGetInfoParams(
-    const struct ur_queue_get_info_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueGetInfoParams(const struct ur_queue_get_info_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_queue_create_params_t struct
@@ -2038,9 +1619,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueGetInfoParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueCreateParams(
-    const struct ur_queue_create_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueCreateParams(const struct ur_queue_create_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_queue_retain_params_t struct
@@ -2048,9 +1627,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueCreateParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueRetainParams(
-    const struct ur_queue_retain_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueRetainParams(const struct ur_queue_retain_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_queue_release_params_t struct
@@ -2058,9 +1635,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueRetainParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueReleaseParams(
-    const struct ur_queue_release_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueReleaseParams(const struct ur_queue_release_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_queue_get_native_handle_params_t struct
@@ -2068,9 +1643,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueReleaseParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueGetNativeHandleParams(
-    const struct ur_queue_get_native_handle_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueGetNativeHandleParams(const struct ur_queue_get_native_handle_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_queue_create_with_native_handle_params_t struct
@@ -2078,9 +1651,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueGetNativeHandleParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueCreateWithNativeHandleParams(
-    const struct ur_queue_create_with_native_handle_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueCreateWithNativeHandleParams(const struct ur_queue_create_with_native_handle_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_queue_finish_params_t struct
@@ -2088,9 +1659,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueCreateWithNativeHandleParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueFinishParams(
-    const struct ur_queue_finish_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueFinishParams(const struct ur_queue_finish_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_queue_flush_params_t struct
@@ -2098,9 +1667,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueFinishParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintQueueFlushParams(const struct ur_queue_flush_params_t *params,
-                        char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintQueueFlushParams(const struct ur_queue_flush_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_sampler_create_params_t struct
@@ -2108,9 +1675,7 @@ urPrintQueueFlushParams(const struct ur_queue_flush_params_t *params,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerCreateParams(
-    const struct ur_sampler_create_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerCreateParams(const struct ur_sampler_create_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_sampler_retain_params_t struct
@@ -2118,9 +1683,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerCreateParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerRetainParams(
-    const struct ur_sampler_retain_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerRetainParams(const struct ur_sampler_retain_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_sampler_release_params_t struct
@@ -2128,9 +1691,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerRetainParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerReleaseParams(
-    const struct ur_sampler_release_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerReleaseParams(const struct ur_sampler_release_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_sampler_get_info_params_t struct
@@ -2138,9 +1699,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerReleaseParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerGetInfoParams(
-    const struct ur_sampler_get_info_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerGetInfoParams(const struct ur_sampler_get_info_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_sampler_get_native_handle_params_t struct
@@ -2148,9 +1707,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerGetInfoParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerGetNativeHandleParams(
-    const struct ur_sampler_get_native_handle_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerGetNativeHandleParams(const struct ur_sampler_get_native_handle_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_sampler_create_with_native_handle_params_t struct
@@ -2158,9 +1715,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerGetNativeHandleParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerCreateWithNativeHandleParams(
-    const struct ur_sampler_create_with_native_handle_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerCreateWithNativeHandleParams(const struct ur_sampler_create_with_native_handle_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_mem_image_create_params_t struct
@@ -2168,9 +1723,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintSamplerCreateWithNativeHandleParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintMemImageCreateParams(
-    const struct ur_mem_image_create_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintMemImageCreateParams(const struct ur_mem_image_create_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_mem_buffer_create_params_t struct
@@ -2178,9 +1731,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintMemImageCreateParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintMemBufferCreateParams(
-    const struct ur_mem_buffer_create_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintMemBufferCreateParams(const struct ur_mem_buffer_create_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_mem_retain_params_t struct
@@ -2188,9 +1739,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintMemBufferCreateParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintMemRetainParams(const struct ur_mem_retain_params_t *params,
-                       char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintMemRetainParams(const struct ur_mem_retain_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_mem_release_params_t struct
@@ -2198,9 +1747,7 @@ urPrintMemRetainParams(const struct ur_mem_retain_params_t *params,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintMemReleaseParams(const struct ur_mem_release_params_t *params,
-                        char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintMemReleaseParams(const struct ur_mem_release_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_mem_buffer_partition_params_t struct
@@ -2208,9 +1755,7 @@ urPrintMemReleaseParams(const struct ur_mem_release_params_t *params,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintMemBufferPartitionParams(
-    const struct ur_mem_buffer_partition_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintMemBufferPartitionParams(const struct ur_mem_buffer_partition_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_mem_get_native_handle_params_t struct
@@ -2218,9 +1763,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintMemBufferPartitionParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintMemGetNativeHandleParams(
-    const struct ur_mem_get_native_handle_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintMemGetNativeHandleParams(const struct ur_mem_get_native_handle_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_mem_buffer_create_with_native_handle_params_t struct
@@ -2228,10 +1771,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintMemGetNativeHandleParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintMemBufferCreateWithNativeHandleParams(
-    const struct ur_mem_buffer_create_with_native_handle_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintMemBufferCreateWithNativeHandleParams(const struct ur_mem_buffer_create_with_native_handle_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_mem_image_create_with_native_handle_params_t struct
@@ -2239,9 +1779,7 @@ urPrintMemBufferCreateWithNativeHandleParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintMemImageCreateWithNativeHandleParams(
-    const struct ur_mem_image_create_with_native_handle_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintMemImageCreateWithNativeHandleParams(const struct ur_mem_image_create_with_native_handle_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_mem_get_info_params_t struct
@@ -2249,9 +1787,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintMemImageCreateWithNativeHandleParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintMemGetInfoParams(const struct ur_mem_get_info_params_t *params,
-                        char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintMemGetInfoParams(const struct ur_mem_get_info_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_mem_image_get_info_params_t struct
@@ -2259,9 +1795,7 @@ urPrintMemGetInfoParams(const struct ur_mem_get_info_params_t *params,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintMemImageGetInfoParams(
-    const struct ur_mem_image_get_info_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintMemImageGetInfoParams(const struct ur_mem_image_get_info_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_physical_mem_create_params_t struct
@@ -2269,9 +1803,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintMemImageGetInfoParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintPhysicalMemCreateParams(
-    const struct ur_physical_mem_create_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintPhysicalMemCreateParams(const struct ur_physical_mem_create_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_physical_mem_retain_params_t struct
@@ -2279,9 +1811,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintPhysicalMemCreateParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintPhysicalMemRetainParams(
-    const struct ur_physical_mem_retain_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintPhysicalMemRetainParams(const struct ur_physical_mem_retain_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_physical_mem_release_params_t struct
@@ -2289,9 +1819,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintPhysicalMemRetainParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintPhysicalMemReleaseParams(
-    const struct ur_physical_mem_release_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintPhysicalMemReleaseParams(const struct ur_physical_mem_release_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_physical_mem_get_info_params_t struct
@@ -2299,9 +1827,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintPhysicalMemReleaseParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintPhysicalMemGetInfoParams(
-    const struct ur_physical_mem_get_info_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintPhysicalMemGetInfoParams(const struct ur_physical_mem_get_info_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_adapter_get_params_t struct
@@ -2309,9 +1835,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintPhysicalMemGetInfoParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintAdapterGetParams(const struct ur_adapter_get_params_t *params,
-                        char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintAdapterGetParams(const struct ur_adapter_get_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_adapter_release_params_t struct
@@ -2319,9 +1843,7 @@ urPrintAdapterGetParams(const struct ur_adapter_get_params_t *params,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintAdapterReleaseParams(
-    const struct ur_adapter_release_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintAdapterReleaseParams(const struct ur_adapter_release_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_adapter_retain_params_t struct
@@ -2329,9 +1851,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintAdapterReleaseParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintAdapterRetainParams(
-    const struct ur_adapter_retain_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintAdapterRetainParams(const struct ur_adapter_retain_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_adapter_get_last_error_params_t struct
@@ -2339,9 +1859,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintAdapterRetainParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintAdapterGetLastErrorParams(
-    const struct ur_adapter_get_last_error_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintAdapterGetLastErrorParams(const struct ur_adapter_get_last_error_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_adapter_get_info_params_t struct
@@ -2349,9 +1867,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintAdapterGetLastErrorParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintAdapterGetInfoParams(
-    const struct ur_adapter_get_info_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintAdapterGetInfoParams(const struct ur_adapter_get_info_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_kernel_launch_params_t struct
@@ -2359,9 +1875,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintAdapterGetInfoParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueKernelLaunchParams(
-    const struct ur_enqueue_kernel_launch_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueKernelLaunchParams(const struct ur_enqueue_kernel_launch_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_events_wait_params_t struct
@@ -2369,9 +1883,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueKernelLaunchParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueEventsWaitParams(
-    const struct ur_enqueue_events_wait_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueEventsWaitParams(const struct ur_enqueue_events_wait_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_events_wait_with_barrier_params_t struct
@@ -2379,9 +1891,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueEventsWaitParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueEventsWaitWithBarrierParams(
-    const struct ur_enqueue_events_wait_with_barrier_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueEventsWaitWithBarrierParams(const struct ur_enqueue_events_wait_with_barrier_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_mem_buffer_read_params_t struct
@@ -2389,9 +1899,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueEventsWaitWithBarrierParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferReadParams(
-    const struct ur_enqueue_mem_buffer_read_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferReadParams(const struct ur_enqueue_mem_buffer_read_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_mem_buffer_write_params_t struct
@@ -2399,9 +1907,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferReadParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferWriteParams(
-    const struct ur_enqueue_mem_buffer_write_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferWriteParams(const struct ur_enqueue_mem_buffer_write_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_mem_buffer_read_rect_params_t struct
@@ -2409,9 +1915,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferWriteParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferReadRectParams(
-    const struct ur_enqueue_mem_buffer_read_rect_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferReadRectParams(const struct ur_enqueue_mem_buffer_read_rect_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_mem_buffer_write_rect_params_t struct
@@ -2419,9 +1923,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferReadRectParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferWriteRectParams(
-    const struct ur_enqueue_mem_buffer_write_rect_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferWriteRectParams(const struct ur_enqueue_mem_buffer_write_rect_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_mem_buffer_copy_params_t struct
@@ -2429,9 +1931,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferWriteRectParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferCopyParams(
-    const struct ur_enqueue_mem_buffer_copy_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferCopyParams(const struct ur_enqueue_mem_buffer_copy_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_mem_buffer_copy_rect_params_t struct
@@ -2439,9 +1939,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferCopyParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferCopyRectParams(
-    const struct ur_enqueue_mem_buffer_copy_rect_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferCopyRectParams(const struct ur_enqueue_mem_buffer_copy_rect_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_mem_buffer_fill_params_t struct
@@ -2449,9 +1947,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferCopyRectParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferFillParams(
-    const struct ur_enqueue_mem_buffer_fill_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferFillParams(const struct ur_enqueue_mem_buffer_fill_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_mem_image_read_params_t struct
@@ -2459,9 +1955,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferFillParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemImageReadParams(
-    const struct ur_enqueue_mem_image_read_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemImageReadParams(const struct ur_enqueue_mem_image_read_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_mem_image_write_params_t struct
@@ -2469,9 +1963,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemImageReadParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemImageWriteParams(
-    const struct ur_enqueue_mem_image_write_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemImageWriteParams(const struct ur_enqueue_mem_image_write_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_mem_image_copy_params_t struct
@@ -2479,9 +1971,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemImageWriteParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemImageCopyParams(
-    const struct ur_enqueue_mem_image_copy_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemImageCopyParams(const struct ur_enqueue_mem_image_copy_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_mem_buffer_map_params_t struct
@@ -2489,9 +1979,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemImageCopyParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferMapParams(
-    const struct ur_enqueue_mem_buffer_map_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferMapParams(const struct ur_enqueue_mem_buffer_map_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_mem_unmap_params_t struct
@@ -2499,9 +1987,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemBufferMapParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemUnmapParams(
-    const struct ur_enqueue_mem_unmap_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemUnmapParams(const struct ur_enqueue_mem_unmap_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_usm_fill_params_t struct
@@ -2509,9 +1995,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueMemUnmapParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueUsmFillParams(
-    const struct ur_enqueue_usm_fill_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueUsmFillParams(const struct ur_enqueue_usm_fill_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_usm_memcpy_params_t struct
@@ -2519,9 +2003,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueUsmFillParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueUsmMemcpyParams(
-    const struct ur_enqueue_usm_memcpy_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueUsmMemcpyParams(const struct ur_enqueue_usm_memcpy_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_usm_prefetch_params_t struct
@@ -2529,9 +2011,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueUsmMemcpyParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueUsmPrefetchParams(
-    const struct ur_enqueue_usm_prefetch_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueUsmPrefetchParams(const struct ur_enqueue_usm_prefetch_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_usm_advise_params_t struct
@@ -2539,9 +2019,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueUsmPrefetchParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueUsmAdviseParams(
-    const struct ur_enqueue_usm_advise_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueUsmAdviseParams(const struct ur_enqueue_usm_advise_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_usm_fill_2d_params_t struct
@@ -2549,9 +2027,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueUsmAdviseParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueUsmFill_2dParams(
-    const struct ur_enqueue_usm_fill_2d_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueUsmFill_2dParams(const struct ur_enqueue_usm_fill_2d_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_usm_memcpy_2d_params_t struct
@@ -2559,9 +2035,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueUsmFill_2dParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueUsmMemcpy_2dParams(
-    const struct ur_enqueue_usm_memcpy_2d_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueUsmMemcpy_2dParams(const struct ur_enqueue_usm_memcpy_2d_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_device_global_variable_write_params_t struct
@@ -2569,10 +2043,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueUsmMemcpy_2dParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintEnqueueDeviceGlobalVariableWriteParams(
-    const struct ur_enqueue_device_global_variable_write_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueDeviceGlobalVariableWriteParams(const struct ur_enqueue_device_global_variable_write_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_device_global_variable_read_params_t struct
@@ -2580,10 +2051,7 @@ urPrintEnqueueDeviceGlobalVariableWriteParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintEnqueueDeviceGlobalVariableReadParams(
-    const struct ur_enqueue_device_global_variable_read_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueDeviceGlobalVariableReadParams(const struct ur_enqueue_device_global_variable_read_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_read_host_pipe_params_t struct
@@ -2591,9 +2059,7 @@ urPrintEnqueueDeviceGlobalVariableReadParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueReadHostPipeParams(
-    const struct ur_enqueue_read_host_pipe_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueReadHostPipeParams(const struct ur_enqueue_read_host_pipe_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_write_host_pipe_params_t struct
@@ -2601,9 +2067,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueReadHostPipeParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueWriteHostPipeParams(
-    const struct ur_enqueue_write_host_pipe_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueWriteHostPipeParams(const struct ur_enqueue_write_host_pipe_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_kernel_launch_custom_exp_params_t struct
@@ -2611,9 +2075,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueWriteHostPipeParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueKernelLaunchCustomExpParams(
-    const struct ur_enqueue_kernel_launch_custom_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueKernelLaunchCustomExpParams(const struct ur_enqueue_kernel_launch_custom_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_events_wait_with_barrier_ext_params_t struct
@@ -2621,10 +2083,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueKernelLaunchCustomExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintEnqueueEventsWaitWithBarrierExtParams(
-    const struct ur_enqueue_events_wait_with_barrier_ext_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueEventsWaitWithBarrierExtParams(const struct ur_enqueue_events_wait_with_barrier_ext_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_cooperative_kernel_launch_exp_params_t struct
@@ -2632,10 +2091,7 @@ urPrintEnqueueEventsWaitWithBarrierExtParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintEnqueueCooperativeKernelLaunchExpParams(
-    const struct ur_enqueue_cooperative_kernel_launch_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueCooperativeKernelLaunchExpParams(const struct ur_enqueue_cooperative_kernel_launch_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_timestamp_recording_exp_params_t struct
@@ -2643,9 +2099,7 @@ urPrintEnqueueCooperativeKernelLaunchExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueTimestampRecordingExpParams(
-    const struct ur_enqueue_timestamp_recording_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueTimestampRecordingExpParams(const struct ur_enqueue_timestamp_recording_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_enqueue_native_command_exp_params_t struct
@@ -2653,35 +2107,23 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueTimestampRecordingExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueNativeCommandExpParams(
-    const struct ur_enqueue_native_command_exp_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintEnqueueNativeCommandExpParams(const struct ur_enqueue_native_command_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Print ur_bindless_images_unsampled_image_handle_destroy_exp_params_t
-/// struct
+/// @brief Print ur_bindless_images_unsampled_image_handle_destroy_exp_params_t struct
 /// @returns
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintBindlessImagesUnsampledImageHandleDestroyExpParams(
-    const struct ur_bindless_images_unsampled_image_handle_destroy_exp_params_t
-        *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesUnsampledImageHandleDestroyExpParams(const struct ur_bindless_images_unsampled_image_handle_destroy_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Print ur_bindless_images_sampled_image_handle_destroy_exp_params_t
-/// struct
+/// @brief Print ur_bindless_images_sampled_image_handle_destroy_exp_params_t struct
 /// @returns
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintBindlessImagesSampledImageHandleDestroyExpParams(
-    const struct ur_bindless_images_sampled_image_handle_destroy_exp_params_t
-        *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesSampledImageHandleDestroyExpParams(const struct ur_bindless_images_sampled_image_handle_destroy_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_bindless_images_image_allocate_exp_params_t struct
@@ -2689,9 +2131,7 @@ urPrintBindlessImagesSampledImageHandleDestroyExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesImageAllocateExpParams(
-    const struct ur_bindless_images_image_allocate_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesImageAllocateExpParams(const struct ur_bindless_images_image_allocate_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_bindless_images_image_free_exp_params_t struct
@@ -2699,9 +2139,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesImageAllocateExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesImageFreeExpParams(
-    const struct ur_bindless_images_image_free_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesImageFreeExpParams(const struct ur_bindless_images_image_free_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_bindless_images_unsampled_image_create_exp_params_t struct
@@ -2709,10 +2147,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesImageFreeExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintBindlessImagesUnsampledImageCreateExpParams(
-    const struct ur_bindless_images_unsampled_image_create_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesUnsampledImageCreateExpParams(const struct ur_bindless_images_unsampled_image_create_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_bindless_images_sampled_image_create_exp_params_t struct
@@ -2720,10 +2155,7 @@ urPrintBindlessImagesUnsampledImageCreateExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintBindlessImagesSampledImageCreateExpParams(
-    const struct ur_bindless_images_sampled_image_create_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesSampledImageCreateExpParams(const struct ur_bindless_images_sampled_image_create_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_bindless_images_image_copy_exp_params_t struct
@@ -2731,9 +2163,7 @@ urPrintBindlessImagesSampledImageCreateExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesImageCopyExpParams(
-    const struct ur_bindless_images_image_copy_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesImageCopyExpParams(const struct ur_bindless_images_image_copy_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_bindless_images_image_get_info_exp_params_t struct
@@ -2741,9 +2171,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesImageCopyExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesImageGetInfoExpParams(
-    const struct ur_bindless_images_image_get_info_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesImageGetInfoExpParams(const struct ur_bindless_images_image_get_info_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_bindless_images_mipmap_get_level_exp_params_t struct
@@ -2751,10 +2179,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesImageGetInfoExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintBindlessImagesMipmapGetLevelExpParams(
-    const struct ur_bindless_images_mipmap_get_level_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesMipmapGetLevelExpParams(const struct ur_bindless_images_mipmap_get_level_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_bindless_images_mipmap_free_exp_params_t struct
@@ -2762,9 +2187,7 @@ urPrintBindlessImagesMipmapGetLevelExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesMipmapFreeExpParams(
-    const struct ur_bindless_images_mipmap_free_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesMipmapFreeExpParams(const struct ur_bindless_images_mipmap_free_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_bindless_images_import_external_memory_exp_params_t struct
@@ -2772,10 +2195,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesMipmapFreeExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintBindlessImagesImportExternalMemoryExpParams(
-    const struct ur_bindless_images_import_external_memory_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesImportExternalMemoryExpParams(const struct ur_bindless_images_import_external_memory_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_bindless_images_map_external_array_exp_params_t struct
@@ -2783,23 +2203,15 @@ urPrintBindlessImagesImportExternalMemoryExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintBindlessImagesMapExternalArrayExpParams(
-    const struct ur_bindless_images_map_external_array_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesMapExternalArrayExpParams(const struct ur_bindless_images_map_external_array_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Print ur_bindless_images_map_external_linear_memory_exp_params_t
-/// struct
+/// @brief Print ur_bindless_images_map_external_linear_memory_exp_params_t struct
 /// @returns
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintBindlessImagesMapExternalLinearMemoryExpParams(
-    const struct ur_bindless_images_map_external_linear_memory_exp_params_t
-        *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesMapExternalLinearMemoryExpParams(const struct ur_bindless_images_map_external_linear_memory_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_bindless_images_release_external_memory_exp_params_t struct
@@ -2807,37 +2219,23 @@ urPrintBindlessImagesMapExternalLinearMemoryExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintBindlessImagesReleaseExternalMemoryExpParams(
-    const struct ur_bindless_images_release_external_memory_exp_params_t
-        *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesReleaseExternalMemoryExpParams(const struct ur_bindless_images_release_external_memory_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Print ur_bindless_images_import_external_semaphore_exp_params_t
-/// struct
+/// @brief Print ur_bindless_images_import_external_semaphore_exp_params_t struct
 /// @returns
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintBindlessImagesImportExternalSemaphoreExpParams(
-    const struct ur_bindless_images_import_external_semaphore_exp_params_t
-        *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesImportExternalSemaphoreExpParams(const struct ur_bindless_images_import_external_semaphore_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Print ur_bindless_images_release_external_semaphore_exp_params_t
-/// struct
+/// @brief Print ur_bindless_images_release_external_semaphore_exp_params_t struct
 /// @returns
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintBindlessImagesReleaseExternalSemaphoreExpParams(
-    const struct ur_bindless_images_release_external_semaphore_exp_params_t
-        *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesReleaseExternalSemaphoreExpParams(const struct ur_bindless_images_release_external_semaphore_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_bindless_images_wait_external_semaphore_exp_params_t struct
@@ -2845,24 +2243,15 @@ urPrintBindlessImagesReleaseExternalSemaphoreExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintBindlessImagesWaitExternalSemaphoreExpParams(
-    const struct ur_bindless_images_wait_external_semaphore_exp_params_t
-        *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesWaitExternalSemaphoreExpParams(const struct ur_bindless_images_wait_external_semaphore_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Print ur_bindless_images_signal_external_semaphore_exp_params_t
-/// struct
+/// @brief Print ur_bindless_images_signal_external_semaphore_exp_params_t struct
 /// @returns
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintBindlessImagesSignalExternalSemaphoreExpParams(
-    const struct ur_bindless_images_signal_external_semaphore_exp_params_t
-        *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintBindlessImagesSignalExternalSemaphoreExpParams(const struct ur_bindless_images_signal_external_semaphore_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_host_alloc_params_t struct
@@ -2870,9 +2259,7 @@ urPrintBindlessImagesSignalExternalSemaphoreExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmHostAllocParams(
-    const struct ur_usm_host_alloc_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmHostAllocParams(const struct ur_usm_host_alloc_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_device_alloc_params_t struct
@@ -2880,9 +2267,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmHostAllocParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmDeviceAllocParams(
-    const struct ur_usm_device_alloc_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmDeviceAllocParams(const struct ur_usm_device_alloc_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_shared_alloc_params_t struct
@@ -2890,9 +2275,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmDeviceAllocParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmSharedAllocParams(
-    const struct ur_usm_shared_alloc_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmSharedAllocParams(const struct ur_usm_shared_alloc_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_free_params_t struct
@@ -2900,9 +2283,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmSharedAllocParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintUsmFreeParams(const struct ur_usm_free_params_t *params, char *buffer,
-                     const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmFreeParams(const struct ur_usm_free_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_get_mem_alloc_info_params_t struct
@@ -2910,9 +2291,7 @@ urPrintUsmFreeParams(const struct ur_usm_free_params_t *params, char *buffer,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmGetMemAllocInfoParams(
-    const struct ur_usm_get_mem_alloc_info_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmGetMemAllocInfoParams(const struct ur_usm_get_mem_alloc_info_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_pool_create_params_t struct
@@ -2920,9 +2299,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmGetMemAllocInfoParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmPoolCreateParams(
-    const struct ur_usm_pool_create_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmPoolCreateParams(const struct ur_usm_pool_create_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_pool_retain_params_t struct
@@ -2930,9 +2307,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmPoolCreateParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmPoolRetainParams(
-    const struct ur_usm_pool_retain_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmPoolRetainParams(const struct ur_usm_pool_retain_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_pool_release_params_t struct
@@ -2940,9 +2315,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmPoolRetainParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmPoolReleaseParams(
-    const struct ur_usm_pool_release_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmPoolReleaseParams(const struct ur_usm_pool_release_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_pool_get_info_params_t struct
@@ -2950,9 +2323,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmPoolReleaseParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmPoolGetInfoParams(
-    const struct ur_usm_pool_get_info_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmPoolGetInfoParams(const struct ur_usm_pool_get_info_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_pitched_alloc_exp_params_t struct
@@ -2960,9 +2331,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmPoolGetInfoParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmPitchedAllocExpParams(
-    const struct ur_usm_pitched_alloc_exp_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmPitchedAllocExpParams(const struct ur_usm_pitched_alloc_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_import_exp_params_t struct
@@ -2970,9 +2339,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmPitchedAllocExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmImportExpParams(
-    const struct ur_usm_import_exp_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmImportExpParams(const struct ur_usm_import_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_release_exp_params_t struct
@@ -2980,9 +2347,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmImportExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmReleaseExpParams(
-    const struct ur_usm_release_exp_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmReleaseExpParams(const struct ur_usm_release_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_command_buffer_create_exp_params_t struct
@@ -2990,9 +2355,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmReleaseExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferCreateExpParams(
-    const struct ur_command_buffer_create_exp_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferCreateExpParams(const struct ur_command_buffer_create_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_command_buffer_retain_exp_params_t struct
@@ -3000,9 +2363,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferCreateExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferRetainExpParams(
-    const struct ur_command_buffer_retain_exp_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferRetainExpParams(const struct ur_command_buffer_retain_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_command_buffer_release_exp_params_t struct
@@ -3010,9 +2371,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferRetainExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferReleaseExpParams(
-    const struct ur_command_buffer_release_exp_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferReleaseExpParams(const struct ur_command_buffer_release_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_command_buffer_finalize_exp_params_t struct
@@ -3020,9 +2379,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferReleaseExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferFinalizeExpParams(
-    const struct ur_command_buffer_finalize_exp_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferFinalizeExpParams(const struct ur_command_buffer_finalize_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_command_buffer_append_kernel_launch_exp_params_t struct
@@ -3030,10 +2387,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferFinalizeExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintCommandBufferAppendKernelLaunchExpParams(
-    const struct ur_command_buffer_append_kernel_launch_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferAppendKernelLaunchExpParams(const struct ur_command_buffer_append_kernel_launch_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_command_buffer_append_usm_memcpy_exp_params_t struct
@@ -3041,10 +2395,7 @@ urPrintCommandBufferAppendKernelLaunchExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintCommandBufferAppendUsmMemcpyExpParams(
-    const struct ur_command_buffer_append_usm_memcpy_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferAppendUsmMemcpyExpParams(const struct ur_command_buffer_append_usm_memcpy_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_command_buffer_append_usm_fill_exp_params_t struct
@@ -3052,9 +2403,7 @@ urPrintCommandBufferAppendUsmMemcpyExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferAppendUsmFillExpParams(
-    const struct ur_command_buffer_append_usm_fill_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferAppendUsmFillExpParams(const struct ur_command_buffer_append_usm_fill_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_command_buffer_append_mem_buffer_copy_exp_params_t struct
@@ -3062,10 +2411,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferAppendUsmFillExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintCommandBufferAppendMemBufferCopyExpParams(
-    const struct ur_command_buffer_append_mem_buffer_copy_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferAppendMemBufferCopyExpParams(const struct ur_command_buffer_append_mem_buffer_copy_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_command_buffer_append_mem_buffer_write_exp_params_t struct
@@ -3073,10 +2419,7 @@ urPrintCommandBufferAppendMemBufferCopyExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintCommandBufferAppendMemBufferWriteExpParams(
-    const struct ur_command_buffer_append_mem_buffer_write_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferAppendMemBufferWriteExpParams(const struct ur_command_buffer_append_mem_buffer_write_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_command_buffer_append_mem_buffer_read_exp_params_t struct
@@ -3084,49 +2427,31 @@ urPrintCommandBufferAppendMemBufferWriteExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintCommandBufferAppendMemBufferReadExpParams(
-    const struct ur_command_buffer_append_mem_buffer_read_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferAppendMemBufferReadExpParams(const struct ur_command_buffer_append_mem_buffer_read_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Print ur_command_buffer_append_mem_buffer_copy_rect_exp_params_t
-/// struct
+/// @brief Print ur_command_buffer_append_mem_buffer_copy_rect_exp_params_t struct
 /// @returns
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintCommandBufferAppendMemBufferCopyRectExpParams(
-    const struct ur_command_buffer_append_mem_buffer_copy_rect_exp_params_t
-        *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferAppendMemBufferCopyRectExpParams(const struct ur_command_buffer_append_mem_buffer_copy_rect_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Print ur_command_buffer_append_mem_buffer_write_rect_exp_params_t
-/// struct
+/// @brief Print ur_command_buffer_append_mem_buffer_write_rect_exp_params_t struct
 /// @returns
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintCommandBufferAppendMemBufferWriteRectExpParams(
-    const struct ur_command_buffer_append_mem_buffer_write_rect_exp_params_t
-        *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferAppendMemBufferWriteRectExpParams(const struct ur_command_buffer_append_mem_buffer_write_rect_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Print ur_command_buffer_append_mem_buffer_read_rect_exp_params_t
-/// struct
+/// @brief Print ur_command_buffer_append_mem_buffer_read_rect_exp_params_t struct
 /// @returns
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintCommandBufferAppendMemBufferReadRectExpParams(
-    const struct ur_command_buffer_append_mem_buffer_read_rect_exp_params_t
-        *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferAppendMemBufferReadRectExpParams(const struct ur_command_buffer_append_mem_buffer_read_rect_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_command_buffer_append_mem_buffer_fill_exp_params_t struct
@@ -3134,10 +2459,7 @@ urPrintCommandBufferAppendMemBufferReadRectExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintCommandBufferAppendMemBufferFillExpParams(
-    const struct ur_command_buffer_append_mem_buffer_fill_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferAppendMemBufferFillExpParams(const struct ur_command_buffer_append_mem_buffer_fill_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_command_buffer_append_usm_prefetch_exp_params_t struct
@@ -3145,10 +2467,7 @@ urPrintCommandBufferAppendMemBufferFillExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintCommandBufferAppendUsmPrefetchExpParams(
-    const struct ur_command_buffer_append_usm_prefetch_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferAppendUsmPrefetchExpParams(const struct ur_command_buffer_append_usm_prefetch_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_command_buffer_append_usm_advise_exp_params_t struct
@@ -3156,10 +2475,7 @@ urPrintCommandBufferAppendUsmPrefetchExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintCommandBufferAppendUsmAdviseExpParams(
-    const struct ur_command_buffer_append_usm_advise_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferAppendUsmAdviseExpParams(const struct ur_command_buffer_append_usm_advise_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_command_buffer_enqueue_exp_params_t struct
@@ -3167,9 +2483,7 @@ urPrintCommandBufferAppendUsmAdviseExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferEnqueueExpParams(
-    const struct ur_command_buffer_enqueue_exp_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferEnqueueExpParams(const struct ur_command_buffer_enqueue_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_command_buffer_update_kernel_launch_exp_params_t struct
@@ -3177,10 +2491,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferEnqueueExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintCommandBufferUpdateKernelLaunchExpParams(
-    const struct ur_command_buffer_update_kernel_launch_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferUpdateKernelLaunchExpParams(const struct ur_command_buffer_update_kernel_launch_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_command_buffer_update_signal_event_exp_params_t struct
@@ -3188,10 +2499,7 @@ urPrintCommandBufferUpdateKernelLaunchExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintCommandBufferUpdateSignalEventExpParams(
-    const struct ur_command_buffer_update_signal_event_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferUpdateSignalEventExpParams(const struct ur_command_buffer_update_signal_event_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_command_buffer_update_wait_events_exp_params_t struct
@@ -3199,10 +2507,7 @@ urPrintCommandBufferUpdateSignalEventExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintCommandBufferUpdateWaitEventsExpParams(
-    const struct ur_command_buffer_update_wait_events_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferUpdateWaitEventsExpParams(const struct ur_command_buffer_update_wait_events_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_command_buffer_get_info_exp_params_t struct
@@ -3210,9 +2515,7 @@ urPrintCommandBufferUpdateWaitEventsExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferGetInfoExpParams(
-    const struct ur_command_buffer_get_info_exp_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferGetInfoExpParams(const struct ur_command_buffer_get_info_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_p2p_enable_peer_access_exp_params_t struct
@@ -3220,9 +2523,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintCommandBufferGetInfoExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmP2pEnablePeerAccessExpParams(
-    const struct ur_usm_p2p_enable_peer_access_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmP2pEnablePeerAccessExpParams(const struct ur_usm_p2p_enable_peer_access_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_p2p_disable_peer_access_exp_params_t struct
@@ -3230,9 +2531,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmP2pEnablePeerAccessExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmP2pDisablePeerAccessExpParams(
-    const struct ur_usm_p2p_disable_peer_access_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmP2pDisablePeerAccessExpParams(const struct ur_usm_p2p_disable_peer_access_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_usm_p2p_peer_access_get_info_exp_params_t struct
@@ -3240,9 +2539,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmP2pDisablePeerAccessExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmP2pPeerAccessGetInfoExpParams(
-    const struct ur_usm_p2p_peer_access_get_info_exp_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmP2pPeerAccessGetInfoExpParams(const struct ur_usm_p2p_peer_access_get_info_exp_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_loader_init_params_t struct
@@ -3250,9 +2547,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintUsmP2pPeerAccessGetInfoExpParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintLoaderInitParams(const struct ur_loader_init_params_t *params,
-                        char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderInitParams(const struct ur_loader_init_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_loader_tear_down_params_t struct
@@ -3260,9 +2555,7 @@ urPrintLoaderInitParams(const struct ur_loader_init_params_t *params,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderTearDownParams(
-    const struct ur_loader_tear_down_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderTearDownParams(const struct ur_loader_tear_down_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_virtual_mem_granularity_get_info_params_t struct
@@ -3270,9 +2563,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintLoaderTearDownParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemGranularityGetInfoParams(
-    const struct ur_virtual_mem_granularity_get_info_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemGranularityGetInfoParams(const struct ur_virtual_mem_granularity_get_info_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_virtual_mem_reserve_params_t struct
@@ -3280,9 +2571,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemGranularityGetInfoParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemReserveParams(
-    const struct ur_virtual_mem_reserve_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemReserveParams(const struct ur_virtual_mem_reserve_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_virtual_mem_free_params_t struct
@@ -3290,9 +2579,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemReserveParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemFreeParams(
-    const struct ur_virtual_mem_free_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemFreeParams(const struct ur_virtual_mem_free_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_virtual_mem_map_params_t struct
@@ -3300,9 +2587,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemFreeParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemMapParams(
-    const struct ur_virtual_mem_map_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemMapParams(const struct ur_virtual_mem_map_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_virtual_mem_unmap_params_t struct
@@ -3310,9 +2595,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemMapParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemUnmapParams(
-    const struct ur_virtual_mem_unmap_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemUnmapParams(const struct ur_virtual_mem_unmap_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_virtual_mem_set_access_params_t struct
@@ -3320,9 +2603,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemUnmapParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemSetAccessParams(
-    const struct ur_virtual_mem_set_access_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemSetAccessParams(const struct ur_virtual_mem_set_access_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_virtual_mem_get_info_params_t struct
@@ -3330,9 +2611,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemSetAccessParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemGetInfoParams(
-    const struct ur_virtual_mem_get_info_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemGetInfoParams(const struct ur_virtual_mem_get_info_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_get_params_t struct
@@ -3340,9 +2619,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintVirtualMemGetInfoParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintDeviceGetParams(const struct ur_device_get_params_t *params,
-                       char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceGetParams(const struct ur_device_get_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_get_selected_params_t struct
@@ -3350,9 +2627,7 @@ urPrintDeviceGetParams(const struct ur_device_get_params_t *params,
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceGetSelectedParams(
-    const struct ur_device_get_selected_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceGetSelectedParams(const struct ur_device_get_selected_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_get_info_params_t struct
@@ -3360,9 +2635,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceGetSelectedParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceGetInfoParams(
-    const struct ur_device_get_info_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceGetInfoParams(const struct ur_device_get_info_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_retain_params_t struct
@@ -3370,9 +2643,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceGetInfoParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceRetainParams(
-    const struct ur_device_retain_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceRetainParams(const struct ur_device_retain_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_release_params_t struct
@@ -3380,9 +2651,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceRetainParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceReleaseParams(
-    const struct ur_device_release_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceReleaseParams(const struct ur_device_release_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_partition_params_t struct
@@ -3390,9 +2659,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceReleaseParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintDevicePartitionParams(
-    const struct ur_device_partition_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDevicePartitionParams(const struct ur_device_partition_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_select_binary_params_t struct
@@ -3400,9 +2667,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintDevicePartitionParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceSelectBinaryParams(
-    const struct ur_device_select_binary_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceSelectBinaryParams(const struct ur_device_select_binary_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_get_native_handle_params_t struct
@@ -3410,9 +2675,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceSelectBinaryParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceGetNativeHandleParams(
-    const struct ur_device_get_native_handle_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceGetNativeHandleParams(const struct ur_device_get_native_handle_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_create_with_native_handle_params_t struct
@@ -3420,9 +2683,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceGetNativeHandleParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceCreateWithNativeHandleParams(
-    const struct ur_device_create_with_native_handle_params_t *params,
-    char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceCreateWithNativeHandleParams(const struct ur_device_create_with_native_handle_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print ur_device_get_global_timestamps_params_t struct
@@ -3430,9 +2691,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceCreateWithNativeHandleParams(
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceGetGlobalTimestampsParams(
-    const struct ur_device_get_global_timestamps_params_t *params, char *buffer,
-    const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceGetGlobalTimestampsParams(const struct ur_device_get_global_timestamps_params_t * params, char * buffer, const size_t buff_size, size_t * out_size);
+
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Print function parameters
@@ -3443,9 +2703,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urPrintDeviceGetGlobalTimestampsParams(
 ///         - `NULL == params`
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         - `buff_size < out_size`
-UR_APIEXPORT ur_result_t UR_APICALL
-urPrintFunctionParams(enum ur_function_t function, const void *params,
-                      char *buffer, const size_t buff_size, size_t *out_size);
+UR_APIEXPORT ur_result_t UR_APICALL urPrintFunctionParams(enum ur_function_t function, const void *params, char *buffer, const size_t buff_size, size_t *out_size);
 
 #if defined(__cplusplus)
 } // extern "C"

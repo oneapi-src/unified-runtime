@@ -710,8 +710,6 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueUSMPrefetch(
     ur_event_handle_t *phEvent) {
   TRACK_SCOPE_LATENCY("ur_queue_immediate_in_order_t::enqueueUSMPrefetch");
 
-  std::ignore = flags;
-
   std::scoped_lock<ur_shared_mutex> lock(this->Mutex);
 
   auto zeSignalEvent = getSignalEvent(phEvent, UR_COMMAND_USM_PREFETCH);
@@ -724,12 +722,18 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueUSMPrefetch(
         zeCommandListAppendWaitOnEvents,
         (commandListManager.getZeCommandList(), numWaitEvents, pWaitEvents));
   }
-  // TODO: figure out how to translate "flags"
-  ZE2UR_CALL(zeCommandListAppendMemoryPrefetch,
-             (commandListManager.getZeCommandList(), pMem, size));
-  if (zeSignalEvent) {
-    ZE2UR_CALL(zeCommandListAppendSignalEvent,
-               (commandListManager.getZeCommandList(), zeSignalEvent));
+
+  if (flags == UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE) {
+    ZE2UR_CALL(zeCommandListAppendMemoryPrefetch,
+              (commandListManager.getZeCommandList(), pMem, size));
+    if (zeSignalEvent) {
+      ZE2UR_CALL(zeCommandListAppendSignalEvent,
+                (commandListManager.getZeCommandList(), zeSignalEvent));
+    }
+  } else {
+    // L0 does not suppot migrating from device to host yet: skip procedure
+    setErrorMessage("Prefetch from device to host not yet supported by level "
+                    "zero.", UR_RESULT_SUCCESS);
   }
 
   return UR_RESULT_SUCCESS;
