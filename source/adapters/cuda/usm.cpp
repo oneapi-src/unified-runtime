@@ -64,11 +64,15 @@ urUSMDeviceAlloc(ur_context_handle_t hContext, ur_device_handle_t hDevice,
             UR_RESULT_ERROR_INVALID_VALUE);
 
   if (!hPool) {
+    fprintf(stderr, "urUSMDeviceAlloc(!hPool) -> USMDeviceAllocImpl()\n");
     return USMDeviceAllocImpl(ppMem, hContext, hDevice, /* flags */ 0, size,
                               alignment);
   }
 
+  fprintf(stderr, "urUSMDeviceAlloc(hPool) -> hPool->DeviceMemPool.get()\n");
   auto UMFPool = hPool->DeviceMemPool.get();
+  fprintf(stderr, "urUSMDeviceAlloc(hPool) -> umfPoolAlignedMalloc(%p)\n",
+          (void *)UMFPool);
   *ppMem = umfPoolAlignedMalloc(UMFPool, size, alignment);
   if (*ppMem == nullptr) {
     auto umfErr = umfPoolGetLastAllocationError(UMFPool);
@@ -391,6 +395,8 @@ ur_result_t USMSharedMemoryProvider::allocateImpl(void **ResultPtr, size_t Size,
 
 ur_result_t USMDeviceMemoryProvider::allocateImpl(void **ResultPtr, size_t Size,
                                                   uint32_t Alignment) {
+  fprintf(stderr,
+          "USMDeviceMemoryProvider::allocateImpl() -> USMDeviceAllocImpl()\n");
   return USMDeviceAllocImpl(ResultPtr, Context, Device, /* flags */ 0, Size,
                             Alignment);
 }
