@@ -465,10 +465,19 @@ enqueueKernelLaunch(ur_queue_handle_t hQueue, ur_kernel_handle_t hKernel,
     }
 
     auto &ArgPointers = hKernel->getArgPointers();
-    UR_CHECK_ERROR(cuLaunchKernel(
-        CuFunc, BlocksPerGrid[0], BlocksPerGrid[1], BlocksPerGrid[2],
-        ThreadsPerBlock[0], ThreadsPerBlock[1], ThreadsPerBlock[2], LocalSize,
-        CuStream, const_cast<void **>(ArgPointers.data()), nullptr));
+    try {
+      UR_CHECK_ERROR(cuLaunchKernel(
+          CuFunc, BlocksPerGrid[0], BlocksPerGrid[1], BlocksPerGrid[2],
+          ThreadsPerBlock[0], ThreadsPerBlock[1], ThreadsPerBlock[2], LocalSize,
+          CuStream, const_cast<void **>(ArgPointers.data()), nullptr));
+    } catch (ur_result_t Err) {
+      // cuLaunchKernel returns CUDA_ERROR_INVALID_VALUE if the args are
+      // incorrect
+      if (Err == UR_RESULT_ERROR_INVALID_VALUE) {
+        return UR_RESULT_ERROR_INVALID_KERNEL_ARGS;
+      }
+      return Err;
+    }
 
     if (phEvent) {
       UR_CHECK_ERROR(RetImplEvent->record());
