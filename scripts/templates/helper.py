@@ -1296,17 +1296,6 @@ def get_initial_null_set(obj):
     return ""
 
 """
-Public:
-    returns true if the function always wraps output pointers in loader handles
-"""
-def always_wrap_outputs(obj):
-    cname = obj_traits.class_name(obj)
-    return (cname, obj['name']) in [
-        ('$xProgram', 'Link'),
-        ('$xProgram', 'LinkExp'),
-    ]
-
-"""
 Private:
     returns the list of parameters, filtering based on desc tags
 """
