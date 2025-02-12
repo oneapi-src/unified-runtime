@@ -229,13 +229,13 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
       if (groupsPerThread) {
         for (unsigned thread = 0; thread < numParallelThreads; thread++) {
           futures.emplace_back(
-            tp.schedule_task([groups, thread, groupsPerThread,
-                          kernel = *hKernel](size_t threadId) mutable {
-            for (unsigned i = 0; i < groupsPerThread; i++) {
-              auto index = thread * groupsPerThread + i;
-              groups[index](threadId, kernel);
-            }
-          }));
+              tp.schedule_task([groups, thread, groupsPerThread,
+                                kernel = *hKernel](size_t threadId) mutable {
+                for (unsigned i = 0; i < groupsPerThread; i++) {
+                  auto index = thread * groupsPerThread + i;
+                  groups[index](threadId, kernel);
+                }
+              }));
         }
       }
 
