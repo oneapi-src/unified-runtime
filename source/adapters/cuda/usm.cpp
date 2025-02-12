@@ -128,10 +128,13 @@ ur_result_t USMFreeImpl(ur_context_handle_t hContext, void *Pointer) {
     umf_memory_pool_handle_t MemoryPool;
 
     if (IsManaged) {
+      fprintf(stderr, "Freeing memory from the SHARED memory pool\n");
       MemoryPool = Device->MemoryPoolShared;
     } else if (Type == CU_MEMORYTYPE_DEVICE) {
+      fprintf(stderr, "Freeing memory from the DEVICE memory pool\n");
       MemoryPool = Device->MemoryPoolDevice;
     } else {
+      fprintf(stderr, "Freeing memory from the HOST memory pool\n");
       MemoryPool = hContext->MemoryPoolHost;
     }
 
@@ -146,8 +149,13 @@ ur_result_t USMFreeImpl(ur_context_handle_t hContext, void *Pointer) {
 ///
 UR_APIEXPORT ur_result_t UR_APICALL urUSMFree(ur_context_handle_t hContext,
                                               void *pMem) {
-  if (auto Pool = umfPoolByPtr(pMem))
+  if (auto Pool = umfPoolByPtr(pMem)) {
+    fprintf(stderr,
+            "Freeing memory from the COMMON memory pool (hContext: %p, pMem: "
+            "%p, Pool: %p)\n",
+            (void *)hContext, pMem, (void *)Pool);
     return umf::umf2urResult(umfPoolFree(Pool, pMem));
+  }
   return USMFreeImpl(hContext, pMem);
 }
 
@@ -426,6 +434,9 @@ ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t Context,
                                  UmfHostParamsHandle.get())
           .second;
 
+  fprintf(stderr, "poolMakeUniqueFromOps(provider=%p) -> HostMemPool=%p\n",
+          (void *)MemProvider.get(), (void *)HostMemPool.get());
+
   for (const auto &Device : Context->getDevices()) {
     MemProvider =
         umf::memoryProviderMakeUnique<USMDeviceMemoryProvider>(Context, Device)
@@ -436,6 +447,10 @@ ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t Context,
         umf::poolMakeUniqueFromOps(umfDisjointPoolOps(), std::move(MemProvider),
                                    UmfDeviceParamsHandle.get())
             .second;
+
+    fprintf(stderr, "poolMakeUniqueFromOps(provider=%p) -> DeviceMemPool=%p\n",
+            (void *)MemProvider.get(), (void *)DeviceMemPool.get());
+
     MemProvider =
         umf::memoryProviderMakeUnique<USMSharedMemoryProvider>(Context, Device)
             .second;
@@ -445,6 +460,10 @@ ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t Context,
         umf::poolMakeUniqueFromOps(umfDisjointPoolOps(), std::move(MemProvider),
                                    UmfSharedParamsHandle.get())
             .second;
+
+    fprintf(stderr, "poolMakeUniqueFromOps(provider=%p) -> SharedMemPool=%p\n",
+            (void *)MemProvider.get(), (void *)SharedMemPool.get());
+
     Context->addPool(this);
   }
 }

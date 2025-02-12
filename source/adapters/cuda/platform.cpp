@@ -42,6 +42,10 @@ CreateDeviceMemoryProvidersPools(ur_platform_handle_t_ *Platform) {
         UMF_MEMORY_TYPE_DEVICE, &device_handle->MemoryProviderDevice);
     UMF_RETURN_UR_ERROR(UmfResult);
 
+    fprintf(stderr,
+            "CreateDeviceMemoryProvidersPools() -> MemoryProviderDevice=%p\n",
+            (void *)device_handle->MemoryProviderDevice);
+
     // create UMF CUDA memory provider for the shared memory
     // (UMF_MEMORY_TYPE_SHARED)
     UmfResult = umf::createMemoryProvider(
@@ -49,17 +53,29 @@ CreateDeviceMemoryProvidersPools(ur_platform_handle_t_ *Platform) {
         UMF_MEMORY_TYPE_SHARED, &device_handle->MemoryProviderShared);
     UMF_RETURN_UR_ERROR(UmfResult);
 
+    fprintf(stderr,
+            "CreateDeviceMemoryProvidersPools() -> MemoryProviderShared=%p\n",
+            (void *)device_handle->MemoryProviderShared);
+
     // create UMF CUDA memory pool for the device memory
     // (UMF_MEMORY_TYPE_DEVICE)
     UmfResult = umf::createMemoryProxyPool(device_handle->MemoryProviderDevice,
                                            &device_handle->MemoryPoolDevice);
     UMF_RETURN_UR_ERROR(UmfResult);
 
+    fprintf(stderr,
+            "CreateDeviceMemoryProvidersPools() -> MemoryPoolDevice=%p\n",
+            (void *)device_handle->MemoryPoolDevice);
+
     // create UMF CUDA memory pool for the shared memory
     // (UMF_MEMORY_TYPE_SHARED)
     UmfResult = umf::createMemoryProxyPool(device_handle->MemoryProviderShared,
                                            &device_handle->MemoryPoolShared);
     UMF_RETURN_UR_ERROR(UmfResult);
+
+    fprintf(stderr,
+            "CreateDeviceMemoryProvidersPools() -> MemoryPoolShared=%p\n",
+            (void *)device_handle->MemoryPoolShared);
   }
 
   return UR_RESULT_SUCCESS;

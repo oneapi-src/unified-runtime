@@ -97,6 +97,9 @@ CreateHostMemoryProvider(ur_device_handle_t_ *DeviceHandle,
       UMF_MEMORY_TYPE_HOST, MemoryProviderHost);
   UMF_RETURN_UR_ERROR(UmfResult);
 
+  fprintf(stderr, "CreateHostMemoryProvider() -> MemoryProviderHost=%p\n",
+          (void *)*MemoryProviderHost);
+
   return UR_RESULT_SUCCESS;
 }
 
@@ -111,6 +114,9 @@ CreateHostMemoryPool(umf_memory_provider_handle_t MemoryProviderHost,
   UMF_RETURN_UR_ERROR(UmfResult);
 
   *MemoryPoolHost = _MemoryPoolHost;
+
+  fprintf(stderr, "CreateHostMemoryPool() -> MemoryPoolHost=%p\n",
+          (void *)_MemoryPoolHost);
 
   return UR_RESULT_SUCCESS;
 }

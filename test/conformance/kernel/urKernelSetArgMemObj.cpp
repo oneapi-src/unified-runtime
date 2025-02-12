@@ -12,13 +12,29 @@ struct urKernelSetArgMemObjTest : uur::urKernelTest {
   void SetUp() {
     program_name = "fill";
     UUR_RETURN_ON_FATAL_FAILURE(urKernelTest::SetUp());
+    fprintf(
+        stderr,
+        "urKernelSetArgMemObjTest::SetUp -> urMemBufferCreate(size=%zu) ...\n",
+        16 * sizeof(uint32_t));
     ASSERT_SUCCESS(urMemBufferCreate(context, UR_MEM_FLAG_READ_WRITE,
                                      16 * sizeof(uint32_t), nullptr, &buffer));
+    fprintf(stderr,
+            "urKernelSetArgMemObjTest::SetUp -> urMemBufferCreate(size=%zu, "
+            "buffer=%p) DONE\n",
+            16 * sizeof(uint32_t), (void *)buffer);
   }
 
   void TearDown() {
     if (buffer) {
+      fprintf(
+          stderr,
+          "urKernelSetArgMemObjTest::TearDown -> urMemRelease(buffer=%p) ...\n",
+          (void *)buffer);
       ASSERT_SUCCESS(urMemRelease(buffer));
+      fprintf(stderr,
+              "urKernelSetArgMemObjTest::TearDown -> urMemRelease(buffer=%p) "
+              "DONE\n",
+              (void *)buffer);
     }
     UUR_RETURN_ON_FATAL_FAILURE(urKernelTest::TearDown());
   }
@@ -28,7 +44,9 @@ struct urKernelSetArgMemObjTest : uur::urKernelTest {
 UUR_INSTANTIATE_DEVICE_TEST_SUITE(urKernelSetArgMemObjTest);
 
 TEST_P(urKernelSetArgMemObjTest, Success) {
+  fprintf(stderr, "TEST_P(urKernelSetArgMemObjTest, Success) START\n");
   ASSERT_SUCCESS(urKernelSetArgMemObj(kernel, 0, nullptr, buffer));
+  fprintf(stderr, "TEST_P(urKernelSetArgMemObjTest, Success) END\n");
 }
 
 TEST_P(urKernelSetArgMemObjTest, InvalidNullHandleKernel) {

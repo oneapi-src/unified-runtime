@@ -100,9 +100,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemRelease(ur_mem_handle_t hMem) {
   try {
 
     // Do nothing if there are other references
-    if (hMem->decrementReferenceCount() > 0) {
+    uint32_t rc = hMem->decrementReferenceCount();
+    if (rc > 0) {
+      fprintf(stderr, "urMemRelease() -> decrementReferenceCount(%p) = %u\n",
+              (void *)hMem, rc);
       return UR_RESULT_SUCCESS;
     }
+
+    fprintf(stderr, "urMemRelease() -> Destroy(%p)\n", (void *)hMem);
 
     // Call destructor
     std::unique_ptr<ur_mem_handle_t_> MemObjPtr(hMem);

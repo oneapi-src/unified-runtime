@@ -227,6 +227,8 @@ auto poolMakeUnique(provider_unique_handle_t provider, Args &&...args) {
 
   auto ret = umfPoolCreate(&ops, provider.get(), &argsTuple,
                            UMF_POOL_CREATE_FLAG_OWN_PROVIDER, &hPool);
+  fprintf(stderr, "poolMakeUnique(provider=%p) -> umfPoolCreate=%p\n",
+          (void *)provider.get(), (void *)hPool);
   if (ret == UMF_RESULT_SUCCESS) {
     provider.release(); // pool now owns the provider
   }
@@ -240,6 +242,8 @@ static inline auto poolMakeUniqueFromOps(umf_memory_pool_ops_t *ops,
   umf_memory_pool_handle_t hPool;
   auto ret = umfPoolCreate(ops, provider.get(), params,
                            UMF_POOL_CREATE_FLAG_OWN_PROVIDER, &hPool);
+  fprintf(stderr, "poolMakeUniqueFromOps(provider=%p) -> umfPoolCreate=%p\n",
+          (void *)provider.get(), (void *)hPool);
   if (ret != UMF_RESULT_SUCCESS) {
     return std::pair<umf_result_t, pool_unique_handle_t>{
         ret, pool_unique_handle_t(nullptr, nullptr)};
