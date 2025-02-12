@@ -261,10 +261,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
   if (phEvent) {
     *phEvent = event;
   }
-  event->set_callback([hKernel, event]() {
+  event->set_callback([event]() {
     event->tick_end();
-    // TODO: avoid calling clear() here.
-    // hKernel->_localArgInfo.clear();
   });
 
   if (hQueue->isInOrder()) {
