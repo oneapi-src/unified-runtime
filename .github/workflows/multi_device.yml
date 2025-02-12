@@ -57,9 +57,15 @@ jobs:
       run: cmake --build ${{github.workspace}}/build -j $(nproc)
 
     - name: Test adapter specific
+      env:
+        ZE_DEBUG: 1
+        ZE_ENABLE_LOADER_DEBUG_TRACE: 1
       working-directory: ${{github.workspace}}/build
       run: ctest -C ${{matrix.build_type}} --output-on-failure -L "adapter-specific" --timeout 180
 
     - name: Test adapters
+      env:
+        ZE_DEBUG: 1
+        ZE_ENABLE_LOADER_DEBUG_TRACE: 1
       working-directory: ${{github.workspace}}/build
       run: env UR_CTS_ADAPTER_PLATFORM="${{matrix.adapter.platform}}" ctest -C ${{matrix.build_type}} --output-on-failure -L "conformance" -E "exp_command_buffer" --timeout 180

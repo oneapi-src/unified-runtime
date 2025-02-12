@@ -24,7 +24,12 @@ TEST_P(urLevelZeroKernelNativeHandleTest, OwnedHandleRelease) {
 
   auto kernel_name =
       uur::KernelsEnvironment::instance->GetEntryPointNames("foo")[0];
-
+  ze_init_driver_type_desc_t desc = {};
+  desc.stype = ZE_STRUCTURE_TYPE_INIT_DRIVER_TYPE_DESC;
+  desc.flags = ZE_INIT_DRIVER_TYPE_FLAG_GPU;
+  desc.pNext = nullptr;
+  uint32_t pCount = 0;
+  zeInitDrivers(&pCount, nullptr, &desc);
   ze_module_desc_t moduleDesc{};
   moduleDesc.stype = ZE_STRUCTURE_TYPE_MODULE_DESC;
   moduleDesc.format = ZE_MODULE_FORMAT_IL_SPIRV;
