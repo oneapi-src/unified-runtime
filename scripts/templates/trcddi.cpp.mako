@@ -57,7 +57,7 @@ namespace ur_tracing_layer
         if (logger.getLevel() <= logger::Level::INFO) {
             std::ostringstream args_str;
             ur::extras::printFunctionParams(args_str, ${th.make_func_etor(n, tags, obj)}, &params);
-            URLOG_(logger, INFO "   <--- ${th.make_func_name(n, tags, obj)}({}) -> {};\n", args_str.str(), result);
+            URLOG_(logger, INFO, "   <--- ${th.make_func_name(n, tags, obj)}({}) -> {};\n", args_str.str(), result);
         }
 
         return result;
