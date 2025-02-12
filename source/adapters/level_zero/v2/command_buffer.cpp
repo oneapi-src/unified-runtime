@@ -366,8 +366,8 @@ ur_result_t urCommandBufferAppendUSMFillExp(
 
   std::ignore = phCommand;
 
-  UR_CALL(hCommandBuffer->commandListManager.appendUSMFill(pMemory, patternSize, pPattern, size,
-                                             0, nullptr, nullptr));
+  UR_CALL(hCommandBuffer->commandListManager.appendUSMFill(
+      pMemory, patternSize, pPattern, size, 0, nullptr, nullptr));
   return UR_RESULT_SUCCESS;
 } catch (...) {
   return exceptionToResult(std::current_exception());
@@ -393,8 +393,8 @@ ur_result_t urCommandBufferAppendMemBufferFillExp(
 
   std::ignore = phCommand;
 
-  UR_CALL(hCommandBuffer->commandListManager.appendMemBufferFill(hBuffer, pPattern, patternSize, offset, size,
-                                             0, nullptr, nullptr));
+  UR_CALL(hCommandBuffer->commandListManager.appendMemBufferFill(
+      hBuffer, pPattern, patternSize, offset, size, 0, nullptr, nullptr));
   return UR_RESULT_SUCCESS;
 } catch (...) {
   return exceptionToResult(std::current_exception());
@@ -420,8 +420,8 @@ ur_result_t urCommandBufferAppendUSMPrefetchExp(
 
   std::ignore = phCommand;
 
-  UR_CALL(hCommandBuffer->commandListManager.appendUSMPrefetch(pMemory, size, flags,
-                                             0, nullptr, nullptr));
+  UR_CALL(hCommandBuffer->commandListManager.appendUSMPrefetch(
+      pMemory, size, flags, 0, nullptr, nullptr));
 
   return UR_RESULT_SUCCESS;
 } catch (...) {
@@ -447,7 +447,8 @@ ur_result_t urCommandBufferAppendUSMAdviseExp(
 
   std::ignore = phCommand;
 
-  UR_CALL(hCommandBuffer->commandListManager.appendUSMAdvise(pMemory, size, advice, nullptr));
+  UR_CALL(hCommandBuffer->commandListManager.appendUSMAdvise(pMemory, size,
+                                                             advice, nullptr));
 
   return UR_RESULT_SUCCESS;
 } catch (...) {

@@ -45,9 +45,8 @@ ur_result_t ur_command_list_manager::appendGenericFillUnlocked(
       device, ur_mem_handle_t_::device_access_mode_t::read_only, offset, size,
       [&](void *src, void *dst, size_t size) {
         ZE2UR_CALL_THROWS(zeCommandListAppendMemoryCopy,
-                          (zeCommandList.get(), dst, src,
-                           size, nullptr, waitListView.num,
-                           waitListView.handles));
+                          (zeCommandList.get(), dst, src, size, nullptr,
+                           waitListView.num, waitListView.handles));
         waitListView.clear();
       }));
 
@@ -55,9 +54,8 @@ ur_result_t ur_command_list_manager::appendGenericFillUnlocked(
   // When it's not, the fill is emulated with zeCommandListAppendMemoryCopy.
   if (isPowerOf2(patternSize)) {
     ZE2UR_CALL(zeCommandListAppendMemoryFill,
-               (zeCommandList.get(), pDst, pPattern,
-                patternSize, size, zeSignalEvent, waitListView.num,
-                waitListView.handles));
+               (zeCommandList.get(), pDst, pPattern, patternSize, size,
+                zeSignalEvent, waitListView.num, waitListView.handles));
   } else {
     // Copy pattern into every entry in memory array pointed by Ptr.
     uint32_t numOfCopySteps = size / patternSize;
@@ -266,9 +264,9 @@ ur_result_t ur_command_list_manager::appendMemBufferFill(
   std::scoped_lock<ur_shared_mutex, ur_shared_mutex> lock(this->Mutex,
                                                           hBuffer->getMutex());
 
-  return appendGenericFillUnlocked(hBuffer, offset, patternSize, pPattern,
-                                    size, numEventsInWaitList, phEventWaitList,
-                                    phEvent, UR_COMMAND_MEM_BUFFER_FILL);
+  return appendGenericFillUnlocked(hBuffer, offset, patternSize, pPattern, size,
+                                   numEventsInWaitList, phEventWaitList,
+                                   phEvent, UR_COMMAND_MEM_BUFFER_FILL);
 }
 
 ur_result_t ur_command_list_manager::appendUSMFill(
@@ -281,8 +279,8 @@ ur_result_t ur_command_list_manager::appendUSMFill(
 
   ur_usm_handle_t_ dstHandle(context, size, pMem);
   return appendGenericFillUnlocked(&dstHandle, 0, patternSize, pPattern, size,
-                                    numEventsInWaitList, phEventWaitList,
-                                    phEvent, UR_COMMAND_USM_FILL);
+                                   numEventsInWaitList, phEventWaitList,
+                                   phEvent, UR_COMMAND_USM_FILL);
 }
 
 ur_result_t ur_command_list_manager::appendUSMPrefetch(
@@ -301,9 +299,8 @@ ur_result_t ur_command_list_manager::appendUSMPrefetch(
       getWaitListView(phEventWaitList, numEventsInWaitList);
 
   if (pWaitEvents) {
-    ZE2UR_CALL(
-        zeCommandListAppendWaitOnEvents,
-        (zeCommandList.get(), numWaitEvents, pWaitEvents));
+    ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
+               (zeCommandList.get(), numWaitEvents, pWaitEvents));
   }
   // TODO: figure out how to translate "flags"
   ZE2UR_CALL(zeCommandListAppendMemoryPrefetch,
@@ -318,10 +315,9 @@ ur_result_t ur_command_list_manager::appendUSMPrefetch(
 
 ur_result_t
 ur_command_list_manager::appendUSMAdvise(const void *pMem, size_t size,
-                                                ur_usm_advice_flags_t advice,
-                                                ur_event_handle_t *phEvent) {
+                                         ur_usm_advice_flags_t advice,
+                                         ur_event_handle_t *phEvent) {
   TRACK_SCOPE_LATENCY("ur_command_list_manager::appendUSMAdvise");
-
 
   std::scoped_lock<ur_shared_mutex> lock(this->Mutex);
 
@@ -332,14 +328,12 @@ ur_command_list_manager::appendUSMAdvise(const void *pMem, size_t size,
   auto [pWaitEvents, numWaitEvents] = getWaitListView(nullptr, 0);
 
   if (pWaitEvents) {
-    ZE2UR_CALL(
-        zeCommandListAppendWaitOnEvents,
-        (zeCommandList.get(), numWaitEvents, pWaitEvents));
+    ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
+               (zeCommandList.get(), numWaitEvents, pWaitEvents));
   }
 
   ZE2UR_CALL(zeCommandListAppendMemAdvise,
-             (zeCommandList.get(), device->ZeDevice,
-              pMem, size, zeAdvice));
+             (zeCommandList.get(), device->ZeDevice, pMem, size, zeAdvice));
 
   if (zeSignalEvent) {
     ZE2UR_CALL(zeCommandListAppendSignalEvent,

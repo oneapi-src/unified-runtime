@@ -373,9 +373,9 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueMemBufferFill(
     const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent) {
   TRACK_SCOPE_LATENCY("ur_queue_immediate_in_order_t::enqueueMemBufferFill");
 
-  UR_CALL(commandListManager.appendMemBufferFill(hBuffer, pPattern, patternSize, offset, size,
-                                             numEventsInWaitList,
-                                             phEventWaitList, phEvent));
+  UR_CALL(commandListManager.appendMemBufferFill(
+      hBuffer, pPattern, patternSize, offset, size, numEventsInWaitList,
+      phEventWaitList, phEvent));
 
   return UR_RESULT_SUCCESS;
 }
@@ -514,8 +514,8 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueUSMFill(
   TRACK_SCOPE_LATENCY("ur_queue_immediate_in_order_t::enqueueUSMFill");
 
   UR_CALL(commandListManager.appendUSMFill(pMem, patternSize, pPattern, size,
-                                             numEventsInWaitList,
-                                             phEventWaitList, phEvent));
+                                           numEventsInWaitList, phEventWaitList,
+                                           phEvent));
 
   return UR_RESULT_SUCCESS;
 }
@@ -540,9 +540,8 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueUSMPrefetch(
     ur_event_handle_t *phEvent) {
   TRACK_SCOPE_LATENCY("ur_queue_immediate_in_order_t::enqueueUSMPrefetch");
 
-  UR_CALL(commandListManager.appendUSMPrefetch(pMem, size, flags,
-                                             numEventsInWaitList,
-                                             phEventWaitList, phEvent));
+  UR_CALL(commandListManager.appendUSMPrefetch(
+      pMem, size, flags, numEventsInWaitList, phEventWaitList, phEvent));
 
   return UR_RESULT_SUCCESS;
 }

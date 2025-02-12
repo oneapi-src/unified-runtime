@@ -97,24 +97,27 @@ struct ur_command_list_manager : public _ur_object {
                                 size_t height, uint32_t numEventsInWaitList,
                                 const ur_event_handle_t *phEventWaitList,
                                 ur_event_handle_t *phEvent);
-ur_result_t appendMemBufferFill(
-    ur_mem_handle_t hBuffer, const void *pPattern, size_t patternSize,
-    size_t offset, size_t size, uint32_t numEventsInWaitList,
-    const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent);
+  ur_result_t appendMemBufferFill(ur_mem_handle_t hBuffer, const void *pPattern,
+                                  size_t patternSize, size_t offset,
+                                  size_t size, uint32_t numEventsInWaitList,
+                                  const ur_event_handle_t *phEventWaitList,
+                                  ur_event_handle_t *phEvent);
 
-  ur_result_t appendUSMFill(
-    void *pMem, size_t patternSize, const void *pPattern, size_t size,
-    uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
-    ur_event_handle_t *phEvent);
+  ur_result_t appendUSMFill(void *pMem, size_t patternSize,
+                            const void *pPattern, size_t size,
+                            uint32_t numEventsInWaitList,
+                            const ur_event_handle_t *phEventWaitList,
+                            ur_event_handle_t *phEvent);
 
-ur_result_t appendUSMPrefetch(
-    const void *pMem, size_t size, ur_usm_migration_flags_t flags,
-    uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
-    ur_event_handle_t *phEvent);
+  ur_result_t appendUSMPrefetch(const void *pMem, size_t size,
+                                ur_usm_migration_flags_t flags,
+                                uint32_t numEventsInWaitList,
+                                const ur_event_handle_t *phEventWaitList,
+                                ur_event_handle_t *phEvent);
 
-ur_result_t appendUSMAdvise(const void *pMem, size_t size,
-                                                ur_usm_advice_flags_t advice,
-                                                ur_event_handle_t *phEvent);
+  ur_result_t appendUSMAdvise(const void *pMem, size_t size,
+                              ur_usm_advice_flags_t advice,
+                              ur_event_handle_t *phEvent);
 
   ze_command_list_handle_t getZeCommandList();
 
