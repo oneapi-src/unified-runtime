@@ -64,11 +64,15 @@ urUSMDeviceAlloc(ur_context_handle_t hContext, ur_device_handle_t hDevice,
             UR_RESULT_ERROR_INVALID_VALUE);
 
   if (!hPool) {
+    fprintf(stderr, "urUSMDeviceAlloc(!hPool) -> USMDeviceAllocImpl()\n");
     return USMDeviceAllocImpl(ppMem, hContext, hDevice, /* flags */ 0, size,
                               alignment);
   }
 
+  fprintf(stderr, "urUSMDeviceAlloc(hPool) -> hPool->DeviceMemPool.get()\n");
   auto UMFPool = hPool->DeviceMemPool.get();
+  fprintf(stderr, "urUSMDeviceAlloc(hPool) -> umfPoolAlignedMalloc(%p)\n",
+          (void *)UMFPool);
   *ppMem = umfPoolAlignedMalloc(UMFPool, size, alignment);
   if (*ppMem == nullptr) {
     auto umfErr = umfPoolGetLastAllocationError(UMFPool);
@@ -125,18 +129,20 @@ ur_result_t USMFreeImpl(ur_context_handle_t hContext, void *Pointer) {
     UR_ASSERT(DeviceOrdinal < NumDevices, UR_RESULT_ERROR_INVALID_DEVICE);
 
     ur_device_handle_t Device = Platform->Devices[DeviceOrdinal].get();
-    umf_memory_provider_handle_t MemoryProvider;
+    umf_memory_pool_handle_t MemoryPool;
 
     if (IsManaged) {
-      MemoryProvider = Device->MemoryProviderShared;
+      fprintf(stderr, "Freeing memory from the SHARED memory pool\n");
+      MemoryPool = Device->MemoryPoolShared;
     } else if (Type == CU_MEMORYTYPE_DEVICE) {
-      MemoryProvider = Device->MemoryProviderDevice;
+      fprintf(stderr, "Freeing memory from the DEVICE memory pool\n");
+      MemoryPool = Device->MemoryPoolDevice;
     } else {
-      MemoryProvider = hContext->MemoryProviderHost;
+      fprintf(stderr, "Freeing memory from the HOST memory pool\n");
+      MemoryPool = hContext->MemoryPoolHost;
     }
 
-    UMF_CHECK_ERROR(umfMemoryProviderFree(MemoryProvider, Pointer,
-                                          0 /* size is unknown */));
+    UMF_CHECK_ERROR(umfPoolFree(MemoryPool, Pointer));
   } catch (ur_result_t Err) {
     Result = Err;
   }
@@ -147,8 +153,13 @@ ur_result_t USMFreeImpl(ur_context_handle_t hContext, void *Pointer) {
 ///
 UR_APIEXPORT ur_result_t UR_APICALL urUSMFree(ur_context_handle_t hContext,
                                               void *pMem) {
-  if (auto Pool = umfPoolByPtr(pMem))
+  if (auto Pool = umfPoolByPtr(pMem)) {
+    fprintf(stderr,
+            "Freeing memory from the COMMON memory pool (hContext: %p, pMem: "
+            "%p, Pool: %p)\n",
+            (void *)hContext, pMem, (void *)Pool);
     return umf::umf2urResult(umfPoolFree(Pool, pMem));
+  }
   return USMFreeImpl(hContext, pMem);
 }
 
@@ -158,8 +169,8 @@ ur_result_t USMDeviceAllocImpl(void **ResultPtr, ur_context_handle_t,
                                uint32_t Alignment) {
   try {
     ScopedContext Active(Device);
-    UMF_CHECK_ERROR(umfMemoryProviderAlloc(Device->MemoryProviderDevice, Size,
-                                           Alignment, ResultPtr));
+    *ResultPtr = umfPoolMalloc(Device->MemoryPoolDevice, Size);
+    UMF_CHECK_PTR(*ResultPtr);
   } catch (ur_result_t Err) {
     return Err;
   }
@@ -180,8 +191,8 @@ ur_result_t USMSharedAllocImpl(void **ResultPtr, ur_context_handle_t,
                                uint32_t Alignment) {
   try {
     ScopedContext Active(Device);
-    UMF_CHECK_ERROR(umfMemoryProviderAlloc(Device->MemoryProviderShared, Size,
-                                           Alignment, ResultPtr));
+    *ResultPtr = umfPoolMalloc(Device->MemoryPoolShared, Size);
+    UMF_CHECK_PTR(*ResultPtr);
   } catch (ur_result_t Err) {
     return Err;
   }
@@ -199,8 +210,8 @@ ur_result_t USMHostAllocImpl(void **ResultPtr, ur_context_handle_t hContext,
                              ur_usm_host_mem_flags_t, size_t Size,
                              uint32_t Alignment) {
   try {
-    UMF_CHECK_ERROR(umfMemoryProviderAlloc(hContext->MemoryProviderHost, Size,
-                                           Alignment, ResultPtr));
+    *ResultPtr = umfPoolMalloc(hContext->MemoryPoolHost, Size);
+    UMF_CHECK_PTR(*ResultPtr);
   } catch (ur_result_t Err) {
     return Err;
   }
@@ -384,6 +395,8 @@ ur_result_t USMSharedMemoryProvider::allocateImpl(void **ResultPtr, size_t Size,
 
 ur_result_t USMDeviceMemoryProvider::allocateImpl(void **ResultPtr, size_t Size,
                                                   uint32_t Alignment) {
+  fprintf(stderr,
+          "USMDeviceMemoryProvider::allocateImpl() -> USMDeviceAllocImpl()\n");
   return USMDeviceAllocImpl(ResultPtr, Context, Device, /* flags */ 0, Size,
                             Alignment);
 }
@@ -427,6 +440,9 @@ ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t Context,
                                  UmfHostParamsHandle.get())
           .second;
 
+  fprintf(stderr, "poolMakeUniqueFromOps(provider=%p) -> HostMemPool=%p\n",
+          (void *)MemProvider.get(), (void *)HostMemPool.get());
+
   for (const auto &Device : Context->getDevices()) {
     MemProvider =
         umf::memoryProviderMakeUnique<USMDeviceMemoryProvider>(Context, Device)
@@ -437,6 +453,10 @@ ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t Context,
         umf::poolMakeUniqueFromOps(umfDisjointPoolOps(), std::move(MemProvider),
                                    UmfDeviceParamsHandle.get())
             .second;
+
+    fprintf(stderr, "poolMakeUniqueFromOps(provider=%p) -> DeviceMemPool=%p\n",
+            (void *)MemProvider.get(), (void *)DeviceMemPool.get());
+
     MemProvider =
         umf::memoryProviderMakeUnique<USMSharedMemoryProvider>(Context, Device)
             .second;
@@ -446,6 +466,10 @@ ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t Context,
         umf::poolMakeUniqueFromOps(umfDisjointPoolOps(), std::move(MemProvider),
                                    UmfSharedParamsHandle.get())
             .second;
+
+    fprintf(stderr, "poolMakeUniqueFromOps(provider=%p) -> SharedMemPool=%p\n",
+            (void *)MemProvider.get(), (void *)SharedMemPool.get());
+
     Context->addPool(this);
   }
 }

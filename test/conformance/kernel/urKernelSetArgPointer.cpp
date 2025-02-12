@@ -34,6 +34,7 @@ struct urKernelSetArgPointerTest : uur::urKernelExecutionTest {
 UUR_INSTANTIATE_DEVICE_TEST_SUITE(urKernelSetArgPointerTest);
 
 TEST_P(urKernelSetArgPointerTest, SuccessHost) {
+  fprintf(stderr, "TEST_P(urKernelSetArgPointerTest, SuccessHost) START\n");
   ur_device_usm_access_capability_flags_t host_usm_flags = 0;
   ASSERT_SUCCESS(uur::GetDeviceUSMHostSupport(device, host_usm_flags));
   if (!(host_usm_flags & UR_DEVICE_USM_ACCESS_CAPABILITY_FLAG_ACCESS)) {
@@ -48,6 +49,7 @@ TEST_P(urKernelSetArgPointerTest, SuccessHost) {
   ASSERT_SUCCESS(urKernelSetArgValue(kernel, 1, sizeof(data), nullptr, &data));
   Launch1DRange(array_size);
   ValidateAllocation(allocation);
+  fprintf(stderr, "TEST_P(urKernelSetArgPointerTest, SuccessHost) END\n");
 }
 
 TEST_P(urKernelSetArgPointerTest, SuccessDevice) {

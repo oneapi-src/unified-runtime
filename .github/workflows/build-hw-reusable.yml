@@ -37,6 +37,7 @@ env:
   UR_LOG_LEVEL_ZERO: "level:error;flush:error"
   UR_LOG_NATIVE_CPU: "level:error;flush:error"
   UR_LOG_OPENCL: "level:error;flush:error"
+  UMF_LOG: "level:debug;flush:debug;output:stderr;pid:yes"
 
 jobs:
   adapter-build-hw:

@@ -15,6 +15,13 @@ UUR_INSTANTIATE_DEVICE_TEST_SUITE(cudaUrContextCreateTest);
 
 constexpr unsigned int known_cuda_api_version = 3020;
 
+namespace umf {
+ur_result_t getProviderNativeError(const char *, int32_t) {
+  // TODO: implement when UMF supports CUDA
+  return UR_RESULT_ERROR_UNKNOWN;
+}
+} // namespace umf
+
 TEST_P(cudaUrContextCreateTest, CreateWithChildThread) {
   uur::raii::Context context = nullptr;
   ASSERT_SUCCESS(urContextCreate(1, &device, nullptr, context.ptr()));

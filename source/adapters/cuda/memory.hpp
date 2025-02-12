@@ -158,7 +158,7 @@ public:
     case AllocMode::Classic:
       for (auto &DevPtr : Ptrs) {
         if (DevPtr != native_type{0}) {
-          UR_CHECK_ERROR(cuMemFree(DevPtr));
+          UR_CHECK_ERROR(umf::umfCUDAFree((void *)DevPtr));
         }
       }
       break;
@@ -166,7 +166,7 @@ public:
       UR_CHECK_ERROR(cuMemHostUnregister(HostPtr));
       break;
     case AllocMode::AllocHostPtr:
-      UR_CHECK_ERROR(cuMemFreeHost(HostPtr));
+      UR_CHECK_ERROR(umf::umfCUDAFree((void *)HostPtr));
     }
     return UR_RESULT_SUCCESS;
   }

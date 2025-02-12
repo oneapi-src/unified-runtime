@@ -50,8 +50,8 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemBufferCreate(
           cuMemHostRegister(HostPtr, size, CU_MEMHOSTREGISTER_DEVICEMAP));
       AllocMode = BufferMem::AllocMode::UseHostPtr;
     } else if (flags & UR_MEM_FLAG_ALLOC_HOST_POINTER) {
-      UMF_CHECK_ERROR(umfMemoryProviderAlloc(hContext->MemoryProviderHost, size,
-                                             0, &HostPtr));
+      HostPtr = umfPoolMalloc(hContext->MemoryPoolHost, size);
+      UMF_CHECK_PTR(HostPtr);
       AllocMode = BufferMem::AllocMode::AllocHostPtr;
     } else if (flags & UR_MEM_FLAG_ALLOC_COPY_HOST_POINTER) {
       AllocMode = BufferMem::AllocMode::CopyIn;
@@ -100,9 +100,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urMemRelease(ur_mem_handle_t hMem) {
   try {
 
     // Do nothing if there are other references
-    if (hMem->decrementReferenceCount() > 0) {
+    uint32_t rc = hMem->decrementReferenceCount();
+    if (rc > 0) {
+      fprintf(stderr, "urMemRelease() -> decrementReferenceCount(%p) = %u\n",
+              (void *)hMem, rc);
       return UR_RESULT_SUCCESS;
     }
+
+    fprintf(stderr, "urMemRelease() -> Destroy(%p)\n", (void *)hMem);
 
     // Call destructor
     std::unique_ptr<ur_mem_handle_t_> MemObjPtr(hMem);
@@ -442,8 +447,8 @@ ur_result_t allocateMemObjOnDeviceIfNeeded(ur_mem_handle_t Mem,
                                        CU_MEMHOSTALLOC_DEVICEMAP));
       UR_CHECK_ERROR(cuMemHostGetDevicePointer(&DevPtr, Buffer.HostPtr, 0));
     } else {
-      UMF_CHECK_ERROR(umfMemoryProviderAlloc(hDevice->MemoryProviderDevice,
-                                             Buffer.Size, 0, (void **)&DevPtr));
+      *(void **)&DevPtr = umfPoolMalloc(hDevice->MemoryPoolDevice, Buffer.Size);
+      UMF_CHECK_PTR(*(void **)&DevPtr);
     }
   } else {
     CUarray ImageArray{};
