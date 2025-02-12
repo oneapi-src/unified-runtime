@@ -375,13 +375,11 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueMemBufferFill(
   auto hBuffer = hMem->getBuffer();
 
   UR_ASSERT(offset + size <= hBuffer->getSize(), UR_RESULT_ERROR_INVALID_SIZE);
+  UR_CALL(commandListManager.appendMemBufferFill(
+      hBuffer, pPattern, patternSize, offset, size, numEventsInWaitList,
+      phEventWaitList, phEvent));
 
-  std::scoped_lock<ur_shared_mutex, ur_shared_mutex> lock(this->Mutex,
-                                                          hBuffer->getMutex());
-
-  return enqueueGenericFillUnlocked(hBuffer, offset, patternSize, pPattern,
-                                    size, numEventsInWaitList, phEventWaitList,
-                                    phEvent, UR_COMMAND_MEM_BUFFER_FILL);
+  return UR_RESULT_SUCCESS;
 }
 
 ur_result_t ur_queue_immediate_in_order_t::enqueueMemImageRead(
@@ -601,7 +599,9 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueUSMFill(
     ur_event_handle_t *phEvent) {
   TRACK_SCOPE_LATENCY("ur_queue_immediate_in_order_t::enqueueUSMFill");
 
-  std::scoped_lock<ur_shared_mutex> lock(this->Mutex);
+  UR_CALL(commandListManager.appendUSMFill(pMem, patternSize, pPattern, size,
+                                           numEventsInWaitList, phEventWaitList,
+                                           phEvent));
 
   ur_usm_handle_t dstHandle(hContext, size, pMem);
   return enqueueGenericFillUnlocked(&dstHandle, 0, patternSize, pPattern, size,
@@ -629,27 +629,8 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueUSMPrefetch(
     ur_event_handle_t *phEvent) {
   TRACK_SCOPE_LATENCY("ur_queue_immediate_in_order_t::enqueueUSMPrefetch");
 
-  std::ignore = flags;
-
-  std::scoped_lock<ur_shared_mutex> lock(this->Mutex);
-
-  auto zeSignalEvent = getSignalEvent(phEvent, UR_COMMAND_USM_PREFETCH);
-
-  auto [pWaitEvents, numWaitEvents] =
-      getWaitListView(phEventWaitList, numEventsInWaitList);
-
-  if (pWaitEvents) {
-    ZE2UR_CALL(
-        zeCommandListAppendWaitOnEvents,
-        (commandListManager.getZeCommandList(), numWaitEvents, pWaitEvents));
-  }
-  // TODO: figure out how to translate "flags"
-  ZE2UR_CALL(zeCommandListAppendMemoryPrefetch,
-             (commandListManager.getZeCommandList(), pMem, size));
-  if (zeSignalEvent) {
-    ZE2UR_CALL(zeCommandListAppendSignalEvent,
-               (commandListManager.getZeCommandList(), zeSignalEvent));
-  }
+  UR_CALL(commandListManager.appendUSMPrefetch(
+      pMem, size, flags, numEventsInWaitList, phEventWaitList, phEvent));
 
   return UR_RESULT_SUCCESS;
 }
@@ -660,31 +641,8 @@ ur_queue_immediate_in_order_t::enqueueUSMAdvise(const void *pMem, size_t size,
                                                 ur_event_handle_t *phEvent) {
   TRACK_SCOPE_LATENCY("ur_queue_immediate_in_order_t::enqueueUSMAdvise");
 
-  std::ignore = flags;
+  UR_CALL(commandListManager.appendUSMAdvise(pMem, size, advice, phEvent));
 
-  std::scoped_lock<ur_shared_mutex> lock(this->Mutex);
-
-  auto zeAdvice = ur_cast<ze_memory_advice_t>(advice);
-
-  auto zeSignalEvent = getSignalEvent(phEvent, UR_COMMAND_USM_ADVISE);
-
-  auto [pWaitEvents, numWaitEvents] = getWaitListView(nullptr, 0);
-
-  if (pWaitEvents) {
-    ZE2UR_CALL(
-        zeCommandListAppendWaitOnEvents,
-        (commandListManager.getZeCommandList(), numWaitEvents, pWaitEvents));
-  }
-
-  // TODO: figure out how to translate "flags"
-  ZE2UR_CALL(zeCommandListAppendMemAdvise,
-             (commandListManager.getZeCommandList(), this->hDevice->ZeDevice,
-              pMem, size, zeAdvice));
-
-  if (zeSignalEvent) {
-    ZE2UR_CALL(zeCommandListAppendSignalEvent,
-               (commandListManager.getZeCommandList(), zeSignalEvent));
-  }
   return UR_RESULT_SUCCESS;
 }
 
