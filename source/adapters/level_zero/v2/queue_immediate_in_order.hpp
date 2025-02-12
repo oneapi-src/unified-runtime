@@ -43,12 +43,6 @@ private:
 
   void deferEventFree(ur_event_handle_t hEvent) override;
 
-  ur_result_t enqueueGenericFillUnlocked(
-      ur_mem_handle_t hBuffer, size_t offset, size_t patternSize,
-      const void *pPattern, size_t size, uint32_t numEventsInWaitList,
-      const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent,
-      ur_command_t commandType);
-
   ur_result_t enqueueGenericCommandListsExp(
       uint32_t numCommandLists, ze_command_list_handle_t *phCommandLists,
       ur_event_handle_t *phEvent, uint32_t numEventsInWaitList,
