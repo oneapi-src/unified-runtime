@@ -63,13 +63,13 @@ static native_cpu::state getResizedState(const native_cpu::NDRDescT &ndr,
 }
 #endif
 
-class LaunchInfoLocalArgs {
+class LaunchInfoGroup {
   native_cpu::state state;
   const size_t numParallelThreads;
 
 public:
-  LaunchInfoLocalArgs(const native_cpu::state &state, unsigned g0, unsigned g1,
-                      unsigned g2, size_t numParallelThreads)
+  LaunchInfoGroup(const native_cpu::state &state, unsigned g0, unsigned g1,
+                  unsigned g2, size_t numParallelThreads)
       : state(state), numParallelThreads(numParallelThreads) {
     this->state.update(g0, g1, g2);
   }
@@ -125,7 +125,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
   const size_t numParallelThreads = tp.num_threads();
   hKernel->updateMemPool(numParallelThreads);
   std::vector<std::future<void>> futures;
-  std::vector<LaunchInfoLocalArgs> groups;
+  std::vector<LaunchInfoGroup> groups;
   const auto numWG0 = ndr.GlobalSize[0] / ndr.LocalSize[0];
   const auto numWG1 = ndr.GlobalSize[1] / ndr.LocalSize[1];
   const auto numWG2 = ndr.GlobalSize[2] / ndr.LocalSize[2];
