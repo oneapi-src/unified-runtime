@@ -1008,8 +1008,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
           &MemoryBusWidth, CU_DEVICE_ATTRIBUTE_GLOBAL_MEMORY_BUS_WIDTH,
           hDevice->get()));
     }
+    // This is a collection of all constants mentioned in this computation:
+    // https://github.com/jeffhammond/HPCInfo/blob/aae05c733016cc8fbb91ee71fc8076f17fa7b912/cuda/gpu-detect.cu#L241
+    constexpr uint64_t MemoryBandwidthConstant = 250;
 
-    uint32_t MemoryBandwidth = MemoryClockKHz * MemoryBusWidth * 250;
+    uint64_t MemoryBandwidth =
+        MemoryBandwidthConstant * MemoryClockKHz * MemoryBusWidth;
 
     return ReturnValue(MemoryBandwidth);
   }
