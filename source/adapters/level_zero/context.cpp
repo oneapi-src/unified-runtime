@@ -185,8 +185,10 @@ ur_result_t urContextSetExtendedDeleter(
   std::ignore = Context;
   std::ignore = Deleter;
   std::ignore = UserData;
-  logger::error(logger::LegacyMessage("[UR][L0] {} function not implemented!"),
-                "{} function not implemented!", __FUNCTION__);
+  logger::get_logger().log(
+      logger::LegacyMessage("[UR][L0] {} function not implemented!"),
+      logger::Level::ERR, SHORT_FILE, UR_STR(__LINE__),
+      "{} function not implemented!", __FUNCTION__);
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 } // namespace ur::level_zero
@@ -331,7 +333,8 @@ ur_result_t ur_context_handle_t_::initialize() {
   ZeCommandQueueDesc.mode = ZE_COMMAND_QUEUE_MODE_SYNCHRONOUS;
   if (Device->useDriverInOrderLists() &&
       Device->useDriverCounterBasedEvents()) {
-    logger::debug(
+    URLOG(
+        DEBUG,
         "L0 Synchronous Immediate Command List needed with In Order property.");
     ZeCommandQueueDesc.flags |= ZE_COMMAND_LIST_FLAG_IN_ORDER;
   }
@@ -550,8 +553,8 @@ ur_result_t ur_context_handle_t_::getFreeSlotInExistingOrNewPool(
       ZeEventPoolDesc.flags |= ZE_EVENT_POOL_FLAG_HOST_VISIBLE;
     if (ProfilingEnabled)
       ZeEventPoolDesc.flags |= ZE_EVENT_POOL_FLAG_KERNEL_TIMESTAMP;
-    logger::debug("ze_event_pool_desc_t flags set to: {}",
-                  ZeEventPoolDesc.flags);
+    URLOG(DEBUG, "ze_event_pool_desc_t flags set to: {}",
+          ZeEventPoolDesc.flags);
     if (CounterBasedEventEnabled) {
       if (UsingImmCmdList) {
         counterBasedExt.flags = ZE_EVENT_POOL_COUNTER_BASED_EXP_FLAG_IMMEDIATE;
@@ -559,8 +562,8 @@ ur_result_t ur_context_handle_t_::getFreeSlotInExistingOrNewPool(
         counterBasedExt.flags =
             ZE_EVENT_POOL_COUNTER_BASED_EXP_FLAG_NON_IMMEDIATE;
       }
-      logger::debug("ze_event_pool_desc_t counter based flags set to: {}",
-                    counterBasedExt.flags);
+      URLOG(DEBUG, "ze_event_pool_desc_t counter based flags set to: {}",
+            counterBasedExt.flags);
       if (InterruptBasedEventEnabled) {
         counterBasedExt.pNext = &eventSyncMode;
       }
@@ -600,10 +603,11 @@ ur_event_handle_t ur_context_handle_t_::getEventFromContextCache(
       getEventCache(HostVisible, WithProfiling, Device,
                     CounterBasedEventEnabled, InterruptBasedEventEnabled);
   if (Cache->empty()) {
-    logger::info("Cache empty (Host Visible: {}, Profiling: {}, Counter: {}, "
-                 "Interrupt: {}, Device: {})",
-                 HostVisible, WithProfiling, CounterBasedEventEnabled,
-                 InterruptBasedEventEnabled, Device);
+    URLOG(INFO,
+          "Cache empty (Host Visible: {}, Profiling: {}, Counter: {}, "
+          "Interrupt: {}, Device: {})",
+          HostVisible, WithProfiling, CounterBasedEventEnabled,
+          InterruptBasedEventEnabled, Device);
     return nullptr;
   }
 
@@ -614,11 +618,12 @@ ur_event_handle_t ur_context_handle_t_::getEventFromContextCache(
   // We have to reset event before using it.
   Event->reset();
 
-  logger::info("Using {} event (Host Visible: {}, Profiling: {}, Counter: {}, "
-               "Interrupt: {}, Device: {}) from cache {}",
-               Event, Event->HostVisibleEvent, Event->isProfilingEnabled(),
-               Event->CounterBasedEventsEnabled,
-               Event->InterruptBasedEventsEnabled, Device, Cache);
+  URLOG(INFO,
+        "Using {} event (Host Visible: {}, Profiling: {}, Counter: {}, "
+        "Interrupt: {}, Device: {}) from cache {}",
+        Event, Event->HostVisibleEvent, Event->isProfilingEnabled(),
+        Event->CounterBasedEventsEnabled, Event->InterruptBasedEventsEnabled,
+        Device, Cache);
 
   return Event;
 }
@@ -634,10 +639,11 @@ void ur_context_handle_t_::addEventToContextCache(ur_event_handle_t Event) {
   auto Cache = getEventCache(
       Event->isHostVisible(), Event->isProfilingEnabled(), Device,
       Event->CounterBasedEventsEnabled, Event->InterruptBasedEventsEnabled);
-  logger::info("Inserting {} event (Host Visible: {}, Profiling: {}, Counter: "
-               "{}, Device: {}) into cache {}",
-               Event, Event->HostVisibleEvent, Event->isProfilingEnabled(),
-               Event->CounterBasedEventsEnabled, Device, Cache);
+  URLOG(INFO,
+        "Inserting {} event (Host Visible: {}, Profiling: {}, Counter: "
+        "{}, Device: {}) into cache {}",
+        Event, Event->HostVisibleEvent, Event->isProfilingEnabled(),
+        Event->CounterBasedEventsEnabled, Device, Cache);
   Cache->emplace_back(Event);
 }
 

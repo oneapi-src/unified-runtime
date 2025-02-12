@@ -78,9 +78,9 @@ ur_result_t urSamplerCreate(
       ZeSamplerDesc.addressMode = ZE_SAMPLER_ADDRESS_MODE_MIRROR;
       break;
     default:
-      logger::error("urSamplerCreate: unsupported "
-                    "UR_SAMPLER_PROPERTIES_ADDRESSING_MODEE "
-                    "value");
+      URLOG(ERR, "urSamplerCreate: unsupported "
+                 "UR_SAMPLER_PROPERTIES_ADDRESSING_MODEE "
+                 "value");
       return UR_RESULT_ERROR_INVALID_VALUE;
     }
 
@@ -89,8 +89,7 @@ ur_result_t urSamplerCreate(
     else if (Props->filterMode == UR_SAMPLER_FILTER_MODE_LINEAR)
       ZeSamplerDesc.filterMode = ZE_SAMPLER_FILTER_MODE_LINEAR;
     else {
-      logger::error(
-          "urSamplerCreate: unsupported UR_SAMPLER_FILTER_MODE value");
+      URLOG(ERR, "urSamplerCreate: unsupported UR_SAMPLER_FILTER_MODE value");
       return UR_RESULT_ERROR_INVALID_VALUE;
     }
   }
@@ -149,8 +148,10 @@ ur_result_t urSamplerGetInfo(
   std::ignore = PropValueSize;
   std::ignore = PropValue;
   std::ignore = PropSizeRet;
-  logger::error(logger::LegacyMessage("[UR][L0] {} function not implemented!"),
-                "{} function not implemented!", __FUNCTION__);
+  logger::get_logger().log(
+      logger::LegacyMessage("[UR][L0] {} function not implemented!"),
+      logger::Level::ERR, SHORT_FILE, UR_STR(__LINE__),
+      "{} function not implemented!", __FUNCTION__);
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
@@ -161,8 +162,10 @@ ur_result_t urSamplerGetNativeHandle(
     ur_native_handle_t *NativeSampler) {
   std::ignore = Sampler;
   std::ignore = NativeSampler;
-  logger::error(logger::LegacyMessage("[UR][L0] {} function not implemented!"),
-                "{} function not implemented!", __FUNCTION__);
+  logger::get_logger().log(
+      logger::LegacyMessage("[UR][L0] {} function not implemented!"),
+      logger::Level::ERR, SHORT_FILE, UR_STR(__LINE__),
+      "{} function not implemented!", __FUNCTION__);
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 
@@ -179,8 +182,10 @@ ur_result_t urSamplerCreateWithNativeHandle(
   std::ignore = Context;
   std::ignore = Properties;
   std::ignore = Sampler;
-  logger::error(logger::LegacyMessage("[UR][L0] {} function not implemented!"),
-                "{} function not implemented!", __FUNCTION__);
+  logger::get_logger().log(
+      logger::LegacyMessage("[UR][L0] {} function not implemented!"),
+      logger::Level::ERR, SHORT_FILE, UR_STR(__LINE__),
+      "{} function not implemented!", __FUNCTION__);
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
 } // namespace ur::level_zero

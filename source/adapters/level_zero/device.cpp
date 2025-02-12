@@ -52,8 +52,8 @@ getRangeOfAllowedCopyEngines(const ur_device_handle_t &Device) {
   int UpperCopyEngineIndex = std::stoi(CopyEngineRange.substr(pos + 1));
   if ((LowerCopyEngineIndex > UpperCopyEngineIndex) ||
       (LowerCopyEngineIndex < -1) || (UpperCopyEngineIndex < -1)) {
-    logger::error("UR_L0_LEVEL_ZERO_USE_COPY_ENGINE: invalid value provided, "
-                  "default set.");
+    URLOG(ERR, "UR_L0_LEVEL_ZERO_USE_COPY_ENGINE: invalid value provided, "
+               "default set.");
     LowerCopyEngineIndex = 0;
     UpperCopyEngineIndex = INT_MAX;
   }
@@ -141,7 +141,7 @@ ur_result_t urDeviceGet(
       break;
     default:
       Matched = false;
-      logger::warning("Unknown device type");
+      URLOG(WARN, "Unknown device type");
       break;
     }
 
@@ -217,7 +217,7 @@ ur_result_t urDeviceGetInfo(
     case ZE_DEVICE_TYPE_FPGA:
       return ReturnValue(UR_DEVICE_TYPE_FPGA);
     default:
-      logger::error("This device type is not supported");
+      URLOG(ERR, "This device type is not supported");
       return UR_RESULT_ERROR_INVALID_VALUE;
     }
   }
@@ -765,8 +765,8 @@ ur_result_t urDeviceGetInfo(
   case UR_DEVICE_INFO_GLOBAL_MEM_FREE: {
     bool SysManEnv = getenv_tobool("ZES_ENABLE_SYSMAN", false);
     if ((Device->Platform->ZedeviceToZesDeviceMap.size() == 0) && !SysManEnv) {
-      logger::error("SysMan support is unavailable on this system. Please "
-                    "check your level zero driver installation.");
+      URLOG(ERR, "SysMan support is unavailable on this system. Please "
+                 "check your level zero driver installation.");
       return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
     }
     // Calculate the global memory size as the max limit that can be reported as
@@ -1103,8 +1103,8 @@ ur_result_t urDeviceGetInfo(
   case UR_DEVICE_INFO_MAX_IMAGE_LINEAR_WIDTH_EXP:
   case UR_DEVICE_INFO_MAX_IMAGE_LINEAR_HEIGHT_EXP:
   case UR_DEVICE_INFO_MAX_IMAGE_LINEAR_PITCH_EXP:
-    logger::error("Unsupported ParamName in urGetDeviceInfo");
-    logger::error("ParamName=%{}(0x{})", ParamName, logger::toHex(ParamName));
+    URLOG(ERR, "Unsupported ParamName in urGetDeviceInfo");
+    URLOG(ERR, "ParamName=%{}(0x{})", ParamName, logger::toHex(ParamName));
     return UR_RESULT_ERROR_INVALID_VALUE;
   case UR_DEVICE_INFO_MIPMAP_SUPPORT_EXP: {
     // L0 does not support mipmaps.
@@ -1115,8 +1115,8 @@ ur_result_t urDeviceGetInfo(
     return ReturnValue(false);
   }
   case UR_DEVICE_INFO_MIPMAP_MAX_ANISOTROPY_EXP:
-    logger::error("Unsupported ParamName in urGetDeviceInfo");
-    logger::error("ParamName=%{}(0x{})", ParamName, logger::toHex(ParamName));
+    URLOG(ERR, "Unsupported ParamName in urGetDeviceInfo");
+    URLOG(ERR, "ParamName=%{}(0x{})", ParamName, logger::toHex(ParamName));
     return UR_RESULT_ERROR_INVALID_VALUE;
   case UR_DEVICE_INFO_MIPMAP_LEVEL_REFERENCE_SUPPORT_EXP: {
     // L0 does not support creation of images from individual mipmap levels.
@@ -1211,9 +1211,9 @@ ur_result_t urDeviceGetInfo(
   case UR_DEVICE_INFO_HOST_PIPE_READ_WRITE_SUPPORTED:
     return ReturnValue(false);
   default:
-    logger::error("Unsupported ParamName in urGetDeviceInfo");
-    logger::error("ParamNameParamName={}(0x{})", ParamName,
-                  logger::toHex(ParamName));
+    URLOG(ERR, "Unsupported ParamName in urGetDeviceInfo");
+    URLOG(ERR, "ParamNameParamName={}(0x{})", ParamName,
+          logger::toHex(ParamName));
     return UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION;
   }
 
@@ -1672,8 +1672,10 @@ ur_result_t ur_device_handle_t_::initialize(int SubSubDeviceOrdinal,
   if (numQueueGroups == 0) {
     return UR_RESULT_ERROR_UNKNOWN;
   }
-  logger::info(logger::LegacyMessage("NOTE: Number of queue groups = {}"),
-               "Number of queue groups = {}", numQueueGroups);
+  logger::get_logger().log(
+      logger::LegacyMessage("NOTE: Number of queue groups = {}"),
+      logger::Level::INFO, SHORT_FILE, UR_STR(__LINE__),
+      "Number of queue groups = {}", numQueueGroups);
   std::vector<ZeStruct<ze_command_queue_group_properties_t>>
       QueueGroupProperties(numQueueGroups);
   ZE2UR_CALL(zeDeviceGetCommandQueueGroupProperties,
@@ -1726,22 +1728,30 @@ ur_result_t ur_device_handle_t_::initialize(int SubSubDeviceOrdinal,
         }
       }
       if (QueueGroup[queue_group_info_t::MainCopy].ZeOrdinal < 0)
-        logger::info(logger::LegacyMessage(
-                         "NOTE: main blitter/copy engine is not available"),
-                     "main blitter/copy engine is not available");
+        logger::get_logger().log(
+            logger::LegacyMessage(
+                "NOTE: main blitter/copy engine is not available"),
+            logger::Level::INFO, SHORT_FILE, UR_STR(__LINE__),
+            "main blitter/copy engine is not available");
       else
-        logger::info(logger::LegacyMessage(
-                         "NOTE: main blitter/copy engine is available"),
-                     "main blitter/copy engine is available");
+        logger::get_logger().log(
+            logger::LegacyMessage(
+                "NOTE: main blitter/copy engine is available"),
+            logger::Level::INFO, SHORT_FILE, UR_STR(__LINE__),
+            "main blitter/copy engine is available");
 
       if (QueueGroup[queue_group_info_t::LinkCopy].ZeOrdinal < 0)
-        logger::info(logger::LegacyMessage(
-                         "NOTE: link blitter/copy engines are not available"),
-                     "link blitter/copy engines are not available");
+        logger::get_logger().log(
+            logger::LegacyMessage(
+                "NOTE: link blitter/copy engines are not available"),
+            logger::Level::INFO, SHORT_FILE, UR_STR(__LINE__),
+            "link blitter/copy engines are not available");
       else
-        logger::info(logger::LegacyMessage(
-                         "NOTE: link blitter/copy engines are available"),
-                     "link blitter/copy engines are available");
+        logger::get_logger().log(
+            logger::LegacyMessage(
+                "NOTE: link blitter/copy engines are available"),
+            logger::Level::INFO, SHORT_FILE, UR_STR(__LINE__),
+            "link blitter/copy engines are available");
     }
   }
 

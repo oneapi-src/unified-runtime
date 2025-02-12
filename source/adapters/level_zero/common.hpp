@@ -174,10 +174,10 @@ static auto getUrResultString = [](ur_result_t Result) {
 #define UR_CALL(Call)                                                          \
   {                                                                            \
     if (PrintTrace)                                                            \
-      logger::always("UR ---> {}", #Call);                                     \
+      URLOG_ALWAYS("UR ---> {}", #Call);                                       \
     ur_result_t Result = (Call);                                               \
     if (PrintTrace)                                                            \
-      logger::always("UR <--- {}({})", #Call, getUrResultString(Result));      \
+      URLOG_ALWAYS("UR <--- {}({})", #Call, getUrResultString(Result));        \
     if (Result != UR_RESULT_SUCCESS)                                           \
       return Result;                                                           \
   }
@@ -186,10 +186,10 @@ static auto getUrResultString = [](ur_result_t Result) {
 #define UR_CALL_THROWS(Call)                                                   \
   {                                                                            \
     if (PrintTrace)                                                            \
-      logger::always("UR ---> {}", #Call);                                     \
+      URLOG_ALWAYS("UR ---> {}", #Call);                                       \
     ur_result_t Result = (Call);                                               \
     if (PrintTrace)                                                            \
-      logger::always("UR <--- {}({})", #Call, getUrResultString(Result));      \
+      URLOG_ALWAYS("UR <--- {}({})", #Call, getUrResultString(Result));        \
     if (Result != UR_RESULT_SUCCESS)                                           \
       throw Result;                                                            \
   }

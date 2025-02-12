@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <sanitizer_common/sanitizer_common.hpp>
 #include <stdexcept>
 
 namespace ur_sanitizer_layer {
@@ -31,7 +32,7 @@ AsanOptions::AsanOptions() {
     std::stringstream SS;
     SS << "<SANITIZER>[ERROR]: ";
     SS << e.what();
-    getContext()->logger.always(SS.str().c_str());
+    URLOG_CTX_ALWAYS(SHORT_FILE, UR_STR(__LINE__), SS.str().c_str());
     die("Sanitizer failed to parse options.\n");
   }
 
@@ -78,7 +79,7 @@ AsanOptions::AsanOptions() {
           SS << " \"" << S << "\"";
         }
         SS << ".";
-        getContext()->logger.error(SS.str().c_str());
+        URLOG_CTX(ERR, SS.str().c_str());
         die("Sanitizer failed to parse options.\n");
       }
     }
@@ -101,9 +102,10 @@ AsanOptions::AsanOptions() {
       }
       MaxQuarantineSizeMB = temp_long;
     } catch (...) {
-      getContext()->logger.error("\"quarantine_size_mb\" should be "
-                                 "an integer in range[0, {}].",
-                                 UINT32_MAX);
+      URLOG_CTX(ERR,
+                "\"quarantine_size_mb\" should be "
+                "an integer in range[0, {}].",
+                UINT32_MAX);
       die("Sanitizer failed to parse options.\n");
     }
   }
@@ -115,12 +117,11 @@ AsanOptions::AsanOptions() {
       MinRZSize = std::stoul(Value);
       if (MinRZSize < 16) {
         MinRZSize = 16;
-        getContext()->logger.warning("Trying to set redzone size to a "
-                                     "value less than 16 is ignored.");
+        URLOG_CTX(WARN, "Trying to set redzone size to a "
+                        "value less than 16 is ignored.");
       }
     } catch (...) {
-      getContext()->logger.error(
-          "\"redzone\" should be an integer in range[0, 16].");
+      URLOG_CTX(ERR, "\"redzone\" should be an integer in range[0, 16].");
       die("Sanitizer failed to parse options.\n");
     }
   }
@@ -132,12 +133,11 @@ AsanOptions::AsanOptions() {
       MaxRZSize = std::stoul(Value);
       if (MaxRZSize > 2048) {
         MaxRZSize = 2048;
-        getContext()->logger.warning("Trying to set max redzone size to a "
-                                     "value greater than 2048 is ignored.");
+        URLOG_CTX(WARN, "Trying to set max redzone size to a "
+                        "value greater than 2048 is ignored.");
       }
     } catch (...) {
-      getContext()->logger.error(
-          "\"max_redzone\" should be an integer in range[0, 2048].");
+      URLOG_CTX(ERR, "\"max_redzone\" should be an integer in range[0, 2048].");
       die("Sanitizer failed to parse options.\n");
     }
   }
