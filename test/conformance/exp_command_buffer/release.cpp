@@ -13,7 +13,6 @@ UUR_INSTANTIATE_DEVICE_TEST_SUITE(urCommandBufferReleaseExpTest);
 
 TEST_P(urCommandBufferReleaseExpTest, Success) {
   EXPECT_SUCCESS(urCommandBufferRetainExp(cmd_buf_handle));
-
   uint32_t prev_ref_count = 0;
   EXPECT_SUCCESS(uur::GetObjectReferenceCount(cmd_buf_handle, prev_ref_count));
 
