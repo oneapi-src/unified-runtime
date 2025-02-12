@@ -1196,7 +1196,8 @@ std::string deviceTestWithParamPrinter(
 
   std::stringstream ss;
   ss << param;
-  return uur::GetPlatformAndDeviceName(device) + "__" + ss.str();
+  return uur::GetPlatformAndDeviceName(device) + "__" +
+         GTestSanitizeString(ss.str());
 }
 
 template <>
@@ -1311,6 +1312,35 @@ template <class T> struct urProgramTestWithParam : urQueueTestWithParam<T> {
   ur_program_handle_t program = nullptr;
   std::vector<ur_program_metadata_t> metadatas{};
 };
+
+template <typename Derived> struct urProgramLinkBaseTest : public Derived {
+  void SetUp() override {
+    UUR_RETURN_ON_FATAL_FAILURE(Derived::SetUp());
+    // TODO: This should use a query for urProgramCreateWithIL support or
+    // rely on UR_RESULT_ERROR_UNSUPPORTED_FEATURE being returned.
+    ur_platform_backend_t backend;
+    ASSERT_SUCCESS(urPlatformGetInfo(this->platform, UR_PLATFORM_INFO_BACKEND,
+                                     sizeof(ur_platform_backend_t), &backend,
+                                     nullptr));
+    if (backend == UR_PLATFORM_BACKEND_HIP) {
+      GTEST_SKIP();
+    }
+    ASSERT_SUCCESS(urProgramCompile(this->context, this->program, nullptr));
+  }
+
+  void TearDown() override {
+    if (linked_program) {
+      EXPECT_SUCCESS(urProgramRelease(linked_program));
+    }
+    UUR_RETURN_ON_FATAL_FAILURE(Derived::TearDown());
+  }
+
+  ur_program_handle_t linked_program = nullptr;
+};
+
+template <class T>
+struct urProgramLinkWithParamBaseTest
+    : urProgramLinkBaseTest<uur::urProgramTestWithParam<T>> {};
 
 // This fixture can provide a kernel, but it doesn't build the kernel at SetUp,
 // instead Build() must be invoked separately. This is for tests that wish to
