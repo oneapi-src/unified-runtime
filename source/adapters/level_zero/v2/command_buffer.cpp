@@ -65,8 +65,8 @@ urCommandBufferCreateExp(ur_context_handle_t context, ur_device_handle_t device,
   uint32_t queueGroupOrdinal =
       device->QueueGroup[queue_group_type::Compute].ZeOrdinal;
   v2::raii::command_list_unique_handle zeCommandList =
-      context->commandListCache.getRegularCommandList(device->ZeDevice, true,
-                                                      queueGroupOrdinal, true);
+      context->getCommandListCache().getRegularCommandList(
+          device->ZeDevice, true, queueGroupOrdinal, true);
 
   *commandBuffer = new ur_exp_command_buffer_handle_t_(
       context, device, std::move(zeCommandList), commandBufferDesc);
@@ -138,13 +138,210 @@ ur_result_t urCommandBufferAppendKernelLaunchExp(
   return exceptionToResult(std::current_exception());
 }
 
-ur_result_t urCommandBufferEnqueueExp(
-    ur_exp_command_buffer_handle_t hCommandBuffer, ur_queue_handle_t hQueue,
+ur_result_t urCommandBufferAppendUSMMemcpyExp(
+    ur_exp_command_buffer_handle_t hCommandBuffer, void *pDst, const void *pSrc,
+    size_t size, uint32_t numSyncPointsInWaitList,
+    const ur_exp_command_buffer_sync_point_t *pSyncPointWaitList,
     uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
-    ur_event_handle_t *phEvent) try {
-  return hQueue->get().enqueueCommandBuffer(
-      hCommandBuffer->commandListManager.getZeCommandList(), phEvent,
-      numEventsInWaitList, phEventWaitList);
+    ur_exp_command_buffer_sync_point_t *pSyncPoint, ur_event_handle_t *phEvent,
+    ur_exp_command_buffer_command_handle_t *phCommand) try {
+
+  // the same issue as in urCommandBufferAppendKernelLaunchExp
+  std::ignore = numEventsInWaitList;
+  std::ignore = phEventWaitList;
+  std::ignore = phEvent;
+  // sync mechanic can be ignored, because all lists are in-order
+  std::ignore = numSyncPointsInWaitList;
+  std::ignore = pSyncPointWaitList;
+  std::ignore = pSyncPoint;
+
+  std::ignore = phCommand;
+  // Responsibility of UMD to offload to copy engine
+  UR_CALL(hCommandBuffer->commandListManager.appendUSMMemcpy(
+      false, pDst, pSrc, size, 0, nullptr, nullptr));
+
+  return UR_RESULT_SUCCESS;
+} catch (...) {
+  return exceptionToResult(std::current_exception());
+}
+
+ur_result_t urCommandBufferAppendMemBufferCopyExp(
+    ur_exp_command_buffer_handle_t hCommandBuffer, ur_mem_handle_t hSrcMem,
+    ur_mem_handle_t hDstMem, size_t srcOffset, size_t dstOffset, size_t size,
+    uint32_t numSyncPointsInWaitList,
+    const ur_exp_command_buffer_sync_point_t *pSyncPointWaitList,
+    uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
+    ur_exp_command_buffer_sync_point_t *pSyncPoint, ur_event_handle_t *phEvent,
+    ur_exp_command_buffer_command_handle_t *phCommand) try {
+
+  // the same issue as in urCommandBufferAppendKernelLaunchExp
+  std::ignore = numEventsInWaitList;
+  std::ignore = phEventWaitList;
+  std::ignore = phEvent;
+  // sync mechanic can be ignored, because all lists are in-order
+  std::ignore = numSyncPointsInWaitList;
+  std::ignore = pSyncPointWaitList;
+  std::ignore = pSyncPoint;
+
+  std::ignore = phCommand;
+  // Responsibility of UMD to offload to copy engine
+  UR_CALL(hCommandBuffer->commandListManager.appendMemBufferCopy(
+      hSrcMem, hDstMem, srcOffset, dstOffset, size, 0, nullptr, nullptr));
+
+  return UR_RESULT_SUCCESS;
+} catch (...) {
+  return exceptionToResult(std::current_exception());
+}
+
+ur_result_t urCommandBufferAppendMemBufferWriteExp(
+    ur_exp_command_buffer_handle_t hCommandBuffer, ur_mem_handle_t hBuffer,
+    size_t offset, size_t size, const void *pSrc,
+    uint32_t numSyncPointsInWaitList,
+    const ur_exp_command_buffer_sync_point_t *pSyncPointWaitList,
+    uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
+    ur_exp_command_buffer_sync_point_t *pSyncPoint, ur_event_handle_t *phEvent,
+    ur_exp_command_buffer_command_handle_t *phCommand) try {
+
+  // the same issue as in urCommandBufferAppendKernelLaunchExp
+  std::ignore = numEventsInWaitList;
+  std::ignore = phEventWaitList;
+  std::ignore = phEvent;
+  // sync mechanic can be ignored, because all lists are in-order
+  std::ignore = numSyncPointsInWaitList;
+  std::ignore = pSyncPointWaitList;
+  std::ignore = pSyncPoint;
+
+  std::ignore = phCommand;
+  // Responsibility of UMD to offload to copy engine
+  UR_CALL(hCommandBuffer->commandListManager.appendMemBufferWrite(
+      hBuffer, false, offset, size, pSrc, 0, nullptr, nullptr));
+
+  return UR_RESULT_SUCCESS;
+} catch (...) {
+  return exceptionToResult(std::current_exception());
+}
+
+ur_result_t urCommandBufferAppendMemBufferReadExp(
+    ur_exp_command_buffer_handle_t hCommandBuffer, ur_mem_handle_t hBuffer,
+    size_t offset, size_t size, void *pDst, uint32_t numSyncPointsInWaitList,
+    const ur_exp_command_buffer_sync_point_t *pSyncPointWaitList,
+    uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
+    ur_exp_command_buffer_sync_point_t *pSyncPoint, ur_event_handle_t *phEvent,
+    ur_exp_command_buffer_command_handle_t *phCommand) try {
+
+  // the same issue as in urCommandBufferAppendKernelLaunchExp
+  std::ignore = numEventsInWaitList;
+  std::ignore = phEventWaitList;
+  std::ignore = phEvent;
+  // sync mechanic can be ignored, because all lists are in-order
+  std::ignore = numSyncPointsInWaitList;
+  std::ignore = pSyncPointWaitList;
+  std::ignore = pSyncPoint;
+
+  std::ignore = phCommand;
+
+  // Responsibility of UMD to offload to copy engine
+  UR_CALL(hCommandBuffer->commandListManager.appendMemBufferRead(
+      hBuffer, false, offset, size, pDst, 0, nullptr, nullptr));
+
+  return UR_RESULT_SUCCESS;
+} catch (...) {
+  return exceptionToResult(std::current_exception());
+}
+
+ur_result_t urCommandBufferAppendMemBufferCopyRectExp(
+    ur_exp_command_buffer_handle_t hCommandBuffer, ur_mem_handle_t hSrcMem,
+    ur_mem_handle_t hDstMem, ur_rect_offset_t srcOrigin,
+    ur_rect_offset_t dstOrigin, ur_rect_region_t region, size_t srcRowPitch,
+    size_t srcSlicePitch, size_t dstRowPitch, size_t dstSlicePitch,
+    uint32_t numSyncPointsInWaitList,
+    const ur_exp_command_buffer_sync_point_t *pSyncPointWaitList,
+    uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
+    ur_exp_command_buffer_sync_point_t *pSyncPoint, ur_event_handle_t *phEvent,
+    ur_exp_command_buffer_command_handle_t *phCommand) try {
+
+  // the same issue as in urCommandBufferAppendKernelLaunchExp
+  std::ignore = numEventsInWaitList;
+  std::ignore = phEventWaitList;
+  std::ignore = phEvent;
+  // sync mechanic can be ignored, because all lists are in-order
+  std::ignore = numSyncPointsInWaitList;
+  std::ignore = pSyncPointWaitList;
+  std::ignore = pSyncPoint;
+
+  std::ignore = phCommand;
+  // Responsibility of UMD to offload to copy engine
+  UR_CALL(hCommandBuffer->commandListManager.appendMemBufferCopyRect(
+      hSrcMem, hDstMem, srcOrigin, dstOrigin, region, srcRowPitch,
+      srcSlicePitch, dstRowPitch, dstSlicePitch, 0, nullptr, nullptr));
+
+  return UR_RESULT_SUCCESS;
+} catch (...) {
+  return exceptionToResult(std::current_exception());
+}
+
+ur_result_t urCommandBufferAppendMemBufferWriteRectExp(
+    ur_exp_command_buffer_handle_t hCommandBuffer, ur_mem_handle_t hBuffer,
+    ur_rect_offset_t bufferOffset, ur_rect_offset_t hostOffset,
+    ur_rect_region_t region, size_t bufferRowPitch, size_t bufferSlicePitch,
+    size_t hostRowPitch, size_t hostSlicePitch, void *pSrc,
+    uint32_t numSyncPointsInWaitList,
+    const ur_exp_command_buffer_sync_point_t *pSyncPointWaitList,
+    uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
+    ur_exp_command_buffer_sync_point_t *pSyncPoint, ur_event_handle_t *phEvent,
+    ur_exp_command_buffer_command_handle_t *phCommand) try {
+
+  // the same issue as in urCommandBufferAppendKernelLaunchExp
+  std::ignore = numEventsInWaitList;
+  std::ignore = phEventWaitList;
+  std::ignore = phEvent;
+  // sync mechanic can be ignored, because all lists are in-order
+  std::ignore = numSyncPointsInWaitList;
+  std::ignore = pSyncPointWaitList;
+  std::ignore = pSyncPoint;
+
+  std::ignore = phCommand;
+
+  // Responsibility of UMD to offload to copy engine
+  UR_CALL(hCommandBuffer->commandListManager.appendMemBufferWriteRect(
+      hBuffer, false, bufferOffset, hostOffset, region, bufferRowPitch,
+      bufferSlicePitch, hostRowPitch, hostSlicePitch, pSrc, 0, nullptr,
+      nullptr));
+
+  return UR_RESULT_SUCCESS;
+} catch (...) {
+  return exceptionToResult(std::current_exception());
+}
+
+ur_result_t urCommandBufferAppendMemBufferReadRectExp(
+    ur_exp_command_buffer_handle_t hCommandBuffer, ur_mem_handle_t hBuffer,
+    ur_rect_offset_t bufferOffset, ur_rect_offset_t hostOffset,
+    ur_rect_region_t region, size_t bufferRowPitch, size_t bufferSlicePitch,
+    size_t hostRowPitch, size_t hostSlicePitch, void *pDst,
+    uint32_t numSyncPointsInWaitList,
+    const ur_exp_command_buffer_sync_point_t *pSyncPointWaitList,
+    uint32_t numEventsInWaitList, const ur_event_handle_t *phEventWaitList,
+    ur_exp_command_buffer_sync_point_t *pSyncPoint, ur_event_handle_t *phEvent,
+    ur_exp_command_buffer_command_handle_t *phCommand) try {
+
+  // the same issue as in urCommandBufferAppendKernelLaunchExp
+  std::ignore = numEventsInWaitList;
+  std::ignore = phEventWaitList;
+  std::ignore = phEvent;
+  // sync mechanic can be ignored, because all lists are in-order
+  std::ignore = numSyncPointsInWaitList;
+  std::ignore = pSyncPointWaitList;
+  std::ignore = pSyncPoint;
+
+  std::ignore = phCommand;
+
+  // Responsibility of UMD to offload to copy engine
+  UR_CALL(hCommandBuffer->commandListManager.appendMemBufferReadRect(
+      hBuffer, false, bufferOffset, hostOffset, region, bufferRowPitch,
+      bufferSlicePitch, hostRowPitch, hostSlicePitch, pDst, 0, nullptr,
+      nullptr));
+
+  return UR_RESULT_SUCCESS;
 } catch (...) {
   return exceptionToResult(std::current_exception());
 }
@@ -173,6 +370,17 @@ urCommandBufferGetInfoExp(ur_exp_command_buffer_handle_t hCommandBuffer,
     assert(!"Command-buffer info request not implemented");
   }
   return UR_RESULT_ERROR_INVALID_ENUMERATION;
+} catch (...) {
+  return exceptionToResult(std::current_exception());
+}
+
+ur_result_t urCommandBufferEnqueueExp(
+    ur_exp_command_buffer_handle_t CommandBuffer, ur_queue_handle_t UrQueue,
+    uint32_t NumEventsInWaitList, const ur_event_handle_t *EventWaitList,
+    ur_event_handle_t *Event) try {
+  return UrQueue->get().enqueueCommandBuffer(
+      CommandBuffer->commandListManager.getZeCommandList(), Event,
+      NumEventsInWaitList, EventWaitList);
 } catch (...) {
   return exceptionToResult(std::current_exception());
 }

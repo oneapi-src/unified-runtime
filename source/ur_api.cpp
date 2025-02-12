@@ -5517,8 +5517,6 @@ urEnqueueMemImageCopy(
 ///        address space and return a pointer to the mapped region
 /// 
 /// @details
-///     - Input parameter blockingMap indicates if the map is blocking or
-///       non-blocking.
 ///     - Currently, no direct support in Level Zero. Implemented as a shared
 ///       allocation followed by copying on discrete GPU
 ///     - TODO: add a driver function in Level Zero?
@@ -5821,8 +5819,9 @@ urEnqueueUSMPrefetch(
 /// @details
 ///     - Not all memory advice hints may be supported for all devices or
 ///       allocation types. If a memory advice hint is not supported, it will be
-///       ignored.
-/// 
+///       ignored. Some adapters may return ::UR_RESULT_ERROR_ADAPTER_SPECIFIC,
+///       more information can be retrieved by using urAdapterGetLastError.
+///
 /// @returns
 ///     - ::UR_RESULT_SUCCESS
 ///     - ::UR_RESULT_ERROR_UNINITIALIZED
