@@ -261,9 +261,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
   if (phEvent) {
     *phEvent = event;
   }
-  event->set_callback([event]() {
-    event->tick_end();
-  });
+  event->set_callback([event]() { event->tick_end(); });
 
   if (hQueue->isInOrder()) {
     urEventWait(1, &event);
