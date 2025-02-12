@@ -68,10 +68,10 @@ class LaunchInfoLocalArgs {
   const size_t numParallelThreads;
 
 public:
-  LaunchInfoLocalArgs(const native_cpu::state &state_, unsigned g0_,
-                      unsigned g1_, unsigned g2_, size_t numParallelThreads_)
-      : state(state_), numParallelThreads(numParallelThreads_) {
-    state.update(g0_, g1_, g2_);
+  LaunchInfoLocalArgs(const native_cpu::state &state, unsigned g0, unsigned g1,
+                      unsigned g2, size_t numParallelThreads)
+      : state(state), numParallelThreads(numParallelThreads) {
+    this->state.update(g0, g1, g2);
   }
 
   void operator()(size_t threadId, ur_kernel_handle_t_ kernel) {
