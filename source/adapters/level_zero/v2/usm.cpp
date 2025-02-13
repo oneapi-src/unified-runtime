@@ -171,7 +171,7 @@ ur_usm_pool_handle_t_::ur_usm_pool_handle_t_(ur_context_handle_t hContext,
     }
   } else {
     // If pooling is disabled, do nothing.
-    logger::info("USM pooling is disabled. Skiping pool limits adjustment.");
+    URLOG(INFO, "USM pooling is disabled. Skiping pool limits adjustment.");
   }
 
   auto [result, descriptors] = usm::pool_descriptor::create(this, hContext);

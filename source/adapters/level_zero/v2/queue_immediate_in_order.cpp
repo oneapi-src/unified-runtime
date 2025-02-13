@@ -185,7 +185,7 @@ ur_queue_immediate_in_order_t::~ur_queue_immediate_in_order_t() {
   try {
     UR_CALL_THROWS(queueFinish());
   } catch (...) {
-    logger::error("Failed to finish queue on destruction");
+    URLOG(ERR, "Failed to finish queue on destruction");
   }
 }
 
