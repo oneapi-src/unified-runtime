@@ -1192,7 +1192,8 @@ std::string deviceTestWithParamPrinter(
 
   std::stringstream ss;
   ss << param;
-  return uur::GetPlatformAndDeviceName(device) + "__" + ss.str();
+  return uur::GetPlatformAndDeviceName(device) + "__" +
+         GTestSanitizeString(ss.str());
 }
 
 template <>
