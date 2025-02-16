@@ -2142,57 +2142,55 @@ typedef enum ur_device_info_t {
   /// [::ur_memory_scope_capability_flags_t] return a bit-field of atomic
   /// memory fence scope capabilities
   UR_DEVICE_INFO_ATOMIC_FENCE_SCOPE_CAPABILITIES = 103,
-  /// [::ur_bool_t] support for bfloat16
-  UR_DEVICE_INFO_BFLOAT16 = 104,
   /// [uint32_t] Returns 1 if the device doesn't have a notion of a
   /// queue index. Otherwise, returns the number of queue indices that are
   /// available for this device.
-  UR_DEVICE_INFO_MAX_COMPUTE_QUEUE_INDICES = 105,
+  UR_DEVICE_INFO_MAX_COMPUTE_QUEUE_INDICES = 104,
   /// [::ur_bool_t] support the ::urKernelSetSpecializationConstants entry
   /// point
-  UR_DEVICE_INFO_KERNEL_SET_SPECIALIZATION_CONSTANTS = 106,
+  UR_DEVICE_INFO_KERNEL_SET_SPECIALIZATION_CONSTANTS = 105,
   /// [uint32_t][optional-query] return the width in bits of the memory bus
   /// interface of the device.
-  UR_DEVICE_INFO_MEMORY_BUS_WIDTH = 107,
+  UR_DEVICE_INFO_MEMORY_BUS_WIDTH = 106,
   /// [size_t[3]] return max 3D work groups
-  UR_DEVICE_INFO_MAX_WORK_GROUPS_3D = 108,
+  UR_DEVICE_INFO_MAX_WORK_GROUPS_3D = 107,
   /// [::ur_bool_t] return true if Async Barrier is supported
-  UR_DEVICE_INFO_ASYNC_BARRIER = 109,
+  UR_DEVICE_INFO_ASYNC_BARRIER = 108,
   /// [::ur_bool_t] return true if specifying memory channels is supported
-  UR_DEVICE_INFO_MEM_CHANNEL_SUPPORT = 110,
+  UR_DEVICE_INFO_MEM_CHANNEL_SUPPORT = 109,
   /// [::ur_bool_t] Return true if the device supports enqueueing commands
   /// to read and write pipes from the host.
-  UR_DEVICE_INFO_HOST_PIPE_READ_WRITE_SUPPORTED = 111,
+  UR_DEVICE_INFO_HOST_PIPE_READ_WRITE_SUPPORTED = 110,
   /// [uint32_t][optional-query] The maximum number of registers available
   /// per block.
-  UR_DEVICE_INFO_MAX_REGISTERS_PER_WORK_GROUP = 112,
+  UR_DEVICE_INFO_MAX_REGISTERS_PER_WORK_GROUP = 111,
   /// [uint32_t][optional-query] The device IP version. The meaning of the
   /// device IP version is implementation-defined, but newer devices should
   /// have a higher version than older devices.
-  UR_DEVICE_INFO_IP_VERSION = 113,
+  UR_DEVICE_INFO_IP_VERSION = 112,
   /// [::ur_bool_t] return true if the device supports virtual memory.
-  UR_DEVICE_INFO_VIRTUAL_MEMORY_SUPPORT = 114,
+  UR_DEVICE_INFO_VIRTUAL_MEMORY_SUPPORT = 113,
   /// [::ur_bool_t] return true if the device supports ESIMD.
-  UR_DEVICE_INFO_ESIMD_SUPPORT = 115,
+  UR_DEVICE_INFO_ESIMD_SUPPORT = 114,
   /// [::ur_device_handle_t[]][optional-query] The set of component devices
   /// contained by this composite device.
-  UR_DEVICE_INFO_COMPONENT_DEVICES = 116,
+  UR_DEVICE_INFO_COMPONENT_DEVICES = 115,
   /// [::ur_device_handle_t][optional-query] The composite device containing
   /// this component device.
-  UR_DEVICE_INFO_COMPOSITE_DEVICE = 117,
+  UR_DEVICE_INFO_COMPOSITE_DEVICE = 116,
   /// [::ur_bool_t] return true if the device supports the
   /// `EnqueueDeviceGlobalVariableWrite` and
   /// `EnqueueDeviceGlobalVariableRead` entry points.
-  UR_DEVICE_INFO_GLOBAL_VARIABLE_SUPPORT = 118,
+  UR_DEVICE_INFO_GLOBAL_VARIABLE_SUPPORT = 117,
   /// [::ur_bool_t] return true if the device supports USM pooling. Pertains
   /// to the `USMPool` entry points and usage of the `pool` parameter of the
   /// USM alloc entry points.
-  UR_DEVICE_INFO_USM_POOL_SUPPORT = 119,
+  UR_DEVICE_INFO_USM_POOL_SUPPORT = 118,
   /// [uint32_t] the number of compute units for specific backend.
-  UR_DEVICE_INFO_NUM_COMPUTE_UNITS = 120,
+  UR_DEVICE_INFO_NUM_COMPUTE_UNITS = 119,
   /// [::ur_bool_t] support the ::urProgramSetSpecializationConstants entry
   /// point
-  UR_DEVICE_INFO_PROGRAM_SET_SPECIALIZATION_CONSTANTS = 121,
+  UR_DEVICE_INFO_PROGRAM_SET_SPECIALIZATION_CONSTANTS = 120,
   /// [::ur_bool_t] Returns true if the device supports the use of
   /// command-buffers.
   UR_DEVICE_INFO_COMMAND_BUFFER_SUPPORT_EXP = 0x1000,
