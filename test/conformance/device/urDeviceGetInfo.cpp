@@ -99,7 +99,7 @@ static std::unordered_map<ur_device_info_t, size_t> device_info_size_map = {
     {UR_DEVICE_INFO_GPU_EU_COUNT_PER_SUBSLICE, sizeof(uint32_t)},
     {UR_DEVICE_INFO_GPU_SUBSLICES_PER_SLICE, sizeof(uint32_t)},
     {UR_DEVICE_INFO_GPU_HW_THREADS_PER_EU, sizeof(uint32_t)},
-    {UR_DEVICE_INFO_MAX_MEMORY_BANDWIDTH, sizeof(uint32_t)},
+    {UR_DEVICE_INFO_MAX_MEMORY_BANDWIDTH, sizeof(uint64_t)},
     {UR_DEVICE_INFO_IMAGE_SRGB, sizeof(ur_bool_t)},
     {UR_DEVICE_INFO_BUILD_ON_SUBDEVICE, sizeof(ur_bool_t)},
     {UR_DEVICE_INFO_ATOMIC_64, sizeof(ur_bool_t)},
