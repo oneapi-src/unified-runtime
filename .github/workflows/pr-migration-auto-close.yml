@@ -1,0 +1,69 @@
+name: Auto-Close PRs after 30 days
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  pull-requests: write
+  issues: read
+
+jobs:
+  close-stale-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close PRs labeled "auto-close"
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+            const label = "auto-close";
+            const now = new Date();
+            const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days ago
+
+            // Fetch all open PRs
+            const prs = await github.paginate(github.rest.pulls.list, {
+              owner,
+              repo,
+              state: "open",
+              per_page: 100
+            });
+
+            for (const pr of prs) {
+              // Check if PR has the "auto-close" label
+              if (!pr.labels.some(l => l.name === label)) continue;
+
+              // Get the PR's label event timeline
+              const events = await github.paginate(github.rest.issues.listEvents, {
+                owner,
+                repo,
+                issue_number: pr.number
+              });
+
+              // Find the label added event
+              const labelEvent = events.find(e => e.event === "labeled" && e.label.name === label);
+
+              // If label added event found and is older than 30 days, close the PR
+              if (labelEvent && new Date(labelEvent.created_at).toISOString() < thirtyDaysAgo) {
+                console.log(`Closing PR #${pr.number}`);
+                
+                // Close the PR
+                await github.rest.pulls.update({
+                  owner,
+                  repo,
+                  pull_number: pr.number,
+                  state: "closed"
+                });
+
+                // Comment on the PR
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: pr.number,
+                  body: "This PR has been automatically closed 30 days after being labeled with 'auto-close'.
+                  <more migration info should PR author still want to proceed with the PR"
+                });
+              }
+            }
