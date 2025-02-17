@@ -372,11 +372,8 @@ ur_result_t ur_queue_immediate_in_order_t::enqueueMemBufferFill(
     const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent) {
   TRACK_SCOPE_LATENCY("ur_queue_immediate_in_order_t::enqueueMemBufferFill");
 
-  auto hBuffer = hMem->getBuffer();
-
-  UR_ASSERT(offset + size <= hBuffer->getSize(), UR_RESULT_ERROR_INVALID_SIZE);
   UR_CALL(commandListManager.appendMemBufferFill(
-      hBuffer, pPattern, patternSize, offset, size, numEventsInWaitList,
+      hMem, pPattern, patternSize, offset, size, numEventsInWaitList,
       phEventWaitList, phEvent));
 
   return UR_RESULT_SUCCESS;

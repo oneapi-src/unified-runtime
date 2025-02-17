@@ -32,7 +32,7 @@ ur_command_list_manager::~ur_command_list_manager() {
 }
 
 ur_result_t ur_command_list_manager::appendGenericFillUnlocked(
-    ur_mem_handle_t dst, size_t offset, size_t patternSize,
+    ur_mem_buffer_t *dst, size_t offset, size_t patternSize,
     const void *pPattern, size_t size, uint32_t numEventsInWaitList,
     const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent,
     ur_command_t commandType) {
@@ -42,7 +42,7 @@ ur_result_t ur_command_list_manager::appendGenericFillUnlocked(
   auto waitListView = getWaitListView(phEventWaitList, numEventsInWaitList);
 
   auto pDst = ur_cast<char *>(dst->getDevicePtr(
-      device, ur_mem_handle_t_::device_access_mode_t::read_only, offset, size,
+      device, ur_mem_buffer_t::device_access_mode_t::read_only, offset, size,
       [&](void *src, void *dst, size_t size) {
         ZE2UR_CALL_THROWS(zeCommandListAppendMemoryCopy,
                           (zeCommandList.get(), dst, src, size, nullptr,
@@ -254,11 +254,12 @@ ur_result_t ur_command_list_manager::appendUSMMemcpy(
 }
 
 ur_result_t ur_command_list_manager::appendMemBufferFill(
-    ur_mem_handle_t hBuffer, const void *pPattern, size_t patternSize,
+    ur_mem_handle_t hMem, const void *pPattern, size_t patternSize,
     size_t offset, size_t size, uint32_t numEventsInWaitList,
     const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent) {
   TRACK_SCOPE_LATENCY("ur_command_list_manager::appendMemBufferFill");
 
+  auto hBuffer = hMem->getBuffer();
   UR_ASSERT(offset + size <= hBuffer->getSize(), UR_RESULT_ERROR_INVALID_SIZE);
 
   std::scoped_lock<ur_shared_mutex, ur_shared_mutex> lock(this->Mutex,
@@ -277,7 +278,7 @@ ur_result_t ur_command_list_manager::appendUSMFill(
 
   std::scoped_lock<ur_shared_mutex> lock(this->Mutex);
 
-  ur_usm_handle_t_ dstHandle(context, size, pMem);
+  ur_usm_handle_t dstHandle(context, size, pMem);
   return appendGenericFillUnlocked(&dstHandle, 0, patternSize, pPattern, size,
                                    numEventsInWaitList, phEventWaitList,
                                    phEvent, UR_COMMAND_USM_FILL);

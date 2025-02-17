@@ -129,7 +129,7 @@ struct ur_command_list_manager : public _ur_object {
 
 private:
   ur_result_t appendGenericFillUnlocked(
-      ur_mem_handle_t hBuffer, size_t offset, size_t patternSize,
+      ur_mem_buffer_t *hBuffer, size_t offset, size_t patternSize,
       const void *pPattern, size_t size, uint32_t numEventsInWaitList,
       const ur_event_handle_t *phEventWaitList, ur_event_handle_t *phEvent,
       ur_command_t commandType);
