@@ -19,7 +19,7 @@ struct LocalMemoryUpdateTestBase
 
     // HIP has extra args for local memory so we define an offset for arg
     // indices here for updating
-    hip_arg_offset = backend == UR_PLATFORM_BACKEND_HIP ? 3 : 0;
+    hip_arg_offset = backend == UR_BACKEND_HIP ? 3 : 0;
     ur_device_usm_access_capability_flags_t shared_usm_flags;
     ASSERT_SUCCESS(
         uur::GetDeviceUSMSingleSharedSupport(device, shared_usm_flags));
@@ -43,7 +43,7 @@ struct LocalMemoryUpdateTestBase
                                        local_mem_a_size, nullptr));
 
     // Hip has extra args for local mem at index 1-3
-    if (backend == UR_PLATFORM_BACKEND_HIP) {
+    if (backend == UR_BACKEND_HIP) {
       ASSERT_SUCCESS(urKernelSetArgValue(kernel, current_index++,
                                          sizeof(hip_local_offset), nullptr,
                                          &hip_local_offset));
@@ -58,7 +58,7 @@ struct LocalMemoryUpdateTestBase
     // Index 1 is local_mem_b arg
     ASSERT_SUCCESS(urKernelSetArgLocal(kernel, current_index++,
                                        local_mem_b_size, nullptr));
-    if (backend == UR_PLATFORM_BACKEND_HIP) {
+    if (backend == UR_BACKEND_HIP) {
       ASSERT_SUCCESS(urKernelSetArgValue(kernel, current_index++,
                                          sizeof(hip_local_offset), nullptr,
                                          &hip_local_offset));
@@ -406,7 +406,7 @@ TEST_P(LocalMemoryUpdateTest, UpdateParametersSmallerLocalSize) {
       nullptr,                                                    // hArgValue
   });
 
-  if (backend == UR_PLATFORM_BACKEND_HIP) {
+  if (backend == UR_BACKEND_HIP) {
     new_value_descs.push_back({
         UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_VALUE_ARG_DESC, // stype
         nullptr,                                                    // pNext
@@ -444,7 +444,7 @@ TEST_P(LocalMemoryUpdateTest, UpdateParametersSmallerLocalSize) {
       nullptr,                                                    // hArgValue
   });
 
-  if (backend == UR_PLATFORM_BACKEND_HIP) {
+  if (backend == UR_BACKEND_HIP) {
     new_value_descs.push_back({
         UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_VALUE_ARG_DESC, // stype
         nullptr,                                                    // pNext
@@ -560,7 +560,7 @@ TEST_P(LocalMemoryUpdateTest, UpdateParametersLargerLocalSize) {
       nullptr,                                                    // hArgValue
   });
 
-  if (backend == UR_PLATFORM_BACKEND_HIP) {
+  if (backend == UR_BACKEND_HIP) {
     new_value_descs.push_back({
         UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_VALUE_ARG_DESC, // stype
         nullptr,                                                    // pNext
@@ -598,7 +598,7 @@ TEST_P(LocalMemoryUpdateTest, UpdateParametersLargerLocalSize) {
       nullptr,                                                    // hArgValue
   });
 
-  if (backend == UR_PLATFORM_BACKEND_HIP) {
+  if (backend == UR_BACKEND_HIP) {
     new_value_descs.push_back({
         UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_VALUE_ARG_DESC, // stype
         nullptr,                                                    // pNext
@@ -715,7 +715,7 @@ TEST_P(LocalMemoryUpdateTest, UpdateParametersPartialLocalSize) {
       nullptr,                                                    // hArgValue
   });
 
-  if (backend == UR_PLATFORM_BACKEND_HIP) {
+  if (backend == UR_BACKEND_HIP) {
     new_value_descs.push_back({
         UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_VALUE_ARG_DESC, // stype
         nullptr,                                                    // pNext
@@ -806,7 +806,7 @@ TEST_P(LocalMemoryUpdateTest, UpdateParametersPartialLocalSize) {
       nullptr,                                                    // hArgValue
   });
 
-  if (backend == UR_PLATFORM_BACKEND_HIP) {
+  if (backend == UR_BACKEND_HIP) {
     second_update_value_args.push_back({
         UR_STRUCTURE_TYPE_EXP_COMMAND_BUFFER_UPDATE_VALUE_ARG_DESC, // stype
         nullptr,                                                    // pNext
@@ -1081,14 +1081,14 @@ struct LocalMemoryUpdateTestBaseOutOfOrder : LocalMemoryUpdateTestBase {
     UUR_RETURN_ON_FATAL_FAILURE(
         urUpdatableCommandBufferExpExecutionTest::SetUp());
 
-    if (backend == UR_PLATFORM_BACKEND_LEVEL_ZERO) {
+    if (backend == UR_BACKEND_LEVEL_ZERO) {
       GTEST_SKIP()
           << "Local memory argument update not supported on Level Zero.";
     }
 
     // HIP has extra args for local memory so we define an offset for arg
     // indices here for updating
-    hip_arg_offset = backend == UR_PLATFORM_BACKEND_HIP ? 3 : 0;
+    hip_arg_offset = backend == UR_BACKEND_HIP ? 3 : 0;
     ur_device_usm_access_capability_flags_t shared_usm_flags;
     ASSERT_SUCCESS(
         uur::GetDeviceUSMSingleSharedSupport(device, shared_usm_flags));
@@ -1108,7 +1108,7 @@ struct LocalMemoryUpdateTestBaseOutOfOrder : LocalMemoryUpdateTestBase {
     }
 
     std::array<size_t, 12> index_order{};
-    if (backend != UR_PLATFORM_BACKEND_HIP) {
+    if (backend != UR_BACKEND_HIP) {
       index_order = {3, 2, 4, 5, 1, 0};
     } else {
       index_order = {9, 8, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3};
@@ -1132,7 +1132,7 @@ struct LocalMemoryUpdateTestBaseOutOfOrder : LocalMemoryUpdateTestBase {
     // Index 1 is local_mem_b arg
     ASSERT_SUCCESS(urKernelSetArgLocal(kernel, index_order[current_index++],
                                        local_mem_b_size, nullptr));
-    if (backend == UR_PLATFORM_BACKEND_HIP) {
+    if (backend == UR_BACKEND_HIP) {
       ASSERT_SUCCESS(urKernelSetArgValue(kernel, index_order[current_index++],
                                          sizeof(hip_local_offset), nullptr,
                                          &hip_local_offset));
@@ -1149,7 +1149,7 @@ struct LocalMemoryUpdateTestBaseOutOfOrder : LocalMemoryUpdateTestBase {
                                        local_mem_a_size, nullptr));
 
     // Hip has extra args for local mem at index 1-3
-    if (backend == UR_PLATFORM_BACKEND_HIP) {
+    if (backend == UR_BACKEND_HIP) {
       ASSERT_SUCCESS(urKernelSetArgValue(kernel, index_order[current_index++],
                                          sizeof(hip_local_offset), nullptr,
                                          &hip_local_offset));
