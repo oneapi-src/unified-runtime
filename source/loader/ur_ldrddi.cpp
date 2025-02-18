@@ -8411,35 +8411,43 @@ __urdlllocal ur_result_t UR_APICALL urCommandBufferUpdateKernelLaunchExp(
 
   // Deal with any struct parameters that have handle members we need to
   // convert.
-  auto pUpdateKernelLaunchLocal = *pUpdateKernelLaunch;
+  std::vector<ur_exp_command_buffer_update_kernel_launch_desc_t>
+      pUpdateKernelLaunchVector = {};
+  std::vector<std::vector<ur_exp_command_buffer_update_memobj_arg_desc_t>>
+      ppUpdateKernelLaunchpNewMemObjArgList(numKernelUpdates);
+  for (size_t Offset = 0; Offset < numKernelUpdates; Offset++) {
+    auto pUpdateKernelLaunchLocal = *pUpdateKernelLaunch;
 
-  pUpdateKernelLaunchLocal.hCommand =
-      reinterpret_cast<ur_exp_command_buffer_command_object_t *>(
-          pUpdateKernelLaunchLocal.hCommand)
-          ->handle;
-  if (pUpdateKernelLaunchLocal.hNewKernel)
-    pUpdateKernelLaunchLocal.hNewKernel =
-        reinterpret_cast<ur_kernel_object_t *>(
-            pUpdateKernelLaunchLocal.hNewKernel)
+    pUpdateKernelLaunchLocal.hCommand =
+        reinterpret_cast<ur_exp_command_buffer_command_object_t *>(
+            pUpdateKernelLaunchLocal.hCommand)
             ->handle;
-
-  std::vector<ur_exp_command_buffer_update_memobj_arg_desc_t>
-      pUpdateKernelLaunchpNewMemObjArgList;
-  for (uint32_t i = 0; i < pUpdateKernelLaunch->numNewMemObjArgs; i++) {
-    ur_exp_command_buffer_update_memobj_arg_desc_t NewRangeStruct =
-        pUpdateKernelLaunchLocal.pNewMemObjArgList[i];
-    if (NewRangeStruct.hNewMemObjArg)
-      NewRangeStruct.hNewMemObjArg =
-          reinterpret_cast<ur_mem_object_t *>(NewRangeStruct.hNewMemObjArg)
+    if (pUpdateKernelLaunchLocal.hNewKernel)
+      pUpdateKernelLaunchLocal.hNewKernel =
+          reinterpret_cast<ur_kernel_object_t *>(
+              pUpdateKernelLaunchLocal.hNewKernel)
               ->handle;
 
-    pUpdateKernelLaunchpNewMemObjArgList.push_back(NewRangeStruct);
-  }
-  pUpdateKernelLaunchLocal.pNewMemObjArgList =
-      pUpdateKernelLaunchpNewMemObjArgList.data();
+    std::vector<ur_exp_command_buffer_update_memobj_arg_desc_t>
+        &pUpdateKernelLaunchpNewMemObjArgList =
+            ppUpdateKernelLaunchpNewMemObjArgList[Offset];
+    for (uint32_t i = 0; i < pUpdateKernelLaunch->numNewMemObjArgs; i++) {
+      ur_exp_command_buffer_update_memobj_arg_desc_t NewRangeStruct =
+          pUpdateKernelLaunchLocal.pNewMemObjArgList[i];
+      if (NewRangeStruct.hNewMemObjArg)
+        NewRangeStruct.hNewMemObjArg =
+            reinterpret_cast<ur_mem_object_t *>(NewRangeStruct.hNewMemObjArg)
+                ->handle;
 
-  // Now that we've converted all the members update the param pointers
-  pUpdateKernelLaunch = &pUpdateKernelLaunchLocal;
+      pUpdateKernelLaunchpNewMemObjArgList.push_back(NewRangeStruct);
+    }
+    pUpdateKernelLaunchLocal.pNewMemObjArgList =
+        pUpdateKernelLaunchpNewMemObjArgList.data();
+
+    pUpdateKernelLaunchVector.push_back(pUpdateKernelLaunchLocal);
+    pUpdateKernelLaunch++;
+  }
+  pUpdateKernelLaunch = pUpdateKernelLaunchVector.data();
 
   // forward to device-platform
   result = pfnUpdateKernelLaunchExp(hCommandBuffer, numKernelUpdates,
