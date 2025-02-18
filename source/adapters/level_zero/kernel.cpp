@@ -752,8 +752,11 @@ ur_result_t urKernelGetInfo(
   case UR_KERNEL_INFO_NUM_ARGS:
     return ReturnValue(uint32_t{Kernel->ZeKernelProperties->numKernelArgs});
   case UR_KERNEL_INFO_SPILL_MEM_SIZE: {
-    std::vector<uint32_t> spills = {
-        uint32_t{Kernel->ZeKernelProperties->spillMemSize}};
+    std::vector<uint32_t> spills;
+    spills.reserve(Kernel->ZeKernels.size());
+    for (const auto *K : Kernel->ZeKernels()) {
+      spills.push_back(K->ZeKernelProperties->spillMemSize);
+    }
     return ReturnValue(static_cast<const uint32_t *>(spills.data()),
                        spills.size());
   }
