@@ -1309,7 +1309,7 @@ ur_result_t urCommandBufferAppendUSMPrefetchExp(
     if (Flags == UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE) {
       // Add the prefetch command to the command-buffer.
       ZE2UR_CALL(zeCommandListAppendMemoryPrefetch,
-                (CommandBuffer->ZeComputeCommandList, Mem, Size));
+                 (CommandBuffer->ZeComputeCommandList, Mem, Size));
     } else {
       // L0 currently does not handle migration flags -- All other migration
       // behavior is ignored:
@@ -1332,7 +1332,7 @@ ur_result_t urCommandBufferAppendUSMPrefetchExp(
     if (Flags == UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE) {
       // Add the prefetch command to the command buffer.
       ZE2UR_CALL(zeCommandListAppendMemoryPrefetch,
-                (CommandBuffer->ZeComputeCommandList, Mem, Size));
+                 (CommandBuffer->ZeComputeCommandList, Mem, Size));
     } else {
       // L0 currently does not handle migration flags -- All other migration
       // behavior is ignored:

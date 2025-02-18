@@ -19,7 +19,8 @@ struct urEnqueueUSMPrefetchWithParamTest
 
 UUR_DEVICE_TEST_SUITE_WITH_PARAM(
     urEnqueueUSMPrefetchWithParamTest,
-    ::testing::Values(UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE, UR_USM_MIGRATION_FLAG_DEVICE_TO_HOST),
+    ::testing::Values(UR_USM_MIGRATION_FLAG_HOST_TO_DEVICE,
+                      UR_USM_MIGRATION_FLAG_DEVICE_TO_HOST),
     uur::deviceTestWithParamPrinter<ur_usm_migration_flag_t>);
 
 TEST_P(urEnqueueUSMPrefetchWithParamTest, Success) {
@@ -163,7 +164,7 @@ TEST_P(urEnqueueUSMPrefetchTest, InvalidEventWaitList) {
 }
 
 TEST_P(urEnqueueUSMPrefetchTest, InvalidMigrationFlag) {
-    ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_ENUMERATION,
-                     urEnqueueUSMPrefetch(queue, ptr, allocation_size, 23, 0,
-                                          nullptr, nullptr));
+  ASSERT_EQ_RESULT(UR_RESULT_ERROR_INVALID_ENUMERATION,
+                   urEnqueueUSMPrefetch(queue, ptr, allocation_size, 23, 0,
+                                        nullptr, nullptr));
 }

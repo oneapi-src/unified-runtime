@@ -16,7 +16,8 @@ namespace cl_adapter {
 thread_local ur_result_t ErrorMessageCode = UR_RESULT_SUCCESS;
 thread_local char ErrorMessage[MaxMessageSize]{};
 
-[[maybe_unused]] void setErrorMessage(const char *Message, ur_result_t ErrorCode) {
+[[maybe_unused]] void setErrorMessage(const char *Message,
+                                      ur_result_t ErrorCode) {
   assert(strlen(Message) < cl_adapter::MaxMessageSize);
   // Copy at most MaxMessageSize - 1 bytes to ensure the resultant string is
   // always null terminated.
