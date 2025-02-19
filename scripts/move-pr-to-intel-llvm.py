@@ -57,6 +57,7 @@ import platform
 
 verbose = False
 yes = False
+allow_dirty = False
 
 ur_default_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 unified_runtime_slug = "oneapi-src/unified-runtime"
@@ -64,7 +65,7 @@ intel_llvm_slug = "intel/llvm"
 
 
 def main():
-    global verbose, yes
+    global verbose, yes, allow_dirty
 
     cli = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawTextHelpFormatter
@@ -111,13 +112,19 @@ def main():
     )
     cli.add_argument(
         "--intel-llvm-base-branch",
-        default=None,
+        default="sycl",
         help="intel/llvm branch to base new branch upon, defaults to 'sycl'",
     )
     cli.add_argument(
         "--intel-llvm-feature-branch",
         default=None,
         help="intel/llvm remote branch to create, defaults to --ur-branch",
+    )
+    cli.add_argument(
+        "--allow-dirty",
+        default=False,
+        action="store_true",
+        help="Skip checks for a clean workspace. Please check any generated patch files before applying",
     )
     args = cli.parse_args()
 
@@ -127,6 +134,7 @@ def main():
 
     verbose = args.verbose
     yes = args.yes
+    allow_dirty = args.allow_dirty
 
     git = get_git_executable()
     gh = get_gh_executable()
@@ -173,7 +181,7 @@ def main():
             locally
             and remotely
             and not confirm(
-                f"Feature branch '{args.intel_llvm_feature_branch}' exists "
+                f"LLVM feature branch '{args.intel_llvm_feature_branch}' exists "
                 "locally and remotely, proceed with applying patches on top "
                 "of this branch?"
             )
@@ -182,7 +190,7 @@ def main():
             not locally
             and remotely
             and not confirm(
-                f"Feature branch '{args.intel_llvm_feature_branch}' exists "
+                f"LLVM feature branch '{args.intel_llvm_feature_branch}' exists "
                 "remotely but not locally, proceed with applying patches on "
                 "top of this branch?"
             )
@@ -191,7 +199,7 @@ def main():
             locally
             and not remotely
             and not confirm(
-                f"Feature branch '{args.intel_llvm_feature_branch}' exists "
+                f"LLVM feature branch '{args.intel_llvm_feature_branch}' exists "
                 "locally but not remotely, proceed with applying patches on "
                 "top of this branch?"
             )
@@ -230,14 +238,14 @@ def main():
             os.remove(patch)
 
     if not confirm(
-        f"Push '{args.intel_llvm_feature_branch}' to '{args.intel_llvm_remote}'?"
+        f"Push '{args.intel_llvm_feature_branch}' to '{args.intel_llvm_push_remote}'?"
     ):
         print("Please push the changes and create your pull request manually.")
         exit(0)
     push_branch(
         git,
         args.intel_llvm_dir,
-        args.intel_llvm_remote,
+        args.intel_llvm_push_remote,
         args.intel_llvm_feature_branch,
     )
 
@@ -260,7 +268,7 @@ def main():
     if not confirm(f"Close {ur_pr['url']}?"):
         print("Please create your pull request manually.")
         exit()
-    close_pull_request(gh, args.ur_dir, unified_runtime_slug, ur_pr["number"])
+    close_pull_request(gh, args.ur_dir, unified_runtime_slug, str(ur_pr["number"]))
 
 
 def get_git_executable() -> str:
@@ -319,6 +327,8 @@ def get_current_branch(git, dir) -> str:
 
 
 def check_worktree_is_clean(git, dir):
+    if allow_dirty:
+        return
     result = run([git, "-C", dir, "status", "--porcelain"], stdout=PIPE)
     stdout = result.stdout.decode()
     if verbose:
