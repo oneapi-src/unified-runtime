@@ -557,6 +557,10 @@ returns:
         - "If the adapter has no underlying equivalent handle."
     - $X_RESULT_ERROR_INVALID_NULL_HANDLE:
         - "If `hProgram == NULL` and the implementation requires a valid program."
+    - $X_RESULT_ERROR_INVALID_CONTEXT:
+        - "The implementation requires that the context be associated with the kernel, but it is not."
+    - $X_RESULT_ERROR_INVALID_PROGRAM:
+        - "The implementation requires that the program be associated with the kernel, but it is not."
 --- #--------------------------------------------------------------------------
 type: function
 desc: "Get the suggested local work size for a kernel."
