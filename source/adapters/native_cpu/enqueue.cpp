@@ -53,8 +53,8 @@ struct NDRDescT {
 } // namespace native_cpu
 
 #ifdef NATIVECPU_USE_OCK
-static native_cpu::state getResizedState(const native_cpu::NDRDescT &ndr,
-                                         size_t itemsPerThread) {
+static inline native_cpu::state getResizedState(const native_cpu::NDRDescT &ndr,
+                                                size_t itemsPerThread) {
   native_cpu::state resized_state(
       ndr.GlobalSize[0], ndr.GlobalSize[1], ndr.GlobalSize[2], itemsPerThread,
       ndr.LocalSize[1], ndr.LocalSize[2], ndr.GlobalOffset[0],
@@ -107,7 +107,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
   auto &tp = hQueue->getDevice()->tp;
   const size_t numParallelThreads = tp.num_threads();
   hKernel->updateMemPool(numParallelThreads);
-  std::vector<std::future<void>> futures;
+  auto Tasks = native_cpu::getScheduler(tp);
   std::vector<std::function<void(size_t, ur_kernel_handle_t_)>> groups;
   auto numWG0 = ndr.GlobalSize[0] / ndr.LocalSize[0];
   auto numWG1 = ndr.GlobalSize[1] / ndr.LocalSize[1];
@@ -159,17 +159,17 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
     for (unsigned g2 = 0; g2 < numWG2; g2++) {
       for (unsigned g1 = 0; g1 < numWG1; g1++) {
         for (unsigned g0 = 0; g0 < new_num_work_groups_0; g0 += 1) {
-          futures.emplace_back(tp.schedule_task(
+          Tasks.schedule(
               [ndr, itemsPerThread, kernel = *hKernel, g0, g1, g2](size_t) {
                 native_cpu::state resized_state =
                     getResizedState(ndr, itemsPerThread);
                 resized_state.update(g0, g1, g2);
                 kernel._subhandler(kernel.getArgs().data(), &resized_state);
-              }));
+              });
         }
         // Peel the remaining work items. Since the local size is 1, we iterate
         // over the work groups.
-        for (unsigned g0 = new_num_work_groups_0 * itemsPerThread; g0 < numWG0;
+        for (size_t g0 = new_num_work_groups_0 * itemsPerThread; g0 < numWG0;
              g0++) {
           state.update(g0, g1, g2);
           hKernel->_subhandler(hKernel->getArgs().data(), &state);
@@ -179,26 +179,25 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
 
   } else {
     // We are running a parallel_for over an nd_range
-
     if (numWG1 * numWG2 >= numParallelThreads) {
       // Dimensions 1 and 2 have enough work, split them across the threadpool
       for (unsigned g2 = 0; g2 < numWG2; g2++) {
         for (unsigned g1 = 0; g1 < numWG1; g1++) {
-          futures.emplace_back(
-              tp.schedule_task([state, kernel = *hKernel, numWG0, g1, g2,
-                                numParallelThreads](size_t threadId) mutable {
-                for (unsigned g0 = 0; g0 < numWG0; g0++) {
-                  kernel.handleLocalArgs(numParallelThreads, threadId);
-                  state.update(g0, g1, g2);
-                  kernel._subhandler(kernel.getArgs().data(), &state);
-                }
-              }));
+          Tasks.schedule([state, kernel = *hKernel, numWG0, g1, g2,
+                          numParallelThreads](size_t threadId) mutable {
+            for (unsigned g0 = 0; g0 < numWG0; g0++) {
+              kernel.handleLocalArgs(numParallelThreads, threadId);
+              state.update(g0, g1, g2);
+              kernel._subhandler(kernel.getArgs().data(), &state);
+            }
+          });
         }
       }
     } else {
       // Split dimension 0 across the threadpool
       // Here we try to create groups of workgroups in order to reduce
       // synchronization overhead
+      groups.reserve(numWG2 * numWG1 * numWG0);
       for (unsigned g2 = 0; g2 < numWG2; g2++) {
         for (unsigned g1 = 0; g1 < numWG1; g1++) {
           for (unsigned g0 = 0; g0 < numWG0; g0++) {
@@ -214,35 +213,34 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
       }
       auto numGroups = groups.size();
       auto groupsPerThread = numGroups / numParallelThreads;
-      auto remainder = numGroups % numParallelThreads;
-      for (unsigned thread = 0; thread < numParallelThreads; thread++) {
-        futures.emplace_back(
-            tp.schedule_task([groups, thread, groupsPerThread,
-                              kernel = *hKernel](size_t threadId) {
-              for (unsigned i = 0; i < groupsPerThread; i++) {
-                auto index = thread * groupsPerThread + i;
-                groups[index](threadId, kernel);
-              }
-            }));
+      if (groupsPerThread) {
+        for (unsigned thread = 0; thread < numParallelThreads; thread++) {
+          Tasks.schedule([groups, thread, groupsPerThread,
+                          kernel = *hKernel](size_t threadId) {
+            for (unsigned i = 0; i < groupsPerThread; i++) {
+              auto index = thread * groupsPerThread + i;
+              groups[index](threadId, kernel);
+            }
+          });
+        }
       }
-
       // schedule the remaining tasks
+      auto remainder = numGroups % numParallelThreads;
       if (remainder) {
-        futures.emplace_back(
-            tp.schedule_task([groups, remainder,
-                              scheduled = numParallelThreads * groupsPerThread,
-                              kernel = *hKernel](size_t threadId) {
-              for (unsigned i = 0; i < remainder; i++) {
-                auto index = scheduled + i;
-                groups[index](threadId, kernel);
-              }
-            }));
+        Tasks.schedule([groups, remainder,
+                        scheduled = numParallelThreads * groupsPerThread,
+                        kernel = *hKernel](size_t threadId) {
+          for (unsigned i = 0; i < remainder; i++) {
+            auto index = scheduled + i;
+            groups[index](threadId, kernel);
+          }
+        });
       }
     }
   }
 
 #endif // NATIVECPU_USE_OCK
-  event->set_futures(futures);
+  event->set_futures(Tasks.getTaskInfo());
 
   if (phEvent) {
     *phEvent = event;
@@ -458,7 +456,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueMemBufferFill(
         // TODO: error checking
         // TODO: handle async
         void *startingPtr = hBuffer->_mem + offset;
-        unsigned steps = size / patternSize;
+        size_t steps = size / patternSize;
         for (unsigned i = 0; i < steps; i++) {
           memcpy(static_cast<int8_t *>(startingPtr) + i * patternSize, pPattern,
                  patternSize);
@@ -599,7 +597,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueUSMFill(
           break;
         }
         default: {
-          for (unsigned int step{0}; step < size; step += patternSize) {
+          for (size_t step{0}; step < size; step += patternSize) {
             auto *dest = reinterpret_cast<void *>(
                 reinterpret_cast<uint8_t *>(ptr) + step);
             memcpy(dest, pPattern, patternSize);

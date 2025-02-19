@@ -22,7 +22,7 @@ using nativecpu_task_t = std::function<nativecpu_kernel_t>;
 struct local_arg_info_t {
   uint32_t argIndex;
   size_t argSize;
-  local_arg_info_t(uint32_t argIndex, size_t argSize)
+  inline local_arg_info_t(uint32_t argIndex, size_t argSize)
       : argIndex(argIndex), argSize(argSize) {}
 };
 
@@ -41,7 +41,7 @@ struct ur_kernel_handle_t_ : RefCounted {
     incrementReferenceCount();
   }
 
-  ~ur_kernel_handle_t_() {
+  inline ~ur_kernel_handle_t_() {
     if (decrementReferenceCount() == 0) {
       free(_localMemPool);
       Args.deallocate();
