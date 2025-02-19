@@ -171,6 +171,65 @@ ur_result_t getEventsFromSyncPoints(
 }
 
 /**
+ * If necessary, it creates a signal event and appends it to the previous
+ * command list (copy or compute), to indicate when it's finished executing.
+ * @param[in] CommandBuffer The CommandBuffer where the command is appended.
+ * @param[in] ZeCommandList the CommandList that's currently in use.
+ * @param[out] WaitEventList The list of event for the future command list to
+ * wait on before execution.
+ * @return UR_RESULT_SUCCESS or an error code on failure
+ */
+ur_result_t createSyncPointBetweenCopyAndCompute(
+    ur_exp_command_buffer_handle_t CommandBuffer,
+    ze_command_list_handle_t ZeCommandList,
+    std::vector<ze_event_handle_t> &WaitEventList) {
+
+  if (!CommandBuffer->ZeCopyCommandList) {
+    return UR_RESULT_SUCCESS;
+  }
+
+  bool IsCopy{ZeCommandList == CommandBuffer->ZeCopyCommandList};
+
+  // Skip synchronization for the first node in a graph or if the current
+  // command list matches the previous one.
+  if (!CommandBuffer->MWasPrevCopyCommandList.has_value()) {
+    CommandBuffer->MWasPrevCopyCommandList = IsCopy;
+    return UR_RESULT_SUCCESS;
+  } else if (IsCopy == CommandBuffer->MWasPrevCopyCommandList) {
+    return UR_RESULT_SUCCESS;
+  }
+
+  /*
+   * If the current CommandList differs from the previously used one, we must
+   * append a signal event to the previous CommandList to track when
+   * its execution is complete.
+   */
+  ur_event_handle_t SignalPrevCommandEvent = nullptr;
+  UR_CALL(EventCreate(CommandBuffer->Context, nullptr /*Queue*/,
+                      false /*IsMultiDevice*/, false, &SignalPrevCommandEvent,
+                      false /*CounterBasedEventEnabled*/,
+                      !CommandBuffer->IsProfilingEnabled,
+                      false /*InterruptBasedEventEnabled*/));
+
+  // Determine which command list to signal.
+  auto CommandListToSignal = (!IsCopy && CommandBuffer->MWasPrevCopyCommandList)
+                                 ? CommandBuffer->ZeCopyCommandList
+                                 : CommandBuffer->ZeComputeCommandList;
+  CommandBuffer->MWasPrevCopyCommandList = IsCopy;
+
+  ZE2UR_CALL(zeCommandListAppendSignalEvent,
+             (CommandListToSignal, SignalPrevCommandEvent->ZeEvent));
+
+  // Add the event to the dependencies for future command list to wait on.
+  WaitEventList.push_back(SignalPrevCommandEvent->ZeEvent);
+
+  // Mark the event for future reset.
+  CommandBuffer->ZeEventsList.push_back(SignalPrevCommandEvent->ZeEvent);
+
+  return UR_RESULT_SUCCESS;
+}
+
+/**
  * If needed, creates a sync point for a given command and returns the L0
  * events associated with the sync point.
  * This operations is skipped if the command-buffer is in order.
@@ -178,8 +237,8 @@ ur_result_t getEventsFromSyncPoints(
  * @param[in] CommandBuffer The CommandBuffer where the command is appended.
  * @param[in] NumSyncPointsInWaitList Number of sync points that are
  * dependencies for the command.
- * @param[in] SyncPointWaitList List of sync point that are dependencies for the
- * command.
+ * @param[in] SyncPointWaitList List of sync point that are dependencies for
+ * the command.
  * @param[in] HostVisible Whether the event associated with the sync point
  * should be host visible.
  * @param[out][optional] RetSyncPoint The new sync point.
@@ -190,7 +249,7 @@ ur_result_t getEventsFromSyncPoints(
  */
 ur_result_t createSyncPointAndGetZeEvents(
     ur_command_t CommandType, ur_exp_command_buffer_handle_t CommandBuffer,
-    uint32_t NumSyncPointsInWaitList,
+    ze_command_list_handle_t ZeCommandList, uint32_t NumSyncPointsInWaitList,
     const ur_exp_command_buffer_sync_point_t *SyncPointWaitList,
     bool HostVisible, ur_exp_command_buffer_sync_point_t *RetSyncPoint,
     std::vector<ze_event_handle_t> &ZeEventList,
@@ -199,6 +258,11 @@ ur_result_t createSyncPointAndGetZeEvents(
   ZeLaunchEvent = nullptr;
 
   if (CommandBuffer->IsInOrderCmdList) {
+    UR_CALL(createSyncPointBetweenCopyAndCompute(CommandBuffer, ZeCommandList,
+                                                 ZeEventList));
+    if (!ZeEventList.empty()) {
+      NumSyncPointsInWaitList = ZeEventList.size();
+    }
     return UR_RESULT_SUCCESS;
   }
 
@@ -225,9 +289,9 @@ ur_result_t createSyncPointAndGetZeEvents(
   return UR_RESULT_SUCCESS;
 }
 
-// Shared by all memory read/write/copy PI interfaces.
-// Helper function for common code when enqueuing memory operations to a command
-// buffer.
+// Shared by all memory read/write/copy UR interfaces.
+// Helper function for common code when enqueuing memory operations to a
+// command buffer.
 ur_result_t enqueueCommandBufferMemCopyHelper(
     ur_command_t CommandType, ur_exp_command_buffer_handle_t CommandBuffer,
     void *Dst, const void *Src, size_t Size, bool PreferCopyEngine,
@@ -235,14 +299,14 @@ ur_result_t enqueueCommandBufferMemCopyHelper(
     const ur_exp_command_buffer_sync_point_t *SyncPointWaitList,
     ur_exp_command_buffer_sync_point_t *RetSyncPoint) {
 
+  ze_command_list_handle_t ZeCommandList =
+      CommandBuffer->chooseCommandList(PreferCopyEngine);
+
   std::vector<ze_event_handle_t> ZeEventList;
   ze_event_handle_t ZeLaunchEvent = nullptr;
   UR_CALL(createSyncPointAndGetZeEvents(
-      CommandType, CommandBuffer, NumSyncPointsInWaitList, SyncPointWaitList,
-      false, RetSyncPoint, ZeEventList, ZeLaunchEvent));
-
-  ze_command_list_handle_t ZeCommandList =
-      CommandBuffer->chooseCommandList(PreferCopyEngine);
+      CommandType, CommandBuffer, ZeCommandList, NumSyncPointsInWaitList,
+      SyncPointWaitList, false, RetSyncPoint, ZeEventList, ZeLaunchEvent));
 
   ZE2UR_CALL(zeCommandListAppendMemoryCopy,
              (ZeCommandList, Dst, Src, Size, ZeLaunchEvent, ZeEventList.size(),
@@ -251,8 +315,8 @@ ur_result_t enqueueCommandBufferMemCopyHelper(
   return UR_RESULT_SUCCESS;
 }
 
-// Helper function for common code when enqueuing rectangular memory operations
-// to a command-buffer.
+// Helper function for common code when enqueuing rectangular memory
+// operations to a command-buffer.
 ur_result_t enqueueCommandBufferMemCopyRectHelper(
     ur_command_t CommandType, ur_exp_command_buffer_handle_t CommandBuffer,
     void *Dst, const void *Src, ur_rect_offset_t SrcOrigin,
@@ -293,14 +357,14 @@ ur_result_t enqueueCommandBufferMemCopyRectHelper(
   const ze_copy_region_t ZeDstRegion = {DstOriginX, DstOriginY, DstOriginZ,
                                         Width,      Height,     Depth};
 
+  ze_command_list_handle_t ZeCommandList =
+      CommandBuffer->chooseCommandList(PreferCopyEngine);
+
   std::vector<ze_event_handle_t> ZeEventList;
   ze_event_handle_t ZeLaunchEvent = nullptr;
   UR_CALL(createSyncPointAndGetZeEvents(
-      CommandType, CommandBuffer, NumSyncPointsInWaitList, SyncPointWaitList,
-      false, RetSyncPoint, ZeEventList, ZeLaunchEvent));
-
-  ze_command_list_handle_t ZeCommandList =
-      CommandBuffer->chooseCommandList(PreferCopyEngine);
+      CommandType, CommandBuffer, ZeCommandList, NumSyncPointsInWaitList,
+      SyncPointWaitList, false, RetSyncPoint, ZeEventList, ZeLaunchEvent));
 
   ZE2UR_CALL(zeCommandListAppendMemoryCopyRegion,
              (ZeCommandList, Dst, &ZeDstRegion, DstPitch, DstSlicePitch, Src,
@@ -321,18 +385,18 @@ ur_result_t enqueueCommandBufferFillHelper(
   UR_ASSERT((PatternSize > 0) && ((PatternSize & (PatternSize - 1)) == 0),
             UR_RESULT_ERROR_INVALID_VALUE);
 
-  std::vector<ze_event_handle_t> ZeEventList;
-  ze_event_handle_t ZeLaunchEvent = nullptr;
-  UR_CALL(createSyncPointAndGetZeEvents(
-      CommandType, CommandBuffer, NumSyncPointsInWaitList, SyncPointWaitList,
-      true, RetSyncPoint, ZeEventList, ZeLaunchEvent));
-
   bool PreferCopyEngine;
   UR_CALL(
       preferCopyEngineForFill(CommandBuffer, PatternSize, PreferCopyEngine));
 
   ze_command_list_handle_t ZeCommandList =
       CommandBuffer->chooseCommandList(PreferCopyEngine);
+
+  std::vector<ze_event_handle_t> ZeEventList;
+  ze_event_handle_t ZeLaunchEvent = nullptr;
+  UR_CALL(createSyncPointAndGetZeEvents(
+      CommandType, CommandBuffer, ZeCommandList, NumSyncPointsInWaitList,
+      SyncPointWaitList, true, RetSyncPoint, ZeEventList, ZeLaunchEvent));
 
   ZE2UR_CALL(zeCommandListAppendMemoryFill,
              (ZeCommandList, Ptr, Pattern, PatternSize, Size, ZeLaunchEvent,
@@ -477,12 +541,12 @@ void ur_exp_command_buffer_handle_t_::registerSyncPoint(
 
 ze_command_list_handle_t
 ur_exp_command_buffer_handle_t_::chooseCommandList(bool PreferCopyEngine) {
-  if (PreferCopyEngine && this->useCopyEngine() && !this->IsInOrderCmdList) {
+  if (PreferCopyEngine && useCopyEngine()) {
     // We indicate that ZeCopyCommandList contains commands to be submitted.
-    this->MCopyCommandListEmpty = false;
-    return this->ZeCopyCommandList;
+    MCopyCommandListEmpty = false;
+    return ZeCopyCommandList;
   }
-  return this->ZeComputeCommandList;
+  return ZeComputeCommandList;
 }
 
 ur_result_t ur_exp_command_buffer_handle_t_::getFenceForQueue(
@@ -649,7 +713,7 @@ urCommandBufferCreateExp(ur_context_handle_t Context, ur_device_handle_t Device,
   // the current implementation only uses the main copy engine and does not use
   // the link engine even if available.
   if (Device->hasMainCopyEngine()) {
-    UR_CALL(createMainCommandList(Context, Device, false, false, true,
+    UR_CALL(createMainCommandList(Context, Device, IsInOrder, false, true,
                                   ZeCopyCommandList));
   }
 
@@ -815,18 +879,18 @@ finalizeWaitEventPath(ur_exp_command_buffer_handle_t CommandBuffer) {
              (CommandBuffer->ZeCommandListResetEvents,
               CommandBuffer->ExecutionFinishedEvent->ZeEvent));
 
+  // Reset the L0 events we use for command-buffer sync-points to the
+  // non-signaled state. This is required for multiple submissions.
+  for (auto &Event : CommandBuffer->ZeEventsList) {
+    ZE2UR_CALL(zeCommandListAppendEventReset,
+               (CommandBuffer->ZeCommandListResetEvents, Event));
+  }
+
   if (CommandBuffer->IsInOrderCmdList) {
     ZE2UR_CALL(zeCommandListAppendSignalEvent,
                (CommandBuffer->ZeComputeCommandList,
                 CommandBuffer->ExecutionFinishedEvent->ZeEvent));
   } else {
-    // Reset the L0 events we use for command-buffer sync-points to the
-    // non-signaled state. This is required for multiple submissions.
-    for (auto &Event : CommandBuffer->ZeEventsList) {
-      ZE2UR_CALL(zeCommandListAppendEventReset,
-                 (CommandBuffer->ZeCommandListResetEvents, Event));
-    }
-
     // Wait for all the user added commands to complete, and signal the
     // command-buffer signal-event when they are done.
     ZE2UR_CALL(zeCommandListAppendBarrier,
@@ -1073,7 +1137,8 @@ ur_result_t urCommandBufferAppendKernelLaunchExp(
   std::vector<ze_event_handle_t> ZeEventList;
   ze_event_handle_t ZeLaunchEvent = nullptr;
   UR_CALL(createSyncPointAndGetZeEvents(
-      UR_COMMAND_KERNEL_LAUNCH, CommandBuffer, NumSyncPointsInWaitList,
+      UR_COMMAND_KERNEL_LAUNCH, CommandBuffer,
+      CommandBuffer->ZeComputeCommandList, NumSyncPointsInWaitList,
       SyncPointWaitList, false, RetSyncPoint, ZeEventList, ZeLaunchEvent));
 
   ZE2UR_CALL(zeCommandListAppendLaunchKernel,
@@ -1306,29 +1371,25 @@ ur_result_t urCommandBufferAppendUSMPrefetchExp(
   std::ignore = Command;
   std::ignore = Flags;
 
-  if (CommandBuffer->IsInOrderCmdList) {
-    // Add the prefetch command to the command-buffer.
-    // Note that L0 does not handle migration flags.
-    ZE2UR_CALL(zeCommandListAppendMemoryPrefetch,
-               (CommandBuffer->ZeComputeCommandList, Mem, Size));
-  } else {
-    std::vector<ze_event_handle_t> ZeEventList;
-    ze_event_handle_t ZeLaunchEvent = nullptr;
-    UR_CALL(createSyncPointAndGetZeEvents(
-        UR_COMMAND_USM_PREFETCH, CommandBuffer, NumSyncPointsInWaitList,
-        SyncPointWaitList, true, RetSyncPoint, ZeEventList, ZeLaunchEvent));
+  std::vector<ze_event_handle_t> ZeEventList;
+  ze_event_handle_t ZeLaunchEvent = nullptr;
+  UR_CALL(createSyncPointAndGetZeEvents(
+      UR_COMMAND_USM_PREFETCH, CommandBuffer,
+      CommandBuffer->ZeComputeCommandList, NumSyncPointsInWaitList,
+      SyncPointWaitList, true, RetSyncPoint, ZeEventList, ZeLaunchEvent));
 
-    if (NumSyncPointsInWaitList) {
-      ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
-                 (CommandBuffer->ZeComputeCommandList, NumSyncPointsInWaitList,
-                  ZeEventList.data()));
-    }
+  if (NumSyncPointsInWaitList) {
+    ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
+               (CommandBuffer->ZeComputeCommandList, NumSyncPointsInWaitList,
+                ZeEventList.data()));
+  }
 
-    // Add the prefetch command to the command-buffer.
-    // Note that L0 does not handle migration flags.
-    ZE2UR_CALL(zeCommandListAppendMemoryPrefetch,
-               (CommandBuffer->ZeComputeCommandList, Mem, Size));
+  // Add the prefetch command to the command-buffer.
+  // Note that L0 does not handle migration flags.
+  ZE2UR_CALL(zeCommandListAppendMemoryPrefetch,
+             (CommandBuffer->ZeComputeCommandList, Mem, Size));
 
+  if (!CommandBuffer->IsInOrderCmdList) {
     // Level Zero does not have a completion "event" with the prefetch API,
     // so manually add command to signal our event.
     ZE2UR_CALL(zeCommandListAppendSignalEvent,
@@ -1376,27 +1437,24 @@ ur_result_t urCommandBufferAppendUSMAdviseExp(
 
   ze_memory_advice_t ZeAdvice = static_cast<ze_memory_advice_t>(Value);
 
-  if (CommandBuffer->IsInOrderCmdList) {
-    ZE2UR_CALL(zeCommandListAppendMemAdvise,
-               (CommandBuffer->ZeComputeCommandList,
-                CommandBuffer->Device->ZeDevice, Mem, Size, ZeAdvice));
-  } else {
-    std::vector<ze_event_handle_t> ZeEventList;
-    ze_event_handle_t ZeLaunchEvent = nullptr;
-    UR_CALL(createSyncPointAndGetZeEvents(
-        UR_COMMAND_USM_ADVISE, CommandBuffer, NumSyncPointsInWaitList,
-        SyncPointWaitList, true, RetSyncPoint, ZeEventList, ZeLaunchEvent));
+  std::vector<ze_event_handle_t> ZeEventList;
+  ze_event_handle_t ZeLaunchEvent = nullptr;
+  UR_CALL(createSyncPointAndGetZeEvents(
+      UR_COMMAND_USM_ADVISE, CommandBuffer, CommandBuffer->ZeComputeCommandList,
+      NumSyncPointsInWaitList, SyncPointWaitList, true, RetSyncPoint,
+      ZeEventList, ZeLaunchEvent));
 
-    if (NumSyncPointsInWaitList) {
-      ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
-                 (CommandBuffer->ZeComputeCommandList, NumSyncPointsInWaitList,
-                  ZeEventList.data()));
-    }
+  if (NumSyncPointsInWaitList) {
+    ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
+               (CommandBuffer->ZeComputeCommandList, NumSyncPointsInWaitList,
+                ZeEventList.data()));
+  }
 
-    ZE2UR_CALL(zeCommandListAppendMemAdvise,
-               (CommandBuffer->ZeComputeCommandList,
-                CommandBuffer->Device->ZeDevice, Mem, Size, ZeAdvice));
+  ZE2UR_CALL(zeCommandListAppendMemAdvise,
+             (CommandBuffer->ZeComputeCommandList,
+              CommandBuffer->Device->ZeDevice, Mem, Size, ZeAdvice));
 
+  if (!CommandBuffer->IsInOrderCmdList) {
     // Level Zero does not have a completion "event" with the advise API,
     // so manually add command to signal our event.
     ZE2UR_CALL(zeCommandListAppendSignalEvent,
