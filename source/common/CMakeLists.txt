@@ -36,15 +36,11 @@ target_include_directories(ur_common PUBLIC
 
 message(STATUS "Download Unified Memory Framework from github.com")
 if (NOT DEFINED UMF_REPO)
-    set(UMF_REPO "https://github.com/oneapi-src/unified-memory-framework.git")
+    set(UMF_REPO "https://github.com/ldorau/unified-memory-framework.git")
 endif()
 
 if (NOT DEFINED UMF_TAG)
-    # commit ace9f4a60b686463fdad15cd016c548237cb79e0
-    # Author: Rafał Rudnicki <rafal.rudnicki@intel.com>
-    # Date:   Mon Feb 10 11:39:15 2025 +0100
-    # Merge pull request #1088 from ldorau/Fix_remove_CUDA_ERROR_INVALID_RESOURCE_TYPE
-    set(UMF_TAG ace9f4a60b686463fdad15cd016c548237cb79e0)
+    set(UMF_TAG umf-for-async-api)
 endif()
 
 message(STATUS "Will fetch Unified Memory Framework from ${UMF_REPO}")
