@@ -242,6 +242,7 @@ urGetUSMProcAddrTable(ur_api_version_t version, ur_usm_dditable_t *pDdiTable) {
   pDdiTable->pfnGetMemAllocInfo = urUSMGetMemAllocInfo;
   pDdiTable->pfnHostAlloc = urUSMHostAlloc;
   pDdiTable->pfnPoolCreate = urUSMPoolCreate;
+  pDdiTable->pfnPoolCreate = urUSMPoolCreate;
   pDdiTable->pfnPoolRetain = urUSMPoolRetain;
   pDdiTable->pfnPoolRelease = urUSMPoolRelease;
   pDdiTable->pfnPoolGetInfo = urUSMPoolGetInfo;
@@ -361,6 +362,10 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetUSMExpProcAddrTable(
     return result;
   }
   pDdiTable->pfnPitchedAllocExp = urUSMPitchedAllocExp;
+  pDdiTable->pfnPoolCreateExp = urUSMPoolCreateExp;
+  pDdiTable->pfnPoolDestroyExp = urUSMPoolDestroyExp;
+  pDdiTable->pfnPoolGetDefaultDevicePoolExp = urUSMPoolGetDefaultDevicePoolExp;
+  pDdiTable->pfnPoolSetThresholdExp = urUSMPoolSetThresholdExp;
   return UR_RESULT_SUCCESS;
 }
 
@@ -415,6 +420,10 @@ UR_DLLEXPORT ur_result_t UR_APICALL urGetEnqueueExpProcAddrTable(
   pDdiTable->pfnTimestampRecordingExp = urEnqueueTimestampRecordingExp;
   pDdiTable->pfnKernelLaunchCustomExp = urEnqueueKernelLaunchCustomExp;
   pDdiTable->pfnNativeCommandExp = urEnqueueNativeCommandExp;
+  pDdiTable->pfnUSMDeviceAllocExp = urEnqueueUSMDeviceAllocExp;
+  pDdiTable->pfnUSMSharedAllocExp = urEnqueueUSMSharedAllocExp;
+  pDdiTable->pfnUSMHostAllocExp = urEnqueueUSMHostAllocExp;
+  pDdiTable->pfnUSMFreeExp = urEnqueueUSMFreeExp;
 
   return UR_RESULT_SUCCESS;
 }
