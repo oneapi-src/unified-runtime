@@ -63,6 +63,23 @@ static native_cpu::state getResizedState(const native_cpu::NDRDescT &ndr,
 }
 #endif
 
+class LaunchInfoGroup {
+  native_cpu::state state;
+  const size_t numParallelThreads;
+
+public:
+  LaunchInfoGroup(const native_cpu::state &state, unsigned g0, unsigned g1,
+                  unsigned g2, size_t numParallelThreads)
+      : state(state), numParallelThreads(numParallelThreads) {
+    this->state.update(g0, g1, g2);
+  }
+
+  void operator()(size_t threadId, ur_kernel_handle_t_ kernel) {
+    kernel.handleLocalArgs(numParallelThreads, threadId);
+    kernel._subhandler(kernel.getArgs().data(), &state);
+  }
+};
+
 UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
     ur_queue_handle_t hQueue, ur_kernel_handle_t hKernel, uint32_t workDim,
     const size_t *pGlobalWorkOffset, const size_t *pGlobalWorkSize,
@@ -108,10 +125,10 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
   const size_t numParallelThreads = tp.num_threads();
   hKernel->updateMemPool(numParallelThreads);
   std::vector<std::future<void>> futures;
-  std::vector<std::function<void(size_t, ur_kernel_handle_t_)>> groups;
-  auto numWG0 = ndr.GlobalSize[0] / ndr.LocalSize[0];
-  auto numWG1 = ndr.GlobalSize[1] / ndr.LocalSize[1];
-  auto numWG2 = ndr.GlobalSize[2] / ndr.LocalSize[2];
+  std::vector<LaunchInfoGroup> groups;
+  const auto numWG0 = ndr.GlobalSize[0] / ndr.LocalSize[0];
+  const auto numWG1 = ndr.GlobalSize[1] / ndr.LocalSize[1];
+  const auto numWG2 = ndr.GlobalSize[2] / ndr.LocalSize[2];
   native_cpu::state state(ndr.GlobalSize[0], ndr.GlobalSize[1],
                           ndr.GlobalSize[2], ndr.LocalSize[0], ndr.LocalSize[1],
                           ndr.LocalSize[2], ndr.GlobalOffset[0],
@@ -199,39 +216,36 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
       // Split dimension 0 across the threadpool
       // Here we try to create groups of workgroups in order to reduce
       // synchronization overhead
+      groups.reserve(numWG0 * numWG1 * numWG2);
       for (unsigned g2 = 0; g2 < numWG2; g2++) {
         for (unsigned g1 = 0; g1 < numWG1; g1++) {
           for (unsigned g0 = 0; g0 < numWG0; g0++) {
-            groups.push_back(
-                [state, g0, g1, g2, numParallelThreads](
-                    size_t threadId, ur_kernel_handle_t_ kernel) mutable {
-                  kernel.handleLocalArgs(numParallelThreads, threadId);
-                  state.update(g0, g1, g2);
-                  kernel._subhandler(kernel.getArgs().data(), &state);
-                });
+            groups.emplace_back(state, g0, g1, g2, numParallelThreads);
           }
         }
       }
       auto numGroups = groups.size();
       auto groupsPerThread = numGroups / numParallelThreads;
-      auto remainder = numGroups % numParallelThreads;
-      for (unsigned thread = 0; thread < numParallelThreads; thread++) {
-        futures.emplace_back(
-            tp.schedule_task([groups, thread, groupsPerThread,
-                              kernel = *hKernel](size_t threadId) {
-              for (unsigned i = 0; i < groupsPerThread; i++) {
-                auto index = thread * groupsPerThread + i;
-                groups[index](threadId, kernel);
-              }
-            }));
+      if (groupsPerThread) {
+        for (unsigned thread = 0; thread < numParallelThreads; thread++) {
+          futures.emplace_back(
+              tp.schedule_task([groups, thread, groupsPerThread,
+                                kernel = *hKernel](size_t threadId) mutable {
+                for (unsigned i = 0; i < groupsPerThread; i++) {
+                  auto index = thread * groupsPerThread + i;
+                  groups[index](threadId, kernel);
+                }
+              }));
+        }
       }
 
       // schedule the remaining tasks
+      auto remainder = numGroups % numParallelThreads;
       if (remainder) {
         futures.emplace_back(
             tp.schedule_task([groups, remainder,
                               scheduled = numParallelThreads * groupsPerThread,
-                              kernel = *hKernel](size_t threadId) {
+                              kernel = *hKernel](size_t threadId) mutable {
               for (unsigned i = 0; i < remainder; i++) {
                 auto index = scheduled + i;
                 groups[index](threadId, kernel);
@@ -247,11 +261,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
   if (phEvent) {
     *phEvent = event;
   }
-  event->set_callback([hKernel, event]() {
-    event->tick_end();
-    // TODO: avoid calling clear() here.
-    hKernel->_localArgInfo.clear();
-  });
+  event->set_callback([event]() { event->tick_end(); });
 
   if (hQueue->isInOrder()) {
     urEventWait(1, &event);
@@ -260,11 +270,12 @@ UR_APIEXPORT ur_result_t UR_APICALL urEnqueueKernelLaunch(
   return UR_RESULT_SUCCESS;
 }
 
-ur_result_t withTimingEvent(ur_command_t command_type, ur_queue_handle_t hQueue,
-                            uint32_t numEventsInWaitList,
-                            const ur_event_handle_t *phEventWaitList,
-                            ur_event_handle_t *phEvent,
-                            const std::function<ur_result_t()> &f) {
+template <class T>
+static inline ur_result_t
+withTimingEvent(ur_command_t command_type, ur_queue_handle_t hQueue,
+                uint32_t numEventsInWaitList,
+                const ur_event_handle_t *phEventWaitList,
+                ur_event_handle_t *phEvent, T &&f) {
   urEventWait(numEventsInWaitList, phEventWaitList);
   ur_event_handle_t event;
   if (phEvent) {
