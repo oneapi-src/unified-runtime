@@ -5484,7 +5484,7 @@ ur_result_t UR_APICALL urEnqueueUSMPrefetch(
     const void *pMem,
     /// [in] size in bytes to be fetched
     size_t size,
-    /// [in] USM prefetch flags
+    /// [in] USM migration flags
     ur_usm_migration_flags_t flags,
     /// [in] size of the event wait list
     uint32_t numEventsInWaitList,
@@ -7504,7 +7504,7 @@ ur_result_t UR_APICALL urCommandBufferAppendUSMPrefetchExp(
     const void *pMemory,
     /// [in] size in bytes to be fetched.
     size_t size,
-    /// [in] USM prefetch flags
+    /// [in] USM migration flags
     ur_usm_migration_flags_t flags,
     /// [in] The number of sync points in the provided dependency list.
     uint32_t numSyncPointsInWaitList,

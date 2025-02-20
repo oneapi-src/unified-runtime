@@ -150,7 +150,7 @@ inline const OpenCLVersion V3_0(3, 0);
 
 namespace cl_adapter {
 constexpr size_t MaxMessageSize = 256;
-extern thread_local int32_t ErrorMessageCode;
+extern thread_local ur_result_t ErrorMessageCode;
 extern thread_local char ErrorMessage[MaxMessageSize];
 
 // Utility function for setting a message and warning
@@ -203,6 +203,7 @@ CONSTFIX char EnqueueWriteGlobalVariableName[] =
     "clEnqueueWriteGlobalVariableINTEL";
 CONSTFIX char EnqueueReadGlobalVariableName[] =
     "clEnqueueReadGlobalVariableINTEL";
+CONSTFIX char EnqueueMigrateMemName[] = "clEnqueueMigrateMemINTEL";
 // Names of host pipe functions queried from OpenCL
 CONSTFIX char EnqueueReadHostPipeName[] = "clEnqueueReadHostPipeINTEL";
 CONSTFIX char EnqueueWriteHostPipeName[] = "clEnqueueWriteHostPipeINTEL";
