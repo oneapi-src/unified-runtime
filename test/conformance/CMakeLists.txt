@@ -29,7 +29,7 @@ function(add_test_adapter name adapter backend)
             LABELS "conformance;${adapter}")
     endfunction()
 
-    do_add_test(${TEST_NAME} UR_ADAPTERS_FORCE_LOAD="$<TARGET_FILE:ur_${adapter}>")
+    do_add_test(${TEST_NAME} UR_ADAPTERS_FORCE_LOAD="$<TARGET_FILE:ur_${adapter}>" UR_ENABLE_LAYERS="UR_LAYER_TRACING" UR_LOG_TRACING=level:debug UR_LOG_LOADER=level:debug)
     if(UR_CONFORMANCE_TEST_LOADER)
         do_add_test(${TEST_NAME}-loader "")
     endif()
