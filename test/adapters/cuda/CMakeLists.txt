@@ -21,7 +21,7 @@ add_adapter_test(cuda
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../source/adapters/cuda/queue.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../source/adapters/cuda/common.cpp
     ENVIRONMENT
-        "UR_ADAPTERS_FORCE_LOAD=\"$<TARGET_FILE:ur_adapter_cuda>\""
+        "UR_ADAPTERS_FORCE_LOAD=\"$<TARGET_FILE:ur_adapter_cuda>\" UR_ENABLE_LAYERS=\"UR_LAYER_TRACING\" UR_LOG_TRACING=level:debug UR_LOG_LOADER=level:debug UR_LOG_CUDA=level:debug"
 )
 
 target_include_directories(test-adapter-cuda PRIVATE
