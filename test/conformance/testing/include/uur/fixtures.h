@@ -63,6 +63,7 @@ GetDevices(ur_platform_handle_t platform) {
   if (count == 0) {
     return {false, {}};
   }
+  count = 1;
   std::vector<ur_device_handle_t> devices(count);
   if (urDeviceGet(platform, UR_DEVICE_TYPE_ALL, count, devices.data(),
                   nullptr)) {

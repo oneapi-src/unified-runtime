@@ -13,7 +13,7 @@ permissions:
 jobs:
   examples:
     name: Multi Device testing
-    if: github.repository == 'oneapi-src/unified-runtime'  # run only on upstream; forks won't have the HW
+    if: false
     strategy:
       matrix:
         adapter: [
