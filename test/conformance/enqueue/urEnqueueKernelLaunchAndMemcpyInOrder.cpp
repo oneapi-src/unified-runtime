@@ -179,10 +179,10 @@ UUR_PLATFORM_TEST_SUITE_WITH_PARAM(
     uur::platformTestWithParamPrinter<uur::BoolTestParam>);
 
 TEST_P(urEnqueueKernelLaunchIncrementTest, Success) {
-  UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{});
-  if (devices.size() > 1) {
-    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
-  }
+  UUR_KNOWN_FAILURE_ON(uur::LevelZeroV2{}); /*
+   if (devices.size() > 1) {
+     UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+   }*/
 
   constexpr size_t global_offset = 0;
   constexpr size_t n_dimensions = 1;
@@ -360,10 +360,11 @@ UUR_PLATFORM_TEST_SUITE_WITH_PARAM(
 
 // Enqueue kernelLaunch concurrently from multiple threads
 // With !queuePerThread this becomes a test on a single device
-TEST_P(urEnqueueKernelLaunchIncrementMultiDeviceMultiThreadTest, Success) {
-  if (devices.size() > 1) {
-    UUR_KNOWN_FAILURE_ON(uur::CUDA{});
-  }
+TEST_P(urEnqueueKernelLaunchIncrementMultiDeviceMultiThreadTest, Success) { /*
+   if (devices.size() > 1) {
+     UUR_KNOWN_FAILURE_ON(uur::CUDA{});
+   }*/
+  printf("\n\ndevice count: %lu\n\n", devices.size());
   auto useEvents = std::get<0>(getParam()).value;
   auto queuePerThread = std::get<1>(getParam()).value;
 
