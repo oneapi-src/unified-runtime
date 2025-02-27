@@ -3,10 +3,12 @@ name: Warn about intel/llvm migration
 on:
   pull_request:
     types: [opened, reopened, edited, ready_for_review, synchronize]
+  pull_request_target:
+    types: [opened, reopened, edited, ready_for_review, synchronize]
 
 permissions:
   pull-requests: write
-  issues: read
+  issues: write
 
 jobs:
   label-and-comment:
