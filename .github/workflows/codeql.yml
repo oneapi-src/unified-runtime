@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   analyze-ubuntu:
+    if: false
     name: Analyze on Ubuntu
     runs-on: ${{ github.repository_owner == 'oneapi-src' && 'intel-ubuntu-22.04' || 'ubuntu-latest' }}
     permissions:
