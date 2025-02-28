@@ -192,7 +192,7 @@ struct urMultiQueueMultiDeviceTest : uur::urAllDevicesTest {
   std::vector<ur_queue_handle_t> queues;
 };
 
-template <size_t minDevices, class T, bool trueMultiDevice = true>
+template <size_t minDevices, class T>
 struct urMultiQueueMultiDeviceTestWithParam
     : uur::urAllDevicesTestWithParam<T> {
   using uur::urAllDevicesTestWithParam<T>::devices;
@@ -232,6 +232,7 @@ struct urMultiQueueMultiDeviceTestWithParam
 
   ur_context_handle_t context;
   std::vector<ur_queue_handle_t> queues;
+  bool trueMultiDevice = true;
 };
 
 } // namespace uur
