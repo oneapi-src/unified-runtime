@@ -361,6 +361,7 @@ struct urEnqueueKernelLaunchIncrementMultiDeviceMultiThreadTest
     queuePerThread = std::get<1>(getParam()).value;
     // With !queuePerThread this becomes a test on a single device
     this->trueMultiDevice = queuePerThread;
+    urEnqueueKernelLaunchIncrementMultiDeviceTestWithParam<Param>::SetUp();
   }
 
   bool useEvents;
