@@ -1,0 +1,82 @@
+name: Auto-Close PRs
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs daily at midnight (UTC)
+  workflow_dispatch: # Allows manual triggering
+
+permissions:
+  pull-requests: write
+  issues: write
+
+jobs:
+  close-stale-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close PRs labeled "auto-close"
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+            const label = "auto-close";
+            const now = new Date();
+            const millisecondsInADay = 24 * 60 * 60 * 1000;
+            const autoCloseDays = 30; // how many days before PRs should be closed automatically
+
+            // Fetch all open PRs
+            const prs = await github.paginate(github.rest.pulls.list, {
+              owner,
+              repo,
+              state: "open",
+              per_page: 100
+            });
+
+            for (const pr of prs) {
+              // Check if PR has the "auto-close" label
+              if (!pr.labels.some(l => l.name === label)) continue;
+
+              // Get the PR's label event timeline
+              const events = await github.paginate(github.rest.issues.listEvents, {
+                owner,
+                repo,
+                issue_number: pr.number
+              });
+
+              // Find the label added event
+              const labelEvent = events.find(e => e.event === "labeled" && e.label.name === label);
+
+              const timeSinceLabeled = Math.floor((now - new Date(labelEvent.created_at)) / millisecondsInADay);
+
+              // If label added event found and is older than autoCloseDays days, close the PR
+              if (labelEvent && timeSinceLabeled >= autoCloseDays) {
+                console.log(`Closing PR #${pr.number}`);
+                
+                // Close the PR
+                await github.rest.pulls.update({
+                  owner,
+                  repo,
+                  pull_number: pr.number,
+                  state: "closed"
+                });
+
+                const commentBody = 
+                  "# Automatic PR Closure Notice\n" +
+                  "## Information\n" +
+                  "This PR has been closed automatically. It was marked with the `auto-close` [label](https://github.com/oneapi-src/unified-runtime/labels/auto-close) 30 days ago as part of the Unified Runtime source code migration to the intel/llvm repository - https://github.com/intel/llvm/pull/17043.\n\n" +
+                  "All Unified Runtime development should be done in [intel/llvm](https://github.com/intel/llvm/tree/sycl/unified-runtime), details can be found in the updated [contribution guide](https://oneapi-src.github.io/unified-runtime/core/CONTRIB.html).\n" +
+                  "This repository will continue to exist as a mirror and will host the [specification documentation](https://oneapi-src.github.io/unified-runtime/).\n\n" +
+                  "## Next Steps\n" +
+                  "Should you wish to re-open this PR it **must be moved** to [intel/llvm](https://github.com/intel/llvm/tree/sycl/unified-runtime). We have provided a [script to help automate this process](https://github.com/oneapi-src/unified-runtime/blob/main/scripts/move-pr-to-intel-llvm.py), otherwise no actions are required.\n\n" +
+                  "---\n" +
+                  "*This is an automated comment.*";
+
+                // Comment on the PR
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: pr.number,
+                  body: commentBody
+                });
+              }
+            }
