@@ -103,6 +103,16 @@ def main():
     for patch in patches:
         os.remove(patch)
 
+    run(
+        [
+            "git",
+            "commit",
+            args.intel_llvm_mirror_base_commit_file,
+            "-m",
+            f"Update intel/llvm mirror base commit to {new_intel_llvm_mirror_base_commit[:8]}",
+        ]
+    )
+
 
 if __name__ == "__main__":
     try:
