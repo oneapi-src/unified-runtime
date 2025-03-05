@@ -1,0 +1,37 @@
+---
+name: Mirror intel/llvm commits
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *"
+
+jobs:
+  mirror-commits:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          path: ${{github.workspace}}/unified-runtime
+          ref: main
+
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          path: ${{github.workspace}}/intel-llvm
+          repository: intel/llvm
+          fetch-depth: 0
+          ref: sycl
+
+      - run: |
+          git -C ${{github.workspace}}/unified-runtime config user.name "github-actions[bot]"
+          git -C ${{github.workspace}}/unified-runtime config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - run: |
+          python3 unified-runtime/scripts/mirror-commits-from-intel-llvm.py ${{github.workspace}}/unified-runtime ${{github.workspace}}/intel-llvm
+
+      - run: |
+          git -C ${{github.workspace}}/unified-runtime push origin main
