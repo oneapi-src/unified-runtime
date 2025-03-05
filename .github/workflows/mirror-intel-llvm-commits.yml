@@ -3,8 +3,9 @@ name: Mirror intel/llvm commits
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 * * * *"
+  # TODO: Renable schedule once push permission issue is resolved
+  # schedule:
+  #   - cron: "0 * * * *"
 
 jobs:
   mirror-commits:
