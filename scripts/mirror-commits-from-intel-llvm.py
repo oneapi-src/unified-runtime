@@ -106,6 +106,8 @@ def main():
     run(
         [
             "git",
+            "-C",
+            args.unified_runtime_dir,
             "commit",
             args.intel_llvm_mirror_base_commit_file,
             "-m",
