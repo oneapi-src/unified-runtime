@@ -87,6 +87,8 @@ def main():
             "log",
             "-1",
             "--format=%H",
+            f"{args.intel_llvm_remote}/sycl",
+            "--",
             "unified-runtime",
         ],
         stdout=PIPE,
