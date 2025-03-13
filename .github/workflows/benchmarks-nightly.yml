@@ -5,7 +5,7 @@ on:
     - cron: '0 0 * * *'  # Runs at midnight UTC every day
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 jobs:
@@ -14,9 +14,9 @@ jobs:
     uses: ./.github/workflows/benchmarks-reusable.yml
     with:
       str_name: 'level_zero'
-      unit: 'gpu'
+      preset: 'Full'
       pr_no: 0
-      bench_script_params: '--save baseline'
+      bench_script_params: '--save Baseline_PVC_L0'
       sycl_config_params: ''
       sycl_repo: 'intel/llvm'
       sycl_commit: ''
@@ -29,10 +29,9 @@ jobs:
     uses: ./.github/workflows/benchmarks-reusable.yml
     with:
         str_name: 'level_zero_v2'
-        unit: 'gpu'
+        preset: 'Full'
         pr_no: 0
-        bench_script_params: '--save baseline-v2'
+        bench_script_params: '--save Baseline_PVC_L0v2'
         sycl_config_params: ''
         sycl_repo: 'intel/llvm'
         sycl_commit: ''
-        upload_report: true
