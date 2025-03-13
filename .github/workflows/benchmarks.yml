@@ -11,14 +11,15 @@ on:
         options:
           - level_zero
           - level_zero_v2
-      unit:
-        description: Test unit (cpu/gpu)
+      preset:
+        description: Preset
         type: choice
         required: true
-        default: 'gpu'
+        default: 'Minimal'
         options:
-          - cpu
-          - gpu
+          - Minimal
+          - Normal
+          - Full
       pr_no:
         description: PR number (if 0, it'll run on the main)
         type: number
@@ -48,14 +49,9 @@ on:
         type: string
         required: false
         default: ''
-      upload_report:
-        description: 'Upload HTML report'
-        type: boolean
-        required: false
-        default: false
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 jobs:
@@ -64,11 +60,10 @@ jobs:
     uses: ./.github/workflows/benchmarks-reusable.yml
     with:
       str_name: ${{ inputs.str_name }}
-      unit: ${{ inputs.unit }}
       pr_no: ${{ inputs.pr_no }}
       bench_script_params: ${{ inputs.bench_script_params }}
       sycl_config_params: ${{ inputs.sycl_config_params }}
       sycl_repo: ${{ inputs.sycl_repo }}
       sycl_commit: ${{ inputs.sycl_commit }}
       compute_runtime_commit: ${{ inputs.compute_runtime_commit }}
-      upload_report: ${{ inputs.upload_report }}
+      preset: ${{ inputs.preset }}

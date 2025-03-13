@@ -6,7 +6,7 @@ on:
       str_name:
         required: true
         type: string
-      unit:
+      preset:
         required: true
         type: string
       pr_no:
@@ -30,17 +30,13 @@ on:
         required: false
         type: string
         default: ''
-      upload_report:
-        required: false
-        type: boolean
-        default: false
       compute_runtime_commit:
         required: false
         type: string
         default: ''
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 jobs:
@@ -51,7 +47,6 @@ jobs:
         adapter: [
           {str_name: "${{ inputs.str_name }}",
           sycl_config: "${{ inputs.sycl_config_params }}",
-          unit: "${{ inputs.unit }}"
           }
         ]
         build_type: [Release]
@@ -60,12 +55,6 @@ jobs:
     runs-on: "${{ inputs.str_name }}_PERF"
 
     steps:
-    - name: Cleanup self-hosted workspace
-      if: always()
-      run: |
-        ls -la ./
-        rm -rf ./* || true
-
     - name: Add comment to PR
       uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
       if: ${{ always() && inputs.pr_no != 0 }}
@@ -84,25 +73,28 @@ jobs:
             body: body
           })
 
-    - name: Checkout UR
+    - name: Checkout benchmark scripts
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       with:
-        path: ur-repo
+        repository: intel/llvm
+        ref: unify-benchmark-ci
+        path: sc
+        sparse-checkout: |
+          devops/scripts/benchmarks
 
-    - name: Install pip packages
-      run: |
-        pip install --force-reinstall -r ${{github.workspace}}/ur-repo/third_party/benchmark_requirements.txt
+    - name: Checkout results branch
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      with:
+        ref: benchmark-results
+        path: results-repo
 
-    # We need to fetch special ref for proper PR's merge commit. Note, this ref may be absent if the PR is already merged.
-    - name: Fetch PR's merge commit
-      if: ${{ inputs.pr_no != 0 }}
-      working-directory: ${{github.workspace}}/ur-repo
-      env:
-        PR_NO: ${{ inputs.pr_no }}
+    - name: Create virtual environment
+      run: python -m venv .venv
+
+    - name: Activate virtual environment and install pip packages
       run: |
-        git fetch -- https://github.com/${{github.repository}} +refs/pull/${PR_NO}/*:refs/remotes/origin/pr/${PR_NO}/*
-        git checkout origin/pr/${PR_NO}/merge
-        git rev-parse origin/pr/${PR_NO}/merge
+        source .venv/bin/activate
+        pip install -r sc/devops/scripts/benchmarks/requirements.txt
 
     - name: Checkout SYCL
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -135,8 +127,6 @@ jobs:
         --ci-defaults ${{matrix.adapter.sycl_config}}
         --cmake-opt="-DLLVM_INSTALL_UTILS=ON"
         --cmake-opt="-DSYCL_PI_TESTS=OFF"
-        --cmake-opt="-DSYCL_UR_USE_FETCH_CONTENT=OFF"
-        --cmake-opt="-DSYCL_UR_SOURCE_DIR=${{github.workspace}}/ur-repo/"
         --cmake-opt=-DCMAKE_C_COMPILER_LAUNCHER=ccache
         --cmake-opt=-DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
@@ -146,7 +136,7 @@ jobs:
     - name: Configure UR
       run: >
         cmake -DCMAKE_BUILD_TYPE=Release
-        -S${{github.workspace}}/ur-repo
+        -S${{github.workspace}}/sycl-repo/unified-runtime
         -B${{github.workspace}}/ur_build
         -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/ur_install
         -DUR_BUILD_TESTS=OFF
@@ -159,35 +149,6 @@ jobs:
 
     - name: Install UR
       run: cmake --install ${{github.workspace}}/ur_build
-
-    - name: Checkout UMF
-      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      with:
-        repository: oneapi-src/unified-memory-framework
-        ref: main
-        path: umf-repo
-        fetch-depth: 1
-        fetch-tags: false
-
-    - name: Configure UMF
-      run: >
-        cmake -DCMAKE_BUILD_TYPE=Release
-        -S${{github.workspace}}/umf-repo
-        -B${{github.workspace}}/umf_build
-        -DUMF_BUILD_BENCHMARKS=ON
-        -DUMF_BUILD_SHARED_LIBRARY=ON
-        -DUMF_BUILD_BENCHMARKS_MT=ON
-        -DUMF_BUILD_TESTS=OFF
-        -DUMF_FORMAT_CODE_STYLE=OFF
-        -DUMF_DEVELOPER_MODE=OFF
-        -DUMF_BUILD_LEVEL_ZERO_PROVIDER=ON
-        -DUMF_BUILD_CUDA_PROVIDER=ON
-        -DUMF_BUILD_LIBUMF_POOL_DISJOINT=ON
-        -DUMF_BUILD_LIBUMF_POOL_JEMALLOC=ON
-        -DUMF_BUILD_EXAMPLES=OFF
-
-    - name: Build UMF
-      run: cmake --build ${{github.workspace}}/umf_build -j $(nproc)
 
     - name: Compute core range
       run: |
@@ -208,25 +169,25 @@ jobs:
         echo "ZE_AFFINITY_MASK=$ZE_AFFINITY_MASK" >> $GITHUB_ENV
 
     - name: Run benchmarks
-      working-directory: ${{ github.workspace }}/ur-repo/
       id: benchmarks
       run: >
-        taskset -c ${{ env.CORES }} ${{ github.workspace }}/ur-repo/scripts/benchmarks/main.py
-        ~/bench_workdir
+        source .venv/bin/activate &&
+        taskset -c ${{ env.CORES }} ./sc/devops/scripts/benchmarks/main.py
+        ~/ur_bench_workdir
         --sycl ${{ github.workspace }}/sycl_build
         --ur ${{ github.workspace }}/ur_install
-        --umf ${{ github.workspace }}/umf_build
         --adapter ${{ matrix.adapter.str_name }}
         --compute-runtime ${{ inputs.compute_runtime_commit }}
         --build-igc
-        --compare baseline
-        ${{ inputs.upload_report && '--output-html' || '' }}
-        ${{ inputs.pr_no != 0 && '--output-markdown' || '' }}
+        --output-html remote
+        --results-dir ${{ github.workspace }}/results-repo
+        --output-markdown
+        --preset ${{ inputs.preset }}
         ${{ inputs.bench_script_params }}
 
     - name: Print benchmark results
       run: |
-        cat ${{ github.workspace }}/ur-repo/benchmark_results.md || true
+        cat ${{ github.workspace }}/sc/devops/scripts/benchmarks/benchmark_results.md || true
 
     - name: Add comment to PR
       uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
@@ -236,7 +197,7 @@ jobs:
           let markdown = ""
           try {
             const fs = require('fs');
-            markdown = fs.readFileSync('ur-repo/benchmark_results.md', 'utf8');
+            markdown = fs.readFileSync('sc/devops/scripts/benchmarks/benchmark_results.md', 'utf8');
           } catch(err) {
           }
 
@@ -255,14 +216,41 @@ jobs:
             body: body
           })
 
-    - name: Upload HTML report
-      if: ${{ always() && inputs.upload_report }}
-      uses: actions/cache/save@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
-      with:
-        path: ur-repo/benchmark_results.html
-        key: benchmark-results-${{ matrix.adapter.str_name }}-${{ github.run_id }}
+    - name: Commit data.json and results directory
+      working-directory: results-repo
+      run: |
+        git config --global user.name "GitHub Actions Bot"
+        git config --global user.email "actions@github.com"
 
-    - name: Get information about platform
-      if: ${{ always() }}
-      working-directory: ${{ github.workspace }}/ur-repo/
-      run: .github/scripts/get_system_info.sh
+        for attempt in {1..5}; do
+          echo "Attempt $attempt to push changes"
+
+          rm -f data.json
+          cp ${{ github.workspace }}/sc/devops/scripts/benchmarks/html/data.json .
+
+          git add data.json results/
+          git commit -m "Add benchmark results and data.json"
+
+          results_file=$(git diff HEAD~1 --name-only -- results/ | head -n 1)
+
+          if git push origin benchmark-results; then
+            echo "Push succeeded"
+            break
+          fi
+
+          echo "Push failed, retrying..."
+
+          if [ -n "$results_file" ]; then
+            mv $results_file ${{ github.workspace }}/temp_$(basename $results_file)
+
+            git reset --hard origin/benchmark-results
+            git pull origin benchmark-results
+
+            new_file="results/$(basename "$results_file")"
+            mv ${{ github.workspace }}/temp_$(basename $results_file) $new_file
+          fi
+
+          echo "Regenerating data.json"
+          (cd ${{ github.workspace }} && ${{ github.workspace }}/sc/devops/scripts/benchmarks/main.py ~/ur_bench_workdir --dry-run --results-dir ${{ github.workspace }}/results-repo --output-html remote)
+
+        done
