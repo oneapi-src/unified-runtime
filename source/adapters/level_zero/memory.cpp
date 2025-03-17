@@ -2368,6 +2368,11 @@ _ur_buffer::_ur_buffer(ur_context_handle_t Context, size_t Size,
   LastDeviceWithValidAllocation = Device;
 }
 
+_ur_buffer::~_ur_buffer() {
+  if (isSubBuffer())
+    ur::level_zero::urMemRelease(SubBuffer->Parent);
+}
+
 ur_result_t _ur_buffer::getZeHandlePtr(char **&ZeHandlePtr,
                                        access_mode_t AccessMode,
                                        ur_device_handle_t Device,
