@@ -116,6 +116,8 @@ struct _ur_buffer final : ur_mem_handle_t_ {
     Parent->RefCount.increment();
   }
 
+  ~_ur_buffer();
+
   // Interop-buffer constructor
   _ur_buffer(ur_context_handle_t Context, size_t Size,
              ur_device_handle_t Device, char *ZeMemHandle, bool OwnZeMemHandle);
