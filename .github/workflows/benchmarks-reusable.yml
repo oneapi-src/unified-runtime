@@ -34,6 +34,10 @@ on:
         required: false
         type: string
         default: ''
+      runner:
+        required: true
+        type: string
+        default: 'level_zero_PERF'
 
 permissions:
   contents: write
@@ -52,7 +56,7 @@ jobs:
         build_type: [Release]
         compiler: [{c: clang, cxx: clang++}]
 
-    runs-on: "${{ inputs.str_name }}_PERF"
+    runs-on: "${{ inputs.runner }}"
 
     steps:
     - name: Add comment to PR
