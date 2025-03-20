@@ -49,6 +49,14 @@ on:
         type: string
         required: false
         default: ''
+      runner:
+        description: 'Runner'
+        type: choice
+        required: true
+        default: 'level_zero_PERF'
+        options:
+          - level_zero_PERF
+          - DSS-L0-BMG
 
 permissions:
   contents: write
@@ -67,3 +75,4 @@ jobs:
       sycl_commit: ${{ inputs.sycl_commit }}
       compute_runtime_commit: ${{ inputs.compute_runtime_commit }}
       preset: ${{ inputs.preset }}
+      runner: ${{ inputs.runner }}

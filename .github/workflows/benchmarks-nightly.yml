@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   nightly:
-    name: Compute Benchmarks Nightly level-zero
+    name: Compute Benchmarks Nightly level-zero PVC
     uses: ./.github/workflows/benchmarks-reusable.yml
     with:
       str_name: 'level_zero'
@@ -25,7 +25,7 @@ jobs:
     # we need to wait until previous job is done so that the html report
     # contains both runs
     needs: nightly
-    name: Compute Benchmarks Nightly level-zero v2
+    name: Compute Benchmarks Nightly level-zero v2 PVC
     uses: ./.github/workflows/benchmarks-reusable.yml
     with:
         str_name: 'level_zero_v2'
@@ -35,3 +35,32 @@ jobs:
         sycl_config_params: ''
         sycl_repo: 'intel/llvm'
         sycl_commit: ''
+
+  nightly3:
+    name: Compute Benchmarks Nightly level-zero BMG
+    uses: ./.github/workflows/benchmarks-reusable.yml
+    with:
+      str_name: 'level_zero'
+      preset: 'Full'
+      pr_no: 0
+      bench_script_params: '--save Baseline_BMG_L0'
+      sycl_config_params: ''
+      sycl_repo: 'intel/llvm'
+      sycl_commit: ''
+      runner: 'DSS-L0-BMG'
+
+  nightly4:
+    # we need to wait until previous job is done so that the html report
+    # contains both runs
+    needs: nightly3
+    name: Compute Benchmarks Nightly level-zero v2 BMG
+    uses: ./.github/workflows/benchmarks-reusable.yml
+    with:
+        str_name: 'level_zero_v2'
+        preset: 'Full'
+        pr_no: 0
+        bench_script_params: '--save Baseline_BMG_L0v2'
+        sycl_config_params: ''
+        sycl_repo: 'intel/llvm'
+        sycl_commit: ''
+        runner: 'DSS-L0-BMG'
