@@ -20,6 +20,7 @@ jobs:
       sycl_config_params: ''
       sycl_repo: 'intel/llvm'
       sycl_commit: ''
+      runner: 'level_zero_PERF'
 
   nightly2:
     # we need to wait until previous job is done so that the html report
@@ -35,6 +36,7 @@ jobs:
         sycl_config_params: ''
         sycl_repo: 'intel/llvm'
         sycl_commit: ''
+        runner: 'level_zero_PERF'
 
   nightly3:
     name: Compute Benchmarks Nightly level-zero BMG
