@@ -40,12 +40,14 @@ on:
         default: 'level_zero_PERF'
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   e2e-build-hw:
     name: Build SYCL, UR, run Compute Benchmarks
+    permissions:
+      contents: write
+      pull-requests: write
     strategy:
       matrix:
         adapter: [
