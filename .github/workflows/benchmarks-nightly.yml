@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   nightly:
-    name: Compute Benchmarks Nightly level-zero PVC
+    name: '[PVC] CB Nightly level-zero'
     uses: ./.github/workflows/benchmarks-reusable.yml
     with:
       str_name: 'level_zero'
@@ -23,10 +23,9 @@ jobs:
       runner: 'level_zero_PERF'
 
   nightly2:
-    # we need to wait until previous job is done so that the html report
-    # contains both runs
+    # uses the same machine, so let's just wait for the prev. job
     needs: nightly
-    name: Compute Benchmarks Nightly level-zero v2 PVC
+    name: '[PVC] CB Nightly level-zero v2'
     uses: ./.github/workflows/benchmarks-reusable.yml
     with:
         str_name: 'level_zero_v2'
@@ -39,7 +38,7 @@ jobs:
         runner: 'level_zero_PERF'
 
   nightly3:
-    name: Compute Benchmarks Nightly level-zero BMG
+    name: '[BMG] CB Nightly level-zero'
     uses: ./.github/workflows/benchmarks-reusable.yml
     with:
       str_name: 'level_zero'
@@ -52,10 +51,9 @@ jobs:
       runner: 'DSS-L0-BMG'
 
   nightly4:
-    # we need to wait until previous job is done so that the html report
-    # contains both runs
+    # uses the same machine, so let's just wait for the prev. job
     needs: nightly3
-    name: Compute Benchmarks Nightly level-zero v2 BMG
+    name: '[BMG] CB Nightly level-zero v2'
     uses: ./.github/workflows/benchmarks-reusable.yml
     with:
         str_name: 'level_zero_v2'

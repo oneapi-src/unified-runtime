@@ -25,6 +25,8 @@ on:
         type: number
         required: true
       bench_script_params:
+        # If you want to save the results of the manual run in 'benchmark-results' branch,
+        # you have to pass '--save XXX', where XXX is the label of your results.
         description: Parameters passed to the script executing benchmark
         type: string
         required: false
