@@ -5,13 +5,15 @@ on:
     - cron: '0 0 * * *'  # Runs at midnight UTC every day
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   nightly:
     name: '[PVC] CB Nightly level-zero'
     uses: ./.github/workflows/benchmarks-reusable.yml
+    permissions:
+      contents: write
+      pull-requests: write
     with:
       str_name: 'level_zero'
       preset: 'Full'
@@ -27,6 +29,9 @@ jobs:
     needs: nightly
     name: '[PVC] CB Nightly level-zero v2'
     uses: ./.github/workflows/benchmarks-reusable.yml
+    permissions:
+      contents: write
+      pull-requests: write
     with:
         str_name: 'level_zero_v2'
         preset: 'Full'
@@ -40,6 +45,9 @@ jobs:
   nightly3:
     name: '[BMG] CB Nightly level-zero'
     uses: ./.github/workflows/benchmarks-reusable.yml
+    permissions:
+      contents: write
+      pull-requests: write
     with:
       str_name: 'level_zero'
       preset: 'Full'
@@ -55,6 +63,9 @@ jobs:
     needs: nightly3
     name: '[BMG] CB Nightly level-zero v2'
     uses: ./.github/workflows/benchmarks-reusable.yml
+    permissions:
+      contents: write
+      pull-requests: write
     with:
         str_name: 'level_zero_v2'
         preset: 'Full'

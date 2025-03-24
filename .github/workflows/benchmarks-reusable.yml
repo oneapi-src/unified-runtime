@@ -39,12 +39,14 @@ on:
         type: string
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   benchmarks:
     name: Build SYCL, UR, run Compute Benchmarks
+    permissions:
+      contents: write
+      pull-requests: write
     strategy:
       matrix:
         adapter: [

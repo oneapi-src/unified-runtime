@@ -61,13 +61,15 @@ on:
           - DSS-L0-BMG
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   manual:
     name: Compute Benchmarks
     uses: ./.github/workflows/benchmarks-reusable.yml
+    permissions:
+      contents: write
+      pull-requests: write
     with:
       str_name: ${{ inputs.str_name }}
       pr_no: ${{ inputs.pr_no }}

@@ -7,10 +7,12 @@ on:
   # schedule:
   #   - cron: "0 * * * *"
 
+permissions:
+  contents: read
+
 jobs:
   mirror-commits:
     runs-on: ubuntu-latest
-
     permissions:
       contents: write
 
