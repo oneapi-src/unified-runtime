@@ -37,41 +37,51 @@ jobs:
                 issue_number: pr_number
               });
 
-              // Check if label is already present
-              if (!labels.some(labelObj => labelObj.name === label)) {
-                // Add the label if not present
-                await github.rest.issues.addLabels({
-                  owner,
-                  repo,
-                  issue_number: pr_number,
-                  labels: [label]
-                });
+              // Get issue events
+              const { data: events } = await github.rest.issues.listEvents({
+                owner,
+                repo,
+                issue_number: pr_number
+              });
 
-                const commentBody = 
-                    "# Unified Runtime -> intel/llvm Repo Move Notice\n" +
-                    "## Information\n" +
-                    "The source code of Unified Runtime has been moved to [intel/llvm](https://github.com/intel/llvm) under the [unified-runtime](https://github.com/intel/llvm/tree/sycl/unified-runtime) top-level directory,\n" +
-                    "all future development will now be carried out there. This was done in https://github.com/intel/llvm/pull/17043.\n\n" +
-                    "The code will be mirrored to [oneapi-src/unified-runtime](https://github.com/oneapi-src/unified-runtime) and the specification will continue to be hosted at [oneapi-src.github.io/unified-runtime](https://oneapi-src.github.io/unified-runtime/).\n\n" +
-                    "The [contribution guide](https://oneapi-src.github.io/unified-runtime/core/CONTRIB.html) will be updated with new instructions for contributing to Unified Runtime.\n\n" +
-                    "## PR Migration\n" +
-                    "All open PRs including this one will be marked with the `auto-close` [label](https://github.com/oneapi-src/unified-runtime/labels/auto-close) and shall be **automatically closed after 30 days**.\n\n" +
-                    "Should you wish to continue with your PR **you will need to migrate it** to [intel/llvm](https://github.com/intel/llvm/tree/sycl/unified-runtime).\n" +
-                    "We have provided a [script to help automate this process](https://github.com/oneapi-src/unified-runtime/blob/main/scripts/move-pr-to-intel-llvm.py).\n\n" +
-                    "If your PR should remain open and not be closed automatically, you can remove the `auto-close` label.\n\n" +
-                    "---\n" +
-                    "*This is an automated comment.*";
+              const hasLabelNow = labels.some(l => l.name === label);
+              const hadLabelBefore = events.some(e => e.event === "labeled" && e.label.name === label);
 
-                // Add a comment about the migration process
-                await github.rest.issues.createComment({
-                  owner,
-                  repo,
-                  issue_number: pr_number,
-                  body: commentBody
-                });
-
-                console.log(`Added label '${label}' and commented on PR #${pr_number}`);
-              } else {
-                console.log(`PR #${pr_number} already has the '${label}' label. Skipping.`);
+              if (hasLabelNow || hadLabelBefore) {
+                console.log(`PR #${pr_number} already had or currently has the '${label}' label. Skipping.`);
+                continue;
               }
+
+              // Add the label 
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: pr_number,
+                labels: [label]
+              });
+
+              const commentBody = 
+                  "# Unified Runtime -> intel/llvm Repo Move Notice\n" +
+                  "## Information\n" +
+                  "The source code of Unified Runtime has been moved to [intel/llvm](https://github.com/intel/llvm) under the [unified-runtime](https://github.com/intel/llvm/tree/sycl/unified-runtime) top-level directory,\n" +
+                  "all future development will now be carried out there. This was done in https://github.com/intel/llvm/pull/17043.\n\n" +
+                  "The code will be mirrored to [oneapi-src/unified-runtime](https://github.com/oneapi-src/unified-runtime) and the specification will continue to be hosted at [oneapi-src.github.io/unified-runtime](https://oneapi-src.github.io/unified-runtime/).\n\n" +
+                  "The [contribution guide](https://oneapi-src.github.io/unified-runtime/core/CONTRIB.html) will be updated with new instructions for contributing to Unified Runtime.\n\n" +
+                  "## PR Migration\n" +
+                  "All open PRs including this one will be marked with the `auto-close` [label](https://github.com/oneapi-src/unified-runtime/labels/auto-close) and shall be **automatically closed after 30 days**.\n\n" +
+                  "Should you wish to continue with your PR **you will need to migrate it** to [intel/llvm](https://github.com/intel/llvm/tree/sycl/unified-runtime).\n" +
+                  "We have provided a [script to help automate this process](https://github.com/oneapi-src/unified-runtime/blob/main/scripts/move-pr-to-intel-llvm.py).\n\n" +
+                  "If your PR should remain open and not be closed automatically, you can remove the `auto-close` label.\n\n" +
+                  "---\n" +
+                  "*This is an automated comment.*";
+
+              // Add a comment about the migration process
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pr_number,
+                body: commentBody
+              });
+
+              console.log(`Added label '${label}' and commented on PR #${pr_number}`);
             }
