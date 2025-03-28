@@ -254,6 +254,8 @@ jobs:
           fi
 
           echo "Regenerating data.json"
-          (cd ${{ github.workspace }} && ${{ github.workspace }}/sc/devops/scripts/benchmarks/main.py ~/ur_bench_workdir --dry-run --results-dir ${{ github.workspace }}/results-repo --output-html remote)
+          # --sycl and --ur params must be set to some values for the dry-run to properly output metadata for sycl and ur based benchmarks.
+          # TODO: remove this once it's addressed in the benchmark scripts.
+          (cd ${{ github.workspace }} && ${{ github.workspace }}/sc/devops/scripts/benchmarks/main.py ~/ur_bench_workdir --dry-run --sycl invalid --ur invalid --results-dir ${{ github.workspace }}/results-repo --output-html remote)
 
         done
