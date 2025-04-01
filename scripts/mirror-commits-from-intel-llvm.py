@@ -75,7 +75,8 @@ def main():
         print("There are no patches to apply, exiting.")
         exit(0)
 
-    print(f"Applying the following patches:\n{'\n'.join(patches)}")
+    patches_lines = "\n".join(patches)
+    print(f"Applying the following patches:\n{patches_lines}")
 
     run(["git", "-C", args.unified_runtime_dir, "am"] + patches)
 
