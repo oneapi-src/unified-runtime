@@ -4,7 +4,7 @@ name: Mirror intel/llvm commits
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 * * * *"
+    - cron: "0 0 * * *"
 
 permissions:
   contents: read
@@ -19,12 +19,12 @@ jobs:
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
-          path: ${{github.workspace}}/unified-runtime
+          path: unified-runtime
           ref: main
 
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
-          path: ${{github.workspace}}/intel-llvm
+          path: intel-llvm
           repository: intel/llvm
           fetch-depth: 0
           ref: sycl
@@ -43,3 +43,4 @@ jobs:
         with:
           title: Mirror intel/llvm commits ${{ steps.date.output.value }}
           branch: mirror-commits-${{ steps.date.output.value }}
+          path: unified-runtime
