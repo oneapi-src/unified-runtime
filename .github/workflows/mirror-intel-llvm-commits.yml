@@ -34,7 +34,7 @@ jobs:
           git -C ${{github.workspace}}/unified-runtime config user.email "github-actions[bot]@users.noreply.github.com"
 
       - run: |
-          python3 unified-runtime/scripts/mirror-commits-from-intel-llvm.py ${{github.workspace}}/unified-runtime ${{github.workspace}}/intel-llvm
+          python3 unified-runtime/scripts/mirror-commits-from-intel-llvm.py unified-runtime intel-llvm
 
       - id: date
         run: echo "::set-output name=value::$(date +'%Y-%m-%d')"
