@@ -49,6 +49,14 @@ def main():
 
     args = cli.parse_args()
 
+    def make_path_absolute(p) -> str:
+        if os.path.isabs(p):
+            return p
+        return os.path.join(os.path.abspath(os.path.curdir), p)
+
+    args.unified_runtime_dir = make_path_absolute(args.unified_runtime_dir)
+    args.intel_llvm_dir = make_path_absolute(args.intel_llvm_dir)
+
     with open(args.intel_llvm_mirror_base_commit_file, "r") as base_commit_file:
         intel_llvm_mirror_base_commit = base_commit_file.read().strip()
 
