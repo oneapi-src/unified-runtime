@@ -44,3 +44,4 @@ jobs:
           title: Mirror intel/llvm commits ${{ steps.date.output.value }}
           branch: mirror-commits-${{ steps.date.output.value }}
           path: unified-runtime
+          token: ${{ secrets.UR_MIRROR_COMMITS_TOKEN }}
