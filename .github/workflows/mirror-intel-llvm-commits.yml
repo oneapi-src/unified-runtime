@@ -45,3 +45,4 @@ jobs:
           branch: mirror-commits-${{ steps.date.output.value }}
           path: unified-runtime
           token: ${{ secrets.UR_MIRROR_COMMITS_TOKEN }}
+          branch-token: ${{ secrets.GITHUB_TOKEN }}
