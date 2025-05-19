@@ -37,7 +37,7 @@ jobs:
           python3 unified-runtime/scripts/mirror-commits-from-intel-llvm.py unified-runtime intel-llvm
 
       - id: date
-        run: echo "::set-output name=value::$(date +'%Y-%m-%d')"
+        run: echo "value=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
       - uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
         with:
