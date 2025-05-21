@@ -81,7 +81,7 @@ jobs:
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       with:
         repository: igchor/llvm
-        ref: 8af9795f1214de33c427cc01268f34f657e2ebfb
+        ref: 15308b16ada53663d83c92e52e708af9e06fd1db
         path: sc
         sparse-checkout: |
           devops/scripts/benchmarks
