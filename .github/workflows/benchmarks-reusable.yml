@@ -80,8 +80,8 @@ jobs:
     - name: Checkout benchmark scripts
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       with:
-        repository: intel/llvm
-        ref: sycl
+        repository: igchor/llvm
+        ref: f4bc8bab6e55d689388cb3812b92217b9785dc18
         path: sc
         sparse-checkout: |
           devops/scripts/benchmarks
