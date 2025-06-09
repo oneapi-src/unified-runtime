@@ -11,6 +11,7 @@ on:
         options:
           - level_zero
           - level_zero_v2
+          - offload
       preset:
         description: Preset
         type: choice
@@ -59,6 +60,7 @@ on:
         options:
           - level_zero_PERF
           - DSS-L0-BMG
+          - NVIDIA
 
 permissions:
   contents: read

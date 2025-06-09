@@ -99,6 +99,35 @@ jobs:
         echo "$PATH" >> $GITHUB_PATH
         pip install -r sc/devops/scripts/benchmarks/requirements.txt
 
+    - name: Checkout LLVM (Offload)
+      if: matrix.adapter.str_name == 'offload'
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      with:
+        repository: llvm/llvm-project
+        ref: refs/heads/main
+        fetch-tags: false
+        path: llvm
+
+    - name: Configure Liboffload (Offload)
+      if: matrix.adapter.str_name == 'offload'
+      # TODO: Can remove clang once LLVM has been updated
+      run: >
+        cmake -S ${{github.workspace}}/llvm/llvm -B ${{github.workspace}}/llvm_build
+        -DCMAKE_INSTALL_PREFIX="${{github.workspace}}/llvm_install"
+        -DCMAKE_BUILD_TYPE=Release
+        -DLIBOMPTARGET_PLUGINS_TO_BUILD="amdgpu;cuda"
+        -DLLVM_ENABLE_PROJECTS="clang"
+        -DLLVM_ENABLE_RUNTIMES="offload;openmp"
+        -DLLVM_PARALLEL_LINK_JOBS=4
+        -DLLVM_INCLUDE_TESTS=OFF
+        -DLIBOMPTARGET_BUILD_DEVICERTL_BCLIB=OFF
+
+    - name: Build Liboffload (Offload)
+      if: matrix.adapter.str_name == 'offload'
+      run: |
+        cmake --build ${{github.workspace}}/llvm_build -j -t install
+        echo "LD_LIBRARY_PATH=${{github.workspace}}/llvm_install/lib/x86_64-unknown-linux-gnu:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+
     - name: Checkout SYCL
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       with:
@@ -135,7 +164,8 @@ jobs:
     - name: Build SYCL
       run: cmake --build ${{github.workspace}}/sycl_build -j
 
-    - name: Configure UR
+    - name: Configure UR (Level Zero)
+      if: ${{ startsWith(matrix.adapter.str_name, 'level_zero') }}
       run: >
         cmake -DCMAKE_BUILD_TYPE=Release
         -S${{github.workspace}}/sycl-repo/unified-runtime
@@ -145,6 +175,19 @@ jobs:
         -DUR_BUILD_ADAPTER_L0=ON
         -DUR_BUILD_ADAPTER_L0_V2=ON
         -DUMF_DISABLE_HWLOC=ON
+
+    - name: Configure UR (Offload)
+      if: matrix.adapter.str_name == 'offload'
+      run: >
+        cmake -DCMAKE_BUILD_TYPE=Release
+        -S${{github.workspace}}/sycl-repo/unified-runtime
+        -B${{github.workspace}}/ur_build
+        -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/ur_install
+        -DUR_BUILD_TESTS=OFF
+        -DUR_BUILD_ADAPTER_OFFLOAD=ON
+        -DUMF_DISABLE_HWLOC=ON
+        -DUR_OFFLOAD_INSTALL_DIR="${{github.workspace}}/llvm_install"
+        -DUR_OFFLOAD_INCLUDE_DIR="${{github.workspace}}/llvm_install/include"
 
     - name: Build UR
       run: cmake --build ${{github.workspace}}/ur_build -j $(nproc)
@@ -169,6 +212,16 @@ jobs:
 
         ZE_AFFINITY_MASK=0
         echo "ZE_AFFINITY_MASK=$ZE_AFFINITY_MASK" >> $GITHUB_ENV
+
+    - name: Print System Info (Offload)
+      if: matrix.adapter.str_name == 'offload'
+      run: |
+        echo "llvm-offload-device-info:"
+        ${{github.workspace}}/llvm_install/bin/llvm-offload-device-info
+        echo "urinfo:"
+        ${{github.workspace}}/ur_build/bin/urinfo
+        echo "sycl-ls:"
+        ${{github.workspace}}/sycl_build/bin/sycl-ls
 
     - name: Run benchmarks
       id: benchmarks
@@ -220,6 +273,7 @@ jobs:
 
     - name: Commit data.json and results directory
       working-directory: results-repo
+      if: ${{ startsWith(matrix.adapter.str_name, 'level_zero') }}
       run: |
         git config --global user.name "GitHub Actions Bot"
         git config --global user.email "actions@github.com"
