@@ -135,7 +135,8 @@ jobs:
     - name: Build SYCL
       run: cmake --build ${{github.workspace}}/sycl_build -j
 
-    - name: Configure UR
+    - name: Configure UR (Level Zero)
+      if: ${{ startsWith(matrix.adapter.str_name, "level_zero" }}
       run: >
         cmake -DCMAKE_BUILD_TYPE=Release
         -S${{github.workspace}}/sycl-repo/unified-runtime
@@ -152,7 +153,8 @@ jobs:
     - name: Install UR
       run: cmake --install ${{github.workspace}}/ur_build
 
-    - name: Compute core range
+    - name: Compute core range (Level Zero)
+      if: ${{ startsWith(matrix.adapter.str_name, "level_zero" }}
       run: |
         # Compute the core range for the first NUMA node; second node is for UMF jobs.
         # Skip the first 4 cores - the kernel is likely to schedule more work on these.

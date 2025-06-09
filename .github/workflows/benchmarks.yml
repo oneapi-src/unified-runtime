@@ -11,6 +11,7 @@ on:
         options:
           - level_zero
           - level_zero_v2
+          - offload
       preset:
         description: Preset
         type: choice
