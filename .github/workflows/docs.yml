@@ -67,7 +67,7 @@ jobs:
       - name: Replace config.js
         run: |
           cat << 'EOF' > ${{ github.workspace }}/docs/html/performance/config.js
-          remoteDataUrl = 'https://raw.githubusercontent.com/oneapi-src/unified-runtime/refs/heads/benchmark-results/data.json';
+          remoteDataUrl = 'https://raw.githubusercontent.com/oneapi-src/unified-runtime/refs/heads/benchmark-results/';
           defaultCompareNames = ["Baseline_PVC_L0", "Baseline_PVC_L0v2"];
           EOF
 
