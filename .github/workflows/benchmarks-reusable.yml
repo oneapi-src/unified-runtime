@@ -218,7 +218,7 @@ jobs:
             body: body
           })
 
-    - name: Commit data.json and results directory
+    - name: Commit data.json, data_archive.json, and results directory
       working-directory: results-repo
       run: |
         git config --global user.name "GitHub Actions Bot"
@@ -227,11 +227,12 @@ jobs:
         for attempt in {1..5}; do
           echo "Attempt #$attempt to push changes"
 
-          rm -f data.json
+          rm -f data.json data_archive.json
           cp ${{ github.workspace }}/sc/devops/scripts/benchmarks/html/data.json .
+          cp ${{ github.workspace }}/sc/devops/scripts/benchmarks/html/data_archive.json .
 
-          git add data.json results/
-          git commit -m "Add benchmark results and data.json"
+          git add data.json data_archive.json results/
+          git commit -m "Add benchmark results, data.json, and data_archive.json"
 
           results_file=$(git diff HEAD~1 --name-only -- results/ | head -n 1)
 
@@ -252,9 +253,7 @@ jobs:
             mv ${{ github.workspace }}/temp_$(basename $results_file) $new_file
           fi
 
-          echo "Regenerating data.json"
-          # --sycl and --ur params must be set to some values for the dry-run to properly output metadata for sycl and ur based benchmarks.
-          # TODO: remove this once it's addressed in the benchmark scripts.
-          (cd ${{ github.workspace }} && ${{ github.workspace }}/sc/devops/scripts/benchmarks/main.py ~/ur_bench_workdir --dry-run --sycl invalid --ur invalid --results-dir ${{ github.workspace }}/results-repo --output-html remote)
+          echo "Regenerating data.json and data_archive.json"
+          (cd ${{ github.workspace }} && ${{ github.workspace }}/sc/devops/scripts/benchmarks/main.py ~/ur_bench_workdir --dry-run --results-dir ${{ github.workspace }}/results-repo --output-html remote)
 
         done
