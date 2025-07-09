@@ -77,15 +77,6 @@ jobs:
             body: body
           })
 
-    - name: Checkout benchmark scripts
-      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      with:
-        repository: intel/llvm
-        ref: sycl
-        path: sc
-        sparse-checkout: |
-          devops/scripts/benchmarks
-
     - name: Checkout results branch
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       with:
@@ -97,7 +88,7 @@ jobs:
         python -m venv .venv
         source .venv/bin/activate
         echo "$PATH" >> $GITHUB_PATH
-        pip install -r sc/devops/scripts/benchmarks/requirements.txt
+        pip install -r sycl-repo/devops/scripts/benchmarks/requirements.txt
 
     - name: Checkout SYCL
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -172,7 +163,7 @@ jobs:
     - name: Run benchmarks
       id: benchmarks
       run: >
-        taskset -c ${{ env.CORES }} ./sc/devops/scripts/benchmarks/main.py
+        taskset -c ${{ env.CORES }} ./sycl-repo/devops/scripts/benchmarks/main.py
         ~/ur_bench_workdir
         --sycl ${{ github.workspace }}/sycl_build
         --ur ${{ github.workspace }}/ur_install
@@ -227,8 +218,8 @@ jobs:
           echo "Attempt #$attempt to push changes"
 
           rm -f data.json data_archive.json
-          cp ${{ github.workspace }}/sc/devops/scripts/benchmarks/html/data.json .
-          cp ${{ github.workspace }}/sc/devops/scripts/benchmarks/html/data_archive.json .
+          cp ${{ github.workspace }}/sycl-repo/devops/scripts/benchmarks/html/data.json .
+          cp ${{ github.workspace }}/sycl-repo/devops/scripts/benchmarks/html/data_archive.json .
 
           git add data.json data_archive.json results/
           git commit -m "Add benchmark results, data.json, and data_archive.json"
@@ -253,6 +244,6 @@ jobs:
           fi
 
           echo "Regenerating data.json and data_archive.json"
-          (cd ${{ github.workspace }} && ${{ github.workspace }}/sc/devops/scripts/benchmarks/main.py ~/ur_bench_workdir --dry-run --results-dir ${{ github.workspace }}/results-repo --output-html remote)
+          (cd ${{ github.workspace }} && ${{ github.workspace }}/sycl-repo/devops/scripts/benchmarks/main.py ~/ur_bench_workdir --dry-run --results-dir ${{ github.workspace }}/results-repo --output-html remote)
 
         done
