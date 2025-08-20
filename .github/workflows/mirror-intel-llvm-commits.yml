@@ -1,4 +1,6 @@
----
+# Checks for new commits in unified-runtime dir of intel/llvm
+# and pushes them to the unified-runtime repo. On top of new changes,
+# there's an extra commit saving intel/llvm's base commit
 name: Mirror intel/llvm commits
 
 on:
@@ -9,6 +11,9 @@ on:
 permissions:
   contents: read
 
+env:
+  UR_BRANCH: main
+
 jobs:
   mirror-commits:
     runs-on: ubuntu-latest
@@ -17,32 +22,33 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Checkout UR
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           path: unified-runtime
-          ref: main
+          ref: ${{ env.UR_BRANCH }}
 
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Checkout intel/llvm
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           path: intel-llvm
           repository: intel/llvm
           fetch-depth: 0
           ref: sycl
 
-      - run: |
-          git -C ${{github.workspace}}/unified-runtime config user.name "github-actions[bot]"
-          git -C ${{github.workspace}}/unified-runtime config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Configure Git
+        working-directory: ${{github.workspace}}/unified-runtime
+        run: |
+          git config user.name "bb-ur"
+          git config user.email "bb-ur@intel.com"
+          git config user.password ${{ secrets.GH_BB_TOKEN }}
 
-      - run: |
+      - name: Mirror commits
+        run: |
           python3 unified-runtime/scripts/mirror-commits-from-intel-llvm.py unified-runtime intel-llvm
 
-      - id: date
-        run: echo "value=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
-
-      - uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
-        with:
-          title: Mirror intel/llvm commits ${{ steps.date.output.value }}
-          branch: mirror-commits-${{ steps.date.output.value }}
-          path: unified-runtime
-          token: ${{ secrets.UR_MIRROR_COMMITS_TOKEN }}
-          branch-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push new changes to UR repo
+        working-directory: ${{github.workspace}}/unified-runtime
+        run: |
+          git log -n 15 --oneline
+          git push origin ${{ env.UR_BRANCH }}
