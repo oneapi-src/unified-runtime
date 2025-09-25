@@ -1,8 +1,8 @@
 # Unified Runtime
 
 [![Deploy documentation to Pages](https://github.com/oneapi-src/unified-runtime/actions/workflows/docs.yml/badge.svg)](https://github.com/oneapi-src/unified-runtime/actions/workflows/docs.yml)
-[![Compute Benchmarks Nightly](https://github.com/oneapi-src/unified-runtime/actions/workflows/benchmarks-nightly.yml/badge.svg)](https://github.com/oneapi-src/unified-runtime/actions/workflows/benchmarks-nightly.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/oneapi-src/unified-runtime/badge)](https://securityscorecards.dev/viewer/?uri=github.com/oneapi-src/unified-runtime)
+[![Trivy](https://github.com/oneapi-src/unified-runtime/actions/workflows/trivy.yml/badge.svg)](https://github.com/oneapi-src/unified-runtime/actions/workflows/trivy.yml)
 
 <!-- TODO: add general description and purpose of the project -->
 
@@ -27,6 +27,12 @@
   - [Release Process](#release-process)
 
 ## Contents of the project
+
+⚠️ **This repository is only a mirror.**
+
+The source code of Unified Runtime has been moved to [intel/llvm](https://github.com/intel/llvm)
+under the [unified-runtime](https://github.com/intel/llvm/tree/sycl/unified-runtime) top-level directory,
+all future development will now be carried out there.
 
 This project contains the following:
 

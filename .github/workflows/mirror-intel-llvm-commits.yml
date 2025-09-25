@@ -5,6 +5,7 @@ name: Mirror intel/llvm commits
 
 on:
   workflow_dispatch:
+  # Runs daily at midnight (UTC)
   schedule:
     - cron: "0 0 * * *"
 

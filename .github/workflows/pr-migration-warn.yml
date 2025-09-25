@@ -2,8 +2,9 @@ name: Warn about intel/llvm migration
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Runs hourly
-  workflow_dispatch:  # Allows manual triggering
+    # Runs at 1:00 and 13:00 UTC daily
+    - cron: '0 1,13 * * *'
+  workflow_dispatch:
 
 permissions:
   pull-requests: write

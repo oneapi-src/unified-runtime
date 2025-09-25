@@ -3,6 +3,9 @@ name: Trivy
 
 on:
   workflow_dispatch:
+  schedule:
+    # Runs at 22:45 UTC on Thursday.
+    - cron: '45 22 * * 4'
   push:
   pull_request:
     paths:
