@@ -7,3 +7,13 @@ updates:
       interval: "daily"
     # Run only required security updates
     open-pull-requests-limit: 0
+  
+  - package-ecosystem: "github-actions"
+    directory: "/.github/workflows/"
+    schedule:
+      interval: "monthly"
+    groups:
+      actions-dependencies:
+        applies-to: version-updates
+        patterns:
+          - "*"
