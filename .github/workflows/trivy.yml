@@ -8,9 +8,6 @@ on:
     - cron: '45 22 * * 4'
   push:
   pull_request:
-    paths:
-      - '.github/docker/*Dockerfile'
-      - '.github/workflows/trivy.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
